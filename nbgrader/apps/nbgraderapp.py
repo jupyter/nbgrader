@@ -3,6 +3,8 @@
 
 from __future__ import print_function
 
+import logging
+
 from IPython.utils.traitlets import Unicode, Bool, List
 from IPython.core.application import BaseIPythonApplication
 from IPython.core.profiledir import ProfileDir
@@ -23,6 +25,9 @@ class NBGraderApp(BaseIPythonApplication):
     version = Unicode(u'0.1')
     examples = Unicode(_examples)
 
+    def _log_level_default(self):
+        return logging.INFO
+
     # The classes added here determine how configuration will be documented
     classes = List()
     def _classes_default(self):
@@ -30,6 +35,15 @@ class NBGraderApp(BaseIPythonApplication):
         return [
             ProfileDir
         ]
+
+    subcommands = dict(
+        assign=('nbgrader.apps.assignapp.AssignApp',
+            """Create a students version of a notebook"""
+        ),
+        autograde=('nbgrader.apps.autogradeapp.AutogradeApp',
+            """Autograde a notebook by running it"""
+        ),
+    )
 
     @catch_config_error
     def initialize(self, argv=None):
