@@ -6,14 +6,32 @@ from IPython.config.loader import Config
 from IPython.config.application import catch_config_error
 from IPython.utils.traitlets import Unicode
 from IPython.nbconvert.nbconvertapp import NbConvertApp
+from IPython.nbconvert.nbconvertapp import nbconvert_aliases, nbconvert_flags
 from IPython.nbconvert.exporters.export import exporter_map
+from IPython.nbconvert.utils.exceptions import ConversionException
+from IPython.nbconvert.exporters.exporter import ResourcesDict
 
+
+aliases = {}
+aliases.update(nbconvert_aliases)
+aliases.update({
+      'student-id': 'CustomNbConvertApp.student_id'
+})
+
+flags = {}
+flags.update(nbconvert_flags)
+flags.update({
+})
 
 
 class CustomNbConvertApp(NbConvertApp):
     
     name = Unicode(u'nbgrader-nbconvert')
     description = Unicode(u'A custom nbconvert app')
+    aliases = aliases
+    flags = flags
+
+    student_id = Unicode(u'', config=True)
 
     def build_extra_config(self):
         pass
@@ -91,6 +109,15 @@ class CustomNbConvertApp(NbConvertApp):
             resources['profile_dir'] = self.profile_dir.location
             resources['unique_key'] = notebook_name
             resources['output_files_dir'] = '%s_files' % notebook_name
+
+            # TODO: refactor these custom resources hacks - put path setting in Exporter
+            resources['metadata'] = ResourcesDict()
+            resources['metadata']['path'] = notebook_path
+            resources['nbgrader'] = ResourcesDict()
+            # Always set student_id, might be empty
+            resources['nbgrader']['student_id'] = self.student_id
+            # TODO: end
+
             self.log.info("Support files will be in %s", os.path.join(resources['output_files_dir'], ''))
 
             # Try to export

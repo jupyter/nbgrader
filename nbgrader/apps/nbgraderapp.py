@@ -43,6 +43,9 @@ class NBGraderApp(BaseIPythonApplication):
         autograde=('nbgrader.apps.autogradeapp.AutogradeApp',
             """Autograde a notebook by running it"""
         ),
+        formgrade=('nbgrader.apps.formgradeapp.FormgradeApp',
+            """Grade a notebook using a Google Form"""
+        ),
     )
 
     @catch_config_error
@@ -53,7 +56,6 @@ class NBGraderApp(BaseIPythonApplication):
     def start(self):
         # This starts subapps
         super(NBGraderApp,self).start()
-        print("HI THERE!!!")
 
 def main():
     NBGraderApp.launch_instance()

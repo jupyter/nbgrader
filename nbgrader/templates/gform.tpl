@@ -33,9 +33,8 @@ body {
 <body>
   <div id="main-form">
     <span>Student ID: {{ resources['nbgrader']['student_id'] }}</span>
-    <span>Grader ID: {{ resources['nbgrader']['grader_id'] }}</span>
     <div class="container">
-      <iframe src="{{resources['nbgrader']['form_url']}}?embedded=true" width="940" height="500" frameborder="0" marginheight="0" marginwidth="0">Loading...</iframe>
+      <iframe src="https://docs.google.com/forms/d/{{resources['nbgrader']['form_id']}}/viewform?embedded=true" width="940" height="500" frameborder="0" marginheight="0" marginwidth="0">Loading...</iframe>
     </div>
   </div>
   <div id="form-spacer"></div>
