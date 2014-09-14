@@ -13,7 +13,7 @@ has solutions omited.
 2. Tag the solution and test cells.
 3. Generate the student version of the assignment.
 
-   nbgrader assign --output=StudentNotebook.ipynb TeacherNotebook.ipynb
+     nbgrader assign --output=StudentNotebook.ipynb TeacherNotebook.ipynb
 
 4. Distribute the student version of the notebook to the students and
    have them use it in doing their work.
@@ -24,8 +24,8 @@ Let's say that students have turned in their notebooks with a special naming con
 of `StudentNotebookLastname.ipynb`. If all of the student notebooks are in the current
 directory, autograde all of them by doing:
 
-  nbgrader autograde StudentNotebook*.ipynb
+    nbgrader autograde StudentNotebook*.ipynb
 
 ## Grade a students solution using an embedded Google Form
 
-  nbgrader formgrade StudentNotebook*.ipynb
+    nbgrader formgrade StudentNotebook*.ipynb
