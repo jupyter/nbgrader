@@ -26,7 +26,7 @@ def test_solutioninputtransformer_reset_solution():
     for line in lines:
         transformer.push(line)
     output = transformer.reset()
-    assert output == "# YOUR CODE HERE\nprint \"hello\"\n"
+    assert output == "# YOUR CODE HERE\nprint(\"hello\")\n"
     assert transformer._lines == []
 
 
@@ -36,7 +36,7 @@ def test_solutioninputtransformer_reset_release():
     for line in lines:
         transformer.push(line)
     output = transformer.reset()
-    assert output == "# YOUR CODE HERE\nprint \"goodbye\"\n"
+    assert output == "# YOUR CODE HERE\nprint(\"goodbye\")\n"
     assert transformer._lines == []
 
 
