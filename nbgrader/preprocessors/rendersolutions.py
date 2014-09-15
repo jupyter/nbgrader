@@ -1,11 +1,12 @@
 from IPython.nbconvert.preprocessors import Preprocessor
-from IPython.utils.traitlets import Bool
+from IPython.utils.traitlets import Bool, Unicode
 from nbgrader import utils
 
 
 class RenderSolutions(Preprocessor):
 
     solution = Bool(False, config=True, help="Whether to generate the release version, or the solutions")
+    title = Unicode("", config=True, help="Title of the assignment")
 
     def __init__(self, *args, **kwargs):
         super(RenderSolutions, self).__init__(*args, **kwargs)
@@ -43,6 +44,12 @@ class RenderSolutions(Preprocessor):
         return nb, resources
 
     def preprocess_cell(self, cell, resources, cell_index):
+        kwargs = {
+            "solution": self.solution,
+            "title": self.title,
+            "toc": resources.get('toc', '')
+        }
+
         # render templates in code cells
         if cell.cell_type == 'code':
             template = self.env.from_string(cell.input)
@@ -54,7 +61,7 @@ class RenderSolutions(Preprocessor):
         # render templates in markdown/heading cells
         elif cell.cell_type in ('markdown', 'heading'):
             template = self.env.from_string(cell.source)
-            rendered = template.render(solution=self.solution)
+            rendered = template.render(**kwargs)
             if rendered[-1] == "\n":
                 rendered = rendered[:-1]
             cell.source = rendered

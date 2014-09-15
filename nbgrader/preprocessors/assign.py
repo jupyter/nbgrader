@@ -9,8 +9,6 @@ class Assign(ExecutePreprocessor):
 
     solution = Bool(False, config=True, help="Whether to generate the release version, or the solutions")
 
-    title = Unicode("", config=True, help="Title of the assignment")
-
     disable_toolbar = Bool(True, config=True, help="Whether to hide the nbgrader toolbar after conversion")
     hide_test_cells = Bool(True, config=True, help="Whether to hide test cells after conversion")
 
@@ -19,9 +17,6 @@ class Assign(ExecutePreprocessor):
 
     def __init__(self, *args, **kwargs):
         super(Assign, self).__init__(*args, **kwargs)
-
-        # create the jinja templating environment
-        self.env = utils.make_jinja_environment()
 
     def _match_tests(self, cells):
         """Determine which tests correspond to which problems."""
