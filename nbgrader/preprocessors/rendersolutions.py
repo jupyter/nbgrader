@@ -41,6 +41,10 @@ class RenderSolutions(Preprocessor):
 
             worksheet.cells = new_cells
 
+        # remove the toolbar setting
+        if 'celltoolbar' in nb.metadata:
+            del nb.metadata['celltoolbar']
+
         return nb, resources
 
     def preprocess_cell(self, cell, resources, cell_index):
