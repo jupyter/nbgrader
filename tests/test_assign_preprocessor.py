@@ -13,21 +13,6 @@ class TestAssign(TestBase):
         super(TestAssign, self).setup()
         self.preprocessor = Assign()
 
-    def test_get_toc_no_heading_cells(self):
-        """Is the ToC empty if there are no heading cells?"""
-        toc = self.preprocessor._get_toc([])
-        assert toc == ""
-
-    def test_get_toc(self):
-        """Is the ToC correctly formatted?"""
-        correct_toc = """* <a href="#foo-bar">foo bar</a>
-\t* <a href="#bar">bar</a>
-\t\t* <a href="#baz">baz</a>
-\t\t* <a href="#quux">quux</a>
-\t* <a href="#foo2">foo2</a>"""
-        toc = self.preprocessor._get_toc(self.cells)
-        assert toc == correct_toc
-
     def test_match_tests(self):
         """Are the tests matched to the correct problems?"""
         tests, rubric = self.preprocessor._match_tests(self.cells)

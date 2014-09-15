@@ -23,34 +23,6 @@ class Assign(ExecutePreprocessor):
         # create the jinja templating environment
         self.env = utils.make_jinja_environment()
 
-    @staticmethod
-    def _get_toc(cells):
-        """Extract a table of contents from the cells, based on the headings
-        in the cells."""
-
-        # get the minimum heading level
-        try:
-            min_level = min(x.level for x in cells if x.cell_type == 'heading')
-        except ValueError:
-            min_level = 1
-
-        toc = []
-        for cell in cells:
-            # skip non-heading cells
-            if cell.cell_type != 'heading':
-                continue
-
-            # format the indentation and anchor link
-            level = cell.level
-            source = cell.source
-            indent = "\t" * (level - min_level)
-            link = '<a href="#{}">{}</a>'.format(
-                source.replace(" ", "-"), source)
-            toc.append("{}* {}".format(indent, link))
-
-        toc = "\n".join(toc)
-        return toc
-
     def _match_tests(self, cells):
         """Determine which tests correspond to which problems."""
 
@@ -138,9 +110,6 @@ class Assign(ExecutePreprocessor):
 
     def _preprocess_nb(self, nb, resources):
         cells = nb.worksheets[0].cells
-
-        # get the table of contents
-        self.toc = self._get_toc(cells)
 
         # figure out which tests go with which problems
         tests, rubric = self._match_tests(cells)
