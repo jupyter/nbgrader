@@ -9,7 +9,7 @@
  *         // Optional: uncomment this line if you always want to display
  *         // the notebook based on the nbgrader metadata, even if the
  *         // toolbar isn't activated. This has the effect of coloring
- *         // gradeable and autograder cells.
+ *         // gradeable and test cells.
  *         //nbgrader.display(IPython.notebook);
  *     });
  * });
@@ -44,7 +44,7 @@ define([
     var display_cell_type = function (cell) {
         var cell_type = get_cell_type(cell),
             grade_cls = "nbgrader-gradeable-cell",
-            test_cls = "nbgrader-autograder-cell",
+            test_cls = "nbgrader-test-cell",
             elem = cell.element;
 
         if (!elem) {
@@ -57,12 +57,12 @@ define([
             elem.removeClass(grade_cls);
         }
 
-        if (cell_type === "autograder" && !elem.hasClass(test_cls)) {
+        if (cell_type === "test" && !elem.hasClass(test_cls)) {
             elem.addClass(test_cls);
-            if (IPython.notebook.metadata.hide_autograder_cells) {
+            if (IPython.notebook.metadata.hide_test_cells) {
                 elem.hide();
             }
-        } else if (cell_type !== "autograder" && elem.hasClass(test_cls)) {
+        } else if (cell_type !== "test" && elem.hasClass(test_cls)) {
             elem.removeClass(test_cls);
         }
     };
@@ -80,7 +80,7 @@ define([
             ['Release only'  , 'release'   ],
             ['Solution only' , 'solution'  ],
             ['Skip'          , 'skip'      ],
-            ['Autograder'    , 'autograder'],
+            ['Test'          , 'test'      ],
         ];
 
         var local_div = $('<div/>');
@@ -153,7 +153,7 @@ define([
     };
 
     /**
-     * Create the input text box for the autograder test weight.
+     * Create the input text box for the test test weight.
      */
     var create_weight_input = function (div, cell, celltoolbar) {
         var local_div = $('<div/>');
@@ -194,8 +194,8 @@ define([
             create_id_input(div, cell, celltoolbar);
             create_points_input(div, cell, celltoolbar);
             
-        } else if (cell_type === 'autograder') {
-            // autograder cells need the id input box and weight input box
+        } else if (cell_type === 'test') {
+            // test cells need the id input box and weight input box
             create_id_input(div, cell, celltoolbar);
             create_weight_input(div, cell, celltoolbar);
         }

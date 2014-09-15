@@ -21,7 +21,7 @@ div.nbgrader-gradeable-cell {
     background-color: #FFA;
 }
 
-div.nbgrader-autograder-cell {
+div.nbgrader-test-cell {
     background-color: #DDD;
 }
 
