@@ -21,4 +21,5 @@ class SolutionApp(CustomNbConvertApp):
             'IPython.nbconvert.preprocessors.ExecutePreprocessor'
         ]
         self.extra_config.RenderSolutions.solution = True
+        self.extra_config.NbGraderApp.writer_class = 'IPython.nbconvert.writers.FilesWriter'
         self.config.merge(self.extra_config)
