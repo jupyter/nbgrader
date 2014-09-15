@@ -1,0 +1,72 @@
+{
+ "title": {
+  "source": "\"\"\"Check that the title is set.\"\"\"\nassert ax.get_title() != \"\", \"title not set\"", 
+  "problem": "sum_of_squares_plot", 
+  "points": 0.16666666666666666, 
+  "cell_type": "code", 
+  "weight": 0.16666666666666666
+ }, 
+ "correct_sum_of_squares": {
+  "source": "\"\"\"Check that sum_of_squares returns the correct answer for various inputs.\"\"\"\nassert_equal(sum_of_squares(1), 1)\nassert_equal(sum_of_squares(2), 5)\nassert_equal(sum_of_squares(10), 385)\nassert_equal(sum_of_squares(11), 506)", 
+  "problem": "sum_of_squares", 
+  "points": 0.5, 
+  "cell_type": "code", 
+  "weight": 0.5
+ }, 
+ "correct_squares": {
+  "source": "\"\"\"Check that squares returns the correct output for several inputs\"\"\"\nfrom nose.tools import assert_equal\nassert_equal(squares(1), [1])\nassert_equal(squares(2), [1, 4])\nassert_equal(squares(10), [1, 4, 9, 16, 25, 36, 49, 64, 81, 100])\nassert_equal(squares(11), [1, 4, 9, 16, 25, 36, 49, 64, 81, 100, 121])", 
+  "problem": "squares", 
+  "points": 1.0, 
+  "cell_type": "code", 
+  "weight": 0.5
+ }, 
+ "xlabel": {
+  "source": "\"\"\"Check that the xlabel is set.\"\"\"\nassert ax.get_xlabel() != \"\", \"xlabel not set\"", 
+  "problem": "sum_of_squares_plot", 
+  "points": 0.16666666666666666, 
+  "cell_type": "code", 
+  "weight": 0.16666666666666666
+ }, 
+ "xdata": {
+  "source": "\"\"\"Check that the correct xdata was used.\"\"\"\nlines = ax.get_lines()\nassert_equal(len(lines), 1)\n\nxdata = lines[0].get_xdata()\nxdata_correct = np.arange(1, 16)\nassert_equal(xdata.shape, xdata_correct.shape)\nassert (xdata == xdata_correct).all()", 
+  "problem": "sum_of_squares_plot", 
+  "points": 0.16666666666666666, 
+  "cell_type": "code", 
+  "weight": 0.16666666666666666
+ }, 
+ "ylabel": {
+  "source": "\"\"\"Check that the ylabel is set.\"\"\"\nassert ax.get_ylabel() != \"\", \"ylabel not set\"", 
+  "problem": "sum_of_squares_plot", 
+  "points": 0.16666666666666666, 
+  "cell_type": "code", 
+  "weight": 0.16666666666666666
+ }, 
+ "squares_invalid_input": {
+  "source": "\"\"\"Check that squares raises an error for invalid inputs\"\"\"\nfrom nose.tools import assert_raises\nassert_raises(ValueError, squares, 0)\nassert_raises(ValueError, squares, -4)", 
+  "problem": "squares", 
+  "points": 1.0, 
+  "cell_type": "code", 
+  "weight": 0.5
+ }, 
+ "ydata": {
+  "source": "\"\"\"Check that the correct ydata was used.\"\"\"\nlines = ax.get_lines()\nassert_equal(len(lines), 1)\n\nxdata = lines[0].get_xdata()\nydata = lines[0].get_ydata()\nydata_correct = np.array([sum_of_squares(x) for x in xdata])\nassert_equal(ydata.shape, ydata_correct.shape)\nassert (ydata == ydata_correct).all()", 
+  "problem": "sum_of_squares_plot", 
+  "points": 0.16666666666666666, 
+  "cell_type": "code", 
+  "weight": 0.16666666666666666
+ }, 
+ "xaxis_limits": {
+  "source": "\"\"\"Check that the axis limits are correct.\"\"\"\nassert_equal(ax.get_xlim(), (1.0, 15.0))", 
+  "problem": "sum_of_squares_plot", 
+  "points": 0.16666666666666666, 
+  "cell_type": "code", 
+  "weight": 0.16666666666666666
+ }, 
+ "sum_of_squares_uses_squares": {
+  "source": "\"\"\"Check that sum_of_squares relies on squares.\"\"\"\norig_squares = squares\ndel squares\ntry:\n    assert_raises(NameError, sum_of_squares, 1)\nexcept AssertionError:\n    raise AssertionError(\"sum_of_squares does not use squares\")\nfinally:\n    squares = orig_squares", 
+  "problem": "sum_of_squares", 
+  "points": 0.5, 
+  "cell_type": "code", 
+  "weight": 0.5
+ }
+}

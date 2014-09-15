@@ -1,0 +1,31 @@
+{
+ "sum_of_squares": {
+  "tests": [
+   "correct_sum_of_squares", 
+   "sum_of_squares_uses_squares"
+  ], 
+  "points": 1.0
+ }, 
+ "sum_of_squares_equation": {
+  "tests": [], 
+  "points": 1.0
+ }, 
+ "sum_of_squares_plot": {
+  "tests": [
+   "xaxis_limits", 
+   "xlabel", 
+   "ylabel", 
+   "title", 
+   "xdata", 
+   "ydata"
+  ], 
+  "points": 1.0
+ }, 
+ "squares": {
+  "tests": [
+   "correct_squares", 
+   "squares_invalid_input"
+  ], 
+  "points": 2.0
+ }
+}
