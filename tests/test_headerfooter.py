@@ -1,12 +1,12 @@
-from IPython.nbformat.current import read as read_nb
 from nbgrader.preprocessors import IncludeHeaderFooter
 
+from .base import TestBase
 
-class TestIncludeHeaderFooter(object):
+
+class TestIncludeHeaderFooter(TestBase):
 
     def setup(self):
-        with open("tests/files/test.ipynb", "r") as fh:
-            self.nb = read_nb(fh, 'ipynb')
+        super(TestIncludeHeaderFooter, self).setup()
         self.preprocessor = IncludeHeaderFooter()
 
     def test_concatenate_nothing(self):

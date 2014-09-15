@@ -1,39 +1,17 @@
 import json
-from IPython.nbformat.current import read as read_nb
 from IPython.nbformat.current import NotebookNode
 from IPython.nbformat.current import new_code_cell, new_text_cell, new_notebook
 from nose.tools import assert_raises
 from nbgrader.preprocessors import Assign
 
+from .base import TestBase
 
-class TestAssign(object):
+
+class TestAssign(TestBase):
 
     def setup(self):
-        with open("tests/files/test.ipynb", "r") as fh:
-            self.nb = read_nb(fh, 'ipynb')
-        self.cells = self.nb.worksheets[0].cells
+        super(TestAssign, self).setup()
         self.preprocessor = Assign()
-
-    @staticmethod
-    def _create_code_cell():
-        source = """# YOUR CODE HERE
-{% if solution %}
-print "hello"
-{% endif %}
-"""
-        cell = new_code_cell(input=source, prompt_number=2, outputs=["foo"])
-        return cell
-
-    @staticmethod
-    def _create_text_cell():
-        source = """{% if solution %}
-this is the answer!
-{% else %}
-YOUR ANSWER HERE
-{% endif %}
-"""
-        cell = new_text_cell('markdown', source=source)
-        return cell
 
     def test_get_toc_no_heading_cells(self):
         """Is the ToC empty if there are no heading cells?"""
