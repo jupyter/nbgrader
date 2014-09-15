@@ -1,0 +1,31 @@
+div.nbgrader-controls {
+    display: flex;
+}
+
+div.nbgrader-points, div.nbgrader-weight, div.nbgrader-id {
+    margin-right: 0.5em;
+}
+
+input.nbgrader-points-input, input.nbgrader-weight-input {
+    width: 3em;
+    height: 22px;
+    text-align: right;
+}
+
+input.nbgrader-id-input {
+    height: 22px;
+    text-align: left;
+}
+
+div.nbgrader-gradeable-cell {
+    background-color: #FFA;
+}
+
+div.nbgrader-autograder-cell {
+    background-color: #DDD;
+}
+
+.ui-resizable {
+    background-color: white;
+    border: solid 1px #999;
+}
