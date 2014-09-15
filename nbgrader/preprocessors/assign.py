@@ -9,9 +9,6 @@ class Assign(ExecutePreprocessor):
 
     solution = Bool(False, config=True, help="Whether to generate the release version, or the solutions")
 
-    header = Unicode("", config=True, help="Path to header notebook")
-    footer = Unicode("", config=True, help="Path to footer notebook")
-
     title = Unicode("", config=True, help="Title of the assignment")
 
     disable_toolbar = Bool(True, config=True, help="Whether to hide the nbgrader toolbar after conversion")
@@ -25,30 +22,6 @@ class Assign(ExecutePreprocessor):
 
         # create the jinja templating environment
         self.env = utils.make_jinja_environment()
-
-    def _concatenate_notebooks(self, cells):
-        """Concatenates the cells from the header and footer notebooks to the
-        given cells.
-
-        """
-        new_cells = []
-
-        # header
-        if self.header != "":
-            with open(self.header, 'r') as fh:
-                header_nb = read_nb(fh, 'ipynb')
-            new_cells.extend(header_nb.worksheets[0].cells)
-
-        # body
-        new_cells.extend(cells)
-
-        # footer
-        if self.footer != "":
-            with open(self.footer, 'r') as fh:
-                footer_nb = read_nb(fh, 'ipynb')
-            new_cells.extend(footer_nb.worksheets[0].cells)
-
-        return new_cells
 
     def _filter_cells(self, cells):
         """Filter out cells, depending on the value of `self.solution`:
@@ -192,15 +165,10 @@ class Assign(ExecutePreprocessor):
     def _preprocess_nb(self, nb, resources):
         cells = nb.worksheets[0].cells
 
-        # add in the header and the footer notebooks
-        cells = self._concatenate_notebooks(cells)
-
         # filter out various cells
         cells = self._filter_cells(cells)
 
-        # get the table of contents -- important that this happens
-        # after adding in the header/footer and doing the filtering,
-        # in case there are header cells that are added/removed
+        # get the table of contents
         self.toc = self._get_toc(cells)
 
         # figure out which tests go with which problems
