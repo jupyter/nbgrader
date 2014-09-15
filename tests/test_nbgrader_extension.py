@@ -5,9 +5,9 @@ from nbgrader.nbgrader_extension import SolutionInputTransformer, _parse_argumen
 lines = [
     "# YOUR CODE HERE",
     "{% if solution %}",
-    "print \"hello\"",
+    "print(\"hello\")",
     "{% else %}",
-    "print \"goodbye\"",
+    "print(\"goodbye\")",
     "{% endif %}"
 ]
 
