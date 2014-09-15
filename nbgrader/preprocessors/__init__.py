@@ -4,4 +4,3 @@ from .rendersolutions import RenderSolutions
 from .extracttests import ExtractTests
 from .gform import GForm
 from .findstudentid import FindStudentID
-from .assign import Assign

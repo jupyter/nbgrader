@@ -40,7 +40,7 @@ class NBGraderApp(BaseIPythonApplication):
         assign=('nbgrader.apps.assignapp.AssignApp',
             """Create a students version of a notebook"""
         ),
-        solution=('nbgrader.apps.assignapp.SolutionApp',
+        solution=('nbgrader.apps.solutionapp.SolutionApp',
             """Create a solution version of a notebook"""
         ),
         autograde=('nbgrader.apps.autogradeapp.AutogradeApp',
