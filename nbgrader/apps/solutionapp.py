@@ -3,10 +3,10 @@ from IPython.config.application import catch_config_error
 from IPython.utils.traitlets import Unicode
 from nbgrader.apps.customnbconvertapp import CustomNbConvertApp
 
-class AssignApp(CustomNbConvertApp):
+class SolutionApp(CustomNbConvertApp):
     
-    name = Unicode(u'nbgrader-assign')
-    description = Unicode(u'Prepare a student version of an assignment by removing solutions')
+    name = Unicode(u'nbgrader-solution')
+    description = Unicode(u'Prepare a solution version of an assignment')
 
     def _export_format_default(self):
         return 'notebook'
@@ -17,7 +17,8 @@ class AssignApp(CustomNbConvertApp):
             'nbgrader.preprocessors.IncludeHeaderFooter',
             'nbgrader.preprocessors.TableOfContents',
             'nbgrader.preprocessors.RenderSolutions',
-            'IPython.nbconvert.preprocessors.ClearOutputPreprocessor'
+            'nbgrader.preprocessors.ExtractTests',
+            'IPython.nbconvert.preprocessors.ExecutePreprocessor'
         ]
-        self.extra_config.RenderSolutions.solution = False
+        self.extra_config.RenderSolutions.solution = True
         self.config.merge(self.extra_config)
