@@ -17,6 +17,7 @@ class AssignApp(CustomNbConvertApp):
             'nbgrader.preprocessors.IncludeHeaderFooter',
             'nbgrader.preprocessors.TableOfContents',
             'nbgrader.preprocessors.RenderSolutions',
+            'nbgrader.preprocessors.ExtractTests',
             'IPython.nbconvert.preprocessors.ClearOutputPreprocessor'
         ]
         self.config.merge(self.extra_config)
