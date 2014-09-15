@@ -36,7 +36,7 @@ class TestRenderSolutions(TestBase):
 
         cell, resources = self.preprocessor.preprocess_cell(cell, {}, 1)
 
-        assert cell.input == """# YOUR CODE HERE\nprint "hello\""""
+        assert cell.input == """# YOUR CODE HERE\nprint("hello\")"""
 
     def test_preprocess_code_cell_release(self):
         """Is the release version of a code cell correctly preprocessed?"""

@@ -13,7 +13,7 @@ class TestBase(object):
     def _create_code_cell():
         source = """# YOUR CODE HERE
 {% if solution %}
-print "hello"
+print("hello")
 {% endif %}
 """
         cell = new_code_cell(input=source, prompt_number=2, outputs=["foo"])
