@@ -4,7 +4,6 @@ from IPython.nbformat.current import NotebookNode
 from IPython.nbformat.current import new_code_cell, new_text_cell, new_notebook
 from nose.tools import assert_raises
 from nbgrader.preprocessors import Assign
-from nbgrader import utils
 
 
 class TestAssign(object):
@@ -35,24 +34,6 @@ YOUR ANSWER HERE
 """
         cell = new_text_cell('markdown', source=source)
         return cell
-
-    def test_filter_solution(self):
-        """Are release and skip cells filtered out when solution=True?"""
-        self.preprocessor.solution = True
-        cells = self.preprocessor._filter_cells(self.cells)
-        for cell in cells:
-            cell_type = utils.get_assignment_cell_type(cell)
-            assert cell_type != 'skip'
-            assert cell_type != 'release'
-
-    def test_filter_release(self):
-        """Are solution and skip cells filtered out when solution=False?"""
-        self.preprocessor.solution = False
-        cells = self.preprocessor._filter_cells(self.cells)
-        for cell in cells:
-            cell_type = utils.get_assignment_cell_type(cell)
-            assert cell_type != 'skip'
-            assert cell_type != 'solution'
 
     def test_get_toc_no_heading_cells(self):
         """Is the ToC empty if there are no heading cells?"""
@@ -152,54 +133,6 @@ YOUR ANSWER HERE
         assert 'celltoolbar' not in nb.metadata
         assert nb.metadata['disable_nbgrader_toolbar']
         assert not nb.metadata['hide_test_cells']
-
-    def test_preprocess_code_cell_solution(self):
-        """Is the solution version of a code cell correctly preprocessed?"""
-        self.preprocessor.solution = True
-        self.preprocessor.toc = ""
-        cell = self._create_code_cell()
-
-        self.preprocessor._create_client()
-        cell, resources = self.preprocessor.preprocess_cell(cell, {}, 1)
-        self.preprocessor._shutdown_client()
-
-        output = NotebookNode()
-        output.stream = "stdout"
-        output.text = "hello\n"
-        output.output_type = "stream"
-
-        assert cell.input == """# YOUR CODE HERE\nprint "hello\""""
-        assert cell.outputs == [output]
-        assert cell.prompt_number == 1
-
-    def test_preprocess_code_cell_release(self):
-        """Is the release version of a code cell correctly preprocessed?"""
-        self.preprocessor.solution = False
-        self.preprocessor.toc = ""
-        cell = self._create_code_cell()
-
-        cell, resources = self.preprocessor.preprocess_cell(cell, {}, 1)
-        assert cell.input == """# YOUR CODE HERE"""
-        assert cell.outputs == []
-        assert 'prompt_number' not in cell
-
-    def test_preprocess_text_cell_solution(self):
-        """Is the solution version of a text cell correctly preprocessed?"""
-        self.preprocessor.solution = True
-        self.preprocessor.toc = ""
-        cell = self._create_text_cell()
-
-        cell, resources = self.preprocessor.preprocess_cell(cell, {}, 1)
-        assert cell.source == """this is the answer!"""
-
-    def test_preprocess_text_cell_release(self):
-        """Is the release version of a text cell correctly preprocessed?"""
-        self.preprocessor.solution = False
-        self.preprocessor.toc = ""
-        cell = self._create_text_cell()
-
-        cell, resources = self.preprocessor.preprocess_cell(cell, {}, 1)
-        assert cell.source == """YOUR ANSWER HERE"""
 
     def test_preprocess_test_cells_hide(self):
         """Are test cells properly preprocessed and hidden?"""

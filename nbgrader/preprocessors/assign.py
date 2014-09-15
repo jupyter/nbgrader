@@ -23,32 +23,6 @@ class Assign(ExecutePreprocessor):
         # create the jinja templating environment
         self.env = utils.make_jinja_environment()
 
-    def _filter_cells(self, cells):
-        """Filter out cells, depending on the value of `self.solution`:
-
-        * always filter out 'skip' cells
-        * if self.solution == True, then filter out 'release' cells
-        * if self.release == True, then filter out 'solution' cells
-
-        """
-        new_cells = []
-        for cell in cells:
-
-            # get the cell type
-            cell_type = utils.get_assignment_cell_type(cell)
-
-            # determine whether the cell should be included
-            if cell_type == 'skip':
-                continue
-            elif cell_type == 'release' and self.solution:
-                continue
-            elif cell_type == 'solution' and not self.solution:
-                continue
-            else:
-                new_cells.append(cell)
-
-        return new_cells
-
     @staticmethod
     def _get_toc(cells):
         """Extract a table of contents from the cells, based on the headings
@@ -165,9 +139,6 @@ class Assign(ExecutePreprocessor):
     def _preprocess_nb(self, nb, resources):
         cells = nb.worksheets[0].cells
 
-        # filter out various cells
-        cells = self._filter_cells(cells)
-
         # get the table of contents
         self.toc = self._get_toc(cells)
 
@@ -224,30 +195,6 @@ class Assign(ExecutePreprocessor):
         return nb, resources
 
     def preprocess_cell(self, cell, resources, cell_index):
-        kwargs = {
-            "solution": self.solution,
-            "toc": self.toc,
-            "title": self.title
-        }
-
-        # render templates in code cells
-        if cell.cell_type == 'code':
-            template = self.env.from_string(cell.input)
-            rendered = template.render(solution=self.solution)
-            cell.outputs = []
-            if 'prompt_number' in cell:
-                del cell['prompt_number']
-            if rendered[-1] == "\n":
-                rendered = rendered[:-1]
-            cell.input = rendered
-
-        # render templates in markdown/heading cells
-        elif cell.cell_type in ('markdown', 'heading'):
-            template = self.env.from_string(cell.source)
-            rendered = template.render(**kwargs)
-            if rendered[-1] == "\n":
-                rendered = rendered[:-1]
-            cell.source = rendered
 
         # if it's an test cell, then record the source and then
         # clear it (so it's not visible to students)
