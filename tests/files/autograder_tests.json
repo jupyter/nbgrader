@@ -1,0 +1,16 @@
+{
+ "test1_for_problem1": {
+  "source": "# blah blah blah",
+  "problem": "problem1", 
+  "points": 1, 
+  "weight": 0.3333333333333333,
+  "cell_type": "code"
+ }, 
+ "test2_for_problem1": {
+  "source": "# blah blah blah blah",
+  "problem": "problem1", 
+  "points": 2, 
+  "weight": 0.6666666666666666,
+  "cell_type": "markdown"
+ }
+}
