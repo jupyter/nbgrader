@@ -6,11 +6,6 @@
  *     require(['nbextensions/nbgrader'], function (nbgrader) {
  *         console.log('nbgrader extension loaded');
  *         nbgrader.register(IPython.notebook);
- *         // Optional: uncomment this line if you always want to display
- *         // the notebook based on the nbgrader metadata, even if the
- *         // toolbar isn't activated. This has the effect of coloring
- *         // gradeable and test cells.
- *         //nbgrader.display(IPython.notebook);
  *     });
  * });
  *
@@ -86,6 +81,9 @@ define([
             celltoolbar.rebuild();
             display_cell_type(cell);
         });
+
+        // display the cell
+        display_cell_type(cell);
 
         local_div.addClass('nbgrader-type');
         $(div).append(local_div.append($('<span/>').append(select)));
@@ -190,19 +188,7 @@ define([
         }
     };
 
-    /**
-     * Display cells appropriately depending on whether they're
-     * gradeable, etc.
-     */
-    var display = function (notebook) {
-        var cells = notebook.get_cells();
-        for (var i = 0; i < cells.length; i++) {
-            display_cell_type(cells[i]);
-        }
-    };
-
     return {
-        'register': register,
-        'display': display
+        'register': register
     };
 });
