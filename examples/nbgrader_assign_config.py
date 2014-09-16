@@ -1,5 +1,5 @@
 c = get_config()
 
-c.AssignApp.notebooks = ['Assignment Template.ipynb']
-c.AssignApp.output_base = 'Assignment'
+c.AssignApp.notebooks = ['TeacherNotebook.ipynb']
+c.AssignApp.output_base = 'StudentNotebook'
 c.IncludeHeaderFooter.header = "header.ipynb"
