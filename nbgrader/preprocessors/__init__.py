@@ -1,4 +1,4 @@
 from .headerfooter import IncludeHeaderFooter
-from .rendersolutions import RenderSolutions
+from .clearsolutions import ClearSolutions
 from .gform import GForm
 from .findstudentid import FindStudentID

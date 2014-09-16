@@ -11,21 +11,15 @@ class TestBase(object):
 
     @staticmethod
     def _create_code_cell():
-        source = """# YOUR CODE HERE
-{% if solution %}
+        source = """print("something")
+### BEGIN SOLUTION
 print("hello")
-{% endif %}
-"""
-        cell = new_code_cell(input=source, prompt_number=2, outputs=["foo"])
+### END SOLUTION"""
+        cell = new_code_cell(input=source)
         return cell
 
     @staticmethod
     def _create_text_cell():
-        source = """{% if solution %}
-this is the answer!
-{% else %}
-YOUR ANSWER HERE
-{% endif %}
-"""
+        source = "this is the answer!\n"
         cell = new_text_cell('markdown', source=source)
         return cell
