@@ -27,7 +27,7 @@ define([
     var CellToolbar = celltoolbar.CellToolbar;
 
     /**
-     * Get the nbgrader cell type. Default is "-".
+     * Get the nbgrader cell type. Default is "".
      */
     var get_cell_type = function (cell) {
         if (cell.metadata.nbgrader === undefined) {
@@ -43,8 +43,7 @@ define([
      */
     var display_cell_type = function (cell) {
         var cell_type = get_cell_type(cell),
-            grade_cls = "nbgrader-gradeable-cell",
-            test_cls = "nbgrader-test-cell",
+            grade_cls = "nbgrader-grade-cell",
             elem = cell.element;
 
         if (!elem) {
@@ -56,15 +55,6 @@ define([
         } else if (cell_type !== "grade" && elem.hasClass(grade_cls)) {
             elem.removeClass(grade_cls);
         }
-
-        if (cell_type === "test" && !elem.hasClass(test_cls)) {
-            elem.addClass(test_cls);
-            if (IPython.notebook.metadata.hide_test_cells) {
-                elem.hide();
-            }
-        } else if (cell_type !== "test" && elem.hasClass(test_cls)) {
-            elem.removeClass(test_cls);
-        }
     };
 
     /**
@@ -75,12 +65,9 @@ define([
      */
     var create_type_select = function (div, cell, celltoolbar) {
         var list_list = [
-            ['-'             , ''          ],
-            ['To be graded'  , 'grade'     ],
-            ['Release only'  , 'release'   ],
-            ['Solution only' , 'solution'  ],
-            ['Skip'          , 'skip'      ],
-            ['Test'          , 'test'      ],
+            ['-'         , ''        ],
+            ['Solution'  , 'solution'],
+            ['Grade'     , 'grade'   ]
         ];
 
         var local_div = $('<div/>');
@@ -111,7 +98,7 @@ define([
         var local_div = $('<div/>');
         var text = $('<input/>').attr('type', 'text');
         var lbl;
-        if (get_cell_type(cell) === 'grade') {
+        if (cell.cell_type == 'markdown') {
             lbl = $('<label/>').append($('<span/>').text('Problem ID: '));
         } else {
             lbl = $('<label/>').append($('<span/>').text('Test name: '));
@@ -153,27 +140,6 @@ define([
     };
 
     /**
-     * Create the input text box for the test test weight.
-     */
-    var create_weight_input = function (div, cell, celltoolbar) {
-        var local_div = $('<div/>');
-        var text = $('<input/>').attr('type', 'text');
-        var lbl = $('<label/>').append($('<span/>').text('Weight: '));
-        lbl.append(text);
-
-        text.addClass('nbgrader-weight-input');
-        text.attr("value", cell.metadata.nbgrader.weight);
-        text.keyup(function () {
-            cell.metadata.nbgrader.weight = text.val();
-        });
-
-        local_div.addClass('nbgrader-weight');
-        $(div).append(local_div.append($('<span/>').append(lbl)));
-
-        IPython.keyboard_manager.register_events(text);
-    };
-
-    /**
      * Create the cell toolbar nbgrader element, which will include
      * different subelements depending on what the nbgrader cell
      * type is.
@@ -188,16 +154,10 @@ define([
         }
 
         var cell_type = get_cell_type(cell);
-
         if (cell_type === 'grade') {
             // grade cells need the id input box and points input box
             create_id_input(div, cell, celltoolbar);
             create_points_input(div, cell, celltoolbar);
-            
-        } else if (cell_type === 'test') {
-            // test cells need the id input box and weight input box
-            create_id_input(div, cell, celltoolbar);
-            create_weight_input(div, cell, celltoolbar);
         }
 
         // all cells get the cell type dropdown menu

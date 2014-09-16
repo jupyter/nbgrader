@@ -2,11 +2,11 @@ div.nbgrader-controls {
     display: flex;
 }
 
-div.nbgrader-points, div.nbgrader-weight, div.nbgrader-id {
+div.nbgrader-points, div.nbgrader-id {
     margin-right: 0.5em;
 }
 
-input.nbgrader-points-input, input.nbgrader-weight-input {
+input.nbgrader-points-input {
     width: 3em;
     height: 22px;
     text-align: right;
@@ -17,12 +17,8 @@ input.nbgrader-id-input {
     text-align: left;
 }
 
-div.nbgrader-gradeable-cell {
+div.nbgrader-grade-cell {
     background-color: #FFA;
-}
-
-div.nbgrader-test-cell {
-    background-color: #DDD;
 }
 
 .ui-resizable {
