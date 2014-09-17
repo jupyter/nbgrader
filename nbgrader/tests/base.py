@@ -1,3 +1,4 @@
+import os
 from IPython.nbformat.current import read as read_nb
 from IPython.nbformat.current import new_code_cell, new_text_cell
 
@@ -5,7 +6,8 @@ from IPython.nbformat.current import new_code_cell, new_text_cell
 class TestBase(object):
 
     def setup(self):
-        with open("tests/files/test.ipynb", "r") as fh:
+        self.pth = os.path.split(os.path.realpath(__file__))[0]
+        with open(os.path.join(self.pth, "files/test.ipynb"), "r") as fh:
             self.nb = read_nb(fh, 'ipynb')
         self.cells = self.nb.worksheets[0].cells
 
