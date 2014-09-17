@@ -11,15 +11,6 @@ class ClearSolutions(Preprocessor):
     def __init__(self, *args, **kwargs):
         super(ClearSolutions, self).__init__(*args, **kwargs)
 
-    def preprocess(self, nb, resources):
-        nb, resources = super(ClearSolutions, self).preprocess(nb, resources)
-
-        # remove the toolbar setting
-        if 'celltoolbar' in nb.metadata:
-            del nb.metadata['celltoolbar']
-
-        return nb, resources
-
     def preprocess_cell(self, cell, resources, cell_index):
         cell_type = utils.get_assignment_cell_type(cell)
 
