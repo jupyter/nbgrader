@@ -1,7 +1,3 @@
-div.nbgrader-controls {
-    display: flex;
-}
-
 div.nbgrader-points, div.nbgrader-id {
     margin-right: 0.5em;
 }

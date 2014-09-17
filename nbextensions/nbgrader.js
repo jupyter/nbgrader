@@ -1,13 +1,8 @@
-/*global define, require */
+/*global define*/
 /**
  * To load this extension, add the following to your custom.js:
  *
- * $([IPython.events]).on('app_initialized.NotebookApp', function() {
- *     require(['nbextensions/nbgrader'], function (nbgrader) {
- *         console.log('nbgrader extension loaded');
- *         nbgrader.register(IPython.notebook);
- *     });
- * });
+ * IPython.load_extensions('nbgrader');
  *
 **/
 
@@ -74,7 +69,6 @@ define([
      * not.
      */
     var create_grader_checkbox = function (div, cell, celltoolbar) {
-        var local_div = $('<div/>');
         var chkb = $('<input/>').attr('type', 'checkbox');
         var lbl = $('<label/>').append($('<span/>').text("Grade? "));
         lbl.append(chkb);
@@ -85,7 +79,7 @@ define([
             display_cell(cell);
         });
         display_cell(cell);
-        $(div).append(local_div.append($('<span/>').append(lbl)));
+        $(div).append($('<span/>').append(lbl));
     };
 
     /**
@@ -93,7 +87,6 @@ define([
      * or not.
      */
     var create_solution_checkbox = function (div, cell, celltoolbar) {
-        var local_div = $('<div/>');
         var chkb = $('<input/>').attr('type', 'checkbox');
         var lbl = $('<label/>').append($('<span/>').text("Solution? "));
         lbl.append(chkb);
@@ -103,13 +96,17 @@ define([
             cell.metadata.nbgrader.solution = v;
             chkb.attr("checked", v);
         });
-        $(div).append(local_div.append($('<span/>').append(lbl)));
+        $(div).append($('<span/>').append(lbl));
     };
 
     /**
      * Create the input text box for the problem or test id.
      */
     var create_id_input = function (div, cell, celltoolbar) {
+        if (!is_grader(cell)) {
+            return;
+        }
+
         var local_div = $('<div/>');
         var text = $('<input/>').attr('type', 'text');
         var lbl = $('<label/>').append($('<span/>').text('ID: '));
@@ -132,6 +129,10 @@ define([
      * is worth.
      */
     var create_points_input = function (div, cell, celltoolbar) {
+        if (!is_grader(cell)) {
+            return;
+        }
+
         var local_div = $('<div/>');
         var text = $('<input/>').attr('type', 'text');
         var lbl = $('<label/>').append($('<span/>').text('Points: '));
@@ -150,36 +151,6 @@ define([
     };
 
     /**
-     * Create the cell toolbar nbgrader element, which will include
-     * different subelements depending on what the nbgrader cell
-     * type is.
-     */
-    var nbgrader = function (div, cell, celltoolbar) {
-        // only code and markdown cells should get the toolbar
-        if (cell.cell_type !== 'code' && cell.cell_type !== 'markdown') {
-            return;
-        }
-
-        var button_container = $(div);
-        button_container.addClass('nbgrader-controls');
-
-        // create the metadata dictionary if it doesn't exist
-        if (!cell.metadata.nbgrader) {
-            cell.metadata.nbgrader = {};
-        }
-
-        // grader cells need the id input box and points input box
-        if (is_grader(cell)) {
-            create_id_input(div, cell, celltoolbar);
-            create_points_input(div, cell, celltoolbar);
-        }
-
-        // all cells get the grade and solution checkboxes
-        create_grader_checkbox(div, cell, celltoolbar);
-        create_solution_checkbox(div, cell, celltoolbar);
-    };
-
-    /**
      * Load custom css for the nbgrader toolbar.
      */
     var load_css = function () {
@@ -194,14 +165,24 @@ define([
     /**
      * Load the nbgrader toolbar extension.
      */
-    var register = function (notebook) {
+    var load_ipython_extension = function () {
         load_css();
-        CellToolbar.register_callback('nbgrader.create_assignment', nbgrader);
-        CellToolbar.register_preset('Create Assignment', ['nbgrader.create_assignment'], notebook);
+        CellToolbar.register_callback('create_assignment.solution_checkbox', create_solution_checkbox); 
+        CellToolbar.register_callback('create_assignment.grader_checkbox', create_grader_checkbox);
+        CellToolbar.register_callback('create_assignment.id_input', create_id_input);
+        CellToolbar.register_callback('create_assignment.points_input', create_points_input);
+
+        var preset = [
+            'create_assignment.solution_checkbox',
+            'create_assignment.grader_checkbox',
+            'create_assignment.points_input',
+            'create_assignment.id_input'
+        ];
+        CellToolbar.register_preset('Create Assignment', preset, IPython.notebook);
         console.log('nbgrader extension for metadata editing loaded.');
     };
 
     return {
-        'register': register
+        'load_ipython_extension': load_ipython_extension
     };
 });
