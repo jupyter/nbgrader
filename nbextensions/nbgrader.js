@@ -191,13 +191,9 @@ define([
      */
     var register = function (notebook) {
         load_css();
-
-        var metadata = IPython.notebook.metadata;
-        if (!metadata.disable_nbgrader_toolbar) {
-            CellToolbar.register_callback('nbgrader.create_assignment', nbgrader);
-            CellToolbar.register_preset('Create Assignment', ['nbgrader.create_assignment'], notebook);
-            console.log('nbgrader extension for metadata editing loaded.');
-        }
+        CellToolbar.register_callback('nbgrader.create_assignment', nbgrader);
+        CellToolbar.register_preset('Create Assignment', ['nbgrader.create_assignment'], notebook);
+        console.log('nbgrader extension for metadata editing loaded.');
     };
 
     return {
