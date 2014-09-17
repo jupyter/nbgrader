@@ -1,0 +1,12 @@
+language: python
+python:
+  - 2.7
+before_install:
+  - sudo apt-get update
+  - git clone --recursive https://github.com/ipython/ipython.git
+install:
+  - sudo apt-get install libzmq3-dev
+  - cd ipython && pip install -e ".[notebook]" && cd ..
+  - pip install nose
+script:
+  - nosetests
