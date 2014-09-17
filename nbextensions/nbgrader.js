@@ -22,13 +22,30 @@ define([
     var CellToolbar = celltoolbar.CellToolbar;
 
     /**
-     * Get the nbgrader cell type. Default is "".
+     * Is the cell a solution cell?
      */
-    var get_cell_type = function (cell) {
+    var is_solution = function (cell) {
         if (cell.metadata.nbgrader === undefined) {
-            return '';
+            cell.metadata.nbgrader = {};
+            return false;
+        } else if (cell.metadata.nbgrader.solution === undefined) {
+            return false;
         } else {
-            return cell.metadata.nbgrader.cell_type;
+            return cell.metadata.nbgrader.solution;
+        }
+    };
+
+    /**
+     * Is the cell a grader cell?
+     */
+    var is_grader = function (cell) {
+        if (cell.metadata.nbgrader === undefined) {
+            cell.metadata.nbgrader = {};
+            return false;
+        } else if (cell.metadata.nbgrader.grade === undefined) {
+            return false;
+        } else {
+            return cell.metadata.nbgrader.grade;
         }
     };
 
@@ -36,8 +53,8 @@ define([
      * Add a display class to the cell element, depending on the
      * nbgrader cell type.
      */
-    var display_cell_type = function (cell) {
-        var cell_type = get_cell_type(cell),
+    var display_cell = function (cell) {
+        var grader = is_grader(cell),
             grade_cls = "nbgrader-grade-cell",
             elem = cell.element;
 
@@ -45,48 +62,48 @@ define([
             return;
         }
 
-        if (cell_type === "grade" && !elem.hasClass(grade_cls)) {
+        if (grader && !elem.hasClass(grade_cls)) {
             elem.addClass(grade_cls);
-        } else if (cell_type !== "grade" && elem.hasClass(grade_cls)) {
+        } else if (!grader && elem.hasClass(grade_cls)) {
             elem.removeClass(grade_cls);
         }
     };
 
     /**
-     * Create a select drop down menu for the nbgrader cell type. On
-     * change, this rebuilds the cell toolbar so that other elements
-     * may (possibly) be displayed -- for example, "grade" cells need
-     * input text boxes for the problem id and points.
+     * Create a checkbox to mark whether the cell is a grader cell or
+     * not.
      */
-    var create_type_select = function (div, cell, celltoolbar) {
-        var list_list = [
-            ['-'         , ''        ],
-            ['Solution'  , 'solution'],
-            ['Grade'     , 'grade'   ]
-        ];
-
+    var create_grader_checkbox = function (div, cell, celltoolbar) {
         var local_div = $('<div/>');
-        var select = $('<select/>');
-        for(var i=0; i < list_list.length; i++){
-            var opt = $('<option/>')
-                    .attr('value', list_list[i][1])
-                    .text(list_list[i][0]);
-            select.append(opt);
-        }
-
-        select.addClass('nbgrader-type-select');
-        select.val(get_cell_type(cell));
-        select.change(function () {
-            cell.metadata.nbgrader.cell_type = select.val();
+        var chkb = $('<input/>').attr('type', 'checkbox');
+        var lbl = $('<label/>').append($('<span/>').text("Grade? "));
+        lbl.append(chkb);
+        chkb.attr("checked", is_grader(cell));
+        chkb.click(function () {
+            cell.metadata.nbgrader.grade = !is_grader(cell);
             celltoolbar.rebuild();
-            display_cell_type(cell);
+            display_cell(cell);
         });
+        display_cell(cell);
+        $(div).append(local_div.append($('<span/>').append(lbl)));
+    };
 
-        // display the cell
-        display_cell_type(cell);
-
-        local_div.addClass('nbgrader-type');
-        $(div).append(local_div.append($('<span/>').append(select)));
+    /**
+     * Create a checkbox to mark whether the cell is a solution cell
+     * or not.
+     */
+    var create_solution_checkbox = function (div, cell, celltoolbar) {
+        var local_div = $('<div/>');
+        var chkb = $('<input/>').attr('type', 'checkbox');
+        var lbl = $('<label/>').append($('<span/>').text("Solution? "));
+        lbl.append(chkb);
+        chkb.attr("checked", is_solution(cell));
+        chkb.click(function () {
+            var v = !is_solution(cell);
+            cell.metadata.nbgrader.solution = v;
+            chkb.attr("checked", v);
+        });
+        $(div).append(local_div.append($('<span/>').append(lbl)));
     };
 
     /**
@@ -95,18 +112,13 @@ define([
     var create_id_input = function (div, cell, celltoolbar) {
         var local_div = $('<div/>');
         var text = $('<input/>').attr('type', 'text');
-        var lbl;
-        if (cell.cell_type == 'markdown') {
-            lbl = $('<label/>').append($('<span/>').text('Problem ID: '));
-        } else {
-            lbl = $('<label/>').append($('<span/>').text('Test name: '));
-        }
+        var lbl = $('<label/>').append($('<span/>').text('ID: '));
         lbl.append(text);
 
         text.addClass('nbgrader-id-input');
-        text.attr("value", cell.metadata.nbgrader.id);
+        text.attr("value", cell.metadata.nbgrader.grader_id);
         text.keyup(function () {
-            cell.metadata.nbgrader.id = text.val();
+            cell.metadata.nbgrader.grader_id = text.val();
         });
                 
         local_div.addClass('nbgrader-id');
@@ -151,15 +163,15 @@ define([
             cell.metadata.nbgrader = {};
         }
 
-        var cell_type = get_cell_type(cell);
-        if (cell_type === 'grade') {
-            // grade cells need the id input box and points input box
+        // grader cells need the id input box and points input box
+        if (is_grader(cell)) {
             create_id_input(div, cell, celltoolbar);
             create_points_input(div, cell, celltoolbar);
         }
 
-        // all cells get the cell type dropdown menu
-        create_type_select(div, cell, celltoolbar);
+        // all cells get the grade and solution checkboxes
+        create_grader_checkbox(div, cell, celltoolbar);
+        create_solution_checkbox(div, cell, celltoolbar);
     };
 
     /**
