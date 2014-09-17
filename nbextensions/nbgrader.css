@@ -16,8 +16,3 @@ input.nbgrader-id-input {
 div.nbgrader-grade-cell {
     background-color: #FFA;
 }
-
-.ui-resizable {
-    background-color: white;
-    border: solid 1px #999;
-}
