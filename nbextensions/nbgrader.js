@@ -155,6 +155,11 @@ define([
      * type is.
      */
     var nbgrader = function (div, cell, celltoolbar) {
+        // only code and markdown cells should get the toolbar
+        if (cell.cell_type !== 'code' && cell.cell_type !== 'markdown') {
+            return;
+        }
+
         var button_container = $(div);
         button_container.addClass('nbgrader-controls');
 
