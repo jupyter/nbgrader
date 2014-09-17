@@ -6,7 +6,7 @@ from nbgrader import utils
 class ClearSolutions(Preprocessor):
 
     code_stub = Unicode("# YOUR CODE HERE\nraise NotImplementedError()", config=True)
-    markdown_stub = Unicode("YOUR ANSWER HERE", config=True)
+    text_stub = Unicode("YOUR ANSWER HERE", config=True)
     comment_mark = Unicode("#", config=True)
     solution_delimeter = Unicode("## ", config=True)
 
@@ -22,9 +22,9 @@ class ClearSolutions(Preprocessor):
         if cell.cell_type == "code":
             lines = cell.input.split("\n")
             stub_lines = self.code_stub.split("\n")
-        elif cell.cell_type == "markdown":
+        else:
             lines = cell.source.split("\n")
-            stub_lines = self.markdown_stub.split("\n")
+            stub_lines = self.text_stub.split("\n")
 
         new_lines = []
         in_solution = False
@@ -64,7 +64,7 @@ class ClearSolutions(Preprocessor):
         # replace the cell input/source
         if cell.cell_type == "code":
             cell.input = "\n".join(new_lines)
-        elif cell.cell_type == "markdown":
+        else:
             cell.source = "\n".join(new_lines)
 
         return replaced_solution
@@ -76,13 +76,13 @@ class ClearSolutions(Preprocessor):
         # determine whether the cell is a solution cell
         is_solution = utils.is_solution(cell)
 
-        # replace solution cells with the code/markdown stub -- but
-        # not if we already replaced a solution region, because that
-        # means there are parts of the cells that should be preserved
+        # replace solution cells with the code/text stub -- but not if
+        # we already replaced a solution region, because that means
+        # there are parts of the cells that should be preserved
         if is_solution and not replaced_solution:
             if cell.cell_type == 'code':
                 cell.input = self.code_stub
-            elif cell.cell_type == 'markdown':
-                cell.source = self.markdown_stub
+            else:
+                cell.source = self.text_stub
 
         return cell, resources
