@@ -7,45 +7,82 @@ class ClearSolutions(Preprocessor):
 
     code_stub = Unicode("# YOUR CODE HERE\nraise NotImplementedError()", config=True)
     markdown_stub = Unicode("YOUR ANSWER HERE", config=True)
+    comment_mark = Unicode("#", config=True)
+    solution_delimeter = Unicode("## ", config=True)
 
     def __init__(self, *args, **kwargs):
         super(ClearSolutions, self).__init__(*args, **kwargs)
+        self.begin_solution = "{}{}BEGIN SOLUTION".format(
+            self.comment_mark, self.solution_delimeter)
+        self.end_solution = "{}{}END SOLUTION".format(
+            self.comment_mark, self.solution_delimeter)
+
+    def _replace_solution_region(self, cell):
+        # pull out the cell input/source
+        if cell.cell_type == "code":
+            lines = cell.input.split("\n")
+            stub_lines = self.code_stub.split("\n")
+        elif cell.cell_type == "markdown":
+            lines = cell.source.split("\n")
+            stub_lines = self.markdown_stub.split("\n")
+
+        new_lines = []
+        in_solution = False
+        replaced_solution = False
+
+        for line in lines:
+            # begin the solution area
+            if line.strip() == self.begin_solution:
+
+                # check to make sure this isn't a nested BEGIN
+                # SOLUTION region
+                if in_solution:
+                    raise RuntimeError(
+                        "encountered nested begin solution statements")
+
+                in_solution = True
+                replaced_solution = True
+
+                # replace it with the stub, indented as necessary
+                indent = line[:line.find(self.begin_solution)]
+                for stub_line in stub_lines:
+                    new_lines.append(indent + stub_line)
+
+            # end the solution area
+            elif line.strip() == self.end_solution:
+                in_solution = False
+
+            # add lines as long as it's not in the solution area
+            elif not in_solution:
+                new_lines.append(line)
+
+        # we finished going through all the lines, but didn't find a
+        # matching END SOLUTION statment
+        if in_solution:
+            raise RuntimeError("no end solution statement found")
+
+        # replace the cell input/source
+        if cell.cell_type == "code":
+            cell.input = "\n".join(new_lines)
+        elif cell.cell_type == "markdown":
+            cell.source = "\n".join(new_lines)
+
+        return replaced_solution
 
     def preprocess_cell(self, cell, resources, cell_index):
-        cell_type = utils.get_assignment_cell_type(cell)
+        # replace solution regions with the relevant stubs
+        replaced_solution = self._replace_solution_region(cell)
 
-        # replace code solution cells with the code stub
-        if cell.cell_type == 'code' and cell_type == 'solution':
-            cell.input = self.code_stub
+        # determine whether the cell is a solution cell
+        is_solution = utils.is_solution(cell)
 
-        # replace markdown grade cells with the markdown stub
-        elif cell.cell_type == 'markdown' and cell_type == 'grade':
-            cell.source = self.markdown_stub
-
-        # replace solution areas in code cells with the code stub
-        elif cell.cell_type == 'code':
-            lines = cell.input.split('\n')
-            new_lines = []
-            in_solution = False
-
-            for line in lines:
-                # begin the solution area
-                if line.strip() == "### BEGIN SOLUTION":
-                    in_solution = True
-                    # replace it with the code stub, indented as necessary
-                    indent = line[:line.find('#')]
-                    for stub_line in self.code_stub.split("\n"):
-                        new_lines.append(indent + stub_line)
-
-                # end the solution area
-                elif line.strip() == "### END SOLUTION":
-                    in_solution = False
-
-                # add lines as long as it's not in the solution area
-                elif not in_solution:
-                    new_lines.append(line)
-
-            # replace the cell input
-            cell.input = '\n'.join(new_lines)
+        # replace solution cells with the code/markdown stub -- but
+        # not if we already replaced a solution region, because that
+        # means there are parts of the cells that should be preserved
+        if is_solution and not replaced_solution:
+            if cell.cell_type == 'code':
+                cell.input = self.code_stub
+            elif cell.cell_type == 'markdown':
+                cell.source = self.markdown_stub
 
         return cell, resources
