@@ -1,5 +1,7 @@
 # nbgrader
 
+[![Build Status](https://travis-ci.org/jupyter/nbgrader.svg)](https://travis-ci.org/jupyter/nbgrader)
+
 A system for assigning and grading notebooks.
 
 **These instructions are currently incomplete**.
