@@ -5,7 +5,7 @@ from nbgrader import utils
 
 class ClearSolutions(Preprocessor):
 
-    code_stub = Unicode("# YOUR CODE HERE\nraise NotImplementedError", config=True)
+    code_stub = Unicode("# YOUR CODE HERE\nraise NotImplementedError()", config=True)
     markdown_stub = Unicode("YOUR ANSWER HERE", config=True)
 
     def __init__(self, *args, **kwargs):
