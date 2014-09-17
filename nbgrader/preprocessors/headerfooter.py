@@ -17,7 +17,7 @@ class IncludeHeaderFooter(Preprocessor):
         new_cells = []
 
         # header
-        if self.header != "":
+        if self.header:
             with open(self.header, 'r') as fh:
                 header_nb = read_nb(fh, 'ipynb')
             new_cells.extend(header_nb.worksheets[0].cells)
@@ -26,7 +26,7 @@ class IncludeHeaderFooter(Preprocessor):
         new_cells.extend(nb.worksheets[0].cells)
 
         # footer
-        if self.footer != "":
+        if self.footer:
             with open(self.footer, 'r') as fh:
                 footer_nb = read_nb(fh, 'ipynb')
             new_cells.extend(footer_nb.worksheets[0].cells)
