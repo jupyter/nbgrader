@@ -135,7 +135,7 @@ define([
         }
 
         var local_div = $('<div/>');
-        var text = $('<input/>').attr('type', 'text');
+        var text = $('<input/>').attr('type', 'number');
         var lbl = $('<label/>').append($('<span/>').text('Points: '));
         lbl.append(text);
 
