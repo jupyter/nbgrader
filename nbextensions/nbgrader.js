@@ -153,7 +153,6 @@ define([
         link.type = 'text/css';
         link.rel = 'stylesheet';
         link.href = require.toUrl('./nbgrader.css');
-        console.log(link);
         document.getElementsByTagName('head')[0].appendChild(link);
     };
 
