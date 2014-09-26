@@ -11,6 +11,9 @@ Contents:
 .. toctree::
    :maxdepth: 2
 
+   creating
+   autograding
+   formgrading
 
 
 Indices and tables
