@@ -1,5 +1,7 @@
-nbgrader autograde
-==================
+.. _autograde:
 
-.. program-output:: nbgrader autograde --help
+``nbgrader autograde``
+======================
+
+.. command-output:: nbgrader autograde --help
 

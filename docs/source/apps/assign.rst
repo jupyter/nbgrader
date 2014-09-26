@@ -1,5 +1,7 @@
-nbgrader assign
-===============
+.. _assign:
 
-.. program-output:: nbgrader assign --help
+``nbgrader assign``
+===================
+
+.. command-output:: nbgrader assign --help
 

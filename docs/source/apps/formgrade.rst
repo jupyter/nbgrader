@@ -1,5 +1,7 @@
-nbgrader formgrade
-==================
+.. _formgrade:
 
-.. program-output:: nbgrader formgrade --help
+``nbgrader formgrade``
+======================
+
+.. command-output:: nbgrader formgrade --help
 

@@ -3,41 +3,51 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to nbgrader's documentation!
-====================================
+Documentation for nbgrader
+==========================
 
-Contents:
+* :ref:`guide`
+* :ref:`cmdline`
+* :ref:`api`
+
+.. _guide:
+
+User guide
+----------
+
+.. toctree::
+   :maxdepth: 1
+
+   guide/install
+   guide/developing
+   guide/releasing
+   guide/autograding
+   guide/formgrading
+
+.. _cmdline:
+
+Command line programs
+---------------------
+
+``nbgrader`` includes three subcommands:
+
+.. toctree::
+   :hidden:
+   :glob:
+
+   apps/*
+
+* :ref:`assign`: create the release version of an assignment to give to students
+* :ref:`autograde`: autograde a student's submitted assignment
+* :ref:`formgrade`: grade a student's submitted assignment with a Google Form
+
+.. _api:
+
+Source documentation
+--------------------
 
 .. toctree::
    :maxdepth: 2
+   :glob:
 
-   install
-   developing
-   releasing
-   autograding
-   formgrading
-
-Program help:
-
-.. toctree::
-   :maxdepth: 1
-
-   apps/assign.rst
-   apps/autograde.rst
-   apps/formgrade.rst
-
-API Documentation:
-
-.. toctree::
-   :maxdepth: 1
-
-   api/preprocessors.rst
-
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
-
+   api/*

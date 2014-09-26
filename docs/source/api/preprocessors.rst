@@ -1,7 +1,8 @@
 Preprocessors
 =============
 
-.. automodule:: nbgrader.preprocessors
-   :members:
-   :undoc-members:
-   :private-members:
+.. toctree::
+   :maxdepth: 1
+   :glob:
+
+   preprocessors/*
