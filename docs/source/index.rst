@@ -17,6 +17,22 @@ Contents:
    autograding
    formgrading
 
+Program help:
+
+.. toctree::
+   :maxdepth: 1
+
+   apps/assign.rst
+   apps/autograde.rst
+   apps/formgrade.rst
+
+API Documentation:
+
+.. toctree::
+   :maxdepth: 1
+
+   api/preprocessors.rst
+
 
 Indices and tables
 ==================
