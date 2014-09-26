@@ -159,7 +159,7 @@ define([
     /**
      * Load the nbgrader toolbar extension.
      */
-    var load_ipython_extension = function () {
+    var load_extension = function () {
         load_css();
         CellToolbar.register_callback('create_assignment.solution_checkbox', create_solution_checkbox); 
         CellToolbar.register_callback('create_assignment.grader_checkbox', create_grader_checkbox);
@@ -177,6 +177,6 @@ define([
     };
 
     return {
-        'load_ipython_extension': load_ipython_extension
+        'load_ipython_extension': load_extension
     };
 });
