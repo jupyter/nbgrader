@@ -12,9 +12,12 @@ class TestClearSolutions(TestBase):
 
     def test_custom_solution_region(self):
         """Are the solution region delimeters properly formatted?"""
-        pp = ClearSolutions(comment_mark="%", solution_delimeter="!!")
-        assert pp.begin_solution == "%!!BEGIN SOLUTION"
-        assert pp.end_solution == "%!!END SOLUTION"
+        pp = ClearSolutions(
+            comment_mark="%",
+            begin_solution_delimeter="!!foo",
+            end_solution_delimeter="@@bar")
+        assert pp.begin_solution == "%!!foo"
+        assert pp.end_solution == "%@@bar"
 
     def test_replace_solution_region_code(self):
         """Are solution regions in code cells correctly replaced?"""

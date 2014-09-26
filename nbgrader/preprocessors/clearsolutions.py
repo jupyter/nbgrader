@@ -8,14 +8,15 @@ class ClearSolutions(Preprocessor):
     code_stub = Unicode("# YOUR CODE HERE\nraise NotImplementedError()", config=True)
     text_stub = Unicode("YOUR ANSWER HERE", config=True)
     comment_mark = Unicode("#", config=True)
-    solution_delimeter = Unicode("## ", config=True)
+    begin_solution_delimeter = Unicode("## BEGIN SOLUTION", config=True)
+    end_solution_delimeter = Unicode("## END SOLUTION", config=True)
 
     def __init__(self, *args, **kwargs):
         super(ClearSolutions, self).__init__(*args, **kwargs)
-        self.begin_solution = "{}{}BEGIN SOLUTION".format(
-            self.comment_mark, self.solution_delimeter)
-        self.end_solution = "{}{}END SOLUTION".format(
-            self.comment_mark, self.solution_delimeter)
+        self.begin_solution = "{}{}".format(
+            self.comment_mark, self.begin_solution_delimeter)
+        self.end_solution = "{}{}".format(
+            self.comment_mark, self.end_solution_delimeter)
 
     def _replace_solution_region(self, cell):
         """Find a region in the cell that is delimeted by
