@@ -18,6 +18,15 @@ class ClearSolutions(Preprocessor):
             self.comment_mark, self.solution_delimeter)
 
     def _replace_solution_region(self, cell):
+        """Find a region in the cell that is delimeted by
+        `self.begin_solution` and `self.end_solution` (e.g. ### BEGIN
+        SOLUTION and ### END SOLUTION). Replace that region either
+        with the code stub or text stub, depending the cell type.
+
+        This modifies the cell in place, and then returns True if a
+        solution region was replaced, and False otherwise.
+
+        """
         # pull out the cell input/source
         if cell.cell_type == "code":
             lines = cell.input.split("\n")
