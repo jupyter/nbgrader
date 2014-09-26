@@ -87,18 +87,12 @@ define([
      * Create a checkbox to mark whether the cell is a solution cell
      * or not.
      */
-    var create_solution_checkbox = function (div, cell, celltoolbar) {
-        var chkb = $('<input/>').attr('type', 'checkbox');
-        var lbl = $('<label/>').append($('<span/>').text("Solution? "));
-        lbl.append(chkb);
-        chkb.attr("checked", is_solution(cell));
-        chkb.click(function () {
-            var v = !is_solution(cell);
-            cell.metadata.nbgrader.solution = v;
-            chkb.attr("checked", v);
-        });
-        $(div).append($('<span/>').append(lbl));
-    };
+    var create_solution_checkbox = CellToolbar.utils.checkbox_ui_generator(
+        "Solution? ",
+        function (cell, val) {
+            cell.metadata.nbgrader.solution = val;
+        },
+        is_solution);
 
     /**
      * Create the input text box for the problem or test id.
