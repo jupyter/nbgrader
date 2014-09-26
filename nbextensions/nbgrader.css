@@ -3,9 +3,10 @@ div.nbgrader-points, div.nbgrader-id {
 }
 
 input.nbgrader-points-input {
-    width: 3em;
+    width: 3.5em;
     height: 22px;
     text-align: right;
+    line-height: 10px;
 }
 
 input.nbgrader-id-input {
