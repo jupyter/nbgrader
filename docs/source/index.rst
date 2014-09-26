@@ -11,7 +11,9 @@ Contents:
 .. toctree::
    :maxdepth: 2
 
-   creating
+   install
+   developing
+   releasing
    autograding
    formgrading
 

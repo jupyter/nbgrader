@@ -6,7 +6,9 @@ Autograde a students solution
 Let's say that students have turned in their notebooks with a special
 naming convention of ``StudentNotebookLastname.ipynb``. If all of the
 student notebooks are in the current directory, autograde all of them
-by doing::
+by doing:
+
+.. code:: bash
 
     nbgrader autograde StudentNotebook*.ipynb
 
