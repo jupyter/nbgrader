@@ -7,11 +7,12 @@
 **/
 
 define([
-    'base/js/namespace',
+    'require',
     'jquery',
+    'base/js/namespace',
     'notebook/js/celltoolbar',
 
-], function (IPython, $, celltoolbar) {
+], function (require, $, IPython, celltoolbar) {
     "use strict";
 
     var CellToolbar = celltoolbar.CellToolbar;
@@ -157,7 +158,7 @@ define([
         var link = document.createElement('link');
         link.type = 'text/css';
         link.rel = 'stylesheet';
-        link.href = '/nbextensions/nbgrader.css';
+        link.href = require.toUrl('./nbgrader.css');
         console.log(link);
         document.getElementsByTagName('head')[0].appendChild(link);
     };
