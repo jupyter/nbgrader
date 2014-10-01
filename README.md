@@ -4,7 +4,7 @@
 
 A system for assigning and grading notebooks.
 
-**These instructions are currently incomplete**.
+**Warning: nbgrader is not yet stable and is under active development. The following instructions are currently incomplete and may change!**
 
 ## Create an asssignment
 
