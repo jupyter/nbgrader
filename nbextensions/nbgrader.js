@@ -32,9 +32,9 @@ define([
     };
 
     /**
-     * Is the cell a grader cell?
+     * Is the cell a grade cell?
      */
-    var is_grader = function (cell) {
+    var is_grade = function (cell) {
         if (cell.metadata.nbgrader === undefined) {
             cell.metadata.nbgrader = {};
             return false;
@@ -50,7 +50,7 @@ define([
      * nbgrader cell type.
      */
     var display_cell = function (cell) {
-        var grader = is_grader(cell),
+        var grader = is_grade(cell),
             grade_cls = "nbgrader-grade-cell",
             elem = cell.element;
 
@@ -73,9 +73,9 @@ define([
         var chkb = $('<input/>').attr('type', 'checkbox');
         var lbl = $('<label/>').append($('<span/>').text("Grade? "));
         lbl.append(chkb);
-        chkb.attr("checked", is_grader(cell));
+        chkb.attr("checked", is_grade(cell));
         chkb.click(function () {
-            cell.metadata.nbgrader.grade = !is_grader(cell);
+            cell.metadata.nbgrader.grade = !is_grade(cell);
             celltoolbar.rebuild();
             display_cell(cell);
         });
@@ -98,7 +98,7 @@ define([
      * Create the input text box for the problem or test id.
      */
     var create_id_input = function (div, cell, celltoolbar) {
-        if (!is_grader(cell)) {
+        if (!is_grade(cell)) {
             return;
         }
 
@@ -124,7 +124,7 @@ define([
      * is worth.
      */
     var create_points_input = function (div, cell, celltoolbar) {
-        if (!is_grader(cell)) {
+        if (!is_grade(cell)) {
             return;
         }
 

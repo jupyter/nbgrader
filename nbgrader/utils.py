@@ -1,13 +1,12 @@
-def get_assignment_cell_type(cell):
-    """Get the assignment cell type from the assignment metadata."""
+def is_grade(cell):
+    """Returns True if the cell is a grade cell."""
     if 'nbgrader' not in cell.metadata:
-        return ''
-    if 'cell_type' not in cell.metadata['nbgrader']:
-        return ''
-    return cell.metadata['nbgrader']['cell_type']
+        return False
+    return cell.metadata['nbgrader'].get('grade', False)
+
 
 def is_solution(cell):
-    return get_assignment_cell_type(cell) == 'solution'
-
-def is_test(cell):
-    return get_assignment_cell_type(cell) == 'test'
+    """Returns True if the cell is a solution cell."""
+    if 'nbgrader' not in cell.metadata:
+        return False
+    return cell.metadata['nbgrader'].get('solution', False)
