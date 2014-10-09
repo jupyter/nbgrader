@@ -3,5 +3,5 @@ all:
 	ipython nbconvert
 
 clean:
-	rm -f examples/StudentNotebook.ipynb
-	rm -f examples/GradedNotebook.ipynb
+	rm -f release_example/StudentNotebook.ipynb
+	rm -f grade_example/GradedNotebookBitdiddle.ipynb
