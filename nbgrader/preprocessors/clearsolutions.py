@@ -11,12 +11,13 @@ class ClearSolutions(Preprocessor):
     begin_solution_delimeter = Unicode("## BEGIN SOLUTION", config=True)
     end_solution_delimeter = Unicode("## END SOLUTION", config=True)
 
-    def __init__(self, *args, **kwargs):
-        super(ClearSolutions, self).__init__(*args, **kwargs)
-        self.begin_solution = "{}{}".format(
-            self.comment_mark, self.begin_solution_delimeter)
-        self.end_solution = "{}{}".format(
-            self.comment_mark, self.end_solution_delimeter)
+    @property
+    def begin_solution(self):
+        return "{}{}".format(self.comment_mark, self.begin_solution_delimeter)
+
+    @property
+    def end_solution(self):
+        return "{}{}".format(self.comment_mark, self.end_solution_delimeter)
 
     def _replace_solution_region(self, cell):
         """Find a region in the cell that is delimeted by
