@@ -12,6 +12,8 @@ Creating an assignment consists of creating a student version of a notebook that
 has solutions omited.
 
 1. Create a notebook that has exercises, solutions and tests.
+	* Use `#Use this cell for your solution` in a code cell to mark where the solution is
+	* Create instructions in markdown around that.
 2. Tag the solution and test cells.
 3. Generate the student version of the assignment.
 
