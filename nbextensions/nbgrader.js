@@ -108,9 +108,9 @@ define([
         lbl.append(text);
 
         text.addClass('nbgrader-id-input');
-        text.attr("value", cell.metadata.nbgrader.grader_id);
+        text.attr("value", cell.metadata.nbgrader.grade_id);
         text.keyup(function () {
-            cell.metadata.nbgrader.grader_id = text.val();
+            cell.metadata.nbgrader.grade_id = text.val();
         });
                 
         local_div.addClass('nbgrader-id');
