@@ -6,24 +6,13 @@
 
 from distutils.core import setup
 
-setup(
-    name                = 'nbgrader',
-    version             = '0.1',
-    description         = 'A system for assigning and grading notebooks',
-    author              = 'Jupyter Development Team',
-    author_email        = 'ipython-dev@scipy.org',
-    license             = 'BSD',
-    url                 = 'https://github.com/jupyter/nbgrader',
-    keywords            = ['Notebooks', 'Grading', 'Homework'],
-    classifiers         = [
-        'License :: OSI Approved :: BSD License',
-        'Programming Language :: Python',
-        'Programming Language :: Python :: 2',
-        'Programming Language :: Python :: 2.7',
-        'Programming Language :: Python :: 3',
-    ],
-    packages=['nbgrader'],
-    package_data={'': ['templates/*.tpl']},
-    scripts = ['scripts/nbgrader']
-)
+release_info = {}
+with open('nbgrader/release.py', 'r') as f:
+    code = compile(f.read(), "nbgrader/release.py", 'exec')
+    exec(code, release_info)
+release_info = {k: v for k, v in release_info.items() if not k.startswith('_')}
 
+setup(packages=['nbgrader'],
+      package_data={'': ['templates/*.tpl']},
+      scripts=['scripts/nbgrader'],
+      **release_info)
