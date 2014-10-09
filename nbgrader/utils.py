@@ -1,4 +1,4 @@
-def is_grader(cell):
+def is_grade(cell):
     """Returns True if the cell is a grade cell."""
     if 'nbgrader' not in cell.metadata:
         return False
