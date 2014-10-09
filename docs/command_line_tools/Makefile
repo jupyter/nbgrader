@@ -1,3 +1,5 @@
-.PHONY: all
+.PHONY: all clean
 all:
 	ipython nbconvert
+
+clean:
