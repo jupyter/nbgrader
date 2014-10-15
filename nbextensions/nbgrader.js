@@ -182,10 +182,10 @@ define([
         CellToolbar.register_callback('create_assignment.points_input', create_points_input);
 
         var preset = [
-            'create_assignment.solution_checkbox',
-            'create_assignment.grader_checkbox',
+            'create_assignment.id_input',
             'create_assignment.points_input',
-            'create_assignment.id_input'
+            'create_assignment.grader_checkbox',
+            'create_assignment.solution_checkbox'
         ];
         CellToolbar.register_preset('Create Assignment', preset, IPython.notebook);
         console.log('nbgrader extension for metadata editing loaded.');
