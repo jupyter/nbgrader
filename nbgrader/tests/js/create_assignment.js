@@ -71,7 +71,7 @@ casper.notebook_test(function () {
             var cell = IPython.notebook.get_cell(0);
             var elem = cell.element.find(".nbgrader-points-input");
             elem.val("2");
-            elem.trigger("keyup");
+            elem.trigger("change");
             return cell.metadata.nbgrader.points;
         });
         this.test.assertEquals(points, "2", "point value changed");
@@ -83,7 +83,7 @@ casper.notebook_test(function () {
             var cell = IPython.notebook.get_cell(0);
             var elem = cell.element.find(".nbgrader-id-input");
             elem.val("foo");
-            elem.trigger("keyup");
+            elem.trigger("change");
             return cell.metadata.nbgrader.grade_id;
         });
         this.test.assertEquals(id, "foo", "grade id changed");

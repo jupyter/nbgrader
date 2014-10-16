@@ -109,7 +109,7 @@ define([
 
         text.addClass('nbgrader-id-input');
         text.attr("value", cell.metadata.nbgrader.grade_id);
-        text.keyup(function () {
+        text.change(function () {
             cell.metadata.nbgrader.grade_id = text.val();
         });
                 
@@ -135,7 +135,7 @@ define([
 
         text.addClass('nbgrader-points-input');
         text.attr("value", cell.metadata.nbgrader.points);
-        text.keyup(function () {
+        text.change(function () {
             cell.metadata.nbgrader.points = text.val();
         });
 
