@@ -16,5 +16,6 @@ install:
   - if [[ $GROUP == 'js' ]]; then pip install 'tornado<4'; fi
   - cd ipython && pip install -e ".[notebook]" && cd ..
   - pip install nose
+  - if [[ $GROUP == 'js' ]]; then cp nbextensions/* $(ipython locate)/nbextensions/; fi
 script:
   - ./scripts/runtests $GROUP
