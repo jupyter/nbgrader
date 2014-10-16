@@ -17,4 +17,4 @@ install:
   - cd ipython && pip install -e ".[notebook]" && cd ..
   - pip install nose
 script:
-  - sh scripts/runtests $GROUP
+  - ./scripts/runtests $GROUP

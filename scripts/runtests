@@ -1,11 +1,19 @@
-#!/bin/sh -e
+#!/usr/bin/env python
 
-GROUP=$1
+import sys
+import os
+import subprocess
 
-if [[ $GROUP == 'js' ]]; then
-    echo "Running javascript tests..."
-    iptest js/$(pwd)/nbgrader/tests/js
-else
-    echo "Running nosetests..."
-    nosetests
-fi
+if len(sys.argv) > 1:
+    group = sys.argv[1]
+else:
+    group = None
+
+if group == 'js':
+    print("Running javascript tests...")
+    pth = os.path.abspath("nbgrader/tests/js")
+    subprocess.call(["iptest", "js/{}".format(pth)])
+
+else:
+    print("Running nosetests...")
+    subprocess.call("nosetests")
