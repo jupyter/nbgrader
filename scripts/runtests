@@ -1,0 +1,11 @@
+#!/bin/sh -e
+
+GROUP=$1
+
+if [[ $GROUP == 'js' ]]; then
+    echo "Running javascript tests..."
+    iptest js/$(pwd)/nbgrader/tests/js
+else
+    echo "Running nosetests..."
+    nosetests
+fi
