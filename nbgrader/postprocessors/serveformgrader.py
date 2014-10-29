@@ -27,7 +27,7 @@ class ServeFormGrader(PostProcessorBase):
         app.grades = app.db['grades']
         app.comments = app.db['comments']
 
-        app.run(host=self.ip, port=self.port)
+        app.run(host=self.ip, port=self.port, debug=True, use_reloader=False)
 
 def main(path):
     """Allow running this module to serve the form grader"""
