@@ -23,7 +23,7 @@ flags.update({
 class FormgradeApp(CustomNbConvertApp):
     
     name = Unicode(u'nbgrader-formgrade')
-    description = Unicode(u'Grade a notebook using a Google Form')
+    description = Unicode(u'Grade a notebook using an HTML form')
     aliases = aliases
     flags = flags
 

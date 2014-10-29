@@ -20,6 +20,7 @@ def build():
 def clean():
     local('rm -f user_guide/release_example/StudentNotebook.ipynb')
     local('rm -f user_guide/grade_example/GradedNotebookBitdiddle.ipynb')
+    local('rm -f user_guide/grade_example/GradedNotebookBitdiddle.html')
 
 @task(default=True)
 def all():
