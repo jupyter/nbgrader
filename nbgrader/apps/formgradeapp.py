@@ -33,6 +33,11 @@ class FormgradeApp(CustomNbConvertApp):
     def _export_format_default(self):
         return 'html'
 
+    @catch_config_error
+    def initialize(self, argv=None):
+        self.postprocessor_class = 'nbgrader.postprocessors.ServeFormGrader'
+        super(FormgradeApp, self).initialize(argv)
+
     def build_extra_config(self):
         self.extra_config = Config()
         self.extra_config.Exporter.preprocessors = [

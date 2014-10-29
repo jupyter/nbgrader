@@ -1,14 +1,9 @@
-from flask import Flask, request
-app = Flask(__name__, static_url_path='/static')
-
 import json
+import os
 from bson.objectid import ObjectId
 
-from pymongo import MongoClient
-client = MongoClient('localhost', 27017)
-db = client['assignments']
-grades = db['grades']
-comments = db['comments']
+from flask import Flask, request, abort, redirect, url_for
+app = Flask(__name__, static_url_path='/static')
 
 
 def jsonify(obj):
@@ -17,14 +12,24 @@ def jsonify(obj):
     return obj
 
 
-@app.route("/<student>/<nb>")
-def hello(student, nb):
-    return app.send_static_file("{}.html".format(nb))
+@app.route("/<nb>")
+def notebook(nb):
+    filename = os.path.join(app.notebook_dir, "{}.html".format(nb))
+    if not os.path.exists(filename):
+        abort(404)
+    with open(filename, "r") as fh:
+        contents = fh.read()
+    return contents
+
+
+@app.route("/fonts/<filename>")
+def fonts(filename):
+    return redirect(url_for('static', filename=os.path.join("fonts", filename)))
 
 
 @app.route("/<student>/<nb>/grades")
 def get_all_grades(student, nb):
-    return json.dumps([jsonify(x) for x in grades.find({
+    return json.dumps([jsonify(x) for x in app.grades.find({
         "notebook": nb,
         "student_id": student
     })])
@@ -32,7 +37,7 @@ def get_all_grades(student, nb):
 
 @app.route("/<student>/<nb>/comments")
 def get_all_comments(student, nb):
-    return json.dumps([jsonify(x) for x in comments.find({
+    return json.dumps([jsonify(x) for x in app.comments.find({
         "notebook": nb,
         "student_id": student
     })])
@@ -42,20 +47,20 @@ def get_all_comments(student, nb):
 def get_grade(_id):
     grade_id = {"_id": ObjectId(_id)}
     if request.method == "PUT":
-        grades.update(grade_id, {"$set": {
+        app.grades.update(grade_id, {"$set": {
             "score": request.json.get("score", None)
         }})
-    return json.dumps(jsonify(grades.find_one(grade_id)))
+    return json.dumps(jsonify(app.grades.find_one(grade_id)))
 
 
 @app.route("/comments/<_id>", methods=["GET", "PUT"])
 def get_comment(_id):
     comment_id = {"_id": ObjectId(_id)}
     if request.method == "PUT":
-        comments.update(comment_id, {"$set": {
+        app.comments.update(comment_id, {"$set": {
             "comment": request.json.get("comment", None)
         }})
-    return json.dumps(jsonify(comments.find_one(comment_id)))
+    return json.dumps(jsonify(app.comments.find_one(comment_id)))
 
 
 if __name__ == "__main__":
