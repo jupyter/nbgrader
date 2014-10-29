@@ -36,5 +36,6 @@ class AutogradeApp(CustomNbConvertApp):
             'nbgrader.preprocessors.FindStudentID',
             'IPython.nbconvert.preprocessors.ClearOutputPreprocessor',
             'IPython.nbconvert.preprocessors.ExecutePreprocessor',
+            'nbgrader.preprocessors.SaveAutoGrades'
         ]
         self.config.merge(self.extra_config)
