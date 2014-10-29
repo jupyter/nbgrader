@@ -12,7 +12,7 @@ class SaveAutoGrades(Preprocessor):
 
     def preprocess(self, nb, resources):
         # connect to the mongo database
-        client = MongoClient(self.hostname, self.port)
+        client = MongoClient(self.ip, self.port)
         db = client['assignments']
         self.grades = db['grades']
         self.comments = db['comments']
