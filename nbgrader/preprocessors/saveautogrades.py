@@ -7,7 +7,7 @@ from nbgrader import utils
 class SaveAutoGrades(Preprocessor):
     """Preprocessor for saving out the autograder grades into a MongoDB"""
 
-    hostname = Unicode("localhost", config=True, help="Hostname for the database")
+    ip = Unicode("localhost", config=True, help="IP address for the database")
     port = Integer(27017, config=True, help="Port for the database")
 
     def preprocess(self, nb, resources):
