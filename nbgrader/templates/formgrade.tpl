@@ -55,6 +55,10 @@ div#notebook {
     page-break-inside: avoid; 
   }
 }
+
+div.prompt {
+  min-width: 21ex;
+}
 </style>
 
 <!-- Loading mathjax macro -->
@@ -81,7 +85,13 @@ div#notebook {
 {%- if cell.metadata.nbgrader.grade -%}
 <div class="cell border-box-sizing code_cell rendered">
   <div class="input">
-    <div class="prompt input_prompt">Score:</div>
+    <div class="prompt input_prompt">
+      {%- if cell.prompt_number is defined -%}
+      Score[{{ cell.prompt_number|replace(None, "&nbsp;") }}]:
+      {%- else -%}
+      Score:
+      {%- endif -%}
+    </div>
     <div class="inner_cell">
       <div style="display: inline;">
         <input class="score" id="{{ cell.metadata.nbgrader.grade_id }}" style="width: 4em;" type="number" /> / {{ cell.metadata.nbgrader.points }}
@@ -95,7 +105,13 @@ div#notebook {
 {%- if cell.metadata.nbgrader.solution -%}
 <div class="cell border-box-sizing code_cell rendered">
   <div class="input">
-    <div class="prompt input_prompt">Comments:</div>
+    <div class="prompt input_prompt">
+      {%- if cell.prompt_number is defined -%}
+      Comments[{{ cell.prompt_number|replace(None, "&nbsp;") }}]:
+      {%- else -%}
+      Comments:
+      {%- endif -%}
+    </div>
     <div class="inner_cell">
       <textarea class="comment" placeholder="Comments"></textarea>
     </div>
