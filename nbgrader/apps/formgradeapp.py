@@ -36,11 +36,8 @@ class FormgradeApp(CustomNbConvertApp):
     def build_extra_config(self):
         self.extra_config = Config()
         self.extra_config.Exporter.preprocessors = [
-            'nbgrader.preprocessors.FindStudentID',
-            'IPython.nbconvert.preprocessors.ClearOutputPreprocessor',
-            'IPython.nbconvert.preprocessors.ExecutePreprocessor',
-            'nbgrader.preprocessors.GForm'
+            'nbgrader.preprocessors.FindStudentID'
         ]
-        self.extra_config.Exporter.template_file = 'gform'
+        self.extra_config.Exporter.template_file = 'formgrade'
         self.extra_config.Exporter.template_path = ['.', get_template_path()]
         self.config.merge(self.extra_config)
