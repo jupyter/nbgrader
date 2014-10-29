@@ -44,7 +44,7 @@ class NBGraderApp(BaseIPythonApplication):
             """Autograde a notebook by running it"""
         ),
         formgrade=('nbgrader.apps.formgradeapp.FormgradeApp',
-            """Grade a notebook using a Google Form"""
+            """Grade a notebook using an HTML form"""
         ),
     )
 

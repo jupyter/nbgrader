@@ -11,7 +11,6 @@ from nbgrader.templates import get_template, get_template_path
 aliases = {}
 aliases.update(base_aliases)
 aliases.update({
-    'form-id': 'GForm.form_id',
     'regexp': 'FindStudentID.regexp'
 })
 
