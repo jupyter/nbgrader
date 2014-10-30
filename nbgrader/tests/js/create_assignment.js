@@ -33,7 +33,7 @@ casper.notebook_test(function () {
         var solution = this.evaluate(function () {
             var cell = IPython.notebook.get_cell(0);
             var elems = cell.element.find(".button_container");
-            $(elems[0]).find("input").click();
+            $(elems[3]).find("input").click();
             return cell.metadata.nbgrader.solution;
         });
         this.test.assertTrue(solution, "cell is marked as a solution cell");
@@ -44,7 +44,7 @@ casper.notebook_test(function () {
         var solution = this.evaluate(function () {
             var cell = IPython.notebook.get_cell(0);
             var elems = cell.element.find(".button_container");
-            $(elems[0]).find("input").click();
+            $(elems[3]).find("input").click();
             return cell.metadata.nbgrader.solution;
         });
         this.test.assertTrue(!solution, "cell is marked as not a solution cell");
@@ -55,7 +55,7 @@ casper.notebook_test(function () {
         var grade = this.evaluate(function () {
             var cell = IPython.notebook.get_cell(0);
             var elems = cell.element.find(".button_container");
-            $(elems[1]).find("input").click();
+            $(elems[2]).find("input").click();
             return cell.metadata.nbgrader.grade;
         });
         this.test.assertTrue(grade, "cell is marked as a grade cell");
@@ -94,7 +94,7 @@ casper.notebook_test(function () {
         var metadata = this.evaluate(function () {
             var cell = IPython.notebook.get_cell(0);
             var elems = cell.element.find(".button_container");
-            $(elems[1]).find("input").click();
+            $(elems[2]).find("input").click();
             return cell.metadata.nbgrader;
         });
         this.test.assertTrue(!metadata.grade, "cell is no longer marked as a grade cell");
