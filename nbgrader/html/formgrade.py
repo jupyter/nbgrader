@@ -1,16 +1,8 @@
 import json
 import os
-import glob
 
 from flask import Flask, request, abort, redirect, url_for, render_template
 app = Flask(__name__, static_url_path='/static')
-
-
-def get_notebook_list():
-    suffix = ".autograded.html"
-    notebooks = glob.glob(os.path.join(app.notebook_dir, "*{}".format(suffix)))
-    notebooks = [os.path.split(x)[1][:-len(suffix)] for x in notebooks]
-    return sorted(notebooks)
 
 
 def get_notebook_score(_id):
