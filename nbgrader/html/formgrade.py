@@ -37,12 +37,26 @@ def fonts(filename):
 
 @app.route("/")
 def home():
-    return render_template("notebook_list.html")
+    return render_template("assignment_list.html")
 
 
-@app.route("/<nb>")
-def notebook(nb):
-    filename = os.path.join(app.notebook_dir, nb)
+@app.route("/assignments")
+def view_assignments():
+    return redirect(url_for('/'))
+
+
+@app.route("/assignments/<assignment_id>/")
+def view_assignment(assignment_id):
+    assignment = app.gradebook.find_assignment(assignment_id=assignment_id)
+    return render_template(
+        "notebook_list.html",
+        assignment_id=assignment.assignment_id,
+        assignment_uuid=assignment._id)
+
+
+@app.route("/assignments/<assignment_id>/<notebook_id>")
+def view_notebook(assignment_id, notebook_id):
+    filename = os.path.join(app.notebook_dir, notebook_id)
     if not os.path.exists(filename):
         abort(404)
     with open(filename, "r") as fh:
@@ -50,15 +64,22 @@ def notebook(nb):
     return contents
 
 
-@app.route("/api/notebooks")
-def get_notebooks():
-    notebooks = [x.to_dict() for x in app.gradebook.notebooks]
+@app.route("/api/assignments")
+def get_assignments():
+    assignments = [x.to_dict() for x in app.gradebook.assignments]
+    return json.dumps(assignments)
+
+
+@app.route("/api/assignment/<_id>/notebooks")
+def get_notebooks(_id):
+    assignment = app.gradebook.find_assignment(_id=_id)
+    notebooks = [x.to_dict() for x in app.gradebook.find_notebooks(assignment=assignment)]
     for nb in notebooks:
         nb.update(get_notebook_score(nb["_id"]))
         student = app.gradebook.find_student(_id=nb["student"])
         nb["student_name"] = "{last_name}, {first_name}".format(**student.to_dict())
         nb["student_id"] = student.student_id
-        nb["path"] = "/{}.html".format(nb["notebook_id"])
+        nb["path"] = "/assignments/{}/{}.html".format(assignment.assignment_id, nb["notebook_id"])
     return json.dumps(notebooks)
 
 
@@ -69,8 +90,10 @@ def next_notebook(_id):
     if index == (len(ids) - 1):
         return json.dumps(None)
     nb = app.gradebook.find_notebook(_id=ids[index + 1]).to_dict()
-    nb["path"] = "/{}.html".format(nb["notebook_id"])
+    assignment = app.gradebook.find_assignment(_id=nb['assignment'])
+    nb["path"] = "/assignments/{}/{}.html".format(assignment.assignment_id, nb["notebook_id"])
     return json.dumps(nb)
+
 
 @app.route("/api/notebook/<_id>/prev")
 def prev_notebook(_id):
@@ -79,7 +102,8 @@ def prev_notebook(_id):
     if index == 0:
         return json.dumps(None)
     nb = app.gradebook.find_notebook(_id=ids[index - 1]).to_dict()
-    nb["path"] = "/{}.html".format(nb["notebook_id"])
+    assignment = app.gradebook.find_assignment(_id=nb['assignment'])
+    nb["path"] = "/assignments/{}/{}.html".format(assignment.assignment_id, nb["notebook_id"])
     return json.dumps(nb)
 
 

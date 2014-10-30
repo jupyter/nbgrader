@@ -73,7 +73,7 @@ div.prompt {
       <nav>
         <ul class="pager">
           <li class="prev-notebook"><a href="#">&larr; Prev</a></li>
-          <li><a href="/">Home</a></li>
+          <li><a href=".">Home</a></li>
           <li class="next-notebook"><a href="#">Next &rarr;</a></li>
         </ul>
       </nav>
@@ -81,7 +81,7 @@ div.prompt {
       <nav>
         <ul class="pager">
           <li class="prev-notebook"><a href="#">&larr; Prev</a></li>
-          <li><a href="/">Home</a></li>
+          <li><a href=".">Home</a></li>
           <li class="next-notebook"><a href="#">Next &rarr;</a></li>
         </ul>
       </nav>

@@ -1,9 +1,9 @@
-/*global $*/
+/*global $, assignment_uuid*/
 
 var notebooks;
 
 $(document).ready(function () {
-    $.get("/api/notebooks", function (data) {
+    $.get("/api/assignment/" + assignment_uuid + "/notebooks", function (data) {
         notebooks = JSON.parse(data);
         var elem = $("#notebook-list");
         var nb, row, link;

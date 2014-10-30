@@ -181,6 +181,9 @@ class Gradebook(object):
             raise ValueError('no such notebook: {}'.format(query))
         return notebook
 
+    def find_notebooks(self, **query):
+        return self._find_all('notebooks', query)
+
     def find_or_create_notebook(self, **query):
         return self._find_or_create('notebooks', query)
 
