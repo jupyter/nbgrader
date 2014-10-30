@@ -11,7 +11,7 @@ $(document).ready(function () {
             nb = notebooks[i];
 
             link = $("<a />");
-            link.attr("href", "/" + nb.notebook_id + ".autograded.html");
+            link.attr("href", nb.path);
             link.text(nb.notebook_id);
 
             row = $("<tr />");

@@ -58,6 +58,7 @@ def get_notebooks():
         student = app.gradebook.find_student(_id=nb["student"])
         nb["student_name"] = "{last_name}, {first_name}".format(**student.to_dict())
         nb["student_id"] = student.student_id
+        nb["path"] = "/{}.autograded.html".format(nb["notebook_id"])
     return json.dumps(notebooks)
 
 
@@ -67,8 +68,9 @@ def next_notebook(_id):
     index = ids.index(_id)
     if index == (len(ids) - 1):
         return json.dumps(None)
-    return app.gradebook.find_notebook(_id=ids[index + 1]).to_json()
-
+    nb = app.gradebook.find_notebook(_id=ids[index + 1]).to_dict()
+    nb["path"] = "/{}.autograded.html".format(nb["notebook_id"])
+    return json.dumps(nb)
 
 @app.route("/api/notebook/<_id>/prev")
 def prev_notebook(_id):
@@ -76,7 +78,9 @@ def prev_notebook(_id):
     index = ids.index(_id)
     if index == 0:
         return json.dumps(None)
-    return app.gradebook.find_notebook(_id=ids[index - 1]).to_json()
+    nb = app.gradebook.find_notebook(_id=ids[index + 1]).to_dict()
+    nb["path"] = "/{}.autograded.html".format(nb["notebook_id"])
+    return json.dumps(nb)
 
 
 @app.route("/api/notebook/<_id>/grades")

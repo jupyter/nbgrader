@@ -77,7 +77,7 @@ $(document).ready(function () {
             $("li.next-notebook a").attr("href", "#");
             $("li.next-notebook").addClass("disabled");
         } else {
-            $("li.next-notebook a").attr("href", "/" + data.notebook_id + ".autograded.html");
+            $("li.next-notebook a").attr("href", data.path);
             if ($("li.next-notebook").hasClass("disabled")) {
                 $("li.next-notebook").removeClass("disabled");
             }
@@ -90,7 +90,7 @@ $(document).ready(function () {
             $("li.prev-notebook a").attr("href", "#");
             $("li.prev-notebook").addClass("disabled");
         } else {
-            $("li.prev-notebook a").attr("href", "/" + data.notebook_id + ".autograded.html");
+            $("li.prev-notebook a").attr("href", data.path);
             if ($("li.prev-notebook").hasClass("disabled")) {
                 $("li.prev-notebook").removeClass("disabled");
             }
