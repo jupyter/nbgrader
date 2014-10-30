@@ -70,4 +70,30 @@ $(document).ready(function () {
 
     comments = new Comments();
     comments.fetch();
+
+    $.get("/" + nb + "/next", function (data) {
+        nb = JSON.parse(data);
+        if (nb === null) {
+            $("li.next-notebook a").attr("href", "#");
+            $("li.next-notebook").addClass("disabled");
+        } else {
+            $("li.next-notebook a").attr("href", "/" + nb);
+            if ($("li.next-notebook").hasClass("disabled")) {
+                $("li.next-notebook").removeClass("disabled");
+            }
+        }
+    });
+
+    $.get("/" + nb + "/prev", function (data) {
+        nb = JSON.parse(data);
+        if (nb === null) {
+            $("li.prev-notebook a").attr("href", "#");
+            $("li.prev-notebook").addClass("disabled");
+        } else {
+            $("li.prev-notebook a").attr("href", "/" + nb);
+            if ($("li.prev-notebook").hasClass("disabled")) {
+                $("li.prev-notebook").removeClass("disabled");
+            }
+        }
+    });
 });

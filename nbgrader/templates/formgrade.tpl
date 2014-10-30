@@ -71,7 +71,21 @@ div.prompt {
 <body>
   <div tabindex="-1" id="notebook" class="border-box-sizing">
     <div class="container" id="notebook-container">
+      <nav>
+        <ul class="pager">
+          <li class="prev-notebook"><a href="#">&larr; Prev</a></li>
+          <li><a href="/">Home</a></li>
+          <li class="next-notebook"><a href="#">Next &rarr;</a></li>
+        </ul>
+      </nav>
 {{ super() }}
+      <nav>
+        <ul class="pager">
+          <li class="prev-notebook"><a href="#">&larr; Prev</a></li>
+          <li><a href="/">Home</a></li>
+          <li class="next-notebook"><a href="#">Next &rarr;</a></li>
+        </ul>
+      </nav>
     </div>
   </div>
 </body>

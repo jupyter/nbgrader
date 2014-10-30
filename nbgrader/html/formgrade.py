@@ -13,12 +13,17 @@ def jsonify(obj):
     return obj
 
 
-@app.route("/")
-def list_notebooks():
+def get_notebook_list():
     suffix = ".autograded.html"
     notebooks = glob.glob(os.path.join(app.notebook_dir, "*{}".format(suffix)))
     notebooks = [os.path.split(x)[1][:-len(suffix)] for x in notebooks]
+    return sorted(notebooks)
+
+@app.route("/")
+def list_notebooks():
+    notebooks = get_notebook_list()
     return render_template("notebook_list.html", notebooks=notebooks)
+
 
 @app.route("/<nb>")
 def notebook(nb):
@@ -28,6 +33,24 @@ def notebook(nb):
     with open(filename, "r") as fh:
         contents = fh.read()
     return contents
+
+
+@app.route("/<nb>/next")
+def next_notebook(nb):
+    notebooks = get_notebook_list()
+    index = notebooks.index(nb)
+    if index == (len(notebooks) - 1):
+        return json.dumps(None)
+    return json.dumps(notebooks[index + 1])
+
+
+@app.route("/<nb>/prev")
+def prev_notebook(nb):
+    notebooks = get_notebook_list()
+    index = notebooks.index(nb)
+    if index == 0:
+        return json.dumps(None)
+    return json.dumps(notebooks[index - 1])
 
 
 @app.route("/fonts/<filename>")
