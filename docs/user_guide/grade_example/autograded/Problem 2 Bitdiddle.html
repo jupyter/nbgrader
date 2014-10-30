@@ -3,10 +3,10 @@
 <head>
 
 <meta charset="utf-8" />
-<title>StudentNotebookBitdiddle</title>
+<title>Problem 2 Bitdiddle</title>
 
 <script>
-nb_uuid = "48c092e5-a954-4a8b-ab66-cc303b2f000d";
+nb_uuid = "852591b9-2ee9-45dd-a556-8cc7e6938d4a";
 </script>
 
 <script src="/static/lib/jquery-2.1.1.min.js"></script>
@@ -10669,7 +10669,7 @@ div.prompt {
 <div class="prompt input_prompt">In&nbsp;[1]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-python"><pre><span class="n">NAME</span> <span class="o">=</span> <span class="s">&quot;Ben Bitdiddle&quot;</span>
+<div class=" highlight hl-ipython3"><pre><span class="n">NAME</span> <span class="o">=</span> <span class="s">&quot;Ben Bitdiddle&quot;</span>
 <span class="n">COLLABORATORS</span> <span class="o">=</span> <span class="s">&quot;Alyssa P. Hacker&quot;</span>
 </pre></div>
 
@@ -10688,221 +10688,20 @@ div.prompt {
 </div>
 </div>
 </div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[2]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-python"><pre><span class="c"># import plotting libraries</span>
-<span class="o">%</span><span class="n">matplotlib</span> <span class="n">inline</span>
-<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
-</pre></div>
-
-</div>
-</div>
-</div>
-
-</div>
 <div class="cell border-box-sizing text_cell rendered">
 <div class="prompt input_prompt">
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="Problem-1">Problem 1<a class="anchor-link" href="#Problem-1">&#182;</a></h2>
-</div>
-</div>
-</div>
-
-<div class="cell border-box-sizing text_cell rendered">
-<div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>Write a function that returns a list of numbers, such that $x_i=i^2$, for $1\leq i \leq n$. Make sure it handles the case where $n<1$ by raising a <code>ValueError</code>.</p>
-
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[3]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-python"><pre><span class="k">def</span> <span class="nf">squares</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Compute the squares of numbers from 1 to n, such that the </span>
-<span class="sd">    ith element of the returned list equals i^2.</span>
-<span class="sd">    </span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="n">n</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span>
-    <span class="n">s</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
-        <span class="n">s</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">s</span>
+<p>Consider the following piece of code:</p>
+<div class="highlight"><pre><span class="k">def</span> <span class="nf">f</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">x</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">x</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">x</span>
+    <span class="k">return</span> <span class="n">f</span><span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="n">f</span><span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="mi">2</span><span class="p">)</span>
 </pre></div>
 
 </div>
 </div>
-</div>
-
-</div><div class="cell border-box-sizing code_cell rendered">
-  <div class="input">
-    <div class="prompt input_prompt">Comments[3]:</div>
-    <div class="inner_cell">
-      <textarea class="comment" placeholder="Comments"></textarea>
-    </div>
-  </div>
-</div>
-<div class="cell border-box-sizing text_cell rendered">
-<div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>Your function should print <code>[1, 4, 9, 16, 25, 36, 49, 64, 81, 100]</code> for $n=10$. Check that it does:</p>
-
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[4]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-python"><pre><span class="n">squares</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
-</pre></div>
-
-</div>
-</div>
-</div>
-
-<div class="output_wrapper">
-<div class="output">
-
-
-<div class="output_area"><div class="prompt output_prompt">Out[4]:</div>
-
-
-<div class="output_text output_subarea output_pyout">
-<pre>[0, 1, 4, 9, 16, 25, 36, 49, 64, 81]</pre>
-</div>
-
-</div>
-
-</div>
-</div>
-
-</div><div class="cell border-box-sizing code_cell rendered">
-  <div class="input">
-    <div class="prompt input_prompt">Score[5]:</div>
-    <div class="inner_cell">
-      <div style="display: inline;">
-        <input class="score" id="correct_squares" style="width: 4em;" type="number" /> / 1
-        <span style="margin-left: 1em;" class="glyphicon glyphicon-floppy-saved"></span>
-      </div>
-    </div>
-  </div>
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[5]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-python"><pre><span class="sd">&quot;&quot;&quot;Check that squares returns the correct output for several inputs&quot;&quot;&quot;</span>
-<span class="kn">from</span> <span class="nn">nose.tools</span> <span class="kn">import</span> <span class="n">assert_equal</span>
-<span class="n">assert_equal</span><span class="p">(</span><span class="n">squares</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="p">[</span><span class="mi">1</span><span class="p">])</span>
-<span class="n">assert_equal</span><span class="p">(</span><span class="n">squares</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">])</span>
-<span class="n">assert_equal</span><span class="p">(</span><span class="n">squares</span><span class="p">(</span><span class="mi">10</span><span class="p">),</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">25</span><span class="p">,</span> <span class="mi">36</span><span class="p">,</span> <span class="mi">49</span><span class="p">,</span> <span class="mi">64</span><span class="p">,</span> <span class="mi">81</span><span class="p">,</span> <span class="mi">100</span><span class="p">])</span>
-<span class="n">assert_equal</span><span class="p">(</span><span class="n">squares</span><span class="p">(</span><span class="mi">11</span><span class="p">),</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">25</span><span class="p">,</span> <span class="mi">36</span><span class="p">,</span> <span class="mi">49</span><span class="p">,</span> <span class="mi">64</span><span class="p">,</span> <span class="mi">81</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">121</span><span class="p">])</span>
-</pre></div>
-
-</div>
-</div>
-</div>
-
-<div class="output_wrapper">
-<div class="output">
-
-
-<div class="output_area"><div class="prompt"></div>
-<div class="output_subarea output_text output_pyerr">
-<pre>
-<span class="ansired">---------------------------------------------------------------------------</span>
-<span class="ansired">AssertionError</span>                            Traceback (most recent call last)
-<span class="ansigreen">&lt;ipython-input-5-8b2bd5b0230e&gt;</span> in <span class="ansicyan">&lt;module&gt;</span><span class="ansiblue">()</span>
-<span class="ansigreen">      1</span> <span class="ansiblue">&quot;&quot;&quot;Check that squares returns the correct output for several inputs&quot;&quot;&quot;</span><span class="ansiblue"></span>
-<span class="ansigreen">      2</span> <span class="ansigreen">from</span> nose<span class="ansiblue">.</span>tools <span class="ansigreen">import</span> assert_equal<span class="ansiblue"></span>
-<span class="ansigreen">----&gt; 3</span><span class="ansired"> </span>assert_equal<span class="ansiblue">(</span>squares<span class="ansiblue">(</span><span class="ansicyan">1</span><span class="ansiblue">)</span><span class="ansiblue">,</span> <span class="ansiblue">[</span><span class="ansicyan">1</span><span class="ansiblue">]</span><span class="ansiblue">)</span><span class="ansiblue"></span>
-<span class="ansigreen">      4</span> assert_equal<span class="ansiblue">(</span>squares<span class="ansiblue">(</span><span class="ansicyan">2</span><span class="ansiblue">)</span><span class="ansiblue">,</span> <span class="ansiblue">[</span><span class="ansicyan">1</span><span class="ansiblue">,</span> <span class="ansicyan">4</span><span class="ansiblue">]</span><span class="ansiblue">)</span><span class="ansiblue"></span>
-<span class="ansigreen">      5</span> assert_equal<span class="ansiblue">(</span>squares<span class="ansiblue">(</span><span class="ansicyan">10</span><span class="ansiblue">)</span><span class="ansiblue">,</span> <span class="ansiblue">[</span><span class="ansicyan">1</span><span class="ansiblue">,</span> <span class="ansicyan">4</span><span class="ansiblue">,</span> <span class="ansicyan">9</span><span class="ansiblue">,</span> <span class="ansicyan">16</span><span class="ansiblue">,</span> <span class="ansicyan">25</span><span class="ansiblue">,</span> <span class="ansicyan">36</span><span class="ansiblue">,</span> <span class="ansicyan">49</span><span class="ansiblue">,</span> <span class="ansicyan">64</span><span class="ansiblue">,</span> <span class="ansicyan">81</span><span class="ansiblue">,</span> <span class="ansicyan">100</span><span class="ansiblue">]</span><span class="ansiblue">)</span><span class="ansiblue"></span>
-
-<span class="ansigreen">/usr/local/Cellar/python3/3.4.1_1/Frameworks/Python.framework/Versions/3.4/lib/python3.4/unittest/case.py</span> in <span class="ansicyan">assertEqual</span><span class="ansiblue">(self, first, second, msg)</span>
-<span class="ansigreen">    795</span>         &quot;&quot;&quot;
-<span class="ansigreen">    796</span>         assertion_func <span class="ansiblue">=</span> self<span class="ansiblue">.</span>_getAssertEqualityFunc<span class="ansiblue">(</span>first<span class="ansiblue">,</span> second<span class="ansiblue">)</span><span class="ansiblue"></span>
-<span class="ansigreen">--&gt; 797</span><span class="ansired">         </span>assertion_func<span class="ansiblue">(</span>first<span class="ansiblue">,</span> second<span class="ansiblue">,</span> msg<span class="ansiblue">=</span>msg<span class="ansiblue">)</span><span class="ansiblue"></span>
-<span class="ansigreen">    798</span> <span class="ansiblue"></span>
-<span class="ansigreen">    799</span>     <span class="ansigreen">def</span> assertNotEqual<span class="ansiblue">(</span>self<span class="ansiblue">,</span> first<span class="ansiblue">,</span> second<span class="ansiblue">,</span> msg<span class="ansiblue">=</span><span class="ansigreen">None</span><span class="ansiblue">)</span><span class="ansiblue">:</span><span class="ansiblue"></span>
-
-<span class="ansigreen">/usr/local/Cellar/python3/3.4.1_1/Frameworks/Python.framework/Versions/3.4/lib/python3.4/unittest/case.py</span> in <span class="ansicyan">assertListEqual</span><span class="ansiblue">(self, list1, list2, msg)</span>
-<span class="ansigreen">    993</span> <span class="ansiblue"></span>
-<span class="ansigreen">    994</span>         &quot;&quot;&quot;
-<span class="ansigreen">--&gt; 995</span><span class="ansired">         </span>self<span class="ansiblue">.</span>assertSequenceEqual<span class="ansiblue">(</span>list1<span class="ansiblue">,</span> list2<span class="ansiblue">,</span> msg<span class="ansiblue">,</span> seq_type<span class="ansiblue">=</span>list<span class="ansiblue">)</span><span class="ansiblue"></span>
-<span class="ansigreen">    996</span> <span class="ansiblue"></span>
-<span class="ansigreen">    997</span>     <span class="ansigreen">def</span> assertTupleEqual<span class="ansiblue">(</span>self<span class="ansiblue">,</span> tuple1<span class="ansiblue">,</span> tuple2<span class="ansiblue">,</span> msg<span class="ansiblue">=</span><span class="ansigreen">None</span><span class="ansiblue">)</span><span class="ansiblue">:</span><span class="ansiblue"></span>
-
-<span class="ansigreen">/usr/local/Cellar/python3/3.4.1_1/Frameworks/Python.framework/Versions/3.4/lib/python3.4/unittest/case.py</span> in <span class="ansicyan">assertSequenceEqual</span><span class="ansiblue">(self, seq1, seq2, msg, seq_type)</span>
-<span class="ansigreen">    975</span>         standardMsg <span class="ansiblue">=</span> self<span class="ansiblue">.</span>_truncateMessage<span class="ansiblue">(</span>standardMsg<span class="ansiblue">,</span> diffMsg<span class="ansiblue">)</span><span class="ansiblue"></span>
-<span class="ansigreen">    976</span>         msg <span class="ansiblue">=</span> self<span class="ansiblue">.</span>_formatMessage<span class="ansiblue">(</span>msg<span class="ansiblue">,</span> standardMsg<span class="ansiblue">)</span><span class="ansiblue"></span>
-<span class="ansigreen">--&gt; 977</span><span class="ansired">         </span>self<span class="ansiblue">.</span>fail<span class="ansiblue">(</span>msg<span class="ansiblue">)</span><span class="ansiblue"></span>
-<span class="ansigreen">    978</span> <span class="ansiblue"></span>
-<span class="ansigreen">    979</span>     <span class="ansigreen">def</span> _truncateMessage<span class="ansiblue">(</span>self<span class="ansiblue">,</span> message<span class="ansiblue">,</span> diff<span class="ansiblue">)</span><span class="ansiblue">:</span><span class="ansiblue"></span>
-
-<span class="ansigreen">/usr/local/Cellar/python3/3.4.1_1/Frameworks/Python.framework/Versions/3.4/lib/python3.4/unittest/case.py</span> in <span class="ansicyan">fail</span><span class="ansiblue">(self, msg)</span>
-<span class="ansigreen">    640</span>     <span class="ansigreen">def</span> fail<span class="ansiblue">(</span>self<span class="ansiblue">,</span> msg<span class="ansiblue">=</span><span class="ansigreen">None</span><span class="ansiblue">)</span><span class="ansiblue">:</span><span class="ansiblue"></span>
-<span class="ansigreen">    641</span>         <span class="ansiblue">&quot;&quot;&quot;Fail immediately, with the given message.&quot;&quot;&quot;</span><span class="ansiblue"></span>
-<span class="ansigreen">--&gt; 642</span><span class="ansired">         </span><span class="ansigreen">raise</span> self<span class="ansiblue">.</span>failureException<span class="ansiblue">(</span>msg<span class="ansiblue">)</span><span class="ansiblue"></span>
-<span class="ansigreen">    643</span> <span class="ansiblue"></span>
-<span class="ansigreen">    644</span>     <span class="ansigreen">def</span> assertFalse<span class="ansiblue">(</span>self<span class="ansiblue">,</span> expr<span class="ansiblue">,</span> msg<span class="ansiblue">=</span><span class="ansigreen">None</span><span class="ansiblue">)</span><span class="ansiblue">:</span><span class="ansiblue"></span>
-
-<span class="ansired">AssertionError</span>: Lists differ: [0] != [1]
-
-First differing element 0:
-0
-1
-
-- [0]
-+ [1]</pre>
-</div>
-</div>
-
-</div>
-</div>
-
-</div><div class="cell border-box-sizing code_cell rendered">
-  <div class="input">
-    <div class="prompt input_prompt">Score[6]:</div>
-    <div class="inner_cell">
-      <div style="display: inline;">
-        <input class="score" id="squares_invalid_input" style="width: 4em;" type="number" /> / 1
-        <span style="margin-left: 1em;" class="glyphicon glyphicon-floppy-saved"></span>
-      </div>
-    </div>
-  </div>
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[6]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-python"><pre><span class="sd">&quot;&quot;&quot;Check that squares raises an error for invalid inputs&quot;&quot;&quot;</span>
-<span class="kn">from</span> <span class="nn">nose.tools</span> <span class="kn">import</span> <span class="n">assert_raises</span>
-<span class="n">assert_raises</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">,</span> <span class="n">squares</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
-<span class="n">assert_raises</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">,</span> <span class="n">squares</span><span class="p">,</span> <span class="o">-</span><span class="mi">4</span><span class="p">)</span>
-</pre></div>
-
-</div>
-</div>
-</div>
-
 </div>
 <div class="cell border-box-sizing text_cell rendered">
 <div class="prompt input_prompt">
@@ -10910,6 +10709,7 @@ First differing element 0:
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
 <hr>
+<h2>Part A</h2>
 
 </div>
 </div>
@@ -10919,207 +10719,7 @@ First differing element 0:
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="Problem-2">Problem 2<a class="anchor-link" href="#Problem-2">&#182;</a></h2>
-</div>
-</div>
-</div>
-
-<div class="cell border-box-sizing text_cell rendered">
-<div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="Part-A">Part A<a class="anchor-link" href="#Part-A">&#182;</a></h3>
-</div>
-</div>
-</div>
-
-<div class="cell border-box-sizing text_cell rendered">
-<div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>Using your <code>squares</code> function, write a function that computes the sum of the squares of the numbers from 1 to $n$. Your function should call the <code>squares</code> function -- it should NOT reimplement its functionality.</p>
-
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[7]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-python"><pre><span class="k">def</span> <span class="nf">sum_of_squares</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Compute the sum of the squares of numbers from 1 to n.&quot;&quot;&quot;</span>
-    <span class="n">s</span> <span class="o">=</span> <span class="n">squares</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
-    <span class="n">total</span> <span class="o">=</span> <span class="mi">0</span>
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">s</span><span class="p">:</span>
-        <span class="n">total</span> <span class="o">+=</span> <span class="n">i</span>
-    <span class="k">return</span> <span class="n">total</span>
-</pre></div>
-
-</div>
-</div>
-</div>
-
-</div><div class="cell border-box-sizing code_cell rendered">
-  <div class="input">
-    <div class="prompt input_prompt">Comments[7]:</div>
-    <div class="inner_cell">
-      <textarea class="comment" placeholder="Comments"></textarea>
-    </div>
-  </div>
-</div>
-<div class="cell border-box-sizing text_cell rendered">
-<div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>The sum of squares from 1 to 10 should be 385. Verify that this is the answer you get:</p>
-
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[8]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-python"><pre><span class="n">sum_of_squares</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
-</pre></div>
-
-</div>
-</div>
-</div>
-
-<div class="output_wrapper">
-<div class="output">
-
-
-<div class="output_area"><div class="prompt output_prompt">Out[8]:</div>
-
-
-<div class="output_text output_subarea output_pyout">
-<pre>285</pre>
-</div>
-
-</div>
-
-</div>
-</div>
-
-</div><div class="cell border-box-sizing code_cell rendered">
-  <div class="input">
-    <div class="prompt input_prompt">Score[9]:</div>
-    <div class="inner_cell">
-      <div style="display: inline;">
-        <input class="score" id="correct_sum_of_squares" style="width: 4em;" type="number" /> / 1
-        <span style="margin-left: 1em;" class="glyphicon glyphicon-floppy-saved"></span>
-      </div>
-    </div>
-  </div>
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[9]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-python"><pre><span class="sd">&quot;&quot;&quot;Check that sum_of_squares returns the correct answer for various inputs.&quot;&quot;&quot;</span>
-<span class="n">assert_equal</span><span class="p">(</span><span class="n">sum_of_squares</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span>
-<span class="n">assert_equal</span><span class="p">(</span><span class="n">sum_of_squares</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span> <span class="mi">5</span><span class="p">)</span>
-<span class="n">assert_equal</span><span class="p">(</span><span class="n">sum_of_squares</span><span class="p">(</span><span class="mi">10</span><span class="p">),</span> <span class="mi">385</span><span class="p">)</span>
-<span class="n">assert_equal</span><span class="p">(</span><span class="n">sum_of_squares</span><span class="p">(</span><span class="mi">11</span><span class="p">),</span> <span class="mi">506</span><span class="p">)</span>
-</pre></div>
-
-</div>
-</div>
-</div>
-
-<div class="output_wrapper">
-<div class="output">
-
-
-<div class="output_area"><div class="prompt"></div>
-<div class="output_subarea output_text output_pyerr">
-<pre>
-<span class="ansired">---------------------------------------------------------------------------</span>
-<span class="ansired">AssertionError</span>                            Traceback (most recent call last)
-<span class="ansigreen">&lt;ipython-input-9-54b95b55a74e&gt;</span> in <span class="ansicyan">&lt;module&gt;</span><span class="ansiblue">()</span>
-<span class="ansigreen">      1</span> <span class="ansiblue">&quot;&quot;&quot;Check that sum_of_squares returns the correct answer for various inputs.&quot;&quot;&quot;</span><span class="ansiblue"></span>
-<span class="ansigreen">----&gt; 2</span><span class="ansired"> </span>assert_equal<span class="ansiblue">(</span>sum_of_squares<span class="ansiblue">(</span><span class="ansicyan">1</span><span class="ansiblue">)</span><span class="ansiblue">,</span> <span class="ansicyan">1</span><span class="ansiblue">)</span><span class="ansiblue"></span>
-<span class="ansigreen">      3</span> assert_equal<span class="ansiblue">(</span>sum_of_squares<span class="ansiblue">(</span><span class="ansicyan">2</span><span class="ansiblue">)</span><span class="ansiblue">,</span> <span class="ansicyan">5</span><span class="ansiblue">)</span><span class="ansiblue"></span>
-<span class="ansigreen">      4</span> assert_equal<span class="ansiblue">(</span>sum_of_squares<span class="ansiblue">(</span><span class="ansicyan">10</span><span class="ansiblue">)</span><span class="ansiblue">,</span> <span class="ansicyan">385</span><span class="ansiblue">)</span><span class="ansiblue"></span>
-<span class="ansigreen">      5</span> assert_equal<span class="ansiblue">(</span>sum_of_squares<span class="ansiblue">(</span><span class="ansicyan">11</span><span class="ansiblue">)</span><span class="ansiblue">,</span> <span class="ansicyan">506</span><span class="ansiblue">)</span><span class="ansiblue"></span>
-
-<span class="ansigreen">/usr/local/Cellar/python3/3.4.1_1/Frameworks/Python.framework/Versions/3.4/lib/python3.4/unittest/case.py</span> in <span class="ansicyan">assertEqual</span><span class="ansiblue">(self, first, second, msg)</span>
-<span class="ansigreen">    795</span>         &quot;&quot;&quot;
-<span class="ansigreen">    796</span>         assertion_func <span class="ansiblue">=</span> self<span class="ansiblue">.</span>_getAssertEqualityFunc<span class="ansiblue">(</span>first<span class="ansiblue">,</span> second<span class="ansiblue">)</span><span class="ansiblue"></span>
-<span class="ansigreen">--&gt; 797</span><span class="ansired">         </span>assertion_func<span class="ansiblue">(</span>first<span class="ansiblue">,</span> second<span class="ansiblue">,</span> msg<span class="ansiblue">=</span>msg<span class="ansiblue">)</span><span class="ansiblue"></span>
-<span class="ansigreen">    798</span> <span class="ansiblue"></span>
-<span class="ansigreen">    799</span>     <span class="ansigreen">def</span> assertNotEqual<span class="ansiblue">(</span>self<span class="ansiblue">,</span> first<span class="ansiblue">,</span> second<span class="ansiblue">,</span> msg<span class="ansiblue">=</span><span class="ansigreen">None</span><span class="ansiblue">)</span><span class="ansiblue">:</span><span class="ansiblue"></span>
-
-<span class="ansigreen">/usr/local/Cellar/python3/3.4.1_1/Frameworks/Python.framework/Versions/3.4/lib/python3.4/unittest/case.py</span> in <span class="ansicyan">_baseAssertEqual</span><span class="ansiblue">(self, first, second, msg)</span>
-<span class="ansigreen">    788</span>             standardMsg <span class="ansiblue">=</span> <span class="ansiblue">&apos;%s != %s&apos;</span> <span class="ansiblue">%</span> _common_shorten_repr<span class="ansiblue">(</span>first<span class="ansiblue">,</span> second<span class="ansiblue">)</span><span class="ansiblue"></span>
-<span class="ansigreen">    789</span>             msg <span class="ansiblue">=</span> self<span class="ansiblue">.</span>_formatMessage<span class="ansiblue">(</span>msg<span class="ansiblue">,</span> standardMsg<span class="ansiblue">)</span><span class="ansiblue"></span>
-<span class="ansigreen">--&gt; 790</span><span class="ansired">             </span><span class="ansigreen">raise</span> self<span class="ansiblue">.</span>failureException<span class="ansiblue">(</span>msg<span class="ansiblue">)</span><span class="ansiblue"></span>
-<span class="ansigreen">    791</span> <span class="ansiblue"></span>
-<span class="ansigreen">    792</span>     <span class="ansigreen">def</span> assertEqual<span class="ansiblue">(</span>self<span class="ansiblue">,</span> first<span class="ansiblue">,</span> second<span class="ansiblue">,</span> msg<span class="ansiblue">=</span><span class="ansigreen">None</span><span class="ansiblue">)</span><span class="ansiblue">:</span><span class="ansiblue"></span>
-
-<span class="ansired">AssertionError</span>: 0 != 1</pre>
-</div>
-</div>
-
-</div>
-</div>
-
-</div><div class="cell border-box-sizing code_cell rendered">
-  <div class="input">
-    <div class="prompt input_prompt">Score[10]:</div>
-    <div class="inner_cell">
-      <div style="display: inline;">
-        <input class="score" id="sum_of_squares_uses_squares" style="width: 4em;" type="number" /> / 1
-        <span style="margin-left: 1em;" class="glyphicon glyphicon-floppy-saved"></span>
-      </div>
-    </div>
-  </div>
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[10]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-python"><pre><span class="sd">&quot;&quot;&quot;Check that sum_of_squares relies on squares.&quot;&quot;&quot;</span>
-<span class="n">orig_squares</span> <span class="o">=</span> <span class="n">squares</span>
-<span class="k">del</span> <span class="n">squares</span>
-<span class="k">try</span><span class="p">:</span>
-    <span class="n">assert_raises</span><span class="p">(</span><span class="ne">NameError</span><span class="p">,</span> <span class="n">sum_of_squares</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-<span class="k">except</span> <span class="ne">AssertionError</span><span class="p">:</span>
-    <span class="k">raise</span> <span class="ne">AssertionError</span><span class="p">(</span><span class="s">&quot;sum_of_squares does not use squares&quot;</span><span class="p">)</span>
-<span class="k">finally</span><span class="p">:</span>
-    <span class="n">squares</span> <span class="o">=</span> <span class="n">orig_squares</span>
-</pre></div>
-
-</div>
-</div>
-</div>
-
-</div>
-<div class="cell border-box-sizing text_cell rendered">
-<div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="Part-B">Part B<a class="anchor-link" href="#Part-B">&#182;</a></h3>
-</div>
-</div>
-</div>
-
-<div class="cell border-box-sizing text_cell rendered">
-<div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>Using LaTeX math notation, write out the equation that is implemented by your <code>sum_of_squares</code> function.</p>
+<p>Describe, in words, what this code does, and how it does it.</p>
 
 </div>
 </div>
@@ -11128,7 +10728,7 @@ First differing element 0:
     <div class="prompt input_prompt">Score:</div>
     <div class="inner_cell">
       <div style="display: inline;">
-        <input class="score" id="sum_of_squares_equation" style="width: 4em;" type="number" /> / 1
+        <input class="score" id="part-a" style="width: 4em;" type="number" /> / 1
         <span style="margin-left: 1em;" class="glyphicon glyphicon-floppy-saved"></span>
       </div>
     </div>
@@ -11139,7 +10739,7 @@ First differing element 0:
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>$\sum_{i=0}^n n^2$</p>
+<p>It computes the fibonacci sequence.</p>
 
 </div>
 </div>
@@ -11156,465 +10756,48 @@ First differing element 0:
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="Part-C">Part C<a class="anchor-link" href="#Part-C">&#182;</a></h3>
-</div>
-</div>
-</div>
+<hr>
+<h2>Part B</h2>
 
+</div>
+</div>
+</div>
 <div class="cell border-box-sizing text_cell rendered">
 <div class="prompt input_prompt">
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>Create a plot of the sum of squares for $n=1$ to $n=15$. Make sure to appropriately label the $x$-axis and $y$-axis, and to give the plot a title. Set the $x$-axis limits to be 1 (minimum) and 15 (maximum).</p>
+<p>For what inputs will this function not behave as expected? What will happen?</p>
 
 </div>
 </div>
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[11]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-python"><pre><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span> <span class="c"># do not delete this line!</span>
-<span class="n">ss</span> <span class="o">=</span> <span class="p">[]</span>
-<span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">15</span><span class="p">):</span>
-    <span class="n">ss</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sum_of_squares</span><span class="p">(</span><span class="n">n</span><span class="p">))</span>
-<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">15</span><span class="p">),</span> <span class="n">ss</span><span class="p">)</span>
-<span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s">&quot;n&quot;</span><span class="p">)</span>
-<span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s">&quot;sum of squares&quot;</span><span class="p">)</span>
-<span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s">&quot;sum of squares&quot;</span><span class="p">)</span>
-</pre></div>
-
-</div>
-</div>
-</div>
-
-<div class="output_wrapper">
-<div class="output">
-
-
-<div class="output_area"><div class="prompt output_prompt">Out[11]:</div>
-
-
-<div class="output_text output_subarea output_pyout">
-<pre>&lt;matplotlib.text.Text at 0x112ca02b0&gt;</pre>
-</div>
-
-</div>
-
-<div class="output_area"><div class="prompt"></div>
-
-
-<div class="output_png output_subarea ">
-<img src="data:image/png;base64,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
-"
->
-</div>
-
-</div>
-
-</div>
-</div>
-
 </div><div class="cell border-box-sizing code_cell rendered">
   <div class="input">
-    <div class="prompt input_prompt">Comments[11]:</div>
+    <div class="prompt input_prompt">Score:</div>
+    <div class="inner_cell">
+      <div style="display: inline;">
+        <input class="score" id="part-b" style="width: 4em;" type="number" /> / 1
+        <span style="margin-left: 1em;" class="glyphicon glyphicon-floppy-saved"></span>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Not sure.</p>
+
+</div>
+</div>
+</div><div class="cell border-box-sizing code_cell rendered">
+  <div class="input">
+    <div class="prompt input_prompt">Comments:</div>
     <div class="inner_cell">
       <textarea class="comment" placeholder="Comments"></textarea>
     </div>
   </div>
-</div><div class="cell border-box-sizing code_cell rendered">
-  <div class="input">
-    <div class="prompt input_prompt">Score[12]:</div>
-    <div class="inner_cell">
-      <div style="display: inline;">
-        <input class="score" id="plot_axis_limits" style="width: 4em;" type="number" /> / 0.1
-        <span style="margin-left: 1em;" class="glyphicon glyphicon-floppy-saved"></span>
-      </div>
-    </div>
-  </div>
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[12]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-python"><pre><span class="sd">&quot;&quot;&quot;Check that the axis limits are correct.&quot;&quot;&quot;</span>
-<span class="n">assert_equal</span><span class="p">(</span><span class="n">ax</span><span class="o">.</span><span class="n">get_xlim</span><span class="p">(),</span> <span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">15.0</span><span class="p">))</span>
-</pre></div>
-
-</div>
-</div>
-</div>
-
-<div class="output_wrapper">
-<div class="output">
-
-
-<div class="output_area"><div class="prompt"></div>
-<div class="output_subarea output_text output_pyerr">
-<pre>
-<span class="ansired">---------------------------------------------------------------------------</span>
-<span class="ansired">AssertionError</span>                            Traceback (most recent call last)
-<span class="ansigreen">&lt;ipython-input-12-7eaa2f5456f5&gt;</span> in <span class="ansicyan">&lt;module&gt;</span><span class="ansiblue">()</span>
-<span class="ansigreen">      1</span> <span class="ansiblue">&quot;&quot;&quot;Check that the axis limits are correct.&quot;&quot;&quot;</span><span class="ansiblue"></span>
-<span class="ansigreen">----&gt; 2</span><span class="ansired"> </span>assert_equal<span class="ansiblue">(</span>ax<span class="ansiblue">.</span>get_xlim<span class="ansiblue">(</span><span class="ansiblue">)</span><span class="ansiblue">,</span> <span class="ansiblue">(</span><span class="ansicyan">1.0</span><span class="ansiblue">,</span> <span class="ansicyan">15.0</span><span class="ansiblue">)</span><span class="ansiblue">)</span><span class="ansiblue"></span>
-
-<span class="ansigreen">/usr/local/Cellar/python3/3.4.1_1/Frameworks/Python.framework/Versions/3.4/lib/python3.4/unittest/case.py</span> in <span class="ansicyan">assertEqual</span><span class="ansiblue">(self, first, second, msg)</span>
-<span class="ansigreen">    795</span>         &quot;&quot;&quot;
-<span class="ansigreen">    796</span>         assertion_func <span class="ansiblue">=</span> self<span class="ansiblue">.</span>_getAssertEqualityFunc<span class="ansiblue">(</span>first<span class="ansiblue">,</span> second<span class="ansiblue">)</span><span class="ansiblue"></span>
-<span class="ansigreen">--&gt; 797</span><span class="ansired">         </span>assertion_func<span class="ansiblue">(</span>first<span class="ansiblue">,</span> second<span class="ansiblue">,</span> msg<span class="ansiblue">=</span>msg<span class="ansiblue">)</span><span class="ansiblue"></span>
-<span class="ansigreen">    798</span> <span class="ansiblue"></span>
-<span class="ansigreen">    799</span>     <span class="ansigreen">def</span> assertNotEqual<span class="ansiblue">(</span>self<span class="ansiblue">,</span> first<span class="ansiblue">,</span> second<span class="ansiblue">,</span> msg<span class="ansiblue">=</span><span class="ansigreen">None</span><span class="ansiblue">)</span><span class="ansiblue">:</span><span class="ansiblue"></span>
-
-<span class="ansigreen">/usr/local/Cellar/python3/3.4.1_1/Frameworks/Python.framework/Versions/3.4/lib/python3.4/unittest/case.py</span> in <span class="ansicyan">assertTupleEqual</span><span class="ansiblue">(self, tuple1, tuple2, msg)</span>
-<span class="ansigreen">   1004</span>                     differences<span class="ansiblue">.</span><span class="ansiblue"></span>
-<span class="ansigreen">   1005</span>         &quot;&quot;&quot;
-<span class="ansigreen">-&gt; 1006</span><span class="ansired">         </span>self<span class="ansiblue">.</span>assertSequenceEqual<span class="ansiblue">(</span>tuple1<span class="ansiblue">,</span> tuple2<span class="ansiblue">,</span> msg<span class="ansiblue">,</span> seq_type<span class="ansiblue">=</span>tuple<span class="ansiblue">)</span><span class="ansiblue"></span>
-<span class="ansigreen">   1007</span> <span class="ansiblue"></span>
-<span class="ansigreen">   1008</span>     <span class="ansigreen">def</span> assertSetEqual<span class="ansiblue">(</span>self<span class="ansiblue">,</span> set1<span class="ansiblue">,</span> set2<span class="ansiblue">,</span> msg<span class="ansiblue">=</span><span class="ansigreen">None</span><span class="ansiblue">)</span><span class="ansiblue">:</span><span class="ansiblue"></span>
-
-<span class="ansigreen">/usr/local/Cellar/python3/3.4.1_1/Frameworks/Python.framework/Versions/3.4/lib/python3.4/unittest/case.py</span> in <span class="ansicyan">assertSequenceEqual</span><span class="ansiblue">(self, seq1, seq2, msg, seq_type)</span>
-<span class="ansigreen">    975</span>         standardMsg <span class="ansiblue">=</span> self<span class="ansiblue">.</span>_truncateMessage<span class="ansiblue">(</span>standardMsg<span class="ansiblue">,</span> diffMsg<span class="ansiblue">)</span><span class="ansiblue"></span>
-<span class="ansigreen">    976</span>         msg <span class="ansiblue">=</span> self<span class="ansiblue">.</span>_formatMessage<span class="ansiblue">(</span>msg<span class="ansiblue">,</span> standardMsg<span class="ansiblue">)</span><span class="ansiblue"></span>
-<span class="ansigreen">--&gt; 977</span><span class="ansired">         </span>self<span class="ansiblue">.</span>fail<span class="ansiblue">(</span>msg<span class="ansiblue">)</span><span class="ansiblue"></span>
-<span class="ansigreen">    978</span> <span class="ansiblue"></span>
-<span class="ansigreen">    979</span>     <span class="ansigreen">def</span> _truncateMessage<span class="ansiblue">(</span>self<span class="ansiblue">,</span> message<span class="ansiblue">,</span> diff<span class="ansiblue">)</span><span class="ansiblue">:</span><span class="ansiblue"></span>
-
-<span class="ansigreen">/usr/local/Cellar/python3/3.4.1_1/Frameworks/Python.framework/Versions/3.4/lib/python3.4/unittest/case.py</span> in <span class="ansicyan">fail</span><span class="ansiblue">(self, msg)</span>
-<span class="ansigreen">    640</span>     <span class="ansigreen">def</span> fail<span class="ansiblue">(</span>self<span class="ansiblue">,</span> msg<span class="ansiblue">=</span><span class="ansigreen">None</span><span class="ansiblue">)</span><span class="ansiblue">:</span><span class="ansiblue"></span>
-<span class="ansigreen">    641</span>         <span class="ansiblue">&quot;&quot;&quot;Fail immediately, with the given message.&quot;&quot;&quot;</span><span class="ansiblue"></span>
-<span class="ansigreen">--&gt; 642</span><span class="ansired">         </span><span class="ansigreen">raise</span> self<span class="ansiblue">.</span>failureException<span class="ansiblue">(</span>msg<span class="ansiblue">)</span><span class="ansiblue"></span>
-<span class="ansigreen">    643</span> <span class="ansiblue"></span>
-<span class="ansigreen">    644</span>     <span class="ansigreen">def</span> assertFalse<span class="ansiblue">(</span>self<span class="ansiblue">,</span> expr<span class="ansiblue">,</span> msg<span class="ansiblue">=</span><span class="ansigreen">None</span><span class="ansiblue">)</span><span class="ansiblue">:</span><span class="ansiblue"></span>
-
-<span class="ansired">AssertionError</span>: Tuples differ: (0.0, 14.0) != (1.0, 15.0)
-
-First differing element 0:
-0.0
-1.0
-
-- (0.0, 14.0)
-?  ^     ^
-
-+ (1.0, 15.0)
-?  ^     ^
-</pre>
-</div>
-</div>
-
-</div>
-</div>
-
-</div><div class="cell border-box-sizing code_cell rendered">
-  <div class="input">
-    <div class="prompt input_prompt">Score[13]:</div>
-    <div class="inner_cell">
-      <div style="display: inline;">
-        <input class="score" id="plot_labels" style="width: 4em;" type="number" /> / 0.2
-        <span style="margin-left: 1em;" class="glyphicon glyphicon-floppy-saved"></span>
-      </div>
-    </div>
-  </div>
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[13]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-python"><pre><span class="sd">&quot;&quot;&quot;Check that the axis labels and title are set.&quot;&quot;&quot;</span>
-<span class="k">assert</span> <span class="n">ax</span><span class="o">.</span><span class="n">get_xlabel</span><span class="p">()</span> <span class="o">!=</span> <span class="s">&quot;&quot;</span><span class="p">,</span> <span class="s">&quot;xlabel not set&quot;</span>
-<span class="k">assert</span> <span class="n">ax</span><span class="o">.</span><span class="n">get_ylabel</span><span class="p">()</span> <span class="o">!=</span> <span class="s">&quot;&quot;</span><span class="p">,</span> <span class="s">&quot;ylabel not set&quot;</span>
-<span class="k">assert</span> <span class="n">ax</span><span class="o">.</span><span class="n">get_title</span><span class="p">()</span> <span class="o">!=</span> <span class="s">&quot;&quot;</span><span class="p">,</span> <span class="s">&quot;title not set&quot;</span>
-</pre></div>
-
-</div>
-</div>
-</div>
-
-</div><div class="cell border-box-sizing code_cell rendered">
-  <div class="input">
-    <div class="prompt input_prompt">Score[14]:</div>
-    <div class="inner_cell">
-      <div style="display: inline;">
-        <input class="score" id="plot_data" style="width: 4em;" type="number" /> / 0.2
-        <span style="margin-left: 1em;" class="glyphicon glyphicon-floppy-saved"></span>
-      </div>
-    </div>
-  </div>
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[14]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-python"><pre><span class="sd">&quot;&quot;&quot;Check that the correct data was used.&quot;&quot;&quot;</span>
-<span class="n">lines</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">get_lines</span><span class="p">()</span>
-<span class="n">assert_equal</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">lines</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span>
-
-<span class="c"># check the x-axis data</span>
-<span class="n">xdata</span> <span class="o">=</span> <span class="n">lines</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">get_xdata</span><span class="p">()</span>
-<span class="n">xdata_correct</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">16</span><span class="p">)</span>
-<span class="n">assert_equal</span><span class="p">(</span><span class="n">xdata</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">xdata_correct</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
-<span class="k">assert</span> <span class="p">(</span><span class="n">xdata</span> <span class="o">==</span> <span class="n">xdata_correct</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
-
-<span class="c"># check the y-axis data</span>
-<span class="n">ydata</span> <span class="o">=</span> <span class="n">lines</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">get_ydata</span><span class="p">()</span>
-<span class="n">ydata_correct</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">sum_of_squares</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">xdata</span><span class="p">])</span>
-<span class="n">assert_equal</span><span class="p">(</span><span class="n">ydata</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">ydata_correct</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
-<span class="k">assert</span> <span class="p">(</span><span class="n">ydata</span> <span class="o">==</span> <span class="n">ydata_correct</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
-</pre></div>
-
-</div>
-</div>
-</div>
-
-<div class="output_wrapper">
-<div class="output">
-
-
-<div class="output_area"><div class="prompt"></div>
-<div class="output_subarea output_text output_pyerr">
-<pre>
-<span class="ansired">---------------------------------------------------------------------------</span>
-<span class="ansired">AssertionError</span>                            Traceback (most recent call last)
-<span class="ansigreen">&lt;ipython-input-14-bcad5ce4f44a&gt;</span> in <span class="ansicyan">&lt;module&gt;</span><span class="ansiblue">()</span>
-<span class="ansigreen">      6</span> xdata <span class="ansiblue">=</span> lines<span class="ansiblue">[</span><span class="ansicyan">0</span><span class="ansiblue">]</span><span class="ansiblue">.</span>get_xdata<span class="ansiblue">(</span><span class="ansiblue">)</span><span class="ansiblue"></span>
-<span class="ansigreen">      7</span> xdata_correct <span class="ansiblue">=</span> np<span class="ansiblue">.</span>arange<span class="ansiblue">(</span><span class="ansicyan">1</span><span class="ansiblue">,</span> <span class="ansicyan">16</span><span class="ansiblue">)</span><span class="ansiblue"></span>
-<span class="ansigreen">----&gt; 8</span><span class="ansired"> </span>assert_equal<span class="ansiblue">(</span>xdata<span class="ansiblue">.</span>shape<span class="ansiblue">,</span> xdata_correct<span class="ansiblue">.</span>shape<span class="ansiblue">)</span><span class="ansiblue"></span>
-<span class="ansigreen">      9</span> <span class="ansigreen">assert</span> <span class="ansiblue">(</span>xdata <span class="ansiblue">==</span> xdata_correct<span class="ansiblue">)</span><span class="ansiblue">.</span>all<span class="ansiblue">(</span><span class="ansiblue">)</span><span class="ansiblue"></span>
-<span class="ansigreen">     10</span> <span class="ansiblue"></span>
-
-<span class="ansigreen">/usr/local/Cellar/python3/3.4.1_1/Frameworks/Python.framework/Versions/3.4/lib/python3.4/unittest/case.py</span> in <span class="ansicyan">assertEqual</span><span class="ansiblue">(self, first, second, msg)</span>
-<span class="ansigreen">    795</span>         &quot;&quot;&quot;
-<span class="ansigreen">    796</span>         assertion_func <span class="ansiblue">=</span> self<span class="ansiblue">.</span>_getAssertEqualityFunc<span class="ansiblue">(</span>first<span class="ansiblue">,</span> second<span class="ansiblue">)</span><span class="ansiblue"></span>
-<span class="ansigreen">--&gt; 797</span><span class="ansired">         </span>assertion_func<span class="ansiblue">(</span>first<span class="ansiblue">,</span> second<span class="ansiblue">,</span> msg<span class="ansiblue">=</span>msg<span class="ansiblue">)</span><span class="ansiblue"></span>
-<span class="ansigreen">    798</span> <span class="ansiblue"></span>
-<span class="ansigreen">    799</span>     <span class="ansigreen">def</span> assertNotEqual<span class="ansiblue">(</span>self<span class="ansiblue">,</span> first<span class="ansiblue">,</span> second<span class="ansiblue">,</span> msg<span class="ansiblue">=</span><span class="ansigreen">None</span><span class="ansiblue">)</span><span class="ansiblue">:</span><span class="ansiblue"></span>
-
-<span class="ansigreen">/usr/local/Cellar/python3/3.4.1_1/Frameworks/Python.framework/Versions/3.4/lib/python3.4/unittest/case.py</span> in <span class="ansicyan">assertTupleEqual</span><span class="ansiblue">(self, tuple1, tuple2, msg)</span>
-<span class="ansigreen">   1004</span>                     differences<span class="ansiblue">.</span><span class="ansiblue"></span>
-<span class="ansigreen">   1005</span>         &quot;&quot;&quot;
-<span class="ansigreen">-&gt; 1006</span><span class="ansired">         </span>self<span class="ansiblue">.</span>assertSequenceEqual<span class="ansiblue">(</span>tuple1<span class="ansiblue">,</span> tuple2<span class="ansiblue">,</span> msg<span class="ansiblue">,</span> seq_type<span class="ansiblue">=</span>tuple<span class="ansiblue">)</span><span class="ansiblue"></span>
-<span class="ansigreen">   1007</span> <span class="ansiblue"></span>
-<span class="ansigreen">   1008</span>     <span class="ansigreen">def</span> assertSetEqual<span class="ansiblue">(</span>self<span class="ansiblue">,</span> set1<span class="ansiblue">,</span> set2<span class="ansiblue">,</span> msg<span class="ansiblue">=</span><span class="ansigreen">None</span><span class="ansiblue">)</span><span class="ansiblue">:</span><span class="ansiblue"></span>
-
-<span class="ansigreen">/usr/local/Cellar/python3/3.4.1_1/Frameworks/Python.framework/Versions/3.4/lib/python3.4/unittest/case.py</span> in <span class="ansicyan">assertSequenceEqual</span><span class="ansiblue">(self, seq1, seq2, msg, seq_type)</span>
-<span class="ansigreen">    975</span>         standardMsg <span class="ansiblue">=</span> self<span class="ansiblue">.</span>_truncateMessage<span class="ansiblue">(</span>standardMsg<span class="ansiblue">,</span> diffMsg<span class="ansiblue">)</span><span class="ansiblue"></span>
-<span class="ansigreen">    976</span>         msg <span class="ansiblue">=</span> self<span class="ansiblue">.</span>_formatMessage<span class="ansiblue">(</span>msg<span class="ansiblue">,</span> standardMsg<span class="ansiblue">)</span><span class="ansiblue"></span>
-<span class="ansigreen">--&gt; 977</span><span class="ansired">         </span>self<span class="ansiblue">.</span>fail<span class="ansiblue">(</span>msg<span class="ansiblue">)</span><span class="ansiblue"></span>
-<span class="ansigreen">    978</span> <span class="ansiblue"></span>
-<span class="ansigreen">    979</span>     <span class="ansigreen">def</span> _truncateMessage<span class="ansiblue">(</span>self<span class="ansiblue">,</span> message<span class="ansiblue">,</span> diff<span class="ansiblue">)</span><span class="ansiblue">:</span><span class="ansiblue"></span>
-
-<span class="ansigreen">/usr/local/Cellar/python3/3.4.1_1/Frameworks/Python.framework/Versions/3.4/lib/python3.4/unittest/case.py</span> in <span class="ansicyan">fail</span><span class="ansiblue">(self, msg)</span>
-<span class="ansigreen">    640</span>     <span class="ansigreen">def</span> fail<span class="ansiblue">(</span>self<span class="ansiblue">,</span> msg<span class="ansiblue">=</span><span class="ansigreen">None</span><span class="ansiblue">)</span><span class="ansiblue">:</span><span class="ansiblue"></span>
-<span class="ansigreen">    641</span>         <span class="ansiblue">&quot;&quot;&quot;Fail immediately, with the given message.&quot;&quot;&quot;</span><span class="ansiblue"></span>
-<span class="ansigreen">--&gt; 642</span><span class="ansired">         </span><span class="ansigreen">raise</span> self<span class="ansiblue">.</span>failureException<span class="ansiblue">(</span>msg<span class="ansiblue">)</span><span class="ansiblue"></span>
-<span class="ansigreen">    643</span> <span class="ansiblue"></span>
-<span class="ansigreen">    644</span>     <span class="ansigreen">def</span> assertFalse<span class="ansiblue">(</span>self<span class="ansiblue">,</span> expr<span class="ansiblue">,</span> msg<span class="ansiblue">=</span><span class="ansigreen">None</span><span class="ansiblue">)</span><span class="ansiblue">:</span><span class="ansiblue"></span>
-
-<span class="ansired">AssertionError</span>: Tuples differ: (14,) != (15,)
-
-First differing element 0:
-14
-15
-
-- (14,)
-?   ^
-
-+ (15,)
-?   ^
-</pre>
-</div>
-</div>
-
-</div>
-</div>
-
 </div>
       <nav>
         <ul class="pager">

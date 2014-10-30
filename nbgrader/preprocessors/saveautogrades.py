@@ -9,15 +9,19 @@ class SaveAutoGrades(Preprocessor):
 
     ip = Unicode("localhost", config=True, help="IP address for the database")
     port = Integer(27017, config=True, help="Port for the database")
+    assignment_id = Unicode(u'assignment', config=True, help="Assignment ID")
 
     def preprocess(self, nb, resources):
         # connect to the mongo database
         self.gradebook = Gradebook()
         self.student = self.gradebook.find_student(
             student_id=resources['nbgrader']['student_id'])
+        self.assignment = self.gradebook.find_assignment(
+            assignment_id=self.assignment_id)
         self.notebook = self.gradebook.find_or_create_notebook(
             notebook_id=resources['unique_key'],
-            student=self.student)
+            student=self.student,
+            assignment=self.assignment)
 
         # keep track of the number of comments we add
         self.comment_index = 0

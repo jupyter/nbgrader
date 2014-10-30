@@ -1,6 +1,7 @@
 c = get_config()
 
-import glob
-c.AutogradeApp.notebooks = [x for x in glob.glob("StudentNotebook*.ipynb") if not x.endswith(".autograded.ipynb")]
-c.Exporter.file_extension = 'autograded.ipynb'
-c.FindStudentID.regexp = r".*/StudentNotebook(?P<student_id>.+).ipynb"
+import os
+c.AutogradeApp.notebooks = ['submitted/*.ipynb']
+c.FilesWriter.build_directory = os.path.join(os.getcwd(), 'autograded')
+c.FindStudentID.regexp = r".*/submitted/Problem [0-9] (?P<student_id>.+).ipynb"
+c.SaveAutoGrades.assignment_id = "Problem Set 1"

@@ -3,10 +3,10 @@
 <head>
 
 <meta charset="utf-8" />
-<title>StudentNotebookHacker</title>
+<title>Problem 1 Bitdiddle</title>
 
 <script>
-nb_uuid = "c091b186-7d2c-440f-a0f0-80724028a410";
+nb_uuid = "870b49bc-1cd4-4487-aad1-d6ee595ccf7e";
 </script>
 
 <script src="/static/lib/jquery-2.1.1.min.js"></script>
@@ -10669,8 +10669,8 @@ div.prompt {
 <div class="prompt input_prompt">In&nbsp;[1]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-python"><pre><span class="n">NAME</span> <span class="o">=</span> <span class="s">&quot;Alyssa P. Hacker&quot;</span>
-<span class="n">COLLABORATORS</span> <span class="o">=</span> <span class="s">&quot;Ben Bitdiddle&quot;</span>
+<div class=" highlight hl-python"><pre><span class="n">NAME</span> <span class="o">=</span> <span class="s">&quot;Ben Bitdiddle&quot;</span>
+<span class="n">COLLABORATORS</span> <span class="o">=</span> <span class="s">&quot;Alyssa P. Hacker&quot;</span>
 </pre></div>
 
 </div>
@@ -10708,11 +10708,12 @@ div.prompt {
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="Problem-1">Problem 1<a class="anchor-link" href="#Problem-1">&#182;</a></h2>
-</div>
-</div>
-</div>
+<hr>
+<h2>Part A</h2>
 
+</div>
+</div>
+</div>
 <div class="cell border-box-sizing text_cell rendered">
 <div class="prompt input_prompt">
 </div>
@@ -10735,7 +10736,10 @@ div.prompt {
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">n</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span>
-    <span class="k">return</span> <span class="p">[</span><span class="n">i</span> <span class="o">**</span> <span class="mi">2</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">n</span><span class="o">+</span><span class="mi">1</span><span class="p">)]</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+        <span class="n">s</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">s</span>
 </pre></div>
 
 </div>
@@ -10780,7 +10784,7 @@ div.prompt {
 
 
 <div class="output_text output_subarea output_pyout">
-<pre>[1, 4, 9, 16, 25, 36, 49, 64, 81, 100]</pre>
+<pre>[0, 1, 4, 9, 16, 25, 36, 49, 64, 81]</pre>
 </div>
 
 </div>
@@ -10813,6 +10817,64 @@ div.prompt {
 </pre></div>
 
 </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area"><div class="prompt"></div>
+<div class="output_subarea output_text output_pyerr">
+<pre>
+<span class="ansired">---------------------------------------------------------------------------</span>
+<span class="ansired">AssertionError</span>                            Traceback (most recent call last)
+<span class="ansigreen">&lt;ipython-input-5-8b2bd5b0230e&gt;</span> in <span class="ansicyan">&lt;module&gt;</span><span class="ansiblue">()</span>
+<span class="ansigreen">      1</span> <span class="ansiblue">&quot;&quot;&quot;Check that squares returns the correct output for several inputs&quot;&quot;&quot;</span><span class="ansiblue"></span>
+<span class="ansigreen">      2</span> <span class="ansigreen">from</span> nose<span class="ansiblue">.</span>tools <span class="ansigreen">import</span> assert_equal<span class="ansiblue"></span>
+<span class="ansigreen">----&gt; 3</span><span class="ansired"> </span>assert_equal<span class="ansiblue">(</span>squares<span class="ansiblue">(</span><span class="ansicyan">1</span><span class="ansiblue">)</span><span class="ansiblue">,</span> <span class="ansiblue">[</span><span class="ansicyan">1</span><span class="ansiblue">]</span><span class="ansiblue">)</span><span class="ansiblue"></span>
+<span class="ansigreen">      4</span> assert_equal<span class="ansiblue">(</span>squares<span class="ansiblue">(</span><span class="ansicyan">2</span><span class="ansiblue">)</span><span class="ansiblue">,</span> <span class="ansiblue">[</span><span class="ansicyan">1</span><span class="ansiblue">,</span> <span class="ansicyan">4</span><span class="ansiblue">]</span><span class="ansiblue">)</span><span class="ansiblue"></span>
+<span class="ansigreen">      5</span> assert_equal<span class="ansiblue">(</span>squares<span class="ansiblue">(</span><span class="ansicyan">10</span><span class="ansiblue">)</span><span class="ansiblue">,</span> <span class="ansiblue">[</span><span class="ansicyan">1</span><span class="ansiblue">,</span> <span class="ansicyan">4</span><span class="ansiblue">,</span> <span class="ansicyan">9</span><span class="ansiblue">,</span> <span class="ansicyan">16</span><span class="ansiblue">,</span> <span class="ansicyan">25</span><span class="ansiblue">,</span> <span class="ansicyan">36</span><span class="ansiblue">,</span> <span class="ansicyan">49</span><span class="ansiblue">,</span> <span class="ansicyan">64</span><span class="ansiblue">,</span> <span class="ansicyan">81</span><span class="ansiblue">,</span> <span class="ansicyan">100</span><span class="ansiblue">]</span><span class="ansiblue">)</span><span class="ansiblue"></span>
+
+<span class="ansigreen">/usr/local/Cellar/python3/3.4.1_1/Frameworks/Python.framework/Versions/3.4/lib/python3.4/unittest/case.py</span> in <span class="ansicyan">assertEqual</span><span class="ansiblue">(self, first, second, msg)</span>
+<span class="ansigreen">    795</span>         &quot;&quot;&quot;
+<span class="ansigreen">    796</span>         assertion_func <span class="ansiblue">=</span> self<span class="ansiblue">.</span>_getAssertEqualityFunc<span class="ansiblue">(</span>first<span class="ansiblue">,</span> second<span class="ansiblue">)</span><span class="ansiblue"></span>
+<span class="ansigreen">--&gt; 797</span><span class="ansired">         </span>assertion_func<span class="ansiblue">(</span>first<span class="ansiblue">,</span> second<span class="ansiblue">,</span> msg<span class="ansiblue">=</span>msg<span class="ansiblue">)</span><span class="ansiblue"></span>
+<span class="ansigreen">    798</span> <span class="ansiblue"></span>
+<span class="ansigreen">    799</span>     <span class="ansigreen">def</span> assertNotEqual<span class="ansiblue">(</span>self<span class="ansiblue">,</span> first<span class="ansiblue">,</span> second<span class="ansiblue">,</span> msg<span class="ansiblue">=</span><span class="ansigreen">None</span><span class="ansiblue">)</span><span class="ansiblue">:</span><span class="ansiblue"></span>
+
+<span class="ansigreen">/usr/local/Cellar/python3/3.4.1_1/Frameworks/Python.framework/Versions/3.4/lib/python3.4/unittest/case.py</span> in <span class="ansicyan">assertListEqual</span><span class="ansiblue">(self, list1, list2, msg)</span>
+<span class="ansigreen">    993</span> <span class="ansiblue"></span>
+<span class="ansigreen">    994</span>         &quot;&quot;&quot;
+<span class="ansigreen">--&gt; 995</span><span class="ansired">         </span>self<span class="ansiblue">.</span>assertSequenceEqual<span class="ansiblue">(</span>list1<span class="ansiblue">,</span> list2<span class="ansiblue">,</span> msg<span class="ansiblue">,</span> seq_type<span class="ansiblue">=</span>list<span class="ansiblue">)</span><span class="ansiblue"></span>
+<span class="ansigreen">    996</span> <span class="ansiblue"></span>
+<span class="ansigreen">    997</span>     <span class="ansigreen">def</span> assertTupleEqual<span class="ansiblue">(</span>self<span class="ansiblue">,</span> tuple1<span class="ansiblue">,</span> tuple2<span class="ansiblue">,</span> msg<span class="ansiblue">=</span><span class="ansigreen">None</span><span class="ansiblue">)</span><span class="ansiblue">:</span><span class="ansiblue"></span>
+
+<span class="ansigreen">/usr/local/Cellar/python3/3.4.1_1/Frameworks/Python.framework/Versions/3.4/lib/python3.4/unittest/case.py</span> in <span class="ansicyan">assertSequenceEqual</span><span class="ansiblue">(self, seq1, seq2, msg, seq_type)</span>
+<span class="ansigreen">    975</span>         standardMsg <span class="ansiblue">=</span> self<span class="ansiblue">.</span>_truncateMessage<span class="ansiblue">(</span>standardMsg<span class="ansiblue">,</span> diffMsg<span class="ansiblue">)</span><span class="ansiblue"></span>
+<span class="ansigreen">    976</span>         msg <span class="ansiblue">=</span> self<span class="ansiblue">.</span>_formatMessage<span class="ansiblue">(</span>msg<span class="ansiblue">,</span> standardMsg<span class="ansiblue">)</span><span class="ansiblue"></span>
+<span class="ansigreen">--&gt; 977</span><span class="ansired">         </span>self<span class="ansiblue">.</span>fail<span class="ansiblue">(</span>msg<span class="ansiblue">)</span><span class="ansiblue"></span>
+<span class="ansigreen">    978</span> <span class="ansiblue"></span>
+<span class="ansigreen">    979</span>     <span class="ansigreen">def</span> _truncateMessage<span class="ansiblue">(</span>self<span class="ansiblue">,</span> message<span class="ansiblue">,</span> diff<span class="ansiblue">)</span><span class="ansiblue">:</span><span class="ansiblue"></span>
+
+<span class="ansigreen">/usr/local/Cellar/python3/3.4.1_1/Frameworks/Python.framework/Versions/3.4/lib/python3.4/unittest/case.py</span> in <span class="ansicyan">fail</span><span class="ansiblue">(self, msg)</span>
+<span class="ansigreen">    640</span>     <span class="ansigreen">def</span> fail<span class="ansiblue">(</span>self<span class="ansiblue">,</span> msg<span class="ansiblue">=</span><span class="ansigreen">None</span><span class="ansiblue">)</span><span class="ansiblue">:</span><span class="ansiblue"></span>
+<span class="ansigreen">    641</span>         <span class="ansiblue">&quot;&quot;&quot;Fail immediately, with the given message.&quot;&quot;&quot;</span><span class="ansiblue"></span>
+<span class="ansigreen">--&gt; 642</span><span class="ansired">         </span><span class="ansigreen">raise</span> self<span class="ansiblue">.</span>failureException<span class="ansiblue">(</span>msg<span class="ansiblue">)</span><span class="ansiblue"></span>
+<span class="ansigreen">    643</span> <span class="ansiblue"></span>
+<span class="ansigreen">    644</span>     <span class="ansigreen">def</span> assertFalse<span class="ansiblue">(</span>self<span class="ansiblue">,</span> expr<span class="ansiblue">,</span> msg<span class="ansiblue">=</span><span class="ansigreen">None</span><span class="ansiblue">)</span><span class="ansiblue">:</span><span class="ansiblue"></span>
+
+<span class="ansired">AssertionError</span>: Lists differ: [0] != [1]
+
+First differing element 0:
+0
+1
+
+- [0]
++ [1]</pre>
+</div>
+</div>
+
 </div>
 </div>
 
@@ -10849,30 +10911,11 @@ div.prompt {
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
 <hr>
+<h2>Part B</h2>
 
 </div>
 </div>
 </div>
-<div class="cell border-box-sizing text_cell rendered">
-<div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="Problem-2">Problem 2<a class="anchor-link" href="#Problem-2">&#182;</a></h2>
-</div>
-</div>
-</div>
-
-<div class="cell border-box-sizing text_cell rendered">
-<div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="Part-A">Part A<a class="anchor-link" href="#Part-A">&#182;</a></h3>
-</div>
-</div>
-</div>
-
 <div class="cell border-box-sizing text_cell rendered">
 <div class="prompt input_prompt">
 </div>
@@ -10890,7 +10933,11 @@ div.prompt {
     <div class="input_area">
 <div class=" highlight hl-python"><pre><span class="k">def</span> <span class="nf">sum_of_squares</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Compute the sum of the squares of numbers from 1 to n.&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="n">squares</span><span class="p">(</span><span class="n">n</span><span class="p">))</span>
+    <span class="n">total</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="n">squares</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="p">)):</span>
+        <span class="n">total</span> <span class="o">+=</span> <span class="n">s</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">total</span>
 </pre></div>
 
 </div>
@@ -10935,7 +10982,7 @@ div.prompt {
 
 
 <div class="output_text output_subarea output_pyout">
-<pre>385</pre>
+<pre>285</pre>
 </div>
 
 </div>
@@ -10967,6 +11014,43 @@ div.prompt {
 </pre></div>
 
 </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area"><div class="prompt"></div>
+<div class="output_subarea output_text output_pyerr">
+<pre>
+<span class="ansired">---------------------------------------------------------------------------</span>
+<span class="ansired">AssertionError</span>                            Traceback (most recent call last)
+<span class="ansigreen">&lt;ipython-input-9-54b95b55a74e&gt;</span> in <span class="ansicyan">&lt;module&gt;</span><span class="ansiblue">()</span>
+<span class="ansigreen">      1</span> <span class="ansiblue">&quot;&quot;&quot;Check that sum_of_squares returns the correct answer for various inputs.&quot;&quot;&quot;</span><span class="ansiblue"></span>
+<span class="ansigreen">----&gt; 2</span><span class="ansired"> </span>assert_equal<span class="ansiblue">(</span>sum_of_squares<span class="ansiblue">(</span><span class="ansicyan">1</span><span class="ansiblue">)</span><span class="ansiblue">,</span> <span class="ansicyan">1</span><span class="ansiblue">)</span><span class="ansiblue"></span>
+<span class="ansigreen">      3</span> assert_equal<span class="ansiblue">(</span>sum_of_squares<span class="ansiblue">(</span><span class="ansicyan">2</span><span class="ansiblue">)</span><span class="ansiblue">,</span> <span class="ansicyan">5</span><span class="ansiblue">)</span><span class="ansiblue"></span>
+<span class="ansigreen">      4</span> assert_equal<span class="ansiblue">(</span>sum_of_squares<span class="ansiblue">(</span><span class="ansicyan">10</span><span class="ansiblue">)</span><span class="ansiblue">,</span> <span class="ansicyan">385</span><span class="ansiblue">)</span><span class="ansiblue"></span>
+<span class="ansigreen">      5</span> assert_equal<span class="ansiblue">(</span>sum_of_squares<span class="ansiblue">(</span><span class="ansicyan">11</span><span class="ansiblue">)</span><span class="ansiblue">,</span> <span class="ansicyan">506</span><span class="ansiblue">)</span><span class="ansiblue"></span>
+
+<span class="ansigreen">/usr/local/Cellar/python3/3.4.1_1/Frameworks/Python.framework/Versions/3.4/lib/python3.4/unittest/case.py</span> in <span class="ansicyan">assertEqual</span><span class="ansiblue">(self, first, second, msg)</span>
+<span class="ansigreen">    795</span>         &quot;&quot;&quot;
+<span class="ansigreen">    796</span>         assertion_func <span class="ansiblue">=</span> self<span class="ansiblue">.</span>_getAssertEqualityFunc<span class="ansiblue">(</span>first<span class="ansiblue">,</span> second<span class="ansiblue">)</span><span class="ansiblue"></span>
+<span class="ansigreen">--&gt; 797</span><span class="ansired">         </span>assertion_func<span class="ansiblue">(</span>first<span class="ansiblue">,</span> second<span class="ansiblue">,</span> msg<span class="ansiblue">=</span>msg<span class="ansiblue">)</span><span class="ansiblue"></span>
+<span class="ansigreen">    798</span> <span class="ansiblue"></span>
+<span class="ansigreen">    799</span>     <span class="ansigreen">def</span> assertNotEqual<span class="ansiblue">(</span>self<span class="ansiblue">,</span> first<span class="ansiblue">,</span> second<span class="ansiblue">,</span> msg<span class="ansiblue">=</span><span class="ansigreen">None</span><span class="ansiblue">)</span><span class="ansiblue">:</span><span class="ansiblue"></span>
+
+<span class="ansigreen">/usr/local/Cellar/python3/3.4.1_1/Frameworks/Python.framework/Versions/3.4/lib/python3.4/unittest/case.py</span> in <span class="ansicyan">_baseAssertEqual</span><span class="ansiblue">(self, first, second, msg)</span>
+<span class="ansigreen">    788</span>             standardMsg <span class="ansiblue">=</span> <span class="ansiblue">&apos;%s != %s&apos;</span> <span class="ansiblue">%</span> _common_shorten_repr<span class="ansiblue">(</span>first<span class="ansiblue">,</span> second<span class="ansiblue">)</span><span class="ansiblue"></span>
+<span class="ansigreen">    789</span>             msg <span class="ansiblue">=</span> self<span class="ansiblue">.</span>_formatMessage<span class="ansiblue">(</span>msg<span class="ansiblue">,</span> standardMsg<span class="ansiblue">)</span><span class="ansiblue"></span>
+<span class="ansigreen">--&gt; 790</span><span class="ansired">             </span><span class="ansigreen">raise</span> self<span class="ansiblue">.</span>failureException<span class="ansiblue">(</span>msg<span class="ansiblue">)</span><span class="ansiblue"></span>
+<span class="ansigreen">    791</span> <span class="ansiblue"></span>
+<span class="ansigreen">    792</span>     <span class="ansigreen">def</span> assertEqual<span class="ansiblue">(</span>self<span class="ansiblue">,</span> first<span class="ansiblue">,</span> second<span class="ansiblue">,</span> msg<span class="ansiblue">=</span><span class="ansigreen">None</span><span class="ansiblue">)</span><span class="ansiblue">:</span><span class="ansiblue"></span>
+
+<span class="ansired">AssertionError</span>: 0 != 1</pre>
+</div>
+</div>
+
 </div>
 </div>
 
@@ -11007,11 +11091,12 @@ div.prompt {
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="Part-B">Part B<a class="anchor-link" href="#Part-B">&#182;</a></h3>
-</div>
-</div>
-</div>
+<hr>
+<h2>Part C</h2>
 
+</div>
+</div>
+</div>
 <div class="cell border-box-sizing text_cell rendered">
 <div class="prompt input_prompt">
 </div>
@@ -11037,7 +11122,7 @@ div.prompt {
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>$\sum_{i=1}^n n^2$</p>
+<p>$\sum_{i=0}^n i^2$</p>
 
 </div>
 </div>
@@ -11054,11 +11139,12 @@ div.prompt {
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="Part-C">Part C<a class="anchor-link" href="#Part-C">&#182;</a></h3>
-</div>
-</div>
-</div>
+<hr>
+<h2>Part D</h2>
 
+</div>
+</div>
+</div>
 <div class="cell border-box-sizing text_cell rendered">
 <div class="prompt input_prompt">
 </div>
@@ -11075,14 +11161,14 @@ div.prompt {
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-python"><pre><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span> <span class="c"># do not delete this line!</span>
-<span class="n">ss</span> <span class="o">=</span> <span class="p">[]</span>
-<span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">16</span><span class="p">):</span>
-    <span class="n">ss</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sum_of_squares</span><span class="p">(</span><span class="n">n</span><span class="p">))</span>
-<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">16</span><span class="p">),</span> <span class="n">ss</span><span class="p">)</span>
-<span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s">&quot;n&quot;</span><span class="p">)</span>
-<span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s">&quot;sum of squares&quot;</span><span class="p">)</span>
+<span class="c"># YOUR CODE HERE</span>
+<span class="n">s</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">15</span><span class="p">):</span>
+    <span class="n">s</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sum_of_squares</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">15</span><span class="p">),</span> <span class="n">s</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s">&quot;i&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s">&quot;sum&quot;</span><span class="p">)</span>
 <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s">&quot;sum of squares&quot;</span><span class="p">)</span>
-<span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">15</span><span class="p">)</span>
 </pre></div>
 
 </div>
@@ -11097,7 +11183,7 @@ div.prompt {
 
 
 <div class="output_text output_subarea output_pyout">
-<pre>(1, 15)</pre>
+<pre>&lt;matplotlib.text.Text at 0x1062554a8&gt;</pre>
 </div>
 
 </div>
@@ -11107,175 +11193,177 @@ div.prompt {
 
 <div class="output_png output_subarea ">
 <img src="data:image/png;base64,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
-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
+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
 "
 >
 </div>
@@ -11313,6 +11401,65 @@ Azg5mJnZAE4OZmY2wP8Hqgfzd3EVWKoAAAAASUVORK5CYII=
 </pre></div>
 
 </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area"><div class="prompt"></div>
+<div class="output_subarea output_text output_pyerr">
+<pre>
+<span class="ansired">---------------------------------------------------------------------------</span>
+<span class="ansired">AssertionError</span>                            Traceback (most recent call last)
+<span class="ansigreen">&lt;ipython-input-12-7eaa2f5456f5&gt;</span> in <span class="ansicyan">&lt;module&gt;</span><span class="ansiblue">()</span>
+<span class="ansigreen">      1</span> <span class="ansiblue">&quot;&quot;&quot;Check that the axis limits are correct.&quot;&quot;&quot;</span><span class="ansiblue"></span>
+<span class="ansigreen">----&gt; 2</span><span class="ansired"> </span>assert_equal<span class="ansiblue">(</span>ax<span class="ansiblue">.</span>get_xlim<span class="ansiblue">(</span><span class="ansiblue">)</span><span class="ansiblue">,</span> <span class="ansiblue">(</span><span class="ansicyan">1.0</span><span class="ansiblue">,</span> <span class="ansicyan">15.0</span><span class="ansiblue">)</span><span class="ansiblue">)</span><span class="ansiblue"></span>
+
+<span class="ansigreen">/usr/local/Cellar/python3/3.4.1_1/Frameworks/Python.framework/Versions/3.4/lib/python3.4/unittest/case.py</span> in <span class="ansicyan">assertEqual</span><span class="ansiblue">(self, first, second, msg)</span>
+<span class="ansigreen">    795</span>         &quot;&quot;&quot;
+<span class="ansigreen">    796</span>         assertion_func <span class="ansiblue">=</span> self<span class="ansiblue">.</span>_getAssertEqualityFunc<span class="ansiblue">(</span>first<span class="ansiblue">,</span> second<span class="ansiblue">)</span><span class="ansiblue"></span>
+<span class="ansigreen">--&gt; 797</span><span class="ansired">         </span>assertion_func<span class="ansiblue">(</span>first<span class="ansiblue">,</span> second<span class="ansiblue">,</span> msg<span class="ansiblue">=</span>msg<span class="ansiblue">)</span><span class="ansiblue"></span>
+<span class="ansigreen">    798</span> <span class="ansiblue"></span>
+<span class="ansigreen">    799</span>     <span class="ansigreen">def</span> assertNotEqual<span class="ansiblue">(</span>self<span class="ansiblue">,</span> first<span class="ansiblue">,</span> second<span class="ansiblue">,</span> msg<span class="ansiblue">=</span><span class="ansigreen">None</span><span class="ansiblue">)</span><span class="ansiblue">:</span><span class="ansiblue"></span>
+
+<span class="ansigreen">/usr/local/Cellar/python3/3.4.1_1/Frameworks/Python.framework/Versions/3.4/lib/python3.4/unittest/case.py</span> in <span class="ansicyan">assertTupleEqual</span><span class="ansiblue">(self, tuple1, tuple2, msg)</span>
+<span class="ansigreen">   1004</span>                     differences<span class="ansiblue">.</span><span class="ansiblue"></span>
+<span class="ansigreen">   1005</span>         &quot;&quot;&quot;
+<span class="ansigreen">-&gt; 1006</span><span class="ansired">         </span>self<span class="ansiblue">.</span>assertSequenceEqual<span class="ansiblue">(</span>tuple1<span class="ansiblue">,</span> tuple2<span class="ansiblue">,</span> msg<span class="ansiblue">,</span> seq_type<span class="ansiblue">=</span>tuple<span class="ansiblue">)</span><span class="ansiblue"></span>
+<span class="ansigreen">   1007</span> <span class="ansiblue"></span>
+<span class="ansigreen">   1008</span>     <span class="ansigreen">def</span> assertSetEqual<span class="ansiblue">(</span>self<span class="ansiblue">,</span> set1<span class="ansiblue">,</span> set2<span class="ansiblue">,</span> msg<span class="ansiblue">=</span><span class="ansigreen">None</span><span class="ansiblue">)</span><span class="ansiblue">:</span><span class="ansiblue"></span>
+
+<span class="ansigreen">/usr/local/Cellar/python3/3.4.1_1/Frameworks/Python.framework/Versions/3.4/lib/python3.4/unittest/case.py</span> in <span class="ansicyan">assertSequenceEqual</span><span class="ansiblue">(self, seq1, seq2, msg, seq_type)</span>
+<span class="ansigreen">    975</span>         standardMsg <span class="ansiblue">=</span> self<span class="ansiblue">.</span>_truncateMessage<span class="ansiblue">(</span>standardMsg<span class="ansiblue">,</span> diffMsg<span class="ansiblue">)</span><span class="ansiblue"></span>
+<span class="ansigreen">    976</span>         msg <span class="ansiblue">=</span> self<span class="ansiblue">.</span>_formatMessage<span class="ansiblue">(</span>msg<span class="ansiblue">,</span> standardMsg<span class="ansiblue">)</span><span class="ansiblue"></span>
+<span class="ansigreen">--&gt; 977</span><span class="ansired">         </span>self<span class="ansiblue">.</span>fail<span class="ansiblue">(</span>msg<span class="ansiblue">)</span><span class="ansiblue"></span>
+<span class="ansigreen">    978</span> <span class="ansiblue"></span>
+<span class="ansigreen">    979</span>     <span class="ansigreen">def</span> _truncateMessage<span class="ansiblue">(</span>self<span class="ansiblue">,</span> message<span class="ansiblue">,</span> diff<span class="ansiblue">)</span><span class="ansiblue">:</span><span class="ansiblue"></span>
+
+<span class="ansigreen">/usr/local/Cellar/python3/3.4.1_1/Frameworks/Python.framework/Versions/3.4/lib/python3.4/unittest/case.py</span> in <span class="ansicyan">fail</span><span class="ansiblue">(self, msg)</span>
+<span class="ansigreen">    640</span>     <span class="ansigreen">def</span> fail<span class="ansiblue">(</span>self<span class="ansiblue">,</span> msg<span class="ansiblue">=</span><span class="ansigreen">None</span><span class="ansiblue">)</span><span class="ansiblue">:</span><span class="ansiblue"></span>
+<span class="ansigreen">    641</span>         <span class="ansiblue">&quot;&quot;&quot;Fail immediately, with the given message.&quot;&quot;&quot;</span><span class="ansiblue"></span>
+<span class="ansigreen">--&gt; 642</span><span class="ansired">         </span><span class="ansigreen">raise</span> self<span class="ansiblue">.</span>failureException<span class="ansiblue">(</span>msg<span class="ansiblue">)</span><span class="ansiblue"></span>
+<span class="ansigreen">    643</span> <span class="ansiblue"></span>
+<span class="ansigreen">    644</span>     <span class="ansigreen">def</span> assertFalse<span class="ansiblue">(</span>self<span class="ansiblue">,</span> expr<span class="ansiblue">,</span> msg<span class="ansiblue">=</span><span class="ansigreen">None</span><span class="ansiblue">)</span><span class="ansiblue">:</span><span class="ansiblue"></span>
+
+<span class="ansired">AssertionError</span>: Tuples differ: (0.0, 14.0) != (1.0, 15.0)
+
+First differing element 0:
+0.0
+1.0
+
+- (0.0, 14.0)
+?  ^     ^
+
++ (1.0, 15.0)
+?  ^     ^
+</pre>
+</div>
+</div>
+
 </div>
 </div>
 
@@ -11376,6 +11523,68 @@ Azg5mJnZAE4OZmY2wP8Hqgfzd3EVWKoAAAAASUVORK5CYII=
 </pre></div>
 
 </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area"><div class="prompt"></div>
+<div class="output_subarea output_text output_pyerr">
+<pre>
+<span class="ansired">---------------------------------------------------------------------------</span>
+<span class="ansired">AssertionError</span>                            Traceback (most recent call last)
+<span class="ansigreen">&lt;ipython-input-14-bcad5ce4f44a&gt;</span> in <span class="ansicyan">&lt;module&gt;</span><span class="ansiblue">()</span>
+<span class="ansigreen">      6</span> xdata <span class="ansiblue">=</span> lines<span class="ansiblue">[</span><span class="ansicyan">0</span><span class="ansiblue">]</span><span class="ansiblue">.</span>get_xdata<span class="ansiblue">(</span><span class="ansiblue">)</span><span class="ansiblue"></span>
+<span class="ansigreen">      7</span> xdata_correct <span class="ansiblue">=</span> np<span class="ansiblue">.</span>arange<span class="ansiblue">(</span><span class="ansicyan">1</span><span class="ansiblue">,</span> <span class="ansicyan">16</span><span class="ansiblue">)</span><span class="ansiblue"></span>
+<span class="ansigreen">----&gt; 8</span><span class="ansired"> </span>assert_equal<span class="ansiblue">(</span>xdata<span class="ansiblue">.</span>shape<span class="ansiblue">,</span> xdata_correct<span class="ansiblue">.</span>shape<span class="ansiblue">)</span><span class="ansiblue"></span>
+<span class="ansigreen">      9</span> <span class="ansigreen">assert</span> <span class="ansiblue">(</span>xdata <span class="ansiblue">==</span> xdata_correct<span class="ansiblue">)</span><span class="ansiblue">.</span>all<span class="ansiblue">(</span><span class="ansiblue">)</span><span class="ansiblue"></span>
+<span class="ansigreen">     10</span> <span class="ansiblue"></span>
+
+<span class="ansigreen">/usr/local/Cellar/python3/3.4.1_1/Frameworks/Python.framework/Versions/3.4/lib/python3.4/unittest/case.py</span> in <span class="ansicyan">assertEqual</span><span class="ansiblue">(self, first, second, msg)</span>
+<span class="ansigreen">    795</span>         &quot;&quot;&quot;
+<span class="ansigreen">    796</span>         assertion_func <span class="ansiblue">=</span> self<span class="ansiblue">.</span>_getAssertEqualityFunc<span class="ansiblue">(</span>first<span class="ansiblue">,</span> second<span class="ansiblue">)</span><span class="ansiblue"></span>
+<span class="ansigreen">--&gt; 797</span><span class="ansired">         </span>assertion_func<span class="ansiblue">(</span>first<span class="ansiblue">,</span> second<span class="ansiblue">,</span> msg<span class="ansiblue">=</span>msg<span class="ansiblue">)</span><span class="ansiblue"></span>
+<span class="ansigreen">    798</span> <span class="ansiblue"></span>
+<span class="ansigreen">    799</span>     <span class="ansigreen">def</span> assertNotEqual<span class="ansiblue">(</span>self<span class="ansiblue">,</span> first<span class="ansiblue">,</span> second<span class="ansiblue">,</span> msg<span class="ansiblue">=</span><span class="ansigreen">None</span><span class="ansiblue">)</span><span class="ansiblue">:</span><span class="ansiblue"></span>
+
+<span class="ansigreen">/usr/local/Cellar/python3/3.4.1_1/Frameworks/Python.framework/Versions/3.4/lib/python3.4/unittest/case.py</span> in <span class="ansicyan">assertTupleEqual</span><span class="ansiblue">(self, tuple1, tuple2, msg)</span>
+<span class="ansigreen">   1004</span>                     differences<span class="ansiblue">.</span><span class="ansiblue"></span>
+<span class="ansigreen">   1005</span>         &quot;&quot;&quot;
+<span class="ansigreen">-&gt; 1006</span><span class="ansired">         </span>self<span class="ansiblue">.</span>assertSequenceEqual<span class="ansiblue">(</span>tuple1<span class="ansiblue">,</span> tuple2<span class="ansiblue">,</span> msg<span class="ansiblue">,</span> seq_type<span class="ansiblue">=</span>tuple<span class="ansiblue">)</span><span class="ansiblue"></span>
+<span class="ansigreen">   1007</span> <span class="ansiblue"></span>
+<span class="ansigreen">   1008</span>     <span class="ansigreen">def</span> assertSetEqual<span class="ansiblue">(</span>self<span class="ansiblue">,</span> set1<span class="ansiblue">,</span> set2<span class="ansiblue">,</span> msg<span class="ansiblue">=</span><span class="ansigreen">None</span><span class="ansiblue">)</span><span class="ansiblue">:</span><span class="ansiblue"></span>
+
+<span class="ansigreen">/usr/local/Cellar/python3/3.4.1_1/Frameworks/Python.framework/Versions/3.4/lib/python3.4/unittest/case.py</span> in <span class="ansicyan">assertSequenceEqual</span><span class="ansiblue">(self, seq1, seq2, msg, seq_type)</span>
+<span class="ansigreen">    975</span>         standardMsg <span class="ansiblue">=</span> self<span class="ansiblue">.</span>_truncateMessage<span class="ansiblue">(</span>standardMsg<span class="ansiblue">,</span> diffMsg<span class="ansiblue">)</span><span class="ansiblue"></span>
+<span class="ansigreen">    976</span>         msg <span class="ansiblue">=</span> self<span class="ansiblue">.</span>_formatMessage<span class="ansiblue">(</span>msg<span class="ansiblue">,</span> standardMsg<span class="ansiblue">)</span><span class="ansiblue"></span>
+<span class="ansigreen">--&gt; 977</span><span class="ansired">         </span>self<span class="ansiblue">.</span>fail<span class="ansiblue">(</span>msg<span class="ansiblue">)</span><span class="ansiblue"></span>
+<span class="ansigreen">    978</span> <span class="ansiblue"></span>
+<span class="ansigreen">    979</span>     <span class="ansigreen">def</span> _truncateMessage<span class="ansiblue">(</span>self<span class="ansiblue">,</span> message<span class="ansiblue">,</span> diff<span class="ansiblue">)</span><span class="ansiblue">:</span><span class="ansiblue"></span>
+
+<span class="ansigreen">/usr/local/Cellar/python3/3.4.1_1/Frameworks/Python.framework/Versions/3.4/lib/python3.4/unittest/case.py</span> in <span class="ansicyan">fail</span><span class="ansiblue">(self, msg)</span>
+<span class="ansigreen">    640</span>     <span class="ansigreen">def</span> fail<span class="ansiblue">(</span>self<span class="ansiblue">,</span> msg<span class="ansiblue">=</span><span class="ansigreen">None</span><span class="ansiblue">)</span><span class="ansiblue">:</span><span class="ansiblue"></span>
+<span class="ansigreen">    641</span>         <span class="ansiblue">&quot;&quot;&quot;Fail immediately, with the given message.&quot;&quot;&quot;</span><span class="ansiblue"></span>
+<span class="ansigreen">--&gt; 642</span><span class="ansired">         </span><span class="ansigreen">raise</span> self<span class="ansiblue">.</span>failureException<span class="ansiblue">(</span>msg<span class="ansiblue">)</span><span class="ansiblue"></span>
+<span class="ansigreen">    643</span> <span class="ansiblue"></span>
+<span class="ansigreen">    644</span>     <span class="ansigreen">def</span> assertFalse<span class="ansiblue">(</span>self<span class="ansiblue">,</span> expr<span class="ansiblue">,</span> msg<span class="ansiblue">=</span><span class="ansigreen">None</span><span class="ansiblue">)</span><span class="ansiblue">:</span><span class="ansiblue"></span>
+
+<span class="ansired">AssertionError</span>: Tuples differ: (14,) != (15,)
+
+First differing element 0:
+14
+15
+
+- (14,)
+?   ^
+
++ (15,)
+?   ^
+</pre>
+</div>
+</div>
+
 </div>
 </div>
 

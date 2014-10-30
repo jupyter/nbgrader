@@ -9,7 +9,8 @@ from nbgrader.apps.customnbconvertapp import flags as base_flags
 aliases = {}
 aliases.update(base_aliases)
 aliases.update({
-    'regexp': 'FindStudentID.regexp'
+    'regexp': 'FindStudentID.regexp',
+    'assignment': 'SaveAutoGrades.assignment_id'
 })
 
 flags = {}

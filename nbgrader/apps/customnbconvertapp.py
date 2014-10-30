@@ -134,5 +134,6 @@ class CustomNbConvertApp(NbConvertApp):
 
         # Post-process if post processor has been defined.
         if hasattr(self, 'postprocessor') and self.postprocessor:
+            os.chdir(cwd)
             self.postprocessor(cwd)
         conversion_success += 1
