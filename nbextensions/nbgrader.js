@@ -11,11 +11,36 @@ define([
     'jquery',
     'base/js/namespace',
     'notebook/js/celltoolbar',
+    'base/js/events'
 
-], function (require, $, IPython, celltoolbar) {
+], function (require, $, IPython, celltoolbar, events) {
     "use strict";
 
+    var grade_cls = "nbgrader-grade-cell";
     var CellToolbar = celltoolbar.CellToolbar;
+
+    // trigger an event when the toolbar is being rebuilt
+    CellToolbar.prototype._rebuild = CellToolbar.prototype.rebuild;
+    CellToolbar.prototype.rebuild = function () {
+        events.trigger('toolbar_rebuild.CellToolbar', this.cell);
+        this._rebuild();
+    };
+
+    // trigger an event when the toolbar is being (globally) hidden
+    CellToolbar._global_hide = CellToolbar.global_hide;
+    CellToolbar.global_hide = function () {
+        CellToolbar._global_hide();
+        for (var i=0; i < CellToolbar._instances.length; i++) {
+            events.trigger('global_hide.CellToolbar', CellToolbar._instances[i].cell);
+        }
+    };
+
+    // remove nbgrader class when the cell is either hidden or rebuilt
+    events.on("global_hide.CellToolbar toolbar_rebuild.CellToolbar", function (evt, cell) {
+        if (cell.element && cell.element.hasClass(grade_cls)) {
+            cell.element.removeClass(grade_cls);
+        }
+    });
 
     /**
      * Is the cell a solution cell?
@@ -50,18 +75,8 @@ define([
      * nbgrader cell type.
      */
     var display_cell = function (cell) {
-        var grader = is_grade(cell),
-            grade_cls = "nbgrader-grade-cell",
-            elem = cell.element;
-
-        if (!elem) {
-            return;
-        }
-
-        if (grader && !elem.hasClass(grade_cls)) {
-            elem.addClass(grade_cls);
-        } else if (!grader && elem.hasClass(grade_cls)) {
-            elem.removeClass(grade_cls);
+        if (cell.element && is_grade(cell) && !cell.element.hasClass(grade_cls)) {
+            cell.element.addClass(grade_cls);
         }
     };
 
