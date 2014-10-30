@@ -78,7 +78,7 @@ def prev_notebook(_id):
     index = ids.index(_id)
     if index == 0:
         return json.dumps(None)
-    nb = app.gradebook.find_notebook(_id=ids[index + 1]).to_dict()
+    nb = app.gradebook.find_notebook(_id=ids[index - 1]).to_dict()
     nb["path"] = "/{}.autograded.html".format(nb["notebook_id"])
     return json.dumps(nb)
 
