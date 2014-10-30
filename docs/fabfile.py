@@ -19,8 +19,8 @@ def build():
 @task
 def clean():
     local('rm -f user_guide/release_example/StudentNotebook.ipynb')
-    local('rm -f user_guide/grade_example/GradedNotebookBitdiddle.ipynb')
-    local('rm -f user_guide/grade_example/GradedNotebookBitdiddle.html')
+    local('rm -f user_guide/grade_example/StudentNotebook*.autograded.ipynb')
+    local('rm -f user_guide/grade_example/StudentNotebook*.autograded.html')
 
 @task(default=True)
 def all():
