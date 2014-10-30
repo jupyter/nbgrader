@@ -8,11 +8,11 @@
 <head>
 
 <meta charset="utf-8" />
-<title>{{resources['metadata']['name']}}</title>
+<title>{{ nb.metadata.nbgrader.notebook_id }}</title>
 
 <script>
-nb = "{{ resources['metadata']['name'] }}";
-student = "{{ resources['nbgrader']['student_id'] }}";
+nb = "{{ nb.metadata.nbgrader.notebook_id }}";
+student = "{{ nb.metadata.nbgrader.student_id }}";
 </script>
 
 <script src="/static/lib/jquery-2.1.1.min.js"></script>

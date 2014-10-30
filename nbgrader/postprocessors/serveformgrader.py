@@ -1,5 +1,3 @@
-import os
-
 from IPython.nbconvert.postprocessors import PostProcessorBase
 from IPython.utils.traitlets import Unicode, Integer
 from nbgrader.html.formgrade import app
@@ -13,12 +11,10 @@ class ServeFormGrader(PostProcessorBase):
     ip = Unicode("localhost", config=True, help="IP address for the server")
     port = Integer(5000, config=True, help="Port for the server")
 
-    def postprocess(self, input):
-        dirname, filename = os.path.split(input)
-        filename = os.path.splitext(filename)[0]
+    def postprocess(self, dirname):
         app.notebook_dir = dirname
 
-        url = "http://{:s}:{:d}/{:s}".format(self.ip, self.port, filename)
+        url = "http://{:s}:{:d}/".format(self.ip, self.port)
         self.log.info("Form grader running at {}".format(url))
         self.log.info("Use Control-C to stop this server")
 

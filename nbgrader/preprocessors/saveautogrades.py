@@ -23,6 +23,12 @@ class SaveAutoGrades(Preprocessor):
         # process the cells
         nb, resources = super(SaveAutoGrades, self).preprocess(nb, resources)
 
+        # save the notebook id
+        if 'nbgrader' not in nb.metadata:
+            nb.metadata['nbgrader'] = {}
+        nb.metadata['nbgrader']['notebook_id'] = resources['unique_key']
+        nb.metadata['nbgrader']['student_id'] = resources['nbgrader']['student_id']
+
         return nb, resources
 
     def _add_comment(self, cell, resources):
@@ -36,7 +42,7 @@ class SaveAutoGrades(Preprocessor):
         # these are the fields that we use to identify the specific
         # comment in the database
         comment_id = {
-            "notebook": resources['unique_key'],
+            "notebook_id": resources['unique_key'],
             "student_id": resources['nbgrader']['student_id'],
             "comment_id": self.comment_index
         }
@@ -62,7 +68,7 @@ class SaveAutoGrades(Preprocessor):
         # these are the fields by which we will identify the score
         # information
         grade_id = {
-            "notebook": resources['unique_key'],
+            "notebook_id": resources['unique_key'],
             "student_id": resources['nbgrader']['student_id'],
             "grade_id": cell.metadata['nbgrader']['grade_id']
         }

@@ -86,8 +86,9 @@ class CustomNbConvertApp(NbConvertApp):
             cannot be used when converting multiple notebooks.
             """)
             self.exit(1)
-        
+
         exporter = exporter_map[self.export_format](config=self.config)
+        cwd = os.getcwd()
 
         for notebook_path, notebook_filename in self.notebooks:
             if os.getcwd() != notebook_path:
@@ -130,8 +131,7 @@ class CustomNbConvertApp(NbConvertApp):
             else:
                 write_results = self.writer.write(output, resources, notebook_name=notebook_name)
 
-                #Post-process if post processor has been defined.
-                if hasattr(self, 'postprocessor') and self.postprocessor:
-                    self.postprocessor(write_results)
-                conversion_success += 1
-
+        # Post-process if post processor has been defined.
+        if hasattr(self, 'postprocessor') and self.postprocessor:
+            self.postprocessor(cwd)
+        conversion_success += 1

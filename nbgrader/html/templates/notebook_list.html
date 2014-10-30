@@ -1,0 +1,12 @@
+<!doctype html>
+<head>
+<title>Notebooks</title>
+</head>
+<body>
+<h1>Notebooks</h1>
+<ul>
+{%- for nb in notebooks %}
+    <li><a href="/{{ nb }}">{{ nb }}</a>
+{%- endfor %}
+</ul>
+</body>

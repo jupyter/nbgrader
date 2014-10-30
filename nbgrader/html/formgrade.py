@@ -1,8 +1,9 @@
 import json
 import os
+import glob
 from bson.objectid import ObjectId
 
-from flask import Flask, request, abort, redirect, url_for
+from flask import Flask, request, abort, redirect, url_for, render_template
 app = Flask(__name__, static_url_path='/static')
 
 
@@ -12,9 +13,16 @@ def jsonify(obj):
     return obj
 
 
+@app.route("/")
+def list_notebooks():
+    suffix = ".autograded.html"
+    notebooks = glob.glob(os.path.join(app.notebook_dir, "*{}".format(suffix)))
+    notebooks = [os.path.split(x)[1][:-len(suffix)] for x in notebooks]
+    return render_template("notebook_list.html", notebooks=notebooks)
+
 @app.route("/<nb>")
 def notebook(nb):
-    filename = os.path.join(app.notebook_dir, "{}.html".format(nb))
+    filename = os.path.join(app.notebook_dir, "{}.autograded.html".format(nb))
     if not os.path.exists(filename):
         abort(404)
     with open(filename, "r") as fh:
@@ -30,7 +38,7 @@ def fonts(filename):
 @app.route("/<student>/<nb>/grades")
 def get_all_grades(student, nb):
     return json.dumps([jsonify(x) for x in app.grades.find({
-        "notebook": nb,
+        "notebook_id": nb,
         "student_id": student
     })])
 
@@ -38,7 +46,7 @@ def get_all_grades(student, nb):
 @app.route("/<student>/<nb>/comments")
 def get_all_comments(student, nb):
     return json.dumps([jsonify(x) for x in app.comments.find({
-        "notebook": nb,
+        "notebook_id": nb,
         "student_id": student
     })])
 
