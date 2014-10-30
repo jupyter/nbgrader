@@ -29,6 +29,7 @@ class FormgradeApp(CustomNbConvertApp):
     description = Unicode(u'Grade a notebook using an HTML form')
     aliases = aliases
     flags = flags
+    ipython_dir = "/tmp"
 
     student_id = Unicode(u'', config=True)
 
