@@ -1,4 +1,4 @@
 c = get_config()
 
-c.FormgradeApp.notebooks = ['GradedNotebookBitdiddle.ipynb']
-c.FindStudentID.regexp = ".*/GradedNotebook(?P<student_id>.+).ipynb"
+c.FormgradeApp.notebooks = ['StudentNotebook*.autograded.ipynb']
+c.FindStudentID.regexp = ".*/StudentNotebook(?P<student_id>.+).autograded.ipynb"
