@@ -1,11 +1,10 @@
 from IPython.config.loader import Config
-from IPython.config.application import catch_config_error
 from IPython.utils.traitlets import Unicode
 
 from nbgrader.apps.customnbconvertapp import CustomNbConvertApp
 from nbgrader.apps.customnbconvertapp import aliases as base_aliases
 from nbgrader.apps.customnbconvertapp import flags as base_flags
-from nbgrader.templates import get_template, get_template_path
+from nbgrader.templates import get_template_path
 
 
 aliases = {}
@@ -17,11 +16,15 @@ aliases.update({
 flags = {}
 flags.update(base_flags)
 flags.update({
+    'serve': (
+        {'FormgradeApp': {'postprocessor_class': 'nbgrader.postprocessors.ServeFormGrader'}},
+        "Run the form grading server"
+    )
 })
 
 
 class FormgradeApp(CustomNbConvertApp):
-    
+
     name = Unicode(u'nbgrader-formgrade')
     description = Unicode(u'Grade a notebook using an HTML form')
     aliases = aliases
@@ -31,11 +34,6 @@ class FormgradeApp(CustomNbConvertApp):
 
     def _export_format_default(self):
         return 'html'
-
-    @catch_config_error
-    def initialize(self, argv=None):
-        self.postprocessor_class = 'nbgrader.postprocessors.ServeFormGrader'
-        super(FormgradeApp, self).initialize(argv)
 
     def build_extra_config(self):
         self.extra_config = Config()
