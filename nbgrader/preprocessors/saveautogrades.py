@@ -48,8 +48,7 @@ class SaveAutoGrades(Preprocessor):
 
         # update the number of comments we have inserted
         self.comment_index += 1
-
-        print(comment)
+        self.log.debug(comment)
 
     def _add_score(self, cell, resources):
         """Graders can override the autograder grades, and may need to
@@ -84,7 +83,7 @@ class SaveAutoGrades(Preprocessor):
 
         # Update the grade information and print it out
         self.gradebook.update_grade(grade)
-        print(grade)
+        self.log.debug(grade)
 
     def preprocess_cell(self, cell, resources, cell_index):
         # if it's a solution cell, then add a comment
