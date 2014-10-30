@@ -1,8 +1,8 @@
-/*global $, Backbone, student, nb */
+/*global $, Backbone, student, nb_uuid */
 
 var Grade = Backbone.Model.extend({
     idAttribute: "_id",
-    urlRoot: "/grades",
+    urlRoot: "/api/grade",
     initialize: function () {
         var elem = $("#" + this.get("grade_id"));
         var glyph = $(elem.siblings()[0]);
@@ -38,12 +38,12 @@ var Grade = Backbone.Model.extend({
 
 var Grades = Backbone.Collection.extend({
     model: Grade,
-    url: "/" + student + "/" + nb + "/grades"
+    url: "/api/notebook/" + nb_uuid + "/grades"
 });
 
 var Comment = Backbone.Model.extend({
     idAttribute: "_id",
-    urlRoot: "/comments",
+    urlRoot: "/api/comment",
     initialize: function () {
         var elem = $($(".comment")[this.get("comment_id")]);
         elem.val(this.get("comment"));
@@ -58,7 +58,7 @@ var Comment = Backbone.Model.extend({
 
 var Comments = Backbone.Collection.extend({
     model: Comment,
-    url: "/" + student + "/" + nb + "/comments"
+    url: "/api/notebook/" + nb_uuid + "/comments"
 });
 
 var grades;
@@ -71,26 +71,26 @@ $(document).ready(function () {
     comments = new Comments();
     comments.fetch();
 
-    $.get("/" + nb + "/next", function (data) {
-        nb = JSON.parse(data);
-        if (nb === null) {
+    $.get("/api/notebook/" + nb_uuid + "/next", function (data) {
+        data = JSON.parse(data);
+        if (data === null) {
             $("li.next-notebook a").attr("href", "#");
             $("li.next-notebook").addClass("disabled");
         } else {
-            $("li.next-notebook a").attr("href", "/" + nb);
+            $("li.next-notebook a").attr("href", "/" + data.notebook_id + ".autograded.html");
             if ($("li.next-notebook").hasClass("disabled")) {
                 $("li.next-notebook").removeClass("disabled");
             }
         }
     });
 
-    $.get("/" + nb + "/prev", function (data) {
-        nb = JSON.parse(data);
-        if (nb === null) {
+    $.get("/api/notebook/" + nb_uuid + "/prev", function (data) {
+        data = JSON.parse(data);
+        if (data === null) {
             $("li.prev-notebook a").attr("href", "#");
             $("li.prev-notebook").addClass("disabled");
         } else {
-            $("li.prev-notebook a").attr("href", "/" + nb);
+            $("li.prev-notebook a").attr("href", "/" + data.notebook_id + ".autograded.html");
             if ($("li.prev-notebook").hasClass("disabled")) {
                 $("li.prev-notebook").removeClass("disabled");
             }

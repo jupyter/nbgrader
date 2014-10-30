@@ -1,7 +1,7 @@
 from IPython.nbconvert.postprocessors import PostProcessorBase
 from IPython.utils.traitlets import Unicode, Integer
 from nbgrader.html.formgrade import app
-from pymongo import MongoClient
+from nbgrader.api import Gradebook
 
 class ServeFormGrader(PostProcessorBase):
 
@@ -18,11 +18,7 @@ class ServeFormGrader(PostProcessorBase):
         self.log.info("Form grader running at {}".format(url))
         self.log.info("Use Control-C to stop this server")
 
-        app.client = MongoClient(self.db_ip, self.db_port)
-        app.db = app.client['assignments']
-        app.grades = app.db['grades']
-        app.comments = app.db['comments']
-
+        app.gradebook = Gradebook(ip=self.db_ip, port=self.db_port)
         app.run(host=self.ip, port=self.port, debug=True, use_reloader=False)
 
 def main(path):

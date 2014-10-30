@@ -16,25 +16,24 @@
 }
 </style>
 
-<script type="text/javascript">
-notebooks = [
-{%- for nb in notebooks %}
-    "{{ nb }}",
-{%- endfor %}
-];
-</script>
 </head>
 
 <body>
   <div class="container">
     <h1>Notebooks</h1>
-    <ul class="list-group">
-      {%- for nb in notebooks %}
-      <li id="{{ nb }}" class="list-group-item">
-        <a href="/{{ nb }}">{{ nb }}</a>
-        <span class="badge"></span>
-      </li>
-      {%- endfor %}
-    </ul>
+    <div class="panel panel-default">
+      <table class="table">
+        <thead><tr>
+          <th>Notebook</th>
+          <th>Student Name</th>
+          <th>Student ID</th>
+          <th>Score</th>
+          <th>Needs manual grade</th>
+        </tr></thead>
+        <tbody id="notebook-list"></tbody>
+      </table>
+    </div>
   </div>
 </body>
+
+

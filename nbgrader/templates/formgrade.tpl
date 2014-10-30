@@ -11,8 +11,7 @@
 <title>{{ nb.metadata.nbgrader.notebook_id }}</title>
 
 <script>
-nb = "{{ nb.metadata.nbgrader.notebook_id }}";
-student = "{{ nb.metadata.nbgrader.student_id }}";
+nb_uuid = "{{ nb.metadata.nbgrader.notebook_uuid }}";
 </script>
 
 <script src="/static/lib/jquery-2.1.1.min.js"></script>
