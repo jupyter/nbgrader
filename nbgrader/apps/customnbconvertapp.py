@@ -15,7 +15,8 @@ from IPython.nbconvert.exporters.exporter import ResourcesDict
 aliases = {}
 aliases.update(nbconvert_aliases)
 aliases.update({
-      'student-id': 'CustomNbConvertApp.student_id'
+    'student-id': 'CustomNbConvertApp.student_id',
+    'build-directory': 'FilesWriter.build_directory'
 })
 
 flags = {}
