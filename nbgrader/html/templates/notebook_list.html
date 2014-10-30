@@ -1,12 +1,40 @@
 <!doctype html>
 <head>
 <title>Notebooks</title>
-</head>
-<body>
-<h1>Notebooks</h1>
-<ul>
+
+<script src="/static/lib/jquery-2.1.1.min.js"></script>
+<script src="/static/lib/underscore-min.js"></script>
+<script src="/static/lib/backbone-min.js"></script>
+<script src="/static/lib/bootstrap.min.js"></script>
+<script src="/static/js/notebooklist.js"></script>
+
+<link rel="stylesheet" href="/static/css/bootstrap.min.css" />
+
+<style type="text/css">
+.badge-warning {
+    background-color: #f0ad4e;
+}
+</style>
+
+<script type="text/javascript">
+notebooks = [
 {%- for nb in notebooks %}
-    <li><a href="/{{ nb }}">{{ nb }}</a>
+    "{{ nb }}",
 {%- endfor %}
-</ul>
+];
+</script>
+</head>
+
+<body>
+  <div class="container">
+    <h1>Notebooks</h1>
+    <ul class="list-group">
+      {%- for nb in notebooks %}
+      <li id="{{ nb }}" class="list-group-item">
+        <a href="/{{ nb }}">{{ nb }}</a>
+        <span class="badge"></span>
+      </li>
+      {%- endfor %}
+    </ul>
+  </div>
 </body>

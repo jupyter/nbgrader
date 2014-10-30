@@ -53,6 +53,30 @@ def prev_notebook(nb):
     return json.dumps(notebooks[index - 1])
 
 
+@app.route("/<nb>/score")
+def get_notebook_score(nb):
+    score = 0
+    max_score = 0
+    needs_manual_grade = False
+
+    for grade in app.grades.find({"notebook_id": nb}):
+        if 'score' in grade:
+            score += grade['score']
+        elif grade.get('autoscore', None) is not None:
+            score += grade['autoscore']
+        else:
+            needs_manual_grade = True
+
+        if grade.get('max_score', None):
+            max_score += grade['max_score']
+
+    return json.dumps({
+        "score": score,
+        "max_score": max_score,
+        "needs_manual_grade": needs_manual_grade
+    })
+
+
 @app.route("/fonts/<filename>")
 def fonts(filename):
     return redirect(url_for('static', filename=os.path.join("fonts", filename)))
