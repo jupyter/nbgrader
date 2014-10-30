@@ -1,7 +1,7 @@
 from IPython.nbconvert.preprocessors import Preprocessor
 from IPython.utils.traitlets import Unicode, Integer
-from pymongo import MongoClient
 from nbgrader import utils
+from nbgrader.api import Gradebook
 
 
 class SaveAutoGrades(Preprocessor):
@@ -12,10 +12,12 @@ class SaveAutoGrades(Preprocessor):
 
     def preprocess(self, nb, resources):
         # connect to the mongo database
-        client = MongoClient(self.ip, self.port)
-        db = client['assignments']
-        self.grades = db['grades']
-        self.comments = db['comments']
+        self.gradebook = Gradebook()
+        self.student = self.gradebook.find_student(
+            student_id=resources['nbgrader']['student_id'])
+        self.notebook = self.gradebook.find_or_create_notebook(
+            notebook_id=resources['unique_key'],
+            student=self.student)
 
         # keep track of the number of comments we add
         self.comment_index = 0
@@ -26,8 +28,8 @@ class SaveAutoGrades(Preprocessor):
         # save the notebook id
         if 'nbgrader' not in nb.metadata:
             nb.metadata['nbgrader'] = {}
-        nb.metadata['nbgrader']['notebook_id'] = resources['unique_key']
-        nb.metadata['nbgrader']['student_id'] = resources['nbgrader']['student_id']
+        nb.metadata['nbgrader']['notebook_id'] = self.notebook.notebook_id
+        nb.metadata['nbgrader']['notebook_uuid'] = self.notebook._id
 
         return nb, resources
 
@@ -39,23 +41,15 @@ class SaveAutoGrades(Preprocessor):
 
         """
 
-        # these are the fields that we use to identify the specific
-        # comment in the database
-        comment_id = {
-            "notebook_id": resources['unique_key'],
-            "student_id": resources['nbgrader']['student_id'],
-            "comment_id": self.comment_index
-        }
-
-        # try to look up the comment -- if it doesn't exist, create it
-        comment = self.comments.find_one(comment_id)
-        if comment is None:
-            comment = {"comment": ""}
-            comment.update(comment_id)
-            self.comments.insert(comment)
+        # retrieve or create the comment object from the database
+        comment = self.gradebook.find_or_create_comment(
+            notebook=self.notebook,
+            comment_id=self.comment_index)
 
         # update the number of comments we have inserted
         self.comment_index += 1
+
+        print(comment)
 
     def _add_score(self, cell, resources):
         """Graders can override the autograder grades, and may need to
@@ -67,38 +61,29 @@ class SaveAutoGrades(Preprocessor):
         """
         # these are the fields by which we will identify the score
         # information
-        grade_id = {
-            "notebook_id": resources['unique_key'],
-            "student_id": resources['nbgrader']['student_id'],
-            "grade_id": cell.metadata['nbgrader']['grade_id']
-        }
-
-        # try to look up the grade -- if it doesn't exist, create it
-        grade = self.grades.find_one(grade_id)
-        if grade is None:
-            grade = grade_id.copy()
-            self.grades.insert(grade)
+        grade = self.gradebook.find_or_create_grade(
+            notebook=self.notebook,
+            grade_id=cell.metadata['nbgrader']['grade_id'])
 
         # set the maximum earnable score
         points = float(cell.metadata['nbgrader']['points'])
-        grade['max_score'] = points
+        grade.max_score = points
 
         # If it's a code cell and it threw an error, then they get
         # zero points, otherwise they get max_score points. If it's a
         # text cell, we can't autograde it.
         if cell.cell_type == 'code':
-            autoscore = points
+            grade.autoscore = points
             for output in cell.outputs:
                 if output.output_type == 'pyerr':
-                    autoscore = 0
+                    grade.autoscore = 0
                     break
-            grade['autoscore'] = float(autoscore)
 
         else:
-            grade['autoscore'] = None
+            grade.autoscore = None
 
         # Update the grade information and print it out
-        self.grades.update(grade_id, {"$set": grade})
+        self.gradebook.update_grade(grade)
         print(grade)
 
     def preprocess_cell(self, cell, resources, cell_index):
