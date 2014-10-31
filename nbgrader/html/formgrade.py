@@ -42,7 +42,7 @@ def home():
 
 @app.route("/assignments")
 def view_assignments():
-    return redirect(url_for('/'))
+    return redirect('/')
 
 
 @app.route("/assignments/<assignment_id>/")
