@@ -37,7 +37,7 @@ def fonts(filename):
 
 @app.route("/")
 def home():
-    return render_template("assignment_list.html")
+    return render_template("assignment_list.tpl")
 
 
 @app.route("/assignments")
@@ -49,7 +49,7 @@ def view_assignments():
 def view_assignment(assignment_id):
     assignment = app.gradebook.find_assignment(assignment_id=assignment_id)
     return render_template(
-        "notebook_list.html",
+        "notebook_list.tpl",
         assignment_id=assignment.assignment_id,
         assignment_uuid=assignment._id)
 
@@ -59,9 +59,9 @@ def view_notebook(assignment_id, notebook_id):
     filename = os.path.join(app.notebook_dir, notebook_id)
     if not os.path.exists(filename):
         abort(404)
-    with open(filename, "r") as fh:
-        contents = fh.read()
-    return contents
+
+    output, resources = app.exporter.from_filename(filename, resources={})
+    return output
 
 
 @app.route("/api/assignments")
@@ -79,7 +79,7 @@ def get_notebooks(_id):
         student = app.gradebook.find_student(_id=nb["student"])
         nb["student_name"] = "{last_name}, {first_name}".format(**student.to_dict())
         nb["student_id"] = student.student_id
-        nb["path"] = "/assignments/{}/{}.html".format(assignment.assignment_id, nb["notebook_id"])
+        nb["path"] = "/assignments/{}/{}.ipynb".format(assignment.assignment_id, nb["notebook_id"])
     return json.dumps(notebooks)
 
 
@@ -91,7 +91,7 @@ def next_notebook(_id):
         return json.dumps(None)
     nb = app.gradebook.find_notebook(_id=ids[index + 1]).to_dict()
     assignment = app.gradebook.find_assignment(_id=nb['assignment'])
-    nb["path"] = "/assignments/{}/{}.html".format(assignment.assignment_id, nb["notebook_id"])
+    nb["path"] = "/assignments/{}/{}.ipynb".format(assignment.assignment_id, nb["notebook_id"])
     return json.dumps(nb)
 
 
@@ -103,7 +103,7 @@ def prev_notebook(_id):
         return json.dumps(None)
     nb = app.gradebook.find_notebook(_id=ids[index - 1]).to_dict()
     assignment = app.gradebook.find_assignment(_id=nb['assignment'])
-    nb["path"] = "/assignments/{}/{}.html".format(assignment.assignment_id, nb["notebook_id"])
+    nb["path"] = "/assignments/{}/{}.ipynb".format(assignment.assignment_id, nb["notebook_id"])
     return json.dumps(nb)
 
 
