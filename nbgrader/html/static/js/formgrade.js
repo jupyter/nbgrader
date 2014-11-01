@@ -46,12 +46,27 @@ var Comment = Backbone.Model.extend({
     urlRoot: "/api/comment",
     initialize: function () {
         var elem = $($(".comment")[this.get("comment_id")]);
+        var glyph = $($(elem.siblings()[0]).children()[0]);
         elem.val(this.get("comment"));
+        glyph.hide();
 
         var that = this;
         elem.on("change", function (evt) {
             that.set("comment", elem.val());
-            that.save();
+
+            glyph.removeClass("glyphicon-floppy-saved");
+            glyph.addClass("glyphicon-refresh");
+            glyph.fadeIn(10);
+
+            that.save("comment", that.get("comment"), {
+                success: function () {
+                    glyph.removeClass("glyphicon-refresh");
+                    glyph.addClass("glyphicon-floppy-saved");
+                    setTimeout(function () {
+                        glyph.fadeOut();
+                    }, 1000);
+                }
+            });
         });
     }
 });

@@ -134,6 +134,7 @@ div.prompt {
       {%- endif -%}
     </div>
     <div class="inner_cell">
+      <p style="margin: 0.4em 0;">Instructor feedback:<span style="margin-left: 1em;" class="glyphicon glyphicon-floppy-saved"></span></p>
       <textarea class="comment" placeholder="Comments"></textarea>
     </div>
   </div>
