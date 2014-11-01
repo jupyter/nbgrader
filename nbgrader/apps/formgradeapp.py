@@ -23,10 +23,6 @@ aliases.update({
 flags = {}
 flags.update(base_flags)
 flags.update({
-    'serve': (
-        {'FormgradeApp': {'postprocessor_class': 'nbgrader.postprocessors.ServeFormGrader'}},
-        "Run the form grading server"
-    )
 })
 
 
