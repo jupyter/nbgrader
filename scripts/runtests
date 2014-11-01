@@ -12,8 +12,10 @@ else:
 if group == 'js':
     print("Running javascript tests...")
     pth = os.path.abspath("nbgrader/tests/js")
-    subprocess.call(["iptest", "js/{}".format(pth)])
+    code = subprocess.call(["iptest", "js/{}".format(pth)])
 
 else:
     print("Running nosetests...")
-    subprocess.call("nosetests")
+    code = subprocess.call("nosetests")
+
+sys.exit(code)
