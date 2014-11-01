@@ -5,8 +5,6 @@ from IPython.core.application import BaseIPythonApplication
 from IPython.nbconvert.exporters import HTMLExporter
 from IPython.config.application import catch_config_error
 
-from nbgrader.apps.customnbconvertapp import aliases as base_aliases
-from nbgrader.apps.customnbconvertapp import flags as base_flags
 from nbgrader.html.formgrade import app
 from nbgrader.api import Gradebook
 
@@ -14,17 +12,12 @@ import os
 import logging
 
 
-aliases = {}
-aliases.update(base_aliases)
-aliases.update({
+aliases = {
     'ip': 'FormgradeApp.ip',
     'port': 'FormgradeApp.port'
-})
+}
 
 flags = {}
-flags.update(base_flags)
-flags.update({
-})
 
 examples = """
 nbgrader formgrade .
