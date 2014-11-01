@@ -1,45 +1,39 @@
 import os
-import sys
 import glob
 
-from IPython.config.loader import Config
 from IPython.config.application import catch_config_error
-from IPython.utils.traitlets import Unicode
+from IPython.utils.traitlets import Unicode, List
 from IPython.nbconvert.nbconvertapp import NbConvertApp
-from IPython.nbconvert.nbconvertapp import nbconvert_aliases, nbconvert_flags
 from IPython.nbconvert.exporters.export import exporter_map
 from IPython.nbconvert.utils.exceptions import ConversionException
 from IPython.nbconvert.exporters.exporter import ResourcesDict
 
-
 aliases = {}
-aliases.update(nbconvert_aliases)
-aliases.update({
-    'student-id': 'CustomNbConvertApp.student_id',
-    'build-directory': 'FilesWriter.build_directory'
-})
-
 flags = {}
-flags.update(nbconvert_flags)
-flags.update({
-})
-
 
 class CustomNbConvertApp(NbConvertApp):
-    
+
     name = Unicode(u'nbgrader-nbconvert')
     description = Unicode(u'A custom nbconvert app')
     aliases = aliases
     flags = flags
+    ipython_dir = "/tmp/nbgrader"
 
     student_id = Unicode(u'', config=True)
 
     def build_extra_config(self):
         pass
 
+    # The classes added here determine how configuration will be documented
+    classes = List()
+
+    def _classes_default(self):
+        """This has to be in a method, for TerminalIPythonApp to be available."""
+        return []
+
     @catch_config_error
     def initialize(self, argv=None):
-        super(CustomNbConvertApp,self).initialize(argv)
+        super(CustomNbConvertApp, self).initialize(argv)
         self.stage_default_config_file()
         self.build_extra_config()
 

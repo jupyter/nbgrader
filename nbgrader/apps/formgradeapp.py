@@ -1,8 +1,8 @@
 from IPython.config.loader import Config
-from IPython.utils.traitlets import Unicode, Integer
+from IPython.utils.traitlets import Unicode, Integer, List
 
 from IPython.core.application import BaseIPythonApplication
-from IPython.nbconvert.exporters.export import exporter_map
+from IPython.nbconvert.exporters import HTMLExporter
 from IPython.config.application import catch_config_error
 
 from nbgrader.apps.customnbconvertapp import aliases as base_aliases
@@ -17,7 +17,8 @@ import logging
 aliases = {}
 aliases.update(base_aliases)
 aliases.update({
-    'regexp': 'FindStudentID.regexp'
+    'ip': 'FormgradeApp.ip',
+    'port': 'FormgradeApp.port'
 })
 
 flags = {}
@@ -25,6 +26,11 @@ flags.update(base_flags)
 flags.update({
 })
 
+examples = """
+nbgrader formgrade .
+nbgrader formgrade autograded/
+nbgrader formgrade --ip=0.0.0.0 --port=80
+"""
 
 class FormgradeApp(BaseIPythonApplication):
 
@@ -32,7 +38,8 @@ class FormgradeApp(BaseIPythonApplication):
     description = Unicode(u'Grade a notebook using an HTML form')
     aliases = aliases
     flags = flags
-    ipython_dir = "/tmp"
+    examples = examples
+    ipython_dir = "/tmp/nbgrader"
 
     db_name = Unicode("gradebook", config=True, help="Database name")
     db_ip = Unicode("localhost", config=True, help="IP address for the database")
@@ -41,6 +48,15 @@ class FormgradeApp(BaseIPythonApplication):
     ip = Unicode("localhost", config=True, help="IP address for the server")
     port = Integer(5000, config=True, help="Port for the server")
     base_directory = Unicode('.', config=True, help="Root server directory")
+
+    # The classes added here determine how configuration will be documented
+    classes = List()
+
+    def _classes_default(self):
+        """This has to be in a method, for TerminalIPythonApp to be available."""
+        return [
+            HTMLExporter
+        ]
 
     def _log_level_default(self):
         return logging.INFO
@@ -86,7 +102,7 @@ class FormgradeApp(BaseIPythonApplication):
         super(FormgradeApp, self).start()
 
         app.notebook_dir = self.base_directory
-        app.exporter = exporter_map['html'](config=self.config)
+        app.exporter = HTMLExporter(config=self.config)
 
         url = "http://{:s}:{:d}/".format(self.ip, self.port)
         self.log.info("Form grader running at {}".format(url))
