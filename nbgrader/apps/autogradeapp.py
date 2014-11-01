@@ -1,6 +1,5 @@
 from IPython.config.loader import Config
 from IPython.utils.traitlets import Unicode, List
-from IPython.nbconvert.writers import FilesWriter
 from IPython.nbconvert.preprocessors import ClearOutputPreprocessor, ExecutePreprocessor
 from nbgrader.apps.customnbconvertapp import CustomNbConvertApp
 from nbgrader.apps.customnbconvertapp import aliases as base_aliases
@@ -13,8 +12,6 @@ aliases.update({
     'student-id': 'AutogradeApp.student_id',
     'regexp': 'FindStudentID.regexp',
     'assignment': 'SaveAutoGrades.assignment_id',
-    'build-directory': 'FilesWriter.build_directory',
-    'output': 'NbConvertApp.output_base'
 })
 
 flags = {}
@@ -48,8 +45,7 @@ class AutogradeApp(CustomNbConvertApp):
             FindStudentID,
             ClearOutputPreprocessor,
             ExecutePreprocessor,
-            SaveAutoGrades,
-            FilesWriter
+            SaveAutoGrades
         ])
         return classes
 
