@@ -56,14 +56,20 @@ def view_assignment(assignment_id):
 
 @app.route("/assignments/<assignment_id>/<nb>")
 def view_notebook(assignment_id, nb):
-    filename = os.path.join(app.notebook_dir, nb)
-    if not os.path.exists(filename):
-        abort(404)
-
     assignment = app.gradebook.find_assignment(assignment_id=assignment_id)
     notebook = app.gradebook.find_notebook(
         assignment=assignment,
         notebook_id=os.path.splitext(nb)[0])
+    student = app.gradebook.find_student(_id=notebook.student)
+
+    filename = os.path.join(app.notebook_dir, app.notebook_dir_format.format(
+        assignment_id=assignment.assignment_id,
+        notebook_id=notebook.notebook_id,
+        student_id=student.student_id))
+
+    if not os.path.exists(filename):
+        print filename
+        abort(404)
 
     resources = {
         'assignment_id': assignment.assignment_id,
