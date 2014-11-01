@@ -34,6 +34,7 @@ class FormgradeApp(BaseIPythonApplication):
     flags = flags
     ipython_dir = "/tmp"
 
+    db_name = Unicode("gradebook", config=True, help="Database name")
     db_ip = Unicode("localhost", config=True, help="IP address for the database")
     db_port = Integer(27017, config=True, help="Port for the database")
 
@@ -91,5 +92,5 @@ class FormgradeApp(BaseIPythonApplication):
         self.log.info("Form grader running at {}".format(url))
         self.log.info("Use Control-C to stop this server")
 
-        app.gradebook = Gradebook(ip=self.db_ip, port=self.db_port)
+        app.gradebook = Gradebook(self.db_name, ip=self.db_ip, port=self.db_port)
         app.run(host=self.ip, port=self.port, debug=True, use_reloader=False)

@@ -85,9 +85,9 @@ class Gradebook(object):
         'assignments': Assignment
     }
 
-    def __init__(self, ip="localhost", port=27017):
+    def __init__(self, name, ip="localhost", port=27017):
         self.client = MongoClient(ip, port)
-        self.db = self.client['gradebook']
+        self.db = self.client[name]
 
     def _add(self, collection, document):
         self.db[collection].insert(document.to_dict())

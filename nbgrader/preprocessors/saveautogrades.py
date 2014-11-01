@@ -7,13 +7,15 @@ from nbgrader.api import Gradebook
 class SaveAutoGrades(Preprocessor):
     """Preprocessor for saving out the autograder grades into a MongoDB"""
 
-    ip = Unicode("localhost", config=True, help="IP address for the database")
-    port = Integer(27017, config=True, help="Port for the database")
+    db_name = Unicode("gradebook", config=True, help="Database name")
+    db_ip = Unicode("localhost", config=True, help="IP address for the database")
+    db_port = Integer(27017, config=True, help="Port for the database")
+
     assignment_id = Unicode(u'assignment', config=True, help="Assignment ID")
 
     def preprocess(self, nb, resources):
         # connect to the mongo database
-        self.gradebook = Gradebook()
+        self.gradebook = Gradebook(self.db_name, ip=self.db_ip, port=self.db_port)
         self.student = self.gradebook.find_student(
             student_id=resources['nbgrader']['student_id'])
         self.assignment = self.gradebook.find_assignment(
