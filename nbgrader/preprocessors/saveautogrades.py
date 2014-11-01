@@ -31,12 +31,6 @@ class SaveAutoGrades(Preprocessor):
         # process the cells
         nb, resources = super(SaveAutoGrades, self).preprocess(nb, resources)
 
-        # save the notebook id
-        if 'nbgrader' not in nb.metadata:
-            nb.metadata['nbgrader'] = {}
-        nb.metadata['nbgrader']['notebook_id'] = self.notebook.notebook_id
-        nb.metadata['nbgrader']['notebook_uuid'] = self.notebook._id
-
         return nb, resources
 
     def _add_comment(self, cell, resources):

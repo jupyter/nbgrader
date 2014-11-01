@@ -74,9 +74,9 @@ $(document).ready(function () {
     $.get("/api/notebook/" + nb_uuid + "/next", function (data) {
         data = JSON.parse(data);
         if (data === null) {
-            $("li.next-notebook a").attr("href", "#");
-            $("li.next-notebook").addClass("disabled");
+            $("li.next-notebook a").hide();
         } else {
+            $("li.next-notebook a").html("Next &rarr;");
             $("li.next-notebook a").attr("href", data.path);
             if ($("li.next-notebook").hasClass("disabled")) {
                 $("li.next-notebook").removeClass("disabled");
@@ -87,9 +87,9 @@ $(document).ready(function () {
     $.get("/api/notebook/" + nb_uuid + "/prev", function (data) {
         data = JSON.parse(data);
         if (data === null) {
-            $("li.prev-notebook a").attr("href", "#");
-            $("li.prev-notebook").addClass("disabled");
+            $("li.prev-notebook").hide();
         } else {
+            $("li.prev-notebook a").html("&larr; Prev");
             $("li.prev-notebook a").attr("href", data.path);
             if ($("li.prev-notebook").hasClass("disabled")) {
                 $("li.prev-notebook").removeClass("disabled");

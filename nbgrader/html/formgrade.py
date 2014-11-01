@@ -40,7 +40,7 @@ def home():
     return render_template("assignment_list.tpl")
 
 
-@app.route("/assignments")
+@app.route("/assignments/")
 def view_assignments():
     return redirect('/')
 
@@ -54,13 +54,24 @@ def view_assignment(assignment_id):
         assignment_uuid=assignment._id)
 
 
-@app.route("/assignments/<assignment_id>/<notebook_id>")
-def view_notebook(assignment_id, notebook_id):
-    filename = os.path.join(app.notebook_dir, notebook_id)
+@app.route("/assignments/<assignment_id>/<nb>")
+def view_notebook(assignment_id, nb):
+    filename = os.path.join(app.notebook_dir, nb)
     if not os.path.exists(filename):
         abort(404)
 
-    output, resources = app.exporter.from_filename(filename, resources={})
+    assignment = app.gradebook.find_assignment(assignment_id=assignment_id)
+    notebook = app.gradebook.find_notebook(
+        assignment=assignment,
+        notebook_id=os.path.splitext(nb)[0])
+
+    resources = {
+        'assignment_id': assignment.assignment_id,
+        'notebook_id': notebook.notebook_id,
+        'notebook_uuid': notebook._id
+    }
+
+    output, resources = app.exporter.from_filename(filename, resources=resources)
     return output
 
 

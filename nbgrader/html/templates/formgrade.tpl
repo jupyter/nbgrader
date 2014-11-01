@@ -8,10 +8,10 @@
 <head>
 
 <meta charset="utf-8" />
-<title>{{ nb.metadata.nbgrader.notebook_id }}</title>
+<title>{{ resources.notebook_id }}</title>
 
 <script>
-nb_uuid = "{{ nb.metadata.nbgrader.notebook_uuid }}";
+nb_uuid = "{{ resources.notebook_uuid }}";
 </script>
 
 <script src="/static/lib/jquery-2.1.1.min.js"></script>
@@ -70,21 +70,29 @@ div.prompt {
 <body>
   <div tabindex="-1" id="notebook" class="border-box-sizing">
     <div class="container" id="notebook-container">
+      <ol class="breadcrumb">
+        <li><a href="..">Assignments</a></li>
+        <li><a href=".">{{ resources.assignment_id }}</a></li>
+        <li class="active">{{ resources.notebook_id }}</li>
+      </ol>
       <nav>
         <ul class="pager">
-          <li class="prev-notebook"><a href="#">&larr; Prev</a></li>
-          <li><a href=".">Home</a></li>
-          <li class="next-notebook"><a href="#">Next &rarr;</a></li>
+          <li class="prev-notebook"><a href="#"></a></li>
+          <li class="next-notebook"><a href="#"></a></li>
         </ul>
       </nav>
 {{ super() }}
       <nav>
         <ul class="pager">
-          <li class="prev-notebook"><a href="#">&larr; Prev</a></li>
-          <li><a href=".">Home</a></li>
-          <li class="next-notebook"><a href="#">Next &rarr;</a></li>
+          <li class="prev-notebook"><a href="#"></a></li>
+          <li class="next-notebook"><a href="#"></a></li>
         </ul>
       </nav>
+      <ol class="breadcrumb">
+        <li><a href="..">Assignments</a></li>
+        <li><a href=".">{{ resources.assignment_id }}</a></li>
+        <li class="active">{{ resources.notebook_id }}</li>
+      </ol>
     </div>
   </div>
 </body>

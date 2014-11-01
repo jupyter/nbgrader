@@ -20,6 +20,10 @@ assignment_uuid = "{{ assignment_uuid }}";
 <body>
   <div class="container">
     <h1>{{ assignment_id }}</h1>
+    <ol class="breadcrumb">
+      <li><a href="..">Assignments</a></li>
+      <li class="active">{{ assignment_id }}</li>
+    </ol>
     <div class="panel panel-default">
       <table class="table">
         <thead><tr>
