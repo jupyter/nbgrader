@@ -102,7 +102,9 @@ class Gradebook(object):
 
     def _update(self, collection, document):
         _id = {"_id": document._id}
-        self.db[collection].update(_id, {"$set": document.to_dict()})
+        doc = document.to_dict()
+        del doc['_id']
+        self.db[collection].update(_id, {"$set": doc})
 
     def _find(self, collection, query):
         new_query = {}
