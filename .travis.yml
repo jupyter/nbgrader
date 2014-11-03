@@ -16,7 +16,7 @@ install:
   - sudo apt-get install pandoc casperjs libzmq3-dev
   # pin tornado < 4 for js tests while phantom is on super old webkit
   - if [[ $GROUP == 'js' ]]; then pip install 'tornado<4'; fi
-  - cd ipython && git checkout 9679128611cae27898e4752811091216792c3a6d && pip install -e ".[notebook]" && cd ..
+  - cd ipython && git checkout 9679128611cae27898e4752811091216792c3a6d && git submodule update && pip install -e ".[notebook]" && cd ..
   - pip install -r requirements.txt
   - pip install nose requests!=2.4.2
   - if [[ $GROUP == 'js' ]]; then cp nbextensions/* $(ipython locate)/nbextensions/; fi
