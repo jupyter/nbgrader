@@ -32,9 +32,15 @@
   {%- else -%}
   <tr>
   {%- endif -%}
-    <td><a href="/assignments/{{ assignment.assignment_id }}/{{ notebook_id }}/{{ submission.student.student_id }}">
-      {{ submission.student.last_name }}, {{ submission.student.first_name }}
-    </a></td>
+    <td>
+      {%- if submission.score != None -%}
+      <a href="/assignments/{{ assignment.assignment_id }}/{{ notebook_id }}/{{ submission.student.student_id }}">
+        {{ submission.student.last_name }}, {{ submission.student.first_name }}
+      </a>
+      {%- else -%}
+        {{ submission.student.last_name }}, {{ submission.student.first_name }}
+      {%- endif -%}
+    </td>
     <td class="center">{{ submission.student.student_id }}</td>
     <td class="center">
       {%- if submission.score == None -%}
