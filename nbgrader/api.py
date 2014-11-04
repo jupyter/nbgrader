@@ -462,6 +462,9 @@ class Gradebook(object):
 
     def assignment_score(self, assignment, student):
         notebooks = self.find_notebooks(assignment=assignment, student=student)
+        if len(notebooks) == 0:
+            return None
+
         score = {"score": 0, "max_score": 0, "needs_manual_grade": False}
         for nb in notebooks:
             nb_score = self.notebook_score(nb)
@@ -490,6 +493,7 @@ class Gradebook(object):
 
     def avg_assignment_score(self, assignment):
         scores = [self.assignment_score(assignment, student) for student in self.students]
+        scores = [s for s in scores if s is not None]
         avg_score = sum([s["score"] for s in scores]) / float(len(scores))
         max_score = set([s["max_score"] for s in scores])
         assert len(max_score) == 1

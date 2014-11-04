@@ -38,13 +38,28 @@ def view_assignment(assignment_id):
 @app.route("/assignments/<assignment_id>/<notebook_id>/")
 def view_assignment_notebook(assignment_id, notebook_id):
     assignment = app.gradebook.find_assignment(assignment_id=assignment_id)
-    submissions = app.gradebook.get_assignment_notebooks(assignment)[notebook_id]
-    submissions = [x.to_dict() for x in submissions]
-    for submission in submissions:
-        score = app.gradebook.notebook_score(submission["_id"])
-        submission.update(score)
-        student = app.gradebook.find_student(_id=submission["student"])
+    students = app.gradebook.students
+    submissions = []
+    for student in students:
+        try:
+            submission = app.gradebook.find_notebook(
+                assignment=assignment,
+                student=student,
+                notebook_id=notebook_id)
+        except ValueError:
+            submission = {
+                "assignment": assignment._id,
+                "notebook_id": notebook_id,
+                "score": None,
+                "max_score": None
+            }
+        else:
+            submission = submission.to_dict()
+            score = app.gradebook.notebook_score(submission["_id"])
+            submission.update(score)
+
         submission["student"] = student.to_dict()
+        submissions.append(submission)
 
     return render_template(
         "notebook_submissions.tpl",
