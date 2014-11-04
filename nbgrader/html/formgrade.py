@@ -5,31 +5,6 @@ from flask import Flask, request, abort, redirect, url_for, render_template
 app = Flask(__name__, static_url_path='/static')
 
 
-def get_notebook_score(_id):
-    score = 0
-    max_score = 0
-    needs_manual_grade = False
-
-    notebook = app.gradebook.find_notebook(_id=_id)
-    grades = app.gradebook.find_grades(notebook=notebook)
-    for grade in grades:
-        if grade.score is not None:
-            score += grade.score
-        elif grade.autoscore is not None:
-            score += grade.autoscore
-        else:
-            needs_manual_grade = True
-
-        if grade.max_score is not None:
-            max_score += grade.max_score
-
-    return {
-        "score": score,
-        "max_score": max_score,
-        "needs_manual_grade": needs_manual_grade
-    }
-
-
 @app.route("/fonts/<filename>")
 def fonts(filename):
     return redirect(url_for('static', filename=os.path.join("fonts", filename)))
@@ -37,30 +12,55 @@ def fonts(filename):
 
 @app.route("/")
 def home():
-    return render_template("assignment_list.tpl")
+    return redirect('/assignments/')
 
 
 @app.route("/assignments/")
 def view_assignments():
-    return redirect('/')
+    assignments = [x.to_dict() for x in app.gradebook.assignments]
+    for assignment in assignments:
+        all_notebooks = app.gradebook.find_notebooks(assignment=assignment["_id"])
+        assignment['num_submissions'] = len(set([x.student for x in all_notebooks]))
+        assignment.update(app.gradebook.avg_assignment_score(assignment["_id"]))
+    return render_template("assignments.tpl", assignments=assignments)
 
 
 @app.route("/assignments/<assignment_id>/")
 def view_assignment(assignment_id):
     assignment = app.gradebook.find_assignment(assignment_id=assignment_id)
+    notebooks = app.gradebook.avg_notebook_scores(assignment)
     return render_template(
-        "notebook_list.tpl",
-        assignment_id=assignment.assignment_id,
-        assignment_uuid=assignment._id)
+        "assignment_notebooks.tpl",
+        assignment=assignment,
+        notebooks=notebooks)
 
 
-@app.route("/assignments/<assignment_id>/<nb>")
-def view_notebook(assignment_id, nb):
+@app.route("/assignments/<assignment_id>/<notebook_id>/")
+def view_assignment_notebook(assignment_id, notebook_id):
     assignment = app.gradebook.find_assignment(assignment_id=assignment_id)
+    submissions = app.gradebook.get_assignment_notebooks(assignment)[notebook_id]
+    submissions = [x.to_dict() for x in submissions]
+    for submission in submissions:
+        score = app.gradebook.notebook_score(submission["_id"])
+        submission.update(score)
+        student = app.gradebook.find_student(_id=submission["student"])
+        submission["student"] = student.to_dict()
+
+    return render_template(
+        "notebook_submissions.tpl",
+        notebook_id=notebook_id,
+        assignment=assignment,
+        submissions=submissions)
+
+
+@app.route("/assignments/<assignment_id>/<notebook_id>/<student_id>")
+def view_submission(assignment_id, notebook_id, student_id):
+    assignment = app.gradebook.find_assignment(assignment_id=assignment_id)
+    student = app.gradebook.find_student(student_id=student_id)
     notebook = app.gradebook.find_notebook(
         assignment=assignment,
-        notebook_id=os.path.splitext(nb)[0])
-    student = app.gradebook.find_student(_id=notebook.student)
+        student=student,
+        notebook_id=notebook_id)
 
     filename = os.path.join(app.notebook_dir, app.notebook_dir_format.format(
         assignment_id=assignment.assignment_id,
@@ -71,57 +71,28 @@ def view_notebook(assignment_id, nb):
         print filename
         abort(404)
 
+    students = [s.student_id for s in app.gradebook.students]
+    ix = students.index(student_id)
+    if ix == 0:
+        prev_student = None
+    else:
+        prev_student = students[ix - 1]
+    if ix == (len(students) - 1):
+        next_student = None
+    else:
+        next_student = students[ix + 1]
+
     resources = {
         'assignment_id': assignment.assignment_id,
+        'student_id': student.student_id,
         'notebook_id': notebook.notebook_id,
-        'notebook_uuid': notebook._id
+        'notebook_uuid': notebook._id,
+        'next': next_student,
+        'prev': prev_student
     }
 
     output, resources = app.exporter.from_filename(filename, resources=resources)
     return output
-
-
-@app.route("/api/assignments")
-def get_assignments():
-    assignments = [x.to_dict() for x in app.gradebook.assignments]
-    return json.dumps(assignments)
-
-
-@app.route("/api/assignment/<_id>/notebooks")
-def get_notebooks(_id):
-    assignment = app.gradebook.find_assignment(_id=_id)
-    notebooks = [x.to_dict() for x in app.gradebook.find_notebooks(assignment=assignment)]
-    for nb in notebooks:
-        nb.update(get_notebook_score(nb["_id"]))
-        student = app.gradebook.find_student(_id=nb["student"])
-        nb["student_name"] = "{last_name}, {first_name}".format(**student.to_dict())
-        nb["student_id"] = student.student_id
-        nb["path"] = "/assignments/{}/{}.ipynb".format(assignment.assignment_id, nb["notebook_id"])
-    return json.dumps(notebooks)
-
-
-@app.route("/api/notebook/<_id>/next")
-def next_notebook(_id):
-    ids = [x._id for x in app.gradebook.notebooks]
-    index = ids.index(_id)
-    if index == (len(ids) - 1):
-        return json.dumps(None)
-    nb = app.gradebook.find_notebook(_id=ids[index + 1]).to_dict()
-    assignment = app.gradebook.find_assignment(_id=nb['assignment'])
-    nb["path"] = "/assignments/{}/{}.ipynb".format(assignment.assignment_id, nb["notebook_id"])
-    return json.dumps(nb)
-
-
-@app.route("/api/notebook/<_id>/prev")
-def prev_notebook(_id):
-    ids = [x._id for x in app.gradebook.notebooks]
-    index = ids.index(_id)
-    if index == 0:
-        return json.dumps(None)
-    nb = app.gradebook.find_notebook(_id=ids[index - 1]).to_dict()
-    assignment = app.gradebook.find_assignment(_id=nb['assignment'])
-    nb["path"] = "/assignments/{}/{}.ipynb".format(assignment.assignment_id, nb["notebook_id"])
-    return json.dumps(nb)
 
 
 @app.route("/api/notebook/<_id>/grades")

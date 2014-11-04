@@ -10,14 +10,15 @@
 <meta charset="utf-8" />
 <title>{{ resources.notebook_id }}</title>
 
-<script>
-nb_uuid = "{{ resources.notebook_uuid }}";
-</script>
-
 <script src="/static/lib/jquery-2.1.1.min.js"></script>
 <script src="/static/lib/underscore-min.js"></script>
 <script src="/static/lib/backbone-min.js"></script>
 <script src="/static/lib/bootstrap.min.js"></script>
+
+<script type="text/javascript">
+var nb_uuid = "{{ resources.notebook_uuid }}";
+</script>
+
 <script src="/static/js/formgrade.js"></script>
 
 <link rel="stylesheet" href="/static/css/bootstrap.min.css" />
@@ -32,7 +33,7 @@ nb_uuid = "{{ resources.notebook_uuid }}";
 /* Overrides of notebook CSS for static HTML export */
 body {
   overflow: visible;
-  padding: 8px;
+  font-size: 14px;
 }
 
 div#notebook {
@@ -68,33 +69,51 @@ div.prompt {
 
 {% block body %}
 <body>
+  <ol class="breadcrumb">
+    <li><a href="/assignments">Assignments</a></li>
+    <li><a href="/assignments/{{ resources.assignment_id }}">{{ resources.assignment_id }}</a></li>
+    <li><a href="/assignments/{{ resources.assignment_id }}/{{ resources.notebook_id }}">{{ resources.notebook_id }}</a></li>
+    <li class="active">{{ resources.student_id }}</li>
+  </ol>
   <div tabindex="-1" id="notebook" class="border-box-sizing">
     <div class="container" id="notebook-container">
-      <ol class="breadcrumb">
-        <li><a href="..">Assignments</a></li>
-        <li><a href=".">{{ resources.assignment_id }}</a></li>
-        <li class="active">{{ resources.notebook_id }}</li>
-      </ol>
       <nav>
         <ul class="pager">
-          <li class="prev-notebook"><a href="#"></a></li>
-          <li class="next-notebook"><a href="#"></a></li>
+          {%- if resources.prev -%}
+          <li class="prev-notebook"><a href="/assignments/{{ resources.assignment_id }}/{{ resources.notebook_id }}/{{ resources.prev }}">&larr; Prev</a></li>
+          {%- else -%}
+          <li class="prev-notebook disabled"><a>&larr; Prev</a></li>
+          {%- endif -%}
+          {%- if resources.next -%}
+          <li class="next-notebook"><a href="/assignments/{{ resources.assignment_id }}/{{ resources.notebook_id }}/{{ resources.next }}">Next &rarr;</a></li>
+          {%- else -%}
+          <li class="next-notebook disabled"><a>Next &rarr;</a></li>
+          {%- endif -%}
         </ul>
       </nav>
 {{ super() }}
       <nav>
         <ul class="pager">
-          <li class="prev-notebook"><a href="#"></a></li>
-          <li class="next-notebook"><a href="#"></a></li>
+          {%- if resources.prev -%}
+          <li class="prev-notebook"><a href="/assignments/{{ resources.assignment_id }}/{{ resources.notebook_id }}/{{ resources.prev }}">&larr; Prev</a></li>
+          {%- else -%}
+          <li class="prev-notebook disabled"><a>&larr; Prev</a></li>
+          {%- endif -%}
+          {%- if resources.next -%}
+          <li class="next-notebook"><a href="/assignments/{{ resources.assignment_id }}/{{ resources.notebook_id }}/{{ resources.next }}">Next &rarr;</a></li>
+          {%- else -%}
+          <li class="next-notebook disabled"><a>Next &rarr;</a></li>
+          {%- endif -%}
         </ul>
       </nav>
-      <ol class="breadcrumb">
-        <li><a href="..">Assignments</a></li>
-        <li><a href=".">{{ resources.assignment_id }}</a></li>
-        <li class="active">{{ resources.notebook_id }}</li>
-      </ol>
     </div>
   </div>
+  <ol class="breadcrumb" style="margin-bottom: 0px;">
+    <li><a href="/assignments">Assignments</a></li>
+    <li><a href="/assignments/{{ resources.assignment_id }}">{{ resources.assignment_id }}</a></li>
+    <li><a href="/assignments/{{ resources.assignment_id }}/{{ resources.notebook_id }}">{{ resources.notebook_id }}</a></li>
+    <li class="active">{{ resources.student_id }}</li>
+  </ol>
 </body>
 {%- endblock body %}
 
