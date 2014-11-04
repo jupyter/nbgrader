@@ -7,7 +7,6 @@
   <script src="/static/lib/backbone-min.js"></script>
   <script src="/static/lib/bootstrap.min.js"></script>
 
-  <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
   <link rel="stylesheet" href="/static/css/bootstrap.min.css">
   <link rel="stylesheet" href="/static/css/formgrade.css">
 </head>
