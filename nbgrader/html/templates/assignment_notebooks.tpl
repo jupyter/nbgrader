@@ -5,6 +5,14 @@
 <li class="active">{{ assignment.assignment_id }}</li>
 {%- endblock -%}
 
+{%- block body -%}
+<div class="panel-body">
+  The following table lists the notebooks that are associated with the
+  assignment "{{ assignment.assignment_id }}". Click on a notebook
+  name to see the list of student submissions for that notebook.
+</div>
+{%- endblock -%}
+
 {%- block table -%}
 <thead>
   <tr>

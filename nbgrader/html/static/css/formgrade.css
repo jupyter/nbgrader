@@ -1,3 +1,8 @@
+.breadcrumb {
+    margin-bottom: 0px;
+    padding: 0px;
+}
+
 td.center, th.center {
     text-align: center;
 }

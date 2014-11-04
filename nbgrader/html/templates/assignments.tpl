@@ -4,6 +4,14 @@
 <li class="active">Assignments</li>
 {%- endblock -%}
 
+{%- block body -%}
+<div class="panel-body">
+  The following table lists all of the assignments that have been
+  added to the gradebook. Click on the name of an assignment to see
+  the notebooks that are associated with that assignment.
+</div>
+{%- endblock -%}
+
 {%- block table -%}
 <thead>
   <tr>
