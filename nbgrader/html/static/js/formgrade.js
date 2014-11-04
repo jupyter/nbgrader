@@ -85,4 +85,7 @@ $(document).ready(function () {
 
     comments = new Comments();
     comments.fetch();
+
+    $("li.previous a").tooltip();
+    $("li.next a").tooltip();
 });

@@ -86,20 +86,24 @@ def view_submission(assignment_id, notebook_id, student_id):
         print filename
         abort(404)
 
-    students = [s.student_id for s in app.gradebook.students]
-    ix = students.index(student_id)
+    students = []
+    for submission in app.gradebook.find_notebooks(assignment=assignment, notebook_id=notebook_id):
+        s = app.gradebook.find_student(_id=submission.student)
+        students.append(s._id)
+
+    ix = students.index(student._id)
     if ix == 0:
         prev_student = None
     else:
-        prev_student = students[ix - 1]
+        prev_student = app.gradebook.find_student(_id=students[ix - 1]).to_dict()
     if ix == (len(students) - 1):
         next_student = None
     else:
-        next_student = students[ix + 1]
+        next_student = app.gradebook.find_student(_id=students[ix + 1]).to_dict()
 
     resources = {
         'assignment_id': assignment.assignment_id,
-        'student_id': student.student_id,
+        'student': student.to_dict(),
         'notebook_id': notebook.notebook_id,
         'notebook_uuid': notebook._id,
         'next': next_student,
