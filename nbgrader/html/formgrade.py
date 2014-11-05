@@ -1,8 +1,13 @@
 import json
 import os
 
-from flask import Flask, request, abort, redirect, url_for, render_template
-app = Flask(__name__, static_url_path='/static')
+from flask import Flask, request, abort, redirect, url_for, render_template, send_from_directory
+app = Flask(__name__, static_url_path='')
+
+
+@app.route("/static/<path:filename>")
+def static_proxy(filename):
+    return send_from_directory(os.path.join(app.root_path, 'static'), filename)
 
 
 @app.route("/fonts/<filename>")
@@ -27,7 +32,11 @@ def view_assignments():
 
 @app.route("/assignments/<assignment_id>/")
 def view_assignment(assignment_id):
-    assignment = app.gradebook.find_assignment(assignment_id=assignment_id)
+    try:
+        assignment = app.gradebook.find_assignment(assignment_id=assignment_id)
+    except ValueError:
+        abort(404)
+
     notebooks = app.gradebook.avg_notebook_scores(assignment)
     return render_template(
         "assignment_notebooks.tpl",
@@ -37,7 +46,11 @@ def view_assignment(assignment_id):
 
 @app.route("/assignments/<assignment_id>/<notebook_id>/")
 def view_assignment_notebook(assignment_id, notebook_id):
-    assignment = app.gradebook.find_assignment(assignment_id=assignment_id)
+    try:
+        assignment = app.gradebook.find_assignment(assignment_id=assignment_id)
+    except ValueError:
+        abort(404)
+
     students = app.gradebook.students
     submissions = []
     for student in students:
@@ -68,14 +81,38 @@ def view_assignment_notebook(assignment_id, notebook_id):
         submissions=submissions)
 
 
-@app.route("/assignments/<assignment_id>/<notebook_id>/<student_id>")
+@app.route("/assignments/<assignment_id>/<notebook_id>/<student_id>/<path:path>")
+def view_submission_files(assignment_id, notebook_id, student_id, path):
+    try:
+        assignment = app.gradebook.find_assignment(assignment_id=assignment_id)
+        student = app.gradebook.find_student(student_id=student_id)
+        notebook = app.gradebook.find_notebook(
+            assignment=assignment,
+            student=student,
+            notebook_id=notebook_id)
+    except ValueError:
+        abort(404)
+
+    filename = os.path.join(app.notebook_dir, app.notebook_dir_format.format(
+        assignment_id=assignment.assignment_id,
+        notebook_id=notebook.notebook_id,
+        student_id=student.student_id))
+
+    dirname = os.path.split(filename)[0]
+    return send_from_directory(dirname, path)
+
+
+@app.route("/assignments/<assignment_id>/<notebook_id>/<student_id>/")
 def view_submission(assignment_id, notebook_id, student_id):
-    assignment = app.gradebook.find_assignment(assignment_id=assignment_id)
-    student = app.gradebook.find_student(student_id=student_id)
-    notebook = app.gradebook.find_notebook(
-        assignment=assignment,
-        student=student,
-        notebook_id=notebook_id)
+    try:
+        assignment = app.gradebook.find_assignment(assignment_id=assignment_id)
+        student = app.gradebook.find_student(student_id=student_id)
+        notebook = app.gradebook.find_notebook(
+            assignment=assignment,
+            student=student,
+            notebook_id=notebook_id)
+    except ValueError:
+        abort(404)
 
     filename = os.path.join(app.notebook_dir, app.notebook_dir_format.format(
         assignment_id=assignment.assignment_id,
@@ -116,21 +153,30 @@ def view_submission(assignment_id, notebook_id, student_id):
 
 @app.route("/api/notebook/<_id>/grades")
 def get_all_grades(_id):
-    notebook = app.gradebook.find_notebook(_id=_id)
+    try:
+        notebook = app.gradebook.find_notebook(_id=_id)
+    except ValueError:
+        abort(404)
     grades = app.gradebook.find_grades(notebook=notebook)
     return json.dumps([x.to_dict() for x in grades])
 
 
 @app.route("/api/notebook/<_id>/comments")
 def get_all_comments(_id):
-    notebook = app.gradebook.find_notebook(_id=_id)
+    try:
+        notebook = app.gradebook.find_notebook(_id=_id)
+    except ValueError:
+        abort(404)
     comments = app.gradebook.find_comments(notebook=notebook)
     return json.dumps([x.to_dict() for x in comments])
 
 
 @app.route("/api/grade/<_id>", methods=["GET", "PUT"])
 def get_grade(_id):
-    grade = app.gradebook.find_grade(_id=_id)
+    try:
+        grade = app.gradebook.find_grade(_id=_id)
+    except ValueError:
+        abort(404)
     if request.method == "PUT":
         grade.score = request.json.get("score", None)
         app.gradebook.update_grade(grade)
@@ -139,7 +185,10 @@ def get_grade(_id):
 
 @app.route("/api/comment/<_id>", methods=["GET", "PUT"])
 def get_comment(_id):
-    comment = app.gradebook.find_comment(_id=_id)
+    try:
+        comment = app.gradebook.find_comment(_id=_id)
+    except ValueError:
+        abort(404)
     if request.method == "PUT":
         comment.comment = request.json.get("comment", None)
         app.gradebook.update_comment(comment)
