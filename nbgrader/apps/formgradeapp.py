@@ -2,6 +2,8 @@ from IPython.config.loader import Config
 from IPython.utils.traitlets import Unicode, Integer, List
 
 from IPython.core.application import BaseIPythonApplication
+from IPython.core.application import base_aliases, base_flags
+from IPython.core.profiledir import ProfileDir
 from IPython.nbconvert.exporters import HTMLExporter
 from IPython.config.application import catch_config_error
 
@@ -11,13 +13,15 @@ from nbgrader.api import Gradebook
 import os
 import logging
 
-
-aliases = {
+aliases = {}
+aliases.update(base_aliases)
+aliases.update({
     'ip': 'FormgradeApp.ip',
     'port': 'FormgradeApp.port'
-}
+})
 
 flags = {}
+flags.update(base_flags)
 
 examples = """
 nbgrader formgrade .
@@ -49,7 +53,8 @@ class FormgradeApp(BaseIPythonApplication):
     def _classes_default(self):
         """This has to be in a method, for TerminalIPythonApp to be available."""
         return [
-            HTMLExporter
+            HTMLExporter,
+            ProfileDir
         ]
 
     def _log_level_default(self):

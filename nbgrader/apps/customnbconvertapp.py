@@ -8,17 +8,25 @@ from IPython.nbconvert.exporters.export import exporter_map
 from IPython.nbconvert.utils.exceptions import ConversionException
 from IPython.nbconvert.exporters.exporter import ResourcesDict
 from IPython.nbconvert.writers import FilesWriter
+from IPython.core.profiledir import ProfileDir
+from IPython.core.application import base_aliases, base_flags
 
-aliases = {
+
+aliases = {}
+aliases.update(base_aliases)
+aliases.update({
     'output': 'NbConvertApp.output_base',
     'output-dir': 'CustomNbConvertApp.output_dir'
-}
-flags = {
+})
+
+flags = {}
+flags.update(base_flags)
+flags.update({
     'recursive': (
         {'CustomNbConvertApp': {'recursive': True}},
         "Recursively find notebook files."
     )
-}
+})
 
 class CustomNbConvertApp(NbConvertApp):
 
@@ -39,7 +47,7 @@ class CustomNbConvertApp(NbConvertApp):
 
     def _classes_default(self):
         """This has to be in a method, for TerminalIPythonApp to be available."""
-        return [FilesWriter]
+        return [FilesWriter, ProfileDir]
 
     @catch_config_error
     def initialize(self, argv=None):
@@ -113,8 +121,10 @@ class CustomNbConvertApp(NbConvertApp):
 
         for notebook_path, notebook_filename in self.notebooks:
             os.chdir(cwd)
-            self.log.info("Changing to directory: %s", notebook_path)
-            os.chdir(notebook_path)
+            if notebook_path != '':
+                self.log.info("Changing to directory: %s", notebook_path)
+                os.chdir(notebook_path)
+
             self.log.info("Converting notebook %s to %s", notebook_filename, self.export_format)
 
             # Get a unique key for the notebook and set it in the resources object.
@@ -145,7 +155,10 @@ class CustomNbConvertApp(NbConvertApp):
                 prefix = os.path.relpath(notebook_path, self.prefix)
                 self.writer.build_directory = os.path.join(self.output_dir, prefix)
             else:
-                self.writer.build_directory = self.output_dir
+                if self.output_dir == '':
+                    self.writer.build_directory = '.'
+                else:
+                    self.writer.build_director = self.output_dir
 
             # Try to export
             try:
