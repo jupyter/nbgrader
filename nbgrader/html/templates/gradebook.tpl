@@ -12,15 +12,32 @@
 </head>
 
 <body>
-  <div class="container">
-    <h2>nbgrader formgrade</h2>
-    <div class="panel panel-default">
-      <div class="panel-heading">
-        <ol class="breadcrumb">
-          {%- block breadcrumb -%}
-          {%- endblock -%}
-        </ol>
+  <nav class="navbar navbar-default" role="navigation">
+    <div class="container">
+      <div class="navbar-header">
+        <a class="navbar-brand" href="#">nbgrader formgrade</a>
       </div>
+      <div>
+        <ul class="nav navbar-nav navbar-left">
+          <ul class="breadcrumb list-inline">
+            {%- block breadcrumb -%}
+            {%- endblock -%}
+          </ul>
+        </ul>
+        <ul class="nav navbar-nav navbar-right">
+          <li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown">Change View <b class="caret"></b></a>
+            <ul class="dropdown-menu">
+              <li><a href="/assignments">Assignments</a></li>
+              <li><a href="/students">Students</a></li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <div class="container">
+    <div class="panel panel-default">
       {%- block body -%}
       <div class="panel-body"></div>
       {%- endblock -%}

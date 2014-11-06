@@ -6,3 +6,12 @@
 td.center, th.center {
     text-align: center;
 }
+
+.nav .breadcrumb {
+    margin-left: 1em;
+}
+
+.breadcrumb > li {
+    padding-top: 15px;
+    padding-bottom: 15px;
+}
