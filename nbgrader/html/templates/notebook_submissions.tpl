@@ -55,6 +55,7 @@
       {%- else -%}
       <span class="glyphicon glyphicon-ok"></span>
       {%- endif -%}
+    </td>
     <td class="center">
       {%- if submission.needs_manual_grade -%}
       <span class="glyphicon glyphicon-ok"></span>

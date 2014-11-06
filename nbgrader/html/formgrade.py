@@ -105,6 +105,28 @@ def view_assignment_notebook(assignment_id, notebook_id):
         assignment=assignment,
         submissions=submissions)
 
+@app.route("/students/<student_id>/<assignment_id>/")
+def view_student_assignment(student_id, assignment_id):
+    try:
+        student = app.gradebook.find_student(student_id=student_id)
+        assignment = app.gradebook.find_assignment(assignment_id=assignment_id)
+    except ValueError:
+        abort(404)
+
+    notebooks = app.gradebook.find_notebooks(student=student, assignment=assignment)
+    submissions = []
+    for notebook in notebooks:
+        submission = notebook.to_dict()
+        score = app.gradebook.notebook_score(submission["_id"])
+        submission.update(score)
+        submissions.append(submission)
+
+    return render_template(
+        "student_submissions.tpl",
+        assignment_id=assignment_id,
+        student=student.to_dict(),
+        submissions=submissions
+    )
 
 @app.route("/assignments/<assignment_id>/<notebook_id>/<student_id>/<path:path>")
 def view_submission_files(assignment_id, notebook_id, student_id, path):
