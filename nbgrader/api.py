@@ -502,3 +502,14 @@ class Gradebook(object):
             "max_score": list(max_score)[0]
         }
         return all_scores
+
+    def student_score(self, student):
+        scores = [self.assignment_score(assignment, student) for assignment in self.assignments]
+        scores = [s for s in scores if s is not None]
+        score = sum([s["score"] for s in scores])
+        max_score = sum([s["max_score"] for s in scores])
+        all_scores = {
+            "score": score,
+            "max_score": max_score
+        }
+        return all_scores

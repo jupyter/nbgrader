@@ -29,6 +29,12 @@ def view_assignments():
         assignment.update(app.gradebook.avg_assignment_score(assignment["_id"]))
     return render_template("assignments.tpl", assignments=assignments)
 
+@app.route("/students/")
+def view_students():
+    students = [x.to_dict() for x in app.gradebook.students]
+    for student in students:
+        student.update(app.gradebook.student_score(student["_id"]))
+    return render_template("students.tpl", students=students)
 
 @app.route("/assignments/<assignment_id>/")
 def view_assignment(assignment_id):
