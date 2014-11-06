@@ -1,7 +1,6 @@
 {%- extends 'basic.tpl' -%}
 {% from 'mathjax.tpl' import mathjax %}
 
-
 {%- block header -%}
 <!DOCTYPE html>
 <html>
@@ -29,107 +28,68 @@ var nb_uuid = "{{ resources.notebook_uuid }}";
     </style>
 {% endfor %}
 
-<style type="text/css">
-/* Overrides of notebook CSS for static HTML export */
-body {
-  overflow: visible;
-  font-size: 14px;
-}
-
-div#notebook {
-  overflow: visible;
-  border-top: none;
-}
-
-div#notebook-container {
-  width: 100%;
-}
-
-@media print {
-  div.cell {
-    display: block;
-    page-break-inside: avoid;
-  } 
-  div.output_wrapper { 
-    display: block;
-    page-break-inside: avoid; 
-  }
-  div.output { 
-    display: block;
-    page-break-inside: avoid; 
-  }
-}
-
-div.prompt {
-  min-width: 21ex;
-}
-
-.breadcrumb {
-  margin-bottom: 0px;
-  padding: 0px;
-}
-</style>
-
 <!-- Loading mathjax macro -->
 {{ mathjax() }}
+
+<link rel="stylesheet" href="/static/css/formgrade.css" />
 
 </head>
 {%- endblock header -%}
 
-{%- macro breadcrumb() -%}
-<ol class="breadcrumb" style="margin-bottom: 0px;">
-  <li><a href="/assignments">Assignments</a></li>
-  <li><a href="/assignments/{{ resources.assignment_id }}">{{ resources.assignment_id }}</a></li>
-  <li><a href="/assignments/{{ resources.assignment_id }}/{{ resources.notebook_id }}">{{ resources.notebook_id }}</a></li>
-  <li class="active">{{ resources.student.student_id }}</li>
-</ol>
-{%- endmacro -%}
-
-{%- macro pager() -%}
-<nav>
-  <ul class="pager">
-    {%- if resources.prev -%}
-    <li class="previous">
-      <a data-toggle="tooltip" data-placement="right" title="{{ resources.prev.last_name }}, {{ resources.prev.first_name }}" href="/assignments/{{ resources.assignment_id }}/{{ resources.notebook_id }}/{{ resources.prev.student_id }}">
-      &larr; Prev
-      </a>
-    </li>
-    {%- else -%}
-    <li class="previous disabled"><a>&larr; Prev</a></li>
-    {%- endif -%}
-    <li style="font-size: 1.5em;">{{ resources.notebook_id }} - {{ resources.student.last_name }}, {{ resources.student.first_name }}</li>
-    {%- if resources.next -%}
-    <li class="next">
-      <a data-toggle="tooltip" data-placement="left" title="{{ resources.next.last_name }}, {{ resources.next.first_name }}" href="/assignments/{{ resources.assignment_id }}/{{ resources.notebook_id }}/{{ resources.next.student_id }}">
-      Next &rarr;
-      </a>
-    </li>
-    {%- else -%}
-    <li class="next disabled"><a>Next &rarr;</a></li>
-    {%- endif -%}
-  </ul>
-</nav>
-{%- endmacro -%}
-
 {% block body %}
 <body>
+  <nav class="navbar navbar-default navbar-fixed-top" role="navigation">
+    <div class="container">
+      <div class="col-md-2">
+        <ul class="nav navbar-nav navbar-left">
+          {%- if resources.prev -%}
+          <li class="previous">
+            <a data-toggle="tooltip" data-placement="right" title="{{ resources.prev.last_name }}, {{ resources.prev.first_name }}" href="/assignments/{{ resources.assignment_id }}/{{ resources.notebook_id }}/{{ resources.prev.student_id }}">
+            &larr; Prev
+            </a>
+          </li>
+          {%- else -%}
+          <li class="previous disabled"><a>&larr; Prev</a></li>
+          {%- endif -%}
+        </ul>
+      </div>
+      <div class="col-md-8">
+        <ul class="nav text-center">
+          <ul class="breadcrumb">
+            <li><a href="/assignments">Assignments</a></li>
+            <li><a href="/assignments/{{ resources.assignment_id }}">{{ resources.assignment_id }}</a></li>
+            <li><a href="/assignments/{{ resources.assignment_id }}/{{ resources.notebook_id }}">{{ resources.notebook_id }}</a></li>
+            <li class="active">{{ resources.student.student_id }}</li>
+          </ul>
+        </ul>
+      </div>
+      <div class="col-md-2">
+        <ul class="nav navbar-nav navbar-right">
+          {%- if resources.next -%}
+          <li class="next">
+            <a data-toggle="tooltip" data-placement="left" title="{{ resources.next.last_name }}, {{ resources.next.first_name }}" href="/assignments/{{ resources.assignment_id }}/{{ resources.notebook_id }}/{{ resources.next.student_id }}">
+            Next &rarr;
+            </a>
+          </li>
+          {%- else -%}
+          <li class="next disabled"><a>Next &rarr;</a></li>
+          {%- endif -%}
+        </ul>
+      </div>
+    </div>
+    </div>
+  </nav>
   <div class="container">
-    <h2>nbgrader formgrade</h2>
     <div class="panel panel-default">
       <div class="panel-heading">
-        {{ breadcrumb() }}
+        <h4>{{ resources.notebook_id }} - {{ resources.student.last_name }}, {{ resources.student.first_name }}</h4>
       </div>
       <div class="panel-body">
-        {{ pager() }}
         <div id="notebook" class="border-box-sizing">
           <div class="container" id="notebook-container">
             {{ super() }}
           </div>
         </div>
-        {{ pager() }}
-      </div>
-      <div class="panel-footer">
-        {{ breadcrumb() }}
       </div>
     </div>
   </div>

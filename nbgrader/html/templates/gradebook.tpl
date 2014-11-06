@@ -12,14 +12,14 @@
 </head>
 
 <body>
-  <nav class="navbar navbar-default" role="navigation">
+  <nav class="navbar navbar-default navbar-fixed-top" role="navigation">
     <div class="container">
       <div class="navbar-header">
         <a class="navbar-brand" href="#">nbgrader formgrade</a>
       </div>
       <div>
         <ul class="nav navbar-nav navbar-left">
-          <ul class="breadcrumb list-inline">
+          <ul class="breadcrumb">
             {%- block breadcrumb -%}
             {%- endblock -%}
           </ul>
