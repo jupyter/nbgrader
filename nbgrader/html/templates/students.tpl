@@ -16,7 +16,7 @@
   <tr>
     <th>Name</th>
     <th class="center">Student ID</th>
-    <th class="center">Score</th>
+    <th class="center">Overall score</th>
   </tr>
 </thead>
 <tbody>

@@ -49,6 +49,25 @@ def view_assignment(assignment_id):
         assignment=assignment,
         notebooks=notebooks)
 
+@app.route("/students/<student_id>/")
+def view_student(student_id):
+    try:
+        student = app.gradebook.find_student(student_id=student_id)
+    except ValueError:
+        abort(404)
+
+    assignments = [x.to_dict() for x in app.gradebook.assignments]
+    for assignment in assignments:
+        score = app.gradebook.assignment_score(assignment["_id"], student)
+        if score:
+            assignment.update(score)
+        else:
+            assignment['score'] = None
+
+    return render_template(
+        "student_assignments.tpl",
+        assignments=assignments,
+        student=student)
 
 @app.route("/assignments/<assignment_id>/<notebook_id>/")
 def view_assignment_notebook(assignment_id, notebook_id):
