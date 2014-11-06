@@ -96,3 +96,9 @@ class TestClearSolutions(TestBase):
     def test_preprocess_nb(self):
         """Is the test notebook processed without error?"""
         self.preprocessor.preprocess(self.nb, {})
+
+    def test_remove_celltoolbar(self):
+        """Is the celltoolbar removed?"""
+        self.nb.metadata['celltoolbar'] = 'Create Assignment'
+        nb, resources = self.preprocessor.preprocess(self.nb, {})
+        assert 'celltoolbar' not in nb.metadata
