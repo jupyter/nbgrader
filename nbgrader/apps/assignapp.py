@@ -1,7 +1,6 @@
 from IPython.config.loader import Config
 from IPython.utils.traitlets import Unicode, List
 from IPython.nbconvert.preprocessors import ClearOutputPreprocessor
-from IPython.nbconvert.writers import FilesWriter
 from nbgrader.apps.customnbconvertapp import CustomNbConvertApp
 from nbgrader.apps.customnbconvertapp import aliases as base_aliases
 from nbgrader.apps.customnbconvertapp import flags as base_flags
@@ -12,8 +11,6 @@ aliases.update(base_aliases)
 aliases.update({
     'header': 'IncludeHeaderFooter.header',
     'footer': 'IncludeHeaderFooter.footer',
-    'build-directory': 'FilesWriter.build_directory',
-    'output': 'NbConvertApp.output_base'
 })
 
 flags = {}
@@ -45,8 +42,7 @@ class AssignApp(CustomNbConvertApp):
         classes.extend([
             IncludeHeaderFooter,
             ClearSolutions,
-            ClearOutputPreprocessor,
-            FilesWriter
+            ClearOutputPreprocessor
         ])
         return classes
 

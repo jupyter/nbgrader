@@ -1,11 +1,12 @@
 import os
 import re
 
-from IPython.nbconvert.preprocessors import *
+from IPython.nbconvert.preprocessors import Preprocessor
 from IPython.utils.traitlets import Unicode
 
 class FindStudentID(Preprocessor):
-    """Try to discover the student id given the full notebook path and a regular expression."""
+    """Try to discover the student id given the full notebook path and a
+    regular expression."""
 
     regexp = Unicode(r'', config=True)
 
@@ -21,11 +22,12 @@ class FindStudentID(Preprocessor):
         return nb, resources
 
     def find_student_id(self, filename):
-        self.log.info('%r %r', filename, self.regexp)
         m = re.match(self.regexp, filename)
         if m is not None:
             gd = m.groupdict()
             if 'student_id' in gd:
                 return gd['student_id']
-        return ''
+        elif self.regexp != '':
+            self.log.warn("No match found for regexp: {} (filename is: {})".format(self.regexp, filename))
 
+        return ''

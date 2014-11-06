@@ -2,17 +2,16 @@ from IPython.config.loader import Config
 from IPython.utils.traitlets import Unicode, Integer, List
 
 from IPython.core.application import BaseIPythonApplication
+from IPython.core.application import base_aliases, base_flags
+from IPython.core.profiledir import ProfileDir
 from IPython.nbconvert.exporters import HTMLExporter
 from IPython.config.application import catch_config_error
 
-from nbgrader.apps.customnbconvertapp import aliases as base_aliases
-from nbgrader.apps.customnbconvertapp import flags as base_flags
 from nbgrader.html.formgrade import app
 from nbgrader.api import Gradebook
 
 import os
 import logging
-
 
 aliases = {}
 aliases.update(base_aliases)
@@ -23,8 +22,6 @@ aliases.update({
 
 flags = {}
 flags.update(base_flags)
-flags.update({
-})
 
 examples = """
 nbgrader formgrade .
@@ -48,6 +45,7 @@ class FormgradeApp(BaseIPythonApplication):
     ip = Unicode("localhost", config=True, help="IP address for the server")
     port = Integer(5000, config=True, help="Port for the server")
     base_directory = Unicode('.', config=True, help="Root server directory")
+    directory_format = Unicode('{notebook_id}.ipynb', config=True, help="Format string for the directory structure of the autograded notebooks")
 
     # The classes added here determine how configuration will be documented
     classes = List()
@@ -55,7 +53,8 @@ class FormgradeApp(BaseIPythonApplication):
     def _classes_default(self):
         """This has to be in a method, for TerminalIPythonApp to be available."""
         return [
-            HTMLExporter
+            HTMLExporter,
+            ProfileDir
         ]
 
     def _log_level_default(self):
@@ -102,6 +101,7 @@ class FormgradeApp(BaseIPythonApplication):
         super(FormgradeApp, self).start()
 
         app.notebook_dir = self.base_directory
+        app.notebook_dir_format = self.directory_format
         app.exporter = HTMLExporter(config=self.config)
 
         url = "http://{:s}:{:d}/".format(self.ip, self.port)

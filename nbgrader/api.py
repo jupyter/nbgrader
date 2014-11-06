@@ -437,3 +437,68 @@ class Gradebook(object):
 
         """
         self._update('comments', comment)
+
+    def get_assignment_notebooks(self, assignment):
+        notebooks = {}
+        for notebook in self.find_notebooks(assignment=assignment):
+            if notebook.notebook_id not in notebooks:
+                notebooks[notebook.notebook_id] = []
+            notebooks[notebook.notebook_id].append(notebook)
+        return notebooks
+
+    def notebook_score(self, notebook):
+        grades = self.find_grades(notebook=notebook)
+        score = {"score": 0, "max_score": 0, "needs_manual_grade": False}
+        for grade in grades:
+            if grade.score is not None:
+                score["score"] += grade.score
+            elif grade.autoscore is not None:
+                score["score"] += grade.autoscore
+            else:
+                score["needs_manual_grade"] = True
+            if grade.max_score is not None:
+                score["max_score"] += grade.max_score
+        return score
+
+    def assignment_score(self, assignment, student):
+        notebooks = self.find_notebooks(assignment=assignment, student=student)
+        if len(notebooks) == 0:
+            return None
+
+        score = {"score": 0, "max_score": 0, "needs_manual_grade": False}
+        for nb in notebooks:
+            nb_score = self.notebook_score(nb)
+            score["score"] += nb_score["score"]
+            score["max_score"] += nb_score["max_score"]
+            if nb_score["needs_manual_grade"]:
+                score["needs_manual_grade"] = True
+        return score
+
+    def avg_notebook_scores(self, assignment):
+        all_scores = []
+        assignment_notebooks = self.get_assignment_notebooks(assignment)
+        notebook_ids = sorted(assignment_notebooks.keys())
+        for notebook_id in notebook_ids:
+            notebooks = assignment_notebooks[notebook_id]
+            scores = [self.notebook_score(nb) for nb in notebooks]
+            avg_score = sum([s["score"] for s in scores]) / float(len(scores))
+            max_score = set([s["max_score"] for s in scores])
+            assert len(max_score) == 1
+            all_scores.append({
+                "notebook_id": notebook_id,
+                "avg_score": avg_score,
+                "max_score": list(max_score)[0]
+            })
+        return all_scores
+
+    def avg_assignment_score(self, assignment):
+        scores = [self.assignment_score(assignment, student) for student in self.students]
+        scores = [s for s in scores if s is not None]
+        avg_score = sum([s["score"] for s in scores]) / float(len(scores))
+        max_score = set([s["max_score"] for s in scores])
+        assert len(max_score) == 1
+        all_scores = {
+            "avg_score": avg_score,
+            "max_score": list(max_score)[0]
+        }
+        return all_scores
