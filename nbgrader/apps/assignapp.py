@@ -53,6 +53,7 @@ class AssignApp(CustomNbConvertApp):
         self.extra_config = Config()
         self.extra_config.Exporter.preprocessors = [
             'nbgrader.preprocessors.IncludeHeaderFooter',
+            'nbgrader.preprocessors.LockCells',
             'nbgrader.preprocessors.ClearSolutions',
             'IPython.nbconvert.preprocessors.ClearOutputPreprocessor'
         ]
