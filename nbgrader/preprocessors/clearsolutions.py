@@ -80,6 +80,12 @@ class ClearSolutions(Preprocessor):
 
         return replaced_solution
 
+    def preprocess(self, nb, resources):
+        nb, resources = super(ClearSolutions, self).preprocess(nb, resources)
+        if 'celltoolbar' in nb.metadata:
+            del nb.metadata['celltoolbar']
+        return nb, resources
+
     def preprocess_cell(self, cell, resources, cell_index):
         # replace solution regions with the relevant stubs
         replaced_solution = self._replace_solution_region(cell)
