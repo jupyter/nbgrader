@@ -86,6 +86,6 @@ $(document).ready(function () {
     comments = new Comments();
     comments.fetch();
 
-    $("li.previous a").tooltip();
-    $("li.next a").tooltip();
+    $("li.previous a").tooltip({container: 'body'});
+    $("li.next a").tooltip({container: 'body'});
 });

@@ -1,8 +1,76 @@
-.breadcrumb {
-    margin-bottom: 0px;
-    padding: 0px;
-}
-
 td.center, th.center {
     text-align: center;
+}
+
+.nav .breadcrumb {
+    margin-bottom: 0px;
+    padding: 0px;
+    margin-left: 1em;
+}
+
+.breadcrumb > li {
+    padding-top: 15px;
+    padding-bottom: 15px;
+}
+
+.navbar-header .navbar-brand {
+    padding: 15px;
+    font-size: 18px;
+    height: 50px;
+    line-height: 20px;
+}
+
+.navbar-nav > li > a {
+    padding: 15px;
+}
+
+li.next, li.previous {
+    padding: 1px;
+}
+
+li.next a, li.previous a {
+    padding: 15px 0;
+}
+
+.navbar .col-md-2 {
+  padding-left: 0px;
+  padding-right: 0px;
+}
+
+.navbar-nav.navbar-right:last-child {
+  margin-right: 0px;
+}
+
+body {
+  overflow: visible;
+  font-size: 14px;
+  padding-top: 70px;
+}
+
+div#notebook {
+  overflow: visible;
+  border-top: none;
+}
+
+div#notebook-container {
+  width: 100%;
+}
+
+@media print {
+  div.cell {
+    display: block;
+    page-break-inside: avoid;
+  } 
+  div.output_wrapper { 
+    display: block;
+    page-break-inside: avoid; 
+  }
+  div.output { 
+    display: block;
+    page-break-inside: avoid; 
+  }
+}
+
+div.prompt {
+  min-width: 21ex;
 }
