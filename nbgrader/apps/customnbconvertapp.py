@@ -158,7 +158,7 @@ class CustomNbConvertApp(NbConvertApp):
                 if self.output_dir == '':
                     self.writer.build_directory = '.'
                 else:
-                    self.writer.build_director = self.output_dir
+                    self.writer.build_directory = self.output_dir
 
             # Try to export
             try:
