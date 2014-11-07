@@ -32,6 +32,15 @@ li.next a, li.previous a {
     padding: 15px 0;
 }
 
+.navbar .col-md-2 {
+  padding-left: 0px;
+  padding-right: 0px;
+}
+
+.navbar-nav.navbar-right:last-child {
+  margin-right: 0px;
+}
+
 body {
   overflow: visible;
   font-size: 14px;
