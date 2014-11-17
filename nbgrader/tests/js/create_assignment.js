@@ -74,7 +74,7 @@ casper.notebook_test(function () {
             elem.trigger("change");
             return cell.metadata.nbgrader.points;
         });
-        this.test.assertEquals(points, "2", "point value changed");
+        this.test.assertEquals(points, 2, "point value changed");
     });
 
     // set the id
