@@ -18,6 +18,7 @@ define([
 
     var grade_cls = "nbgrader-grade-cell";
     var CellToolbar = celltoolbar.CellToolbar;
+    var totalPoints = 0;
 
     // trigger an event when the toolbar is being rebuilt
     CellToolbar.prototype._rebuild = CellToolbar.prototype.rebuild;
@@ -41,6 +42,13 @@ define([
             cell.element.removeClass(grade_cls);
         }
     });
+
+    var to_float = function(val) {
+        if (val == "") {
+            return 0;
+        }
+        return parseFloat(val);
+    }
 
     /**
      * Is the cell a solution cell?
@@ -148,11 +156,22 @@ define([
         var lbl = $('<label/>').append($('<span/>').text('Points: '));
         lbl.append(text);
 
+        if ($("#nbgrader-total-points").length == 0) {
+            $("#maintoolbar-container").append($("<span />").text("Total points: " + totalPoints).attr("id", "nbgrader-total-points"));
+        }
+
         text.addClass('nbgrader-points-input');
         text.attr("value", cell.metadata.nbgrader.points);
+        totalPoints += to_float(cell.metadata.nbgrader.points);
         text.change(function () {
-            cell.metadata.nbgrader.points = text.val();
+            totalPoints -= to_float(cell.metadata.nbgrader.points);
+            cell.metadata.nbgrader.points = to_float(text.val());
+            totalPoints += to_float(cell.metadata.nbgrader.points);
+            $("#nbgrader-total-points").text("Total points: " + totalPoints);
+
         });
+
+        $("#nbgrader-total-points").text("Total points: " + totalPoints);
 
         local_div.addClass('nbgrader-points');
         $(div).append(local_div.append($('<span/>').append(lbl)));
