@@ -52,6 +52,10 @@ class NBGraderApp(BaseIPythonApplication):
             'nbgrader.apps.formgradeapp.FormgradeApp',
             "Grade a notebook using an HTML form"
         ),
+        validate=(
+            'nbgrader.apps.validateapp.ValidateApp',
+            "Validate a notebook"
+        ),
     )
 
     @catch_config_error
