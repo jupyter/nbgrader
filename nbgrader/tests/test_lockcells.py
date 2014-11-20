@@ -1,4 +1,5 @@
-from nose.tools import assert_raises
+import traceback
+import itertools
 from nbgrader.preprocessors import LockCells
 
 from .base import TestBase
@@ -23,7 +24,7 @@ class TestClearSolutions(TestBase):
         cell.metadata['nbgrader'] = {}
         cell.metadata['nbgrader']['solution'] = True
         assert self.deletable(cell)
-        new_cell, resources = self.preprocessor.preprocess_cell(cell, {}, 0)
+        new_cell = self.preprocessor.preprocess_cell(cell, {}, 0)[0]
         assert not self.deletable(new_cell)
 
     def test_solution_cell_unchanged(self):
@@ -35,7 +36,7 @@ class TestClearSolutions(TestBase):
         cell.metadata['nbgrader'] = {}
         cell.metadata['nbgrader']['solution'] = True
         assert self.deletable(cell)
-        new_cell, resources = self.preprocessor.preprocess_cell(cell, {}, 0)
+        new_cell = self.preprocessor.preprocess_cell(cell, {}, 0)[0]
         assert self.deletable(new_cell)
 
     def test_grade_cell_undeletable(self):
@@ -47,7 +48,7 @@ class TestClearSolutions(TestBase):
         cell.metadata['nbgrader'] = {}
         cell.metadata['nbgrader']['grade'] = True
         assert self.deletable(cell)
-        new_cell, resources = self.preprocessor.preprocess_cell(cell, {}, 0)
+        new_cell = self.preprocessor.preprocess_cell(cell, {}, 0)[0]
         assert not self.deletable(new_cell)
 
     def test_grade_cell_unchanged(self):
@@ -59,7 +60,7 @@ class TestClearSolutions(TestBase):
         cell.metadata['nbgrader'] = {}
         cell.metadata['nbgrader']['grade'] = True
         assert self.deletable(cell)
-        new_cell, resources = self.preprocessor.preprocess_cell(cell, {}, 0)
+        new_cell = self.preprocessor.preprocess_cell(cell, {}, 0)[0]
         assert self.deletable(new_cell)
 
     def test_cell_undeletable(self):
@@ -70,7 +71,7 @@ class TestClearSolutions(TestBase):
         cell = self._create_code_cell()
         cell.metadata['nbgrader'] = {}
         assert self.deletable(cell)
-        new_cell, resources = self.preprocessor.preprocess_cell(cell, {}, 0)
+        new_cell = self.preprocessor.preprocess_cell(cell, {}, 0)[0]
         assert not self.deletable(new_cell)
 
     def test_cell_unchanged(self):
@@ -81,6 +82,22 @@ class TestClearSolutions(TestBase):
         cell = self._create_code_cell()
         cell.metadata['nbgrader'] = {}
         assert self.deletable(cell)
-        new_cell, resources = self.preprocessor.preprocess_cell(cell, {}, 0)
+        new_cell = self.preprocessor.preprocess_cell(cell, {}, 0)[0]
         assert self.deletable(new_cell)
 
+    def _test_preprocess_nb(self, name, lock_solution_cells, lock_grade_cells, lock_all_cells):
+        """Is the test notebook processed without error?"""
+        self.preprocessor.lock_solution_cells = lock_solution_cells
+        self.preprocessor.lock_grade_cells = lock_grade_cells
+        self.preprocessor.lock_all_cells = lock_all_cells
+        try:
+            self.preprocessor.preprocess(self.nbs[name], {})
+        except Exception:
+            print(traceback.print_exc())
+            raise AssertionError("{} failed to process".format(name))
+
+    def test_preprocess_nb(self):
+        for name in self.files:
+            args = itertools.product([True, False], [True, False], [True, False])
+            for lsc, lgc, lac in args:
+                yield self._test_preprocess_nb, name, lsc, lgc, lac
