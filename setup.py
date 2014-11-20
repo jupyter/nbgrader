@@ -4,9 +4,10 @@
 # Copyright (c) Juptyer Development Team.
 # Distributed under the terms of the Modified BSD License.
 
+import sys
 from distutils.core import setup
 
-setup(
+setup_args = dict(
     name                = 'nbgrader',
     version             = '0.1',
     description         = 'A system for assigning and grading notebooks',
@@ -51,3 +52,14 @@ setup(
     scripts = ['scripts/nbgrader']
 )
 
+# setuptools requirements
+if 'setuptools' in sys.modules:
+    setup_args['install_requires'] = install_requires = []
+    with open('requirements.txt') as f:
+        for line in f.readlines():
+            req = line.strip()
+            if not req or req.startswith(('-e', '#')):
+                continue
+            install_requires.append(req)
+
+setup(**setup_args)
