@@ -22,8 +22,32 @@ setup(
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
     ],
-    packages=['nbgrader'],
-    package_data={'': ['templates/*.tpl']},
+    packages=[
+        'nbgrader',
+        'nbgrader.apps',
+        'nbgrader.html',
+        'nbgrader.preprocessors',
+        'nbgrader.tests'
+    ],
+    package_data={
+        '': [
+            'nbextensions/*.js',
+            'nbextensions/*.css'
+        ],
+        'nbgrader.html': [
+            'static/css/*.css',
+            'static/css/*.map',
+            'static/fonts/*',
+            'static/js/*.js',
+            'static/lib/*.js',
+            'static/lib/*.map',
+            'templates/*.tpl',
+        ],
+        'nbgrader.tests': [
+            'files/*',
+            'js/*'
+        ]
+    },
     scripts = ['scripts/nbgrader']
 )
 
