@@ -30,11 +30,10 @@ class ClearSolutions(Preprocessor):
 
         """
         # pull out the cell input/source
+        lines = cell.source.split("\n")
         if cell.cell_type == "code":
-            lines = cell.input.split("\n")
             stub_lines = self.code_stub.split("\n")
         else:
-            lines = cell.source.split("\n")
             stub_lines = self.text_stub.split("\n")
 
         new_lines = []
@@ -72,11 +71,8 @@ class ClearSolutions(Preprocessor):
         if in_solution:
             raise RuntimeError("no end solution statement found")
 
-        # replace the cell input/source
-        if cell.cell_type == "code":
-            cell.input = "\n".join(new_lines)
-        else:
-            cell.source = "\n".join(new_lines)
+        # replace the cell source
+        cell.source = "\n".join(new_lines)
 
         return replaced_solution
 
@@ -98,7 +94,7 @@ class ClearSolutions(Preprocessor):
         # there are parts of the cells that should be preserved
         if is_solution and not replaced_solution:
             if cell.cell_type == 'code':
-                cell.input = self.code_stub
+                cell.source = self.code_stub
             else:
                 cell.source = self.text_stub
 

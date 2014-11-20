@@ -1,5 +1,5 @@
-import os
 from nbgrader.preprocessors import IncludeHeaderFooter
+from nose.tools import assert_equal
 
 from .base import TestBase
 
@@ -10,32 +10,56 @@ class TestIncludeHeaderFooter(TestBase):
         super(TestIncludeHeaderFooter, self).setup()
         self.preprocessor = IncludeHeaderFooter()
 
-    def test_concatenate_nothing(self):
+    def _test_concatenate_nothing(self, name):
         """Are the cells the same if there is no header/footer?"""
-        nb, resources = self.preprocessor.preprocess(self.nb, {})
-        assert nb == self.nb
+        orig_nb = self.nbs[name]
+        nb = self.preprocessor.preprocess(orig_nb, {})[0]
+        assert_equal(nb, orig_nb, name)
+
+    def test_concatenate_nothing(self):
+        for name in self.files:
+            yield self._test_concatenate_nothing, name
+
+    def _test_concatenate_header(self, name, header):
+        """Is the header prepended correctly?"""
+        self.preprocessor.header = self.files[header]
+        cells = self.nbs[header].cells[:]
+        orig_nb = self.nbs[name]
+        orig_cells = orig_nb.cells[:]
+        nb = self.preprocessor.preprocess(orig_nb, {})[0]
+        assert_equal(nb.cells, (cells + orig_cells), name)
 
     def test_concatenate_header(self):
-        """Is the header prepended correctly?"""
-        self.preprocessor.header = os.path.join(self.pth, "files/test.ipynb")
-        cells = self.nb.worksheets[0].cells
-        self.nb.worksheets[0].cells = cells[:-1]
-        nb, resources = self.preprocessor.preprocess(self.nb, {})
-        assert nb.worksheets[0].cells == (cells + cells[:-1])
+        for header in self.files:
+            for name in self.files:
+                yield self._test_concatenate_header, name, header
+
+    def _test_concatenate_footer(self, name, footer):
+        """Is the footer appended correctly?"""
+        self.preprocessor.footer = self.files[footer]
+        cells = self.nbs[footer].cells[:]
+        orig_nb = self.nbs[name]
+        orig_cells = orig_nb.cells[:]
+        nb = self.preprocessor.preprocess(orig_nb, {})[0]
+        assert_equal(nb.cells, (orig_cells + cells), name)
 
     def test_concatenate_footer(self):
-        """Is the footer appended correctly?"""
-        self.preprocessor.footer = os.path.join(self.pth, "files/test.ipynb")
-        cells = self.nb.worksheets[0].cells
-        self.nb.worksheets[0].cells = cells[:-1]
-        nb, resources = self.preprocessor.preprocess(self.nb, {})
-        assert nb.worksheets[0].cells == (cells[:-1] + cells)
+        for footer in self.files:
+            for name in self.files:
+                yield self._test_concatenate_footer, name, footer
+
+    def _test_concatenate_header_and_footer(self, name, header, footer):
+        """Are the header and footer appended correctly?"""
+        self.preprocessor.header = self.files[header]
+        self.preprocessor.footer = self.files[footer]
+        header_cells = self.nbs[header].cells[:]
+        footer_cells = self.nbs[footer].cells[:]
+        orig_nb = self.nbs[name]
+        orig_cells = orig_nb.cells[:]
+        nb = self.preprocessor.preprocess(orig_nb, {})[0]
+        assert_equal(nb.cells, (header_cells + orig_cells + footer_cells), name)
 
     def test_concatenate_header_and_footer(self):
-        """Is the header and footer concatenated correctly?"""
-        self.preprocessor.header = os.path.join(self.pth, "files/test.ipynb")
-        self.preprocessor.footer = os.path.join(self.pth, "files/test.ipynb")
-        cells = self.nb.worksheets[0].cells
-        self.nb.worksheets[0].cells = cells[:-1]
-        nb, resources = self.preprocessor.preprocess(self.nb, {})
-        assert nb.worksheets[0].cells == (cells + cells[:-1] + cells)
+        for header in self.files:
+            for name in self.files:
+                yield self._test_concatenate_header_and_footer, name, header, header

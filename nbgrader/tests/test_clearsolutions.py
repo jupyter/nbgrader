@@ -1,4 +1,6 @@
-from nose.tools import assert_raises
+import traceback
+from nose.tools import assert_raises, assert_equal
+from textwrap import dedent
 from nbgrader.preprocessors import ClearSolutions
 
 from .base import TestBase
@@ -16,23 +18,39 @@ class TestClearSolutions(TestBase):
             comment_mark="%",
             begin_solution_delimeter="!!foo",
             end_solution_delimeter="@@bar")
-        assert pp.begin_solution == "%!!foo"
-        assert pp.end_solution == "%@@bar"
+        assert_equal(pp.begin_solution, "%!!foo")
+        assert_equal(pp.end_solution, "%@@bar")
 
     def test_replace_solution_region_code(self):
         """Are solution regions in code cells correctly replaced?"""
         cell = self._create_code_cell()
         replaced_solution = self.preprocessor._replace_solution_region(cell)
         assert replaced_solution
-        assert cell.input == """print("something")\n# YOUR CODE HERE\nraise NotImplementedError()"""
+        assert_equal(
+            cell.source,
+            dedent(
+                """
+                print("something")
+                # YOUR CODE HERE
+                raise NotImplementedError()
+                """
+            ).strip()
+        )
 
     def test_replace_solution_region_text(self):
         """Are solution regions in text cells correctly replaced?"""
         cell = self._create_text_cell()
-        cell.source = "something something\n### BEGIN SOLUTION\nthis is the answer!\n### END SOLUTION"
+        cell.source = dedent(
+            """
+            something something
+            ### BEGIN SOLUTION
+            this is the answer!
+            ### END SOLUTION
+            """
+        ).strip()
         replaced_solution = self.preprocessor._replace_solution_region(cell)
         assert replaced_solution
-        assert cell.source == "something something\nYOUR ANSWER HERE"
+        assert_equal(cell.source, "something something\nYOUR ANSWER HERE")
 
     def test_dont_replace_solution_region(self):
         """Is false returned when there is no solution region?"""
@@ -43,62 +61,124 @@ class TestClearSolutions(TestBase):
     def test_replace_solution_region_no_end(self):
         """Is an error thrown when there is no end solution statement?"""
         cell = self._create_text_cell()
-        cell.source = "something something\n### BEGIN SOLUTION\nthis is the answer!"
-        assert_raises(RuntimeError, self.preprocessor._replace_solution_region, cell)
+        cell.source = dedent(
+            """
+            something something
+            ### BEGIN SOLUTION
+            this is the answer!
+            """
+        ).strip()
+        assert_raises(
+            RuntimeError, self.preprocessor._replace_solution_region, cell)
 
     def test_replace_solution_region_nested_solution(self):
         """Is an error thrown when there are nested solution statements?"""
         cell = self._create_text_cell()
-        cell.source = "something something\n### BEGIN SOLUTION\n### BEGIN SOLUTION\nthis is the answer!\n### END SOLUTION"
-        assert_raises(RuntimeError, self.preprocessor._replace_solution_region, cell)
+        cell.source = dedent(
+            """
+            something something
+            ### BEGIN SOLUTION
+            ### BEGIN SOLUTION
+            this is the answer!
+            ### END SOLUTION
+            """
+        ).strip()
+        assert_raises(
+            RuntimeError, self.preprocessor._replace_solution_region, cell)
 
     def test_preprocess_code_cell_student(self):
         """Is the student version of a code cell correctly preprocessed?"""
         cell = self._create_code_cell()
 
-        cell, resources = self.preprocessor.preprocess_cell(cell, {}, 1)
-        assert cell.input == """print("something")\n# YOUR CODE HERE\nraise NotImplementedError()"""
+        cell = self.preprocessor.preprocess_cell(cell, {}, 1)[0]
+        assert_equal(
+            cell.source,
+            dedent(
+                """
+                print("something")
+                # YOUR CODE HERE
+                raise NotImplementedError()
+                """
+            ).strip()
+        )
 
     def test_preprocess_code_cell_solution(self):
         """Is a code solution cell correctly cleared when there is a solution region?"""
         cell = self._create_code_cell()
         cell.metadata['nbgrader'] = dict(solution=True)
 
-        cell, resources = self.preprocessor.preprocess_cell(cell, {}, 1)
-        assert cell.input == """print("something")\n# YOUR CODE HERE\nraise NotImplementedError()"""
+        cell = self.preprocessor.preprocess_cell(cell, {}, 1)[0]
+        assert_equal(
+            cell.source,
+            dedent(
+                """
+                print("something")
+                # YOUR CODE HERE
+                raise NotImplementedError()
+                """
+            ).strip()
+        )
 
     def test_preprocess_code_cell_solution_no_region(self):
         """Is a code solution cell correctly cleared when there is no solution region?"""
         cell = self._create_code_cell()
-        cell.input = """print("the answer!")"""
+        cell.source = """print("the answer!")"""
         cell.metadata['nbgrader'] = dict(solution=True)
 
-        cell, resources = self.preprocessor.preprocess_cell(cell, {}, 1)
-        assert cell.input == """# YOUR CODE HERE\nraise NotImplementedError()"""
+        cell = self.preprocessor.preprocess_cell(cell, {}, 1)[0]
+        assert_equal(
+            cell.source,
+            dedent(
+                """
+                # YOUR CODE HERE
+                raise NotImplementedError()
+                """
+            ).strip()
+        )
 
     def test_preprocess_text_cell_solution(self):
         """Is a text grade cell correctly cleared when there is a solution region?"""
         cell = self._create_text_cell()
         cell.metadata['nbgrader'] = dict(solution=True)
 
-        cell, resources = self.preprocessor.preprocess_cell(cell, {}, 1)
-        assert cell.source == """YOUR ANSWER HERE"""
+        cell = self.preprocessor.preprocess_cell(cell, {}, 1)[0]
+        assert_equal(cell.source, "YOUR ANSWER HERE")
 
     def test_preprocess_text_cell_solution_no_region(self):
         """Is a text grade cell correctly cleared when there is no solution region?"""
         cell = self._create_text_cell()
-        cell.source = "something something\n### BEGIN SOLUTION\nthis is the answer!\n### END SOLUTION"
+        cell.source = dedent(
+            """
+            something something
+            ### BEGIN SOLUTION
+            this is the answer!
+            ### END SOLUTION
+            """
+        ).strip()
         cell.metadata['nbgrader'] = dict(solution=True)
 
-        cell, resources = self.preprocessor.preprocess_cell(cell, {}, 1)
-        assert cell.source == """something something\nYOUR ANSWER HERE"""
+        cell = self.preprocessor.preprocess_cell(cell, {}, 1)[0]
+        assert_equal(cell.source, "something something\nYOUR ANSWER HERE")
+
+    def _test_preprocess_notebook(self, name):
+        """Is the test notebook processed without error?"""
+        try:
+            self.preprocessor.preprocess(self.nbs[name], {})
+        except Exception:
+            print(traceback.print_exc())
+            raise AssertionError("{} failed to process".format(name))
 
     def test_preprocess_nb(self):
-        """Is the test notebook processed without error?"""
-        self.preprocessor.preprocess(self.nb, {})
+        for name in self.files:
+            yield self._test_preprocess_notebook, name
+
+    def _test_remove_celltoolbar(self, name):
+        """Is the celltoolbar removed?"""
+        nb = self.nbs[name]
+        nb.metadata['celltoolbar'] = 'Create Assignment'
+        nb = self.preprocessor.preprocess(nb, {})[0]
+        assert 'celltoolbar' not in nb.metadata, name
 
     def test_remove_celltoolbar(self):
-        """Is the celltoolbar removed?"""
-        self.nb.metadata['celltoolbar'] = 'Create Assignment'
-        nb, resources = self.preprocessor.preprocess(self.nb, {})
-        assert 'celltoolbar' not in nb.metadata
+        for name in self.files:
+            yield self._test_remove_celltoolbar, name
