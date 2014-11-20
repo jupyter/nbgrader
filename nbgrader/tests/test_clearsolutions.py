@@ -24,7 +24,7 @@ class TestClearSolutions(TestBase):
         cell = self._create_code_cell()
         replaced_solution = self.preprocessor._replace_solution_region(cell)
         assert replaced_solution
-        assert cell.input == """print("something")\n# YOUR CODE HERE\nraise NotImplementedError()"""
+        assert cell.source == """print("something")\n# YOUR CODE HERE\nraise NotImplementedError()"""
 
     def test_replace_solution_region_text(self):
         """Are solution regions in text cells correctly replaced?"""
@@ -57,7 +57,7 @@ class TestClearSolutions(TestBase):
         cell = self._create_code_cell()
 
         cell, resources = self.preprocessor.preprocess_cell(cell, {}, 1)
-        assert cell.input == """print("something")\n# YOUR CODE HERE\nraise NotImplementedError()"""
+        assert cell.source == """print("something")\n# YOUR CODE HERE\nraise NotImplementedError()"""
 
     def test_preprocess_code_cell_solution(self):
         """Is a code solution cell correctly cleared when there is a solution region?"""
@@ -65,16 +65,16 @@ class TestClearSolutions(TestBase):
         cell.metadata['nbgrader'] = dict(solution=True)
 
         cell, resources = self.preprocessor.preprocess_cell(cell, {}, 1)
-        assert cell.input == """print("something")\n# YOUR CODE HERE\nraise NotImplementedError()"""
+        assert cell.source == """print("something")\n# YOUR CODE HERE\nraise NotImplementedError()"""
 
     def test_preprocess_code_cell_solution_no_region(self):
         """Is a code solution cell correctly cleared when there is no solution region?"""
         cell = self._create_code_cell()
-        cell.input = """print("the answer!")"""
+        cell.source = """print("the answer!")"""
         cell.metadata['nbgrader'] = dict(solution=True)
 
         cell, resources = self.preprocessor.preprocess_cell(cell, {}, 1)
-        assert cell.input == """# YOUR CODE HERE\nraise NotImplementedError()"""
+        assert cell.source == """# YOUR CODE HERE\nraise NotImplementedError()"""
 
     def test_preprocess_text_cell_solution(self):
         """Is a text grade cell correctly cleared when there is a solution region?"""
