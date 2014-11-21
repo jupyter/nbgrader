@@ -1,5 +1,6 @@
 import os
 import glob
+import subprocess as sp
 from IPython.nbformat import current_nbformat
 from IPython.nbformat import read as read_nb
 from IPython.nbformat.v4 import new_code_cell, new_markdown_cell
@@ -30,3 +31,11 @@ print("hello")
         source = "this is the answer!\n"
         cell = new_markdown_cell(source=source)
         return cell
+
+    @staticmethod
+    def _run_command(command):
+        proc = sp.Popen(command, stdout=sp.PIPE, stderr=sp.STDOUT)
+        if proc.wait() != 0:
+            output = proc.communicate()[0]
+            print(output.decode())
+            raise AssertionError("process returned a non-zero exit code")

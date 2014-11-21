@@ -19,6 +19,7 @@ install:
   - cd ipython && git submodule update && pip install -e ".[notebook]" && cd ..
   - pip install -r requirements.txt
   - pip install nose requests!=2.4.2
+  - python setup.py install
   - if [[ $GROUP == 'js' ]]; then cp nbextensions/* $(ipython locate)/nbextensions/; fi
 script:
   - ./scripts/runtests $GROUP
