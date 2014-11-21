@@ -65,7 +65,7 @@ class SaveAutoGrades(Preprocessor):
             grade_id=cell.metadata['nbgrader']['grade_id'])
 
         # deterine what the grade is
-        grade.max_score, grade.autoscore = utils.determine_grade(cell)
+        grade.autoscore, grade.max_score = utils.determine_grade(cell)
 
         # Update the grade information and print it out
         self.gradebook.update_grade(grade)
