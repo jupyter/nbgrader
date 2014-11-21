@@ -70,7 +70,8 @@ class SubmitApp(BaseIPythonApplication):
     ignore = List(
         [
             ".ipynb_checkpoints",
-            "*.pyc"
+            "*.pyc",
+            "__pycache__"
         ], 
         config=True,
         help=dedent(
