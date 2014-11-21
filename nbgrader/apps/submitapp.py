@@ -180,20 +180,22 @@ class SubmitApp(BaseIPythonApplication):
         archive = "{}.tar.gz".format(self.assignment_name)
         target = os.path.join(self.submissions_directory, archive)
         shutil.copy(path_to_tarball, target)
+        return target
 
     def start(self):
         super(SubmitApp, self).start()
         self.tmpdir = tempfile.mkdtemp()
         
         try:
-            path_to_submission = self.make_temp_copy()
-            path_to_tarball = self.make_archive(path_to_submission)
-            self.submit(path_to_tarball)
+            path_to_copy = self.make_temp_copy()
+            path_to_tarball = self.make_archive(path_to_copy)
+            path_to_submission = self.submit(path_to_tarball)
             
         except:
             raise
             
         else:
+            self.log.debug("Saved to '{}'".format(path_to_submission))
             self.log.info("'{}' submitted by {} at {}".format(
                 self.assignment_name, self.student, self.timestamp))
             
