@@ -53,6 +53,10 @@ class NBGraderApp(BaseIPythonApplication):
             'nbgrader.apps.validateapp.ValidateApp',
             "Validate a notebook"
         ),
+        submit=(
+            'nbgrader.apps.submitapp.SubmitApp',
+            "Submit a completed assignment"
+        ),
     )
 
     @catch_config_error
