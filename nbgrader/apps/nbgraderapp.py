@@ -27,9 +27,6 @@ class NBGraderApp(BaseIPythonApplication):
     examples = Unicode(_examples)
     ipython_dir = "/tmp/nbgrader"
 
-    def _log_level_default(self):
-        return logging.INFO
-
     # The classes added here determine how configuration will be documented
     classes = List()
 
@@ -51,6 +48,10 @@ class NBGraderApp(BaseIPythonApplication):
         formgrade=(
             'nbgrader.apps.formgradeapp.FormgradeApp',
             "Grade a notebook using an HTML form"
+        ),
+        validate=(
+            'nbgrader.apps.validateapp.ValidateApp',
+            "Validate a notebook"
         ),
     )
 

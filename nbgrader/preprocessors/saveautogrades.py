@@ -64,22 +64,8 @@ class SaveAutoGrades(Preprocessor):
             notebook=self.notebook,
             grade_id=cell.metadata['nbgrader']['grade_id'])
 
-        # set the maximum earnable score
-        points = float(cell.metadata['nbgrader']['points'])
-        grade.max_score = points
-
-        # If it's a code cell and it threw an error, then they get
-        # zero points, otherwise they get max_score points. If it's a
-        # text cell, we can't autograde it.
-        if cell.cell_type == 'code':
-            grade.autoscore = points
-            for output in cell.outputs:
-                if output.output_type == 'pyerr':
-                    grade.autoscore = 0
-                    break
-
-        else:
-            grade.autoscore = None
+        # deterine what the grade is
+        grade.autoscore, grade.max_score = utils.determine_grade(cell)
 
         # Update the grade information and print it out
         self.gradebook.update_grade(grade)
