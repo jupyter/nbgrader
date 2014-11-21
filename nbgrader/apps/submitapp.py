@@ -40,6 +40,7 @@ class SubmitApp(BaseIPythonApplication):
     examples = examples
 
     student = Unicode(os.environ['USER'])
+    timestamp = Unicode(str(datetime.datetime.now()))
     assignment_directory = Unicode(
         '.', config=True, 
         help=dedent(
@@ -134,55 +135,67 @@ class SubmitApp(BaseIPythonApplication):
                 return True
         return False
 
+    def make_temp_copy(self):
+        """Copy the submission to a temporary directory. Returns the path to the
+        temporary copy of the submission."""
+        # copy everything to a temporary directory
+        pth = os.path.join(self.tmpdir, self.assignment_name)
+        shutil.copytree(self.assignment_directory, pth)
+        os.chdir(self.tmpdir)
+
+        # get the user name, write it to file
+        with open(os.path.join(self.assignment_name, "user.txt"), "w") as fh:
+            fh.write(self.student)
+
+        # save the submission time
+        with open(os.path.join(self.assignment_name, "timestamp.txt"), "w") as fh:
+            fh.write(self.timestamp)
+
+        return pth
+
+    def make_archive(self, path_to_submission):
+        """Make a tarball of the submission. Returns the path to the created
+        archive."""
+        root, submission = os.path.split(path_to_submission)
+        os.chdir(root)
+
+        archive = os.path.join(self.tmpdir, "{}.tar.gz".format(self.assignment_name))
+        tf = tarfile.open(archive, "w:gz")
+
+        for (dirname, dirnames, filenames) in os.walk(submission):
+            if self._is_ignored(dirname):
+                continue
+
+            for filename in filenames:
+                pth = os.path.join(dirname, filename)
+                if not self._is_ignored(pth):
+                    self.log.debug("Adding '{}' to submission".format(pth))
+                    tf.add(pth)
+
+        tf.close()
+        return archive
+
+    def submit(self, path_to_tarball):
+        """Submit the assignment."""
+        archive = "{}.tar.gz".format(self.assignment_name)
+        target = os.path.join(self.submissions_directory, archive)
+        shutil.copy(path_to_tarball, target)
+
     def start(self):
         super(SubmitApp, self).start()
-        tmpdir = tempfile.mkdtemp()
+        self.tmpdir = tempfile.mkdtemp()
         
         try:
-            # copy everything to a temporary directory
-            shutil.copytree(self.assignment_directory, os.path.join(tmpdir, self.assignment_name))
-            os.chdir(tmpdir)
-
-            # get the user name, write it to file
-            with open(os.path.join(self.assignment_name, "user.txt"), "w") as fh:
-                fh.write(self.student)
-
-            # save the submission time
-            timestamp = str(datetime.datetime.now())
-            with open(os.path.join(self.assignment_name, "timestamp.txt"), "w") as fh:
-                fh.write(timestamp)
-
-            # get the path to where we will save the archive
-            archive = os.path.join(
-                self.submissions_directory, 
-                "{}.tar.gz".format(self.assignment_name))
-            if not os.path.exists(os.path.dirname(archive)):
-                os.makedirs(os.path.dirname(archive))
-            if os.path.exists(archive):
-                shutil.copy(archive, "{}.bak".format(archive))
-                os.remove(archive)
-
-            # create a tarball with the assignment files
-            tf = tarfile.open(archive, "w:gz")
-
-            for (dirname, dirnames, filenames) in os.walk(self.assignment_name):
-                if self._is_ignored(dirname):
-                    continue
-
-                for filename in filenames:
-                    pth = os.path.join(dirname, filename)
-                    if not self._is_ignored(pth):
-                        self.log.debug("Adding '{}' to submission".format(pth))
-                        tf.add(pth)
-    
-            tf.close()
+            path_to_submission = self.make_temp_copy()
+            path_to_tarball = self.make_archive(path_to_submission)
+            self.submit(path_to_tarball)
             
         except:
             raise
             
         else:
             self.log.info("'{}' submitted by {} at {}".format(
-                self.assignment_name, self.student, timestamp))
+                self.assignment_name, self.student, self.timestamp))
             
         finally:
-            shutil.rmtree(tmpdir)
+            shutil.rmtree(self.tmpdir)
