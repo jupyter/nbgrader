@@ -10,13 +10,13 @@ import tempfile
 import datetime
 import tarfile
 import glob
+import logging
 
 from textwrap import dedent
 
 aliases = {}
 aliases.update(base_aliases)
 aliases.update({
-    "assignment-dir": "SubmitApp.assignment_directory",
     "assignment": "SubmitApp.assignment_name",
     "submit-dir": "SubmitApp.submissions_directory"
 })
@@ -27,7 +27,8 @@ flags.update({
 })
 
 examples = """
-nbgrader submit "Problem Set 1"
+nbgrader submit "Problem Set 1/"
+nbgrader submit "Problem Set 1/" --assignment ps01
 """
 
 class SubmitApp(BaseIPythonApplication):
@@ -87,6 +88,9 @@ class SubmitApp(BaseIPythonApplication):
             ProfileDir
         ]
 
+    def _log_level_default(self):
+        return logging.INFO
+
     @catch_config_error
     def initialize(self, argv=None):
         if not os.path.exists(self.ipython_dir):
@@ -94,10 +98,32 @@ class SubmitApp(BaseIPythonApplication):
             os.mkdir(self.ipython_dir)
         super(SubmitApp, self).initialize(argv)
         self.stage_default_config_file()
+        self.init_assignment_root()
 
-        self.assignment_directory = os.path.abspath(self.assignment_directory)
         if self.assignment_name == '':
             self.assignment_name = os.path.basename(self.assignment_directory)
+
+    def init_assignment_root(self):
+        # Specifying notebooks on the command-line overrides (rather than adds)
+        # the notebook list
+        if self.extra_args:
+            patterns = self.extra_args
+        else:
+            patterns = [self.assignment_directory]
+
+        if len(patterns) == 0:
+            pass
+
+        elif len(patterns) == 1:
+            self.assignment_directory = patterns[0]
+
+        else:
+            raise ValueError("You must specify the name of a directory")
+
+        self.assignment_directory = os.path.abspath(self.assignment_directory)
+
+        if not os.path.isdir(self.assignment_directory):
+            raise ValueError("Path is not a directory: {}".format(self.assignment_directory))
 
     def _is_ignored(self, filename):
         dirname = os.path.dirname(filename)
