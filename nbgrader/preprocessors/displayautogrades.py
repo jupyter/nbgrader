@@ -31,7 +31,7 @@ class DisplayAutoGrades(Preprocessor):
         print("\nThe error was:\n")
         for output in cell.outputs:
             if output.output_type == "error":
-                print self._indent("\n".join(output.traceback))
+                print(self._indent("\n".join(output.traceback)))
         print
 
     def preprocess(self, nb, resources):
