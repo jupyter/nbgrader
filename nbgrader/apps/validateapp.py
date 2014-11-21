@@ -28,6 +28,8 @@ class ValidateApp(CustomNbConvertApp):
     aliases = aliases
     flags = flags
     examples = examples
+    log_level = 50
+    output_dir = "/tmp"
 
     # The classes added here determine how configuration will be documented
     classes = List()

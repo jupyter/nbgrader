@@ -27,9 +27,6 @@ class NBGraderApp(BaseIPythonApplication):
     examples = Unicode(_examples)
     ipython_dir = "/tmp/nbgrader"
 
-    def _log_level_default(self):
-        return logging.INFO
-
     # The classes added here determine how configuration will be documented
     classes = List()
 

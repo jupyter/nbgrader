@@ -18,7 +18,7 @@ def determine_grade(cell):
     max_points = float(cell.metadata['nbgrader']['points'])
     if cell.cell_type == 'code':
         for output in cell.outputs:
-            if output.output_type == 'pyerr':
+            if output.output_type == 'error':
                 return 0, max_points
         return max_points, max_points
 
