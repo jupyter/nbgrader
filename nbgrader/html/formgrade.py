@@ -167,7 +167,6 @@ def view_submission(assignment_id, notebook_id, student_id):
         student_id=student.student_id))
 
     if not os.path.exists(filename):
-        print filename
         abort(404)
 
     students = []

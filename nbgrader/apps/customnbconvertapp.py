@@ -95,7 +95,7 @@ class CustomNbConvertApp(NbConvertApp):
         self.notebooks = sorted(matched_files)
 
         if self.recursive:
-            self.prefix = os.path.commonprefix(zip(*self.notebooks)[0])
+            self.prefix = os.path.commonprefix(list(zip(*self.notebooks))[0])
             while not os.path.isdir(self.prefix):
                 self.prefix = os.path.split(self.prefix)[0]
             self.log.info("Directory tree prefix: {}".format(self.prefix))
