@@ -2,7 +2,11 @@
 /**
  * To load this extension, add the following to your custom.js:
  *
- * IPython.load_extensions('nbgrader');
+ * require(['base/js/events'], function (events) {
+ *     events.on('app_initialized.NotebookApp', function() {
+ *         IPython.load_extensions('nbgrader');
+ *     });
+ * });
  *
 **/
 
