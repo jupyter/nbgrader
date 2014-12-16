@@ -1,5 +1,6 @@
 # nbgrader
 
+[![Gitter chat](https://badges.gitter.im/jupyter/nbgrader.png)](https://gitter.im/jupyter/nbgrader)
 [![Build Status](https://travis-ci.org/jupyter/nbgrader.svg)](https://travis-ci.org/jupyter/nbgrader)
 
 A system for assigning and grading notebooks.
