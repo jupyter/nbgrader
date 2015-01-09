@@ -14,6 +14,10 @@ aliases.update({
 flags = {}
 flags.update(base_flags)
 flags.update({
+    'invert': (
+        {'DisplayAutoGrades': {'invert': True}},
+        "Complain when cells pass, rather than vice versa."
+    )
 })
 
 examples = """

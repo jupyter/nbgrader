@@ -1,6 +1,6 @@
 import sys
 from IPython.nbconvert.preprocessors import Preprocessor
-from IPython.utils.traitlets import Unicode, Integer
+from IPython.utils.traitlets import Unicode, Integer, Bool
 from nbgrader import utils
 from textwrap import fill, dedent
 
@@ -13,6 +13,7 @@ class DisplayAutoGrades(Preprocessor):
 
     indent = Unicode("    ", config=True)
     width = Integer(90, config=True)
+    invert = Bool(False, config=True, help="Complain when cells pass, rather than fail.")
 
     def _indent(self, val):
         lines = val.split("\n")
@@ -34,23 +35,40 @@ class DisplayAutoGrades(Preprocessor):
                 print(self._indent("\n".join(output.traceback)))
         print
 
+    def _print_pass(self, cell):
+        print("\n" + "=" * self.width)
+        print("The following cell passed:\n")
+        print(self._indent(cell.source))
+        print
+
     def preprocess(self, nb, resources):
         resources['nbgrader']['failed_cells'] = []
+        resources['nbgrader']['passed_cells'] = []
         nb, resources = super(DisplayAutoGrades, self).preprocess(nb, resources)
 
-        if len(resources['nbgrader']['failed_cells']) == 0:
-            print("Success! Your notebook passes all the tests.")
+        if not self.invert:
+            if len(resources['nbgrader']['failed_cells']) == 0:
+                print("Success! Your notebook passes all the tests.")
+
+            else:
+                print(fill(dedent(
+                    """
+                    VALIDATION FAILED ON {} CELLS! If you submit your assignment as
+                    it is, you WILL NOT receive full credit.
+                    """.format(len(resources['nbgrader']['failed_cells']))
+                ).strip(), width=self.width))
+
+                for cell_index in resources["nbgrader"]["failed_cells"]:
+                    self._print_error(nb.cells[cell_index])
 
         else:
-            print(fill(dedent(
-                """
-                VALIDATION FAILED ON {} CELLS! If you submit your assignment as
-                it is, you WILL NOT receive full credit.
-                """.format(len(resources['nbgrader']['failed_cells']))
-            ).strip(), width=self.width))
+            if len(resources['nbgrader']['passed_cells']) == 0:
+                print("Success! The notebook does not pass any tests.")
 
-            for cell_index in resources["nbgrader"]["failed_cells"]:
-                self._print_error(nb.cells[cell_index])
+            else:
+                print("NOTEBOOK PASSED ON {} CELLS!".format(len(resources['nbgrader']['passed_cells'])))
+                for cell_index in resources["nbgrader"]["passed_cells"]:
+                    self._print_pass(nb.cells[cell_index])
 
         return nb, resources
 
@@ -66,5 +84,7 @@ class DisplayAutoGrades(Preprocessor):
             pass
         elif score < max_score:
             resources['nbgrader']['failed_cells'].append(cell_index)
+        else:
+            resources['nbgrader']['passed_cells'].append(cell_index)
 
         return cell, resources
