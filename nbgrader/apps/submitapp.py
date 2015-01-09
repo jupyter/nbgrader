@@ -59,7 +59,7 @@ class SubmitApp(BaseIPythonApplication):
         )
     )
     submissions_directory = Unicode(
-        "{}/.submissions".format(os.environ['HOME']), config=True, 
+        "{}/.nbgrader/submissions".format(os.environ['HOME']), config=True, 
         help=dedent(
             """
             The directory where the submission will be saved.
@@ -98,6 +98,8 @@ class SubmitApp(BaseIPythonApplication):
         if not os.path.exists(self.ipython_dir):
             self.log.warning("Creating IPython directory: {}".format(self.ipython_dir))
             os.mkdir(self.ipython_dir)
+        if not os.path.exists(self.submissions_directory):
+            os.makedirs(self.submissions_directory)
         super(SubmitApp, self).initialize(argv)
         self.stage_default_config_file()
         self.init_assignment_root()
