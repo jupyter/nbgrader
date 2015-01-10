@@ -153,3 +153,11 @@ class TestGradebook(object):
 
         g = self.gb.find_comment(_id=c1._id)
         assert g.comment == 'lorem ipsum'
+
+    def test_avg_assignment_scores_no_scores(self):
+        """Test that an error is not thrown when there are no scores to actually average over"""
+        a = self._add_assignment()
+        self._add_student()
+
+        all_scores = self.gb.avg_assignment_score(a)
+        assert all_scores == dict(avg_score=0, max_score=0)
