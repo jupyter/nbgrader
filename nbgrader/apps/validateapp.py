@@ -1,3 +1,6 @@
+import tempfile
+import shutil
+
 from IPython.config.loader import Config
 from IPython.utils.traitlets import Unicode, List
 from IPython.nbconvert.preprocessors import ClearOutputPreprocessor, ExecutePreprocessor
@@ -33,6 +36,7 @@ class ValidateApp(CustomNbConvertApp):
     flags = flags
     examples = examples
     log_level = 50
+    output_dir = "/tmp"
 
     # The classes added here determine how configuration will be documented
     classes = List()
@@ -58,3 +62,10 @@ class ValidateApp(CustomNbConvertApp):
             'nbgrader.preprocessors.DisplayAutoGrades'
         ]
         self.config.merge(self.extra_config)
+
+    def convert_notebooks(self):
+        self.output_dir = tempfile.mkdtemp()
+        try:
+            super(ValidateApp, self).convert_notebooks()
+        finally:
+            shutil.rmtree(self.output_dir)
