@@ -34,10 +34,14 @@ class CustomNbConvertApp(NbConvertApp):
     description = Unicode(u'A custom nbconvert app')
     aliases = aliases
     flags = flags
-    ipython_dir = "/tmp/nbgrader"
 
     recursive = Bool(False, config=True, help="Perform operations recursively through directories")
     output_dir = Unicode('', config=True, help="Output directory")
+
+    def _ipython_dir_default(self):
+        d = os.path.join(os.environ["HOME"], ".nbgrader")
+        self._ipython_dir_changed('ipython_dir', d, d)
+        return d
 
     def build_extra_config(self):
         pass

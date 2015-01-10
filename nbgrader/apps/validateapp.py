@@ -1,10 +1,13 @@
+import tempfile
+import shutil
+
 from IPython.config.loader import Config
 from IPython.utils.traitlets import Unicode, List
 from IPython.nbconvert.preprocessors import ClearOutputPreprocessor, ExecutePreprocessor
 from nbgrader.apps.customnbconvertapp import CustomNbConvertApp
 from nbgrader.apps.customnbconvertapp import aliases as base_aliases
 from nbgrader.apps.customnbconvertapp import flags as base_flags
-from nbgrader.preprocessors import FindStudentID, DisplayAutoGrades
+from nbgrader.preprocessors import DisplayAutoGrades
 
 aliases = {}
 aliases.update(base_aliases)
@@ -59,3 +62,10 @@ class ValidateApp(CustomNbConvertApp):
             'nbgrader.preprocessors.DisplayAutoGrades'
         ]
         self.config.merge(self.extra_config)
+
+    def convert_notebooks(self):
+        self.output_dir = tempfile.mkdtemp()
+        try:
+            super(ValidateApp, self).convert_notebooks()
+        finally:
+            shutil.rmtree(self.output_dir)

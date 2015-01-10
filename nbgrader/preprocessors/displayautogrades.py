@@ -1,4 +1,3 @@
-import sys
 from IPython.nbconvert.preprocessors import Preprocessor
 from IPython.utils.traitlets import Unicode, Integer, Bool
 from nbgrader import utils

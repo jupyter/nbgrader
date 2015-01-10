@@ -82,6 +82,11 @@ class SubmitApp(BaseIPythonApplication):
         )
     )
 
+    def _ipython_dir_default(self):
+        d = os.path.join(os.environ["HOME"], ".nbgrader")
+        self._ipython_dir_changed('ipython_dir', d, d)
+        return d
+
     # The classes added here determine how configuration will be documented
     classes = List()
     def _classes_default(self):
@@ -96,7 +101,7 @@ class SubmitApp(BaseIPythonApplication):
     @catch_config_error
     def initialize(self, argv=None):
         if not os.path.exists(self.ipython_dir):
-            self.log.warning("Creating IPython directory: {}".format(self.ipython_dir))
+            self.log.warning("Creating nbgrader directory: {}".format(self.ipython_dir))
             os.mkdir(self.ipython_dir)
         if not os.path.exists(self.submissions_directory):
             os.makedirs(self.submissions_directory)
