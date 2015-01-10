@@ -4,7 +4,7 @@ from IPython.nbconvert.preprocessors import ClearOutputPreprocessor, ExecutePrep
 from nbgrader.apps.customnbconvertapp import CustomNbConvertApp
 from nbgrader.apps.customnbconvertapp import aliases as base_aliases
 from nbgrader.apps.customnbconvertapp import flags as base_flags
-from nbgrader.preprocessors import FindStudentID, DisplayAutoGrades
+from nbgrader.preprocessors import DisplayAutoGrades
 
 aliases = {}
 aliases.update(base_aliases)
@@ -33,7 +33,6 @@ class ValidateApp(CustomNbConvertApp):
     flags = flags
     examples = examples
     log_level = 50
-    output_dir = "/tmp"
 
     # The classes added here determine how configuration will be documented
     classes = List()

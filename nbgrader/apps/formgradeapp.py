@@ -36,7 +36,6 @@ class FormgradeApp(BaseIPythonApplication):
     aliases = aliases
     flags = flags
     examples = examples
-    ipython_dir = "/tmp/nbgrader"
 
     db_name = Unicode("gradebook", config=True, help="Database name")
     db_ip = Unicode("localhost", config=True, help="IP address for the database")
@@ -46,6 +45,9 @@ class FormgradeApp(BaseIPythonApplication):
     port = Integer(5000, config=True, help="Port for the server")
     base_directory = Unicode('.', config=True, help="Root server directory")
     directory_format = Unicode('{notebook_id}.ipynb', config=True, help="Format string for the directory structure of the autograded notebooks")
+
+    def _ipython_dir_default(self):
+        return os.path.join(os.environ["HOME"], ".nbgrader")
 
     # The classes added here determine how configuration will be documented
     classes = List()

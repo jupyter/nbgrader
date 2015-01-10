@@ -3,7 +3,6 @@
 
 from __future__ import print_function
 
-import logging
 import os
 
 from IPython.utils.traitlets import Unicode, List
@@ -25,7 +24,9 @@ class NBGraderApp(BaseIPythonApplication):
     description = Unicode(u'A system for assigning and grading notebooks')
     version = Unicode(u'0.1')
     examples = Unicode(_examples)
-    ipython_dir = "/tmp/nbgrader"
+
+    def _ipython_dir_default(self):
+        return os.path.join(os.environ["HOME"], ".nbgrader")
 
     # The classes added here determine how configuration will be documented
     classes = List()
@@ -61,9 +62,6 @@ class NBGraderApp(BaseIPythonApplication):
 
     @catch_config_error
     def initialize(self, argv=None):
-        if not os.path.exists(self.ipython_dir):
-            self.log.warning("Creating IPython directory: {}".format(self.ipython_dir))
-            os.mkdir(self.ipython_dir)
         super(NBGraderApp, self).initialize(argv)
         self.stage_default_config_file()
 
