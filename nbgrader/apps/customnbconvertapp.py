@@ -39,7 +39,9 @@ class CustomNbConvertApp(NbConvertApp):
     output_dir = Unicode('', config=True, help="Output directory")
 
     def _ipython_dir_default(self):
-        return os.path.join(os.environ["HOME"], ".nbgrader")
+        d = os.path.join(os.environ["HOME"], ".nbgrader")
+        self._ipython_dir_changed('ipython_dir', d, d)
+        return d
 
     def build_extra_config(self):
         pass

@@ -83,7 +83,9 @@ class SubmitApp(BaseIPythonApplication):
     )
 
     def _ipython_dir_default(self):
-        return os.path.join(os.environ["HOME"], ".nbgrader")
+        d = os.path.join(os.environ["HOME"], ".nbgrader")
+        self._ipython_dir_changed('ipython_dir', d, d)
+        return d
 
     # The classes added here determine how configuration will be documented
     classes = List()

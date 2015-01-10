@@ -47,7 +47,9 @@ class FormgradeApp(BaseIPythonApplication):
     directory_format = Unicode('{notebook_id}.ipynb', config=True, help="Format string for the directory structure of the autograded notebooks")
 
     def _ipython_dir_default(self):
-        return os.path.join(os.environ["HOME"], ".nbgrader")
+        d = os.path.join(os.environ["HOME"], ".nbgrader")
+        self._ipython_dir_changed('ipython_dir', d, d)
+        return d
 
     # The classes added here determine how configuration will be documented
     classes = List()
