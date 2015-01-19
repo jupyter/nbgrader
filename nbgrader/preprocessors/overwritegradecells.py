@@ -37,13 +37,13 @@ class OverwriteGradeCells(Preprocessor):
 
             # we only want the source and checksum for non-solution cells
             if not utils.is_solution(cell) and grade_cell.source:
-                cell.source = grade_cell.source
+                old_checksum = grade_cell.checksum
+                new_checksum = utils.compute_checksum(cell)
 
-                old_checksum = cell.metadata.nbgrader['checksum']
-                new_checksum = grade_cell.checksum
                 if old_checksum != new_checksum:
                     self.log.warning("Checksum for grade cell %s has changed!", grade_cell.grade_id)
 
+                cell.source = grade_cell.source
                 cell.metadata.nbgrader['checksum'] = grade_cell.checksum
 
             self.log.debug("Overwrote grade cell %s", grade_cell.grade_id)
