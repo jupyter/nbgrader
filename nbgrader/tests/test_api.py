@@ -50,3 +50,13 @@ class TestApi(object):
         assert c.notebook == n
         assert c._id
         assert c.to_dict()['notebook'] == n._id
+
+    def test_create_grade_cell(self):
+        a = api.Assignment(assignment_id='foo', duedate='someday')
+        g = api.GradeCell(grade_id='foo', max_score=10, notebook_id='blah', assignment=a)
+        assert g.grade_id == 'foo'
+        assert g.max_score == 10
+        assert g.notebook_id == 'blah'
+        assert g.assignment == a
+        assert g._id
+        assert g.to_dict()['assignment'] == a._id

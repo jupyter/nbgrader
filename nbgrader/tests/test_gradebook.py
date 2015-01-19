@@ -161,3 +161,25 @@ class TestGradebook(object):
 
         all_scores = self.gb.avg_assignment_score(a)
         assert all_scores == dict(avg_score=0, max_score=0)
+
+    def test_add_grade_cell(self):
+        a = self._add_assignment()
+        g1 = api.GradeCell(grade_id='grade1', notebook_id='blah', assignment=a, max_score=2)
+        g2 = self.gb.find_or_create_grade_cell(**g1.to_dict())
+        assert_equal(g1.to_dict(), g2.to_dict())
+        assert_equal(self.gb.find_grade_cell(grade_id='grade1').to_dict(), g1.to_dict())
+
+        grade_cells = self.gb.find_grade_cells(assignment=a, notebook_id='blah')
+        assert len(grade_cells) == 1
+
+        self.gb.find_or_create_grade_cell(grade_id='grade2', assignment=a, notebook_id='blah', max_score=3)
+        grade_cells = self.gb.find_grade_cells(assignment=a, notebook_id='blah')
+        assert len(grade_cells) == 2
+
+        g1.source = "hello\n"
+        g1.checksum = "abcd"
+        self.gb.update_grade_cell(g1)
+
+        g = self.gb.find_grade_cell(_id=g1._id)
+        assert g.source == "hello\n"
+        assert g.checksum == "abcd"
