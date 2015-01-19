@@ -22,8 +22,8 @@ aliases.update({
 flags = {}
 flags.update(base_flags)
 flags.update({
-    'save': (
-        {'AssignApp': {'save': True}},
+    'save-cells': (
+        {'AssignApp': {'save_cells': True}},
         "Save information about grade cells into the database."
     )
 })
@@ -43,7 +43,7 @@ class AssignApp(CustomNbConvertApp):
     flags = flags
     examples = examples
 
-    save = Bool(False, config=True, help="Save information about grade cells into the database.")
+    save_cells = Bool(False, config=True, help="Save information about grade cells into the database.")
 
     # The classes added here determine how configuration will be documented
     classes = List()
@@ -73,7 +73,7 @@ class AssignApp(CustomNbConvertApp):
             'IPython.nbconvert.preprocessors.ClearOutputPreprocessor',
             'nbgrader.preprocessors.ComputeChecksums'
         ]
-        if self.save:
+        if self.save_cells:
             self.extra_config.Exporter.preprocessors.append(
                 'nbgrader.preprocessors.SaveGradeCells'
             )

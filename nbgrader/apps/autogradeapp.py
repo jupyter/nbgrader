@@ -17,8 +17,8 @@ aliases.update({
 flags = {}
 flags.update(base_flags)
 flags.update({
-    'overwrite': (
-        {'AutogradeApp': {'overwrite': True}},
+    'overwrite-cells': (
+        {'AutogradeApp': {'overwrite_cells': True}},
         "Overwrite grade cells from the database."
     )
 })
@@ -38,7 +38,7 @@ class AutogradeApp(CustomNbConvertApp):
     examples = examples
 
     student_id = Unicode(u'', config=True)
-    overwrite = Bool(False, config=True, help="Overwrite grade cells from the database")
+    overwrite_cells = Bool(False, config=True, help="Overwrite grade cells from the database")
 
     # The classes added here determine how configuration will be documented
     classes = List()
@@ -64,7 +64,7 @@ class AutogradeApp(CustomNbConvertApp):
             'nbgrader.preprocessors.FindStudentID',
             'IPython.nbconvert.preprocessors.ClearOutputPreprocessor'
         ]
-        if self.overwrite:
+        if self.overwrite_cells:
             self.extra_config.Exporter.preprocessors.append(
                 'nbgrader.preprocessors.OverwriteGradeCells'
             )
