@@ -167,6 +167,41 @@ class Gradebook(object):
             raise ValueError("The new grade cell must be an GradeCell object")
         return self._add('grade_cells', grade_cell)
 
+    def find_grade_cell(self, **attributes):
+        """Look up a grade cell by its associated attributes. For example:
+
+        >>> gb = Gradebook("example")
+        >>> assignment = gb.find_assignment(assignment_id="Problem Set 0")
+        >>> gb.find_or_create_grade_cell(grade_id="foo", notebook_id="Problem 1", assignment=assignment)
+
+        will find a grade cell with id "foo" in the notebook "Problem
+        1" and with an associated assignment whose id is "Problem Set
+        0". If there is more than one matching grade cell, then an
+        error will be thrown.
+
+        Valid keyword arguments correspond to the attributes for a
+        GradeCell.
+
+        """
+        grade_cell = self._find('grade_cells', attributes)
+        if grade_cell is None:
+            raise ValueError('no such grade cell: {}'.format(attributes))
+        return grade_cell
+
+    def find_grade_cells(self, **attributes):
+        """Find all grade cells matching the given attributes. For example:
+
+        >>> gb = Gradebook("example")
+        >>> gb.find_grade_cells(grade_id="foo")
+
+        will find all grade cells with id "foo".
+
+        Valid keyword arguments correspond to the attributes for a
+        Grade.
+
+        """
+        return self._find_all('grade_cells', attributes)
+
     def find_or_create_grade_cell(self, **attributes):
         """Look up or create a grade cell by its associated attributes. For
         example:

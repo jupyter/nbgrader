@@ -10,5 +10,9 @@ class ComputeChecksums(Preprocessor):
         if utils.is_grade(cell) and not utils.is_solution(cell):
             checksum = utils.compute_checksum(cell)
             cell.metadata.nbgrader['checksum'] = checksum
+            self.log.debug(
+                "Checksum for '%s' is %s",
+                cell.metadata.nbgrader['grade_id'],
+                checksum)
 
         return cell, resources

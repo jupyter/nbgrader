@@ -73,7 +73,7 @@ class AssignApp(CustomNbConvertApp):
             'IPython.nbconvert.preprocessors.ClearOutputPreprocessor',
             'nbgrader.preprocessors.ComputeChecksums'
         ]
-        if self.checksums:
+        if self.save:
             self.extra_config.Exporter.preprocessors.append(
                 'nbgrader.preprocessors.SaveGradeCells'
             )

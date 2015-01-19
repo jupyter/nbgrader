@@ -19,6 +19,10 @@ class SaveGradeCells(Preprocessor):
             assignment_id=self.assignment_id)
         self.notebook_id = resources['unique_key']
 
+        nb, resources = super(SaveGradeCells, self).preprocess(nb, resources)
+
+        return nb, resources
+
     def preprocess_cell(self, cell, resources, cell_index):
         if utils.is_grade(cell) and not utils.is_solution(cell):
             grade_cell = self.gradebook.find_or_create_grade_cell(
@@ -31,6 +35,6 @@ class SaveGradeCells(Preprocessor):
             grade_cell.checksum = cell.metadata.nbgrader['checksum']
 
             self.gradebook.update_grade_cell(grade_cell)
-            self.log.debug(grade_cell)
+            self.log.debug("Recorded grade cell %s into database", grade_cell.grade_id)
 
         return cell, resources
