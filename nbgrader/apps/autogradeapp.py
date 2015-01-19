@@ -1,10 +1,10 @@
 from IPython.config.loader import Config
-from IPython.utils.traitlets import Unicode, List
+from IPython.utils.traitlets import Unicode, List, Bool
 from IPython.nbconvert.preprocessors import ClearOutputPreprocessor, ExecutePreprocessor
 from nbgrader.apps.customnbconvertapp import CustomNbConvertApp
 from nbgrader.apps.customnbconvertapp import aliases as base_aliases
 from nbgrader.apps.customnbconvertapp import flags as base_flags
-from nbgrader.preprocessors import FindStudentID, SaveAutoGrades
+from nbgrader.preprocessors import FindStudentID, SaveAutoGrades, OverwriteGradeCells
 
 aliases = {}
 aliases.update(base_aliases)
@@ -17,6 +17,10 @@ aliases.update({
 flags = {}
 flags.update(base_flags)
 flags.update({
+    'overwrite': (
+        {'AutogradeApp': {'overwrite': True}},
+        "Overwrite grade cells from the database."
+    )
 })
 
 examples = """
@@ -34,6 +38,7 @@ class AutogradeApp(CustomNbConvertApp):
     examples = examples
 
     student_id = Unicode(u'', config=True)
+    overwrite = Bool(False, config=True, help="Overwrite grade cells from the database")
 
     # The classes added here determine how configuration will be documented
     classes = List()
@@ -44,6 +49,7 @@ class AutogradeApp(CustomNbConvertApp):
         classes.extend([
             FindStudentID,
             ClearOutputPreprocessor,
+            OverwriteGradeCells,
             ExecutePreprocessor,
             SaveAutoGrades
         ])
@@ -56,8 +62,14 @@ class AutogradeApp(CustomNbConvertApp):
         self.extra_config = Config()
         self.extra_config.Exporter.preprocessors = [
             'nbgrader.preprocessors.FindStudentID',
-            'IPython.nbconvert.preprocessors.ClearOutputPreprocessor',
+            'IPython.nbconvert.preprocessors.ClearOutputPreprocessor'
+        ]
+        if self.overwrite:
+            self.extra_config.Exporter.preprocessors.append(
+                'nbgrader.preprocessors.OverwriteGradeCells'
+            )
+        self.extra_config.Exporter.preprocessors.extend([
             'IPython.nbconvert.preprocessors.ExecutePreprocessor',
             'nbgrader.preprocessors.SaveAutoGrades'
-        ]
+        ])
         self.config.merge(self.extra_config)
