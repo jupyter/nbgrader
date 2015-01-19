@@ -39,4 +39,8 @@ def compute_checksum(cell):
     if 'points' in cell.metadata.nbgrader:
         m.update(cell.metadata.nbgrader['points'])
 
+    # include the grade_id
+    if 'grade_id' in cell.metadata.nbgrader:
+        m.update(cell.metadata.nbgrader['grade_id'])
+
     return m.hexdigest()
