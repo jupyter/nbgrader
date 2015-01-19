@@ -14,6 +14,15 @@ input.nbgrader-id-input {
     text-align: left;
 }
 
+#nbgrader-total-points {
+    width: 3em;
+    height: 24px;
+    text-align: right;
+    line-height: 10px;
+    margin-left: 0.3em;
+    margin-right: 0.3em;
+}
+
 div.nbgrader-grade-cell {
     background-color: #FFA;
 }
