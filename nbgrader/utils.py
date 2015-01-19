@@ -37,7 +37,7 @@ def compute_checksum(cell):
 
     # include number of points that the cell is worth
     if 'points' in cell.metadata.nbgrader:
-        m.update(cell.metadata.nbgrader['points'])
+        m.update(str(float(cell.metadata.nbgrader['points'])))
 
     # include the grade_id
     if 'grade_id' in cell.metadata.nbgrader:
