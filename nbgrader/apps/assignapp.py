@@ -1,5 +1,5 @@
 from IPython.config.loader import Config
-from IPython.utils.traitlets import Unicode, List
+from IPython.utils.traitlets import Unicode, List, Bool
 from IPython.nbconvert.preprocessors import ClearOutputPreprocessor
 from nbgrader.apps.customnbconvertapp import CustomNbConvertApp
 from nbgrader.apps.customnbconvertapp import aliases as base_aliases
@@ -8,7 +8,8 @@ from nbgrader.preprocessors import (
     IncludeHeaderFooter,
     ClearSolutions,
     LockCells,
-    ComputeChecksums
+    ComputeChecksums,
+    SaveGradeCells
 )
 
 aliases = {}
@@ -21,6 +22,10 @@ aliases.update({
 flags = {}
 flags.update(base_flags)
 flags.update({
+    'save': (
+        {'AssignApp': {'save': True}},
+        "Save information about grade cells into the database."
+    )
 })
 
 examples = """
@@ -38,6 +43,8 @@ class AssignApp(CustomNbConvertApp):
     flags = flags
     examples = examples
 
+    save = Bool(False, config=True, help="Save information about grade cells into the database.")
+
     # The classes added here determine how configuration will be documented
     classes = List()
 
@@ -49,7 +56,8 @@ class AssignApp(CustomNbConvertApp):
             LockCells,
             ClearSolutions,
             ClearOutputPreprocessor,
-            ComputeChecksums
+            ComputeChecksums,
+            SaveGradeCells
         ])
         return classes
 
@@ -63,6 +71,10 @@ class AssignApp(CustomNbConvertApp):
             'nbgrader.preprocessors.LockCells',
             'nbgrader.preprocessors.ClearSolutions',
             'IPython.nbconvert.preprocessors.ClearOutputPreprocessor',
-            'nbgrader.preprocessors.ComputeChecksums',
+            'nbgrader.preprocessors.ComputeChecksums'
         ]
+        if self.checksums:
+            self.extra_config.Exporter.preprocessors.append(
+                'nbgrader.preprocessors.SaveGradeCells'
+            )
         self.config.merge(self.extra_config)

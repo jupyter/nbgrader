@@ -39,6 +39,17 @@ class Document(object):
         return self.to_json()
 
 
+class GradeCell(Document):
+    _defaults = {
+        'grade_id': None,
+        'notebook_id': None,
+        'assignment': None,
+        'max_score': None,
+        'source': None,
+        'checksum': None
+    }
+
+
 class Grade(Document):
     _defaults = {
         'grade_id': None,
@@ -83,6 +94,7 @@ class Assignment(Document):
 
 class Gradebook(object):
     _collections = {
+        'grade_cells': GradeCell,
         'grades': Grade,
         'comments': Comment,
         'students': Student,
@@ -138,6 +150,55 @@ class Gradebook(object):
         for document in self.db[collection].find(new_query):
             documents.append(self._collections[collection](**document))
         return documents
+
+    #### Grade cells
+
+    def add_grade_cell(self, grade_cell):
+        """Add a new grade cell to the gradebook. If the assignent already
+        exists in the gradebook, an error will be thrown.
+
+        Parameters
+        ----------
+        grade_cell: nbgrader.api.GradeCell
+            The new grade cell
+
+        """
+        if not isinstance(grade_cell, GradeCell):
+            raise ValueError("The new grade cell must be an GradeCell object")
+        return self._add('grade_cells', grade_cell)
+
+    def find_or_create_grade_cell(self, **attributes):
+        """Look up or create a grade cell by its associated attributes. For
+        example:
+
+        >>> gb = Gradebook("example")
+        >>> assignment = gb.find_assignment(assignment_id="Problem Set 0")
+        >>> gb.find_or_create_grade_cell(grade_id="foo", notebook_id="Problem 1", assignment=assignment)
+
+        will find a grade cell with id "foo" in the notebook "Problem
+        1" and with an associated assignment whose id is "Problem Set
+        0". If there is more than one matching grade cell, then an
+        error will be thrown.
+
+        If there are no matching grade cells, then a new grade cell
+        will be created with the given attributes.
+
+        Valid keyword arguments correspond to the attributes for a
+        GradeCell.
+
+        """
+        return self._find_or_create('grade_cells', attributes)
+
+    def update_grade_cell(self, grade_cell):
+        """Update a grade cell.
+
+        Parameters
+        ----------
+        grade_cell: nbgrader.api.GradeCell
+            The grade cell to update.
+
+        """
+        self._update('grade_cells', grade_cell)
 
     #### Assignments
 
