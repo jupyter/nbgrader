@@ -20,9 +20,11 @@ define([
 ], function (require, $, IPython, celltoolbar, events) {
     "use strict";
 
+    var nbgrader_preset_name = "Create Assignment";
     var grade_cls = "nbgrader-grade-cell";
+    var total_points = 0;
+
     var CellToolbar = celltoolbar.CellToolbar;
-    var totalPoints = 0;
 
     // trigger an event when the toolbar is being rebuilt
     CellToolbar.prototype._rebuild = CellToolbar.prototype.rebuild;
@@ -34,25 +36,58 @@ define([
     // trigger an event when the toolbar is being (globally) hidden
     CellToolbar._global_hide = CellToolbar.global_hide;
     CellToolbar.global_hide = function () {
+        $("#nbgrader-total-points-group").hide();
+        total_points = 0;
+
         CellToolbar._global_hide();
         for (var i=0; i < CellToolbar._instances.length; i++) {
             events.trigger('global_hide.CellToolbar', CellToolbar._instances[i].cell);
         }
     };
 
+    // show the total points when the preset is activated
+    events.on('preset_activated.CellToolbar', function(evt, preset) {
+        var elem = $("#nbgrader-total-points-group");
+        if (preset.name === nbgrader_preset_name) {
+            if (elem.length == 0) {
+                elem = $("<div />").attr("id", "nbgrader-total-points-group");
+                elem.addClass("btn-group");
+                elem.append($("<span />").text("Total points:"));
+                elem.append($("<input />")
+                            .attr("disabled", "disabled")
+                            .attr("type", "number")
+                            .attr("id", "nbgrader-total-points"));
+                $("#maintoolbar-container").append(elem);
+            }
+            elem.show();
+            update_total();
+        } else {
+            elem.hide();
+            total_points = 0;
+        }
+    });
+
     // remove nbgrader class when the cell is either hidden or rebuilt
     events.on("global_hide.CellToolbar toolbar_rebuild.CellToolbar", function (evt, cell) {
         if (cell.element && cell.element.hasClass(grade_cls)) {
+            if (is_grade(cell)) {
+                total_points -= to_float(cell.metadata.nbgrader.points);
+                update_total();
+            }
             cell.element.removeClass(grade_cls);
         }
     });
 
     var to_float = function(val) {
-        if (val == "") {
+        if (val === undefined || val === "") {
             return 0;
         }
         return parseFloat(val);
-    }
+    };
+
+    var update_total = function() {
+        $("#nbgrader-total-points").attr("value", total_points);
+    };
 
     /**
      * Is the cell a solution cell?
@@ -102,6 +137,10 @@ define([
         lbl.append(chkb);
         chkb.attr("checked", is_grade(cell));
         chkb.click(function () {
+            if (is_grade(cell)) {
+                total_points -= to_float(cell.metadata.nbgrader.points);
+                update_total();
+            }
             cell.metadata.nbgrader.grade = !is_grade(cell);
             celltoolbar.rebuild();
             display_cell(cell);
@@ -160,22 +199,17 @@ define([
         var lbl = $('<label/>').append($('<span/>').text('Points: '));
         lbl.append(text);
 
-        if ($("#nbgrader-total-points").length == 0) {
-            $("#maintoolbar-container").append($("<span />").text("Total points: " + totalPoints).attr("id", "nbgrader-total-points"));
-        }
-
         text.addClass('nbgrader-points-input');
         text.attr("value", cell.metadata.nbgrader.points);
-        totalPoints += to_float(cell.metadata.nbgrader.points);
+        total_points += to_float(cell.metadata.nbgrader.points);
+        update_total();
+
         text.change(function () {
-            totalPoints -= to_float(cell.metadata.nbgrader.points);
+            total_points -= to_float(cell.metadata.nbgrader.points);
             cell.metadata.nbgrader.points = to_float(text.val());
-            totalPoints += to_float(cell.metadata.nbgrader.points);
-            $("#nbgrader-total-points").text("Total points: " + totalPoints);
-
+            total_points += to_float(cell.metadata.nbgrader.points);
+            update_total();
         });
-
-        $("#nbgrader-total-points").text("Total points: " + totalPoints);
 
         local_div.addClass('nbgrader-points');
         $(div).append(local_div.append($('<span/>').append(lbl)));
@@ -203,14 +237,14 @@ define([
         CellToolbar.register_callback('create_assignment.grader_checkbox', create_grader_checkbox);
         CellToolbar.register_callback('create_assignment.id_input', create_id_input);
         CellToolbar.register_callback('create_assignment.points_input', create_points_input);
-
+        
         var preset = [
             'create_assignment.id_input',
             'create_assignment.points_input',
             'create_assignment.grader_checkbox',
             'create_assignment.solution_checkbox'
         ];
-        CellToolbar.register_preset('Create Assignment', preset, IPython.notebook);
+        CellToolbar.register_preset(nbgrader_preset_name, preset, IPython.notebook);
         console.log('nbgrader extension for metadata editing loaded.');
     };
 
