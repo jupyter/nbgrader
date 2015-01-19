@@ -4,7 +4,12 @@ from IPython.nbconvert.preprocessors import ClearOutputPreprocessor
 from nbgrader.apps.customnbconvertapp import CustomNbConvertApp
 from nbgrader.apps.customnbconvertapp import aliases as base_aliases
 from nbgrader.apps.customnbconvertapp import flags as base_flags
-from nbgrader.preprocessors import IncludeHeaderFooter, ClearSolutions, LockCells
+from nbgrader.preprocessors import (
+    IncludeHeaderFooter,
+    ClearSolutions,
+    LockCells,
+    ComputeChecksums
+)
 
 aliases = {}
 aliases.update(base_aliases)
@@ -43,7 +48,8 @@ class AssignApp(CustomNbConvertApp):
             IncludeHeaderFooter,
             LockCells,
             ClearSolutions,
-            ClearOutputPreprocessor
+            ClearOutputPreprocessor,
+            ComputeChecksums
         ])
         return classes
 
@@ -56,6 +62,7 @@ class AssignApp(CustomNbConvertApp):
             'nbgrader.preprocessors.IncludeHeaderFooter',
             'nbgrader.preprocessors.LockCells',
             'nbgrader.preprocessors.ClearSolutions',
-            'IPython.nbconvert.preprocessors.ClearOutputPreprocessor'
+            'IPython.nbconvert.preprocessors.ClearOutputPreprocessor',
+            'nbgrader.preprocessors.ComputeChecksums',
         ]
         self.config.merge(self.extra_config)
