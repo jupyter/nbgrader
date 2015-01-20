@@ -7,3 +7,7 @@ c.AutogradeApp.recursive = True
 c.FindStudentID.regexp = r"submitted/(?P<student_id>.+)/.*.ipynb"
 c.SaveAutoGrades.assignment_id = "Problem Set 1"
 c.SaveAutoGrades.db_name = "example"
+
+# Only necessary if --overwrite-cells is given
+c.OverwriteGradeCells.assignment_id = "Problem Set 1"
+c.OverwriteGradeCells.db_name = "example"
