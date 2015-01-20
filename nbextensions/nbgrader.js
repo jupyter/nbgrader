@@ -14,15 +14,17 @@ define([
     'require',
     'jquery',
     'base/js/namespace',
+    'base/js/dialog',
     'notebook/js/celltoolbar',
     'base/js/events'
 
-], function (require, $, IPython, celltoolbar, events) {
+], function (require, $, IPython, dialog, celltoolbar, events) {
     "use strict";
 
     var nbgrader_preset_name = "Create Assignment";
     var grade_cls = "nbgrader-grade-cell";
     var total_points = 0;
+    var warning;
 
     var CellToolbar = celltoolbar.CellToolbar;
 
@@ -89,6 +91,38 @@ define([
         $("#nbgrader-total-points").attr("value", total_points);
     };
 
+    var validate_ids = function() {
+        var elems, set, i, label;
+
+        if (warning !== undefined) {
+            return;
+        }
+
+        elems = $(".nbgrader-id-input");
+        set = new Object();
+        for (i = 0; i < elems.length; i++) {
+            label = $(elems[i]).val();
+            if (label in set) {
+                warning = dialog.modal({
+                    notebook: IPython.notebook,
+                    keyboard_manager: IPython.keyboard_manager,
+                    title: "Duplicate grade cell ID",
+                    body: "The ID \"" + label + "\" has been used for more than one grade cell. This will cause nbgrader to break! Please make sure all grade cells have unique ids.",
+                    buttons: {
+                        OK: {
+                            class: "btn-primary",
+                            click: function () {
+                                warning = undefined;
+                            }
+                        }
+                    }
+                });
+            } else {
+                set[label] = true;
+            }
+        }
+    };
+
     /**
      * Is the cell a solution cell?
      */
@@ -144,6 +178,7 @@ define([
             cell.metadata.nbgrader.grade = !is_grade(cell);
             celltoolbar.rebuild();
             display_cell(cell);
+            validate_ids();
         });
         display_cell(cell);
         $(div).append($('<span/>').append(lbl));
@@ -175,8 +210,10 @@ define([
 
         text.addClass('nbgrader-id-input');
         text.attr("value", cell.metadata.nbgrader.grade_id);
+        validate_ids();
         text.change(function () {
             cell.metadata.nbgrader.grade_id = text.val();
+            validate_ids();
         });
                 
         local_div.addClass('nbgrader-id');
