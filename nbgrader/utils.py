@@ -1,6 +1,8 @@
 import hashlib
 import autopep8
 
+from IPython.utils.py3compat import str_to_bytes
+
 def is_grade(cell):
     """Returns True if the cell is a grade cell."""
     if 'nbgrader' not in cell.metadata:
@@ -33,14 +35,14 @@ def compute_checksum(cell):
 
     # fix minor whitespace issues that might have been added and then
     # add cell contents
-    m.update(autopep8.fix_code(cell.source).rstrip())
+    m.update(str_to_bytes(autopep8.fix_code(cell.source).rstrip()))
 
     # include number of points that the cell is worth
     if 'points' in cell.metadata.nbgrader:
-        m.update(str(float(cell.metadata.nbgrader['points'])))
+        m.update(str_to_bytes(str(float(cell.metadata.nbgrader['points']))))
 
     # include the grade_id
     if 'grade_id' in cell.metadata.nbgrader:
-        m.update(cell.metadata.nbgrader['grade_id'])
+        m.update(str_to_bytes(cell.metadata.nbgrader['grade_id']))
 
     return m.hexdigest()
