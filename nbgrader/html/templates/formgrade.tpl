@@ -101,7 +101,7 @@ var nb_uuid = "{{ resources.notebook_uuid }}";
 {% endblock footer %}
 
 {%- block any_cell scoped -%}
-{%- if cell.metadata.nbgrader.grade -%}
+{%- if 'nbgrader' in cell.metadata and cell.metadata.nbgrader.grade -%}
 <div class="cell border-box-sizing code_cell rendered">
   <div class="input">
     <div class="prompt input_prompt">
@@ -121,7 +121,7 @@ var nb_uuid = "{{ resources.notebook_uuid }}";
 </div>
 {%- endif -%}
 {{ super() }}
-{%- if cell.metadata.nbgrader.solution -%}
+{%- if 'nbgrader' in cell.metadata and cell.metadata.nbgrader.solution -%}
 <div class="cell border-box-sizing code_cell rendered">
   <div class="input">
     <div class="prompt input_prompt">
