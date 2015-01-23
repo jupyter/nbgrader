@@ -5,7 +5,7 @@ var Grade = Backbone.Model.extend({
     urlRoot: "/api/grade",
     initialize: function () {
         var elem = $("#" + this.get("grade_id"));
-        var glyph = $(elem.siblings()[0]);
+        var glyph = $("#" + this.get("grade_id") + "-saved");
         elem.val(this.get("score"));
         elem.attr("placeholder", this.get("autoscore"));
         glyph.hide();
@@ -46,7 +46,7 @@ var Comment = Backbone.Model.extend({
     urlRoot: "/api/comment",
     initialize: function () {
         var elem = $($(".comment")[this.get("comment_id")]);
-        var glyph = $($(elem.siblings()[0]).children()[0]);
+        var glyph = $($(".comment-saved")[this.get("comment_id")]);
         elem.val(this.get("comment"));
         glyph.hide();
 
