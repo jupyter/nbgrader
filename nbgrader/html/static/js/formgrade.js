@@ -116,8 +116,8 @@ $(window).load(function () {
     $("li.previous a").tooltip({container: 'body'});
     $("li.next a").tooltip({container: 'body'});
 
+    // disable link selection on tabs
     $('a').attr('tabindex', '-1');
-    $('li.next a').attr('tabindex', $("input, textarea").length - 1);
 
     $("input, textarea").on('keydown', function(e) { 
         var keyCode = e.keyCode || e.which;
