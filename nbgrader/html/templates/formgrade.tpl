@@ -100,42 +100,84 @@ var nb_uuid = "{{ resources.notebook_uuid }}";
 </html>
 {% endblock footer %}
 
-{%- block any_cell scoped -%}
-{%- if 'nbgrader' in cell.metadata and cell.metadata.nbgrader.grade -%}
-<div class="cell border-box-sizing code_cell rendered">
-  <div class="input">
-    <div class="prompt input_prompt">
-      {%- if cell.prompt_number is defined -%}
-      Score[{{ cell.prompt_number|replace(None, "&nbsp;") }}]:
-      {%- else -%}
-      Score:
-      {%- endif -%}
-    </div>
-    <div class="inner_cell">
-      <div style="display: inline;">
-        <input class="score" id="{{ cell.metadata.nbgrader.grade_id }}" style="width: 4em;" type="number" /> / {{ cell.metadata.nbgrader.points }}
-        <span style="margin-left: 1em;" class="glyphicon glyphicon-floppy-saved"></span>
+{% macro score(cell) -%}
+  <span id="{{ cell.metadata.nbgrader.grade_id }}-saved" class="glyphicon glyphicon-floppy-saved save-icon"></span>
+  <span class="pull-right">
+    Score: <input class="score" id="{{ cell.metadata.nbgrader.grade_id }}" style="width: 4em;" type="number" /> / {{ cell.metadata.nbgrader.points }}
+  </span>
+{%- endmacro %}
+
+
+{% macro nbgrader_heading(cell) -%}
+<div class="panel-heading">
+{%- if cell.metadata.nbgrader.solution -%}
+  <span class="nbgrader-label">Student's answer</span>
+  <span class="glyphicon glyphicon-floppy-saved comment-saved save-icon"></span>
+  {%- if cell.metadata.nbgrader.grade -%}
+  {{ score(cell) }}
+  {%- endif -%}
+{%- elif cell.metadata.nbgrader.grade -%}
+  <span class="nbgrader-label">Grade cell: <code>{{ cell.metadata.nbgrader.grade_id }}</code></span>
+  {{ score(cell) }}
+{%- endif -%}
+</div>  
+{%- endmacro %}
+
+{% macro nbgrader_footer(cell) -%}
+{%- if cell.metadata.nbgrader.solution -%}
+<div class="panel-footer">
+  <div><textarea class="comment" placeholder="Comments"></textarea></div>
+</div>
+{%- endif -%}
+{%- endmacro %}
+
+{% block markdowncell scoped %}
+<div class="cell border-box-sizing text_cell rendered">
+  {{ self.empty_in_prompt() }}
+
+  {%- if 'nbgrader' in cell.metadata and (cell.metadata.nbgrader.solution or cell.metadata.nbgrader.grade) -%}
+  <div class="panel panel-primary nbgrader_cell">
+    {{ nbgrader_heading(cell) }}
+    <div class="panel-body">
+      <div class="text_cell_render border-box-sizing rendered_html">
+        {{ cell.source  | markdown2html | strip_files_prefix }}
       </div>
     </div>
+    {{ nbgrader_footer(cell) }}
   </div>
-</div>
-{%- endif -%}
-{{ super() }}
-{%- if 'nbgrader' in cell.metadata and cell.metadata.nbgrader.solution -%}
-<div class="cell border-box-sizing code_cell rendered">
-  <div class="input">
-    <div class="prompt input_prompt">
-      {%- if cell.prompt_number is defined -%}
-      Comments[{{ cell.prompt_number|replace(None, "&nbsp;") }}]:
-      {%- else -%}
-      Comments:
-      {%- endif -%}
-    </div>
-    <div class="inner_cell">
-      <p style="margin: 0.4em 0;">Instructor feedback:<span style="margin-left: 1em;" class="glyphicon glyphicon-floppy-saved"></span></p>
-      <textarea class="comment" placeholder="Comments"></textarea>
+
+  {%- else -%}
+
+  <div class="inner_cell">
+    <div class="text_cell_render border-box-sizing rendered_html">
+      {{ cell.source  | markdown2html | strip_files_prefix }}
     </div>
   </div>
+
+  {%- endif -%}
+
 </div>
-{%- endif -%}
-{%- endblock any_cell -%}
+{% endblock markdowncell %}
+
+{% block input %}
+  {%- if 'nbgrader' in cell.metadata and (cell.metadata.nbgrader.solution or cell.metadata.nbgrader.grade) -%}
+  <div class="panel panel-primary nbgrader_cell">
+    {{ nbgrader_heading(cell) }}
+    <div class="panel-body">
+      <div class="input_area">
+        {{ cell.source | highlight_code(metadata=cell.metadata) }}
+      </div>
+    </div>
+    {{ nbgrader_footer(cell) }}
+  </div>
+
+  {%- else -%}
+  
+  <div class="inner_cell">
+    <div class="input_area">
+      {{ cell.source | highlight_code(metadata=cell.metadata) }}
+    </div>
+  </div>
+  {%- endif -%}
+
+{% endblock input %}

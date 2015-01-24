@@ -5,7 +5,7 @@ var Grade = Backbone.Model.extend({
     urlRoot: "/api/grade",
     initialize: function () {
         var elem = $("#" + this.get("grade_id"));
-        var glyph = $(elem.siblings()[0]);
+        var glyph = $("#" + this.get("grade_id") + "-saved");
         elem.val(this.get("score"));
         elem.attr("placeholder", this.get("autoscore"));
         glyph.hide();
@@ -46,7 +46,7 @@ var Comment = Backbone.Model.extend({
     urlRoot: "/api/comment",
     initialize: function () {
         var elem = $($(".comment")[this.get("comment_id")]);
-        var glyph = $($(elem.siblings()[0]).children()[0]);
+        var glyph = $($(".comment-saved")[this.get("comment_id")]);
         elem.val(this.get("comment"));
         glyph.hide();
 
@@ -76,10 +76,37 @@ var Comments = Backbone.Collection.extend({
     url: "/api/notebook/" + nb_uuid + "/comments"
 });
 
+var getIndex = function (elem) {
+    var elems = $("input, textarea");
+    return elems.index(elem);
+};
+
+var selectNext = function (target, shift) {
+    var index, elems;
+    elems = $("input, textarea");
+    if (shift) {
+        index = getIndex(target) - 1;
+    } else {
+        index = getIndex(target) + 1;
+    }
+    if (index === elems.length) {
+        index = 0;
+    } else if (index === -1) {
+        index = elems.length - 1;
+    }
+    $(elems[index]).select();
+};
+
+var scrollTo = function (elem) {
+    var target = elem.closest(".nbgrader_cell");
+    return target.offset().top - $(window).height() * 0.33 + 60;
+};
+
 var grades;
 var comments;
+var last_selected;
     
-$(document).ready(function () {
+$(window).load(function () {
     grades = new Grades();
     grades.fetch();
 
@@ -88,4 +115,55 @@ $(document).ready(function () {
 
     $("li.previous a").tooltip({container: 'body'});
     $("li.next a").tooltip({container: 'body'});
+
+    // disable link selection on tabs
+    $('a').attr('tabindex', '-1');
+
+    $("input, textarea").on('keydown', function(e) { 
+        var keyCode = e.keyCode || e.which;
+
+        if (keyCode === 9) { // tab
+            e.preventDefault();
+            e.stopPropagation();
+            selectNext(e.currentTarget, e.shiftKey);
+            
+        } else if (keyCode === 27) { // escape
+            $(e.currentTarget).blur();
+        }
+    });
+
+    $("body").on('keydown', function(e) {
+        var keyCode = e.keyCode || e.which;
+        var href;
+
+        if (keyCode === 9) { // tab
+            e.preventDefault();
+            selectNext(last_selected, e.shiftKey);
+
+        } else if (keyCode === 13) { // enter
+            last_selected.select();
+        } else if (keyCode == 39 && e.shiftKey) {
+            href = $("li.next a").attr("href");
+            if (href) {
+                window.location = href + "#" + getIndex(last_selected);
+            }
+        } else if (keyCode == 37 && e.shiftKey) {
+            href = $("li.previous a").attr("href");
+            if (href) {
+                window.location = href + "#" + getIndex(last_selected);
+            }
+        }
+    });
+
+    var index = parseInt(document.URL.split('#')[1]) || 0;
+    last_selected = $($("input, textarea")[index]);
+    last_selected.select();
+    $("body, html").stop().scrollTop(scrollTo(last_selected));
+
+    $("input, textarea").focus(function (event) {
+        last_selected = $(event.currentTarget);
+        $("body, html").stop().animate({
+            scrollTop: scrollTo(last_selected)
+        }, 500);
+    });
 });
