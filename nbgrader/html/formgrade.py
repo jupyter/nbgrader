@@ -31,7 +31,7 @@ def view_assignments():
 
 @app.route("/students/")
 def view_students():
-    students = [x.to_dict() for x in app.gradebook.students]
+    students = sorted([x.to_dict() for x in app.gradebook.students], key=lambda x: x["last_name"])
     for student in students:
         student.update(app.gradebook.student_score(student["_id"]))
     return render_template("students.tpl", students=students)
@@ -98,6 +98,8 @@ def view_assignment_notebook(assignment_id, notebook_id):
 
         submission["student"] = student.to_dict()
         submissions.append(submission)
+
+    submissions = sorted(submissions, key=lambda x: x["student"]["last_name"])
 
     return render_template(
         "notebook_submissions.tpl",
@@ -172,7 +174,9 @@ def view_submission(assignment_id, notebook_id, student_id):
     students = []
     for submission in app.gradebook.find_notebooks(assignment=assignment, notebook_id=notebook_id):
         s = app.gradebook.find_student(_id=submission.student)
-        students.append(s._id)
+        students.append(s.to_dict())
+    students = sorted(students, key=lambda x: x["last_name"])
+    students = [x["_id"] for x in students]
 
     ix = students.index(student._id)
     if ix == 0:
