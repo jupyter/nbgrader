@@ -1,4 +1,5 @@
 import json
+import warnings
 from uuid import uuid4
 from pymongo import MongoClient
 from pymongo.errors import DuplicateKeyError
@@ -579,12 +580,16 @@ class Gradebook(object):
             scores = [self.notebook_score(nb) for nb in notebooks]
             avg_score = sum([s["score"] for s in scores]) / float(len(scores))
             max_score = set([s["max_score"] for s in scores])
-            assert len(max_score) == 1
+
+            if len(max_score) > 1:
+                warnings.warn("Multiple max scores: {}".format(max_score))
+
             all_scores.append({
                 "notebook_id": notebook_id,
                 "avg_score": avg_score,
                 "max_score": list(max_score)[0]
             })
+
         return all_scores
 
     def avg_assignment_score(self, assignment):
@@ -596,7 +601,10 @@ class Gradebook(object):
         else:
             avg_score = 0
             max_score = set([0])
-        assert len(max_score) == 1
+
+        if len(max_score) > 1:
+            warnings.warn("Multiple max scores: {}".format(max_score))
+
         all_scores = {
             "avg_score": avg_score,
             "max_score": list(max_score)[0]
