@@ -44,6 +44,7 @@ class OverwriteGradeCells(Preprocessor):
                     self.log.warning("Checksum for grade cell %s has changed!", grade_cell.grade_id)
 
                 cell.source = grade_cell.source
+                cell.cell_type = grade_cell.cell_type
                 cell.metadata.nbgrader['checksum'] = grade_cell.checksum
 
             self.log.debug("Overwrote grade cell %s", grade_cell.grade_id)

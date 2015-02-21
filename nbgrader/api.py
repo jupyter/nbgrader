@@ -46,6 +46,7 @@ class GradeCell(Document):
         'assignment': None,
         'max_score': None,
         'source': None,
+        'cell_type': None,
         'checksum': None
     }
 
