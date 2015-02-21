@@ -28,8 +28,8 @@
     <td><a href="/assignments/{{ assignment.assignment_id }}">{{ assignment.assignment_id }}</a></td>
     <td class="center">{{ assignment.duedate }}</td>
     <td class="center">{{ assignment.num_submissions }}</td>
-    <td class="center">{{ assignment.avg_score }}</td>
-    <td class="center">{{ assignment.max_score }}</td>
+    <td class="center">{{ assignment.avg_score | float | round(2) }}</td>
+    <td class="center">{{ assignment.max_score | float | round(2) }}</td>
   </tr>
   {%- endfor -%}
 </tbody>

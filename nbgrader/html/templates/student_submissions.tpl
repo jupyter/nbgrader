@@ -29,7 +29,7 @@
         {{ submission.notebook_id }}
       </a>
     </td>
-    <td class="center">{{ submission.score }} / {{ submission.max_score }}</td>
+    <td class="center">{{ submission.score | float | round(2) }} / {{ submission.max_score | float | round(2) }}</td>
     <td class="center">
       {%- if submission.needs_manual_grade -%}
       <span class="glyphicon glyphicon-ok"></span>
