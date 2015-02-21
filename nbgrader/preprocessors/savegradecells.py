@@ -36,9 +36,11 @@ class SaveGradeCells(Preprocessor):
             if utils.is_solution(cell):
                 grade_cell.source = None
                 grade_cell.checksum = None
+                grade_cell.cell_type = None
             else:
                 grade_cell.source = cell.source
                 grade_cell.checksum = cell.metadata.nbgrader['checksum']
+                grade_cell.cell_type = cell.cell_type
 
             self.gradebook.update_grade_cell(grade_cell)
             self.log.debug("Recorded grade cell %s into database", grade_cell.grade_id)

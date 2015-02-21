@@ -37,6 +37,9 @@ def compute_checksum(cell):
     # add cell contents
     m.update(str_to_bytes(autopep8.fix_code(cell.source).rstrip()))
 
+    # add the cell type
+    m.update(str_to_bytes(cell.cell_type))
+
     # include number of points that the cell is worth
     if 'points' in cell.metadata.nbgrader:
         m.update(str_to_bytes(str(float(cell.metadata.nbgrader['points']))))
