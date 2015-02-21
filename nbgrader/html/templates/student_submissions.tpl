@@ -2,7 +2,7 @@
 
 {%- block breadcrumb -%}
 <li><a href="/students">Students</a></li>
-<li><a href="/students/{{ student_id }}">{{ student.student_id }}</a></li>
+<li><a href="/students/{{ student.student_id }}">{{ student.student_id }}</a></li>
 <li class="active">{{ assignment_id }}</li>
 {%- endblock -%}
 
