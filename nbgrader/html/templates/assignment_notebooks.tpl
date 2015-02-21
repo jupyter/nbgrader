@@ -25,8 +25,8 @@
   {%- for notebook in notebooks -%}
   <tr>
     <td><a href="/assignments/{{ assignment.assignment_id }}/{{ notebook.notebook_id }}">{{ notebook.notebook_id }}</a></td>
-    <td class="center">{{ notebook.avg_score }}</td>
-    <td class="center">{{ notebook.max_score }}</td>
+    <td class="center">{{ notebook.avg_score | float | round(2) }}</td>
+    <td class="center">{{ notebook.max_score | float | round(2) }}</td>
   </tr>
   {%- endfor -%}
 </tbody>

@@ -103,7 +103,7 @@ var nb_uuid = "{{ resources.notebook_uuid }}";
 {% macro score(cell) -%}
   <span id="{{ cell.metadata.nbgrader.grade_id }}-saved" class="glyphicon glyphicon-floppy-saved save-icon"></span>
   <span class="pull-right">
-    Score: <input class="score" id="{{ cell.metadata.nbgrader.grade_id }}" style="width: 4em;" type="number" /> / {{ cell.metadata.nbgrader.points }}
+    Score: <input class="score" id="{{ cell.metadata.nbgrader.grade_id }}" style="width: 4em;" type="number" /> / {{ cell.metadata.nbgrader.points | float | round(2) }}
   </span>
 {%- endmacro %}
 

@@ -23,6 +23,7 @@ def home():
 @app.route("/assignments/")
 def view_assignments():
     assignments = [x.to_dict() for x in app.gradebook.assignments]
+    assignments.sort(key=lambda x: x['assignment_id'])
     for assignment in assignments:
         all_notebooks = app.gradebook.find_notebooks(assignment=assignment["_id"])
         assignment['num_submissions'] = len(set([x.student for x in all_notebooks]))
@@ -31,7 +32,8 @@ def view_assignments():
 
 @app.route("/students/")
 def view_students():
-    students = sorted([x.to_dict() for x in app.gradebook.students], key=lambda x: x["last_name"])
+    students = [x.to_dict() for x in app.gradebook.students]
+    students.sort(key=lambda x: x["last_name"])
     for student in students:
         student.update(app.gradebook.student_score(student["_id"]))
     return render_template("students.tpl", students=students)
@@ -44,6 +46,7 @@ def view_assignment(assignment_id):
         abort(404)
 
     notebooks = app.gradebook.avg_notebook_scores(assignment)
+    notebooks.sort(key=lambda x: x['notebook_id'])
     return render_template(
         "assignment_notebooks.tpl",
         assignment=assignment,
@@ -57,6 +60,7 @@ def view_student(student_id):
         abort(404)
 
     assignments = [x.to_dict() for x in app.gradebook.assignments]
+    assignments.sort(key=lambda x: x['assignment_id'])
     for assignment in assignments:
         score = app.gradebook.assignment_score(assignment["_id"], student)
         if score:
@@ -99,7 +103,7 @@ def view_assignment_notebook(assignment_id, notebook_id):
         submission["student"] = student.to_dict()
         submissions.append(submission)
 
-    submissions = sorted(submissions, key=lambda x: x["student"]["last_name"])
+    submissions.sort(key=lambda x: x["student"]["last_name"])
 
     return render_template(
         "notebook_submissions.tpl",
@@ -122,6 +126,8 @@ def view_student_assignment(student_id, assignment_id):
         score = app.gradebook.notebook_score(submission["_id"])
         submission.update(score)
         submissions.append(submission)
+
+    submissions.sort(key=lambda x: x['notebook_id'])
 
     return render_template(
         "student_submissions.tpl",

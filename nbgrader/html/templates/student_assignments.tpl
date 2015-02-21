@@ -41,7 +41,7 @@
     </td>
     <td class="center">
       {%- if assignment.score != None -%}
-      {{ assignment.score }} / {{ assignment.max_score }}
+      {{ assignment.score | float | round(2) }} / {{ assignment.max_score | float | round(2) }}
       {%- else -%}
       -
       {%- endif -%}
