@@ -572,19 +572,16 @@ class Gradebook(object):
                 score["needs_manual_grade"] = True
         return score
 
-    def avg_notebook_scores(self, assignment):
+    def avg_notebook_scores(self, assignment, precision=4):
         all_scores = []
         assignment_notebooks = self.get_assignment_notebooks(assignment)
         notebook_ids = sorted(assignment_notebooks.keys())
         for notebook_id in notebook_ids:
             notebooks = assignment_notebooks[notebook_id]
             scores = [self.notebook_score(nb) for nb in notebooks]
-            avg_score = sum([s["score"] for s in scores]) / float(len(scores))
-            max_score = set([s["max_score"] for s in scores])
-
-            if len(max_score) > 1:
-                warnings.warn("Multiple max scores: {}".format(max_score))
-
+            avg_score = sum([round(s["score"], precision) for s in scores]) / float(len(scores))
+            max_score = set([round(s["max_score"], precision) for s in scores])
+            assert len(max_score) == 1
             all_scores.append({
                 "notebook_id": notebook_id,
                 "avg_score": avg_score,
@@ -593,19 +590,16 @@ class Gradebook(object):
 
         return all_scores
 
-    def avg_assignment_score(self, assignment):
+    def avg_assignment_score(self, assignment, precision=4):
         scores = [self.assignment_score(assignment, student) for student in self.students]
         scores = [s for s in scores if s is not None]
         if len(scores) > 0:
-            avg_score = sum([s["score"] for s in scores]) / float(len(scores))
-            max_score = set([s["max_score"] for s in scores])
+            avg_score = sum([round(s["score"], precision) for s in scores]) / float(len(scores))
+            max_score = set([round(s["max_score"], precision) for s in scores])
         else:
             avg_score = 0
             max_score = set([0])
-
-        if len(max_score) > 1:
-            warnings.warn("Multiple max scores: {}".format(max_score))
-
+        assert len(max_score) == 1
         all_scores = {
             "avg_score": avg_score,
             "max_score": list(max_score)[0]
