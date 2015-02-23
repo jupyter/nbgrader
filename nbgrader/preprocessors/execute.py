@@ -12,9 +12,10 @@ class Execute(ExecutePreprocessor):
 
     def preprocess(self, nb, resources):
         kernel_name = nb.metadata.get('kernelspec', {}).get('name', 'python')
+        extra_arguments = self.extra_arguments + ["--HistoryManager.hist_file=:memory:"]
 
         self.km = KernelManager(kernel_name=kernel_name)
-        self.km.start_kernel(startup_timeout=60, extra_arguments=self.extra_arguments)
+        self.km.start_kernel(startup_timeout=60, extra_arguments=extra_arguments)
         self.kc = self.km.client()
         self.kc.start_channels(stdin=False)
         self.kc.wait_for_ready()
