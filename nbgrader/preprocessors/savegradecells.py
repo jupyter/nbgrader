@@ -24,17 +24,16 @@ class SaveGradeCells(Preprocessor):
 
     def preprocess_cell(self, cell, resources, cell_index):
         if utils.is_grade(cell):
-            max_score = float(cell.metadata.nbgrader['points'])            
+            max_score = float(cell.metadata.nbgrader['points']) 
+            cell_type = cell.cell_type           
 
             # we only want the source and checksum for non-solution cells
             if utils.is_solution(cell):
                 source = None
                 checksum = None
-                cell_type = None
             else:
                 source = cell.source
                 checksum = cell.metadata.nbgrader['checksum']
-                cell_type = cell.cell_type
 
             grade_cell = self.gradebook.update_or_create_grade_cell(
                 cell.metadata.nbgrader.grade_id,

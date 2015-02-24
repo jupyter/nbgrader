@@ -16,6 +16,8 @@
 
 <script type="text/javascript">
 var submission_id = "{{ resources.submission_id }}";
+var notebook_id = "{{ resources.notebook_id }}";
+var assignment_id = "{{ resources.assignment_id }}";
 </script>
 
 <script src="/static/js/formgrade.js"></script>

@@ -1,3 +1,5 @@
+from __future__ import division
+
 from sqlalchemy import create_engine, ForeignKey, Column, String, Text, DateTime, Float, Enum
 from sqlalchemy.orm import sessionmaker, scoped_session, relationship
 from sqlalchemy.orm.exc import NoResultFound
@@ -12,6 +14,13 @@ def new_uuid():
     return uuid4().hex
 
 
+def mean(x):
+    if len(x) == 0:
+        return 0.0
+    else:
+        return sum(x) / len(x)
+
+
 class Assignment(Base):
     __tablename__ = "assignment"
 
@@ -19,13 +28,49 @@ class Assignment(Base):
     name = Column(String(128), unique=True, nullable=False)
     duedate = Column(DateTime())
 
-    notebooks = relationship("Notebook", backref="assignment")
-
+    notebooks = relationship("Notebook", backref="assignment", order_by="Notebook.name")
     submissions = relationship("SubmittedAssignment", backref="assignment")
 
     @property
     def max_score(self):
         return sum([n.max_score for n in self.notebooks])
+
+    @property
+    def max_code_score(self):
+        return sum([n.max_code_score for n in self.notebooks])
+
+    @property
+    def max_written_score(self):
+        return sum([n.max_written_score for n in self.notebooks])
+
+    @property
+    def num_submissions(self):
+        return len(self.submissions)
+
+    @property
+    def average_score(self):
+        return mean([n.score for n in self.submissions])
+
+    @property
+    def average_code_score(self):
+        return mean([n.code_score for n in self.submissions])
+
+    @property
+    def average_written_score(self):
+        return mean([n.written_score for n in self.submissions])
+
+    def to_dict(self):
+        return {
+            "name": self.name,
+            "duedate": self.duedate,
+            "num_submissions": self.num_submissions,
+            "average_score": self.average_score,
+            "max_score": self.max_score,
+            "average_code_score": self.average_code_score,
+            "max_code_score": self.max_code_score,
+            "average_written_score": self.average_written_score,
+            "max_written_score": self.max_written_score,
+        }
 
     def __repr__(self):
         return self.name
@@ -54,6 +99,29 @@ class Notebook(Base):
     @property
     def max_written_score(self):
         return sum([g.max_score for g in self.grade_cells if g.cell_type == "markdown"])
+
+    @property
+    def average_score(self):
+        return mean([n.score for n in self.submissions])
+
+    @property
+    def average_code_score(self):
+        return mean([n.code_score for n in self.submissions])
+
+    @property
+    def average_written_score(self):
+        return mean([n.written_score for n in self.submissions])
+
+    def to_dict(self):
+        return {
+            "name": self.name,
+            "max_score": self.max_score,
+            "max_code_score": self.max_code_score,
+            "max_written_score": self.max_written_score,
+            "average_score": self.average_score,
+            "average_code_score": self.average_code_score,
+            "average_written_score": self.average_written_score
+        }        
 
     def __repr__(self):
         return "{}/{}".format(self.assignment, self.name)
@@ -105,6 +173,24 @@ class Student(Base):
 
     submissions = relationship("SubmittedAssignment", backref="student")
 
+    @property
+    def score(self):
+        return sum([s.score for s in self.submissions])
+
+    @property
+    def max_score(self):
+        return sum([s.max_score for s in self.submissions])
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "first_name": self.first_name,
+            "last_name": self.last_name,
+            "email": self.email,
+            "score": self.score,
+            "max_score": self.max_score
+        }
+
     def __repr__(self):
         return self.id
 
@@ -125,6 +211,40 @@ class SubmittedAssignment(Base):
     @property
     def max_score(self):
         return self.assignment.max_score
+
+    @property
+    def code_score(self):
+        return sum([n.code_score for n in self.notebooks])
+
+    @property
+    def max_code_score(self):
+        return self.assignment.max_code_score
+
+    @property
+    def written_score(self):
+        return sum([n.written_score for n in self.notebooks])
+
+    @property
+    def max_written_score(self):
+        return self.assignment.max_written_score
+
+    @property
+    def needs_manual_grade(self):
+        return any([n.needs_manual_grade for n in self.notebooks])
+
+    def to_dict(self):
+        return {
+            "name": self.assignment.name,
+            "student": self.student.id,
+            "duedate": self.assignment.duedate,
+            "score": self.score,
+            "max_score": self.max_score,
+            "code_score": self.code_score,
+            "max_code_score": self.max_code_score,
+            "written_score": self.written_score,
+            "max_written_score": self.max_written_score,
+            "needs_manual_grade": self.needs_manual_grade
+        }
 
     def __repr__(self):
         return "{} for {}".format(self.assignment, self.student)
@@ -166,6 +286,23 @@ class SubmittedNotebook(Base):
     def max_written_score(self):
         return self.notebook.max_written_score
 
+    @property
+    def needs_manual_grade(self):
+        return any([g.needs_manual_grade for g in self.grades])
+
+    def to_dict(self):
+        return {
+            "name": self.notebook.name,
+            "student": self.student.to_dict(),
+            "score": self.score,
+            "max_score": self.max_score,
+            "code_score": self.code_score,
+            "max_code_score": self.max_code_score,
+            "written_score": self.written_score,
+            "max_written_score": self.max_written_score,
+            "needs_manual_grade": self.needs_manual_grade
+        }
+
     def __repr__(self):
         return "{} for {}".format(self.notebook, self.student)
 
@@ -191,7 +328,24 @@ class Grade(Base):
         elif self.auto_score is not None:
             return self.auto_score
         else:
-            return float('nan')
+            return 0.0
+
+    @property
+    def needs_manual_grade(self):
+        return self.cell.cell_type == "markdown" and self.manual_score is None
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "name": self.cell.name,
+            "notebook": self.notebook.notebook.name,
+            "assignment": self.assignment.assignment.name,
+            "student": self.student.id,
+            "auto_score": self.auto_score,
+            "manual_score": self.manual_score,
+            "max_score": self.max_score,
+            "needs_manual_grade": self.needs_manual_grade
+        }
 
     def __repr__(self):
         return "{} for {}".format(self.cell, self.student)
@@ -208,6 +362,16 @@ class Comment(Base):
 
     assignment = association_proxy('notebook', 'assignment')
     student = association_proxy('notebook', 'student')
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "name": self.cell.name,
+            "notebook": self.notebook.notebook.name,
+            "assignment": self.assignment.assignment.name,
+            "student": self.student.id,
+            "comment": self.comment,
+        }
 
     def __repr__(self):
         return "{} for {}".format(self.cell, self.student)
@@ -390,6 +554,21 @@ class Gradebook(object):
             .filter(Assignment.name == assignment, Student.id == student)\
             .one()
 
+    def find_submission_notebook(self, name, assignment, student):
+        return self.db.query(SubmittedNotebook)\
+            .join(Notebook, Notebook.id == SubmittedNotebook.notebook_id)\
+            .join(SubmittedAssignment, SubmittedAssignment.id == SubmittedNotebook.assignment_id)\
+            .join(Assignment, Assignment.id == SubmittedAssignment.assignment_id)\
+            .join(Student, Student.id == SubmittedAssignment.student_id)\
+            .filter(
+                Notebook.name == name,
+                Assignment.name == assignment,
+                Student.id == student)\
+            .one()
+
+    def find_submission_notebook_by_id(self, notebook_id):
+        return self.db.query(SubmittedNotebook).filter(SubmittedNotebook.id == notebook_id).one()
+
     def find_grade(self, name, notebook, assignment, student):
         return self.db.query(Grade)\
             .join(GradeCell, GradeCell.id == Grade.cell_id)\
@@ -405,6 +584,9 @@ class Gradebook(object):
                 Student.id == student)\
             .one()
 
+    def find_grade_by_id(self, grade_id):
+        return self.db.query(Grade).filter(Grade.id == grade_id).one()
+
     def find_comment(self, name, notebook, assignment, student):
         return self.db.query(Comment)\
             .join(SolutionCell, SolutionCell.id == Comment.cell_id)\
@@ -419,6 +601,9 @@ class Gradebook(object):
                 Assignment.name == assignment,
                 Student.id == student)\
             .one()
+
+    def find_comment_by_id(self, comment_id):
+        return self.db.query(Comment).filter(Comment.id == comment_id).one()
 
     def update_or_create_submission(self, assignment, student, **kwargs):
         try:

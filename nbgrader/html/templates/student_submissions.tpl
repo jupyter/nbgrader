@@ -2,7 +2,7 @@
 
 {%- block breadcrumb -%}
 <li><a href="/students">Students</a></li>
-<li><a href="/students/{{ student.student_id }}">{{ student.student_id }}</a></li>
+<li><a href="/students/{{ student.id }}">{{ student.id }}</a></li>
 <li class="active">{{ assignment_id }}</li>
 {%- endblock -%}
 
@@ -17,7 +17,9 @@
 <thead>
   <tr>
     <th>Notebook ID</th>
-    <th class="center">Score</th>
+    <th class="center">Overall Score</th>
+    <th class="center">Code Score</th>
+    <th class="center">Written Score</th>
     <th class="center">Manual grade?</th>
   </tr>
 </thead>
@@ -25,11 +27,13 @@
   {%- for submission in submissions -%}
   <tr>
     <td>
-      <a href="/assignments/{{ assignment_id }}/{{ submission.notebook_id }}/{{ student.student_id }}">
-        {{ submission.notebook_id }}
+      <a href="/assignments/{{ assignment_id }}/{{ submission.name }}/{{ student.id }}">
+        {{ submission.name }}
       </a>
     </td>
     <td class="center">{{ submission.score | float | round(2) }} / {{ submission.max_score | float | round(2) }}</td>
+    <td class="center">{{ submission.code_score | float | round(2) }} / {{ submission.max_code_score | float | round(2) }}</td>
+    <td class="center">{{ submission.written_score | float | round(2) }} / {{ submission.max_written_score | float | round(2) }}</td>
     <td class="center">
       {%- if submission.needs_manual_grade -%}
       <span class="glyphicon glyphicon-ok"></span>

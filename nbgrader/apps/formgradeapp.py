@@ -48,10 +48,7 @@ class FormgradeApp(BaseIPythonApplication):
     flags = flags
     examples = examples
 
-    db_name = Unicode("gradebook", config=True, help="Database name")
-    db_ip = Unicode("localhost", config=True, help="IP address for the database")
-    db_port = Integer(27017, config=True, help="Port for the database")
-
+    db_url = Unicode("sqlite:///gradebook.db", config=True, help="URL to database")
     ip = Unicode("localhost", config=True, help="IP address for the server")
     port = Integer(5000, config=True, help="Port for the server")
     base_directory = Unicode('.', config=True, help="Root server directory")
@@ -135,5 +132,5 @@ class FormgradeApp(BaseIPythonApplication):
         self.log.info("Form grader running at {}".format(url))
         self.log.info("Use Control-C to stop this server")
 
-        app.gradebook = Gradebook(self.db_name, ip=self.db_ip, port=self.db_port)
+        app.gradebook = Gradebook(self.db_url)
         app.run(host=self.ip, port=self.port, debug=True, use_reloader=False)
