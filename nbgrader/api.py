@@ -174,7 +174,7 @@ class Grade(Base):
     __tablename__ = "grade"
 
     id = Column(String(32), primary_key=True, default=new_uuid)
-    grade_cell_id = Column(String(32), ForeignKey('grade_cell.id'))
+    cell_id = Column(String(32), ForeignKey('grade_cell.id'))
     notebook_id = Column(String(32), ForeignKey('submitted_notebook.id'))
 
     auto_score = Column(Float())
@@ -182,7 +182,7 @@ class Grade(Base):
 
     assignment = association_proxy('notebook', 'assignment')
     student = association_proxy('notebook', 'student')
-    max_score = association_proxy('grade_cell', 'max_score')
+    max_score = association_proxy('cell', 'max_score')
 
     @property
     def score(self):
@@ -201,7 +201,7 @@ class Comment(Base):
     __tablename__ = "comment"
 
     id = Column(String(32), primary_key=True, default=new_uuid)
-    solution_cell_id = Column(String(32), ForeignKey('solution_cell.id'))
+    cell_id = Column(String(32), ForeignKey('solution_cell.id'))
     notebook_id = Column(String(32), ForeignKey('submitted_notebook.id'))
 
     comment = Column(Text())
@@ -388,6 +388,36 @@ class Gradebook(object):
             .join(Assignment, Assignment.id == SubmittedAssignment.assignment_id)\
             .join(Student, Student.id == SubmittedAssignment.student_id)\
             .filter(Assignment.name == assignment, Student.id == student)\
+            .one()
+
+    def find_grade(self, name, notebook, assignment, student):
+        return self.db.query(Grade)\
+            .join(GradeCell, GradeCell.id == Grade.cell_id)\
+            .join(SubmittedNotebook, SubmittedNotebook.id == Grade.notebook_id)\
+            .join(Notebook, Notebook.id == SubmittedNotebook.notebook_id)\
+            .join(SubmittedAssignment, SubmittedAssignment.id == SubmittedNotebook.assignment_id)\
+            .join(Assignment, Assignment.id == SubmittedAssignment.assignment_id)\
+            .join(Student, Student.id == SubmittedAssignment.student_id)\
+            .filter(
+                GradeCell.name == name,
+                Notebook.name == notebook,
+                Assignment.name == assignment,
+                Student.id == student)\
+            .one()
+
+    def find_comment(self, name, notebook, assignment, student):
+        return self.db.query(Comment)\
+            .join(SolutionCell, SolutionCell.id == Comment.cell_id)\
+            .join(SubmittedNotebook, SubmittedNotebook.id == Comment.notebook_id)\
+            .join(Notebook, Notebook.id == SubmittedNotebook.notebook_id)\
+            .join(SubmittedAssignment, SubmittedAssignment.id == SubmittedNotebook.assignment_id)\
+            .join(Assignment, Assignment.id == SubmittedAssignment.assignment_id)\
+            .join(Student, Student.id == SubmittedAssignment.student_id)\
+            .filter(
+                SolutionCell.name == name,
+                Notebook.name == notebook,
+                Assignment.name == assignment,
+                Student.id == student)\
             .one()
 
     def update_or_create_submission(self, assignment, student, **kwargs):

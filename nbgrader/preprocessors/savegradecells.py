@@ -16,6 +16,8 @@ class SaveGradeCells(Preprocessor):
         self.gradebook.update_or_create_notebook(
             self.notebook_id, self.assignment_id)
 
+        self.comment_index = 0
+
         nb, resources = super(SaveGradeCells, self).preprocess(nb, resources)
 
         return nb, resources
@@ -44,5 +46,14 @@ class SaveGradeCells(Preprocessor):
                 cell_type=cell_type)
 
             self.log.debug("Recorded grade cell %s into database", grade_cell)
+
+        if utils.is_solution(cell):
+            solution_cell = self.gradebook.update_or_create_solution_cell(
+                self.comment_index,
+                self.notebook_id,
+                self.assignment_id)
+
+            self.comment_index += 1
+            self.log.debug("Recorded solution cell %s into database", solution_cell)
 
         return cell, resources

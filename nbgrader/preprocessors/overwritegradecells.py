@@ -1,22 +1,17 @@
 from IPython.nbconvert.preprocessors import Preprocessor
-from IPython.utils.traitlets import Unicode, Integer
+from IPython.utils.traitlets import Unicode
 from nbgrader import utils
 from nbgrader.api import Gradebook
+from sqlalchemy.orm.exc import NoResultFound
 
 class OverwriteGradeCells(Preprocessor):
     """A preprocessor to save information about grade cells."""
 
-    db_name = Unicode("gradebook", config=True, help="Database name")
-    db_ip = Unicode("localhost", config=True, help="IP address for the database")
-    db_port = Integer(27017, config=True, help="Port for the database")
-
+    db_url = Unicode("sqlite:///gradebook.db", config=True, help="URL to database")
     assignment_id = Unicode(u'assignment', config=True, help="Assignment ID")
 
     def preprocess(self, nb, resources):
-        # connect to the mongo database
-        self.gradebook = Gradebook(self.db_name, ip=self.db_ip, port=self.db_port)
-        self.assignment = self.gradebook.find_assignment(
-            assignment_id=self.assignment_id)
+        self.gradebook = Gradebook(self.db_url)
         self.notebook_id = resources['unique_key']
 
         nb, resources = super(OverwriteGradeCells, self).preprocess(nb, resources)
@@ -27,11 +22,13 @@ class OverwriteGradeCells(Preprocessor):
         if utils.is_grade(cell):
             try:
                 grade_cell = self.gradebook.find_grade_cell(
-                    grade_id=cell.metadata.nbgrader.grade_id,
-                    notebook_id=self.notebook_id,
-                    assignment=self.assignment)
-            except:
+                    cell.metadata.nbgrader.grade_id,
+                    self.notebook_id,
+                    self.assignment_id)
+            except NoResultFound:
                 return cell, resources
+            except:
+                raise
 
             cell.metadata.nbgrader['points'] = grade_cell.max_score
 
@@ -47,6 +44,6 @@ class OverwriteGradeCells(Preprocessor):
                 cell.cell_type = grade_cell.cell_type
                 cell.metadata.nbgrader['checksum'] = grade_cell.checksum
 
-            self.log.debug("Overwrote grade cell %s", grade_cell.grade_id)
+            self.log.debug("Overwrote grade cell %s", grade_cell.name)
 
         return cell, resources
