@@ -264,58 +264,6 @@ class Gradebook(object):
             .filter(Assignment.name == name)\
             .one()
 
-    #### Submissions
-
-    def add_submission(self, assignment, student, **kwargs):
-        submission = SubmittedAssignment(
-            assignment=self.find_assignment(assignment),
-            student=self.find_student(student),
-            **kwargs)
-
-        for notebook in submission.assignment.notebooks:
-            nb = SubmittedNotebook(notebook=notebook, assignment=submission)
-
-            for grade_cell in notebook.grade_cells:
-                grade = Grade(cell=grade_cell, notebook=nb)
-
-            for solution_cell in notebook.solution_cells:
-                comment = Comment(cell=solution_cell, notebook=nb)
-
-        self.db.add(submission)
-        self.db.commit()
-        return submission
-
-    def assignment_submissions(self, assignment):
-        return self.db.query(SubmittedAssignment)\
-            .join(Assignment, Assignment.id == SubmittedAssignment.assignment_id)\
-            .filter(Assignment.name == assignment)\
-            .all()
-
-    def student_submissions(self, student):
-        return self.db.query(SubmittedAssignment)\
-            .join(Student, Student.id == SubmittedAssignment.student_id)\
-            .filter(Student.id == student)\
-            .all()
-
-    def find_submission(self, assignment, student):
-        return self.db.query(SubmittedAssignment)\
-            .join(Assignment, Assignment.id == SubmittedAssignment.assignment_id)\
-            .join(Student, Student.id == SubmittedAssignment.student_id)\
-            .filter(Assignment.name == assignment, Student.id == student)\
-            .one()
-
-    def update_or_create_submission(self, assignment, student, **kwargs):
-        try:
-            submission = self.find_submission(assignment, student)
-        except NoResultFound:
-            submission = self.add_submission(assignment, student, **kwargs)
-        else:
-            for attr in kwargs:
-                setattr(submission, attr, kwargs[attr])
-            self.db.commit()
-
-        return submission
-
     #### Notebooks
 
     def add_notebook(self, name, assignment, **kwargs):
@@ -402,37 +350,54 @@ class Gradebook(object):
 
         return solution_cell
 
+    #### Submissions
 
+    def add_submission(self, assignment, student, **kwargs):
+        submission = SubmittedAssignment(
+            assignment=self.find_assignment(assignment),
+            student=self.find_student(student),
+            **kwargs)
 
-# gb = Gradebook("sqlite:///test.db")
+        for notebook in submission.assignment.notebooks:
+            nb = SubmittedNotebook(notebook=notebook, assignment=submission)
 
-# gb.add_assignment("Problem Set 0")
-# gb.add_student("jhamrick", first_name="Jessica", last_name="Hamrick")
-# gb.add_student("smeylan", first_name="Stephan", last_name="Meylan")
+            for grade_cell in notebook.grade_cells:
+                grade = Grade(cell=grade_cell, notebook=nb)
 
-# gb.add_notebook("Problem 1", "Problem Set 0")
-# gb.update_or_create_notebook("Problem 2", "Problem Set 0")
+            for solution_cell in notebook.solution_cells:
+                comment = Comment(cell=solution_cell, notebook=nb)
 
-# gb.add_grade_cell("foo", "Problem 1", "Problem Set 0", max_score=1)
-# gb.update_or_create_grade_cell("bar", "Problem 2", "Problem Set 0", max_score=2)
-# gb.update_or_create_solution_cell("first", "Problem 1", "Problem Set 0")
+        self.db.add(submission)
+        self.db.commit()
+        return submission
 
-# gb.add_submission("Problem Set 0", "jhamrick")
-# gb.add_submission("Problem Set 0", "smeylan")
+    def assignment_submissions(self, assignment):
+        return self.db.query(SubmittedAssignment)\
+            .join(Assignment, Assignment.id == SubmittedAssignment.assignment_id)\
+            .filter(Assignment.name == assignment)\
+            .all()
 
-# ps0 = Assignment(name="Problem Set 0")
-# nb1 = Notebook(name="Problem 1", assignment=ps0)
-# gc1 = GradeCell(name="foo", max_score=1.0, notebook=nb1)
-# sc1 = SolutionCell(name="bar", notebook=nb1)
+    def student_submissions(self, student):
+        return self.db.query(SubmittedAssignment)\
+            .join(Student, Student.id == SubmittedAssignment.student_id)\
+            .filter(Student.id == student)\
+            .all()
 
-# db.add(ps0)
-# db.commit()
+    def find_submission(self, assignment, student):
+        return self.db.query(SubmittedAssignment)\
+            .join(Assignment, Assignment.id == SubmittedAssignment.assignment_id)\
+            .join(Student, Student.id == SubmittedAssignment.student_id)\
+            .filter(Assignment.name == assignment, Student.id == student)\
+            .one()
 
-# student1 = Student(id="jhamrick", first_name="Jessica", last_name="Hamrick")
-# sps0 = SubmittedAssignment(student=student1, assignment=ps0)
-# snb1 = SubmittedNotebook(assignment=sps0, notebook=nb1)
-# g1 = Grade(cell=gc1, notebook=snb1, auto_score=0.0, manual_score=0.5)
-# c1 = Comment(cell=sc1, notebook=snb1, comment="almost there")
+    def update_or_create_submission(self, assignment, student, **kwargs):
+        try:
+            submission = self.find_submission(assignment, student)
+        except NoResultFound:
+            submission = self.add_submission(assignment, student, **kwargs)
+        else:
+            for attr in kwargs:
+                setattr(submission, attr, kwargs[attr])
+            self.db.commit()
 
-# db.add(student1)
-# db.commit()
+        return submission
