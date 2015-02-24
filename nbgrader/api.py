@@ -1,618 +1,438 @@
-import json
-import warnings
+from sqlalchemy import create_engine, ForeignKey, Column, String, Text, DateTime, Float, Enum
+from sqlalchemy.orm import sessionmaker, scoped_session, relationship
+from sqlalchemy.orm.exc import NoResultFound
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.ext.associationproxy import association_proxy
+
 from uuid import uuid4
-from pymongo import MongoClient
-from pymongo.errors import DuplicateKeyError
+
+Base = declarative_base()
+
+def new_uuid():
+    return uuid4().hex
 
 
-class Document(object):
+class Assignment(Base):
+    __tablename__ = "assignment"
 
-    _defaults = {}
+    id = Column(String(32), primary_key=True, default=new_uuid)
+    name = Column(String(128), unique=True, nullable=False)
+    duedate = Column(DateTime())
 
-    def __init__(self, **kwargs):
-        if '_id' in kwargs:
-            self._id = kwargs['_id']
-        else:
-            self._id = str(uuid4())
-        attributes = self._defaults.copy()
-        attributes.update(kwargs)
-        for field, value in attributes.items():
-            if field not in self._defaults and field != '_id':
-                raise ValueError("Unexpected attribute: {}".format(field))
-            setattr(self, field, value)
+    notebooks = relationship("Notebook", backref="assignment")
 
-    def to_dict(self):
-        dict_obj = {'_id': self._id}
-        for field in self._defaults:
-            value = getattr(self, field)
-            if isinstance(value, Document):
-                value = value._id
-            dict_obj[field] = value
-        return dict_obj
+    submissions = relationship("SubmittedAssignment", backref="assignment")
 
-    def to_json(self):
-        return json.dumps(self.to_dict())
-
-    def __str__(self):
-        return self.to_json()
+    @property
+    def max_score(self):
+        return sum([n.max_score for n in self.notebooks])
 
     def __repr__(self):
-        return self.to_json()
+        return self.name
+
+class Notebook(Base):
+    __tablename__ = "notebook"
+
+    id = Column(String(32), primary_key=True, default=new_uuid)
+    name = Column(String(128), nullable=False)
+
+    assignment_id = Column(String(32), ForeignKey('assignment.id'))
+
+    grade_cells = relationship("GradeCell", backref="notebook")
+    solution_cells = relationship("SolutionCell", backref="notebook")
+
+    submissions = relationship("SubmittedNotebook", backref="notebook")
+
+    @property
+    def max_score(self):
+        return sum([g.max_score for g in self.grade_cells])
+
+    @property
+    def max_code_score(self):
+        return sum([g.max_score for g in self.grade_cells if g.cell_type == "code"])
+
+    @property
+    def max_written_score(self):
+        return sum([g.max_score for g in self.grade_cells if g.cell_type == "markdown"])
+
+    def __repr__(self):
+        return "{}/{}".format(self.assignment, self.name)
 
 
-class GradeCell(Document):
-    _defaults = {
-        'grade_id': None,
-        'notebook_id': None,
-        'assignment': None,
-        'max_score': None,
-        'source': None,
-        'cell_type': None,
-        'checksum': None
-    }
+class GradeCell(Base):
+    __tablename__ = "grade_cell"
+
+    id = Column(String(32), primary_key=True, default=new_uuid)
+    name = Column(String(128), nullable=False)
+    max_score = Column(Float(), nullable=False)
+    source = Column(Text())
+    cell_type = Column(Enum("code", "markdown"))
+    checksum = Column(String(128))
+
+    notebook_id = Column(String(32), ForeignKey('notebook.id'))
+
+    assignment = association_proxy("notebook", "assignment")
+
+    grades = relationship("Grade", backref="cell")
+
+    def __repr__(self):
+        return "{}/{}".format(self.notebook, self.name)
 
 
-class Grade(Document):
-    _defaults = {
-        'grade_id': None,
-        'max_score': None,
-        'autoscore': None,
-        'score': None,
-        'notebook': None
-    }
+class SolutionCell(Base):
+    __tablename__ = "solution_cell"
+
+    id = Column(String(32), primary_key=True, default=new_uuid)
+    name = Column(String(128), nullable=False)
+
+    notebook_id = Column(String(32), ForeignKey('notebook.id'))
+
+    assignment = association_proxy("notebook", "assignment")
+
+    comments = relationship("Comment", backref="cell")
+
+    def __repr__(self):
+        return "{}/{}".format(self.notebook, self.name)
 
 
-class Comment(Document):
-    _defaults = {
-        'comment_id': None,
-        'comment': '',
-        'notebook': None
-    }
+class Student(Base):
+    __tablename__ = "student"
+
+    id = Column(String(128), primary_key=True, nullable=False)
+    first_name = Column(String(128))
+    last_name = Column(String(128))
+    email = Column(String(128))
+
+    submissions = relationship("SubmittedAssignment", backref="student")
+
+    def __repr__(self):
+        return self.id
 
 
-class Student(Document):
-    _defaults = {
-        'student_id': None,
-        'first_name': None,
-        'last_name': None,
-        'email': None
-    }
+class SubmittedAssignment(Base):
+    __tablename__ = "submitted_assignment"
+
+    id = Column(String(32), primary_key=True, default=new_uuid)
+    assignment_id = Column(String(32), ForeignKey('assignment.id'))
+    student_id = Column(String(128), ForeignKey('student.id'))
+
+    notebooks = relationship("SubmittedNotebook", backref="assignment")
+
+    @property
+    def score(self):
+        return sum([n.score for n in self.notebooks])
+
+    @property
+    def max_score(self):
+        return self.assignment.max_score
+
+    def __repr__(self):
+        return "{} for {}".format(self.assignment, self.student)
 
 
-class Notebook(Document):
-    _defaults = {
-        'notebook_id': None,
-        'assignment': None,
-        'student': None
-    }
+class SubmittedNotebook(Base):
+    __tablename__ = "submitted_notebook"
+
+    id = Column(String(32), primary_key=True, default=new_uuid)
+    notebook_id = Column(String(32), ForeignKey('notebook.id'))
+    assignment_id = Column(String(32), ForeignKey('submitted_assignment.id'))
+
+    grades = relationship("Grade", backref="notebook")
+    comments = relationship("Comment", backref="notebook")
+
+    student = association_proxy('assignment', 'student')
+
+    @property
+    def score(self):
+        return sum([g.score for g in self.grades])
+
+    @property
+    def max_score(self):
+        return self.notebook.max_score
+
+    @property
+    def code_score(self):
+        return sum([g.score for g in self.grades if g.cell.cell_type == "code"])
+
+    @property
+    def max_code_score(self):
+        return self.notebook.max_code_score
+
+    @property
+    def written_score(self):
+        return sum([g.score for g in self.grades if g.cell.cell_type == "markdown"])
+
+    @property
+    def max_written_score(self):
+        return self.notebook.max_written_score
+
+    def __repr__(self):
+        return "{} for {}".format(self.notebook, self.student)
 
 
-class Assignment(Document):
-    _defaults = {
-        'assignment_id': None,
-        'duedate': None
-    }
+class Grade(Base):
+    __tablename__ = "grade"
+
+    id = Column(String(32), primary_key=True, default=new_uuid)
+    grade_cell_id = Column(String(32), ForeignKey('grade_cell.id'))
+    notebook_id = Column(String(32), ForeignKey('submitted_notebook.id'))
+
+    auto_score = Column(Float())
+    manual_score = Column(Float())
+
+    assignment = association_proxy('notebook', 'assignment')
+    student = association_proxy('notebook', 'student')
+    max_score = association_proxy('grade_cell', 'max_score')
+
+    @property
+    def score(self):
+        if self.manual_score is not None:
+            return self.manual_score
+        elif self.auto_score is not None:
+            return self.auto_score
+        else:
+            return float('nan')
+
+    def __repr__(self):
+        return "{} for {}".format(self.cell, self.student)
+
+
+class Comment(Base):
+    __tablename__ = "comment"
+
+    id = Column(String(32), primary_key=True, default=new_uuid)
+    solution_cell_id = Column(String(32), ForeignKey('solution_cell.id'))
+    notebook_id = Column(String(32), ForeignKey('submitted_notebook.id'))
+
+    comment = Column(Text())
+
+    assignment = association_proxy('notebook', 'assignment')
+    student = association_proxy('notebook', 'student')
+
+    def __repr__(self):
+        return "{} for {}".format(self.cell, self.student)
 
 
 class Gradebook(object):
-    _collections = {
-        'grade_cells': GradeCell,
-        'grades': Grade,
-        'comments': Comment,
-        'students': Student,
-        'notebooks': Notebook,
-        'assignments': Assignment
-    }
 
-    def __init__(self, name, ip="localhost", port=27017):
-        self.client = MongoClient(ip, port)
-        self.db = self.client[name]
-
-    def _add(self, collection, document):
-        try:
-            self.db[collection].insert(document.to_dict())
-        except DuplicateKeyError:
-            raise DuplicateKeyError("Document already exists in '{}':\n\n{}".format(collection, document))
-
-    def _update(self, collection, document):
-        _id = {"_id": document._id}
-        doc = document.to_dict()
-        del doc['_id']
-        self.db[collection].update(_id, {"$set": doc})
-
-    def _find(self, collection, query):
-        new_query = {}
-        for key, value in query.items():
-            if isinstance(value, Document):
-                new_query[key] = value._id
-            else:
-                new_query[key] = value
-
-        document = self.db[collection].find_one(new_query)
-        if document:
-            document = self._collections[collection](**document)
-        return document
-
-    def _find_or_create(self, collection, query):
-        document = self._find(collection, query)
-        if not document:
-            document = self._collections[collection](**query)
-            self._add(collection, document)
-        return document
-
-    def _find_all(self, collection, query):
-        new_query = {}
-        for key, value in query.items():
-            if isinstance(value, Document):
-                new_query[key] = value._id
-            else:
-                new_query[key] = value
-
-        documents = []
-        for document in self.db[collection].find(new_query):
-            documents.append(self._collections[collection](**document))
-        return documents
-
-    #### Grade cells
-
-    def add_grade_cell(self, grade_cell):
-        """Add a new grade cell to the gradebook. If the assignent already
-        exists in the gradebook, an error will be thrown.
-
-        Parameters
-        ----------
-        grade_cell: nbgrader.api.GradeCell
-            The new grade cell
-
-        """
-        if not isinstance(grade_cell, GradeCell):
-            raise ValueError("The new grade cell must be an GradeCell object")
-        return self._add('grade_cells', grade_cell)
-
-    def find_grade_cell(self, **attributes):
-        """Look up a grade cell by its associated attributes. For example:
-
-        >>> gb = Gradebook("example")
-        >>> assignment = gb.find_assignment(assignment_id="Problem Set 0")
-        >>> gb.find_or_create_grade_cell(grade_id="foo", notebook_id="Problem 1", assignment=assignment)
-
-        will find a grade cell with id "foo" in the notebook "Problem
-        1" and with an associated assignment whose id is "Problem Set
-        0". If there is more than one matching grade cell, then an
-        error will be thrown.
-
-        Valid keyword arguments correspond to the attributes for a
-        GradeCell.
-
-        """
-        grade_cell = self._find('grade_cells', attributes)
-        if grade_cell is None:
-            raise ValueError('no such grade cell: {}'.format(attributes))
-        return grade_cell
-
-    def find_grade_cells(self, **attributes):
-        """Find all grade cells matching the given attributes. For example:
-
-        >>> gb = Gradebook("example")
-        >>> gb.find_grade_cells(grade_id="foo")
-
-        will find all grade cells with id "foo".
-
-        Valid keyword arguments correspond to the attributes for a
-        Grade.
-
-        """
-        return self._find_all('grade_cells', attributes)
-
-    def find_or_create_grade_cell(self, **attributes):
-        """Look up or create a grade cell by its associated attributes. For
-        example:
-
-        >>> gb = Gradebook("example")
-        >>> assignment = gb.find_assignment(assignment_id="Problem Set 0")
-        >>> gb.find_or_create_grade_cell(grade_id="foo", notebook_id="Problem 1", assignment=assignment)
-
-        will find a grade cell with id "foo" in the notebook "Problem
-        1" and with an associated assignment whose id is "Problem Set
-        0". If there is more than one matching grade cell, then an
-        error will be thrown.
-
-        If there are no matching grade cells, then a new grade cell
-        will be created with the given attributes.
-
-        Valid keyword arguments correspond to the attributes for a
-        GradeCell.
-
-        """
-        return self._find_or_create('grade_cells', attributes)
-
-    def update_grade_cell(self, grade_cell):
-        """Update a grade cell.
-
-        Parameters
-        ----------
-        grade_cell: nbgrader.api.GradeCell
-            The grade cell to update.
-
-        """
-        self._update('grade_cells', grade_cell)
-
-    #### Assignments
-
-    @property
-    def assignments(self):
-        """A list of all assignments in the gradebook."""
-        return self._find_all('assignments', {})
-
-    def add_assignment(self, assignment):
-        """Add a new assignment to the gradebook. If the assignent already
-        exists in the gradebook, an error will be thrown.
-
-        Parameters
-        ----------
-        assignment: nbgrader.api.Assignment
-            The new assignment
-
-        """
-        if not isinstance(assignment, Assignment):
-            raise ValueError("The new assignment must be an Assignment object")
-        return self._add('assignments', assignment)
-
-    def find_assignment(self, **attributes):
-        """Look up an assignment by its associated attributes. For example:
-
-        >>> gb = Gradebook("example")
-        >>> gb.find_assignment(assignment_id="Problem Set 1")
-
-        will find an assignment called "Problem Set 1". If there is
-        more than one matching assignment, then an error will be
-        thrown.
-
-        Valid keyword arguments correspond to the attributes for an
-        Assignment.
-
-        """
-        assignment = self._find('assignments', attributes)
-        if assignment is None:
-            raise ValueError('no such assignment: {}'.format(attributes))
-        return assignment
+    def __init__(self, db_url):
+        # create the connection to the database
+        engine = create_engine(db_url)
+        self.db = scoped_session(sessionmaker(autoflush=True, bind=engine))
+        Base.query = self.db.query_property()
+        Base.metadata.create_all(bind=engine)
 
     #### Students
 
     @property
     def students(self):
-        """A list of all students in the gradebook."""
-        return self._find_all('students', {})
+        return self.db.query(Student)\
+            .order_by(Student.last_name, Student.first_name)\
+            .all()
 
-    def add_student(self, student):
-        """Add a new student to the gradebook. If the student already
+    def add_student(self, student_id, **kwargs):
+        student = Student(id=student_id, **kwargs)
+        self.db.add(student)
+        self.db.commit()
+        return student
+
+    def find_student(self, student_id):
+        return self.db.query(Student)\
+            .filter(Student.id == student_id)\
+            .one()
+
+    #### Assignments
+
+    @property
+    def assignments(self):
+        return self.db.query(Assignment)\
+            .order_by(Assignment.duedate, Assignment.name)\
+            .all()
+
+    def add_assignment(self, name, **kwargs):
+        """Add a new assignment to the gradebook. If the assignent already
         exists in the gradebook, an error will be thrown.
 
-        Parameters
-        ----------
-        student: nbgrader.api.Student
-            The new student
-
         """
-        if not isinstance(student, Student):
-            raise ValueError("The new student must be a Student object")
-        return self._add('students', student)
+        assignment = Assignment(name=name, **kwargs)
+        self.db.add(assignment)
+        self.db.commit()
+        return assignment
 
-    def find_student(self, **attributes):
-        """Look up student by its associated attributes. For example:
+    def find_assignment(self, name):
+        return self.db.query(Assignment)\
+            .filter(Assignment.name == name)\
+            .one()
 
-        >>> gb = Gradebook("example")
-        >>> gb.find_student(student_id="Hacker")
+    #### Submissions
 
-        will find a student with id "Hacker". If there is more than
-        one matching student, then an error will be thrown.
+    def add_submission(self, assignment, student, **kwargs):
+        submission = SubmittedAssignment(
+            assignment=self.find_assignment(assignment),
+            student=self.find_student(student),
+            **kwargs)
 
-        Valid keyword arguments correspond to the attributes for a
-        Student.
+        for notebook in submission.assignment.notebooks:
+            nb = SubmittedNotebook(notebook=notebook, assignment=submission)
 
-        """
-        student = self._find('students', attributes)
-        if student is None:
-            raise ValueError('no such student: {}'.format(attributes))
-        return student
+            for grade_cell in notebook.grade_cells:
+                grade = Grade(cell=grade_cell, notebook=nb)
+
+            for solution_cell in notebook.solution_cells:
+                comment = Comment(cell=solution_cell, notebook=nb)
+
+        self.db.add(submission)
+        self.db.commit()
+        return submission
+
+    def assignment_submissions(self, assignment):
+        return self.db.query(SubmittedAssignment)\
+            .join(Assignment, Assignment.id == SubmittedAssignment.assignment_id)\
+            .filter(Assignment.name == assignment)\
+            .all()
+
+    def student_submissions(self, student):
+        return self.db.query(SubmittedAssignment)\
+            .join(Student, Student.id == SubmittedAssignment.student_id)\
+            .filter(Student.id == student)\
+            .all()
+
+    def find_submission(self, assignment, student):
+        return self.db.query(SubmittedAssignment)\
+            .join(Assignment, Assignment.id == SubmittedAssignment.assignment_id)\
+            .join(Student, Student.id == SubmittedAssignment.student_id)\
+            .filter(Assignment.name == assignment, Student.id == student)\
+            .one()
+
+    def update_or_create_submission(self, assignment, student, **kwargs):
+        try:
+            submission = self.find_submission(assignment, student)
+        except NoResultFound:
+            submission = self.add_submission(assignment, student, **kwargs)
+        else:
+            for attr in kwargs:
+                setattr(submission, attr, kwargs[attr])
+            self.db.commit()
+
+        return submission
 
     #### Notebooks
 
-    @property
-    def notebooks(self):
-        """A list of all notebooks in the gradebook."""
-        return self._find_all('notebooks', {})
-
-    def add_notebook(self, notebook):
-        """Add a new notebook to the gradebook. If the notebook already
-        exists in the gradebook, an error will be thrown.
-
-        Parameters
-        ----------
-        notebook: nbgrader.api.Notebook
-            The new notebook
-
-        """
-        if not isinstance(notebook, Notebook):
-            raise ValueError("The new student must be a Student object")
-        return self._add('notebooks', notebook)
-
-    def find_notebook(self, **attributes):
-        """Look up notebook by its associated attributes. For example:
-
-        >>> gb = Gradebook("example")
-        >>> student = gb.find_student(student_id="Hacker")
-        >>> gb.find_notebook(notebook_id="Problem 1", student=student)
-
-        will find a notebook with id "Problem 1" and with an
-        associated students whos id is "Hacker". If there is more than
-        one matching notebook, then an error will be thrown.
-
-        Valid keyword arguments correspond to the attributes for a
-        Notebook.
-
-        """
-        notebook = self._find('notebooks', attributes)
-        if notebook is None:
-            raise ValueError('no such notebook: {}'.format(attributes))
+    def add_notebook(self, name, assignment, **kwargs):
+        notebook = Notebook(
+            name=name, assignment=self.find_assignment(assignment), **kwargs)
+        self.db.add(notebook)
+        self.db.commit()
         return notebook
 
-    def find_or_create_notebook(self, **attributes):
-        """Look up or create a notebook by its associated attributes. For
-        example:
+    def find_notebook(self, name, assignment):
+        return self.db.query(Notebook)\
+            .join(Assignment, Assignment.id == Notebook.assignment_id)\
+            .filter(Notebook.name == name, Assignment.name == assignment)\
+            .one()
 
-        >>> gb = Gradebook("example")
-        >>> student = gb.find_student(student_id="Hacker")
-        >>> gb.find_or_create_notebook(notebook_id="Problem 1", student=student)
-
-        will find a notebook with id "Problem 1" and with an
-        associated student whose id is "Hacker". If there is more than
-        one matching notebook, then an error will be thrown.
-
-        If there are no matching notebooks, then a new notebook will
-        be created with the given attributes.
-
-        Valid keyword arguments correspond to the attributes for a
-        Notebook.
-
-        """
-        return self._find_or_create('notebooks', attributes)
-
-    def find_notebooks(self, **attributes):
-        """Find all notebooks matching the given attributes. For example:
-
-        >>> gb = Gradebook("example")
-        >>> gb.find_notebooks(notebook_id="Problem 1")
-
-        will find all notebooks with id "Problem 1".
-
-        Valid keyword arguments correspond to the attributes for a
-        Notebook.
-
-        """
-        return self._find_all('notebooks', attributes)
-
-    #### Grades
-
-    def find_or_create_grade(self, **attributes):
-        """Look up or create a grade by its associated attributes. For
-        example:
-
-        >>> gb = Gradebook("example")
-        >>> student = gb.find_student(student_id="Hacker")
-        >>> notebook = gb.find_notebook(notebook_id="Problem 1", student=student)
-        >>> gb.find_or_create_grade(grade_id="foo", notebook=notebook)
-
-        will find a grade with id "foo" and with an associated
-        notebook whose id is "Problem 1" and whose student has id
-        "Hacker". If there is more than one matching grade, then an
-        error will be thrown.
-
-        If there are no matching grades, then a new grade will be
-        created with the given attributes.
-
-        Valid keyword arguments correspond to the attributes for a
-        Grade.
-
-        """
-        return self._find_or_create('grades', attributes)
-
-    def find_grade(self, **attributes):
-        """Look up a grade by its associated attributes. For example:
-
-        >>> gb = Gradebook("example")
-        >>> student = gb.find_student(student_id="Hacker")
-        >>> notebook = gb.find_notebook(notebook_id="Problem 1", student=student)
-        >>> gb.find_grade(grade_id="foo", notebook=notebook)
-
-        will find a grade with id "foo" and with an associated
-        notebook whose id is "Problem 1" and whose student has id
-        "Hacker". If there is more than one matching grade, then an
-        error will be thrown.
-
-        Valid keyword arguments correspond to the attributes for a
-        Grade.
-
-        """
-        grade = self._find('grades', attributes)
-        if grade is None:
-            raise ValueError('no such grade: {}'.format(attributes))
-        return grade
-
-    def find_grades(self, **attributes):
-        """Find all grades matching the given attributes. For example:
-
-        >>> gb = Gradebook("example")
-        >>> gb.find_grades(grade_id="foo")
-
-        will find all grade with id "foo".
-
-        Valid keyword arguments correspond to the attributes for a
-        Grade.
-
-        """
-        return self._find_all('grades', attributes)
-
-    def update_grade(self, grade):
-        """Update a grade.
-
-        Parameters
-        ----------
-        grade: nbgrader.api.Grade
-            The grade to update.
-
-        """
-        self._update('grades', grade)
-
-    #### Comments
-
-    def find_or_create_comment(self, **attributes):
-        """Look up or create a comment by its associated attributes. For
-        example:
-
-        >>> gb = Commentbook("example")
-        >>> student = gb.find_student(student_id="Hacker")
-        >>> notebook = gb.find_notebook(notebook_id="Problem 1", student=student)
-        >>> gb.find_or_create_comment(comment_id="foo", notebook=notebook)
-
-        will find a comment with id "foo" and with an associated
-        notebook whose id is "Problem 1" and whose student has id
-        "Hacker". If there is more than one matching comment, then an
-        error will be thrown.
-
-        If there are no matching comments, then a new comment will be
-        created with the given attributes.
-
-        Valid keyword arguments correspond to the attributes for a
-        Comment.
-
-        """
-        return self._find_or_create('comments', attributes)
-
-    def find_comment(self, **attributes):
-        """Look up a comment by its associated attributes. For example:
-
-        >>> gb = Commentbook("example")
-        >>> student = gb.find_student(student_id="Hacker")
-        >>> notebook = gb.find_notebook(notebook_id="Problem 1", student=student)
-        >>> gb.find_comment(comment_id="foo", notebook=notebook)
-
-        will find a comment with id "foo" and with an associated
-        notebook whose id is "Problem 1" and whose student has id
-        "Hacker". If there is more than one matching comment, then an
-        error will be thrown.
-
-        Valid keyword arguments correspond to the attributes for a
-        Comment.
-
-        """
-        comment = self._find('comments', attributes)
-        if comment is None:
-            raise ValueError('no such comment: {}'.format(attributes))
-        return comment
-
-    def find_comments(self, **attributes):
-        """Find all comments matching the given attributes. For example:
-
-        >>> gb = Commentbook("example")
-        >>> gb.find_comments(comment_id="foo")
-
-        will find all comment with id "foo".
-
-        Valid keyword arguments correspond to the attributes for a
-        Comment.
-
-        """
-        return self._find_all('comments', attributes)
-
-    def update_comment(self, comment):
-        """Update a comment.
-
-        Parameters
-        ----------
-        comment: nbgrader.api.Comment
-            The comment to update.
-
-        """
-        self._update('comments', comment)
-
-    def get_assignment_notebooks(self, assignment):
-        notebooks = {}
-        for notebook in self.find_notebooks(assignment=assignment):
-            if notebook.notebook_id not in notebooks:
-                notebooks[notebook.notebook_id] = []
-            notebooks[notebook.notebook_id].append(notebook)
-        return notebooks
-
-    def notebook_score(self, notebook):
-        grades = self.find_grades(notebook=notebook)
-        score = {"score": 0, "max_score": 0, "needs_manual_grade": False}
-        for grade in grades:
-            if grade.score is not None:
-                score["score"] += grade.score
-            elif grade.autoscore is not None:
-                score["score"] += grade.autoscore
-            else:
-                score["needs_manual_grade"] = True
-            if grade.max_score is not None:
-                score["max_score"] += grade.max_score
-        return score
-
-    def assignment_score(self, assignment, student):
-        notebooks = self.find_notebooks(assignment=assignment, student=student)
-        if len(notebooks) == 0:
-            return None
-
-        score = {"score": 0, "max_score": 0, "needs_manual_grade": False}
-        for nb in notebooks:
-            nb_score = self.notebook_score(nb)
-            score["score"] += nb_score["score"]
-            score["max_score"] += nb_score["max_score"]
-            if nb_score["needs_manual_grade"]:
-                score["needs_manual_grade"] = True
-        return score
-
-    def avg_notebook_scores(self, assignment, precision=4):
-        all_scores = []
-        assignment_notebooks = self.get_assignment_notebooks(assignment)
-        notebook_ids = sorted(assignment_notebooks.keys())
-        for notebook_id in notebook_ids:
-            notebooks = assignment_notebooks[notebook_id]
-            scores = [self.notebook_score(nb) for nb in notebooks]
-            avg_score = sum([round(s["score"], precision) for s in scores]) / float(len(scores))
-            max_score = set([round(s["max_score"], precision) for s in scores])
-            assert len(max_score) == 1
-            all_scores.append({
-                "notebook_id": notebook_id,
-                "avg_score": avg_score,
-                "max_score": list(max_score)[0]
-            })
-
-        return all_scores
-
-    def avg_assignment_score(self, assignment, precision=4):
-        scores = [self.assignment_score(assignment, student) for student in self.students]
-        scores = [s for s in scores if s is not None]
-        if len(scores) > 0:
-            avg_score = sum([round(s["score"], precision) for s in scores]) / float(len(scores))
-            max_score = set([round(s["max_score"], precision) for s in scores])
+    def update_or_create_notebook(self, name, assignment, **kwargs):
+        try:
+            notebook = self.find_notebook(name, assignment)
+        except NoResultFound:
+            notebook = self.add_notebook(name, assignment, **kwargs)
         else:
-            avg_score = 0
-            max_score = set([0])
-        assert len(max_score) == 1
-        all_scores = {
-            "avg_score": avg_score,
-            "max_score": list(max_score)[0]
-        }
-        return all_scores
+            for attr in kwargs:
+                setattr(notebook, attr, kwargs[attr])
+            self.db.commit()
 
-    def student_score(self, student):
-        scores = [self.assignment_score(assignment, student) for assignment in self.assignments]
-        scores = [s for s in scores if s is not None]
-        score = sum([s["score"] for s in scores])
-        max_score = sum([s["max_score"] for s in scores])
-        all_scores = {
-            "score": score,
-            "max_score": max_score
-        }
-        return all_scores
+        return notebook
+
+    #### Grade cells
+
+    def add_grade_cell(self, name, notebook, assignment, **kwargs):
+        notebook = self.find_notebook(notebook, assignment)
+        grade_cell = GradeCell(name=name, notebook=notebook, **kwargs)
+        self.db.add(grade_cell)
+        self.db.commit()
+        return grade_cell
+
+    def find_grade_cell(self, name, notebook, assignment):
+        return self.db.query(GradeCell)\
+            .join(Notebook, Notebook.id == GradeCell.notebook_id)\
+            .join(Assignment, Assignment.id == Notebook.assignment_id)\
+            .filter(
+                GradeCell.name == name,
+                Notebook.name == notebook,
+                Assignment.name == assignment)\
+            .one()
+
+    def update_or_create_grade_cell(self, name, notebook, assignment, **kwargs):
+        try:
+            grade_cell = self.find_grade_cell(name, notebook, assignment)
+        except NoResultFound:
+            grade_cell = self.add_grade_cell(name, notebook, assignment, **kwargs)
+        else:
+            for attr in kwargs:
+                setattr(notebook, attr, kwargs[attr])
+            self.db.commit()
+
+        return grade_cell
+
+    #### Solution cells
+
+    def add_solution_cell(self, name, notebook, assignment, **kwargs):
+        notebook = self.find_notebook(notebook, assignment)
+        solution_cell = SolutionCell(name=name, notebook=notebook, **kwargs)
+        self.db.add(solution_cell)
+        self.db.commit()
+        return solution_cell
+
+    def find_solution_cell(self, name, notebook, assignment):
+        return self.db.query(SolutionCell)\
+            .join(Notebook, Notebook.id == SolutionCell.notebook_id)\
+            .join(Assignment, Assignment.id == Notebook.assignment_id)\
+            .filter(SolutionCell.name == name, Notebook.name == notebook, Assignment.name == assignment)\
+            .one()
+
+    def update_or_create_solution_cell(self, name, notebook, assignment, **kwargs):
+        try:
+            solution_cell = self.find_solution_cell(name, notebook, assignment)
+        except NoResultFound:
+            solution_cell = self.add_solution_cell(name, notebook, assignment, **kwargs)
+        else:
+            for attr in kwargs:
+                setattr(notebook, attr, kwargs[attr])
+            self.db.commit()
+
+        return solution_cell
+
+
+
+# gb = Gradebook("sqlite:///test.db")
+
+# gb.add_assignment("Problem Set 0")
+# gb.add_student("jhamrick", first_name="Jessica", last_name="Hamrick")
+# gb.add_student("smeylan", first_name="Stephan", last_name="Meylan")
+
+# gb.add_notebook("Problem 1", "Problem Set 0")
+# gb.update_or_create_notebook("Problem 2", "Problem Set 0")
+
+# gb.add_grade_cell("foo", "Problem 1", "Problem Set 0", max_score=1)
+# gb.update_or_create_grade_cell("bar", "Problem 2", "Problem Set 0", max_score=2)
+# gb.update_or_create_solution_cell("first", "Problem 1", "Problem Set 0")
+
+# gb.add_submission("Problem Set 0", "jhamrick")
+# gb.add_submission("Problem Set 0", "smeylan")
+
+# ps0 = Assignment(name="Problem Set 0")
+# nb1 = Notebook(name="Problem 1", assignment=ps0)
+# gc1 = GradeCell(name="foo", max_score=1.0, notebook=nb1)
+# sc1 = SolutionCell(name="bar", notebook=nb1)
+
+# db.add(ps0)
+# db.commit()
+
+# student1 = Student(id="jhamrick", first_name="Jessica", last_name="Hamrick")
+# sps0 = SubmittedAssignment(student=student1, assignment=ps0)
+# snb1 = SubmittedNotebook(assignment=sps0, notebook=nb1)
+# g1 = Grade(cell=gc1, notebook=snb1, auto_score=0.0, manual_score=0.5)
+# c1 = Comment(cell=sc1, notebook=snb1, comment="almost there")
+
+# db.add(student1)
+# db.commit()
