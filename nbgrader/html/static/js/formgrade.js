@@ -8,7 +8,6 @@ var Grade = Backbone.Model.extend({
         var glyph = $("#" + this.get("grade_id") + "-saved");
         elem.val(this.get("score"));
         elem.attr("placeholder", this.get("autoscore"));
-        glyph.hide();
 
         var that = this;
         elem.on("change", function (evt) {
@@ -30,6 +29,7 @@ var Grade = Backbone.Model.extend({
                     setTimeout(function () {
                         glyph.fadeOut();
                     }, 1000);
+                    $(document).trigger("finished_saving");
                 }
             });
         });
@@ -48,7 +48,6 @@ var Comment = Backbone.Model.extend({
         var elem = $($(".comment")[this.get("comment_id")]);
         var glyph = $($(".comment-saved")[this.get("comment_id")]);
         elem.val(this.get("comment"));
-        glyph.hide();
 
         var that = this;
         elem.on("change", function (evt) {
@@ -65,6 +64,7 @@ var Comment = Backbone.Model.extend({
                     setTimeout(function () {
                         glyph.fadeOut();
                     }, 1000);
+                    $(document).trigger("finished_saving");
                 }
             });
         });
@@ -105,6 +105,20 @@ var scrollTo = function (elem) {
 var grades;
 var comments;
 var last_selected;
+
+var nextAssignment = function () {
+    href = $("li.next a").attr("href");
+    if (href) {
+       window.location = href + "#" + getIndex(last_selected);
+    }
+};
+
+var prevAssignment = function () {
+    href = $("li.previous a").attr("href");
+    if (href) {
+        window.location = href + "#" + getIndex(last_selected);
+    }
+};
     
 $(window).load(function () {
     grades = new Grades();
@@ -135,6 +149,7 @@ $(window).load(function () {
     $("body").on('keydown', function(e) {
         var keyCode = e.keyCode || e.which;
         var href;
+        var elem;
 
         if (keyCode === 9) { // tab
             e.preventDefault();
@@ -142,15 +157,25 @@ $(window).load(function () {
 
         } else if (keyCode === 13) { // enter
             last_selected.select();
-        } else if (keyCode == 39 && e.shiftKey) {
-            href = $("li.next a").attr("href");
-            if (href) {
-                window.location = href + "#" + getIndex(last_selected);
+
+        } else if (keyCode == 39 && e.shiftKey) { // shift + right arrow
+            elem = document.activeElement;
+            if (elem.tagName === "INPUT" || elem.tagName === "TEXTAREA") {
+                $(document).on("finished_saving", nextAssignment);
+                $(elem).blur();
+                $(elem).trigger("change");
+            } else {
+                nextAssignment();
             }
-        } else if (keyCode == 37 && e.shiftKey) {
-            href = $("li.previous a").attr("href");
-            if (href) {
-                window.location = href + "#" + getIndex(last_selected);
+
+        } else if (keyCode == 37 && e.shiftKey) { // shift + left arrow
+            elem = document.activeElement;
+            if (elem.tagName === "INPUT" || elem.tagName === "TEXTAREA") {
+                $(document).on("finished_saving", prevAssignment);
+                $(elem).blur();
+                $(elem).trigger("change");
+            } else {
+                prevAssignment();
             }
         }
     });

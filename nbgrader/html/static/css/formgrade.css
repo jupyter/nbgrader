@@ -117,4 +117,5 @@ span.nbgrader-label {
 .save-icon {
     margin-left: 1em;
     top: 4px;
+    display: none;
 }
