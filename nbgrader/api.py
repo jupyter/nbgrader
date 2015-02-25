@@ -1,14 +1,19 @@
 from __future__ import division
 
-from sqlalchemy import create_engine, ForeignKey, Column, String, Text, DateTime, Float, Enum
+from sqlalchemy import create_engine, ForeignKey, Column, String, Text, DateTime, Float, Enum, UniqueConstraint
 from sqlalchemy.orm import sessionmaker, scoped_session, relationship
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.ext.associationproxy import association_proxy
+from sqlalchemy.exc import IntegrityError
 
 from uuid import uuid4
 
 Base = declarative_base()
+
+class InvalidEntry(ValueError):
+    pass
+
 
 def new_uuid():
     return uuid4().hex
@@ -77,6 +82,7 @@ class Assignment(Base):
 
 class Notebook(Base):
     __tablename__ = "notebook"
+    __table_args__ = (UniqueConstraint('name', 'assignment_id'),)
 
     id = Column(String(32), primary_key=True, default=new_uuid)
     name = Column(String(128), nullable=False)
@@ -129,12 +135,13 @@ class Notebook(Base):
 
 class GradeCell(Base):
     __tablename__ = "grade_cell"
+    __table_args__ = (UniqueConstraint('name', 'notebook_id'),)
 
     id = Column(String(32), primary_key=True, default=new_uuid)
     name = Column(String(128), nullable=False)
     max_score = Column(Float(), nullable=False)
+    cell_type = Column(Enum("code", "markdown"), nullable=False)
     source = Column(Text())
-    cell_type = Column(Enum("code", "markdown"))
     checksum = Column(String(128))
 
     notebook_id = Column(String(32), ForeignKey('notebook.id'))
@@ -149,6 +156,7 @@ class GradeCell(Base):
 
 class SolutionCell(Base):
     __tablename__ = "solution_cell"
+    __table_args__ = (UniqueConstraint('name', 'notebook_id'),)
 
     id = Column(String(32), primary_key=True, default=new_uuid)
     name = Column(String(128), nullable=False)
@@ -197,6 +205,7 @@ class Student(Base):
 
 class SubmittedAssignment(Base):
     __tablename__ = "submitted_assignment"
+    __table_args__ = (UniqueConstraint('assignment_id', 'student_id'),)
 
     id = Column(String(32), primary_key=True, default=new_uuid)
     assignment_id = Column(String(32), ForeignKey('assignment.id'))
@@ -252,6 +261,7 @@ class SubmittedAssignment(Base):
 
 class SubmittedNotebook(Base):
     __tablename__ = "submitted_notebook"
+    __table_args__ = (UniqueConstraint('notebook_id', 'assignment_id'),)
 
     id = Column(String(32), primary_key=True, default=new_uuid)
     notebook_id = Column(String(32), ForeignKey('notebook.id'))
@@ -309,6 +319,7 @@ class SubmittedNotebook(Base):
 
 class Grade(Base):
     __tablename__ = "grade"
+    __table_args__ = (UniqueConstraint('cell_id', 'notebook_id'),)
 
     id = Column(String(32), primary_key=True, default=new_uuid)
     cell_id = Column(String(32), ForeignKey('grade_cell.id'))
@@ -353,6 +364,7 @@ class Grade(Base):
 
 class Comment(Base):
     __tablename__ = "comment"
+    __table_args__ = (UniqueConstraint('cell_id', 'notebook_id'),)
 
     id = Column(String(32), primary_key=True, default=new_uuid)
     cell_id = Column(String(32), ForeignKey('solution_cell.id'))
@@ -397,7 +409,10 @@ class Gradebook(object):
     def add_student(self, student_id, **kwargs):
         student = Student(id=student_id, **kwargs)
         self.db.add(student)
-        self.db.commit()
+        try:
+            self.db.commit()
+        except IntegrityError as e:
+            raise InvalidEntry(e.message)
         return student
 
     def find_student(self, student_id):
@@ -414,13 +429,12 @@ class Gradebook(object):
             .all()
 
     def add_assignment(self, name, **kwargs):
-        """Add a new assignment to the gradebook. If the assignent already
-        exists in the gradebook, an error will be thrown.
-
-        """
         assignment = Assignment(name=name, **kwargs)
         self.db.add(assignment)
-        self.db.commit()
+        try:
+            self.db.commit()
+        except IntegrityError as e:
+            raise InvalidEntry(e.message)
         return assignment
 
     def find_assignment(self, name):
@@ -434,7 +448,10 @@ class Gradebook(object):
         notebook = Notebook(
             name=name, assignment=self.find_assignment(assignment), **kwargs)
         self.db.add(notebook)
-        self.db.commit()
+        try:
+            self.db.commit()
+        except IntegrityError as e:
+            raise InvalidEntry(e.message)
         return notebook
 
     def find_notebook(self, name, assignment):
@@ -461,7 +478,10 @@ class Gradebook(object):
         notebook = self.find_notebook(notebook, assignment)
         grade_cell = GradeCell(name=name, notebook=notebook, **kwargs)
         self.db.add(grade_cell)
-        self.db.commit()
+        try:
+            self.db.commit()
+        except IntegrityError as e:
+            raise InvalidEntry(e.message)
         return grade_cell
 
     def find_grade_cell(self, name, notebook, assignment):
@@ -481,7 +501,7 @@ class Gradebook(object):
             grade_cell = self.add_grade_cell(name, notebook, assignment, **kwargs)
         else:
             for attr in kwargs:
-                setattr(notebook, attr, kwargs[attr])
+                setattr(grade_cell, attr, kwargs[attr])
             self.db.commit()
 
         return grade_cell
@@ -492,7 +512,10 @@ class Gradebook(object):
         notebook = self.find_notebook(notebook, assignment)
         solution_cell = SolutionCell(name=name, notebook=notebook, **kwargs)
         self.db.add(solution_cell)
-        self.db.commit()
+        try:
+            self.db.commit()
+        except IntegrityError as e:
+            raise InvalidEntry(e.message)
         return solution_cell
 
     def find_solution_cell(self, name, notebook, assignment):
@@ -509,7 +532,7 @@ class Gradebook(object):
             solution_cell = self.add_solution_cell(name, notebook, assignment, **kwargs)
         else:
             for attr in kwargs:
-                setattr(notebook, attr, kwargs[attr])
+                setattr(solution_cell, attr, kwargs[attr])
             self.db.commit()
 
         return solution_cell
@@ -532,7 +555,11 @@ class Gradebook(object):
                 comment = Comment(cell=solution_cell, notebook=nb)
 
         self.db.add(submission)
-        self.db.commit()
+        try:
+            self.db.commit()
+        except IntegrityError as e:
+            raise InvalidEntry(e.message)
+
         return submission
 
     def assignment_submissions(self, assignment):

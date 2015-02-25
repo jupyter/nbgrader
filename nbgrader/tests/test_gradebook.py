@@ -1,185 +1,240 @@
+from datetime import datetime
 from nbgrader import api
-from pymongo.errors import DuplicateKeyError
-from nose.tools import assert_equal, assert_raises
+from nbgrader.api import InvalidEntry, NoResultFound
+from nose.tools import assert_equal, assert_not_equal, assert_raises
 
 class TestGradebook(object):
 
     def setup(self):
-        self.gb = api.Gradebook("nbgrader_testing")
-
-    def teardown(self):
-        self.gb.client.drop_database("nbgrader_testing")
-
-    def _add_assignment(self):
-        a = api.Assignment(assignment_id='foo', duedate='someday')
-        self.gb.add_assignment(a)
-        return a
-
-    def _add_student(self):
-        s = api.Student(student_id=12345, first_name='Jane', last_name='Doe', email='janedoe@nowhere')
-        self.gb.add_student(s)
-        return s
-
-    def _add_notebook(self):
-        a = self._add_assignment()
-        s = self._add_student()
-        n = api.Notebook(notebook_id='blah', assignment=a, student=s)
-        self.gb.add_notebook(n)
-        return n
+        self.gb = api.Gradebook("sqlite:///:memory:")
 
     def test_init(self):
-        assert self.gb.students == []
-        assert self.gb.notebooks == []
-        assert self.gb.assignments == []
+        assert_equal(self.gb.students, [], "students is not empty")
+        assert_equal(self.gb.assignments, [], "assignments is not empty")
 
-    def test_add_assignment(self):
-        a = self._add_assignment()
-
-        # try inserting a duplicate assignment
-        assert_raises(DuplicateKeyError, self.gb.add_assignment, a)
-
-        # try inserting something with the wrong type
-        assert_raises(ValueError, self.gb.add_assignment, a.to_dict())
-
-        # check that the assignment was correctly added
-        assert len(self.gb.assignments) == 1
-        assert_equal(self.gb.assignments[0].to_dict(), a.to_dict())
-        assert_equal(self.gb.find_assignment(_id=a._id).to_dict(), a.to_dict())
-
-        # try looking up a nonexistant assignment
-        assert_raises(ValueError, self.gb.find_assignment, kwargs={'assignment_id': "bar"})
+    #### Test students
 
     def test_add_student(self):
-        s = self._add_student()
+        s = self.gb.add_student('12345')
+        assert_equal(s.id, '12345', "incorrect id")
+        assert_equal(self.gb.students, [s], "student not in students")
 
-        # try inserting a duplicate student
-        assert_raises(DuplicateKeyError, self.gb.add_student, s)
+    def test_add_student_with_args(self):
+        s = self.gb.add_student('12345', last_name="Bar", first_name="Foo", email="foo@bar.com")
+        assert_equal(s.id, '12345', "incorrect id")
+        assert_equal(s.last_name, "Bar", "incorrect last name")
+        assert_equal(s.first_name, "Foo", "incorrect first name")
+        assert_equal(s.email, "foo@bar.com", "incorrect email")
 
-        # try inserting something with the wrong type
-        assert_raises(ValueError, self.gb.add_student, s.to_dict())
+    def test_add_duplicate_student(self):
+        self.gb.add_student('12345')
+        assert_raises(InvalidEntry, self.gb.add_student, '12345')
 
-        # check that the student was correctly added
-        assert len(self.gb.students) == 1
-        assert_equal(self.gb.students[0].to_dict(), s.to_dict())
-        assert_equal(self.gb.find_student(_id=s._id).to_dict(), s.to_dict())
+    def test_find_student(self):
+        s1 = self.gb.add_student('12345')
+        assert_equal(self.gb.find_student('12345'), s1, "student 1 not found")
 
-        # try looking up a nonexistent stuent
-        assert_raises(ValueError, self.gb.find_student, kwargs={'student_id': "bar"})
+        s2 = self.gb.add_student('abcd')
+        assert_equal(self.gb.find_student('12345'), s1, "student 1 not found after adding student 2")
+        assert_equal(self.gb.find_student('abcd'), s2, "student 2 not found")
+
+    def test_find_nonexistant_student(self):
+        assert_raises(NoResultFound, self.gb.find_student, '12345')
+
+    #### Test assignments
+
+    def test_add_assignment(self):
+        a = self.gb.add_assignment('foo')
+        assert_equal(a.name, 'foo', "incorrect name")
+        assert_equal(self.gb.assignments, [a], "assignment not in assignments")
+
+    def test_add_assignment_with_args(self):
+        now = datetime.now()
+        a = self.gb.add_assignment('foo', duedate=now)
+        assert_equal(a.name, 'foo', "incorrect name")
+        assert_equal(a.duedate, now, "incorrect duedate")
+
+    def test_add_duplicate_assignment(self):
+        self.gb.add_assignment('foo')
+        assert_raises(InvalidEntry, self.gb.add_assignment, 'foo')
+
+    def test_find_assignment(self):
+        a1 = self.gb.add_assignment('foo')
+        assert_equal(self.gb.find_assignment('foo'), a1, "assignment 1 not found")
+
+        a2 = self.gb.add_assignment('bar')
+        assert_equal(self.gb.find_assignment('foo'), a1, "assignment 1 not found after adding assignment 2")
+        assert_equal(self.gb.find_assignment('bar'), a2, "assignment 2 not found")
+
+    def test_find_nonexistant_assignment(self):
+        assert_raises(NoResultFound, self.gb.find_assignment, 'foo')
+
+    #### Test notebooks
 
     def test_add_notebook(self):
-        n1 = self._add_notebook()
+        a = self.gb.add_assignment('foo')
+        n = self.gb.add_notebook('p1', 'foo')
+        assert_equal(n.name, 'p1', "incorrect name")
+        assert_equal(n.assignment, a, "assignment set incorrectly")
+        assert_equal(a.notebooks, [n], "notebook set incorrectly")
 
-        # try inserting a duplicate notebook
-        assert_raises(DuplicateKeyError, self.gb.add_notebook, n1)
+    def test_add_duplicate_notebook(self):
+        # it should be ok to add a notebook with the same name, as long as
+        # it's for different assignments
+        self.gb.add_assignment('foo')
+        self.gb.add_assignment('bar')
+        n1 = self.gb.add_notebook('p1', 'foo')
+        n2 = self.gb.add_notebook('p1', 'bar')
+        assert_not_equal(n1.id, n2.id, "notebooks have the same id")
 
-        # try inserting something with the wrong type
-        assert_raises(ValueError, self.gb.add_notebook, n1.to_dict())
+        # but not ok to add a notebook with the same name for the same assignment
+        assert_raises(InvalidEntry, self.gb.add_notebook, 'p1', 'foo')
 
-        # check that the notebook was correctly added
-        assert len(self.gb.notebooks) == 1
-        assert_equal(self.gb.notebooks[0].to_dict(), n1.to_dict())
-        assert_equal(self.gb.find_notebook(_id=n1._id).to_dict(), n1.to_dict())
+    def test_find_notebook(self):
+        self.gb.add_assignment('foo')
+        n1 = self.gb.add_notebook('p1', 'foo')
+        assert_equal(self.gb.find_notebook('p1', 'foo'), n1, "notebook 1 not found")
 
-        # add another notebook for the same student but with a
-        # different assignment
-        a = self._add_assignment()
-        n2 = api.Notebook(notebook_id='blargh', assignment=a, student=n1.student)
-        self.gb.add_notebook(n2)
+        n2 = self.gb.add_notebook('p2', 'foo')
+        assert_equal(self.gb.find_notebook('p1', 'foo'), n1, "notebook 1 not found after adding notebook 2")
+        assert_equal(self.gb.find_notebook('p2', 'foo'), n2, "notebook 2 not found")
 
-        # check that it was added correctly
-        assert len(self.gb.notebooks) == 2
-        assert_equal(self.gb.find_notebook(_id=n2._id).to_dict(), n2.to_dict())
+    def test_find_nonexistant_notebook(self):
+        # check that it doesn't find it when there is nothing in the db
+        assert_raises(NoResultFound, self.gb.find_notebook, 'p1', 'foo')
 
-        # check that both notebooks are associated with the student
-        assert len(self.gb.find_notebooks(student=n1.student)) == 2
+        # check that it doesn't find it even if the assignment exists
+        self.gb.add_assignment('foo')
+        assert_raises(NoResultFound, self.gb.find_notebook, 'p1', 'foo')
 
-        # check that the first notebook is associated with the correct
-        # assignment
-        nbs = self.gb.find_notebooks(assignment=n1.assignment)
-        assert len(nbs) == 1
-        assert nbs[0]._id == n1._id
+    def test_update_or_create_notebook(self):
+        # first test creating it
+        self.gb.add_assignment('foo')
+        n1 = self.gb.update_or_create_notebook('p1', 'foo')
+        assert_equal(self.gb.find_notebook('p1', 'foo'), n1, "notebook not created")
 
-        # check that the second notebook is associated with the
-        # correct assignment
-        nbs = self.gb.find_notebooks(assignment=n2.assignment)
-        assert len(nbs) == 1
-        assert nbs[0]._id == n2._id
+        # now test finding/updating it
+        n2 = self.gb.update_or_create_notebook('p1', 'foo')
+        assert_equal(n1, n2, "notebooks are not the same")
 
-    def test_find_or_create_notebook(self):
-        a = self._add_assignment()
-        s = self._add_student()
-        n1 = api.Notebook(notebook_id='blah', assignment=a, student=s)
-        n2 = self.gb.find_or_create_notebook(**n1.to_dict())
-        assert_equal(n1.to_dict(), n2.to_dict())
-
-    def test_add_grade(self):
-        n = self._add_notebook()
-        g1 = api.Grade(grade_id='grade1', notebook=n, max_score=2)
-        g2 = self.gb.find_or_create_grade(**g1.to_dict())
-        assert_equal(g1.to_dict(), g2.to_dict())
-        assert_equal(self.gb.find_grade(grade_id='grade1').to_dict(), g1.to_dict())
-
-        grades = self.gb.find_grades(notebook=n)
-        assert len(grades) == 1
-
-        self.gb.find_or_create_grade(grade_id='grade2', notebook=n, max_score=3)
-        grades = self.gb.find_grades(notebook=n)
-        assert len(grades) == 2
-
-        g1.autoscore = 1
-        g1.score = 2
-        self.gb.update_grade(g1)
-
-        g = self.gb.find_grade(_id=g1._id)
-        assert g.autoscore == 1
-        assert g.score == 2
-
-    def test_add_comment(self):
-        n = self._add_notebook()
-        c1 = api.Comment(comment_id="comment1", notebook=n)
-        c2 = self.gb.find_or_create_comment(**c1.to_dict())
-        assert_equal(c1.to_dict(), c2.to_dict())
-        assert_equal(self.gb.find_comment(comment_id='comment1').to_dict(), c1.to_dict())
-
-        comments = self.gb.find_comments(notebook=n)
-        assert len(comments) == 1
-
-        self.gb.find_or_create_comment(comment_id='comment2', notebook=n)
-        comments = self.gb.find_comments(notebook=n)
-        assert len(comments) == 2
-
-        c1.comment = 'lorem ipsum'
-        self.gb.update_comment(c1)
-
-        g = self.gb.find_comment(_id=c1._id)
-        assert g.comment == 'lorem ipsum'
-
-    def test_avg_assignment_scores_no_scores(self):
-        """Test that an error is not thrown when there are no scores to actually average over"""
-        a = self._add_assignment()
-        self._add_student()
-
-        all_scores = self.gb.avg_assignment_score(a)
-        assert all_scores == dict(avg_score=0, max_score=0)
+    #### Test grade cells
 
     def test_add_grade_cell(self):
-        a = self._add_assignment()
-        g1 = api.GradeCell(grade_id='grade1', notebook_id='blah', assignment=a, max_score=2)
-        g2 = self.gb.find_or_create_grade_cell(**g1.to_dict())
-        assert_equal(g1.to_dict(), g2.to_dict())
-        assert_equal(self.gb.find_grade_cell(grade_id='grade1').to_dict(), g1.to_dict())
+        self.gb.add_assignment('foo')
+        n = self.gb.add_notebook('p1', 'foo')
+        gc = self.gb.add_grade_cell('test1', 'p1', 'foo', max_score=2, cell_type='markdown')
+        assert_equal(gc.name, 'test1', "incorrect name")
+        assert_equal(gc.max_score, 2, "incorrect max score")
+        assert_equal(gc.cell_type, 'markdown', "incorrect cell type")
+        assert_equal(n.grade_cells, [gc], "grade cells set incorrectly")
+        assert_equal(gc.notebook, n, "notebook set incorrectly")
 
-        grade_cells = self.gb.find_grade_cells(assignment=a, notebook_id='blah')
-        assert len(grade_cells) == 1
+    def test_add_grade_cell_with_args(self):
+        self.gb.add_assignment('foo')
+        self.gb.add_notebook('p1', 'foo')
+        gc = self.gb.add_grade_cell(
+            'test1', 'p1', 'foo', 
+            max_score=3, source="blah blah blah",
+            cell_type="code", checksum="abcde")
+        assert_equal(gc.name, 'test1', "incorrect name")
+        assert_equal(gc.max_score, 3, "incorrect max score")
+        assert_equal(gc.source, "blah blah blah", "incorrect source")
+        assert_equal(gc.cell_type, "code", "incorrect cell type")
+        assert_equal(gc.checksum, "abcde", "incorrect checksum")
 
-        self.gb.find_or_create_grade_cell(grade_id='grade2', assignment=a, notebook_id='blah', max_score=3)
-        grade_cells = self.gb.find_grade_cells(assignment=a, notebook_id='blah')
-        assert len(grade_cells) == 2
+    def test_create_invalid_grade_cell(self):
+        self.gb.add_assignment('foo')
+        self.gb.add_notebook('p1', 'foo')
+        assert_raises(
+            InvalidEntry, self.gb.add_grade_cell,
+            'test1', 'p1', 'foo', 
+            max_score=3, source="blah blah blah",
+            cell_type="something", checksum="abcde")
 
-        g1.source = "hello\n"
-        g1.checksum = "abcd"
-        self.gb.update_grade_cell(g1)
+    def test_add_duplicate_grade_cell(self):
+        self.gb.add_assignment('foo')
+        self.gb.add_notebook('p1', 'foo')
+        self.gb.add_grade_cell('test1', 'p1', 'foo', max_score=1, cell_type='code')
+        assert_raises(InvalidEntry, self.gb.add_grade_cell, 'test1', 'p1', 'foo', max_score=2, cell_type='markdown')
 
-        g = self.gb.find_grade_cell(_id=g1._id)
-        assert g.source == "hello\n"
-        assert g.checksum == "abcd"
+    def test_find_grade_cell(self):
+        self.gb.add_assignment('foo')
+        self.gb.add_notebook('p1', 'foo')
+        gc1 = self.gb.add_grade_cell('test1', 'p1', 'foo', max_score=1, cell_type='code')
+        assert_equal(self.gb.find_grade_cell('test1', 'p1', 'foo'), gc1, "grade cell 1 not found")
+
+        gc2 = self.gb.add_grade_cell('test2', 'p1', 'foo', max_score=2, cell_type='code')
+        assert_equal(self.gb.find_grade_cell('test1', 'p1', 'foo'), gc1, "grade cell 1 not found after adding grade cell 2")
+        assert_equal(self.gb.find_grade_cell('test2', 'p1', 'foo'), gc2, "grade cell 2 not found")
+
+    def test_find_nonexistant_grade_cell(self):
+        assert_raises(NoResultFound, self.gb.find_grade_cell, 'test1', 'p1', 'foo')
+
+        self.gb.add_assignment('foo')
+        assert_raises(NoResultFound, self.gb.find_grade_cell, 'test1', 'p1', 'foo')
+
+        self.gb.add_notebook('p1', 'foo')
+        assert_raises(NoResultFound, self.gb.find_grade_cell, 'test1', 'p1', 'foo')
+
+    def test_update_or_create_grade_cell(self):
+        # first test creating it
+        self.gb.add_assignment('foo')
+        self.gb.add_notebook('p1', 'foo')
+        gc1 = self.gb.update_or_create_grade_cell('test1', 'p1', 'foo', max_score=2, cell_type='code')
+        assert_equal(gc1.max_score, 2, "max score is incorrect")
+        assert_equal(gc1.cell_type, 'code', "cell type is incorrect")
+        assert_equal(self.gb.find_grade_cell('test1', 'p1', 'foo'), gc1, "grade cell not created")
+
+        # now test finding/updating it
+        assert_equal(gc1.checksum, None, "checksum is not empty")
+        gc2 = self.gb.update_or_create_grade_cell('test1', 'p1', 'foo', checksum="123456")
+        assert_equal(gc1, gc2, "grade cells are not the same")
+        assert_equal(gc1.max_score, 2, "max score is incorrect")
+        assert_equal(gc1.cell_type, 'code', "cell type is incorrect")
+        assert_equal(gc1.checksum, "123456", "checksum was not updated")
+
+    #### Test solution cells
+
+    def test_add_solution_cell(self):
+        self.gb.add_assignment('foo')
+        n = self.gb.add_notebook('p1', 'foo')
+        gc = self.gb.add_solution_cell('test1', 'p1', 'foo')
+        assert_equal(gc.name, 'test1', "incorrect name")
+        assert_equal(n.solution_cells, [gc], "solution cells set incorrectly")
+        assert_equal(gc.notebook, n, "notebook set incorrectly")
+
+    def test_add_duplicate_solution_cell(self):
+        self.gb.add_assignment('foo')
+        self.gb.add_notebook('p1', 'foo')
+        self.gb.add_solution_cell('test1', 'p1', 'foo')
+        assert_raises(InvalidEntry, self.gb.add_solution_cell, 'test1', 'p1', 'foo')
+
+    def test_find_solution_cell(self):
+        self.gb.add_assignment('foo')
+        self.gb.add_notebook('p1', 'foo')
+        gc1 = self.gb.add_solution_cell('test1', 'p1', 'foo')
+        assert_equal(self.gb.find_solution_cell('test1', 'p1', 'foo'), gc1, "solution cell 1 not found")
+
+        gc2 = self.gb.add_solution_cell('test2', 'p1', 'foo')
+        assert_equal(self.gb.find_solution_cell('test1', 'p1', 'foo'), gc1, "solution cell 1 not found after adding solution cell 2")
+        assert_equal(self.gb.find_solution_cell('test2', 'p1', 'foo'), gc2, "solution cell 2 not found")
+
+    def test_find_nonexistant_solution_cell(self):
+        assert_raises(NoResultFound, self.gb.find_solution_cell, 'test1', 'p1', 'foo')
+
+        self.gb.add_assignment('foo')
+        assert_raises(NoResultFound, self.gb.find_solution_cell, 'test1', 'p1', 'foo')
+
+        self.gb.add_notebook('p1', 'foo')
+        assert_raises(NoResultFound, self.gb.find_solution_cell, 'test1', 'p1', 'foo')
+
+    def test_update_or_create_solution_cell(self):
+        # first test creating it
+        self.gb.add_assignment('foo')
+        self.gb.add_notebook('p1', 'foo')
+        gc1 = self.gb.update_or_create_solution_cell('test1', 'p1', 'foo')
+        assert_equal(self.gb.find_solution_cell('test1', 'p1', 'foo'), gc1, "solution cell not created")
+
+        # now test finding/updating it
+        gc2 = self.gb.update_or_create_solution_cell('test1', 'p1', 'foo')
+        assert_equal(gc1, gc2, "solution cells are not the same")
