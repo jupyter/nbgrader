@@ -1,12 +1,15 @@
 from datetime import datetime
 from nbgrader import api
-from nbgrader.api import InvalidEntry, NoResultFound
+from nbgrader.api import InvalidEntry, MissingEntry
 from nose.tools import assert_equal, assert_not_equal, assert_raises
 
 class TestGradebook(object):
 
     def setup(self):
         self.gb = api.Gradebook("sqlite:///:memory:")
+
+    def teardown(self):
+        self.gb.db.close()
 
     def test_init(self):
         assert_equal(self.gb.students, [], "students is not empty")
@@ -19,14 +22,19 @@ class TestGradebook(object):
         assert_equal(s.id, '12345', "incorrect id")
         assert_equal(self.gb.students, [s], "student not in students")
 
-    def test_add_student_with_args(self):
-        s = self.gb.add_student('12345', last_name="Bar", first_name="Foo", email="foo@bar.com")
-        assert_equal(s.id, '12345', "incorrect id")
+        # try adding a duplicate student
+        assert_raises(InvalidEntry, self.gb.add_student, '12345')
+
+        # try adding a student with arguments
+        s = self.gb.add_student('6789', last_name="Bar", first_name="Foo", email="foo@bar.com")
+        assert_equal(s.id, '6789', "incorrect id")
         assert_equal(s.last_name, "Bar", "incorrect last name")
         assert_equal(s.first_name, "Foo", "incorrect first name")
         assert_equal(s.email, "foo@bar.com", "incorrect email")
 
     def test_add_duplicate_student(self):
+        # we also need this test because this will cause an IntegrityError
+        # under the hood rather than a FlushError
         self.gb.add_student('12345')
         assert_raises(InvalidEntry, self.gb.add_student, '12345')
 
@@ -39,7 +47,7 @@ class TestGradebook(object):
         assert_equal(self.gb.find_student('abcd'), s2, "student 2 not found")
 
     def test_find_nonexistant_student(self):
-        assert_raises(NoResultFound, self.gb.find_student, '12345')
+        assert_raises(MissingEntry, self.gb.find_student, '12345')
 
     #### Test assignments
 
@@ -48,10 +56,13 @@ class TestGradebook(object):
         assert_equal(a.name, 'foo', "incorrect name")
         assert_equal(self.gb.assignments, [a], "assignment not in assignments")
 
-    def test_add_assignment_with_args(self):
+        # try adding a duplicate assignment
+        assert_raises(InvalidEntry, self.gb.add_assignment, 'foo')
+
+        # try adding an assignment with arguments
         now = datetime.now()
-        a = self.gb.add_assignment('foo', duedate=now)
-        assert_equal(a.name, 'foo', "incorrect name")
+        a = self.gb.add_assignment('bar', duedate=now)
+        assert_equal(a.name, 'bar', "incorrect name")
         assert_equal(a.duedate, now, "incorrect duedate")
 
     def test_add_duplicate_assignment(self):
@@ -67,7 +78,7 @@ class TestGradebook(object):
         assert_equal(self.gb.find_assignment('bar'), a2, "assignment 2 not found")
 
     def test_find_nonexistant_assignment(self):
-        assert_raises(NoResultFound, self.gb.find_assignment, 'foo')
+        assert_raises(MissingEntry, self.gb.find_assignment, 'foo')
 
     #### Test notebooks
 
@@ -77,6 +88,9 @@ class TestGradebook(object):
         assert_equal(n.name, 'p1', "incorrect name")
         assert_equal(n.assignment, a, "assignment set incorrectly")
         assert_equal(a.notebooks, [n], "notebook set incorrectly")
+
+        # try adding a duplicate assignment
+        assert_raises(InvalidEntry, self.gb.add_notebook, 'p1', 'foo')
 
     def test_add_duplicate_notebook(self):
         # it should be ok to add a notebook with the same name, as long as
@@ -101,11 +115,11 @@ class TestGradebook(object):
 
     def test_find_nonexistant_notebook(self):
         # check that it doesn't find it when there is nothing in the db
-        assert_raises(NoResultFound, self.gb.find_notebook, 'p1', 'foo')
+        assert_raises(MissingEntry, self.gb.find_notebook, 'p1', 'foo')
 
         # check that it doesn't find it even if the assignment exists
         self.gb.add_assignment('foo')
-        assert_raises(NoResultFound, self.gb.find_notebook, 'p1', 'foo')
+        assert_raises(MissingEntry, self.gb.find_notebook, 'p1', 'foo')
 
     def test_update_or_create_notebook(self):
         # first test creating it
@@ -168,13 +182,13 @@ class TestGradebook(object):
         assert_equal(self.gb.find_grade_cell('test2', 'p1', 'foo'), gc2, "grade cell 2 not found")
 
     def test_find_nonexistant_grade_cell(self):
-        assert_raises(NoResultFound, self.gb.find_grade_cell, 'test1', 'p1', 'foo')
+        assert_raises(MissingEntry, self.gb.find_grade_cell, 'test1', 'p1', 'foo')
 
         self.gb.add_assignment('foo')
-        assert_raises(NoResultFound, self.gb.find_grade_cell, 'test1', 'p1', 'foo')
+        assert_raises(MissingEntry, self.gb.find_grade_cell, 'test1', 'p1', 'foo')
 
         self.gb.add_notebook('p1', 'foo')
-        assert_raises(NoResultFound, self.gb.find_grade_cell, 'test1', 'p1', 'foo')
+        assert_raises(MissingEntry, self.gb.find_grade_cell, 'test1', 'p1', 'foo')
 
     def test_update_or_create_grade_cell(self):
         # first test creating it
@@ -220,13 +234,13 @@ class TestGradebook(object):
         assert_equal(self.gb.find_solution_cell('test2', 'p1', 'foo'), gc2, "solution cell 2 not found")
 
     def test_find_nonexistant_solution_cell(self):
-        assert_raises(NoResultFound, self.gb.find_solution_cell, 'test1', 'p1', 'foo')
+        assert_raises(MissingEntry, self.gb.find_solution_cell, 'test1', 'p1', 'foo')
 
         self.gb.add_assignment('foo')
-        assert_raises(NoResultFound, self.gb.find_solution_cell, 'test1', 'p1', 'foo')
+        assert_raises(MissingEntry, self.gb.find_solution_cell, 'test1', 'p1', 'foo')
 
         self.gb.add_notebook('p1', 'foo')
-        assert_raises(NoResultFound, self.gb.find_solution_cell, 'test1', 'p1', 'foo')
+        assert_raises(MissingEntry, self.gb.find_solution_cell, 'test1', 'p1', 'foo')
 
     def test_update_or_create_solution_cell(self):
         # first test creating it
@@ -238,3 +252,34 @@ class TestGradebook(object):
         # now test finding/updating it
         gc2 = self.gb.update_or_create_solution_cell('test1', 'p1', 'foo')
         assert_equal(gc1, gc2, "solution cells are not the same")
+
+    #### Test submissions
+
+    def _add_assignment(self):
+        self.gb.add_assignment('foo')
+        self.gb.add_notebook('p1', 'foo')
+        self.gb.add_grade_cell('test1', 'p1', 'foo', max_score=1, cell_type='code')
+        self.gb.add_grade_cell('test2', 'p1', 'foo', max_score=2, cell_type='markdown')
+        self.gb.add_solution_cell('solution1', 'p1', 'foo')
+        self.gb.add_solution_cell('test2', 'p1', 'foo')
+
+    def test_add_submission(self):
+        self._add_assignment()
+        self.gb.add_student('hacker123')
+        self.gb.add_student('bitdiddle')
+        s1 = self.gb.add_submission('foo', 'hacker123')
+        s2 = self.gb.add_submission('foo', 'bitdiddle')
+
+        assert_equal(self.gb.assignment_submissions('foo'), [s2, s1], "wrong list of submissions")
+        assert_equal(self.gb.student_submissions('hacker123'), [s1], "wrong submissions for hacker123")
+        assert_equal(self.gb.student_submissions('bitdiddle'), [s2], "wrong submissions for bitdiddle")
+        assert_equal(self.gb.find_submission('foo', 'hacker123'), s1, "couldn't find submission for hacker123")
+        assert_equal(self.gb.find_submission('foo', 'bitdiddle'), s2, "couldn't find submission for bitdiddle")
+
+    def test_add_duplicate_submission(self):
+        self._add_assignment()
+        self.gb.add_student('hacker123')
+        self.gb.add_submission('foo', 'hacker123')
+        assert_raises(InvalidEntry, self.gb.add_submission, 'foo', 'hacker123')
+
+
