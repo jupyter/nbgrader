@@ -83,10 +83,10 @@ div.nbgrader_cell {
     width: 100%;
 }
 
-div.nbgrader_cell .panel-heading {
+/*div.nbgrader_cell .panel-heading {
     padding: 0.4em 0.6em;
     height: 37px;
-}
+}*/
 
 div.nbgrader_cell .panel-footer {
     padding: 0.4em 0.6em;
@@ -108,14 +108,20 @@ div.nbgrader_cell .input_area {
 
 .score {
     color: black;
+    height: 29px;
+    margin-left: 1em;
 }
 
-span.nbgrader-label {
-    line-height: 25px;
+.nbgrader-label {
+    line-height: 29px;
 }
 
 .save-icon {
     margin-left: 1em;
     top: 4px;
     display: none;
+}
+
+.panel-heading {
+    overflow: hidden;
 }

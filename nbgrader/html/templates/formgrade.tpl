@@ -102,9 +102,15 @@ var nb_uuid = "{{ resources.notebook_uuid }}";
 
 {% macro score(cell) -%}
   <span id="{{ cell.metadata.nbgrader.grade_id }}-saved" class="glyphicon glyphicon-floppy-saved save-icon"></span>
-  <span class="pull-right">
-    Score: <input class="score" id="{{ cell.metadata.nbgrader.grade_id }}" style="width: 4em;" type="number" /> / {{ cell.metadata.nbgrader.points | float | round(2) }}
-  </span>
+  <div class="pull-right">
+    <span class="btn-group btn-group-sm scoring-buttons" role="group">
+      <button type="button" class="btn btn-success" id="{{ cell.metadata.nbgrader.grade_id }}-full-credit">Full credit</button>
+      <button type="button" class="btn btn-danger" id="{{ cell.metadata.nbgrader.grade_id }}-no-credit">No credit</button>
+    </span>
+    <span>
+      <input class="score" id="{{ cell.metadata.nbgrader.grade_id }}" style="width: 4em;" type="number" /> / {{ cell.metadata.nbgrader.points | float | round(2) }}
+    </span>
+  </div>
 {%- endmacro %}
 
 
@@ -117,7 +123,7 @@ var nb_uuid = "{{ resources.notebook_uuid }}";
   {{ score(cell) }}
   {%- endif -%}
 {%- elif cell.metadata.nbgrader.grade -%}
-  <span class="nbgrader-label">Grade cell: <code>{{ cell.metadata.nbgrader.grade_id }}</code></span>
+  <span class="nbgrader-label"><code>{{ cell.metadata.nbgrader.grade_id }}</code></span>
   {{ score(cell) }}
 {%- endif -%}
 </div>  

@@ -10,6 +10,14 @@ var Grade = Backbone.Model.extend({
         elem.attr("placeholder", this.get("autoscore"));
 
         var that = this;
+        $("#" + this.get("grade_id") + "-full-credit").click(function () {
+            elem.val(that.get("max_score"));
+            elem.trigger("change");
+        });
+        $("#" + this.get("grade_id") + "-no-credit").click(function () {
+            elem.val(0);
+            elem.trigger("change");
+        });
         elem.on("change", function (evt) {
             if (elem.val() === "") {
                 that.set("score", null);
