@@ -38,7 +38,7 @@ class OverwriteGradeCells(Preprocessor):
                 new_checksum = utils.compute_checksum(cell)
 
                 if old_checksum != new_checksum:
-                    self.log.warning("Checksum for grade cell %s has changed!", grade_cell.grade_id)
+                    self.log.warning("Checksum for grade cell %s has changed!", grade_cell.name)
 
                 cell.source = grade_cell.source
                 cell.cell_type = grade_cell.cell_type
