@@ -9,4 +9,4 @@ c.IncludeHeaderFooter.header = os.path.join(cwd, 'header.ipynb')
 
 # These are only used if run with --save-cells
 c.SaveGradeCells.assignment_id = "Problem Set 1"
-c.SaveGradeCells.db_name = "example"
+c.SaveGradeCells.db_url = "sqlite:////tmp/nbgrader_example.db"
