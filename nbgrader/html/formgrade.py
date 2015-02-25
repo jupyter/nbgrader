@@ -1,7 +1,6 @@
 import json
 import os
-
-from sqlalchemy.orm.exc import NoResultFound
+from nbgrader.api import MissingEntry
 from flask import Flask, request, abort, redirect, url_for, render_template, send_from_directory
 
 app = Flask(__name__, static_url_path='')
@@ -36,7 +35,7 @@ def view_students():
 def view_assignment(assignment_id):
     try:
         assignment = app.gradebook.find_assignment(assignment_id)
-    except NoResultFound:
+    except MissingEntry:
         abort(404)
 
     notebooks = [nb.to_dict() for nb in assignment.notebooks]
@@ -51,7 +50,7 @@ def view_assignment(assignment_id):
 def view_student(student_id):
     try:
         student = app.gradebook.find_student(student_id)
-    except NoResultFound:
+    except MissingEntry:
         abort(404)
 
     assignments = [x.to_dict() for x in student.submissions]
@@ -67,7 +66,7 @@ def view_student(student_id):
 def view_assignment_notebook(assignment_id, notebook_id):
     try:
         notebook = app.gradebook.find_notebook(notebook_id, assignment_id)
-    except NoResultFound:
+    except MissingEntry:
         abort(404)
 
     submissions = [x.to_dict() for x in notebook.submissions]
@@ -86,7 +85,7 @@ def view_assignment_notebook(assignment_id, notebook_id):
 def view_student_assignment(student_id, assignment_id):
     try:
         assignment = app.gradebook.find_submission(assignment_id, student_id)
-    except NoResultFound:
+    except MissingEntry:
         abort(404)
 
     submissions = [n.to_dict() for n in assignment.notebooks]
@@ -176,7 +175,7 @@ def get_all_grades():
     try:
         notebook = app.gradebook.find_submission_notebook(
             notebook_id, assignment_id, student_id)
-    except NoResultFound:
+    except MissingEntry:
         abort(404)
 
     return json.dumps([g.to_dict() for g in notebook.grades])
@@ -191,7 +190,7 @@ def get_all_comments():
     try:
         notebook = app.gradebook.find_submission_notebook(
             notebook_id, assignment_id, student_id)
-    except NoResultFound:
+    except MissingEntry:
         abort(404)
 
     return json.dumps([c.to_dict() for c in notebook.comments])
@@ -201,7 +200,7 @@ def get_all_comments():
 def get_grade(_id):
     try:
         grade = app.gradebook.find_grade_by_id(_id)
-    except NoResultFound:
+    except MissingEntry:
         abort(404)
 
     if request.method == "PUT":
@@ -215,7 +214,7 @@ def get_grade(_id):
 def get_comment(_id):
     try:
         comment = app.gradebook.find_comment_by_id(_id)
-    except NoResultFound:
+    except MissingEntry:
         abort(404)
 
     if request.method == "PUT":
