@@ -89,21 +89,16 @@ def view_assignment_notebook(assignment_id, notebook_id):
                 student=student,
                 notebook_id=notebook_id)
         except ValueError:
-            submission = {
-                "assignment": assignment._id,
-                "notebook_id": notebook_id,
-                "score": None,
-                "max_score": None
-            }
-        else:
-            submission = submission.to_dict()
-            score = app.gradebook.notebook_score(submission["_id"])
-            submission.update(score)
+            continue
 
-        submission["student"] = student.to_dict()
+        submission = submission.to_dict()
+        score = app.gradebook.notebook_score(submission["_id"])
+        submission.update(score)
         submissions.append(submission)
 
-    submissions.sort(key=lambda x: x["student"]["last_name"])
+    submissions.sort(key=lambda x: x["_id"])
+    for i, submission in enumerate(submissions):
+        submission["index"] = i
 
     return render_template(
         "notebook_submissions.tpl",
@@ -136,71 +131,62 @@ def view_student_assignment(student_id, assignment_id):
         submissions=submissions
     )
 
-@app.route("/assignments/<assignment_id>/<notebook_id>/<student_id>/<path:path>")
-def view_submission_files(assignment_id, notebook_id, student_id, path):
+@app.route("/submissions/<submission_id>/<path:path>")
+def view_submission_files(submission_id, path):
     try:
-        assignment = app.gradebook.find_assignment(assignment_id=assignment_id)
-        student = app.gradebook.find_student(student_id=student_id)
-        notebook = app.gradebook.find_notebook(
-            assignment=assignment,
-            student=student,
-            notebook_id=notebook_id)
+        submission = app.gradebook.find_notebook(_id=submission_id)
+        assignment = app.gradebook.find_assignment(_id=submission.assignment)
+        student = app.gradebook.find_student(_id=submission.student)
     except ValueError:
         abort(404)
 
     filename = os.path.join(app.notebook_dir, app.notebook_dir_format.format(
         assignment_id=assignment.assignment_id,
-        notebook_id=notebook.notebook_id,
+        notebook_id=submission.notebook_id,
         student_id=student.student_id))
 
     dirname = os.path.split(filename)[0]
     return send_from_directory(dirname, path)
 
 
-@app.route("/assignments/<assignment_id>/<notebook_id>/<student_id>/")
-def view_submission(assignment_id, notebook_id, student_id):
+@app.route("/submissions/<submission_id>/")
+def view_submission(submission_id):
     try:
-        assignment = app.gradebook.find_assignment(assignment_id=assignment_id)
-        student = app.gradebook.find_student(student_id=student_id)
-        notebook = app.gradebook.find_notebook(
-            assignment=assignment,
-            student=student,
-            notebook_id=notebook_id)
+        submission = app.gradebook.find_notebook(_id=submission_id)
+        assignment = app.gradebook.find_assignment(_id=submission.assignment)
+        student = app.gradebook.find_student(_id=submission.student)
     except ValueError:
         abort(404)
 
     filename = os.path.join(app.notebook_dir, app.notebook_dir_format.format(
         assignment_id=assignment.assignment_id,
-        notebook_id=notebook.notebook_id,
+        notebook_id=submission.notebook_id,
         student_id=student.student_id))
 
     if not os.path.exists(filename):
         abort(404)
 
-    students = []
-    for submission in app.gradebook.find_notebooks(assignment=assignment, notebook_id=notebook_id):
-        s = app.gradebook.find_student(_id=submission.student)
-        students.append(s.to_dict())
-    students = sorted(students, key=lambda x: x["last_name"])
-    students = [x["_id"] for x in students]
+    submissions = sorted([x._id for x in app.gradebook.find_notebooks(
+        assignment=assignment, notebook_id=submission.notebook_id)])
 
-    ix = students.index(student._id)
+    ix = submissions.index(submission._id)
     if ix == 0:
-        prev_student = None
+        prev_submission = None
     else:
-        prev_student = app.gradebook.find_student(_id=students[ix - 1]).to_dict()
-    if ix == (len(students) - 1):
-        next_student = None
+        prev_submission = submissions[ix - 1]
+    if ix == (len(submissions) - 1):
+        next_submission = None
     else:
-        next_student = app.gradebook.find_student(_id=students[ix + 1]).to_dict()
+        next_submission = submissions[ix + 1]
 
     resources = {
         'assignment_id': assignment.assignment_id,
-        'student': student.to_dict(),
-        'notebook_id': notebook.notebook_id,
-        'notebook_uuid': notebook._id,
-        'next': next_student,
-        'prev': prev_student
+        'notebook_id': submission.notebook_id,
+        'submission_id': submission._id,
+        'next': next_submission,
+        'prev': prev_submission,
+        'index': ix,
+        'total': len(submissions)
     }
 
     output, resources = app.exporter.from_filename(filename, resources=resources)
