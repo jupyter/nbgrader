@@ -13,10 +13,12 @@ var Grade = Backbone.Model.extend({
         $("#" + this.get("grade_id") + "-full-credit").click(function () {
             elem.val(that.get("max_score"));
             elem.trigger("change");
+            elem.select();
         });
         $("#" + this.get("grade_id") + "-no-credit").click(function () {
             elem.val(0);
             elem.trigger("change");
+            elem.select();
         });
         elem.on("change", function (evt) {
             if (elem.val() === "") {
