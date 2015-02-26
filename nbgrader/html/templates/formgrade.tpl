@@ -15,7 +15,7 @@
 <script src="/static/lib/bootstrap.min.js"></script>
 
 <script type="text/javascript">
-var nb_uuid = "{{ resources.notebook_uuid }}";
+var submission_id = "{{ resources.submission_id }}";
 </script>
 
 <script src="/static/js/formgrade.js"></script>
@@ -44,7 +44,7 @@ var nb_uuid = "{{ resources.notebook_uuid }}";
         <ul class="nav navbar-nav navbar-left">
           {%- if resources.prev -%}
           <li class="previous">
-            <a data-toggle="tooltip" data-placement="right" title="{{ resources.prev.last_name }}, {{ resources.prev.first_name }}" href="/assignments/{{ resources.assignment_id }}/{{ resources.notebook_id }}/{{ resources.prev.student_id }}">
+            <a data-toggle="tooltip" data-placement="right" title="{{ resources.index }} remaining" href="/submissions/{{ resources.prev }}">
             &larr; Prev
             </a>
           </li>
@@ -59,7 +59,11 @@ var nb_uuid = "{{ resources.notebook_uuid }}";
             <li><a href="/assignments">Assignments</a></li>
             <li><a href="/assignments/{{ resources.assignment_id }}">{{ resources.assignment_id }}</a></li>
             <li><a href="/assignments/{{ resources.assignment_id }}/{{ resources.notebook_id }}">{{ resources.notebook_id }}</a></li>
-            <li class="active">{{ resources.student.student_id }}</li>
+            <li class="active live-notebook">
+              <a data-toggle="tooltip" data-placement="right" title="Open live notebook" target="_blank" href="{{ resources.notebook_path }}">
+                Submission #{{ resources.index + 1 }}
+              </a>
+            </li>
           </ul>
         </ul>
       </div>
@@ -67,7 +71,7 @@ var nb_uuid = "{{ resources.notebook_uuid }}";
         <ul class="nav navbar-nav navbar-right">
           {%- if resources.next -%}
           <li class="next">
-            <a data-toggle="tooltip" data-placement="left" title="{{ resources.next.last_name }}, {{ resources.next.first_name }}" href="/assignments/{{ resources.assignment_id }}/{{ resources.notebook_id }}/{{ resources.next.student_id }}">
+            <a data-toggle="tooltip" data-placement="left" title="{{ resources.total - (resources.index + 1) }} remaining" href="/submissions/{{ resources.next }}">
             Next &rarr;
             </a>
           </li>
@@ -82,7 +86,10 @@ var nb_uuid = "{{ resources.notebook_uuid }}";
   <div class="container">
     <div class="panel panel-default">
       <div class="panel-heading">
-        <h4>{{ resources.notebook_id }} - {{ resources.student.last_name }}, {{ resources.student.first_name }}</h4>
+        <h4 class="panel-title">
+          <span>{{ resources.notebook_id }}</span>
+          <span class="pull-right">Submission {{ resources.index + 1 }} / {{ resources.total }}</span>
+        </h4>
       </div>
       <div class="panel-body">
         <div id="notebook" class="border-box-sizing">

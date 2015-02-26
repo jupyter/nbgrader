@@ -1,4 +1,4 @@
-/*global $, Backbone, student, nb_uuid */
+/*global $, Backbone, student, submission_id */
 
 var Grade = Backbone.Model.extend({
     idAttribute: "_id",
@@ -48,7 +48,7 @@ var Grade = Backbone.Model.extend({
 
 var Grades = Backbone.Collection.extend({
     model: Grade,
-    url: "/api/notebook/" + nb_uuid + "/grades"
+    url: "/api/notebook/" + submission_id + "/grades"
 });
 
 var Comment = Backbone.Model.extend({
@@ -83,7 +83,7 @@ var Comment = Backbone.Model.extend({
 
 var Comments = Backbone.Collection.extend({
     model: Comment,
-    url: "/api/notebook/" + nb_uuid + "/comments"
+    url: "/api/notebook/" + submission_id + "/comments"
 });
 
 var getIndex = function (elem) {
@@ -139,6 +139,7 @@ $(window).load(function () {
 
     $("li.previous a").tooltip({container: 'body'});
     $("li.next a").tooltip({container: 'body'});
+    $("li.live-notebook a").tooltip({container: 'body'});
 
     // disable link selection on tabs
     $('a').attr('tabindex', '-1');
