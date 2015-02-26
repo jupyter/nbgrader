@@ -244,6 +244,7 @@ define([
         text.change(function () {
             total_points -= to_float(cell.metadata.nbgrader.points);
             cell.metadata.nbgrader.points = to_float(text.val());
+            text.val(cell.metadata.nbgrader.points);
             total_points += to_float(cell.metadata.nbgrader.points);
             update_total();
         });
