@@ -139,6 +139,7 @@ $(window).load(function () {
 
     $("li.previous a").tooltip({container: 'body'});
     $("li.next a").tooltip({container: 'body'});
+    $("li.live-notebook a").tooltip({container: 'body'});
 
     // disable link selection on tabs
     $('a').attr('tabindex', '-1');

@@ -59,7 +59,11 @@ var submission_id = "{{ resources.submission_id }}";
             <li><a href="/assignments">Assignments</a></li>
             <li><a href="/assignments/{{ resources.assignment_id }}">{{ resources.assignment_id }}</a></li>
             <li><a href="/assignments/{{ resources.assignment_id }}/{{ resources.notebook_id }}">{{ resources.notebook_id }}</a></li>
-            <li class="active"><a target="_blank" href="{{ resources.notebook_path }}">Submission #{{ resources.index + 1 }}</a></li>
+            <li class="active live-notebook">
+              <a data-toggle="tooltip" data-placement="right" title="Open live notebook" target="_blank" href="{{ resources.notebook_path }}">
+                Submission #{{ resources.index + 1 }}
+              </a>
+            </li>
           </ul>
         </ul>
       </div>
