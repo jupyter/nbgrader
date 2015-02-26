@@ -22,4 +22,13 @@ class CheckGradeIds(Preprocessor):
             if grade_id == "":
                 raise RuntimeError("Blank grade id!")
             resources['grade_ids'].append(grade_id)
+
+            points = cell.metadata.nbgrader.get("points", "")
+            try:
+                points = float(points)
+            except ValueError:
+                raise RuntimeError(
+                    "Point value for grade cell {} is invalid: {}".format(
+                        grade_id, points))
+
         return cell, resources
