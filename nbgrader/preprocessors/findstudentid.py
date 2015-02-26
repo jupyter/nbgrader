@@ -1,5 +1,6 @@
 import os
 import re
+from textwrap import dedent
 
 from IPython.nbconvert.preprocessors import Preprocessor
 from IPython.utils.traitlets import Unicode
@@ -8,16 +9,33 @@ class FindStudentID(Preprocessor):
     """Try to discover the student id given the full notebook path and a
     regular expression."""
 
-    regexp = Unicode(r'', config=True)
+    regexp = Unicode(
+        r'', 
+        config=True, 
+        help=dedent(
+            """
+            The regular expression to use to find the student id based on the
+            path and filename to the notebook. The regexp should include a named
+            group for `student_id`, e.g. .*/(?P<student_id>.+)\.ipynb would 
+            match files of the pattern <student_id>.ipynb
+            """
+        )
+    )
 
     def preprocess(self, nb, resources):
-        student_id = resources['nbgrader']['student_id']
-        if not student_id:
+        student_id = resources.get('nbgrader', {}).get('student_id', None)
+
+        if not student_id and self.regexp == '':
+            raise ValueError("No student id given, and the regexp is empty!")
+
+        elif not student_id:
             path = resources['metadata']['path']
             name = resources['metadata']['name']
-            filename = os.path.join(path, name+'.ipynb')
-            student_id = self.find_student_id(filename)
+            student_id = self.find_student_id(os.path.join(path, name + '.ipynb'))
+            if 'nbgrader' not in resources:
+                resources['nbgrader'] = {}
             resources['nbgrader']['student_id'] = student_id
+
         self.log.info('Student ID: %s' % student_id)
         return nb, resources
 
@@ -25,9 +43,12 @@ class FindStudentID(Preprocessor):
         m = re.match(self.regexp, filename)
         if m is not None:
             gd = m.groupdict()
+            print(gd)
             if 'student_id' in gd:
                 return gd['student_id']
-        elif self.regexp != '':
-            self.log.warn("No match found for regexp: {} (filename is: {})".format(self.regexp, filename))
+
+        else:
+            self.log.warn("No match found for regexp: {} (filename is: {})".format(
+                self.regexp, filename))
 
         return ''
