@@ -33,6 +33,22 @@ print("hello")
         return cell
 
     @staticmethod
+    def _create_grade_cell(source, cell_type, grade_id, points):
+        if cell_type == "markdown":
+            cell = new_markdown_cell(source=source)
+        elif cell_type == "code":
+            cell = new_code_cell(source=source)
+        else:
+            raise ValueError("invalid cell type: {}".format(cell_type))
+
+        cell.metadata.nbgrader = {}
+        cell.metadata.nbgrader["grade"] = True
+        cell.metadata.nbgrader["grade_id"] = grade_id
+        cell.metadata.nbgrader["points"] = points
+
+        return cell
+
+    @staticmethod
     def _run_command(command):
         proc = sp.Popen(command, stdout=sp.PIPE, stderr=sp.STDOUT)
         if proc.wait() != 0:
