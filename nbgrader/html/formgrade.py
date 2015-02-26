@@ -2,13 +2,6 @@ import json
 import os
 import urllib
 
-# python 3 compatibility
-try:
-    quote_plus = urllib.quote_plus
-except AttributeError:
-    quote_plus = urllib.parse.quote_plus
-
-
 from flask import Flask, request, abort, redirect, url_for, render_template, send_from_directory
 app = Flask(__name__, static_url_path='')
 
