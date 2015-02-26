@@ -9,12 +9,12 @@ var Grade = Backbone.Model.extend({
         elem.attr("placeholder", this.get("auto_score"));
 
         var that = this;
-        $("#" + this.get("grade_id") + "-full-credit").click(function () {
+        $("#" + this.get("name") + "-full-credit").click(function () {
             elem.val(that.get("max_score"));
             elem.trigger("change");
             elem.select();
         });
-        $("#" + this.get("grade_id") + "-no-credit").click(function () {
+        $("#" + this.get("name") + "-no-credit").click(function () {
             elem.val(0);
             elem.trigger("change");
             elem.select();
@@ -132,18 +132,14 @@ $(window).load(function () {
     grades = new Grades();
     grades.fetch({
         data: {
-            notebook_id: notebook_id,
-            assignment_id: assignment_id,
-            student_id: student_id
+            submission_id: submission_id
         }
     });
 
     comments = new Comments();
     comments.fetch({
         data: {
-            notebook_id: notebook_id,
-            assignment_id: assignment_id,
-            student_id: student_id
+            submission_id: submission_id
         }
     });
 

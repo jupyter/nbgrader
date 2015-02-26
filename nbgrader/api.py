@@ -304,6 +304,7 @@ class SubmittedNotebook(Base):
 
     def to_dict(self):
         return {
+            "id": self.id,
             "name": self.notebook.name,
             "student": self.student.to_dict(),
             "score": self.score,
@@ -945,6 +946,29 @@ class Gradebook(object):
             .filter(Assignment.name == assignment)\
             .all()
 
+    def notebook_submissions(self, notebook, assignment):
+        """Find all submissions of a given notebook in a given assignment.
+
+        Parameters
+        ----------
+        notebook : string
+            the name of an assignment
+        assignment : string
+            the name of an assignment
+
+        Returns
+        -------
+        list of nbgrader.api.SubmittedNotebook objects
+
+        """
+
+        return self.db.query(SubmittedNotebook)\
+            .join(Notebook, Notebook.id == SubmittedNotebook.notebook_id)\
+            .join(SubmittedAssignment, SubmittedAssignment.id == SubmittedNotebook.assignment_id)\
+            .join(Assignment, Assignment.id == SubmittedAssignment.assignment_id)\
+            .filter(Notebook.name == notebook, Assignment.name == assignment)\
+            .all()
+
     def student_submissions(self, student):
         """Find all submissions by a given student.
 
@@ -999,7 +1023,27 @@ class Gradebook(object):
                 assignment, notebook, student))
 
     def find_submission_notebook_by_id(self, notebook_id):
-        return self.db.query(SubmittedNotebook).filter(SubmittedNotebook.id == notebook_id).one()
+        """Find a submitted notebook by its unique id.
+
+        Parameters
+        ----------
+        notebook_id : string
+            the unique id of the submitted notebook
+
+        Returns
+        -------
+        nbgrader.api.SubmittedNotebook object
+
+        """
+
+        try:
+            notebook = self.db.query(SubmittedNotebook)\
+                .filter(SubmittedNotebook.id == notebook_id)\
+                .one()
+        except NoResultFound:
+            raise MissingEntry("No such submitted notebook: {}".format(notebook_id))
+
+        return notebook
 
     def find_grade(self, grade_cell, notebook, assignment, student):
         """Find a particular grade in a notebook in a student's submission 

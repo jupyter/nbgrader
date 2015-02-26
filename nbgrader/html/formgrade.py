@@ -104,8 +104,8 @@ def view_submission_files(submission_id, path):
         submission = app.gradebook.find_submission_notebook_by_id(submission_id)
         assignment_id = submission.assignment.assignment.name
         notebook_id = submission.notebook.name
-        student_id = submission.student.name
-    except ValueError:
+        student_id = submission.student.id
+    except MissingEntry:
         abort(404)
 
     filename = os.path.join(app.notebook_dir, app.notebook_dir_format.format(
@@ -123,8 +123,8 @@ def view_submission(submission_id):
         submission = app.gradebook.find_submission_notebook_by_id(submission_id)
         assignment_id = submission.assignment.assignment.name
         notebook_id = submission.notebook.name
-        student_id = submission.student.name
-    except ValueError:
+        student_id = submission.student.id
+    except MissingEntry:
         abort(404)
 
     filename = os.path.join(app.notebook_dir, app.notebook_dir_format.format(
@@ -135,7 +135,7 @@ def view_submission(submission_id):
     if not os.path.exists(filename):
         abort(404)
 
-    submissions = app.gradebook.assignment_submissions(assignment_id)
+    submissions = app.gradebook.notebook_submissions(notebook_id, assignment_id)
     submissions = sorted([x.id for x in submissions])
 
     ix = submissions.index(submission.id)
@@ -168,13 +168,10 @@ def view_submission(submission_id):
 
 @app.route("/api/grades")
 def get_all_grades():
-    notebook_id = request.args["notebook_id"]
-    assignment_id = request.args["assignment_id"]
-    student_id = request.args["student_id"]
+    submission_id = request.args["submission_id"]
 
     try:
-        notebook = app.gradebook.find_submission_notebook(
-            notebook_id, assignment_id, student_id)
+        notebook = app.gradebook.find_submission_notebook_by_id(submission_id)
     except MissingEntry:
         abort(404)
 
@@ -183,13 +180,10 @@ def get_all_grades():
 
 @app.route("/api/comments")
 def get_all_comments():
-    notebook_id = request.args["notebook_id"]
-    assignment_id = request.args["assignment_id"]
-    student_id = request.args["student_id"]
+    submission_id = request.args["submission_id"]
 
     try:
-        notebook = app.gradebook.find_submission_notebook(
-            notebook_id, assignment_id, student_id)
+        notebook = app.gradebook.find_submission_notebook_by_id(submission_id)
     except MissingEntry:
         abort(404)
 

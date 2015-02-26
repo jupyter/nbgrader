@@ -28,7 +28,7 @@
 <tbody>
   {%- for submission in submissions -%}
   <tr>
-    <td><a href="/submissions/{{ submission._id }}">Submission #{{ submission.index + 1 }}</a></td>
+    <td><a href="/submissions/{{ submission.id }}">Submission #{{ submission.index + 1 }}</a></td>
     <td class="center">
       {{ submission.score | float | round(2) }} / {{ submission.max_score | float | round(2) }}
     </td>
