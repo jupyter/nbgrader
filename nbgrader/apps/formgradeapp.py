@@ -12,6 +12,9 @@ from nbgrader.api import Gradebook
 
 import os
 import logging
+import subprocess as sp
+import socket
+import pipes
 
 aliases = {}
 aliases.update(base_aliases)
@@ -28,6 +31,14 @@ nbgrader formgrade .
 nbgrader formgrade autograded/
 nbgrader formgrade --ip=0.0.0.0 --port=80
 """
+
+def random_port():
+    """get a single random port"""
+    sock = socket.socket()
+    sock.bind(('', 0))
+    port = sock.getsockname()[1]
+    sock.close()
+    return port
 
 class FormgradeApp(BaseIPythonApplication):
 
@@ -104,6 +115,16 @@ class FormgradeApp(BaseIPythonApplication):
     def start(self):
         super(FormgradeApp, self).start()
 
+        # first launch a notebook server
+        app.notebook_server_port = str(random_port())
+        app.notebook_server = sp.Popen(
+            [
+                "python", os.path.join(os.path.dirname(__file__), "notebookapp.py"),
+                "--port", app.notebook_server_port
+            ],
+            cwd=self.base_directory)
+
+        # now launch the formgrader
         app.notebook_dir = self.base_directory
         app.notebook_dir_format = self.directory_format
         app.exporter = HTMLExporter(config=self.config)
