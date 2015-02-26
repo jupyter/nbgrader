@@ -116,10 +116,12 @@ class FormgradeApp(BaseIPythonApplication):
         super(FormgradeApp, self).start()
 
         # first launch a notebook server
+        app.notebook_server_ip = self.ip
         app.notebook_server_port = str(random_port())
         app.notebook_server = sp.Popen(
             [
                 "python", os.path.join(os.path.dirname(__file__), "notebookapp.py"),
+                "--ip", app.notebook_server_ip,
                 "--port", app.notebook_server_port
             ],
             cwd=self.base_directory)
