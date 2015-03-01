@@ -1,4 +1,5 @@
 from .base import TestBase
+from nbgrader.api import Gradebook, Assignment
 
 import os
 
@@ -76,3 +77,40 @@ class TestNbgraderAssign(TestBase):
                 assert fh.read() == 'foo'
             with open('student/data/bar.csv', 'r') as fh:
                 assert fh.read() == 'bar'
+
+    def test_no_save_cells(self):
+        """Ensure cells are not saved into the database"""
+        with self._temp_cwd(["files/test.ipynb"]):
+            gb = Gradebook('nbgrader_test')
+            gb.client.drop_database('nbgrader_test')
+            assignment = Assignment(assignment_id="Problem Set 1")
+            gb.add_assignment(assignment)
+
+            self._run_command(
+                'nbgrader assign test.ipynb '
+                '--SaveGradeCells.assignment_id="Problem Set 1" '
+                '--SaveGradeCells.db_name=nbgrader_test')
+
+            gb = Gradebook('nbgrader_test')
+            assignment = gb.find_assignment(assignment_id="Problem Set 1")
+            grade_cells = gb.find_grade_cells(assignment=assignment, notebook_id="test")
+            assert len(grade_cells) == 0
+
+    def test_save_cells(self):
+        """Ensure cells are saved into the database"""
+        with self._temp_cwd(["files/test.ipynb"]):
+            gb = Gradebook('nbgrader_test')
+            gb.client.drop_database('nbgrader_test')
+            assignment = Assignment(assignment_id="Problem Set 1")
+            gb.add_assignment(assignment)
+
+            self._run_command(
+                'nbgrader assign test.ipynb '
+                '--save-cells '
+                '--SaveGradeCells.assignment_id="Problem Set 1" '
+                '--SaveGradeCells.db_name=nbgrader_test')
+
+            gb = Gradebook('nbgrader_test')
+            assignment = gb.find_assignment(assignment_id="Problem Set 1")
+            grade_cells = gb.find_grade_cells(assignment=assignment, notebook_id="test")
+            assert len(grade_cells) == 8

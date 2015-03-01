@@ -43,6 +43,6 @@ class BaseNbGraderApp(BaseIPythonApplication):
 
     @catch_config_error
     def initialize(self, argv=None):
-        self.build_extra_config()
         super(BaseNbGraderApp, self).initialize(argv)
         self.stage_default_config_file()
+        self.build_extra_config()

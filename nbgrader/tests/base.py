@@ -1,5 +1,6 @@
 import os
 import glob
+import shutil
 import subprocess as sp
 from IPython.utils.tempdir import TemporaryWorkingDirectory
 from IPython.nbformat import current_nbformat
@@ -57,8 +58,17 @@ print("hello")
             write_nb(nb, f, 4)    
 
     @staticmethod
-    def _temp_cwd():
-        return TemporaryWorkingDirectory()
+    def _temp_cwd(copy_filenames=None):
+        temp_dir = TemporaryWorkingDirectory()
+
+        if copy_filenames is not None:
+            files_path = os.path.dirname(__file__)
+            for pattern in copy_filenames:
+                for match in glob.glob(os.path.join(files_path, pattern)):
+                    dest = os.path.join(temp_dir.name, os.path.basename(match))
+                    shutil.copyfile(match, dest)
+
+        return temp_dir
 
     @staticmethod
     def _run_command(command):
