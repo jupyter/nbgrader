@@ -95,7 +95,7 @@ class AssignApp(BaseNbGraderApp, NbConvertApp):
         return classes
 
     def _export_format_default(self):
-        return 'notebook'
+        return 'assignment'
 
     def build_extra_config(self):
         self.extra_config = Config()
