@@ -1,9 +1,11 @@
 import os
 import glob
 import subprocess as sp
+from IPython.utils.tempdir import TemporaryWorkingDirectory
 from IPython.nbformat import current_nbformat
 from IPython.nbformat import read as read_nb
-from IPython.nbformat.v4 import new_code_cell, new_markdown_cell
+from IPython.nbformat import write as write_nb
+from IPython.nbformat.v4 import new_notebook, new_code_cell, new_markdown_cell
 
 
 class TestBase(object):
@@ -49,8 +51,18 @@ print("hello")
         return cell
 
     @staticmethod
+    def _empty_notebook(path):
+        nb = new_notebook()
+        with open(path, 'w') as f:
+            write_nb(nb, f, 4)    
+
+    @staticmethod
+    def _temp_cwd():
+        return TemporaryWorkingDirectory()
+
+    @staticmethod
     def _run_command(command):
-        proc = sp.Popen(command, stdout=sp.PIPE, stderr=sp.STDOUT)
+        proc = sp.Popen(command, shell=True, stdout=sp.PIPE, stderr=sp.STDOUT)
         if proc.wait() != 0:
             output = proc.communicate()[0]
             print(output.decode())
