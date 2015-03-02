@@ -39,7 +39,7 @@ class DisplayAutoGrades(Preprocessor):
     passed_warning = Unicode(
         dedent(
             """
-            NOTEBOOK PASSED ON {num_passed} CELL(S)!",
+            NOTEBOOK PASSED ON {num_passed} CELL(S)!
             """
         ).strip(),
         config=True,

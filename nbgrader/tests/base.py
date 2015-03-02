@@ -74,8 +74,9 @@ print("hello")
     def _run_command(command, retcode=0):
         proc = sp.Popen(command, shell=True, stdout=sp.PIPE, stderr=sp.STDOUT)
         true_retcode = proc.wait()
+        output = proc.communicate()[0].decode()
         if true_retcode != retcode:
-            output = proc.communicate()[0]
-            print(output.decode())
+            print(output)
             raise AssertionError(
                 "process returned an unexpected return code: {}".format(true_retcode))
+        return output
