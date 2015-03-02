@@ -41,7 +41,6 @@ class FindStudentID(Preprocessor):
         m = re.match(self.regexp, filename)
         if m is not None:
             gd = m.groupdict()
-            print(gd)
             if 'student_id' in gd:
                 return gd['student_id']
 
