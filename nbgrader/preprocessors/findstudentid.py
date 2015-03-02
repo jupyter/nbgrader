@@ -29,8 +29,10 @@ class FindStudentID(Preprocessor):
             raise ValueError("No student id given, and the regexp is empty!")
 
         elif not student_id:
-            path = resources['metadata']['path']
-            name = resources['metadata']['name']
+            path = resources['metadata'].get('path', '')
+            name = resources['metadata'].get('name', '')
+            if name == '':
+                raise ValueError("invalid file name: {}".format(name))
             student_id = self.find_student_id(os.path.join(path, name + '.ipynb'))
             resources['nbgrader']['student'] = student_id
 
