@@ -26,7 +26,7 @@ class TestNbgraderAutograde(TestBase):
             self._setup_db()
             self._run_command(
                 'nbgrader autograde submitted.ipynb '
-                '--SaveAutoGrades.db_name=nbgrader_test '
+                '--db=nbgrader_test '
                 '--assignment="Problem Set 1"',
                 retcode=1)
 
@@ -36,7 +36,7 @@ class TestNbgraderAutograde(TestBase):
             self._setup_db()
             self._run_command(
                 'nbgrader autograde submitted.ipynb '
-                '--SaveAutoGrades.db_name=nbgrader_test '
+                '--db=nbgrader_test '
                 '--student=foo',
                 retcode=1)
 
@@ -46,7 +46,7 @@ class TestNbgraderAutograde(TestBase):
             self._setup_db()
             self._run_command(
                 'nbgrader autograde submitted.ipynb '
-                '--SaveAutoGrades.db_name=nbgrader_test '
+                '--db=nbgrader_test '
                 '--assignment="Problem Set 1" '
                 '--student=foo')
 

@@ -6,12 +6,14 @@ from nbgrader.api import Gradebook
 class OverwriteGradeCells(Preprocessor):
     """A preprocessor to save information about grade cells."""
 
-    db_url = Unicode("sqlite:///gradebook.db", config=True, help="URL to database")
-    assignment_id = Unicode(u'assignment', config=True, help="Assignment ID")
-
     def preprocess(self, nb, resources):
+        # pull information from the resources
+        self.notebook_id = resources['nbgrader']['notebook']
+        self.assignment_id = resources['nbgrader']['assignment']
+        self.db_url = resources['nbgrader']['db_url']
+
+        # connect to the mongo database
         self.gradebook = Gradebook(self.db_url)
-        self.notebook_id = resources['unique_key']
 
         nb, resources = super(OverwriteGradeCells, self).preprocess(nb, resources)
 

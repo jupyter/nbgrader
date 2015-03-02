@@ -6,12 +6,11 @@ from nbgrader.api import Gradebook
 class SaveGradeCells(Preprocessor):
     """A preprocessor to save information about grade cells."""
 
-    db_url = Unicode("sqlite:///gradebook.db", config=True, help="URL to database")
-
     def preprocess(self, nb, resources):
         # pull information from the resources
         self.notebook_id = resources['nbgrader']['notebook']
         self.assignment_id = resources['nbgrader']['assignment']
+        self.db_url = resources['nbgrader']['db_url']
 
         if self.notebook_id == '':
             raise ValueError("Invalid notebok id: {}".format(self.notebook_id))

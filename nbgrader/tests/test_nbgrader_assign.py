@@ -89,7 +89,7 @@ class TestNbgraderAssign(TestBase):
             self._run_command(
                 'nbgrader assign test.ipynb '
                 '--assignment="Problem Set 1" '
-                '--SaveGradeCells.db_name=nbgrader_test')
+                '--db=nbgrader_test')
 
             gb = Gradebook('nbgrader_test')
             assignment = gb.find_assignment(assignment_id="Problem Set 1")
@@ -108,7 +108,7 @@ class TestNbgraderAssign(TestBase):
                 'nbgrader assign test.ipynb '
                 '--save-cells '
                 '--assignment="Problem Set 1" '
-                '--SaveGradeCells.db_name=nbgrader_test')
+                '--db=nbgrader_test')
 
             gb = Gradebook('nbgrader_test')
             assignment = gb.find_assignment(assignment_id="Problem Set 1")

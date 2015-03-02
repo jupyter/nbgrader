@@ -15,6 +15,7 @@ aliases.update({
     'regexp': 'FindStudentID.regexp',
     'assignment': 'AssignmentExporter.assignment_id',
     'student': 'AssignmentExporter.student_id',
+    'db': 'AssignmentExporter.db_name'
 })
 
 flags = {}

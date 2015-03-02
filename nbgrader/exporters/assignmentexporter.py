@@ -3,7 +3,7 @@
 import os
 from textwrap import dedent
 
-from IPython.utils.traitlets import Unicode
+from IPython.utils.traitlets import Unicode, Integer
 from IPython.nbconvert.exporters import NotebookExporter
 from IPython.nbconvert.exporters.exporter import ResourcesDict
 
@@ -32,6 +32,10 @@ class AssignmentExporter(NotebookExporter):
         help="Student ID"
     )
 
+    db_name = Unicode("gradebook", config=True, help="Database name")
+    db_ip = Unicode("localhost", config=True, help="IP address for the database")
+    db_port = Integer(27017, config=True, help="Port for the database")
+
     def from_filename(self, filename, resources=None, **kw):
         # construct the resources dictionary
         if resources is None:
@@ -56,6 +60,11 @@ class AssignmentExporter(NotebookExporter):
             resources['nbgrader']['assignment'] = self.assignment_id
         if self.student_id != '':
             resources['nbgrader']['student'] = self.student_id
+
+        # database stuff
+        resources['nbgrader']['db_name'] = self.db_name
+        resources['nbgrader']['db_ip'] = self.db_ip
+        resources['nbgrader']['db_port'] = self.db_port
 
         output, resources = super(AssignmentExporter, self).from_filename(
             filename, resources=resources, **kw)

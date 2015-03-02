@@ -7,13 +7,12 @@ from nbgrader.api import Gradebook
 class SaveAutoGrades(Preprocessor):
     """Preprocessor for saving out the autograder grades into a database"""
 
-    db_url = Unicode("sqlite:///gradebook.db", config=True, help="URL to database")
-
     def preprocess(self, nb, resources):
         # pull information from the resources
         self.notebook_id = resources['nbgrader']['notebook']
         self.assignment_id = resources['nbgrader']['assignment']
         self.student_id = resources['nbgrader']['student']
+        self.db_url = resources['nbgrader']['db_url']
 
         # connect to the mongo database
         self.gradebook = Gradebook(self.db_url)

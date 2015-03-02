@@ -18,7 +18,8 @@ from nbgrader.preprocessors import (
 aliases = {}
 aliases.update(nbconvert_aliases)
 aliases.update({
-    'assignment': 'AssignmentExporter.assignment_id'
+    'assignment': 'AssignmentExporter.assignment_id',
+    'db': 'AssignmentExporter.db_name'
 })
 
 flags = {}
@@ -74,6 +75,10 @@ class AssignApp(BaseNbConvertApp):
         indicate what the assignment is that this notebook is a part of:
 
         > nbgrader assign "Problem 1.ipynb" --save-cells --assignment="Problem Set 1"
+
+        You can additionally specifiy the database name with --db:
+
+        > nbgrader assign "Problem 1.ipynb" --save-cells --assignment="Problem Set 1" --db=myclass
 
         """
     ))
