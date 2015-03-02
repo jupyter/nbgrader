@@ -1,43 +1,42 @@
-from IPython.utils.traitlets import Unicode, List
-from IPython.core.application import BaseIPythonApplication
-from IPython.core.application import base_aliases, base_flags
-from IPython.config.application import catch_config_error
-from IPython.core.profiledir import ProfileDir
-
 import os
 import shutil
 import tempfile
 import datetime
 import tarfile
 import glob
-import logging
 
 from textwrap import dedent
 
+from IPython.utils.traitlets import Unicode, List, Dict
+from IPython.config.application import catch_config_error
+
+from nbgrader.apps.baseapp import BaseNbGraderApp, nbgrader_aliases, nbgrader_flags
+
 aliases = {}
-aliases.update(base_aliases)
+aliases.update(nbgrader_aliases)
 aliases.update({
     "assignment": "SubmitApp.assignment_name",
     "submit-dir": "SubmitApp.submissions_directory"
 })
 
 flags = {}
-flags.update(base_flags)
+flags.update(nbgrader_flags)
 flags.update({
 })
 
-examples = """
-nbgrader submit "Problem Set 1/"
-nbgrader submit "Problem Set 1/" --assignment ps01
-"""
-
-class SubmitApp(BaseIPythonApplication):
+class SubmitApp(BaseNbGraderApp):
 
     name = Unicode(u'nbgrader-submit')
     description = Unicode(u'Submit a completed assignment')
-    aliases = aliases
-    flags = flags
-    examples = examples
+    aliases = Dict(aliases)
+    flags = Dict(flags)
+
+    examples = Unicode(dedent(
+        """
+        nbgrader submit "Problem Set 1/"
+        nbgrader submit "Problem Set 1/" --assignment ps01
+        """
+    ))
 
     student = Unicode(os.environ['USER'])
     timestamp = Unicode(str(datetime.datetime.now()))
@@ -82,31 +81,13 @@ class SubmitApp(BaseIPythonApplication):
         )
     )
 
-    def _ipython_dir_default(self):
-        d = os.path.join(os.environ["HOME"], ".nbgrader")
-        self._ipython_dir_changed('ipython_dir', d, d)
-        return d
-
-    # The classes added here determine how configuration will be documented
-    classes = List()
-    def _classes_default(self):
-        """This has to be in a method, for TerminalIPythonApp to be available."""
-        return [
-            ProfileDir
-        ]
-
-    def _log_level_default(self):
-        return logging.INFO
-
     @catch_config_error
-    def initialize(self, argv=None):
-        if not os.path.exists(self.ipython_dir):
-            self.log.warning("Creating nbgrader directory: {}".format(self.ipython_dir))
-            os.mkdir(self.ipython_dir)
+    def initialize(self, argv=None):        
+        super(SubmitApp, self).initialize(argv)
+
         if not os.path.exists(self.submissions_directory):
             os.makedirs(self.submissions_directory)
-        super(SubmitApp, self).initialize(argv)
-        self.stage_default_config_file()
+
         self.init_assignment_root()
 
         if self.assignment_name == '':

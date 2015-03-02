@@ -1,21 +1,21 @@
 import tempfile
 import shutil
 
+from textwrap import dedent
+
 from IPython.config.loader import Config
-from IPython.utils.traitlets import Unicode, List
+from IPython.utils.traitlets import Unicode, Dict
 from IPython.nbconvert.preprocessors import ClearOutputPreprocessor, ExecutePreprocessor
-from nbgrader.apps.customnbconvertapp import CustomNbConvertApp
-from nbgrader.apps.customnbconvertapp import aliases as base_aliases
-from nbgrader.apps.customnbconvertapp import flags as base_flags
 from nbgrader.preprocessors import DisplayAutoGrades
+from nbgrader.apps.baseapp import BaseNbConvertApp, nbconvert_flags, nbconvert_aliases
 
 aliases = {}
-aliases.update(base_aliases)
+aliases.update(nbconvert_aliases)
 aliases.update({
 })
 
 flags = {}
-flags.update(base_flags)
+flags.update(nbconvert_flags)
 flags.update({
     'invert': (
         {'DisplayAutoGrades': {'invert': True}},
@@ -23,36 +23,32 @@ flags.update({
     )
 })
 
-examples = """
-nbgrader validate "Problem 1.ipynb"
-nbgrader validate "Problem Set 1/*.ipynb"
-"""
-
-class ValidateApp(CustomNbConvertApp):
+class ValidateApp(BaseNbConvertApp):
 
     name = Unicode(u'nbgrader-validate')
     description = Unicode(u'Validate a notebook by running it')
-    aliases = aliases
-    flags = flags
-    examples = examples
-    log_level = 50
-    output_dir = "/tmp"
+    
+    aliases = Dict(aliases)
+    flags = Dict(flags)
+    
+    examples = Unicode(dedent(
+        """
+        nbgrader validate "Problem 1.ipynb"
+        nbgrader validate "Problem Set 1/*.ipynb"
+        """
+    ))
 
-    # The classes added here determine how configuration will be documented
-    classes = List()
+    def _log_level_default(self):
+        return 50
 
     def _classes_default(self):
-        """This has to be in a method, for TerminalIPythonApp to be available."""
         classes = super(ValidateApp, self)._classes_default()
         classes.extend([
-            ExecutePreprocessor,
             ClearOutputPreprocessor,
+            ExecutePreprocessor,
             DisplayAutoGrades
         ])
         return classes
-
-    def _export_format_default(self):
-        return 'notebook'
 
     def build_extra_config(self):
         self.extra_config = Config()
@@ -64,8 +60,9 @@ class ValidateApp(CustomNbConvertApp):
         self.config.merge(self.extra_config)
 
     def convert_notebooks(self):
-        self.output_dir = tempfile.mkdtemp()
+        self.tmpdir = tempfile.mkdtemp()
+        self.writer.build_directory = self.tmpdir
         try:
             super(ValidateApp, self).convert_notebooks()
         finally:
-            shutil.rmtree(self.output_dir)
+            shutil.rmtree(self.tmpdir)
