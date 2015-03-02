@@ -1,21 +1,24 @@
+from textwrap import dedent
+
 from IPython.config.loader import Config
-from IPython.utils.traitlets import Unicode, List, Bool
+from IPython.utils.traitlets import Unicode, Bool, Dict
 from IPython.nbconvert.preprocessors import ClearOutputPreprocessor
-from nbgrader.apps.customnbconvertapp import CustomNbConvertApp
-from nbgrader.apps.customnbconvertapp import aliases as base_aliases
-from nbgrader.apps.customnbconvertapp import flags as base_flags
-from nbgrader.preprocessors import FindStudentID, SaveAutoGrades, OverwriteGradeCells, Execute
+
+from nbgrader.apps.baseapp import (
+    BaseNbConvertApp, nbconvert_aliases, nbconvert_flags)
+from nbgrader.preprocessors import (
+    FindStudentID, SaveAutoGrades, OverwriteGradeCells, Execute)
 
 aliases = {}
-aliases.update(base_aliases)
+aliases.update(nbconvert_aliases)
 aliases.update({
-    'student-id': 'AutogradeApp.student_id',
     'regexp': 'FindStudentID.regexp',
-    'assignment': 'SaveAutoGrades.assignment_id',
+    'assignment': 'AssignmentExporter.assignment_id',
+    'student': 'AssignmentExporter.student_id',
 })
 
 flags = {}
-flags.update(base_flags)
+flags.update(nbconvert_flags)
 flags.update({
     'overwrite-cells': (
         {'AutogradeApp': {'overwrite_cells': True}},
@@ -23,25 +26,48 @@ flags.update({
     )
 })
 
-examples = """
-nbgrader autograde assignment.ipynb
-nbgrader autograde assignment.ipynb --output=graded.ipynb
-nbgrader autograde submitted/*.ipynb --build-directory=autograded
-"""
-
-class AutogradeApp(CustomNbConvertApp):
+class AutogradeApp(BaseNbConvertApp):
 
     name = Unicode(u'nbgrader-autograde')
     description = Unicode(u'Autograde a notebook by running it')
-    aliases = aliases
-    flags = flags
-    examples = examples
+    aliases = Dict(aliases)
+    flags = Dict(flags)
+
+    examples = Unicode(dedent(
+        """
+        Running `nbgrader autograde` on a file by itself will produce a student
+        version of that file in the same directory. In this case, it will produce
+        "Problem 1.nbconvert.ipynb":
+        
+        > nbgrader autograde "Problem 1.ipynb"
+
+        If you want to override the .nbconvert part of the filename, you can use
+        the --output flag:
+
+        > nbgrader autograde "Problem 1.ipynb" --output "Problem 1.graded.ipynb"
+
+        Or, you can put the graded version in a different directory. In the
+        following example, there will be a file "graded/Problem 1.ipynb" after
+        running `nbgrader autograde`:
+
+        > nbgrader autograde "Problem 1.ipynb" --build-dir=graded
+
+        You can also use shell globs, and copy files from one directory to another:
+
+        > nbgrader autograde submitted/*.ipynb --build-dir=graded
+
+        If you need to copy dependent files over as well, you can do this with
+        the --files and --relpath flags. In the following example, all the .jpg
+        files in the teacher/images/ folder will be linked to the student/images/
+        folder (without the --relpath flag, they would be in student/teacher/images/):
+
+        > nbgrader autograde submitted/*.ipynb --build-dir=graded --files='["submitted/images/*.jpg"]' --relpath=submitted
+
+        """
+    ))
 
     student_id = Unicode(u'', config=True)
     overwrite_cells = Bool(False, config=True, help="Overwrite grade cells from the database")
-
-    # The classes added here determine how configuration will be documented
-    classes = List()
 
     def _classes_default(self):
         """This has to be in a method, for TerminalIPythonApp to be available."""
@@ -54,9 +80,6 @@ class AutogradeApp(CustomNbConvertApp):
             SaveAutoGrades
         ])
         return classes
-
-    def _export_format_default(self):
-        return 'notebook'
 
     def build_extra_config(self):
         self.extra_config = Config()

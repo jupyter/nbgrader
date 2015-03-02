@@ -23,7 +23,7 @@ class FindStudentID(Preprocessor):
     )
 
     def preprocess(self, nb, resources):
-        student_id = resources.get('nbgrader', {}).get('student_id', None)
+        student_id = resources['nbgrader'].get('student', None)
 
         if not student_id and self.regexp == '':
             raise ValueError("No student id given, and the regexp is empty!")
@@ -32,9 +32,7 @@ class FindStudentID(Preprocessor):
             path = resources['metadata']['path']
             name = resources['metadata']['name']
             student_id = self.find_student_id(os.path.join(path, name + '.ipynb'))
-            if 'nbgrader' not in resources:
-                resources['nbgrader'] = {}
-            resources['nbgrader']['student_id'] = student_id
+            resources['nbgrader']['student'] = student_id
 
         self.log.info('Student ID: %s' % student_id)
         return nb, resources

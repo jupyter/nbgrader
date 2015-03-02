@@ -8,13 +8,15 @@ class SaveAutoGrades(Preprocessor):
     """Preprocessor for saving out the autograder grades into a database"""
 
     db_url = Unicode("sqlite:///gradebook.db", config=True, help="URL to database")
-    assignment_id = Unicode(u'assignment', config=True, help="Assignment ID")
 
     def preprocess(self, nb, resources):
-        self.gradebook = Gradebook(self.db_url)
-        self.notebook_id = resources['unique_key']
-        self.student_id = resources['nbgrader']['student_id']
+        # pull information from the resources
+        self.notebook_id = resources['nbgrader']['notebook']
+        self.assignment_id = resources['nbgrader']['assignment']
+        self.student_id = resources['nbgrader']['student']
 
+        # connect to the mongo database
+        self.gradebook = Gradebook(self.db_url)
         self.gradebook.update_or_create_submission(
             self.assignment_id, self.student_id)
 

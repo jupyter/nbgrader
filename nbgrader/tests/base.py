@@ -71,9 +71,11 @@ print("hello")
         return temp_dir
 
     @staticmethod
-    def _run_command(command):
+    def _run_command(command, retcode=0):
         proc = sp.Popen(command, shell=True, stdout=sp.PIPE, stderr=sp.STDOUT)
-        if proc.wait() != 0:
+        true_retcode = proc.wait()
+        if true_retcode != retcode:
             output = proc.communicate()[0]
             print(output.decode())
-            raise AssertionError("process returned a non-zero exit code")
+            raise AssertionError(
+                "process returned an unexpected return code: {}".format(true_retcode))
