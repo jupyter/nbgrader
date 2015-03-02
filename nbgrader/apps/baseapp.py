@@ -10,6 +10,8 @@ from IPython.config.application import catch_config_error
 from IPython.nbconvert.writers import FilesWriter
 from IPython.nbconvert.nbconvertapp import NbConvertApp
 
+from nbgrader.exporters import AssignmentExporter
+
 # These are the aliases and flags for nbgrader apps that inherit only from
 # BaseNbGraderApp (and not BaseNbConvertApp)
 nbgrader_aliases = {
@@ -89,7 +91,10 @@ class BaseNbConvertApp(BaseNbGraderApp, NbConvertApp):
 
     def _classes_default(self):
         classes = super(BaseNbConvertApp, self)._classes_default()
-        classes.append(FilesWriter)
+        classes.extend([
+            FilesWriter,
+            AssignmentExporter
+        ])
         return classes
 
     def _export_format_default(self):
