@@ -12,7 +12,6 @@ from nbgrader.preprocessors import (
 aliases = {}
 aliases.update(nbconvert_aliases)
 aliases.update({
-    'regexp': 'FindStudentID.regexp',
     'assignment': 'AssignmentExporter.assignment_id',
     'student': 'AssignmentExporter.student_id',
     'db': 'AssignmentExporter.db_url'
@@ -38,31 +37,31 @@ class AutogradeApp(BaseNbConvertApp):
         """
         Running `nbgrader autograde` on a file by itself will produce a student
         version of that file in the same directory. In this case, it will produce
-        "Problem 1.nbconvert.ipynb":
+        "Problem 1.nbconvert.ipynb" (note that you need to specify the assignment
+        name and the student id):
         
-        > nbgrader autograde "Problem 1.ipynb"
+        > nbgrader autograde "Problem 1.ipynb" --assignment="Problem Set 1" --student=student1
 
         If you want to override the .nbconvert part of the filename, you can use
         the --output flag:
 
-        > nbgrader autograde "Problem 1.ipynb" --output "Problem 1.graded.ipynb"
+        > nbgrader autograde "Problem 1.ipynb" --output "Problem 1.graded.ipynb" --assignment="Problem Set 1" --student=student1
 
         Or, you can put the graded version in a different directory. In the
         following example, there will be a file "graded/Problem 1.ipynb" after
         running `nbgrader autograde`:
 
-        > nbgrader autograde "Problem 1.ipynb" --build-dir=graded
+        > nbgrader autograde "Problem 1.ipynb" --build-dir=graded --assignment="Problem Set 1" --student=student1
 
         You can also use shell globs, and copy files from one directory to another:
 
-        > nbgrader autograde submitted/*.ipynb --build-dir=graded
+        > nbgrader autograde submitted/*.ipynb --build-dir=graded --assignment="Problem Set 1" --student=student1
 
-        If you need to copy dependent files over as well, you can do this with
-        the --files and --relpath flags. In the following example, all the .jpg
-        files in the teacher/images/ folder will be linked to the student/images/
-        folder (without the --relpath flag, they would be in student/teacher/images/):
+        If you want to overwrite grade cells with the source and metadata that
+        was stored in the database when running `nbgrader assign` with --save-cells,
+        you can use the --overwrite-cells flag:
 
-        > nbgrader autograde submitted/*.ipynb --build-dir=graded --files='["submitted/images/*.jpg"]' --relpath=submitted
+        > nbgrader autograde "Problem 1.ipynb" --assignment="Problem Set 1" --student=student1 --overwrite-cells
 
         """
     ))
