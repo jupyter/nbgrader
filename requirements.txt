@@ -1,4 +1,4 @@
-ipython[all]>=3
+ipython==3.1.0.dev0
 sqlalchemy
 Flask
 autopep8
