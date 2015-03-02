@@ -7,6 +7,8 @@ from IPython.utils.traitlets import Unicode, List, Bool, Dict
 from IPython.core.application import BaseIPythonApplication
 from IPython.core.profiledir import ProfileDir
 from IPython.config.application import catch_config_error
+from IPython.nbconvert.writers import FilesWriter
+from IPython.nbconvert.nbconvertapp import NbConvertApp
 
 nbgrader_aliases = {
     'log-level' : 'Application.log_level',
@@ -23,6 +25,20 @@ nbgrader_flags = {
         "set log level to logging.CRITICAL (minimize logging output)"
     ),
 }
+
+nbconvert_aliases = {}
+nbconvert_aliases.update(nbgrader_aliases)
+nbconvert_aliases.update({
+    'build-dir': 'FilesWriter.build_directory',
+    'files': 'FilesWriter.files',
+    'relpath': 'FilesWriter.relpath',
+    'output': 'NbConvertApp.output_base',
+})
+
+nbconvert_flags = {}
+nbconvert_flags.update(nbgrader_flags)
+nbconvert_flags.update({
+})
 
 class BaseNbGraderApp(BaseIPythonApplication):
 
@@ -46,3 +62,17 @@ class BaseNbGraderApp(BaseIPythonApplication):
         super(BaseNbGraderApp, self).initialize(argv)
         self.stage_default_config_file()
         self.build_extra_config()
+
+
+class BaseNbConvertApp(BaseNbGraderApp, NbConvertApp):
+
+    aliases = Dict(nbconvert_aliases)
+    flags = Dict(nbconvert_flags)
+
+    def _classes_default(self):
+        classes = super(BaseNbConvertApp, self)._classes_default()
+        classes.append(FilesWriter)
+        return classes
+
+    def _export_format_default(self):
+        return 'assignment'

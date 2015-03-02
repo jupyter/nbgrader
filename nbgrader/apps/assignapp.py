@@ -1,12 +1,11 @@
 from textwrap import dedent
 
 from IPython.config.loader import Config
-from IPython.utils.traitlets import Unicode, List, Bool, Dict
+from IPython.utils.traitlets import Unicode, Bool, Dict
 from IPython.nbconvert.preprocessors import ClearOutputPreprocessor
-from IPython.nbconvert.writers import FilesWriter
-from IPython.nbconvert.nbconvertapp import NbConvertApp
 
-from nbgrader.apps.baseapp import BaseNbGraderApp, nbgrader_aliases, nbgrader_flags
+from nbgrader.apps.baseapp import (
+    BaseNbConvertApp, nbconvert_aliases, nbconvert_flags)
 from nbgrader.preprocessors import (
     IncludeHeaderFooter,
     ClearSolutions,
@@ -17,16 +16,12 @@ from nbgrader.preprocessors import (
 )
 
 aliases = {}
-aliases.update(nbgrader_aliases)
+aliases.update(nbconvert_aliases)
 aliases.update({
-    'build-dir': 'FilesWriter.build_directory',
-    'files': 'FilesWriter.files',
-    'relpath': 'FilesWriter.relpath',
-    'output': 'NbConvertApp.output_base',
 })
 
 flags = {}
-flags.update(nbgrader_flags)
+flags.update(nbconvert_flags)
 flags.update({
     'save-cells': (
         {'AssignApp': {'save_cells': True}},
@@ -34,7 +29,7 @@ flags.update({
     )
 })
 
-class AssignApp(BaseNbGraderApp, NbConvertApp):
+class AssignApp(BaseNbConvertApp):
 
     name = Unicode(u'nbgrader-assign')
     description = Unicode(u'Prepare a student version of an assignment by removing solutions')
@@ -77,13 +72,9 @@ class AssignApp(BaseNbGraderApp, NbConvertApp):
 
     save_cells = Bool(False, config=True, help="Save information about grade cells into the database.")
 
-    # The classes added here determine how configuration will be documented
-    classes = List()
-
     def _classes_default(self):
         classes = super(AssignApp, self)._classes_default()
         classes.extend([
-            FilesWriter,
             IncludeHeaderFooter,
             CheckGradeIds,
             LockCells,
@@ -93,9 +84,6 @@ class AssignApp(BaseNbGraderApp, NbConvertApp):
             SaveGradeCells
         ])
         return classes
-
-    def _export_format_default(self):
-        return 'assignment'
 
     def build_extra_config(self):
         self.extra_config = Config()
