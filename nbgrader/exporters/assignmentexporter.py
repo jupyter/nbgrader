@@ -32,9 +32,7 @@ class AssignmentExporter(NotebookExporter):
         help="Student ID"
     )
 
-    db_name = Unicode("gradebook", config=True, help="Database name")
-    db_ip = Unicode("localhost", config=True, help="IP address for the database")
-    db_port = Integer(27017, config=True, help="Port for the database")
+    db_url = Unicode("sqlite:///gradebook.db", config=True, help="URL to the database")
 
     def from_filename(self, filename, resources=None, **kw):
         # construct the resources dictionary
@@ -62,9 +60,7 @@ class AssignmentExporter(NotebookExporter):
             resources['nbgrader']['student'] = self.student_id
 
         # database stuff
-        resources['nbgrader']['db_name'] = self.db_name
-        resources['nbgrader']['db_ip'] = self.db_ip
-        resources['nbgrader']['db_port'] = self.db_port
+        resources['nbgrader']['db_url'] = self.db_url
 
         output, resources = super(AssignmentExporter, self).from_filename(
             filename, resources=resources, **kw)

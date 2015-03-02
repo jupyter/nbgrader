@@ -19,7 +19,7 @@ aliases = {}
 aliases.update(nbconvert_aliases)
 aliases.update({
     'assignment': 'AssignmentExporter.assignment_id',
-    'db': 'AssignmentExporter.db_name'
+    'db': 'AssignmentExporter.db_url'
 })
 
 flags = {}
