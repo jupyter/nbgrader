@@ -1,36 +1,31 @@
-from IPython.config.loader import Config
-from IPython.utils.traitlets import Unicode, Integer, List
+import os
+import subprocess as sp
+import socket
 
-from IPython.core.application import BaseIPythonApplication
-from IPython.core.application import base_aliases, base_flags
-from IPython.core.profiledir import ProfileDir
+from textwrap import dedent
+
+from IPython.config.loader import Config
+from IPython.utils.traitlets import Unicode, Integer, List, Dict
+
 from IPython.nbconvert.exporters import HTMLExporter
 from IPython.config.application import catch_config_error
 
+from nbgrader.apps.baseapp import BaseNbGraderApp, nbgrader_aliases, nbgrader_flags
 from nbgrader.html.formgrade import app
 from nbgrader.api import Gradebook
 
-import os
-import logging
-import subprocess as sp
-import socket
-import pipes
-
 aliases = {}
-aliases.update(base_aliases)
+aliases.update(nbgrader_aliases)
 aliases.update({
     'ip': 'FormgradeApp.ip',
-    'port': 'FormgradeApp.port'
+    'port': 'FormgradeApp.port',
+    'db': 'FormgradeApp.db_name'
 })
 
 flags = {}
-flags.update(base_flags)
-
-examples = """
-nbgrader formgrade .
-nbgrader formgrade autograded/
-nbgrader formgrade --ip=0.0.0.0 --port=80
-"""
+flags.update(nbgrader_flags)
+flags.update({
+})
 
 def random_port():
     """get a single random port"""
@@ -40,13 +35,20 @@ def random_port():
     sock.close()
     return port
 
-class FormgradeApp(BaseIPythonApplication):
+class FormgradeApp(BaseNbGraderApp):
 
     name = Unicode(u'nbgrader-formgrade')
     description = Unicode(u'Grade a notebook using an HTML form')
-    aliases = aliases
-    flags = flags
-    examples = examples
+    aliases = Dict(aliases)
+    flags = Dict(flags)
+
+    examples = Unicode(dedent(
+        """
+        nbgrader formgrade .
+        nbgrader formgrade autograded/
+        nbgrader formgrade --ip=0.0.0.0 --port=80
+        """
+    ))
 
     db_url = Unicode("sqlite:///gradebook.db", config=True, help="URL to database")
     ip = Unicode("localhost", config=True, help="IP address for the server")
@@ -54,23 +56,10 @@ class FormgradeApp(BaseIPythonApplication):
     base_directory = Unicode('.', config=True, help="Root server directory")
     directory_format = Unicode('{notebook_id}.ipynb', config=True, help="Format string for the directory structure of the autograded notebooks")
 
-    def _ipython_dir_default(self):
-        d = os.path.join(os.environ["HOME"], ".nbgrader")
-        self._ipython_dir_changed('ipython_dir', d, d)
-        return d
-
-    # The classes added here determine how configuration will be documented
-    classes = List()
-
     def _classes_default(self):
-        """This has to be in a method, for TerminalIPythonApp to be available."""
-        return [
-            HTMLExporter,
-            ProfileDir
-        ]
-
-    def _log_level_default(self):
-        return logging.INFO
+        classes = super(FormgradeApp, self)._classes_default()
+        classes.append(HTMLExporter)
+        return classes
 
     def init_server_root(self):
         # Specifying notebooks on the command-line overrides (rather than adds)
@@ -105,8 +94,6 @@ class FormgradeApp(BaseIPythonApplication):
     @catch_config_error
     def initialize(self, argv=None):
         super(FormgradeApp, self).initialize(argv)
-        self.stage_default_config_file()
-        self.build_extra_config()
         self.init_server_root()
 
     def start(self):
