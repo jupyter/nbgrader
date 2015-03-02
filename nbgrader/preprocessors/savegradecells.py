@@ -7,9 +7,18 @@ class SaveGradeCells(Preprocessor):
     """A preprocessor to save information about grade cells."""
 
     db_url = Unicode("sqlite:///gradebook.db", config=True, help="URL to database")
-    assignment_id = Unicode(u'assignment', config=True, help="Assignment ID")
 
     def preprocess(self, nb, resources):
+        # pull information from the resources
+        self.notebook_id = resources['nbgrader']['notebook']
+        self.assignment_id = resources['nbgrader']['assignment']
+
+        if self.notebook_id == '':
+            raise ValueError("Invalid notebok id: {}".format(self.notebook_id))
+        if self.assignment_id == '':
+            raise ValueError("Invalid assignment id: {}".format(self.assignment_id))
+
+        # connect to the mongo database
         self.gradebook = Gradebook(self.db_url)
 
         self.notebook_id = resources['unique_key']

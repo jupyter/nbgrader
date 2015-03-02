@@ -18,6 +18,7 @@ from nbgrader.preprocessors import (
 aliases = {}
 aliases.update(nbconvert_aliases)
 aliases.update({
+    'assignment': 'AssignmentExporter.assignment_id'
 })
 
 flags = {}
@@ -66,6 +67,13 @@ class AssignApp(BaseNbConvertApp):
         folder (without the --relpath flag, they would be in student/teacher/images/):
 
         > nbgrader assign teacher/*.ipynb --build-dir=student --files='["teacher/images/*.jpg"]' --relpath=teacher
+
+        If you want to record the grade cells into the database (for use later
+        when running `nbgrader autograde`), you can use the --save-cells flag.
+        You will need to use this in combination with the --assignment flag to
+        indicate what the assignment is that this notebook is a part of:
+
+        > nbgrader assign "Problem 1.ipynb" --save-cells --assignment="Problem Set 1"
 
         """
     ))
