@@ -35,7 +35,6 @@ nbconvert_aliases.update(nbgrader_aliases)
 nbconvert_aliases.update({
     'build-dir': 'FilesWriter.build_directory',
     'files': 'FilesWriter.files',
-    'relpath': 'FilesWriter.relpath',
     'output': 'NbConvertApp.output_base',
 })
 nbconvert_flags = {}

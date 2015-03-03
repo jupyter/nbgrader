@@ -63,11 +63,10 @@ class AssignApp(BaseNbConvertApp):
         > nbgrader assign teacher/*.ipynb --build-dir=student
 
         If you need to copy dependent files over as well, you can do this with
-        the --files and --relpath flags. In the following example, all the .jpg
-        files in the teacher/images/ folder will be linked to the student/images/
-        folder (without the --relpath flag, they would be in student/teacher/images/):
+        the --files flag. In the following example, all the .jpg files in the 
+        teacher/images/ folder will be linked to the student/images/ folder:
 
-        > nbgrader assign teacher/*.ipynb --build-dir=student --files='["teacher/images/*.jpg"]' --relpath=teacher
+        > nbgrader assign teacher/*.ipynb --build-dir=student --files='["teacher/images/*.jpg"]'
 
         If you want to record the grade cells into the database (for use later
         when running `nbgrader autograde`), you can use the --save-cells flag.

@@ -62,8 +62,7 @@ class TestNbgraderAssign(TestBase):
             self._run_command(
                 'nbgrader assign teacher/*.ipynb '
                 '--build-dir=student '
-                '--files=\'["teacher/data/*.csv"]\' '
-                '--relpath=teacher'
+                '--files=\'["teacher/data/*.csv"]\''
             )
 
             assert os.path.isdir('student')
