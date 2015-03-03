@@ -67,15 +67,24 @@ class AutogradeApp(BaseNbConvertApp):
     ))
 
     student_id = Unicode(u'', config=True)
-    overwrite_cells = Bool(False, config=True, help="Overwrite grade cells from the database")
+    overwrite_cells = Bool(
+        False, 
+        config=True, 
+        help=dedent(
+            """
+            Overwrite grade cells from the database. By default, the database 
+            will automatically be populated by the existing cells in the assignment.
+            Note, however, that if the cells already exist in the database, they
+            will be overwritten by whatever is in this assignment!
+            """
+        )
+    )
 
     def _classes_default(self):
-        """This has to be in a method, for TerminalIPythonApp to be available."""
         classes = super(AutogradeApp, self)._classes_default()
         classes.extend([
             FindStudentID,
             ClearOutputPreprocessor,
-            OverwriteGradeCells,
             Execute,
             SaveAutoGrades
         ])
@@ -91,6 +100,11 @@ class AutogradeApp(BaseNbConvertApp):
             self.extra_config.Exporter.preprocessors.append(
                 'nbgrader.preprocessors.OverwriteGradeCells'
             )
+        else:
+            self.extra_config.Exporter.preprocessors.extend([
+                'nbgrader.preprocessors.ComputeChecksums',
+                'nbgrader.preprocessors.SaveGradeCells'
+            ])
         self.extra_config.Exporter.preprocessors.extend([
             'nbgrader.preprocessors.Execute',
             'nbgrader.preprocessors.SaveAutoGrades'

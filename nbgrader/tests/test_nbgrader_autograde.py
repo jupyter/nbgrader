@@ -78,12 +78,13 @@ class TestNbgraderAutograde(TestBase):
                 '--overwrite-cells '
                 '--db="{}" '
                 '--assignment="Problem Set 1" '
+                '--AssignmentExporter.notebook_id=teacher '
                 '--student=foo'.format(dbpath))
 
             assert os.path.isfile("submitted.nbconvert.ipynb")
 
             gb = Gradebook(dbpath)
-            notebook = gb.find_submission_notebook("submitted", "Problem Set 1", "foo")
+            notebook = gb.find_submission_notebook("teacher", "Problem Set 1", "foo")
             assert_equal(notebook.score, 1, "autograded score is incorrect")
             assert_equal(notebook.max_score, 3, "maximum score is incorrect")
             assert_equal(notebook.needs_manual_grade, True, "should need manual grade")
