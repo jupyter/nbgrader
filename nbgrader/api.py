@@ -433,7 +433,8 @@ class Gradebook(object):
         # create the connection to the database
         engine = create_engine(db_url)
         self.db = scoped_session(sessionmaker(autoflush=True, bind=engine))
-        Base.query = self.db.query_property()
+
+        # this creates all the tables in the database if they don't already exist
         Base.metadata.create_all(bind=engine)
 
     #### Students
