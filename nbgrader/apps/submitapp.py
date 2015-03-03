@@ -15,7 +15,7 @@ from nbgrader.apps.baseapp import BaseNbGraderApp, nbgrader_aliases, nbgrader_fl
 aliases = {}
 aliases.update(nbgrader_aliases)
 aliases.update({
-    "assignment": "SubmitApp.assignment_name",
+    "assignment": "SubmitApp.assignment_id",
     "submit-dir": "SubmitApp.submissions_directory"
 })
 
@@ -48,7 +48,7 @@ class SubmitApp(BaseNbGraderApp):
             """
         )
     )
-    assignment_name = Unicode(
+    assignment_id = Unicode(
         '', config=True, 
         help=dedent(
             """
@@ -58,7 +58,8 @@ class SubmitApp(BaseNbGraderApp):
         )
     )
     submissions_directory = Unicode(
-        "{}/.nbgrader/submissions".format(os.environ['HOME']), config=True, 
+        "{}/.nbgrader/submissions".format(os.environ['HOME']),
+        config=True, 
         help=dedent(
             """
             The directory where the submission will be saved.
@@ -90,8 +91,8 @@ class SubmitApp(BaseNbGraderApp):
 
         self.init_assignment_root()
 
-        if self.assignment_name == '':
-            self.assignment_name = os.path.basename(self.assignment_directory)
+        if self.assignment_id == '':
+            self.assignment_id = os.path.basename(self.assignment_directory)
 
     def init_assignment_root(self):
         # Specifying notebooks on the command-line overrides (rather than adds)
@@ -128,16 +129,16 @@ class SubmitApp(BaseNbGraderApp):
         """Copy the submission to a temporary directory. Returns the path to the
         temporary copy of the submission."""
         # copy everything to a temporary directory
-        pth = os.path.join(self.tmpdir, self.assignment_name)
+        pth = os.path.join(self.tmpdir, self.assignment_id)
         shutil.copytree(self.assignment_directory, pth)
         os.chdir(self.tmpdir)
 
         # get the user name, write it to file
-        with open(os.path.join(self.assignment_name, "user.txt"), "w") as fh:
+        with open(os.path.join(self.assignment_id, "user.txt"), "w") as fh:
             fh.write(self.student)
 
         # save the submission time
-        with open(os.path.join(self.assignment_name, "timestamp.txt"), "w") as fh:
+        with open(os.path.join(self.assignment_id, "timestamp.txt"), "w") as fh:
             fh.write(self.timestamp)
 
         return pth
@@ -148,7 +149,7 @@ class SubmitApp(BaseNbGraderApp):
         root, submission = os.path.split(path_to_submission)
         os.chdir(root)
 
-        archive = os.path.join(self.tmpdir, "{}.tar.gz".format(self.assignment_name))
+        archive = os.path.join(self.tmpdir, "{}.tar.gz".format(self.assignment_id))
         tf = tarfile.open(archive, "w:gz")
 
         for (dirname, dirnames, filenames) in os.walk(submission):
@@ -166,14 +167,17 @@ class SubmitApp(BaseNbGraderApp):
 
     def submit(self, path_to_tarball):
         """Submit the assignment."""
-        archive = "{}.tar.gz".format(self.assignment_name)
+        archive = "{}.tar.gz".format(self.assignment_id)
         target = os.path.join(self.submissions_directory, archive)
         shutil.copy(path_to_tarball, target)
+        self.log.debug("Saved to {}".format(target))
         return target
 
     def start(self):
         super(SubmitApp, self).start()
         self.tmpdir = tempfile.mkdtemp()
+        self.assignment_directory = os.path.abspath(self.assignment_directory)
+        self.submissions_directory = os.path.abspath(self.submissions_directory)
         
         try:
             path_to_copy = self.make_temp_copy()
@@ -186,7 +190,7 @@ class SubmitApp(BaseNbGraderApp):
         else:
             self.log.debug("Saved to '{}'".format(path_to_submission))
             self.log.info("'{}' submitted by {} at {}".format(
-                self.assignment_name, self.student, self.timestamp))
+                self.assignment_id, self.student, self.timestamp))
             
         finally:
             shutil.rmtree(self.tmpdir)
