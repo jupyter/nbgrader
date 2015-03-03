@@ -12,7 +12,7 @@ class OverwriteGradeCells(Preprocessor):
         self.assignment_id = resources['nbgrader']['assignment']
         self.db_url = resources['nbgrader']['db_url']
 
-        # connect to the mongo database
+        # connect to the database
         self.gradebook = Gradebook(self.db_url)
 
         nb, resources = super(OverwriteGradeCells, self).preprocess(nb, resources)

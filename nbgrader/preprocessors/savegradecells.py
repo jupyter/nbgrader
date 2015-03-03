@@ -17,7 +17,7 @@ class SaveGradeCells(Preprocessor):
         if self.assignment_id == '':
             raise ValueError("Invalid assignment id: {}".format(self.assignment_id))
 
-        # connect to the mongo database
+        # connect to the database
         self.gradebook = Gradebook(self.db_url)
 
         self.notebook_id = resources['unique_key']

@@ -14,7 +14,7 @@ class SaveAutoGrades(Preprocessor):
         self.student_id = resources['nbgrader']['student']
         self.db_url = resources['nbgrader']['db_url']
 
-        # connect to the mongo database
+        # connect to the database
         self.gradebook = Gradebook(self.db_url)
         self.gradebook.update_or_create_submission(
             self.assignment_id, self.student_id)
