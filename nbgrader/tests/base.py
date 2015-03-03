@@ -2,6 +2,7 @@ import os
 import glob
 import shutil
 import subprocess as sp
+
 from IPython.utils.tempdir import TemporaryWorkingDirectory
 from IPython.nbformat import current_nbformat
 from IPython.nbformat import read as read_nb
@@ -80,3 +81,10 @@ print("hello")
             raise AssertionError(
                 "process returned an unexpected return code: {}".format(true_retcode))
         return output
+
+    @staticmethod
+    def _init_db():
+        dbpath = "/tmp/nbgrader_test.db"
+        if os.path.exists(dbpath):
+            os.remove(dbpath)
+        return "sqlite:///" + dbpath

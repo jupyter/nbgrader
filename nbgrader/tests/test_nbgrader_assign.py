@@ -1,5 +1,6 @@
 from .base import TestBase
-from nbgrader.api import Gradebook, Assignment
+from nbgrader.api import Gradebook, MissingEntry
+from nose.tools import assert_equal, assert_raises
 
 import os
 
@@ -80,36 +81,31 @@ class TestNbgraderAssign(TestBase):
     def test_no_save_cells(self):
         """Ensure cells are not saved into the database"""
         with self._temp_cwd(["files/test.ipynb"]):
-            gb = Gradebook('nbgrader_test')
-            gb.client.drop_database('nbgrader_test')
-            assignment = Assignment(assignment_id="Problem Set 1")
-            gb.add_assignment(assignment)
+            dbpath = self._init_db()
+            gb = Gradebook(dbpath)
+            gb.add_assignment("Problem Set 1")
 
             self._run_command(
                 'nbgrader assign test.ipynb '
                 '--assignment="Problem Set 1" '
-                '--db=nbgrader_test')
+                '--db="{}"'.format(dbpath))
 
-            gb = Gradebook('nbgrader_test')
-            assignment = gb.find_assignment(assignment_id="Problem Set 1")
-            grade_cells = gb.find_grade_cells(assignment=assignment, notebook_id="test")
-            assert len(grade_cells) == 0
+            gb = Gradebook(dbpath)
+            assert_raises(MissingEntry, gb.find_notebook, "test", "Problem Set 1")
 
     def test_save_cells(self):
         """Ensure cells are saved into the database"""
         with self._temp_cwd(["files/test.ipynb"]):
-            gb = Gradebook('nbgrader_test')
-            gb.client.drop_database('nbgrader_test')
-            assignment = Assignment(assignment_id="Problem Set 1")
-            gb.add_assignment(assignment)
+            dbpath = self._init_db()
+            gb = Gradebook(dbpath)
+            gb.add_assignment("Problem Set 1")
 
             self._run_command(
                 'nbgrader assign test.ipynb '
                 '--save-cells '
                 '--assignment="Problem Set 1" '
-                '--db=nbgrader_test')
+                '--db="{}"'.format(dbpath))
 
-            gb = Gradebook('nbgrader_test')
-            assignment = gb.find_assignment(assignment_id="Problem Set 1")
-            grade_cells = gb.find_grade_cells(assignment=assignment, notebook_id="test")
-            assert len(grade_cells) == 8
+            gb = Gradebook(dbpath)
+            notebook = gb.find_notebook("test", "Problem Set 1")
+            assert_equal(len(notebook.grade_cells), 8)
