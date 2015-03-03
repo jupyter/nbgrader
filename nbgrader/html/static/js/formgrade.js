@@ -1,38 +1,37 @@
 /*global $, Backbone, student, submission_id */
 
 var Grade = Backbone.Model.extend({
-    idAttribute: "_id",
     urlRoot: "/api/grade",
     initialize: function () {
-        var elem = $("#" + this.get("grade_id"));
-        var glyph = $("#" + this.get("grade_id") + "-saved");
-        elem.val(this.get("score"));
-        elem.attr("placeholder", this.get("autoscore"));
+        var elem = $("#" + this.get("name"));
+        var glyph = $("#" + this.get("name") + "-saved");
+        elem.val(this.get("manual_score"));
+        elem.attr("placeholder", this.get("auto_score"));
 
         var that = this;
-        $("#" + this.get("grade_id") + "-full-credit").click(function () {
+        $("#" + this.get("name") + "-full-credit").click(function () {
             elem.val(that.get("max_score"));
             elem.trigger("change");
             elem.select();
         });
-        $("#" + this.get("grade_id") + "-no-credit").click(function () {
+        $("#" + this.get("name") + "-no-credit").click(function () {
             elem.val(0);
             elem.trigger("change");
             elem.select();
         });
         elem.on("change", function (evt) {
             if (elem.val() === "") {
-                that.set("score", null);
+                that.set("manual_score", null);
             } else {
-                that.set("score", Math.min(Math.max(0, elem.val()), that.get("max_score")));
+                that.set("manual_score", Math.min(Math.max(0, elem.val()), that.get("max_score")));
             }
 
-            elem.val(that.get("score"));
+            elem.val(that.get("manual_score"));
             glyph.removeClass("glyphicon-floppy-saved");
             glyph.addClass("glyphicon-refresh");
             glyph.fadeIn(10);
 
-            that.save("score", that.get("score"), {
+            that.save("manual_score", that.get("manual_score"), {
                 success: function () {
                     glyph.removeClass("glyphicon-refresh");
                     glyph.addClass("glyphicon-floppy-saved");
@@ -48,15 +47,14 @@ var Grade = Backbone.Model.extend({
 
 var Grades = Backbone.Collection.extend({
     model: Grade,
-    url: "/api/notebook/" + submission_id + "/grades"
+    url: "/api/grades"
 });
 
 var Comment = Backbone.Model.extend({
-    idAttribute: "_id",
     urlRoot: "/api/comment",
     initialize: function () {
-        var elem = $($(".comment")[this.get("comment_id")]);
-        var glyph = $($(".comment-saved")[this.get("comment_id")]);
+        var elem = $($(".comment")[this.get("name")]);
+        var glyph = $($(".comment-saved")[this.get("name")]);
         elem.val(this.get("comment"));
 
         var that = this;
@@ -83,7 +81,7 @@ var Comment = Backbone.Model.extend({
 
 var Comments = Backbone.Collection.extend({
     model: Comment,
-    url: "/api/notebook/" + submission_id + "/comments"
+    url: "/api/comments"
 });
 
 var getIndex = function (elem) {
@@ -132,10 +130,18 @@ var prevAssignment = function () {
     
 $(window).load(function () {
     grades = new Grades();
-    grades.fetch();
+    grades.fetch({
+        data: {
+            submission_id: submission_id
+        }
+    });
 
     comments = new Comments();
-    comments.fetch();
+    comments.fetch({
+        data: {
+            submission_id: submission_id
+        }
+    });
 
     $("li.previous a").tooltip({container: 'body'});
     $("li.next a").tooltip({container: 'body'});

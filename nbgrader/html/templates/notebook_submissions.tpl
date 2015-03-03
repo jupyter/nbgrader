@@ -2,7 +2,7 @@
 
 {%- block breadcrumb -%}
 <li><a href="/assignments">Assignments</a></li>
-<li><a href="/assignments/{{ assignment.assignment_id }}">{{ assignment.assignment_id }}</a></li>
+<li><a href="/assignments/{{ assignment_id }}">{{ assignment_id }}</a></li>
 <li class="active">{{ notebook_id }}</li>
 {%- endblock -%}
 
@@ -10,7 +10,7 @@
 <div class="panel-body">
   The following table lists all the student submissions for the
   notebook "{{ notebook_id }}", which is part of the assignment "{{
-  assignment.assignment_id }}". By clicking on a submission id, you
+  assignment_id }}". By clicking on a submission id, you
   can grade the submitted notebook.
 </div>
 {%- endblock -%}
@@ -19,16 +19,24 @@
 <thead>
   <tr>
     <th>Submission ID</th>
-    <th class="center">Score</th>
+    <th class="center">Overall Score</th>
+    <th class="center">Code Score</th>
+    <th class="center">Written Score</th>
     <th class="center">Manual grade?</th>
   </tr>
 </thead>
 <tbody>
   {%- for submission in submissions -%}
   <tr>
-    <td><a href="/submissions/{{ submission._id }}">Submission #{{ submission.index + 1 }}</a></td>
+    <td><a href="/submissions/{{ submission.id }}">Submission #{{ submission.index + 1 }}</a></td>
     <td class="center">
       {{ submission.score | float | round(2) }} / {{ submission.max_score | float | round(2) }}
+    </td>
+    <td class="center">
+      {{ submission.code_score | float | round(2) }} / {{ submission.max_code_score | float | round(2) }}
+    </td>
+    <td class="center">
+      {{ submission.written_score | float | round(2) }} / {{ submission.max_written_score | float | round(2) }}
     </td>
     <td class="center">
       {%- if submission.needs_manual_grade -%}

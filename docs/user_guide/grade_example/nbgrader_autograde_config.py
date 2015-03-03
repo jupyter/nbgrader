@@ -6,8 +6,8 @@ c.AutogradeApp.output_dir = os.path.join(os.getcwd(), 'autograded')
 c.AutogradeApp.recursive = True
 c.FindStudentID.regexp = r"submitted/(?P<student_id>.+)/.*.ipynb"
 c.SaveAutoGrades.assignment_id = "Problem Set 1"
-c.SaveAutoGrades.db_name = "example"
+c.SaveAutoGrades.db_url = "sqlite:////tmp/nbgrader_example.db"
 
 # Only necessary if --overwrite-cells is given
 c.OverwriteGradeCells.assignment_id = "Problem Set 1"
-c.OverwriteGradeCells.db_name = "example"
+c.OverwriteGradeCells.db_url = "sqlite:////tmp/nbgrader_example.db"

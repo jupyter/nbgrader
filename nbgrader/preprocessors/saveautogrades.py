@@ -5,50 +5,23 @@ from nbgrader.api import Gradebook
 
 
 class SaveAutoGrades(Preprocessor):
-    """Preprocessor for saving out the autograder grades into a MongoDB"""
+    """Preprocessor for saving out the autograder grades into a database"""
 
-    db_name = Unicode("gradebook", config=True, help="Database name")
-    db_ip = Unicode("localhost", config=True, help="IP address for the database")
-    db_port = Integer(27017, config=True, help="Port for the database")
-
+    db_url = Unicode("sqlite:///gradebook.db", config=True, help="URL to database")
     assignment_id = Unicode(u'assignment', config=True, help="Assignment ID")
 
     def preprocess(self, nb, resources):
-        # connect to the mongo database
-        self.gradebook = Gradebook(self.db_name, ip=self.db_ip, port=self.db_port)
-        self.student = self.gradebook.find_student(
-            student_id=resources['nbgrader']['student_id'])
-        self.assignment = self.gradebook.find_assignment(
-            assignment_id=self.assignment_id)
-        self.notebook = self.gradebook.find_or_create_notebook(
-            notebook_id=resources['unique_key'],
-            student=self.student,
-            assignment=self.assignment)
+        self.gradebook = Gradebook(self.db_url)
+        self.notebook_id = resources['unique_key']
+        self.student_id = resources['nbgrader']['student_id']
 
-        # keep track of the number of comments we add
-        self.comment_index = 0
+        self.gradebook.update_or_create_submission(
+            self.assignment_id, self.student_id)
 
         # process the cells
         nb, resources = super(SaveAutoGrades, self).preprocess(nb, resources)
 
         return nb, resources
-
-    def _add_comment(self, cell, resources):
-        """Graders can optionally add comments to the student's solutions, so
-        add the comment information into the database if it doesn't
-        already exist. It should NOT overwrite existing comments that
-        might have been added by a grader already.
-
-        """
-
-        # retrieve or create the comment object from the database
-        comment = self.gradebook.find_or_create_comment(
-            notebook=self.notebook,
-            comment_id=self.comment_index)
-
-        # update the number of comments we have inserted
-        self.comment_index += 1
-        self.log.debug(comment)
 
     def _add_score(self, cell, resources):
         """Graders can override the autograder grades, and may need to
@@ -60,22 +33,20 @@ class SaveAutoGrades(Preprocessor):
         """
         # these are the fields by which we will identify the score
         # information
-        grade = self.gradebook.find_or_create_grade(
-            notebook=self.notebook,
-            grade_id=cell.metadata['nbgrader']['grade_id'])
+        grade = self.gradebook.find_grade(
+            cell.metadata['nbgrader']['grade_id'],
+            self.notebook_id,
+            self.assignment_id,
+            self.student_id)
 
-        # deterine what the grade is
-        grade.autoscore, grade.max_score = utils.determine_grade(cell)
-
-        # Update the grade information and print it out
-        self.gradebook.update_grade(grade)
+        # determine what the grade is
+        auto_score, max_score = utils.determine_grade(cell)
+        assert max_score == grade.max_score
+        grade.auto_score = auto_score
+        self.gradebook.db.commit()
         self.log.debug(grade)
 
     def preprocess_cell(self, cell, resources, cell_index):
-        # if it's a solution cell, then add a comment
-        if utils.is_solution(cell):
-            self._add_comment(cell, resources)
-
         # if it's a grade cell, the add a grade
         if utils.is_grade(cell):
             self._add_score(cell, resources)

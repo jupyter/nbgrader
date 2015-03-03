@@ -2,7 +2,7 @@
 
 {%- block breadcrumb -%}
 <li><a href="/students">Students</a></li>
-<li class="active">{{ student.student_id }}</li>
+<li class="active">{{ student.id }}</li>
 {%- endblock -%}
 
 {%- block body -%}
@@ -16,35 +16,23 @@
 <thead>
   <tr>
     <th>Assignment ID</th>
-    <th class="center">Received?</th>
-    <th class="center">Score</th>
+    <th class="center">Overall Score</th>
+    <th class="center">Code Score</th>
+    <th class="center">Written Score</th>
   </tr>
 </thead>
 <tbody>
   {%- for assignment in assignments -%}
-  {%- if assignment.score == None -%}
-  <tr class="warning">
-  {%- else -%}
   <tr>
-  {%- endif -%}
-    {%- if assignment.score != None -%}
-    <td><a href="/students/{{ student.student_id }}/{{ assignment.assignment_id }}">{{ assignment.assignment_id }}</a></td>
-    {%- else -%}
-    <td>{{ assignment.assignment_id }}</td>
-    {%- endif -%}
+    <td><a href="/students/{{ student.id }}/{{ assignment.name }}">{{ assignment.name }}</a></td>
     <td class="center">
-      {%- if assignment.score == None -%}
-      <span class="glyphicon glyphicon-remove"></span>
-      {%- else -%}
-      <span class="glyphicon glyphicon-ok"></span>
-      {%- endif -%}
+      {{ assignment.score | float | round(2) }} / {{ assignment.max_score | float | round(2) }}
     </td>
     <td class="center">
-      {%- if assignment.score != None -%}
-      {{ assignment.score | float | round(2) }} / {{ assignment.max_score | float | round(2) }}
-      {%- else -%}
-      -
-      {%- endif -%}
+      {{ assignment.code_score | float | round(2) }} / {{ assignment.max_code_score | float | round(2) }}
+    </td>
+    <td class="center">
+      {{ assignment.written_score | float | round(2) }} / {{ assignment.max_written_score | float | round(2) }}
     </td>
   </tr>
   {%- endfor -%}

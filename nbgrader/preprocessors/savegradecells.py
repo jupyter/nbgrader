@@ -1,23 +1,22 @@
 from IPython.nbconvert.preprocessors import Preprocessor
-from IPython.utils.traitlets import Unicode, Integer
+from IPython.utils.traitlets import Unicode
 from nbgrader import utils
 from nbgrader.api import Gradebook
 
 class SaveGradeCells(Preprocessor):
     """A preprocessor to save information about grade cells."""
 
-    db_name = Unicode("gradebook", config=True, help="Database name")
-    db_ip = Unicode("localhost", config=True, help="IP address for the database")
-    db_port = Integer(27017, config=True, help="Port for the database")
-
+    db_url = Unicode("sqlite:///gradebook.db", config=True, help="URL to database")
     assignment_id = Unicode(u'assignment', config=True, help="Assignment ID")
 
     def preprocess(self, nb, resources):
-        # connect to the mongo database
-        self.gradebook = Gradebook(self.db_name, ip=self.db_ip, port=self.db_port)
-        self.assignment = self.gradebook.find_assignment(
-            assignment_id=self.assignment_id)
+        self.gradebook = Gradebook(self.db_url)
+
         self.notebook_id = resources['unique_key']
+        self.gradebook.update_or_create_notebook(
+            self.notebook_id, self.assignment_id)
+
+        self.comment_index = 0
 
         nb, resources = super(SaveGradeCells, self).preprocess(nb, resources)
 
@@ -25,24 +24,35 @@ class SaveGradeCells(Preprocessor):
 
     def preprocess_cell(self, cell, resources, cell_index):
         if utils.is_grade(cell):
-            grade_cell = self.gradebook.find_or_create_grade_cell(
-                grade_id=cell.metadata.nbgrader.grade_id,
-                notebook_id=self.notebook_id,
-                assignment=self.assignment)
-
-            grade_cell.max_score = float(cell.metadata.nbgrader['points'])
+            max_score = float(cell.metadata.nbgrader['points']) 
+            cell_type = cell.cell_type           
 
             # we only want the source and checksum for non-solution cells
             if utils.is_solution(cell):
-                grade_cell.source = None
-                grade_cell.checksum = None
-                grade_cell.cell_type = None
+                source = None
+                checksum = None
             else:
-                grade_cell.source = cell.source
-                grade_cell.checksum = cell.metadata.nbgrader['checksum']
-                grade_cell.cell_type = cell.cell_type
+                source = cell.source
+                checksum = cell.metadata.nbgrader['checksum']
 
-            self.gradebook.update_grade_cell(grade_cell)
-            self.log.debug("Recorded grade cell %s into database", grade_cell.grade_id)
+            grade_cell = self.gradebook.update_or_create_grade_cell(
+                cell.metadata.nbgrader.grade_id,
+                self.notebook_id,
+                self.assignment_id,
+                max_score=max_score,
+                source=source,
+                checksum=checksum,
+                cell_type=cell_type)
+
+            self.log.debug("Recorded grade cell %s into database", grade_cell)
+
+        if utils.is_solution(cell):
+            solution_cell = self.gradebook.update_or_create_solution_cell(
+                self.comment_index,
+                self.notebook_id,
+                self.assignment_id)
+
+            self.comment_index += 1
+            self.log.debug("Recorded solution cell %s into database", solution_cell)
 
         return cell, resources

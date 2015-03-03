@@ -1,4 +1,4 @@
 ipython[all]>=3
-pymongo
+sqlalchemy
 Flask
 autopep8
