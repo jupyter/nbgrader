@@ -19,8 +19,6 @@ class SaveGradeCells(Preprocessor):
 
         # connect to the database
         self.gradebook = Gradebook(self.db_url)
-
-        self.notebook_id = resources['unique_key']
         self.gradebook.update_or_create_notebook(
             self.notebook_id, self.assignment_id)
 
