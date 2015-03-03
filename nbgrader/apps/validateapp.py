@@ -5,8 +5,8 @@ from textwrap import dedent
 
 from IPython.config.loader import Config
 from IPython.utils.traitlets import Unicode, Dict
-from IPython.nbconvert.preprocessors import ClearOutputPreprocessor, ExecutePreprocessor
-from nbgrader.preprocessors import DisplayAutoGrades
+from IPython.nbconvert.preprocessors import ClearOutputPreprocessor
+from nbgrader.preprocessors import DisplayAutoGrades, Execute
 from nbgrader.apps.baseapp import BaseNbConvertApp, nbconvert_flags, nbconvert_aliases
 
 aliases = {}
@@ -56,7 +56,7 @@ class ValidateApp(BaseNbConvertApp):
         classes = super(ValidateApp, self)._classes_default()
         classes.extend([
             ClearOutputPreprocessor,
-            ExecutePreprocessor,
+            Execute,
             DisplayAutoGrades
         ])
         return classes
@@ -65,7 +65,7 @@ class ValidateApp(BaseNbConvertApp):
         self.extra_config = Config()
         self.extra_config.Exporter.preprocessors = [
             'IPython.nbconvert.preprocessors.ClearOutputPreprocessor',
-            'IPython.nbconvert.preprocessors.ExecutePreprocessor',
+            'nbgrader.preprocessors.Execute',
             'nbgrader.preprocessors.DisplayAutoGrades'
         ]
         self.config.merge(self.extra_config)

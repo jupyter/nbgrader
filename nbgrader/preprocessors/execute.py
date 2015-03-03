@@ -1,3 +1,5 @@
+import os
+
 from IPython.nbconvert.preprocessors import ExecutePreprocessor
 from IPython.nbformat.v4 import output_from_msg
 from IPython.kernel.manager import KernelManager
@@ -11,21 +13,28 @@ except ImportError:
 class Execute(ExecutePreprocessor):
 
     def preprocess(self, nb, resources):
-        kernel_name = nb.metadata.get('kernelspec', {}).get('name', 'python')
-        extra_arguments = self.extra_arguments + ["--HistoryManager.hist_file=:memory:"]
-
-        self.km = KernelManager(kernel_name=kernel_name)
-        self.km.start_kernel(startup_timeout=60, extra_arguments=extra_arguments)
-        self.kc = self.km.client()
-        self.kc.start_channels(stdin=False)
-        self.kc.wait_for_ready()
+        cwd = os.getcwd()
+        os.chdir(resources["metadata"]["path"])
 
         try:
-            self.log.info("Executing notebook with kernel: %s" % kernel_name)
-            nb, resources = super(ExecutePreprocessor, self).preprocess(nb, resources)
+            kernel_name = nb.metadata.get('kernelspec', {}).get('name', 'python')
+            extra_arguments = self.extra_arguments + ["--HistoryManager.hist_file=:memory:"]
+
+            self.km = KernelManager(kernel_name=kernel_name)
+            self.km.start_kernel(startup_timeout=60, extra_arguments=extra_arguments)
+            self.kc = self.km.client()
+            self.kc.start_channels(stdin=False)
+            self.kc.wait_for_ready()
+
+            try:
+                self.log.info("Executing notebook with kernel: %s" % kernel_name)
+                nb, resources = super(ExecutePreprocessor, self).preprocess(nb, resources)
+            finally:
+                self.kc.stop_channels()
+                self.km.shutdown_kernel(now=True)
+
         finally:
-            self.kc.stop_channels()
-            self.km.shutdown_kernel(now=True)
+            os.chdir(cwd)
 
         return nb, resources
 
