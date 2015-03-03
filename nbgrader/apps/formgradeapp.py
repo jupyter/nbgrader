@@ -19,7 +19,7 @@ aliases.update(nbgrader_aliases)
 aliases.update({
     'ip': 'FormgradeApp.ip',
     'port': 'FormgradeApp.port',
-    'db': 'FormgradeApp.db_name'
+    'db': 'FormgradeApp.db_url'
 })
 
 flags = {}
