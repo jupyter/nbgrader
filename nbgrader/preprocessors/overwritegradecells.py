@@ -1,5 +1,4 @@
 from IPython.nbconvert.preprocessors import Preprocessor
-from IPython.utils.traitlets import Unicode
 from nbgrader import utils
 from nbgrader.api import Gradebook
 

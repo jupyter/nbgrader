@@ -6,8 +6,7 @@ from IPython.nbconvert.preprocessors import ClearOutputPreprocessor
 
 from nbgrader.apps.baseapp import (
     BaseNbConvertApp, nbconvert_aliases, nbconvert_flags)
-from nbgrader.preprocessors import (
-    FindStudentID, SaveAutoGrades, OverwriteGradeCells, Execute)
+from nbgrader.preprocessors import (FindStudentID, SaveAutoGrades, Execute)
 
 aliases = {}
 aliases.update(nbconvert_aliases)
