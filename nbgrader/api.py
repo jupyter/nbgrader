@@ -68,6 +68,7 @@ class Assignment(Base):
 
     def to_dict(self):
         return {
+            "id": self.id,
             "name": self.name,
             "duedate": self.duedate,
             "num_submissions": self.num_submissions,
@@ -122,6 +123,7 @@ class Notebook(Base):
 
     def to_dict(self):
         return {
+            "id": self.id,
             "name": self.name,
             "max_score": self.max_score,
             "max_code_score": self.max_code_score,
@@ -152,6 +154,18 @@ class GradeCell(Base):
 
     grades = relationship("Grade", backref="cell")
 
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "max_score": self.max_score,
+            "cell_type": self.cell_type,
+            "source": self.source,
+            "checksum": self.checksum,
+            "notebook": self.notebook.name,
+            "assignment": self.assignment.name
+        }
+
     def __repr__(self):
         return "{}/{}".format(self.notebook, self.name)
 
@@ -168,6 +182,14 @@ class SolutionCell(Base):
     assignment = association_proxy("notebook", "assignment")
 
     comments = relationship("Comment", backref="cell")
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "notebook": self.notebook.name,
+            "assignment": self.assignment.name
+        }
 
     def __repr__(self):
         return "{}/{}".format(self.notebook, self.name)
@@ -245,6 +267,7 @@ class SubmittedAssignment(Base):
 
     def to_dict(self):
         return {
+            "id": self.id,
             "name": self.assignment.name,
             "student": self.student.id,
             "duedate": self.assignment.duedate,
