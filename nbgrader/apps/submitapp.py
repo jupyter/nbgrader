@@ -189,7 +189,7 @@ class SubmitApp(BaseNbGraderApp):
             
         else:
             self.log.debug("Saved to '{}'".format(path_to_submission))
-            self.log.info("'{}' submitted by {} at {}".format(
+            print("'{}' submitted by {} at {}".format(
                 self.assignment_id, self.student, self.timestamp))
             
         finally:
