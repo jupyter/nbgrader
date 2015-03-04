@@ -279,16 +279,19 @@ class SubmittedAssignment(Base):
 
     @property
     def total_seconds_late(self):
-        return max(0, (self.timestamp - self.duedate).total_seconds())
+        if self.timestamp is None or self.duedate is None:
+            return 0
+        else:
+            return max(0, (self.timestamp - self.duedate).total_seconds())
 
     def to_dict(self):
         return {
             "id": self.id,
             "name": self.assignment.name,
             "student": self.student.id,
-            "duedate": self.duedate.isoformat(),
-            "timestamp": self.timestamp.isoformat(),
-            "extension": self.extension.total_seconds(),
+            "duedate": self.duedate.isoformat() if self.duedate is not None else None,
+            "timestamp": self.timestamp.isoformat() if self.timestamp is not None else None,
+            "extension": self.extension.total_seconds() if self.extension is not None else None,
             "total_seconds_late": self.total_seconds_late,
             "score": self.score,
             "max_score": self.max_score,
