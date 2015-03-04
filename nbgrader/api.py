@@ -1,6 +1,7 @@
 from __future__ import division
 
-from sqlalchemy import create_engine, ForeignKey, Column, String, Text, DateTime, Float, Enum, UniqueConstraint
+from sqlalchemy import (create_engine, ForeignKey, Column, String, Text, 
+    DateTime, Interval, Float, Enum, UniqueConstraint)
 from sqlalchemy.orm import sessionmaker, scoped_session, relationship
 from sqlalchemy.orm.exc import NoResultFound, FlushError
 from sqlalchemy.ext.declarative import declarative_base
@@ -235,6 +236,9 @@ class SubmittedAssignment(Base):
     assignment_id = Column(String(32), ForeignKey('assignment.id'))
     student_id = Column(String(128), ForeignKey('student.id'))
 
+    timestamp = Column(DateTime())
+    extension = Column(Interval())
+
     notebooks = relationship("SubmittedNotebook", backref="assignment")
 
     @property
@@ -265,12 +269,26 @@ class SubmittedAssignment(Base):
     def needs_manual_grade(self):
         return any([n.needs_manual_grade for n in self.notebooks])
 
+    @property
+    def duedate(self):
+        orig_duedate = self.assignment.duedate
+        if self.extension is not None:
+            return orig_duedate + self.extension
+        else:
+            return orig_duedate
+
+    @property
+    def total_seconds_late(self):
+        return max(0, (self.timestamp - self.duedate).total_seconds())
+
     def to_dict(self):
         return {
             "id": self.id,
             "name": self.assignment.name,
             "student": self.student.id,
             "duedate": self.assignment.duedate,
+            "timestamp": self.timestamp,
+            "total_seconds_late": self.total_seconds_late,
             "score": self.score,
             "max_score": self.max_score,
             "code_score": self.code_score,
