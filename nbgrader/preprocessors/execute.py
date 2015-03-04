@@ -14,7 +14,9 @@ class Execute(ExecutePreprocessor):
 
     def preprocess(self, nb, resources):
         cwd = os.getcwd()
-        os.chdir(resources["metadata"]["path"])
+        path = resources["metadata"].get("path", "")
+        if path != "":
+            os.chdir(path)
 
         try:
             kernel_name = nb.metadata.get('kernelspec', {}).get('name', 'python')
