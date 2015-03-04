@@ -1,21 +1,21 @@
 import tempfile
 import shutil
 
+from textwrap import dedent
+
 from IPython.config.loader import Config
-from IPython.utils.traitlets import Unicode, List
-from IPython.nbconvert.preprocessors import ClearOutputPreprocessor, ExecutePreprocessor
-from nbgrader.apps.customnbconvertapp import CustomNbConvertApp
-from nbgrader.apps.customnbconvertapp import aliases as base_aliases
-from nbgrader.apps.customnbconvertapp import flags as base_flags
-from nbgrader.preprocessors import DisplayAutoGrades
+from IPython.utils.traitlets import Unicode, Dict
+from IPython.nbconvert.preprocessors import ClearOutputPreprocessor
+from nbgrader.preprocessors import DisplayAutoGrades, Execute
+from nbgrader.apps.baseapp import BaseNbConvertApp, nbconvert_flags, nbconvert_aliases
 
 aliases = {}
-aliases.update(base_aliases)
+aliases.update(nbconvert_aliases)
 aliases.update({
 })
 
 flags = {}
-flags.update(base_flags)
+flags.update(nbconvert_flags)
 flags.update({
     'invert': (
         {'DisplayAutoGrades': {'invert': True}},
@@ -23,49 +23,57 @@ flags.update({
     )
 })
 
-examples = """
-nbgrader validate "Problem 1.ipynb"
-nbgrader validate "Problem Set 1/*.ipynb"
-"""
-
-class ValidateApp(CustomNbConvertApp):
+class ValidateApp(BaseNbConvertApp):
 
     name = Unicode(u'nbgrader-validate')
     description = Unicode(u'Validate a notebook by running it')
-    aliases = aliases
-    flags = flags
-    examples = examples
-    log_level = 50
-    output_dir = "/tmp"
+    
+    aliases = Dict(aliases)
+    flags = Dict(flags)
+    
+    examples = Unicode(dedent(
+        """
+        You can run `nbgrader validate` on just a single file, e.g.:
 
-    # The classes added here determine how configuration will be documented
-    classes = List()
+        > nbgrader validate "Problem 1.ipynb"
+
+        Or, you can run it on multiple files using shell globs:
+
+        > nbgrader validate "Problem Set 1/*.ipynb"
+
+        If you want to test instead that none of the tests pass (rather than that
+        all of the tests pass, which is the default), you can use the --invert
+        flag:
+
+        > nbgrader validate --invert "Problem 1.ipynb"
+        """
+    ))
+
+    def _log_level_default(self):
+        return 50
 
     def _classes_default(self):
-        """This has to be in a method, for TerminalIPythonApp to be available."""
         classes = super(ValidateApp, self)._classes_default()
         classes.extend([
-            ExecutePreprocessor,
             ClearOutputPreprocessor,
+            Execute,
             DisplayAutoGrades
         ])
         return classes
-
-    def _export_format_default(self):
-        return 'notebook'
 
     def build_extra_config(self):
         self.extra_config = Config()
         self.extra_config.Exporter.preprocessors = [
             'IPython.nbconvert.preprocessors.ClearOutputPreprocessor',
-            'IPython.nbconvert.preprocessors.ExecutePreprocessor',
+            'nbgrader.preprocessors.Execute',
             'nbgrader.preprocessors.DisplayAutoGrades'
         ]
         self.config.merge(self.extra_config)
 
     def convert_notebooks(self):
-        self.output_dir = tempfile.mkdtemp()
+        self.tmpdir = tempfile.mkdtemp()
+        self.writer.build_directory = self.tmpdir
         try:
             super(ValidateApp, self).convert_notebooks()
         finally:
-            shutil.rmtree(self.output_dir)
+            shutil.rmtree(self.tmpdir)

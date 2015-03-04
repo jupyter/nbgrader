@@ -1046,6 +1046,8 @@ class Gradebook(object):
             raise MissingEntry("No such submitted notebook: {}/{} for {}".format(
                 assignment, notebook, student))
 
+        return notebook
+
     def find_submission_notebook_by_id(self, notebook_id):
         """Find a submitted notebook by its unique id.
 

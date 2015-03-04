@@ -1,18 +1,23 @@
 from IPython.nbconvert.preprocessors import Preprocessor
-from IPython.utils.traitlets import Unicode
 from nbgrader import utils
 from nbgrader.api import Gradebook
 
 class SaveGradeCells(Preprocessor):
     """A preprocessor to save information about grade cells."""
 
-    db_url = Unicode("sqlite:///gradebook.db", config=True, help="URL to database")
-    assignment_id = Unicode(u'assignment', config=True, help="Assignment ID")
-
     def preprocess(self, nb, resources):
-        self.gradebook = Gradebook(self.db_url)
+        # pull information from the resources
+        self.notebook_id = resources['nbgrader']['notebook']
+        self.assignment_id = resources['nbgrader']['assignment']
+        self.db_url = resources['nbgrader']['db_url']
 
-        self.notebook_id = resources['unique_key']
+        if self.notebook_id == '':
+            raise ValueError("Invalid notebok id: {}".format(self.notebook_id))
+        if self.assignment_id == '':
+            raise ValueError("Invalid assignment id: {}".format(self.assignment_id))
+
+        # connect to the database
+        self.gradebook = Gradebook(self.db_url)
         self.gradebook.update_or_create_notebook(
             self.notebook_id, self.assignment_id)
 

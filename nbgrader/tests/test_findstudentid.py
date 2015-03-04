@@ -11,17 +11,21 @@ class TestFindStudentID(TestBase):
 
     def test_student_id_given(self):
         """Test that the student id is unchanged if it is given."""
-        resources = dict(nbgrader=dict(student_id="foo"))
+        resources = dict(
+            nbgrader=dict(student="foobar"),
+            metadata=dict(name="foo"))
+        self.preprocessor.regexp = r".*/(?P<student_id>.+)\.ipynb"
         nb, resources = self.preprocessor.preprocess(None, resources)
-        assert_equal(resources["nbgrader"]["student_id"], "foo")
+        assert_equal(resources["nbgrader"]["student"], "foobar")
 
     def test_no_regexp_no_id(self):
         """Check that an error is raised if no id is given and no regexp is given."""
-        assert_raises(ValueError, self.preprocessor.preprocess, None, {})
+        resources = dict(nbgrader=dict())
+        assert_raises(ValueError, self.preprocessor.preprocess, None, resources)
 
     def test_regexp_given(self):
-        """Test that the student id is unchanged if it is given."""
-        resources = dict(metadata=dict(name="foobar", path="."))
+        """Test that the student id is correctly determined from the regexp."""
+        resources = dict(nbgrader=dict(), metadata=dict(name="foo", path='.'))
         self.preprocessor.regexp = r".*/(?P<student_id>.+)\.ipynb"
         nb, resources = self.preprocessor.preprocess(None, resources)
-        assert_equal(resources["nbgrader"]["student_id"], "foobar")
+        assert_equal(resources["nbgrader"]["student"], "foo")

@@ -1,9 +1,11 @@
+from textwrap import dedent
+
 from IPython.config.loader import Config
-from IPython.utils.traitlets import Unicode, List, Bool
+from IPython.utils.traitlets import Unicode, Bool, Dict
 from IPython.nbconvert.preprocessors import ClearOutputPreprocessor
-from nbgrader.apps.customnbconvertapp import CustomNbConvertApp
-from nbgrader.apps.customnbconvertapp import aliases as base_aliases
-from nbgrader.apps.customnbconvertapp import flags as base_flags
+
+from nbgrader.apps.baseapp import (
+    BaseNbConvertApp, nbconvert_aliases, nbconvert_flags)
 from nbgrader.preprocessors import (
     IncludeHeaderFooter,
     ClearSolutions,
@@ -14,14 +16,14 @@ from nbgrader.preprocessors import (
 )
 
 aliases = {}
-aliases.update(base_aliases)
+aliases.update(nbconvert_aliases)
 aliases.update({
-    'header': 'IncludeHeaderFooter.header',
-    'footer': 'IncludeHeaderFooter.footer',
+    'assignment': 'AssignmentExporter.assignment_id',
+    'db': 'AssignmentExporter.db_url'
 })
 
 flags = {}
-flags.update(base_flags)
+flags.update(nbconvert_flags)
 flags.update({
     'save-cells': (
         {'AssignApp': {'save_cells': True}},
@@ -29,28 +31,60 @@ flags.update({
     )
 })
 
-examples = """
-nbgrader assign master.ipynb --output=student.ipynb
-nbgrader assign master/*.ipynb --build-directory=student
-
-nbgrader assign --header=header.ipynb --footer=footer.ipynb
-"""
-
-class AssignApp(CustomNbConvertApp):
+class AssignApp(BaseNbConvertApp):
 
     name = Unicode(u'nbgrader-assign')
     description = Unicode(u'Prepare a student version of an assignment by removing solutions')
-    aliases = aliases
-    flags = flags
-    examples = examples
+
+    aliases = Dict(aliases)
+    flags = Dict(flags)
+
+    examples = Unicode(dedent(
+        """
+        Running `nbgrader assign` on a file by itself will produce a student
+        version of that file in the same directory. In this case, it will produce
+        "Problem 1.nbconvert.ipynb":
+        
+        > nbgrader assign "Problem 1.ipynb"
+
+        If you want to override the .nbconvert part of the filename, you can use
+        the --output flag:
+
+        > nbgrader assign "Problem 1.ipynb" --output "Problem 1.student.ipynb"
+
+        Or, you can put the student version in a different directory. In the
+        following example, there will be a file "student/Problem 1.ipynb" after
+        running `nbgrader assign`:
+
+        > nbgrader assign "Problem 1.ipynb" --build-dir=student
+
+        You can also use shell globs, and copy files from one directory to another:
+
+        > nbgrader assign teacher/*.ipynb --build-dir=student
+
+        If you need to copy dependent files over as well, you can do this with
+        the --files flag. In the following example, all the .jpg files in the 
+        teacher/images/ folder will be linked to the student/images/ folder:
+
+        > nbgrader assign teacher/*.ipynb --build-dir=student --files='["teacher/images/*.jpg"]'
+
+        If you want to record the grade cells into the database (for use later
+        when running `nbgrader autograde`), you can use the --save-cells flag.
+        You will need to use this in combination with the --assignment flag to
+        indicate what the assignment is that this notebook is a part of:
+
+        > nbgrader assign "Problem 1.ipynb" --save-cells --assignment="Problem Set 1"
+
+        You can additionally specifiy the database name with --db:
+
+        > nbgrader assign "Problem 1.ipynb" --save-cells --assignment="Problem Set 1" --db=myclass
+
+        """
+    ))
 
     save_cells = Bool(False, config=True, help="Save information about grade cells into the database.")
 
-    # The classes added here determine how configuration will be documented
-    classes = List()
-
     def _classes_default(self):
-        """This has to be in a method, for TerminalIPythonApp to be available."""
         classes = super(AssignApp, self)._classes_default()
         classes.extend([
             IncludeHeaderFooter,
@@ -62,9 +96,6 @@ class AssignApp(CustomNbConvertApp):
             SaveGradeCells
         ])
         return classes
-
-    def _export_format_default(self):
-        return 'notebook'
 
     def build_extra_config(self):
         self.extra_config = Config()

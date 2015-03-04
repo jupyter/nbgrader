@@ -1,5 +1,4 @@
 from IPython.nbconvert.preprocessors import Preprocessor
-from IPython.utils.traitlets import Unicode, Integer
 from nbgrader import utils
 from nbgrader.api import Gradebook
 
@@ -7,14 +6,15 @@ from nbgrader.api import Gradebook
 class SaveAutoGrades(Preprocessor):
     """Preprocessor for saving out the autograder grades into a database"""
 
-    db_url = Unicode("sqlite:///gradebook.db", config=True, help="URL to database")
-    assignment_id = Unicode(u'assignment', config=True, help="Assignment ID")
-
     def preprocess(self, nb, resources):
-        self.gradebook = Gradebook(self.db_url)
-        self.notebook_id = resources['unique_key']
-        self.student_id = resources['nbgrader']['student_id']
+        # pull information from the resources
+        self.notebook_id = resources['nbgrader']['notebook']
+        self.assignment_id = resources['nbgrader']['assignment']
+        self.student_id = resources['nbgrader']['student']
+        self.db_url = resources['nbgrader']['db_url']
 
+        # connect to the database
+        self.gradebook = Gradebook(self.db_url)
         self.gradebook.update_or_create_submission(
             self.assignment_id, self.student_id)
 

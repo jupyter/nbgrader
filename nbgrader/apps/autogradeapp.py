@@ -1,21 +1,23 @@
+from textwrap import dedent
+
 from IPython.config.loader import Config
-from IPython.utils.traitlets import Unicode, List, Bool
+from IPython.utils.traitlets import Unicode, Bool, Dict
 from IPython.nbconvert.preprocessors import ClearOutputPreprocessor
-from nbgrader.apps.customnbconvertapp import CustomNbConvertApp
-from nbgrader.apps.customnbconvertapp import aliases as base_aliases
-from nbgrader.apps.customnbconvertapp import flags as base_flags
-from nbgrader.preprocessors import FindStudentID, SaveAutoGrades, OverwriteGradeCells, Execute
+
+from nbgrader.apps.baseapp import (
+    BaseNbConvertApp, nbconvert_aliases, nbconvert_flags)
+from nbgrader.preprocessors import (FindStudentID, SaveAutoGrades, Execute)
 
 aliases = {}
-aliases.update(base_aliases)
+aliases.update(nbconvert_aliases)
 aliases.update({
-    'student-id': 'AutogradeApp.student_id',
-    'regexp': 'FindStudentID.regexp',
-    'assignment': 'SaveAutoGrades.assignment_id',
+    'assignment': 'AssignmentExporter.assignment_id',
+    'student': 'AssignmentExporter.student_id',
+    'db': 'AssignmentExporter.db_url'
 })
 
 flags = {}
-flags.update(base_flags)
+flags.update(nbconvert_flags)
 flags.update({
     'overwrite-cells': (
         {'AutogradeApp': {'overwrite_cells': True}},
@@ -23,40 +25,69 @@ flags.update({
     )
 })
 
-examples = """
-nbgrader autograde assignment.ipynb
-nbgrader autograde assignment.ipynb --output=graded.ipynb
-nbgrader autograde submitted/*.ipynb --build-directory=autograded
-"""
-
-class AutogradeApp(CustomNbConvertApp):
+class AutogradeApp(BaseNbConvertApp):
 
     name = Unicode(u'nbgrader-autograde')
     description = Unicode(u'Autograde a notebook by running it')
-    aliases = aliases
-    flags = flags
-    examples = examples
+    aliases = Dict(aliases)
+    flags = Dict(flags)
+
+    examples = Unicode(dedent(
+        """
+        Running `nbgrader autograde` on a file by itself will produce a student
+        version of that file in the same directory. In this case, it will produce
+        "Problem 1.nbconvert.ipynb" (note that you need to specify the assignment
+        name and the student id):
+        
+        > nbgrader autograde "Problem 1.ipynb" --assignment="Problem Set 1" --student=student1
+
+        If you want to override the .nbconvert part of the filename, you can use
+        the --output flag:
+
+        > nbgrader autograde "Problem 1.ipynb" --output "Problem 1.graded.ipynb" --assignment="Problem Set 1" --student=student1
+
+        Or, you can put the graded version in a different directory. In the
+        following example, there will be a file "graded/Problem 1.ipynb" after
+        running `nbgrader autograde`:
+
+        > nbgrader autograde "Problem 1.ipynb" --build-dir=graded --assignment="Problem Set 1" --student=student1
+
+        You can also use shell globs, and copy files from one directory to another:
+
+        > nbgrader autograde submitted/*.ipynb --build-dir=graded --assignment="Problem Set 1" --student=student1
+
+        If you want to overwrite grade cells with the source and metadata that
+        was stored in the database when running `nbgrader assign` with --save-cells,
+        you can use the --overwrite-cells flag:
+
+        > nbgrader autograde "Problem 1.ipynb" --assignment="Problem Set 1" --student=student1 --overwrite-cells
+
+        """
+    ))
 
     student_id = Unicode(u'', config=True)
-    overwrite_cells = Bool(False, config=True, help="Overwrite grade cells from the database")
-
-    # The classes added here determine how configuration will be documented
-    classes = List()
+    overwrite_cells = Bool(
+        False, 
+        config=True, 
+        help=dedent(
+            """
+            Overwrite grade cells from the database. By default, the database 
+            will automatically be populated by the existing cells in the assignment.
+            Note, however, that if the cells already exist in the database, they
+            will be overwritten by whatever is in this assignment!
+            """
+        )
+    )
 
     def _classes_default(self):
-        """This has to be in a method, for TerminalIPythonApp to be available."""
         classes = super(AutogradeApp, self)._classes_default()
         classes.extend([
             FindStudentID,
             ClearOutputPreprocessor,
-            OverwriteGradeCells,
             Execute,
             SaveAutoGrades
         ])
         return classes
-
-    def _export_format_default(self):
-        return 'notebook'
 
     def build_extra_config(self):
         self.extra_config = Config()
@@ -68,6 +99,11 @@ class AutogradeApp(CustomNbConvertApp):
             self.extra_config.Exporter.preprocessors.append(
                 'nbgrader.preprocessors.OverwriteGradeCells'
             )
+        else:
+            self.extra_config.Exporter.preprocessors.extend([
+                'nbgrader.preprocessors.ComputeChecksums',
+                'nbgrader.preprocessors.SaveGradeCells'
+            ])
         self.extra_config.Exporter.preprocessors.extend([
             'nbgrader.preprocessors.Execute',
             'nbgrader.preprocessors.SaveAutoGrades'

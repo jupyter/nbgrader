@@ -1,9 +1,13 @@
 import os
 import glob
+import shutil
 import subprocess as sp
+
+from IPython.utils.tempdir import TemporaryWorkingDirectory
 from IPython.nbformat import current_nbformat
 from IPython.nbformat import read as read_nb
-from IPython.nbformat.v4 import new_code_cell, new_markdown_cell
+from IPython.nbformat import write as write_nb
+from IPython.nbformat.v4 import new_notebook, new_code_cell, new_markdown_cell
 
 
 class TestBase(object):
@@ -49,9 +53,38 @@ print("hello")
         return cell
 
     @staticmethod
-    def _run_command(command):
-        proc = sp.Popen(command, stdout=sp.PIPE, stderr=sp.STDOUT)
-        if proc.wait() != 0:
-            output = proc.communicate()[0]
-            print(output.decode())
-            raise AssertionError("process returned a non-zero exit code")
+    def _empty_notebook(path):
+        nb = new_notebook()
+        with open(path, 'w') as f:
+            write_nb(nb, f, 4)    
+
+    @staticmethod
+    def _temp_cwd(copy_filenames=None):
+        temp_dir = TemporaryWorkingDirectory()
+
+        if copy_filenames is not None:
+            files_path = os.path.dirname(__file__)
+            for pattern in copy_filenames:
+                for match in glob.glob(os.path.join(files_path, pattern)):
+                    dest = os.path.join(temp_dir.name, os.path.basename(match))
+                    shutil.copyfile(match, dest)
+
+        return temp_dir
+
+    @staticmethod
+    def _run_command(command, retcode=0):
+        proc = sp.Popen(command, shell=True, stdout=sp.PIPE, stderr=sp.STDOUT)
+        true_retcode = proc.wait()
+        output = proc.communicate()[0].decode()
+        if true_retcode != retcode:
+            print(output)
+            raise AssertionError(
+                "process returned an unexpected return code: {}".format(true_retcode))
+        return output
+
+    @staticmethod
+    def _init_db():
+        dbpath = "/tmp/nbgrader_test.db"
+        if os.path.exists(dbpath):
+            os.remove(dbpath)
+        return "sqlite:///" + dbpath
