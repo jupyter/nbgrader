@@ -21,8 +21,8 @@ class TestNbgraderSubmit(TestBase):
             assert os.path.isfile("../Problem Set 1.tar.gz")
 
             tf = tarfile.open('../Problem Set 1.tar.gz', 'r:gz')
-            names = ['Problem Set 1/Problem 1.ipynb', 'Problem Set 1/timestamp.txt', 'Problem Set 1/user.txt']
-            assert_equal(tf.getnames(), names, "incorrect tarfile names")
+            names = sorted(['Problem Set 1/Problem 1.ipynb', 'Problem Set 1/timestamp.txt', 'Problem Set 1/user.txt'])
+            assert_equal(sorted(tf.getnames()), names, "incorrect tarfile names")
 
     def test_submit_custom_assignment(self):
         """Does everything get properly submitted with a custom assignment name?"""
@@ -34,5 +34,5 @@ class TestNbgraderSubmit(TestBase):
             assert os.path.isfile("../foo.tar.gz")
 
             tf = tarfile.open('../foo.tar.gz', 'r:gz')
-            names = ['foo/Problem 1.ipynb', 'foo/timestamp.txt', 'foo/user.txt']
-            assert_equal(tf.getnames(), names, "incorrect tarfile names")
+            names = sorted(['foo/Problem 1.ipynb', 'foo/timestamp.txt', 'foo/user.txt'])
+            assert_equal(sorted(tf.getnames()), names, "incorrect tarfile names")
