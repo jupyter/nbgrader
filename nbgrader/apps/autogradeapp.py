@@ -13,7 +13,8 @@ aliases.update(nbconvert_aliases)
 aliases.update({
     'assignment': 'AssignmentExporter.assignment_id',
     'student': 'AssignmentExporter.student_id',
-    'db': 'AssignmentExporter.db_url'
+    'db': 'AssignmentExporter.db_url',
+    'timestamp': 'SaveAutoGrades.timestamp'
 })
 
 flags = {}

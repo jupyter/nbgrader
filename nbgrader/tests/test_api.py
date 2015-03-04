@@ -111,8 +111,7 @@ class TestApi(object):
         assert s.max_score == 0
 
     def test_create_submitted_assignment(self):
-        now = datetime.datetime.now()
-        a = api.Assignment(name='foo', duedate=now)
+        a = api.Assignment(name='foo')
         s = api.Student(id="12345", first_name='Jane', last_name='Doe', email='janedoe@nowhere')
         sa = api.SubmittedAssignment(assignment=a, student=s)
         self.db.add(sa)
@@ -132,6 +131,113 @@ class TestApi(object):
         assert sa.written_score == 0
         assert sa.max_written_score == 0
         assert not sa.needs_manual_grade
+
+        assert sa.duedate is None
+        assert sa.timestamp is None
+        assert sa.extension is None
+        assert sa.total_seconds_late == 0
+
+        d = sa.to_dict()
+        assert d['id'] == sa.id
+        assert d['name'] == 'foo'
+        assert d['student'] == '12345'
+        assert d['duedate'] is None
+        assert d['timestamp'] is None
+        assert d['extension'] is None
+        assert d['total_seconds_late'] == 0
+        assert d['score'] == 0
+        assert d['max_score'] == 0
+        assert d['code_score'] == 0
+        assert d['max_code_score'] == 0
+        assert d['written_score'] == 0
+        assert d['max_written_score'] == 0
+        assert not d['needs_manual_grade']
+
+    def test_submission_timestamp_ontime(self):
+        duedate = datetime.datetime.now()
+        timestamp = duedate - datetime.timedelta(days=2)
+
+        a = api.Assignment(name='foo', duedate=duedate)
+        s = api.Student(id="12345", first_name='Jane', last_name='Doe', email='janedoe@nowhere')
+        sa = api.SubmittedAssignment(assignment=a, student=s, timestamp=timestamp)
+        self.db.add(sa)
+        self.db.commit()
+
+        assert sa.duedate == duedate
+        assert sa.timestamp == timestamp
+        assert sa.extension is None
+        assert sa.total_seconds_late == 0
+
+        d = sa.to_dict()
+        assert d['duedate'] == duedate.isoformat()
+        assert d['timestamp'] == timestamp.isoformat()
+        assert d['extension'] is None
+        assert d['total_seconds_late'] == 0
+
+    def test_submission_timestamp_late(self):
+        duedate = datetime.datetime.now()
+        timestamp = duedate + datetime.timedelta(days=2)
+
+        a = api.Assignment(name='foo', duedate=duedate)
+        s = api.Student(id="12345", first_name='Jane', last_name='Doe', email='janedoe@nowhere')
+        sa = api.SubmittedAssignment(assignment=a, student=s, timestamp=timestamp)
+        self.db.add(sa)
+        self.db.commit()
+
+        assert sa.duedate == duedate
+        assert sa.timestamp == timestamp
+        assert sa.extension is None
+        assert sa.total_seconds_late == 172800
+
+        d = sa.to_dict()
+        assert d['duedate'] == duedate.isoformat()
+        assert d['timestamp'] == timestamp.isoformat()
+        assert d['extension'] is None
+        assert d['total_seconds_late'] == 172800
+
+    def test_submission_timestamp_with_extension(self):
+        duedate = datetime.datetime.now()
+        timestamp = duedate + datetime.timedelta(days=2)
+        extension = datetime.timedelta(days=3)
+
+        a = api.Assignment(name='foo', duedate=duedate)
+        s = api.Student(id="12345", first_name='Jane', last_name='Doe', email='janedoe@nowhere')
+        sa = api.SubmittedAssignment(assignment=a, student=s, timestamp=timestamp, extension=extension)
+        self.db.add(sa)
+        self.db.commit()
+
+        assert sa.duedate == (duedate + extension)
+        assert sa.timestamp == timestamp
+        assert sa.extension == extension
+        assert sa.total_seconds_late == 0
+
+        d = sa.to_dict()
+        assert d['duedate'] == (duedate + extension).isoformat()
+        assert d['timestamp'] == timestamp.isoformat()
+        assert d['extension'] == extension.total_seconds()
+        assert d['total_seconds_late'] == 0
+
+    def test_submission_timestamp_late_with_extension(self):
+        duedate = datetime.datetime.now()
+        timestamp = duedate + datetime.timedelta(days=5)
+        extension = datetime.timedelta(days=3)
+
+        a = api.Assignment(name='foo', duedate=duedate)
+        s = api.Student(id="12345", first_name='Jane', last_name='Doe', email='janedoe@nowhere')
+        sa = api.SubmittedAssignment(assignment=a, student=s, timestamp=timestamp, extension=extension)
+        self.db.add(sa)
+        self.db.commit()
+
+        assert sa.duedate == (duedate + extension)
+        assert sa.timestamp == timestamp
+        assert sa.extension == extension
+        assert sa.total_seconds_late == 172800
+
+        d = sa.to_dict()
+        assert d['duedate'] == (duedate + extension).isoformat()
+        assert d['timestamp'] == timestamp.isoformat()
+        assert d['extension'] == extension.total_seconds()
+        assert d['total_seconds_late'] == 172800
 
     def test_create_submitted_notebook(self):
         now = datetime.datetime.now()

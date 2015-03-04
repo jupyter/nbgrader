@@ -5,6 +5,7 @@ from nose.tools import assert_equal
 
 import os
 import shutil
+import datetime
 
 class TestNbgraderAutograde(TestBase):
 
@@ -88,3 +89,21 @@ class TestNbgraderAutograde(TestBase):
             assert_equal(notebook.score, 1, "autograded score is incorrect")
             assert_equal(notebook.max_score, 3, "maximum score is incorrect")
             assert_equal(notebook.needs_manual_grade, True, "should need manual grade")
+
+    def test_timestamp(self):
+        """Can the timestamp on a submission be set?"""
+        with self._temp_cwd(["files/submitted.ipynb"]):
+            now = datetime.datetime.now().isoformat()
+            dbpath = self._setup_db()
+            self._run_command(
+                'nbgrader autograde submitted.ipynb '
+                '--timestamp="{}" '
+                '--db="{}" '
+                '--assignment="Problem Set 1" '
+                '--student=foo'.format(now, dbpath))
+
+            assert os.path.isfile("submitted.nbconvert.ipynb")
+
+            gb = Gradebook(dbpath)
+            submission = gb.find_submission("Problem Set 1", "foo")
+            assert submission.timestamp.isoformat() == now
