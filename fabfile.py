@@ -42,12 +42,6 @@ def docs(branch='master', default=True):
 
 @task
 def travis_docs():
-    repo = local('git config remote.origin.url', capture=True)
-    repo = re.sub("^git://", "https://#{}@".format(os.environ['GH_TOKEN']), repo)
     branch = local('git rev-parse --abbrev-ref HEAD', capture=True)
-
-    local('git config user.name "{}"'.format(os.environ['GIT_NAME']))
-    local('git config user.email "{}"'.format(os.environ['GIT_EMAIL']))
-
     docs(branch=branch)
-    local('git push {} {}:{}'.format(repo, branch, branch))
+    local('git push origin {}:{}'.format(branch, branch))

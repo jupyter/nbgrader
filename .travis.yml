@@ -25,4 +25,8 @@ install:
 script:
   - ./scripts/runtests $GROUP
 after_success:
-  - if [[ $GROUP != 'js' ]]; then fab travis_docs; fi
+  - git config user.name "${GIT_NAME}"
+  - git config user.email "${GIT_EMAIL}"
+  - git config credential.helper "store --file=.git/credentials"
+  - echo "https://${GH_TOKEN}:@github.com" > .git/credentials
+  - if [[ $TRAVIS_PULL_REQUEST = "false" ]] && [[ $GROUP != 'js' ]]; then fab travis_docs; fi
