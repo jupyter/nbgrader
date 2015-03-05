@@ -37,8 +37,3 @@ def docs(branch='master'):
 
     # switch back to master
     run('git checkout {}'.format(branch))
-
-@task
-def travis_docs():
-    docs(branch=run('git rev-parse --abbrev-ref HEAD').stdout.strip())
-    run('git push origin docs:docs')

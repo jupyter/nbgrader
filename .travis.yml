@@ -4,6 +4,7 @@ python:
   - 3.4
 env:
   matrix:
+    - GROUP=docs
     - GROUP=js
     - GROUP=
   global:
@@ -25,10 +26,20 @@ install:
   - python setup.py install
   - if [[ $GROUP == 'js' ]]; then cp nbextensions/* $(ipython locate)/nbextensions/; fi
 script:
-  - ./scripts/runtests $GROUP
+  - |
+  if [[ $GROUP != 'docs' ]]; then 
+    ./scripts/runtests $GROUP
+  else
+    git config user.name "${GIT_NAME}"
+    git config user.email "${GIT_EMAIL}"
+    invoke docs --branch=$(git rev-parse --abbrev-ref HEAD)
+  fi
 after_success:
-  - git config user.name "${GIT_NAME}"
-  - git config user.email "${GIT_EMAIL}"
-  - git config credential.helper "store --file=.git/credentials"
-  - echo "https://${GH_TOKEN}:@github.com" > .git/credentials
-  - if [[ $TRAVIS_PULL_REQUEST == false && $TRAVIS_PYTHON_VERSION == 3.4 && $GROUP != 'js' ]]; then invoke travis_docs; fi
+  - |
+  if [[ $TRAVIS_PULL_REQUEST == false && $TRAVIS_PYTHON_VERSION == 3.4 && $GROUP == 'docs' ]]; then
+    git config credential.helper "store --file=.git/credentials"
+    echo "https://${GH_TOKEN}:@github.com" > .git/credentials
+    git remote set-url --push origin https://github.com/jupyter/nbgrader.git
+    git push origin docs:docs
+    rm .git/credentials
+  fi
