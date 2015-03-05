@@ -29,7 +29,7 @@ script:
   |
   if [[ $GROUP != 'docs' ]]; then 
     ./scripts/runtests $GROUP
-  else
+  elif [[ $TRAVIS_PYTHON_VERSION == 3.4 ]]; then
     git config user.name "${GIT_NAME}"
     git config user.email "${GIT_EMAIL}"
     invoke docs --branch=$(git rev-parse --abbrev-ref HEAD)
