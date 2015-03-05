@@ -3,8 +3,11 @@ python:
   - 2.7
   - 3.4
 env:
-  - GROUP=js
-  - GROUP=
+  matrix:
+    - GROUP=js
+    - GROUP=
+  global:
+    - secure: P1srvJIQ+vFCd7jTuxqhp07JF+wqWtWkCYDcrT8hHZMgsy0wjNTkXP3h5+7dboYOjhmJcy2GX3tsdIzmcSm6/NttMqHhK1WL+dCgFgLijsyUzyOEsAxGi/E4w9xxX5WRRQdFniOgNVpv9bzrD0ngpUCXdQnutc+52mCDAS+hYMk=
 before_install:
   # Pierre Carrier's PPA for PhantomJS and CasperJS
   - time sudo add-apt-repository -y ppa:pcarrier/ppa
@@ -16,8 +19,14 @@ install:
   - if [[ $GROUP == 'js' ]]; then pip install 'tornado<4'; fi
   - cd ipython && git submodule update && pip install -e ".[notebook]" && cd ..
   - pip install -r requirements.txt
-  - pip install nose requests!=2.4.2
+  - pip install nose requests!=2.4.2 fabric
   - python setup.py install
   - if [[ $GROUP == 'js' ]]; then cp nbextensions/* $(ipython locate)/nbextensions/; fi
 script:
   - ./scripts/runtests $GROUP
+after_success:
+  - git config user.name "${GIT_NAME}"
+  - git config user.email "${GIT_EMAIL}"
+  - git config credential.helper "store --file=.git/credentials"
+  - echo "https://${GH_TOKEN}:@github.com" > .git/credentials
+  - if [[ $TRAVIS_PULL_REQUEST == false && $GROUP != 'js' ]]; then fab travis_docs; fi
