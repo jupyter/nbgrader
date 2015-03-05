@@ -21,7 +21,7 @@ install:
   - if [[ $GROUP == 'js' ]]; then pip install 'tornado<4'; fi
   - cd ~/ipython && git submodule update && pip install -e ".[notebook]" && cd -
   - pip install -r requirements.txt
-  - pip install nose requests!=2.4.2 fabric
+  - pip install nose requests!=2.4.2 invoke
   - python setup.py install
   - if [[ $GROUP == 'js' ]]; then cp nbextensions/* $(ipython locate)/nbextensions/; fi
 script:
@@ -31,4 +31,4 @@ after_success:
   - git config user.email "${GIT_EMAIL}"
   - git config credential.helper "store --file=.git/credentials"
   - echo "https://${GH_TOKEN}:@github.com" > .git/credentials
-  - if [[ $TRAVIS_PULL_REQUEST == false && $GROUP != 'js' ]]; then fab travis_docs; fi
+  - if [[ $TRAVIS_PULL_REQUEST == false && $TRAVIS_PYTHON_VERSION == 3.4 && $GROUP != 'js' ]]; then invoke travis_docs; fi
