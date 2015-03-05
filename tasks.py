@@ -1,16 +1,7 @@
 from invoke import run, task
 
 @task
-def docs(ref='master'):
-    # get the current commit
-    commit = run('git rev-parse --short {}'.format(ref)).stdout.strip()
-
-    # switch to the docs branch, and get the latest version from master
-    run('git checkout docs')
-    run('rm -r *')
-    run('git checkout {} -- docs'.format(commit))
-    run('mv docs/* . && rmdir docs')
-
+def docs():
     # cleanup, just to be save
     run('rm -rf user_guide/release_example/student')
     run('rm -rf user_guide/grade_example/autograded')
@@ -30,6 +21,19 @@ def docs(ref='master'):
         '--FilesWriter.build_directory=user_guide '
         '--profile-dir=/tmp '
         'user_guide/*.ipynb')
+
+@task
+def publish_docs(ref='master'):
+    # get the current commit
+    commit = run('git rev-parse --short {}'.format(ref)).stdout.strip()
+
+    # switch to the docs branch, and get the latest version from master
+    run('git checkout docs')
+    run('rm -r *')
+    run('git checkout {} -- docs'.format(commit))
+    run('mv docs/* . && rmdir docs')
+
+    docs()
 
     # commit the changes
     run('git add -A -f')
