@@ -9,4 +9,4 @@ A system for assigning and grading notebooks.
 
 Additional note: nbgrader depends on the master development version of IPython (currently 3.1.0). It will probably not work with older versions of IPython (even the most recent release).
 
-[Documentation can be found on nbviewer.](http://nbviewer.ipython.org/github/jupyter/nbgrader/tree/docs/Index.ipynb).
+[Documentation can be found on nbviewer.](http://nbviewer.ipython.org/github/jupyter/nbgrader/tree/docs/Index.ipynb)
