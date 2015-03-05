@@ -42,6 +42,5 @@ def docs(branch='master', default=True):
 
 @task
 def travis_docs():
-    branch = local('git rev-parse --abbrev-ref HEAD', capture=True)
-    docs(branch=branch)
-    local('git push origin {}:{}'.format(branch, branch))
+    docs(branch=local('git rev-parse --abbrev-ref HEAD', capture=True))
+    local('git push origin docs:docs')
