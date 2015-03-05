@@ -33,15 +33,20 @@ script:
   if [[ $GROUP != 'docs' ]]; then 
     ./scripts/runtests $GROUP
   elif [[ $TRAVIS_PYTHON_VERSION == 3.4 ]]; then
-    git remote set-url --push origin https://github.com/jupyter/nbgrader.git
-    git remote set-branches --add origin docs
-    git fetch -q
-    git config user.name "${GIT_NAME}"
-    git config user.email "${GIT_EMAIL}"
-    git config credential.helper "store --file=.git/credentials"
-    echo "https://${GH_TOKEN}:@github.com" > .git/credentials
-    git branch docs origin/docs
-    invoke docs --ref=$(git rev-parse HEAD)
+    if [[ $TRAVIS_PULL_REQUEST == false ]]; then
+      git remote set-url --push origin https://github.com/jupyter/nbgrader.git
+      git remote set-branches --add origin docs
+      git fetch -q
+      git config user.name "${GIT_NAME}"
+      git config user.email "${GIT_EMAIL}"
+      git config credential.helper "store --file=.git/credentials"
+      echo "https://${GH_TOKEN}:@github.com" > .git/credentials
+      git branch docs origin/docs
+      invoke publish_docs --ref=$(git rev-parse HEAD)
+    else
+      cd docs
+      invoke docs
+    fi
   fi
 after_success:
   |
