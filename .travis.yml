@@ -40,7 +40,8 @@ after_success:
     git config credential.helper "store --file=.git/credentials"
     echo "https://${GH_TOKEN}:@github.com" > .git/credentials
     git remote set-url --push origin https://github.com/jupyter/nbgrader.git
-    git config push.default simple
+    git remote set-branches --add origin docs
+    git checkout docs
     git push origin docs
     rm .git/credentials
   fi
