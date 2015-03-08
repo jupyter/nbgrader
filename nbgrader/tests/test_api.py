@@ -85,12 +85,16 @@ class TestApi(object):
         now = datetime.datetime.now()
         a = api.Assignment(name='foo', duedate=now)
         n = api.Notebook(name='blah', assignment=a)
-        s = api.SolutionCell(name='foo', notebook=n)
+        s = api.SolutionCell(name='foo', notebook=n, source="hello", 
+            cell_type="code", checksum="12345")
         self.db.add(a)
         self.db.commit()
 
         assert s.id
         assert s.name == 'foo'
+        assert s.cell_type == "code"
+        assert s.source == "hello"
+        assert s.checksum == "12345"
         assert s.assignment == a
         assert s.notebook == n
         assert s.comments == []
@@ -393,7 +397,7 @@ class TestApi(object):
         now = datetime.datetime.now()
         a = api.Assignment(name='foo', duedate=now)
         n = api.Notebook(name='blah', assignment=a)
-        sc = api.SolutionCell(name='foo', notebook=n)
+        sc = api.SolutionCell(name='foo', notebook=n, cell_type="code")
         s = api.Student(id="12345", first_name='Jane', last_name='Doe', email='janedoe@nowhere')
         sa = api.SubmittedAssignment(assignment=a, student=s)
         sn = api.SubmittedNotebook(assignment=sa, notebook=n)

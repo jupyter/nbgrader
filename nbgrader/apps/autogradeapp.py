@@ -98,12 +98,12 @@ class AutogradeApp(BaseNbConvertApp):
         ]
         if self.overwrite_cells:
             self.extra_config.Exporter.preprocessors.append(
-                'nbgrader.preprocessors.OverwriteGradeCells'
+                'nbgrader.preprocessors.OverwriteCells'
             )
         else:
             self.extra_config.Exporter.preprocessors.extend([
                 'nbgrader.preprocessors.ComputeChecksums',
-                'nbgrader.preprocessors.SaveGradeCells'
+                'nbgrader.preprocessors.SaveCells'
             ])
         self.extra_config.Exporter.preprocessors.extend([
             'nbgrader.preprocessors.Execute',

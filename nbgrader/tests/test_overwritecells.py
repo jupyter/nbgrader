@@ -37,7 +37,7 @@ class TestSaveCells(TestBase):
 
         assert_equal(cell.metadata.nbgrader["points"], 1)
 
-    def test_overwrite_source(self):
+    def test_overwrite_grade_source(self):
         """Is the source overwritten for grade cells?"""
         cell = self._create_grade_cell("hello", "code", "foo", 1)
         nb = new_notebook()
@@ -49,9 +49,19 @@ class TestSaveCells(TestBase):
 
         assert_equal(cell.source, "hello")
 
-    def test_dont_overwrite_source(self):
+    def test_dont_overwrite_grade_and_solution_source(self):
         """Is the source not overwritten for grade+solution cells?"""
         cell = self._create_grade_and_solution_cell("hello", "code", "foo", 1)
+        nb = new_notebook()
+        nb.cells.append(cell)
+        nb, resources = self.preprocessor1.preprocess(nb, self.resources)
+
+        cell.source = "hello!"
+        nb, resources = self.preprocessor2.preprocess(nb, self.resources)
+
+    def test_dont_overwrite_solution_source(self):
+        """Is the source not overwritten for solution cells?"""
+        cell = self._create_solution_cell("hello", "code")
         nb = new_notebook()
         nb.cells.append(cell)
         nb, resources = self.preprocessor1.preprocess(nb, self.resources)
