@@ -1,5 +1,5 @@
 from IPython.nbformat.v4 import new_output
-from nose.tools import assert_equal, assert_not_equal
+from nose.tools import assert_equal, assert_not_equal, assert_raises
 from nbgrader import utils
 from .base import TestBase
 
@@ -26,20 +26,49 @@ class TestUtils(TestBase):
         cell.metadata['nbgrader']['solution'] = True
         assert utils.is_solution(cell)
 
-    def test_determine_grade(self):
+    def test_determine_grade_code_grade(self):
         cell = self._create_grade_cell('print("test")', "code", "foo", 10)
         cell.outputs = []
-        assert utils.determine_grade(cell) == (10, 10)
+        assert_equal(utils.determine_grade(cell),(10, 10))
+        assert_equal(utils.determine_grade(cell, True), (10, 10))
 
         cell.outputs = [new_output('error', ename="NotImplementedError", evalue="", traceback=["error"])]
-        assert utils.determine_grade(cell) == (0, 10)
+        assert_equal(utils.determine_grade(cell), (0, 10))
+        assert_equal(utils.determine_grade(cell, True), (0, 10))
 
+    def test_determine_grade_markdown_grade(self):
         cell = self._create_grade_cell('test', "markdown", "foo", 10)
-        assert utils.determine_grade(cell) == (0, 10)
+        assert_equal(utils.determine_grade(cell), (None, 10))
+        assert_equal(utils.determine_grade(cell, True), (None, 10))
 
-        cell = self._create_grade_cell('test', "markdown", "foo", 10)
+    def test_determine_grade_solution(self):
+        cell = self._create_solution_cell('test', "code")
+        assert_raises(ValueError, utils.determine_grade, cell)
+        assert_raises(ValueError, utils.determine_grade, cell, True)
+
+        cell = self._create_solution_cell('test', "markdown")
+        assert_raises(ValueError, utils.determine_grade, cell)
+        assert_raises(ValueError, utils.determine_grade, cell, True)
+
+    def test_determine_grade_code_grade_and_solution(self):
+        cell = self._create_grade_and_solution_cell('test', "code", "foo", 10)
+        cell.outputs = []
+        assert_equal(utils.determine_grade(cell), (10, 10))
+        assert_equal(utils.determine_grade(cell, True), (10, 10))
+
+        cell.outputs = [new_output('error', ename="NotImplementedError", evalue="", traceback=["error"])]
+        assert_equal(utils.determine_grade(cell), (0, 10))
+        assert_equal(utils.determine_grade(cell, True), (0, 10))
+
+    def test_determine_grade_markdown_grade_and_solution(self):
+        cell = self._create_grade_and_solution_cell('test', "markdown", "foo", 10)
+        assert_equal(utils.determine_grade(cell), (None, 10))
+        assert_equal(utils.determine_grade(cell, True), (0, 10))
+
+        cell = self._create_grade_and_solution_cell('test', "markdown", "foo", 10)
         cell.source = 'test!'
-        assert utils.determine_grade(cell) == (None, 10)
+        assert_equal(utils.determine_grade(cell), (None, 10))
+        assert_equal(utils.determine_grade(cell, True), (None, 10))
 
     def test_compute_checksum_identical(self):
         # is the same for two identical cells?
