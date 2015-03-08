@@ -69,18 +69,42 @@ class TestUtils(TestBase):
         cell2 = self._create_grade_cell("hello ", "code", "foo", 1)
         assert_equal(utils.compute_checksum(cell1), utils.compute_checksum(cell2))
 
+        cell1 = self._create_grade_cell("hello", "markdown", "foo", 1)
+        cell2 = self._create_grade_cell("hello ", "markdown", "foo", 1)
+        assert_equal(utils.compute_checksum(cell1), utils.compute_checksum(cell2))
+
         cell1 = self._create_solution_cell("hello", "code")
         cell2 = self._create_solution_cell("hello ", "code")
         assert_equal(utils.compute_checksum(cell1), utils.compute_checksum(cell2))
 
+        cell1 = self._create_solution_cell("hello", "markdown")
+        cell2 = self._create_solution_cell("hello ", "markdown")
+        assert_equal(utils.compute_checksum(cell1), utils.compute_checksum(cell2))
+
     def test_compute_checksum_source(self):
         # does the source make a difference?
-        cell1 = self._create_grade_cell("hello", "code", "foo", 1)
-        cell2 = self._create_grade_cell("hello!", "code", "foo", 1)
+        cell1 = self._create_grade_cell("print('hello')", "code", "foo", 1)
+        cell2 = self._create_grade_cell("print( 'hello' )", "code", "foo", 1)
+        assert_equal(utils.compute_checksum(cell1), utils.compute_checksum(cell2))
+
+        cell1 = self._create_grade_cell("print('hello')", "code", "foo", 1)
+        cell2 = self._create_grade_cell("print( 'hello!' )", "code", "foo", 1)
         assert_not_equal(utils.compute_checksum(cell1), utils.compute_checksum(cell2))
 
-        cell1 = self._create_solution_cell("hello", "code")
-        cell2 = self._create_solution_cell("hello!", "code")
+        cell1 = self._create_grade_cell("print('hello')", "markdown", "foo", 1)
+        cell2 = self._create_grade_cell("print( 'hello' )", "markdown", "foo", 1)
+        assert_not_equal(utils.compute_checksum(cell1), utils.compute_checksum(cell2))
+
+        cell1 = self._create_solution_cell("print('hello')", "code")
+        cell2 = self._create_solution_cell("print( 'hello' )", "code")
+        assert_equal(utils.compute_checksum(cell1), utils.compute_checksum(cell2))
+
+        cell1 = self._create_solution_cell("print('hello')", "code")
+        cell2 = self._create_solution_cell("print( 'hello!' )", "code")
+        assert_not_equal(utils.compute_checksum(cell1), utils.compute_checksum(cell2))
+
+        cell1 = self._create_solution_cell("print('hello')", "markdown")
+        cell2 = self._create_solution_cell("print( 'hello' )", "markdown")
         assert_not_equal(utils.compute_checksum(cell1), utils.compute_checksum(cell2))
 
     def test_compute_checksum_points(self):
