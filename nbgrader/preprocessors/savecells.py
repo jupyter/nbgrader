@@ -2,8 +2,8 @@ from IPython.nbconvert.preprocessors import Preprocessor
 from nbgrader import utils
 from nbgrader.api import Gradebook
 
-class SaveGradeCells(Preprocessor):
-    """A preprocessor to save information about grade cells."""
+class SaveCells(Preprocessor):
+    """A preprocessor to save information about grade and solution cells."""
 
     def preprocess(self, nb, resources):
         # pull information from the resources
@@ -12,7 +12,7 @@ class SaveGradeCells(Preprocessor):
         self.db_url = resources['nbgrader']['db_url']
 
         if self.notebook_id == '':
-            raise ValueError("Invalid notebok id: {}".format(self.notebook_id))
+            raise ValueError("Invalid notebook id: {}".format(self.notebook_id))
         if self.assignment_id == '':
             raise ValueError("Invalid assignment id: {}".format(self.assignment_id))
 
@@ -23,25 +23,19 @@ class SaveGradeCells(Preprocessor):
 
         self.comment_index = 0
 
-        nb, resources = super(SaveGradeCells, self).preprocess(nb, resources)
+        nb, resources = super(SaveCells, self).preprocess(nb, resources)
 
         return nb, resources
 
     def preprocess_cell(self, cell, resources, cell_index):
         if utils.is_grade(cell):
-            max_score = float(cell.metadata.nbgrader['points']) 
-            cell_type = cell.cell_type           
-
-            # we only want the source and checksum for non-solution cells
-            if utils.is_solution(cell):
-                source = None
-                checksum = None
-            else:
-                source = cell.source
-                checksum = cell.metadata.nbgrader['checksum']
+            max_score = float(cell.metadata.nbgrader['points'])
+            cell_type = cell.cell_type
+            source = cell.source
+            checksum = cell.metadata.nbgrader['checksum']
 
             grade_cell = self.gradebook.update_or_create_grade_cell(
-                cell.metadata.nbgrader.grade_id,
+                cell.metadata.nbgrader['grade_id'],
                 self.notebook_id,
                 self.assignment_id,
                 max_score=max_score,
@@ -52,10 +46,17 @@ class SaveGradeCells(Preprocessor):
             self.log.debug("Recorded grade cell %s into database", grade_cell)
 
         if utils.is_solution(cell):
+            cell_type = cell.cell_type
+            source = cell.source
+            checksum = cell.metadata.nbgrader['checksum']
+
             solution_cell = self.gradebook.update_or_create_solution_cell(
                 self.comment_index,
                 self.notebook_id,
-                self.assignment_id)
+                self.assignment_id,
+                cell_type=cell_type,
+                source=source,
+                checksum=checksum)
 
             self.comment_index += 1
             self.log.debug("Recorded solution cell %s into database", solution_cell)

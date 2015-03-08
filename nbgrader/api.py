@@ -183,13 +183,19 @@ class SolutionCell(Base):
     assignment = association_proxy("notebook", "assignment")
 
     comments = relationship("Comment", backref="cell")
+    cell_type = Column(Enum("code", "markdown"), nullable=False)
+    source = Column(Text())
+    checksum = Column(String(128))
 
     def to_dict(self):
         return {
             "id": self.id,
             "name": self.name,
             "notebook": self.notebook.name,
-            "assignment": self.assignment.name
+            "assignment": self.assignment.name,
+            "cell_type": self.cell_type,
+            "source": self.source,
+            "checksum": self.checksum
         }
 
     def __repr__(self):
