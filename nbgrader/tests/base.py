@@ -9,6 +9,8 @@ from IPython.nbformat import read as read_nb
 from IPython.nbformat import write as write_nb
 from IPython.nbformat.v4 import new_notebook, new_code_cell, new_markdown_cell
 
+from nbgrader.utils import compute_checksum
+
 
 class TestBase(object):
 
@@ -49,8 +51,43 @@ print("hello")
         cell.metadata.nbgrader["grade"] = True
         cell.metadata.nbgrader["grade_id"] = grade_id
         cell.metadata.nbgrader["points"] = points
+        cell.metadata.nbgrader["checksum"] = compute_checksum(cell)
 
         return cell
+
+    @staticmethod
+    def _create_solution_cell(source, cell_type):
+        if cell_type == "markdown":
+            cell = new_markdown_cell(source=source)
+        elif cell_type == "code":
+            cell = new_code_cell(source=source)
+        else:
+            raise ValueError("invalid cell type: {}".format(cell_type))
+
+        cell.metadata.nbgrader = {}
+        cell.metadata.nbgrader["solution"] = True
+        cell.metadata.nbgrader["checksum"] = compute_checksum(cell)
+
+        return cell
+
+    @staticmethod
+    def _create_grade_and_solution_cell(source, cell_type, grade_id, points):
+        if cell_type == "markdown":
+            cell = new_markdown_cell(source=source)
+        elif cell_type == "code":
+            cell = new_code_cell(source=source)
+        else:
+            raise ValueError("invalid cell type: {}".format(cell_type))
+
+        cell.metadata.nbgrader = {}
+        cell.metadata.nbgrader["solution"] = True
+        cell.metadata.nbgrader["grade"] = True
+        cell.metadata.nbgrader["grade_id"] = grade_id
+        cell.metadata.nbgrader["points"] = points
+        cell.metadata.nbgrader["checksum"] = compute_checksum(cell)
+
+        return cell
+
 
     @staticmethod
     def _empty_notebook(path):

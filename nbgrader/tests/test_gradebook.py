@@ -212,26 +212,48 @@ class TestGradebook(object):
     def test_add_solution_cell(self):
         self.gb.add_assignment('foo')
         n = self.gb.add_notebook('p1', 'foo')
-        gc = self.gb.add_solution_cell('test1', 'p1', 'foo')
-        assert_equal(gc.name, 'test1', "incorrect name")
-        assert_equal(n.solution_cells, [gc], "solution cells set incorrectly")
-        assert_equal(gc.notebook, n, "notebook set incorrectly")
+        sc = self.gb.add_solution_cell('test1', 'p1', 'foo', cell_type="code")
+        assert_equal(sc.name, 'test1', "incorrect name")
+        assert_equal(sc.cell_type, 'code', "incorrect cell type")
+        assert_equal(n.solution_cells, [sc], "solution cells set incorrectly")
+        assert_equal(sc.notebook, n, "notebook set incorrectly")
+
+    def test_add_solution_cell_with_args(self):
+        self.gb.add_assignment('foo')
+        self.gb.add_notebook('p1', 'foo')
+        sc = self.gb.add_solution_cell(
+            'test1', 'p1', 'foo', 
+            source="blah blah blah",
+            cell_type="code", checksum="abcde")
+        assert_equal(sc.name, 'test1', "incorrect name")
+        assert_equal(sc.source, "blah blah blah", "incorrect source")
+        assert_equal(sc.cell_type, "code", "incorrect cell type")
+        assert_equal(sc.checksum, "abcde", "incorrect checksum")
+
+    def test_create_invalid_solution_cell(self):
+        self.gb.add_assignment('foo')
+        self.gb.add_notebook('p1', 'foo')
+        assert_raises(
+            InvalidEntry, self.gb.add_solution_cell,
+            'test1', 'p1', 'foo', 
+            source="blah blah blah",
+            cell_type="something", checksum="abcde")
 
     def test_add_duplicate_solution_cell(self):
         self.gb.add_assignment('foo')
         self.gb.add_notebook('p1', 'foo')
-        self.gb.add_solution_cell('test1', 'p1', 'foo')
-        assert_raises(InvalidEntry, self.gb.add_solution_cell, 'test1', 'p1', 'foo')
+        self.gb.add_solution_cell('test1', 'p1', 'foo', cell_type="code")
+        assert_raises(InvalidEntry, self.gb.add_solution_cell, 'test1', 'p1', 'foo', cell_type="code")
 
     def test_find_solution_cell(self):
         self.gb.add_assignment('foo')
         self.gb.add_notebook('p1', 'foo')
-        gc1 = self.gb.add_solution_cell('test1', 'p1', 'foo')
-        assert_equal(self.gb.find_solution_cell('test1', 'p1', 'foo'), gc1, "solution cell 1 not found")
+        sc1 = self.gb.add_solution_cell('test1', 'p1', 'foo', cell_type="code")
+        assert_equal(self.gb.find_solution_cell('test1', 'p1', 'foo'), sc1, "solution cell 1 not found")
 
-        gc2 = self.gb.add_solution_cell('test2', 'p1', 'foo')
-        assert_equal(self.gb.find_solution_cell('test1', 'p1', 'foo'), gc1, "solution cell 1 not found after adding solution cell 2")
-        assert_equal(self.gb.find_solution_cell('test2', 'p1', 'foo'), gc2, "solution cell 2 not found")
+        sc2 = self.gb.add_solution_cell('test2', 'p1', 'foo', cell_type="code")
+        assert_equal(self.gb.find_solution_cell('test1', 'p1', 'foo'), sc1, "solution cell 1 not found after adding solution cell 2")
+        assert_equal(self.gb.find_solution_cell('test2', 'p1', 'foo'), sc2, "solution cell 2 not found")
 
     def test_find_nonexistant_solution_cell(self):
         assert_raises(MissingEntry, self.gb.find_solution_cell, 'test1', 'p1', 'foo')
@@ -246,12 +268,16 @@ class TestGradebook(object):
         # first test creating it
         self.gb.add_assignment('foo')
         self.gb.add_notebook('p1', 'foo')
-        gc1 = self.gb.update_or_create_solution_cell('test1', 'p1', 'foo')
-        assert_equal(self.gb.find_solution_cell('test1', 'p1', 'foo'), gc1, "solution cell not created")
+        sc1 = self.gb.update_or_create_solution_cell('test1', 'p1', 'foo', cell_type='code')
+        assert_equal(sc1.cell_type, 'code', "cell type is incorrect")
+        assert_equal(self.gb.find_solution_cell('test1', 'p1', 'foo'), sc1, "solution cell not created")
 
         # now test finding/updating it
-        gc2 = self.gb.update_or_create_solution_cell('test1', 'p1', 'foo')
-        assert_equal(gc1, gc2, "solution cells are not the same")
+        assert_equal(sc1.checksum, None, "checksum is not empty")
+        sc2 = self.gb.update_or_create_solution_cell('test1', 'p1', 'foo', checksum="123456")
+        assert_equal(sc1, sc2, "solution cells are not the same")
+        assert_equal(sc1.cell_type, 'code', "cell type is incorrect")
+        assert_equal(sc1.checksum, "123456", "checksum was not updated")
 
     #### Test submissions
 
@@ -260,8 +286,8 @@ class TestGradebook(object):
         self.gb.add_notebook('p1', 'foo')
         self.gb.add_grade_cell('test1', 'p1', 'foo', max_score=1, cell_type='code')
         self.gb.add_grade_cell('test2', 'p1', 'foo', max_score=2, cell_type='markdown')
-        self.gb.add_solution_cell('solution1', 'p1', 'foo')
-        self.gb.add_solution_cell('test2', 'p1', 'foo')
+        self.gb.add_solution_cell('solution1', 'p1', 'foo', cell_type='code')
+        self.gb.add_solution_cell('test2', 'p1', 'foo', cell_type='markdown')
 
     def test_add_submission(self):
         self._add_assignment()

@@ -5,7 +5,7 @@ from .findstudentid import FindStudentID
 from .saveautogrades import SaveAutoGrades
 from .displayautogrades import DisplayAutoGrades
 from .computechecksums import ComputeChecksums
-from .savegradecells import SaveGradeCells
-from .overwritegradecells import OverwriteGradeCells
+from .savecells import SaveCells
+from .overwritecells import OverwriteCells
 from .checkgradeids import CheckGradeIds
 from .execute import Execute

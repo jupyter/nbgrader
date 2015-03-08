@@ -33,19 +33,23 @@ def determine_grade(cell):
 def compute_checksum(cell):
     m = hashlib.md5()
 
-    # fix minor whitespace issues that might have been added and then
-    # add cell contents
-    m.update(str_to_bytes(autopep8.fix_code(cell.source).rstrip()))
+    # if it's a code cell, then fix minor whitespace issues that might have been 
+    # added and then add cell contents; otherwise just add cell contents
+    if cell.cell_type == "code":
+        m.update(str_to_bytes(autopep8.fix_code(cell.source).rstrip()))
+    else:
+        m.update(str_to_bytes(cell.source.strip()))
 
     # add the cell type
     m.update(str_to_bytes(cell.cell_type))
 
-    # include number of points that the cell is worth
-    if 'points' in cell.metadata.nbgrader:
-        m.update(str_to_bytes(str(float(cell.metadata.nbgrader['points']))))
+    # add whether it's a grade cell and/or solution cell
+    m.update(str_to_bytes(str(is_grade(cell))))
+    m.update(str_to_bytes(str(is_solution(cell))))
 
-    # include the grade_id
-    if 'grade_id' in cell.metadata.nbgrader:
+    # include the grade id and the number of points that the cell is worth
+    if is_grade(cell):
+        m.update(str_to_bytes(str(float(cell.metadata.nbgrader['points']))))
         m.update(str_to_bytes(cell.metadata.nbgrader['grade_id']))
 
     return m.hexdigest()

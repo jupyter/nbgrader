@@ -11,7 +11,7 @@ from nbgrader.preprocessors import (
     ClearSolutions,
     LockCells,
     ComputeChecksums,
-    SaveGradeCells,
+    SaveCells,
     CheckGradeIds
 )
 
@@ -93,7 +93,7 @@ class AssignApp(BaseNbConvertApp):
             ClearSolutions,
             ClearOutputPreprocessor,
             ComputeChecksums,
-            SaveGradeCells
+            SaveCells
         ])
         return classes
 
@@ -109,6 +109,6 @@ class AssignApp(BaseNbConvertApp):
         ]
         if self.save_cells:
             self.extra_config.Exporter.preprocessors.append(
-                'nbgrader.preprocessors.SaveGradeCells'
+                'nbgrader.preprocessors.SaveCells'
             )
         self.config.merge(self.extra_config)
