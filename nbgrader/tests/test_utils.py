@@ -27,20 +27,18 @@ class TestUtils(TestBase):
         assert utils.is_solution(cell)
 
     def test_determine_grade(self):
-        cell = self._create_code_cell()
-        cell.metadata['nbgrader'] = {}
-        cell.metadata['nbgrader']['grade'] = True
-        cell.metadata['nbgrader']['points'] = 10
+        cell = self._create_grade_cell('print("test")', "code", "foo", 10)
         cell.outputs = []
         assert utils.determine_grade(cell) == (10, 10)
 
         cell.outputs = [new_output('error', ename="NotImplementedError", evalue="", traceback=["error"])]
         assert utils.determine_grade(cell) == (0, 10)
 
-        cell = self._create_text_cell()
-        cell.metadata['nbgrader'] = {}
-        cell.metadata['nbgrader']['grade'] = True
-        cell.metadata['nbgrader']['points'] = 10
+        cell = self._create_grade_cell('test', "markdown", "foo", 10)
+        assert utils.determine_grade(cell) == (0, 10)
+
+        cell = self._create_grade_cell('test', "markdown", "foo", 10)
+        cell.source = 'test!'
         assert utils.determine_grade(cell) == (None, 10)
 
     def test_compute_checksum_identical(self):

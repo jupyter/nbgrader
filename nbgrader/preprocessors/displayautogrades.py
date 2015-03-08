@@ -122,7 +122,7 @@ class DisplayAutoGrades(Preprocessor):
         return nb, resources
 
     def preprocess_cell(self, cell, resources, cell_index):
-        if not utils.is_grade(cell):
+        if not utils.is_grade(cell) or utils.is_solution(cell):
             return cell, resources
 
         # verify checksums of cells

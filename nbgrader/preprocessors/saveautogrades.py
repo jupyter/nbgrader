@@ -51,7 +51,6 @@ class SaveAutoGrades(Preprocessor):
 
         # determine what the grade is
         auto_score, max_score = utils.determine_grade(cell)
-        assert max_score == grade.max_score
         grade.auto_score = auto_score
         self.gradebook.db.commit()
         self.log.debug(grade)
