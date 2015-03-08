@@ -68,10 +68,20 @@ class TestNbgraderAutograde(TestBase):
             assert_equal(notebook.max_score, 4)
             assert_equal(notebook.needs_manual_grade, False)
 
+            comment1 = gb.find_comment(0, "teacher", "Problem Set 1", "foo")
+            comment2 = gb.find_comment(1, "teacher", "Problem Set 1", "foo")
+            assert_equal(comment1.comment, "No response.")
+            assert_equal(comment2.comment, "No response.")
+
             notebook = gb.find_submission_notebook("teacher", "Problem Set 1", "bar")
             assert_equal(notebook.score, 2)
             assert_equal(notebook.max_score, 4)
             assert_equal(notebook.needs_manual_grade, True)
+
+            comment1 = gb.find_comment(0, "teacher", "Problem Set 1", "bar")
+            comment2 = gb.find_comment(1, "teacher", "Problem Set 1", "bar")
+            assert_equal(comment1.comment, None)
+            assert_equal(comment2.comment, None)
 
     def test_overwrite(self):
         """Can a single file be graded and overwrite cells?"""
@@ -111,10 +121,20 @@ class TestNbgraderAutograde(TestBase):
             assert_equal(notebook.max_score, 4)
             assert_equal(notebook.needs_manual_grade, False)
 
+            comment1 = gb.find_comment(0, "teacher", "Problem Set 1", "foo")
+            comment2 = gb.find_comment(1, "teacher", "Problem Set 1", "foo")
+            assert_equal(comment1.comment, "No response.")
+            assert_equal(comment2.comment, "No response.")
+
             notebook = gb.find_submission_notebook("teacher", "Problem Set 1", "bar")
             assert_equal(notebook.score, 2)
             assert_equal(notebook.max_score, 4)
             assert_equal(notebook.needs_manual_grade, True)
+
+            comment1 = gb.find_comment(0, "teacher", "Problem Set 1", "bar")
+            comment2 = gb.find_comment(1, "teacher", "Problem Set 1", "bar")
+            assert_equal(comment1.comment, None)
+            assert_equal(comment2.comment, None)
 
     def test_timestamp(self):
         """Can the timestamp on a submission be set?"""
