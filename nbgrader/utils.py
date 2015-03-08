@@ -27,6 +27,15 @@ def determine_grade(cell):
                 return 0, max_points
         return max_points, max_points
 
+    elif is_solution(cell):
+        # if it's a solution cell and the checksum hasn't changed, that means
+        # they didn't provide a response, so we can automatically give this a
+        # zero grade
+        if cell.metadata.nbgrader["checksum"] == compute_checksum(cell):
+            return 0, max_points
+        else:
+            return None, max_points
+
     else:
         return None, max_points
 

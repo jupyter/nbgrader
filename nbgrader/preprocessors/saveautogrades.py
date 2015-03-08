@@ -28,6 +28,8 @@ class SaveAutoGrades(Preprocessor):
         self.gradebook.update_or_create_submission(
             self.assignment_id, self.student_id, timestamp=timestamp)
 
+        self.comment_index = 0
+
         # process the cells
         nb, resources = super(SaveAutoGrades, self).preprocess(nb, resources)
 
@@ -51,14 +53,31 @@ class SaveAutoGrades(Preprocessor):
 
         # determine what the grade is
         auto_score, max_score = utils.determine_grade(cell)
-        assert max_score == grade.max_score
         grade.auto_score = auto_score
         self.gradebook.db.commit()
         self.log.debug(grade)
+
+    def _add_comment(self, cell, resources):
+        comment = self.gradebook.find_comment(
+            self.comment_index,
+            self.notebook_id,
+            self.assignment_id,
+            self.student_id)
+
+        if comment.comment:
+            return
+        elif cell.metadata.nbgrader["checksum"] == utils.compute_checksum(cell):
+            comment.comment = "No response."
+            self.gradebook.db.commit()
+            self.log.debug(comment)
 
     def preprocess_cell(self, cell, resources, cell_index):
         # if it's a grade cell, the add a grade
         if utils.is_grade(cell):
             self._add_score(cell, resources)
+
+        if utils.is_solution(cell):
+            self._add_comment(cell, resources)
+            self.comment_index += 1
 
         return cell, resources

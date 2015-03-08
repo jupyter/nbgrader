@@ -60,9 +60,12 @@ class DisplayAutoGrades(Preprocessor):
         print("The following cell failed:\n")
         print(self._indent(cell.source))
         print("\nThe error was:\n")
-        for output in cell.outputs:
-            if output.output_type == "error":
-                print(self._indent("\n".join(output.traceback)))
+        if cell.cell_type == "code":
+            for output in cell.outputs:
+                if output.output_type == "error":
+                    print(self._indent("\n".join(output.traceback)))
+        else:
+            print(self._indent("You did not provide a response."))
         print
 
     def _print_pass(self, cell):
@@ -126,7 +129,7 @@ class DisplayAutoGrades(Preprocessor):
             return cell, resources
 
         # verify checksums of cells
-        if 'checksum' in cell.metadata.nbgrader:
+        if not utils.is_solution(cell):
             old_checksum = cell.metadata.nbgrader['checksum']
             new_checksum = utils.compute_checksum(cell)
             if old_checksum != new_checksum:

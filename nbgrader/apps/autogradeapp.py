@@ -102,7 +102,6 @@ class AutogradeApp(BaseNbConvertApp):
             )
         else:
             self.extra_config.Exporter.preprocessors.extend([
-                'nbgrader.preprocessors.ComputeChecksums',
                 'nbgrader.preprocessors.SaveCells'
             ])
         self.extra_config.Exporter.preprocessors.extend([

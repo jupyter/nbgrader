@@ -13,9 +13,9 @@ class TestNbgraderSubmit(TestBase):
 
     def test_submit(self):
         """Does everything get properly submitted?"""
-        with self._temp_cwd(["files/submitted.ipynb"]):
+        with self._temp_cwd(["files/submitted-changed.ipynb"]):
             os.mkdir('Problem Set 1')
-            shutil.move('submitted.ipynb', 'Problem Set 1/Problem 1.ipynb')
+            shutil.move('submitted-changed.ipynb', 'Problem Set 1/Problem 1.ipynb')
             os.chdir('Problem Set 1')
             self._run_command('nbgrader submit --log-level=DEBUG --submit-dir=..')
             assert os.path.isfile("../Problem Set 1.tar.gz")
@@ -26,9 +26,9 @@ class TestNbgraderSubmit(TestBase):
 
     def test_submit_custom_assignment(self):
         """Does everything get properly submitted with a custom assignment name?"""
-        with self._temp_cwd(["files/submitted.ipynb"]):
+        with self._temp_cwd(["files/submitted-changed.ipynb"]):
             os.mkdir('Problem Set 1')
-            shutil.move('submitted.ipynb', 'Problem Set 1/Problem 1.ipynb')
+            shutil.move('submitted-changed.ipynb', 'Problem Set 1/Problem 1.ipynb')
             os.chdir('Problem Set 1')
             self._run_command('nbgrader submit --log-level=DEBUG --submit-dir=.. --assignment=foo')
             assert os.path.isfile("../foo.tar.gz")

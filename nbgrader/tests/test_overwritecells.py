@@ -7,10 +7,10 @@ from IPython.nbformat.v4 import new_notebook
 from .base import TestBase
 
 
-class TestSaveCells(TestBase):
+class TestOverwriteCells(TestBase):
 
     def setup(self):
-        super(TestSaveCells, self).setup()
+        super(TestOverwriteCells, self).setup()
         db_url = self._init_db()
         self.gb = Gradebook(db_url)
         self.gb.add_assignment("ps0")
