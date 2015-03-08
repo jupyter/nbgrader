@@ -40,12 +40,13 @@ def compute_checksum(cell):
     # add the cell type
     m.update(str_to_bytes(cell.cell_type))
 
-    # include number of points that the cell is worth
-    if 'points' in cell.metadata.nbgrader:
-        m.update(str_to_bytes(str(float(cell.metadata.nbgrader['points']))))
+    # add whether it's a grade cell and/or solution cell
+    m.update(str_to_bytes(str(is_grade(cell))))
+    m.update(str_to_bytes(str(is_solution(cell))))
 
-    # include the grade_id
-    if 'grade_id' in cell.metadata.nbgrader:
+    # include the grade id and the number of points that the cell is worth
+    if is_grade(cell):
+        m.update(str_to_bytes(str(float(cell.metadata.nbgrader['points']))))
         m.update(str_to_bytes(cell.metadata.nbgrader['grade_id']))
 
     return m.hexdigest()
