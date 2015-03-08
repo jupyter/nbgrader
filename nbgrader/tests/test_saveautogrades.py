@@ -68,22 +68,6 @@ class TestSaveAutoGrades(TestBase):
         grade_cell = self.gb.find_grade("foo", "test", "ps0", "bar")
         assert_equal(grade_cell.score, 0)
         assert_equal(grade_cell.max_score, 1)
-        assert_equal(grade_cell.auto_score, None)
-        assert_equal(grade_cell.manual_score, None)
-        assert grade_cell.needs_manual_grade
-
-    def test_grade_unchanged_markdown_checksum_autograding(self):
-        """Is an unchanged markdown cell correctly graded with checksum autograding?"""
-        cell = self._create_grade_and_solution_cell("hello", "markdown", "foo", 1)
-        nb = new_notebook()
-        nb.cells.append(cell)
-        self.preprocessor1.preprocess(nb, self.resources)
-        self.preprocessor2.checksum_autograding = True
-        self.preprocessor2.preprocess(nb, self.resources)
-
-        grade_cell = self.gb.find_grade("foo", "test", "ps0", "bar")
-        assert_equal(grade_cell.score, 0)
-        assert_equal(grade_cell.max_score, 1)
         assert_equal(grade_cell.auto_score, 0)
         assert_equal(grade_cell.manual_score, None)
         assert not grade_cell.needs_manual_grade
@@ -104,41 +88,12 @@ class TestSaveAutoGrades(TestBase):
         assert_equal(grade_cell.manual_score, None)
         assert grade_cell.needs_manual_grade
 
-    def test_grade_changed_markdown_checksum_autograding(self):
-        """Is a changed markdown cell correctly graded with checksum autograding?"""
-        cell = self._create_grade_and_solution_cell("hello", "markdown", "foo", 1)
-        nb = new_notebook()
-        nb.cells.append(cell)
-        self.preprocessor1.preprocess(nb, self.resources)
-        cell.source = "hello!"
-        self.preprocessor2.checksum_autograding = True
-        self.preprocessor2.preprocess(nb, self.resources)
-
-        grade_cell = self.gb.find_grade("foo", "test", "ps0", "bar")
-        assert_equal(grade_cell.score, 0)
-        assert_equal(grade_cell.max_score, 1)
-        assert_equal(grade_cell.auto_score, None)
-        assert_equal(grade_cell.manual_score, None)
-        assert grade_cell.needs_manual_grade
-
     def test_comment_unchanged_code(self):
         """Is an unchanged code cell given the correct comment?"""
         cell = self._create_solution_cell("hello", "code")
         nb = new_notebook()
         nb.cells.append(cell)
         self.preprocessor1.preprocess(nb, self.resources)
-        self.preprocessor2.preprocess(nb, self.resources)
-
-        comment = self.gb.find_comment(0, "test", "ps0", "bar")
-        assert_equal(comment.comment, None)
-
-    def test_comment_unchanged_code_checksum_autograding(self):
-        """Is an unchanged code cell given the correct comment with checksum autograding?"""
-        cell = self._create_solution_cell("hello", "code")
-        nb = new_notebook()
-        nb.cells.append(cell)
-        self.preprocessor1.preprocess(nb, self.resources)
-        self.preprocessor2.checksum_autograding = True
         self.preprocessor2.preprocess(nb, self.resources)
 
         comment = self.gb.find_comment(0, "test", "ps0", "bar")
@@ -156,37 +111,12 @@ class TestSaveAutoGrades(TestBase):
         comment = self.gb.find_comment(0, "test", "ps0", "bar")
         assert_equal(comment.comment, None)
 
-    def test_comment_changed_code_checksum_autograding(self):
-        """Is a changed code cell given the correct comment with checksum autograding?"""
-        cell = self._create_solution_cell("hello", "code")
-        nb = new_notebook()
-        nb.cells.append(cell)
-        self.preprocessor1.preprocess(nb, self.resources)
-        cell.source = "hello!"
-        self.preprocessor2.checksum_autograding = True
-        self.preprocessor2.preprocess(nb, self.resources)
-
-        comment = self.gb.find_comment(0, "test", "ps0", "bar")
-        assert_equal(comment.comment, None)
-
     def test_comment_unchanged_markdown(self):
         """Is an unchanged markdown cell given the correct comment?"""
         cell = self._create_grade_and_solution_cell("hello", "markdown", "foo", 1)
         nb = new_notebook()
         nb.cells.append(cell)
         self.preprocessor1.preprocess(nb, self.resources)
-        self.preprocessor2.preprocess(nb, self.resources)
-
-        comment = self.gb.find_comment(0, "test", "ps0", "bar")
-        assert_equal(comment.comment, None)
-
-    def test_comment_unchanged_markdown_checksum_autograding(self):
-        """Is an unchanged markdown cell given the correct comment with checksum autograding?"""
-        cell = self._create_grade_and_solution_cell("hello", "markdown", "foo", 1)
-        nb = new_notebook()
-        nb.cells.append(cell)
-        self.preprocessor1.preprocess(nb, self.resources)
-        self.preprocessor2.checksum_autograding = True
         self.preprocessor2.preprocess(nb, self.resources)
 
         comment = self.gb.find_comment(0, "test", "ps0", "bar")
@@ -199,19 +129,6 @@ class TestSaveAutoGrades(TestBase):
         nb.cells.append(cell)
         self.preprocessor1.preprocess(nb, self.resources)
         cell.source = "hello!"
-        self.preprocessor2.preprocess(nb, self.resources)
-
-        comment = self.gb.find_comment(0, "test", "ps0", "bar")
-        assert_equal(comment.comment, None)
-
-    def test_comment_changed_markdown_checksum_autograding(self):
-        """Is a changed markdown cell given the correct comment with checksum autograding?"""
-        cell = self._create_grade_and_solution_cell("hello", "markdown", "foo", 1)
-        nb = new_notebook()
-        nb.cells.append(cell)
-        self.preprocessor1.preprocess(nb, self.resources)
-        cell.source = "hello!"
-        self.preprocessor2.checksum_autograding = True
         self.preprocessor2.preprocess(nb, self.resources)
 
         comment = self.gb.find_comment(0, "test", "ps0", "bar")

@@ -21,10 +21,7 @@ flags = {}
 flags.update(nbconvert_flags)
 flags.update({
     'overwrite-cells': (
-        {
-            'AutogradeApp': {'overwrite_cells': True},
-            'SaveAutoGrades': {'checksum_autograding': True}
-        },
+        {'AutogradeApp': {'overwrite_cells': True}},
         "Overwrite grade cells from the database."
     )
 })
@@ -105,7 +102,6 @@ class AutogradeApp(BaseNbConvertApp):
             )
         else:
             self.extra_config.Exporter.preprocessors.extend([
-                'nbgrader.preprocessors.ComputeChecksums',
                 'nbgrader.preprocessors.SaveCells'
             ])
         self.extra_config.Exporter.preprocessors.extend([

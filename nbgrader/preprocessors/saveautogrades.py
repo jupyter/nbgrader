@@ -1,27 +1,15 @@
 import dateutil.parser
 
 from IPython.nbconvert.preprocessors import Preprocessor
-from IPython.utils.traitlets import Unicode, Bool
+from IPython.utils.traitlets import Unicode
 from nbgrader import utils
 from nbgrader.api import Gradebook
-from textwrap import dedent
 
 
 class SaveAutoGrades(Preprocessor):
     """Preprocessor for saving out the autograder grades into a database"""
 
     timestamp = Unicode("", config=True, help="Timestamp when this assignment was submitted")
-    checksum_autograding = Bool(
-        False, 
-        config=True, 
-        help=dedent(
-            """
-            Autograde cells based on their checksums. If the checksum hasn't
-            changed for a solution cell, then add a comment saying "No response.".
-            If the cell is also a grade cell, then give it a score of zero.
-            """
-        )
-    )
 
     def preprocess(self, nb, resources):
         # pull information from the resources
@@ -64,7 +52,7 @@ class SaveAutoGrades(Preprocessor):
             self.student_id)
 
         # determine what the grade is
-        auto_score, max_score = utils.determine_grade(cell, self.checksum_autograding)
+        auto_score, max_score = utils.determine_grade(cell)
         grade.auto_score = auto_score
         self.gradebook.db.commit()
         self.log.debug(grade)
@@ -88,7 +76,7 @@ class SaveAutoGrades(Preprocessor):
         if utils.is_grade(cell):
             self._add_score(cell, resources)
 
-        if self.checksum_autograding and utils.is_solution(cell):
+        if utils.is_solution(cell):
             self._add_comment(cell, resources)
             self.comment_index += 1
 

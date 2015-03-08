@@ -16,7 +16,7 @@ def is_solution(cell):
         return False
     return cell.metadata['nbgrader'].get('solution', False)
 
-def determine_grade(cell, checksum_autograding=False):
+def determine_grade(cell):
     if not is_grade(cell):
         raise ValueError("cell is not a grade cell")
 
@@ -27,7 +27,7 @@ def determine_grade(cell, checksum_autograding=False):
                 return 0, max_points
         return max_points, max_points
 
-    elif is_solution(cell) and checksum_autograding:
+    elif is_solution(cell):
         # if it's a solution cell and the checksum hasn't changed, that means
         # they didn't provide a response, so we can automatically give this a
         # zero grade
