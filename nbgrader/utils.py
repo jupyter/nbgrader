@@ -33,9 +33,12 @@ def determine_grade(cell):
 def compute_checksum(cell):
     m = hashlib.md5()
 
-    # fix minor whitespace issues that might have been added and then
-    # add cell contents
-    m.update(str_to_bytes(autopep8.fix_code(cell.source).rstrip()))
+    # if it's a code cell, then fix minor whitespace issues that might have been 
+    # added and then add cell contents; otherwise just add cell contents
+    if cell.cell_type == "code":
+        m.update(str_to_bytes(autopep8.fix_code(cell.source).rstrip()))
+    else:
+        m.update(str_to_bytes(cell.source.strip()))
 
     # add the cell type
     m.update(str_to_bytes(cell.cell_type))
