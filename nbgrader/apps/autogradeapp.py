@@ -21,7 +21,10 @@ flags = {}
 flags.update(nbconvert_flags)
 flags.update({
     'overwrite-cells': (
-        {'AutogradeApp': {'overwrite_cells': True}},
+        {
+            'AutogradeApp': {'overwrite_cells': True},
+            'SaveAutoGrades': {'checksum_autograding': True}
+        },
         "Overwrite grade cells from the database."
     )
 })

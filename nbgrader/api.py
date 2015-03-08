@@ -397,7 +397,7 @@ class Grade(Base):
 
     @property
     def needs_manual_grade(self):
-        return self.cell.cell_type == "markdown" and self.manual_score is None
+        return self.auto_score is None and self.manual_score is None
 
     def to_dict(self):
         return {
