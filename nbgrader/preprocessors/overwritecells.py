@@ -1,4 +1,5 @@
 from IPython.nbconvert.preprocessors import Preprocessor
+from IPython.nbformat.v4.nbbase import validate
 from nbgrader import utils
 from nbgrader.api import Gradebook
 
@@ -20,6 +21,22 @@ class OverwriteCells(Preprocessor):
 
         return nb, resources
 
+    def update_cell_type(self, cell, cell_type):
+        if cell.cell_type == cell_type:
+            return
+        elif cell_type == 'code':
+            cell.cell_type = 'code'
+            cell.outputs = []
+            cell.execution_count = None
+            validate(cell, 'code_cell')
+        elif cell_type == 'markdown':
+            cell.cell_type = 'markdown'
+            if 'outputs' in cell:
+                del cell['outputs']
+            if 'execution_count' in cell:
+                del cell['execution_count']
+            validate(cell, 'markdown_cell')
+
     def preprocess_cell(self, cell, resources, cell_index):
         if utils.is_grade(cell):
             grade_cell = self.gradebook.find_grade_cell(
@@ -38,8 +55,8 @@ class OverwriteCells(Preprocessor):
                     self.log.warning("Checksum for grade cell %s has changed!", grade_cell.name)
 
                 cell.source = grade_cell.source
-                cell.cell_type = grade_cell.cell_type
                 cell.metadata.nbgrader['checksum'] = grade_cell.checksum
+                self.update_cell_type(cell, grade_cell.cell_type)
 
             self.log.debug("Overwrote grade cell %s", grade_cell.name)
 
@@ -55,8 +72,8 @@ class OverwriteCells(Preprocessor):
             if cell.cell_type != solution_cell.cell_type:
                 self.log.warning("Cell type for solution cell %s has changed!", solution_cell.name)
 
-            cell.cell_type = solution_cell.cell_type
             cell.metadata.nbgrader['checksum'] = solution_cell.checksum
+            self.update_cell_type(cell, solution_cell.cell_type)
 
             self.log.debug("Overwrote solution cell #%s", self.comment_index)
 
