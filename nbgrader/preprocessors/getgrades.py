@@ -44,7 +44,7 @@ class GetGrades(Preprocessor):
             self.student_id)
 
         # save it in the notebook
-        cell.metadata.nbgrader.comment = comment.to_dict()
+        cell.metadata.nbgrader['comment'] = comment.to_dict()
 
         # update the number of comments we have inserted
         self.comment_index += 1
@@ -56,8 +56,8 @@ class GetGrades(Preprocessor):
             self.assignment_id,
             self.student_id)
 
-        cell.metadata.nbgrader.score = grade.score
-        cell.metadata.nbgrader.points = grade.max_score
+        cell.metadata.nbgrader['score'] = grade.score
+        cell.metadata.nbgrader['points'] = grade.max_score
 
     def preprocess_cell(self, cell, resources, cell_index):
         # if it's a solution cell, then add a comment
