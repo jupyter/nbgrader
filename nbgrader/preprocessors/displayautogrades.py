@@ -129,7 +129,7 @@ class DisplayAutoGrades(Preprocessor):
             return cell, resources
 
         # verify checksums of cells
-        if not utils.is_solution(cell):
+        if not utils.is_solution(cell) and 'checksum' in cell.metadata.nbgrader:
             old_checksum = cell.metadata.nbgrader['checksum']
             new_checksum = utils.compute_checksum(cell)
             if old_checksum != new_checksum:
