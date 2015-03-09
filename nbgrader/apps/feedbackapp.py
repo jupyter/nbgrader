@@ -1,8 +1,10 @@
+import os
 from textwrap import dedent
 
 from IPython.config.loader import Config
 from IPython.utils.traitlets import Unicode, Dict
 from IPython.nbconvert.writers import FilesWriter
+from IPython.nbconvert.exporters import HTMLExporter
 
 from nbgrader.apps.baseapp import (
     BaseNbConvertApp, nbconvert_aliases, nbconvert_flags)
@@ -44,6 +46,7 @@ class FeedbackApp(BaseNbConvertApp):
         classes = super(BaseNbConvertApp, self)._classes_default()
         classes.extend([
             FilesWriter,
+            HTMLExporter,
             FeedbackExporter,
             FindStudentID,
             GetGrades
@@ -59,4 +62,13 @@ class FeedbackApp(BaseNbConvertApp):
             'nbgrader.preprocessors.FindStudentID',
             'nbgrader.preprocessors.GetGrades'
         ]
+    
+        if 'template_file' not in self.config.HTMLExporter:
+            self.extra_config.HTMLExporter.template_file = 'feedback'
+        if 'template_path' not in self.config.HTMLExporter:
+            template_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../html/templates'))
+            self.extra_config.HTMLExporter.template_path = ['.', template_path]
+        if 'preprocessors' not in self.config.HTMLExporter:
+            self.extra_config.HTMLExporter.preprocessors = []
+
         self.config.merge(self.extra_config)

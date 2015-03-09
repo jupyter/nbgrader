@@ -1,12 +1,18 @@
-import os
-
 from IPython.nbconvert.exporters import HTMLExporter
+from IPython import nbformat
 from .assignmentexporter import AssignmentExporter
 
-class FeedbackExporter(HTMLExporter, AssignmentExporter):
+class FeedbackExporter(AssignmentExporter):
 
-    def _template_path_default(self):
-        return [os.path.join(os.path.dirname(__file__), "..", "html", "templates")]
+    def from_notebook_node(self, nb, resources=None, **kw):
+        # this will return a notebook in string format, so we want to load
+        # it back in as a notebook node and then pass it to the HTML exporter
+        output, resources = super(FeedbackExporter, self).from_notebook_node(
+            nb, resources=resources, **kw)
 
-    def _template_file_default(self):
-        return 'feedback'
+        exporter = HTMLExporter(config=self.config)
+        output, resources = exporter.from_notebook_node(
+            nbformat.reads(output, as_version=self.nbformat_version),
+            resources=resources, **kw)
+
+        return output, resources

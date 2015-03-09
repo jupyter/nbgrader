@@ -7,20 +7,7 @@
 <head>
 
 <meta charset="utf-8" />
-<title>{{ resources.notebook_id }}</title>
-
-<script src="/static/lib/jquery-2.1.1.min.js"></script>
-<script src="/static/lib/underscore-min.js"></script>
-<script src="/static/lib/backbone-min.js"></script>
-<script src="/static/lib/bootstrap.min.js"></script>
-
-<script type="text/javascript">
-var nb_uuid = "{{ resources.notebook_uuid }}";
-</script>
-
-<script src="/static/js/formgrade.js"></script>
-
-<link rel="stylesheet" href="/static/css/bootstrap.min.css" />
+<title>{{ resources.nbgrader.notebook }}</title>
 
 {% for css in resources.inlining.css -%}
     <style type="text/css">
