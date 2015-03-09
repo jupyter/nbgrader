@@ -33,6 +33,10 @@ class NbGraderApp(BaseNbGraderApp):
             'nbgrader.apps.formgradeapp.FormgradeApp',
             "Grade a notebook using an HTML form"
         ),
+        feedback=(
+            'nbgrader.apps.feedbackapp.FeedbackApp',
+            "Generate feedback"
+        ),
         validate=(
             'nbgrader.apps.validateapp.ValidateApp',
             "Validate a notebook"

@@ -1,4 +1,5 @@
 from __future__ import absolute_import
 
 from .assignmentexporter import AssignmentExporter
-__all__ = ["AssignmentExporter"]
+from .feedbackexporter import FeedbackExporter
+__all__ = ["AssignmentExporter", "FeedbackExporter"]

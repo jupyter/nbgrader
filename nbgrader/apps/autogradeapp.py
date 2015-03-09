@@ -66,7 +66,6 @@ class AutogradeApp(BaseNbConvertApp):
         """
     ))
 
-    student_id = Unicode(u'', config=True)
     overwrite_cells = Bool(
         False, 
         config=True, 
