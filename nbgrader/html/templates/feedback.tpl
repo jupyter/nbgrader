@@ -119,7 +119,7 @@ span.nbgrader-label {
             <li><a href="#{{ cell.metadata.nbgrader.grade_id }}">Test cell</a> (Score: {{ cell.metadata.nbgrader.score | float | round(2) }} / {{ cell.metadata.nbgrader.points | float | round(2) }})</li>
             {% endif %}
             {% if cell.metadata.nbgrader and cell.metadata.nbgrader.comment and cell.metadata.nbgrader.comment.comment %}
-            <li><a href="#comment-{{ cell.metadata.nbgrader.comment.comment_id }}">Comment</a></li>
+            <li><a href="#comment-{{ cell.metadata.nbgrader.comment.name }}">Comment</a></li>
             {% endif %}
           {% endfor %}
           </ol>
@@ -150,7 +150,7 @@ span.nbgrader-label {
 
 {% macro nbgrader_heading(cell) -%}
 {%- if cell.metadata.nbgrader.solution -%}
-<a name="comment-{{ cell.metadata.nbgrader.comment.comment_id }}"></a>
+<a name="comment-{{ cell.metadata.nbgrader.comment.name }}"></a>
 {%- endif -%}
 {%- if cell.metadata.nbgrader.grade -%}
 <a name="{{ cell.metadata.nbgrader.grade_id }}"></a>
