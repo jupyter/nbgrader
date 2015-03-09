@@ -27,7 +27,7 @@
   {%- for submission in submissions -%}
   <tr>
     <td>
-      <a href="/assignments/{{ assignment_id }}/{{ submission.name }}/{{ student.id }}">
+      <a href="/submissions/{{ submission.id }}">
         {{ submission.name }}
       </a>
     </td>
