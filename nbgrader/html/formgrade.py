@@ -23,12 +23,19 @@ def home():
 
 @app.route("/assignments/")
 def view_assignments():
-    assignments = [x.to_dict() for x in app.gradebook.assignments]
+    assignments = []
+    for assignment in app.gradebook.assignments:
+        x = assignment.to_dict()
+        x["average_score"] = app.gradebook.average_assignment_score(assignment.name)
+        x["average_code_score"] = app.gradebook.average_assignment_code_score(assignment.name)
+        x["average_written_score"] = app.gradebook.average_assignment_written_score(assignment.name)
+        assignments.append(x)
     return render_template("assignments.tpl", assignments=assignments)
 
 @app.route("/students/")
 def view_students():
-    students = [x.to_dict() for x in app.gradebook.students]
+    students = app.gradebook.student_dicts()
+    students.sort(key=lambda x: x["last_name"])
     return render_template("students.tpl", students=students)
 
 @app.route("/assignments/<assignment_id>/")
@@ -38,7 +45,13 @@ def view_assignment(assignment_id):
     except MissingEntry:
         abort(404)
 
-    notebooks = [nb.to_dict() for nb in assignment.notebooks]
+    notebooks = []
+    for notebook in assignment.notebooks:
+        x = notebook.to_dict()
+        x["average_score"] = app.gradebook.average_notebook_score(notebook.name, assignment.name)
+        x["average_code_score"] = app.gradebook.average_notebook_code_score(notebook.name, assignment.name)
+        x["average_written_score"] = app.gradebook.average_notebook_written_score(notebook.name, assignment.name)
+        notebooks.append(x)
     assignment = assignment.to_dict()
 
     return render_template(
@@ -65,11 +78,11 @@ def view_student(student_id):
 @app.route("/assignments/<assignment_id>/<notebook_id>/")
 def view_assignment_notebook(assignment_id, notebook_id):
     try:
-        notebook = app.gradebook.find_notebook(notebook_id, assignment_id)
+        app.gradebook.find_notebook(notebook_id, assignment_id)
     except MissingEntry:
         abort(404)
 
-    submissions = [x.to_dict() for x in notebook.submissions]
+    submissions = app.gradebook.notebook_submission_dicts(notebook_id, assignment_id)
     submissions.sort(key=lambda x: x["id"])
 
     for i, submission in enumerate(submissions):

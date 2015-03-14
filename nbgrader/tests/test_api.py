@@ -33,9 +33,6 @@ class TestApi(object):
         assert_equal(a.max_code_score, 0)
         assert_equal(a.max_written_score, 0)
         assert_equal(a.num_submissions, 0)
-        assert_equal(a.average_score, 0)
-        assert_equal(a.average_code_score, 0)
-        assert_equal(a.average_written_score, 0)
 
     def test_create_notebook(self):
         now = datetime.datetime.now()
@@ -55,9 +52,6 @@ class TestApi(object):
         assert_equal(n.max_score, 0)
         assert_equal(n.max_code_score, 0)
         assert_equal(n.max_written_score, 0)
-        assert_equal(n.average_score, 0)
-        assert_equal(n.average_code_score, 0)
-        assert_equal(n.average_written_score, 0)
 
     def test_create_grade_cell(self):
         now = datetime.datetime.now()
@@ -307,12 +301,6 @@ class TestApi(object):
         assert_equal(sa.score, 5)
         assert_equal(sa.code_score, 5)
         assert_equal(sa.written_score, 0)
-        assert_equal(n.average_score, 5)
-        assert_equal(n.average_code_score, 5)
-        assert_equal(n.average_written_score, 0)
-        assert_equal(a.average_score, 5)
-        assert_equal(a.average_code_score, 5)
-        assert_equal(a.average_written_score, 0)
         assert_equal(s.score, 5)
 
         g.manual_score = 7.5
@@ -329,12 +317,6 @@ class TestApi(object):
         assert_equal(sa.score, 7.5)
         assert_equal(sa.code_score, 7.5)
         assert_equal(sa.written_score, 0)
-        assert_equal(n.average_score, 7.5)
-        assert_equal(n.average_code_score, 7.5)
-        assert_equal(n.average_written_score, 0)
-        assert_equal(a.average_score, 7.5)
-        assert_equal(a.average_code_score, 7.5)
-        assert_equal(a.average_written_score, 0)
         assert_equal(s.score, 7.5)
 
     def test_create_written_grade(self):
@@ -370,12 +352,6 @@ class TestApi(object):
         assert_equal(sa.score, 0)
         assert_equal(sa.code_score, 0)
         assert_equal(sa.written_score, 0)
-        assert_equal(n.average_score, 0)
-        assert_equal(n.average_code_score, 0)
-        assert_equal(n.average_written_score, 0)
-        assert_equal(a.average_score, 0)
-        assert_equal(a.average_code_score, 0)
-        assert_equal(a.average_written_score, 0)
         assert_equal(s.score, 0)
 
         g.manual_score = 7.5
@@ -392,12 +368,6 @@ class TestApi(object):
         assert_equal(sa.score, 7.5)
         assert_equal(sa.code_score, 0)
         assert_equal(sa.written_score, 7.5)
-        assert_equal(n.average_score, 7.5)
-        assert_equal(n.average_code_score, 0)
-        assert_equal(n.average_written_score, 7.5)
-        assert_equal(a.average_score, 7.5)
-        assert_equal(a.average_code_score, 0)
-        assert_equal(a.average_written_score, 7.5)
         assert_equal(s.score, 7.5)
 
     def test_create_comment(self):
@@ -759,149 +729,14 @@ class TestApi(object):
             sorted(x[1] for x in self.db.query(api.SubmittedAssignment.id, api.SubmittedAssignment.code_score).all()),
             [1.5, 3])
 
-    def test_query_average_score_ungraded(self):
-        self._init_submissions()
-
-        assert_equal(
-            [x[1] for x in self.db.query(api.Notebook.id, api.Notebook.average_score).all()],
-            [0.0])
-        assert_equal(
-            [x[1] for x in self.db.query(api.Assignment.id, api.Assignment.average_score).all()],
-            [0.0])
-
-    def test_query_average_score_autograded(self):
-        grades = self._init_submissions()
-
-        grades[0].auto_score = 10
-        grades[1].auto_score = 0
-        grades[2].auto_score = 5
-        grades[3].auto_score = 2.5
-        self.db.commit()
-
-        assert_equal(
-            [x[1] for x in self.db.query(api.Notebook.id, api.Notebook.average_score).all()],
-            [8.75])
-        assert_equal(
-            [x[1] for x in self.db.query(api.Assignment.id, api.Assignment.average_score).all()],
-            [8.75])
-
-    def test_query_average_score_manualgraded(self):
-        grades = self._init_submissions()
-
-        grades[0].auto_score = 10
-        grades[1].auto_score = 0
-        grades[2].auto_score = 5
-        grades[3].auto_score = 2.5
-        grades[0].manual_score = 4
-        grades[1].manual_score = 1.5
-        grades[2].manual_score = 9
-        grades[3].manual_score = 2
-        self.db.commit()
-
-        assert_equal(
-            [x[1] for x in self.db.query(api.Notebook.id, api.Notebook.average_score).all()],
-            [8.25])
-        assert_equal(
-            [x[1] for x in self.db.query(api.Assignment.id, api.Assignment.average_score).all()],
-            [8.25])
-
-    def test_query_average_code_score_ungraded(self):
-        self._init_submissions()
-
-        assert_equal(
-            [x[1] for x in self.db.query(api.Notebook.id, api.Notebook.average_code_score).all()],
-            [0.0])
-        assert_equal(
-            [x[1] for x in self.db.query(api.Assignment.id, api.Assignment.average_code_score).all()],
-            [0.0])
-
-    def test_query_average_code_score_autograded(self):
-        grades = self._init_submissions()
-
-        grades[0].auto_score = 10
-        grades[1].auto_score = 0
-        grades[2].auto_score = 5
-        grades[3].auto_score = 2.5
-        self.db.commit()
-
-        assert_equal(
-            [x[1] for x in self.db.query(api.Notebook.id, api.Notebook.average_code_score).all()],
-            [1.25])
-        assert_equal(
-            [x[1] for x in self.db.query(api.Assignment.id, api.Assignment.average_code_score).all()],
-            [1.25])
-
-    def test_query_average_code_score_manualgraded(self):
-        grades = self._init_submissions()
-
-        grades[0].auto_score = 10
-        grades[1].auto_score = 0
-        grades[2].auto_score = 5
-        grades[3].auto_score = 2.5
-        grades[0].manual_score = 4
-        grades[1].manual_score = 1.5
-        grades[2].manual_score = 9
-        grades[3].manual_score = 2
-        self.db.commit()
-
-        assert_equal(
-            [x[1] for x in self.db.query(api.Notebook.id, api.Notebook.average_code_score).all()],
-            [1.75])
-        assert_equal(
-            [x[1] for x in self.db.query(api.Assignment.id, api.Assignment.average_code_score).all()],
-            [1.75])
-
-    def test_query_average_written_score_ungraded(self):
-        self._init_submissions()
-
-        assert_equal(
-            [x[1] for x in self.db.query(api.Notebook.id, api.Notebook.average_written_score).all()],
-            [0.0])
-        assert_equal(
-            [x[1] for x in self.db.query(api.Assignment.id, api.Assignment.average_written_score).all()],
-            [0.0])
-
-    def test_query_average_written_score_autograded(self):
-        grades = self._init_submissions()
-
-        grades[0].auto_score = 10
-        grades[1].auto_score = 0
-        grades[2].auto_score = 5
-        grades[3].auto_score = 2.5
-        self.db.commit()
-
-        assert_equal(
-            [x[1] for x in self.db.query(api.Notebook.id, api.Notebook.average_written_score).all()],
-            [7.5])
-        assert_equal(
-            [x[1] for x in self.db.query(api.Assignment.id, api.Assignment.average_written_score).all()],
-            [7.5])
-
-    def test_query_average_written_score_manualgraded(self):
-        grades = self._init_submissions()
-
-        grades[0].auto_score = 10
-        grades[1].auto_score = 0
-        grades[2].auto_score = 5
-        grades[3].auto_score = 2.5
-        grades[0].manual_score = 4
-        grades[1].manual_score = 1.5
-        grades[2].manual_score = 9
-        grades[3].manual_score = 2
-        self.db.commit()
-
-        assert_equal(
-            [x[1] for x in self.db.query(api.Notebook.id, api.Notebook.average_written_score).all()],
-            [6.5])
-        assert_equal(
-            [x[1] for x in self.db.query(api.Assignment.id, api.Assignment.average_written_score).all()],
-            [6.5])
-
     def test_query_num_submissions(self):
         self._init_submissions()
 
         assert_equal(
             [x[0] for x in self.db.query(api.Assignment.num_submissions).all()],
+            [2])
+        assert_equal(
+            [x[0] for x in self.db.query(api.Notebook.num_submissions).all()],
             [2])
 
 

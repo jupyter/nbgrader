@@ -48,11 +48,8 @@ class Assignment(Base):
             "name": self.name,
             "duedate": self.duedate,
             "num_submissions": self.num_submissions,
-            "average_score": self.average_score,
             "max_score": self.max_score,
-            "average_code_score": self.average_code_score,
             "max_code_score": self.max_code_score,
-            "average_written_score": self.average_written_score,
             "max_written_score": self.max_written_score,
         }
 
@@ -77,12 +74,10 @@ class Notebook(Base):
         return {
             "id": self.id,
             "name": self.name,
+            "num_submissions": self.num_submissions,
             "max_score": self.max_score,
             "max_code_score": self.max_code_score,
             "max_written_score": self.max_written_score,
-            "average_score": self.average_score,
-            "average_code_score": self.average_code_score,
-            "average_written_score": self.average_written_score
         }
 
     def __repr__(self):
@@ -244,7 +239,7 @@ class SubmittedNotebook(Base):
         return {
             "id": self.id,
             "name": self.notebook.name,
-            "student": self.student.to_dict(),
+            "student": self.student.id,
             "score": self.score,
             "max_score": self.max_score,
             "code_score": self.code_score,
@@ -499,51 +494,17 @@ SubmittedAssignment.max_code_score = column_property(
         .correlate_except(Assignment), deferred=True)
 
 
-## Average overall score
-
-Notebook.average_score = column_property(
-    select([cast(func.coalesce(func.avg(SubmittedNotebook.score), 0.0), Float)])\
-        .where(SubmittedNotebook.notebook_id == Notebook.id)\
-        .correlate_except(SubmittedNotebook), deferred=True)
-
-Assignment.average_score = column_property(
-    select([cast(func.coalesce(func.avg(SubmittedAssignment.score), 0.0), Float)])\
-        .where(SubmittedAssignment.assignment_id == Assignment.id)\
-        .correlate_except(SubmittedAssignment), deferred=True)
-
-
-## Average code score
-
-Notebook.average_code_score = column_property(
-    select([cast(func.coalesce(func.avg(SubmittedNotebook.code_score), 0.0), Float)])\
-        .where(SubmittedNotebook.notebook_id == Notebook.id)\
-        .correlate_except(SubmittedNotebook), deferred=True)
-
-Assignment.average_code_score = column_property(
-    select([cast(func.coalesce(func.avg(SubmittedAssignment.code_score), 0.0), Float)])\
-        .where(SubmittedAssignment.assignment_id == Assignment.id)\
-        .correlate_except(SubmittedAssignment), deferred=True)
-
-
-## Average written score
-
-Notebook.average_written_score = column_property(
-    select([cast(func.coalesce(func.avg(SubmittedNotebook.written_score), 0.0), Float)])\
-        .where(SubmittedNotebook.notebook_id == Notebook.id)\
-        .correlate_except(SubmittedNotebook), deferred=True)
-
-Assignment.average_written_score = column_property(
-    select([cast(func.coalesce(func.avg(SubmittedAssignment.written_score), 0.0), Float)])\
-        .where(SubmittedAssignment.assignment_id == Assignment.id)\
-        .correlate_except(SubmittedAssignment), deferred=True)
-
-
 ## Number of submissions
 
 Assignment.num_submissions = column_property(
     select([func.count(SubmittedAssignment.id)])\
         .where(SubmittedAssignment.assignment_id == Assignment.id)\
         .correlate_except(SubmittedAssignment), deferred=True)
+
+Notebook.num_submissions = column_property(
+    select([func.count(SubmittedNotebook.id)])\
+        .where(SubmittedNotebook.notebook_id == Notebook.id)\
+        .correlate_except(SubmittedNotebook), deferred=True)
 
 
 class Gradebook(object):
@@ -562,7 +523,7 @@ class Gradebook(object):
 
         """
         # create the connection to the database
-        engine = create_engine(db_url, echo=True)
+        engine = create_engine(db_url)
         self.db = scoped_session(sessionmaker(autoflush=True, bind=engine))
 
         # this creates all the tables in the database if they don't already exist
@@ -1324,3 +1285,268 @@ class Gradebook(object):
             raise MissingEntry("No such comment: {}".format(comment_id))
 
         return comment
+
+    def average_assignment_score(self, assignment_id):
+        """Compute the average score for an assignment.
+
+        Parameters
+        ----------
+        assignment_id : string
+            the name of the assignment
+
+        Returns
+        -------
+        float : the average score
+
+        """
+
+        assignment = self.find_assignment(assignment_id)
+        if assignment.num_submissions == 0:
+            return 0.0
+
+        score_sum = self.db.query(func.coalesce(func.sum(Grade.score), 0.0))\
+            .join(GradeCell, Notebook, Assignment)\
+            .filter(Assignment.name == assignment_id).scalar()
+        return score_sum / assignment.num_submissions
+
+    def average_assignment_code_score(self, assignment_id):
+        """Compute the average code score for an assignment.
+
+        Parameters
+        ----------
+        assignment_id : string
+            the name of the assignment
+
+        Returns
+        -------
+        float : the average code score
+
+        """
+
+        assignment = self.find_assignment(assignment_id)
+        if assignment.num_submissions == 0:
+            return 0.0
+
+        score_sum = self.db.query(func.coalesce(func.sum(Grade.score), 0.0))\
+            .join(GradeCell, Notebook, Assignment)\
+            .filter(and_(
+                Assignment.name == assignment_id,
+                Notebook.assignment_id == Assignment.id,
+                GradeCell.notebook_id == Notebook.id,
+                Grade.cell_id == GradeCell.id,
+                GradeCell.cell_type == "code")).scalar()
+        return score_sum / assignment.num_submissions
+
+    def average_assignment_written_score(self, assignment_id):
+        """Compute the average written score for an assignment.
+
+        Parameters
+        ----------
+        assignment_id : string
+            the name of the assignment
+
+        Returns
+        -------
+        float : the average writtenscore
+
+        """
+
+        assignment = self.find_assignment(assignment_id)
+        if assignment.num_submissions == 0:
+            return 0.0
+
+        score_sum = self.db.query(func.coalesce(func.sum(Grade.score), 0.0))\
+            .join(GradeCell, Notebook, Assignment)\
+            .filter(and_(
+                Assignment.name == assignment_id,
+                Notebook.assignment_id == Assignment.id,
+                GradeCell.notebook_id == Notebook.id,
+                Grade.cell_id == GradeCell.id,
+                GradeCell.cell_type == "markdown")).scalar()
+        return score_sum / assignment.num_submissions
+
+    def average_notebook_score(self, notebook_id, assignment_id):
+        """Compute the average score for a particular notebook in an assignment.
+
+        Parameters
+        ----------
+        notebook_id : string
+            the name of the notebook
+        assignment_id : string
+            the name of the assignment
+
+        Returns
+        -------
+        float : the average score
+
+        """
+
+        notebook = self.find_notebook(notebook_id, assignment_id)
+        if notebook.num_submissions == 0:
+            return 0.0
+
+        score_sum = self.db.query(func.coalesce(func.sum(Grade.score), 0.0))\
+            .join(SubmittedNotebook, Notebook, Assignment)\
+            .filter(and_(
+                Notebook.name == notebook_id,
+                Assignment.name == assignment_id)).scalar()
+        return score_sum / notebook.num_submissions
+
+    def average_notebook_code_score(self, notebook_id, assignment_id):
+        """Compute the average code score for a particular notebook in an 
+        assignment.
+
+        Parameters
+        ----------
+        notebook_id : string
+            the name of the notebook
+        assignment_id : string
+            the name of the assignment
+
+        Returns
+        -------
+        float : the average code score
+
+        """
+
+        notebook = self.find_notebook(notebook_id, assignment_id)
+        if notebook.num_submissions == 0:
+            return 0.0
+
+        score_sum = self.db.query(func.coalesce(func.sum(Grade.score), 0.0))\
+            .join(GradeCell, Notebook, Assignment)\
+            .filter(and_(
+                Notebook.name == notebook_id,
+                Assignment.name == assignment_id,
+                Notebook.assignment_id == Assignment.id,
+                GradeCell.notebook_id == Notebook.id,
+                Grade.cell_id == GradeCell.id,
+                GradeCell.cell_type == "code")).scalar()
+        return score_sum / notebook.num_submissions
+
+    def average_notebook_written_score(self, notebook_id, assignment_id):
+        """Compute the average written score for a particular notebook in an 
+        assignment.
+
+        Parameters
+        ----------
+        notebook_id : string
+            the name of the notebook
+        assignment_id : string
+            the name of the assignment
+
+        Returns
+        -------
+        float : the average written score
+
+        """
+
+        notebook = self.find_notebook(notebook_id, assignment_id)
+        if notebook.num_submissions == 0:
+            return 0.0
+
+        score_sum = self.db.query(func.coalesce(func.sum(Grade.score), 0.0))\
+            .join(GradeCell, Notebook, Assignment)\
+            .filter(and_(
+                Notebook.name == notebook_id,
+                Assignment.name == assignment_id,
+                Notebook.assignment_id == Assignment.id,
+                GradeCell.notebook_id == Notebook.id,
+                Grade.cell_id == GradeCell.id,
+                GradeCell.cell_type == "markdown")).scalar()
+        return score_sum / notebook.num_submissions
+
+    def student_dicts(self):
+        """Returns a list of dictionaries containing student data. Equivalent
+        to calling Student.to_dict() for each student, except that this method
+        is implemented using proper SQL joins and is much faster.
+
+        """
+        students = self.db.query(
+            Student.id, Student.first_name, Student.last_name, 
+            Student.email, func.sum(Grade.score), func.sum(GradeCell.max_score)
+        ).join(SubmittedAssignment, SubmittedNotebook, Grade, GradeCell)\
+         .filter(and_(
+             Student.id == SubmittedAssignment.student_id,
+             SubmittedAssignment.id == SubmittedNotebook.assignment_id,
+             SubmittedNotebook.id == Grade.notebook_id,
+             GradeCell.id == Grade.cell_id))\
+         .group_by(Student.id)\
+         .all()
+
+        keys = ["id", "first_name", "last_name", "email", "score", "max_score"]
+        return [dict(zip(keys, x)) for x in students]
+
+    def notebook_submission_dicts(self, notebook_id, assignment_id):
+        """Returns a list of dictionaries containing submission data. Equivalent
+        to calling SubmittedNotebook.to_dict() for each submission, except that 
+        this method is implemented using proper SQL joins and is much faster.
+
+        Parameters
+        ----------
+        notebook_id : string
+            the name of the notebook
+        assignment_id : string
+            the name of the assignment
+
+        """
+        # subquery the code scores
+        code_scores = self.db.query(
+            SubmittedNotebook.id,
+            func.sum(Grade.score).label("code_score"), 
+            func.sum(GradeCell.max_score).label("max_code_score"),
+        ).join(SubmittedAssignment, Notebook, Assignment, Student, Grade, GradeCell)\
+         .filter(GradeCell.cell_type == "code")\
+         .group_by(SubmittedNotebook.id)\
+         .subquery()
+
+        # subquery for the written scores
+        written_scores = self.db.query(
+            SubmittedNotebook.id,
+            func.sum(Grade.score).label("written_score"), 
+            func.sum(GradeCell.max_score).label("max_written_score"),
+        ).join(SubmittedAssignment, Notebook, Assignment, Student, Grade, GradeCell)\
+         .filter(GradeCell.cell_type == "markdown")\
+         .group_by(SubmittedNotebook.id)\
+         .subquery()
+
+        # subquery for needing manual grading
+        manual_grade = self.db.query(
+            SubmittedNotebook.id,
+            exists().where(Grade.needs_manual_grade).label("needs_manual_grade")
+        ).join(SubmittedAssignment, Assignment, Notebook)\
+         .filter(
+             Grade.notebook_id == SubmittedNotebook.id,
+             Grade.needs_manual_grade)\
+         .group_by(SubmittedNotebook.id)\
+         .subquery()
+
+        # full query
+        submissions = self.db.query(
+            SubmittedNotebook.id, Notebook.name, Student.id,
+            func.sum(Grade.score), func.sum(GradeCell.max_score),
+            code_scores.c.code_score, code_scores.c.max_code_score,
+            written_scores.c.written_score, written_scores.c.max_written_score,
+            func.coalesce(manual_grade.c.needs_manual_grade, False)
+        ).join(SubmittedAssignment, Notebook, Assignment, Student, Grade, GradeCell)\
+         .outerjoin(code_scores, SubmittedNotebook.id == code_scores.c.id)\
+         .outerjoin(written_scores, SubmittedNotebook.id == written_scores.c.id)\
+         .outerjoin(manual_grade, SubmittedNotebook.id == manual_grade.c.id)\
+         .filter(and_(
+             Notebook.name == notebook_id,
+             Assignment.name == assignment_id,
+             Student.id == SubmittedAssignment.student_id,
+             SubmittedAssignment.id == SubmittedNotebook.assignment_id,
+             SubmittedNotebook.id == Grade.notebook_id,
+             GradeCell.id == Grade.cell_id))\
+         .group_by(Student.id)\
+         .all()
+
+        keys = [
+            "id", "name", "student", 
+            "score", "max_score", 
+            "code_score", "max_code_score", 
+            "written_score", "max_written_score",
+            "needs_manual_grade"
+        ]
+        return [dict(zip(keys, x)) for x in submissions]
