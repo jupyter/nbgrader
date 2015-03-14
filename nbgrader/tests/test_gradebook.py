@@ -308,4 +308,105 @@ class TestGradebook(object):
         self.gb.add_submission('foo', 'hacker123')
         assert_raises(InvalidEntry, self.gb.add_submission, 'foo', 'hacker123')
 
+    ### Test average scores
 
+    def test_average_assignment_score(self):
+        self._add_assignment()
+        self.gb.add_student('hacker123')
+        self.gb.add_student('bitdiddle')
+        self.gb.add_submission('foo', 'hacker123')
+        self.gb.add_submission('foo', 'bitdiddle')
+
+        assert_equal(self.gb.average_assignment_score('foo'), 0.0)
+        assert_equal(self.gb.average_assignment_code_score('foo'), 0.0)
+        assert_equal(self.gb.average_assignment_written_score('foo'), 0.0)
+
+        g1 = self.gb.find_grade("test1", "p1", "foo", "hacker123")
+        g2 = self.gb.find_grade("test2", "p1", "foo", "hacker123")
+        g3 = self.gb.find_grade("test1", "p1", "foo", "bitdiddle")
+        g4 = self.gb.find_grade("test2", "p1", "foo", "bitdiddle")
+
+        g1.manual_score = 0.5
+        g2.manual_score = 2
+        g3.manual_score = 1
+        g4.manual_score = 1
+        self.gb.db.commit()
+
+        assert_equal(self.gb.average_assignment_score('foo'), 2.25)
+        assert_equal(self.gb.average_assignment_code_score('foo'), 0.75)
+        assert_equal(self.gb.average_assignment_written_score('foo'), 1.5)
+
+    def test_average_notebook_score(self):
+        self._add_assignment()
+        self.gb.add_student('hacker123')
+        self.gb.add_student('bitdiddle')
+        self.gb.add_submission('foo', 'hacker123')
+        self.gb.add_submission('foo', 'bitdiddle')
+
+        assert_equal(self.gb.average_notebook_score('p1', 'foo'), 0.0)
+        assert_equal(self.gb.average_notebook_code_score('p1', 'foo'), 0.0)
+        assert_equal(self.gb.average_notebook_written_score('p1', 'foo'), 0.0)
+
+        g1 = self.gb.find_grade("test1", "p1", "foo", "hacker123")
+        g2 = self.gb.find_grade("test2", "p1", "foo", "hacker123")
+        g3 = self.gb.find_grade("test1", "p1", "foo", "bitdiddle")
+        g4 = self.gb.find_grade("test2", "p1", "foo", "bitdiddle")
+
+        g1.manual_score = 0.5
+        g2.manual_score = 2
+        g3.manual_score = 1
+        g4.manual_score = 1
+        self.gb.db.commit()
+
+        assert_equal(self.gb.average_notebook_score('p1', 'foo'), 2.25)
+        assert_equal(self.gb.average_notebook_code_score('p1', 'foo'), 0.75)
+        assert_equal(self.gb.average_notebook_written_score('p1', 'foo'), 1.5)
+
+    ## Test mass dictionary queries
+
+    def test_student_dicts(self):
+        self._add_assignment()
+        self.gb.add_student('hacker123')
+        self.gb.add_student('bitdiddle')
+        self.gb.add_submission('foo', 'hacker123')
+        self.gb.add_submission('foo', 'bitdiddle')
+
+        g1 = self.gb.find_grade("test1", "p1", "foo", "hacker123")
+        g2 = self.gb.find_grade("test2", "p1", "foo", "hacker123")
+        g3 = self.gb.find_grade("test1", "p1", "foo", "bitdiddle")
+        g4 = self.gb.find_grade("test2", "p1", "foo", "bitdiddle")
+
+        g1.manual_score = 0.5
+        g2.manual_score = 2
+        g3.manual_score = 1
+        g4.manual_score = 1
+        self.gb.db.commit()
+
+        students = self.gb.student_dicts()
+        assert_equal(
+            sorted(students, key=lambda x: x["id"]),
+            sorted([x.to_dict() for x in self.gb.students], key=lambda x: x["id"]))
+
+    def test_notebook_submission_dicts(self):
+        self._add_assignment()
+        self.gb.add_student('hacker123')
+        self.gb.add_student('bitdiddle')
+        self.gb.add_submission('foo', 'hacker123')
+        self.gb.add_submission('foo', 'bitdiddle')
+
+        g1 = self.gb.find_grade("test1", "p1", "foo", "hacker123")
+        g2 = self.gb.find_grade("test2", "p1", "foo", "hacker123")
+        g3 = self.gb.find_grade("test1", "p1", "foo", "bitdiddle")
+        g4 = self.gb.find_grade("test2", "p1", "foo", "bitdiddle")
+
+        g1.manual_score = 0.5
+        g2.manual_score = 2
+        g3.manual_score = 1
+        g4.manual_score = 1
+        self.gb.db.commit()
+
+        notebook = self.gb.find_notebook("p1", "foo")
+        submissions = self.gb.notebook_submission_dicts("p1", "foo")
+        assert_equal(
+            sorted(submissions, key=lambda x: x["id"]),
+            sorted([x.to_dict() for x in notebook.submissions], key=lambda x: x["id"]))
