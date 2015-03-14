@@ -2,11 +2,9 @@ import datetime
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, scoped_session
-from nose.tools import assert_equal as _assert_equal
+from nose.tools import assert_equal
 
 from nbgrader import api
-
-assert_equal = lambda x, y: _assert_equal(x, y)
 
 
 class TestApi(object):

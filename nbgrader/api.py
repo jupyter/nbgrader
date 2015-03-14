@@ -8,7 +8,6 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.sql import and_
-from sqlalchemy.sql.expression import cast
 from sqlalchemy import select, func, exists, case, literal_column
 
 from uuid import uuid4
