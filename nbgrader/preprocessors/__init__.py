@@ -7,6 +7,6 @@ from .displayautogrades import DisplayAutoGrades
 from .computechecksums import ComputeChecksums
 from .savecells import SaveCells
 from .overwritecells import OverwriteCells
-from .checkgradeids import CheckGradeIds
+from .checkcellmetadata import CheckCellMetadata
 from .execute import Execute
 from .getgrades import GetGrades
