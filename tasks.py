@@ -70,6 +70,22 @@ def check_docs_input(root='.'):
 @task
 def check_docs_output(root='.'):
     """Check that none of the cells in the documentation has errors."""
+
+    error_msg = dedent(
+        """
+
+        Notebook '{}' was not successfully executed. The cell that failed was:
+
+        ```
+        {}
+        ```
+
+        And the error was:
+
+        {}
+        """
+    )
+
     echo("Checking that all docs were successfully executed...")
     for dirpath, dirnames, filenames in os.walk(root):
         # skip example directory -- those files are allowed to have errors
@@ -91,8 +107,8 @@ def check_docs_output(root='.'):
                         continue
                     for output in cell.outputs:
                         if output.output_type == 'error':
-                            raise RuntimeError(
-                                "Notebook '{}' was not successfully executed".format(pth))
+                            raise RuntimeError(error_msg.format(
+                                pth, cell.source, "\n".join(output.traceback)))
 
 @task
 def docs(root='docs'):
