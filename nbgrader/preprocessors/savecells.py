@@ -32,7 +32,7 @@ class SaveCells(Preprocessor):
             max_score = float(cell.metadata.nbgrader['points'])
             cell_type = cell.cell_type
             source = cell.source
-            checksum = cell.metadata.nbgrader['checksum']
+            checksum = cell.metadata.nbgrader.get('checksum', None)
 
             grade_cell = self.gradebook.update_or_create_grade_cell(
                 cell.metadata.nbgrader['grade_id'],
@@ -48,7 +48,7 @@ class SaveCells(Preprocessor):
         if utils.is_solution(cell):
             cell_type = cell.cell_type
             source = cell.source
-            checksum = cell.metadata.nbgrader['checksum']
+            checksum = cell.metadata.nbgrader.get('checksum', None)
 
             solution_cell = self.gradebook.update_or_create_solution_cell(
                 self.comment_index,

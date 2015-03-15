@@ -66,7 +66,7 @@ class SaveAutoGrades(Preprocessor):
 
         if comment.comment:
             return
-        elif cell.metadata.nbgrader["checksum"] == utils.compute_checksum(cell):
+        elif cell.metadata.nbgrader.get("checksum", None) == utils.compute_checksum(cell):
             comment.comment = "No response."
             self.gradebook.db.commit()
             self.log.debug(comment)
