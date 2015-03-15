@@ -16,6 +16,6 @@ if group == 'js':
 
 else:
     print("Running nosetests...")
-    code = subprocess.call("nosetests --with-coverage --cover-package nbgrader")
+    code = subprocess.call(["nosetests", "--with-coverage", "--cover-package", "nbgrader"])
 
 sys.exit(code)
