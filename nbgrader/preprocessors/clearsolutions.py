@@ -98,4 +98,11 @@ class ClearSolutions(Preprocessor):
             else:
                 cell.source = self.text_stub
 
+        # if we replaced a solution region, then make sure the cell is marked
+        # as a solution cell
+        if replaced_solution:
+            if 'nbgrader' not in cell.metadata:
+                cell.metadata.nbgrader = {}
+            cell.metadata.nbgrader['solution'] = True
+
         return cell, resources

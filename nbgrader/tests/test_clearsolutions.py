@@ -102,12 +102,12 @@ class TestClearSolutions(TestBase):
             ).strip()
         )
 
-    def test_preprocess_code_cell_solution(self):
+    def test_preprocess_code_solution_cell_solution_region(self):
         """Is a code solution cell correctly cleared when there is a solution region?"""
         cell = self._create_code_cell()
         cell.metadata['nbgrader'] = dict(solution=True)
-
         cell = self.preprocessor.preprocess_cell(cell, {}, 1)[0]
+
         assert_equal(
             cell.source,
             dedent(
@@ -118,8 +118,26 @@ class TestClearSolutions(TestBase):
                 """
             ).strip()
         )
+        assert cell.metadata.nbgrader['solution']
 
-    def test_preprocess_code_cell_solution_no_region(self):
+    def test_preprocess_code_cell_solution_region(self):
+        """Is a code cell correctly cleared when there is a solution region?"""
+        cell = self._create_code_cell()
+        cell = self.preprocessor.preprocess_cell(cell, {}, 1)[0]
+
+        assert_equal(
+            cell.source,
+            dedent(
+                """
+                print("something")
+                # YOUR CODE HERE
+                raise NotImplementedError()
+                """
+            ).strip()
+        )
+        assert cell.metadata.nbgrader['solution']
+
+    def test_preprocess_code_solution_cell_no_region(self):
         """Is a code solution cell correctly cleared when there is no solution region?"""
         cell = self._create_code_cell()
         cell.source = """print("the answer!")"""
@@ -136,16 +154,38 @@ class TestClearSolutions(TestBase):
             ).strip()
         )
 
-    def test_preprocess_text_cell_solution(self):
-        """Is a text grade cell correctly cleared when there is a solution region?"""
+        assert cell.metadata.nbgrader['solution']
+
+    def test_preprocess_code_cell_no_region(self):
+        """Is a code cell not cleared when there is no solution region?"""
+        cell = self._create_code_cell()
+        cell.source = """print("the answer!")"""
+        cell.metadata['nbgrader'] = dict()
+        cell = self.preprocessor.preprocess_cell(cell, {}, 1)[0]
+
+        assert_equal(cell.source, """print("the answer!")""")
+        assert not cell.metadata.nbgrader.get('solution', False)
+
+    def test_preprocess_text_solution_cell_no_region(self):
+        """Is a text grade cell correctly cleared when there is no solution region?"""
         cell = self._create_text_cell()
         cell.metadata['nbgrader'] = dict(solution=True)
-
         cell = self.preprocessor.preprocess_cell(cell, {}, 1)[0]
-        assert_equal(cell.source, "YOUR ANSWER HERE")
 
-    def test_preprocess_text_cell_solution_no_region(self):
+        assert_equal(cell.source, "YOUR ANSWER HERE")
+        assert cell.metadata.nbgrader['solution']
+
+    def test_preprocess_text_cell_no_region(self):
         """Is a text grade cell correctly cleared when there is no solution region?"""
+        cell = self._create_text_cell()
+        cell.metadata['nbgrader'] = dict()
+        cell = self.preprocessor.preprocess_cell(cell, {}, 1)[0]
+
+        assert_equal(cell.source, "this is the answer!\n")
+        assert not cell.metadata.nbgrader.get('solution', False)
+
+    def test_preprocess_text_solution_cell_region(self):
+        """Is a text grade cell correctly cleared when there is a solution region?"""
         cell = self._create_text_cell()
         cell.source = dedent(
             """
@@ -159,6 +199,23 @@ class TestClearSolutions(TestBase):
 
         cell = self.preprocessor.preprocess_cell(cell, {}, 1)[0]
         assert_equal(cell.source, "something something\nYOUR ANSWER HERE")
+        assert cell.metadata.nbgrader['solution']
+
+    def test_preprocess_text_cell_region(self):
+        """Is a text grade cell correctly cleared when there is a solution region?"""
+        cell = self._create_text_cell()
+        cell.source = dedent(
+            """
+            something something
+            ### BEGIN SOLUTION
+            this is the answer!
+            ### END SOLUTION
+            """
+        ).strip()
+
+        cell = self.preprocessor.preprocess_cell(cell, {}, 1)[0]
+        assert_equal(cell.source, "something something\nYOUR ANSWER HERE")
+        assert cell.metadata.nbgrader['solution']
 
     def _test_preprocess_notebook(self, name):
         """Is the test notebook processed without error?"""
