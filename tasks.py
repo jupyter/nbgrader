@@ -102,9 +102,8 @@ def docs(root='docs'):
     cwd = os.getcwd()
     os.chdir(root)
 
-    # cleanup, just to be safe
-    run('rm -rf user_guide/release_example/student')
-    run('rm -rf user_guide/grade_example/autograded')
+    # cleanup ignored files
+    run('git clean -fdX docs')
 
     # make sure all the docs have been cleared
     check_docs_input(root='.')
@@ -152,7 +151,7 @@ def clear_docs(root='docs'):
                 new_nb = deepcopy(orig_nb)
 
                 # check outputs of all the cells
-                new_nb = preprocessor(new_nb, {})[0]
+                new_nb = preprocessor.preprocess(new_nb, {})[0]
 
                 # clear metadata
                 new_nb.metadata = {}
