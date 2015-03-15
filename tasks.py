@@ -34,7 +34,7 @@ def check_docs_input(root='.'):
         if _check_if_directory_in_path(dirpath, 'submitted'):
             continue
 
-        for filename in filenames:
+        for filename in sorted(filenames):
             if os.path.splitext(filename)[1] == '.ipynb':
                 # read in the notebook
                 pth = os.path.join(dirpath, filename)
@@ -98,7 +98,7 @@ def check_docs_output(root='.'):
         if _check_if_directory_in_path(dirpath, 'grade_example'):
             continue
 
-        for filename in filenames:
+        for filename in sorted(filenames):
             if os.path.splitext(filename)[1] == '.ipynb':
                 # read in the notebook
                 pth = os.path.join(dirpath, filename)
@@ -172,7 +172,7 @@ def clear_docs(root='docs'):
         if _check_if_directory_in_path(dirpath, 'submitted'):
             continue
 
-        for filename in filenames:
+        for filename in sorted(filenames):
             if os.path.splitext(filename)[1] == '.ipynb':
                 # read in the notebook
                 pth = os.path.join(dirpath, filename)
