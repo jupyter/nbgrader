@@ -165,6 +165,8 @@ def clear_docs(root='docs'):
 
 @task
 def publish_docs(github_token, git_name, git_email):
+    echo("Publishing documentation to 'docs' branch...")
+
     # setup the remote
     run('git remote set-url --push origin https://github.com/jupyter/nbgrader.git')
     run('git remote set-branches --add origin docs')
@@ -228,3 +230,5 @@ def after_success(group='', python_version=None, pull_request=None):
         run('git push origin docs')
     elif group == '' and python_version == '3.4':
         run('coveralls')
+    else:
+        echo('Nothing to do.')
