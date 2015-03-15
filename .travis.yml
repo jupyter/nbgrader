@@ -29,30 +29,6 @@ install:
   - python setup.py install
   - if [[ $GROUP == 'js' ]]; then cp nbextensions/* $(ipython locate)/nbextensions/; fi
 script:
-  |
-  if [[ $GROUP != 'docs' ]]; then 
-    ./scripts/runtests $GROUP
-  elif [[ $TRAVIS_PYTHON_VERSION == 3.4 ]]; then
-    if [[ $TRAVIS_PULL_REQUEST == false ]]; then
-      git remote set-url --push origin https://github.com/jupyter/nbgrader.git
-      git remote set-branches --add origin docs
-      git fetch -q
-      git config user.name "${GIT_NAME}"
-      git config user.email "${GIT_EMAIL}"
-      git config credential.helper "store --file=.git/credentials"
-      echo "https://${GH_TOKEN}:@github.com" > .git/credentials
-      git branch docs origin/docs
-      invoke publish_docs --ref=$(git rev-parse HEAD)
-    else
-      cd docs
-      invoke docs
-    fi
-  fi
-after_success:
-  |
-  if [[ $TRAVIS_PULL_REQUEST == false && $TRAVIS_PYTHON_VERSION == 3.4 && $GROUP == 'docs' ]]; then
-    git checkout docs
-    git push origin docs
-  elif [[ $TRAVIS_PYTHON_VERSION == 3.4 && $GROUP == '' ]]; then
-    coveralls
-  fi
+  - invoke tests --group="${GROUP}" --python-version="${TRAVIS_PYTHON_VERSION}" --pull-request="${TRAVIS_PULL_REQUEST}" --github-token="${GH_TOKEN}" --git-name="${GIT_NAME}" --git-email="${GIT_EMAIL}"
+after_success:  
+  - invoke after_success --group="${GROUP}" --python-version="${TRAVIS_PYTHON_VERSION}" --pull-request="${TRAVIS_PULL_REQUEST}"

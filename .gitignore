@@ -60,3 +60,4 @@ target/
 docs/user_guide/grade_example/autograded
 docs/user_guide/grade_example/feedback
 docs/user_guide/release_example/student
+docs/user_guide/nbgrader_example.db
