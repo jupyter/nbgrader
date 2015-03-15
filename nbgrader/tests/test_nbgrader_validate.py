@@ -37,8 +37,34 @@ class TestNbgraderValidate(TestBase):
             output = self._run_command('nbgrader validate submitted-grade-cell-changed.ipynb')
             assert_equal(output.split("\n")[0], "THE CONTENTS OF 1 TEST CELL(S) HAVE CHANGED! This might mean that even though the tests")
 
+    def test_grade_cell_changed_ignore_checksums(self):
+        """Does the validate pass if a grade cell has changed but we're ignoring checksums?"""
+        with self._temp_cwd(["files/submitted-grade-cell-changed.ipynb"]):
+            output = self._run_command(
+                'nbgrader validate submitted-grade-cell-changed.ipynb '
+                '--DisplayAutoGrades.ignore_checksums=True')
+            assert_equal(output.split("\n")[0], "Success! Your notebook passes all the tests.")
+
     def test_invert_grade_cell_changed(self):
         """Does the validate fail if a grade cell has changed, even with --invert?"""
         with self._temp_cwd(["files/submitted-grade-cell-changed.ipynb"]):
             output = self._run_command('nbgrader validate submitted-grade-cell-changed.ipynb --invert')
             assert_equal(output.split("\n")[0], "THE CONTENTS OF 1 TEST CELL(S) HAVE CHANGED! This might mean that even though the tests")
+
+    def test_invert_grade_cell_changed(self):
+        """Does the validate fail if a grade cell has changed with --invert and ignoring checksums?"""
+        with self._temp_cwd(["files/submitted-grade-cell-changed.ipynb"]):
+            output = self._run_command(
+                'nbgrader validate submitted-grade-cell-changed.ipynb '
+                '--invert '
+                '--DisplayAutoGrades.ignore_checksums=True')
+            assert_equal(output.split("\n")[0], "NOTEBOOK PASSED ON 2 CELL(S)!")
+
+    def test_validate_unchanged_ignore_checksums(self):
+        """Does the validation fail on an unchanged notebook with ignoring checksums?"""
+        with self._temp_cwd(["files/submitted-unchanged.ipynb"]):
+            output = self._run_command(
+                'nbgrader validate submitted-unchanged.ipynb '
+                '--DisplayAutoGrades.ignore_checksums=True')
+            assert_equal(output.split("\n")[0], "VALIDATION FAILED ON 1 CELL(S)! If you submit your assignment as it is, you WILL NOT")
+
