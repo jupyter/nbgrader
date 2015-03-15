@@ -4,6 +4,7 @@ import tempfile
 import datetime
 import tarfile
 import glob
+from dateutil.tz import gettz
 
 from textwrap import dedent
 
@@ -16,7 +17,8 @@ aliases = {}
 aliases.update(nbgrader_aliases)
 aliases.update({
     "assignment": "SubmitApp.assignment_id",
-    "submit-dir": "SubmitApp.submissions_directory"
+    "submit-dir": "SubmitApp.submissions_directory",
+    "timezone": "SubmitApp.timezone"
 })
 
 flags = {}
@@ -39,7 +41,15 @@ class SubmitApp(BaseNbGraderApp):
     ))
 
     student = Unicode(os.environ['USER'])
-    timestamp = Unicode(str(datetime.datetime.now()))
+
+    timezone = Unicode(
+        "UTC", config=True, 
+        help="Timezone for recording timestamps")
+
+    timestamp_format = Unicode(
+        "%Y-%m-%d %H:%M:%S %Z", config=True, 
+        help="Format string for timestamps")
+
     assignment_directory = Unicode(
         '.', config=True, 
         help=dedent(
@@ -83,7 +93,7 @@ class SubmitApp(BaseNbGraderApp):
     )
 
     @catch_config_error
-    def initialize(self, argv=None):        
+    def initialize(self, argv=None):
         super(SubmitApp, self).initialize(argv)
 
         if not os.path.exists(self.submissions_directory):
@@ -93,6 +103,12 @@ class SubmitApp(BaseNbGraderApp):
 
         if self.assignment_id == '':
             self.assignment_id = os.path.basename(self.assignment_directory)
+
+        # record the timestamp
+        tz = gettz(self.timezone)
+        if tz is None:
+            raise ValueError("Invalid timezone: {}".format(self.timezone))
+        self.timestamp = datetime.datetime.now(tz).strftime(self.timestamp_format)
 
     def init_assignment_root(self):
         # Specifying notebooks on the command-line overrides (rather than adds)
