@@ -1,17 +1,113 @@
 import os
 from invoke import task
 from invoke import run as _run
+from copy import deepcopy
+from textwrap import dedent
+
+from IPython.nbformat import read, write
+from IPython.nbconvert.preprocessors import ClearOutputPreprocessor
 
 def run(*args, **kwargs):
     if 'pty' not in kwargs:
         kwargs['pty'] = True
+    if 'echo' not in kwargs:
+        kwargs['echo'] = True
     return _run(*args, **kwargs)
 
+def echo(msg):
+    print("\033[1;37m{0}\033[0m".format(msg))
+
+def _check_if_directory_in_path(pth, target):
+    while pth != '':
+        pth, dirname = os.path.split(pth)
+        if dirname == target:
+            return True
+    return False
+
 @task
-def docs():
+def check_docs_input(root='.'):
+    """Check that docs have output cleared."""
+    echo("Checking that all docs have cleared outputs...")
+    bad = []
+    for dirpath, dirnames, filenames in os.walk(root):
+        # skip submitted directory -- those files are allowed to have outputs
+        if _check_if_directory_in_path(dirpath, 'submitted'):
+            continue
+
+        for filename in filenames:
+            if os.path.splitext(filename)[1] == '.ipynb':
+                # read in the notebook
+                pth = os.path.join(dirpath, filename)
+                with open(pth, 'r') as fh:
+                    nb = read(fh, 4)
+
+                # check notebook metadata
+                if len(nb.metadata) != 0:
+                    bad.append(pth)
+                    continue
+
+                # check outputs of all the cells
+                for cell in nb.cells:
+                    if cell.cell_type != 'code':
+                        continue
+                    if len(cell.outputs) != 0 or cell.execution_count is not None:
+                        bad.append(pth)
+                        break
+
+    if len(bad) > 0:
+        raise RuntimeError(dedent(
+            """
+
+            The following notebooks have not been properly cleared:
+
+            {}
+
+            Please run 'invoke clear_docs' from the root of the repository
+            in order to clear the outputs of these notebooks.
+            """.format(bad)
+        ))
+
+@task
+def check_docs_output(root='.'):
+    """Check that none of the cells in the documentation has errors."""
+    echo("Checking that all docs were successfully executed...")
+    for dirpath, dirnames, filenames in os.walk(root):
+        # skip example directory -- those files are allowed to have errors
+        if _check_if_directory_in_path(dirpath, 'release_example'):
+            continue
+        if _check_if_directory_in_path(dirpath, 'grade_example'):
+            continue
+
+        for filename in filenames:
+            if os.path.splitext(filename)[1] == '.ipynb':
+                # read in the notebook
+                pth = os.path.join(dirpath, filename)
+                with open(pth, 'r') as fh:
+                    nb = read(fh, 4)
+
+                # check outputs of all the cells
+                for cell in nb.cells:
+                    if cell.cell_type != 'code':
+                        continue
+                    for output in cell.outputs:
+                        if output.output_type == 'error':
+                            raise RuntimeError(
+                                "Notebook '{}' was not successfully executed".format(pth))
+
+@task
+def docs(root='docs'):
+    """Build documentation."""
+    echo("Building documentation from '{}'...".format(os.path.abspath(root)))
+
+    cwd = os.getcwd()
+    os.chdir(root)
+
     # cleanup, just to be safe
     run('rm -rf user_guide/release_example/student')
     run('rm -rf user_guide/grade_example/autograded')
+
+    # make sure all the docs have been cleared
+    check_docs_input(root='.')
 
     # build the docs
     run(
@@ -28,6 +124,45 @@ def docs():
         '--FilesWriter.build_directory=user_guide '
         '--profile-dir=/tmp '
         'user_guide/*.ipynb')
+
+    # make sure the notebooks were executed successfully
+    check_docs_output(root='.')
+
+    os.chdir(cwd)
+
+@task
+def clear_docs(root='docs'):
+    """Clear the outputs of documentation notebooks."""
+    echo("Clearing outputs of notebooks in '{}'...".format(os.path.abspath(root)))
+    preprocessor = ClearOutputPreprocessor()
+
+    for dirpath, dirnames, filenames in os.walk(root):
+        # skip submitted directory -- those files are allowed to have outputs
+        if _check_if_directory_in_path(dirpath, 'submitted'):
+            continue
+
+        for filename in filenames:
+            if os.path.splitext(filename)[1] == '.ipynb':
+                # read in the notebook
+                pth = os.path.join(dirpath, filename)
+                with open(pth, 'r') as fh:
+                    orig_nb = read(fh, 4)
+
+                # copy the original notebook
+                new_nb = deepcopy(orig_nb)
+
+                # check outputs of all the cells
+                new_nb = preprocessor(new_nb, {})[0]
+
+                # clear metadata
+                new_nb.metadata = {}
+
+                # write the notebook back to disk
+                with open(pth, 'w') as fh:
+                    write(new_nb, fh, 4)
+
+                if orig_nb != new_nb:
+                    print("Cleared '{}'".format(pth))
 
 @task
 def publish_docs(github_token, git_name, git_email):
@@ -53,7 +188,7 @@ def publish_docs(github_token, git_name, git_email):
     run('git checkout {} -- docs'.format(commit))
     run('mv docs/* . && rmdir docs')
 
-    docs()
+    docs(root='.')
 
     # commit the changes
     run('git add -A -f')
@@ -82,7 +217,7 @@ def tests(group='', python_version=None, pull_request=None, github_token=None, g
         if python_version == '3.4' and pull_request == 'false':
             publish_docs(github_token, git_name, git_email)
         else:
-            docs()
+            docs(root='docs')
 
     else:
         raise ValueError("Invalid test group: {}".format(group))
