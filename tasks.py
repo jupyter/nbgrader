@@ -132,6 +132,10 @@ def docs(root='docs'):
 @task
 def clear_docs(root='docs'):
     """Clear the outputs of documentation notebooks."""
+
+    # cleanup ignored files
+    run('git clean -fdX {}'.format(root))
+
     echo("Clearing outputs of notebooks in '{}'...".format(os.path.abspath(root)))
     preprocessor = ClearOutputPreprocessor()
 
