@@ -168,9 +168,7 @@ def clear_docs(root='docs'):
     preprocessor = ClearOutputPreprocessor()
 
     for dirpath, dirnames, filenames in os.walk(root):
-        # skip submitted directory -- those files are allowed to have outputs
-        if _check_if_directory_in_path(dirpath, 'submitted'):
-            continue
+        is_submitted = _check_if_directory_in_path(dirpath, 'submitted')
 
         for filename in sorted(filenames):
             if os.path.splitext(filename)[1] == '.ipynb':
@@ -183,7 +181,8 @@ def clear_docs(root='docs'):
                 new_nb = deepcopy(orig_nb)
 
                 # check outputs of all the cells
-                new_nb = preprocessor.preprocess(new_nb, {})[0]
+                if not is_submitted:
+                    new_nb = preprocessor.preprocess(new_nb, {})[0]
 
                 # clear metadata
                 new_nb.metadata = {}
