@@ -14,6 +14,17 @@ class DisplayAutoGrades(Preprocessor):
     width = Integer(90, config=True)
     invert = Bool(False, config=True, help="Complain when cells pass, rather than fail.")
 
+    ignore_checksums = Bool(
+        False, config=True, 
+        help=dedent(
+            """
+            Don't complain if cell checksums have changed (if they are code
+            grade cells) or haven't changed (if they are markdown solution
+            and grade cells)
+            """
+        )
+    )
+
     changed_warning = Unicode(
         dedent(
             """
@@ -90,7 +101,7 @@ class DisplayAutoGrades(Preprocessor):
         num_failed = len(resources['nbgrader']['failed_cells'])
         num_passed = len(resources['nbgrader']['passed_cells'])
 
-        if num_changed > 0:
+        if not self.ignore_checksums and num_changed > 0:
             print(fill(
                 self.changed_warning.format(num_changed=num_changed),
                 width=self.width))
@@ -127,6 +138,11 @@ class DisplayAutoGrades(Preprocessor):
     def preprocess_cell(self, cell, resources, cell_index):
         if not utils.is_grade(cell):
             return cell, resources
+
+        # if we're ignoring checksums, then remove the checksum from the
+        # cell metadata
+        if self.ignore_checksums and 'checksum' in cell.metadata.nbgrader:
+            del cell.metadata.nbgrader['checksum']
 
         # verify checksums of cells
         if not utils.is_solution(cell) and 'checksum' in cell.metadata.nbgrader:
