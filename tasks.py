@@ -80,7 +80,11 @@ def check_docs_output(root='.'):
         {}
         ```
 
-        And the error was:
+        It generated the following output:
+
+        {}
+
+        The actual error was:
 
         {}
         """
@@ -105,10 +109,18 @@ def check_docs_output(root='.'):
                 for cell in nb.cells:
                     if cell.cell_type != 'code':
                         continue
+
+                    error = ""
+                    stdout = ""
                     for output in cell.outputs:
                         if output.output_type == 'error':
-                            raise RuntimeError(error_msg.format(
-                                pth, cell.source, "\n".join(output.traceback)))
+                            error = "\n".join(output.traceback)
+                        elif output.output_type == 'stream':
+                            stdout += output.text
+
+                    if error != "":
+                        raise RuntimeError(error_msg.format(
+                            pth, cell.source, stdout, error))
 
 @task
 def docs(root='docs'):
