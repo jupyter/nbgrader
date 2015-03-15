@@ -12,7 +12,7 @@ from nbgrader.preprocessors import (
     LockCells,
     ComputeChecksums,
     SaveCells,
-    CheckGradeIds
+    CheckCellMetadata
 )
 
 aliases = {}
@@ -88,10 +88,10 @@ class AssignApp(BaseNbConvertApp):
         classes = super(AssignApp, self)._classes_default()
         classes.extend([
             IncludeHeaderFooter,
-            CheckGradeIds,
             LockCells,
             ClearSolutions,
             ClearOutputPreprocessor,
+            CheckCellMetadata,
             ComputeChecksums,
             SaveCells
         ])
@@ -101,10 +101,10 @@ class AssignApp(BaseNbConvertApp):
         self.extra_config = Config()
         self.extra_config.Exporter.preprocessors = [
             'nbgrader.preprocessors.IncludeHeaderFooter',
-            'nbgrader.preprocessors.CheckGradeIds',
             'nbgrader.preprocessors.LockCells',
             'nbgrader.preprocessors.ClearSolutions',
             'IPython.nbconvert.preprocessors.ClearOutputPreprocessor',
+            'nbgrader.preprocessors.CheckCellMetadata',
             'nbgrader.preprocessors.ComputeChecksums'
         ]
         if self.save_cells:
