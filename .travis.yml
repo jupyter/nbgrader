@@ -25,7 +25,7 @@ install:
   - if [[ $GROUP == 'js' ]]; then pip install 'tornado<4'; fi
   - cd ~/ipython && git submodule update && pip install -e ".[notebook]" && cd -
   - pip install -r requirements.txt
-  - pip install nose requests!=2.4.2 invoke
+  - pip install nose coverage coveralls requests!=2.4.2 invoke
   - python setup.py install
   - if [[ $GROUP == 'js' ]]; then cp nbextensions/* $(ipython locate)/nbextensions/; fi
 script:
@@ -53,4 +53,6 @@ after_success:
   if [[ $TRAVIS_PULL_REQUEST == false && $TRAVIS_PYTHON_VERSION == 3.4 && $GROUP == 'docs' ]]; then
     git checkout docs
     git push origin docs
+  elif [[ $TRAVIS_PYTHON_VERSION == 3.4 && $GROUP == '' ]]; then
+    coveralls
   fi
