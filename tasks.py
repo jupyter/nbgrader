@@ -198,16 +198,16 @@ def clear_docs(root='docs'):
 def publish_docs(github_token, git_name, git_email):
     echo("Publishing documentation to 'docs' branch...")
 
+    # configure git credentials
+    run('git config user.name "{}"'.format(git_name.strip()))
+    run('git config user.email "{}"'.format(git_email.strip()))
+    run('git config credential.helper "store --file=.git/credentials"')
+    run('echo "https://{}:@github.com" > .git/credentials'.format(github_token.strip()), echo=False)
+
     # setup the remote
     run('git remote set-url --push origin https://github.com/jupyter/nbgrader.git')
     run('git remote set-branches --add origin docs')
-    run('git fetch -q')
-
-    # configure git credentials
-    run('git config user.name "{}"'.format(git_name.strip()), echo=False)
-    run('git config user.email "{}"'.format(git_email.strip()), echo=False)
-    run('git config credential.helper "store --file=.git/credentials"', echo=False)
-    run('echo "https://{}:@github.com" > .git/credentials'.format(github_token.strip()), echo=False)
+    run('git fetch origin')
     run('git branch docs origin/docs')
 
     # get the current commit
@@ -226,8 +226,8 @@ def publish_docs(github_token, git_name, git_email):
     run('git add -A -f')
     run('git commit -m "Update docs ({})"'.format(commit))
 
-    # switch back to master
-    run('git checkout {}'.format(ref))
+    # push to origin
+    run('git push -v origin docs')
 
 @task
 def python_tests():
@@ -238,7 +238,7 @@ def js_tests():
     run("iptest js/{}".format(os.path.abspath("nbgrader/tests/js")))
 
 @task
-def tests(group='', python_version=None, pull_request=None, github_token=None, git_name=None, git_email=None):
+def tests(group='', python_version=None, pull_request=None, github_token="", git_name="", git_email=""):
     if group == '':
         python_tests()
 
@@ -256,11 +256,8 @@ def tests(group='', python_version=None, pull_request=None, github_token=None, g
         raise ValueError("Invalid test group: {}".format(group))
 
 @task
-def after_success(group='', python_version=None, pull_request=None):
-    if group == 'docs' and python_version == '3.4' and pull_request == 'false':
-        run('git checkout docs')
-        run('git push origin docs')
-    elif group == '' and python_version == '3.4':
+def after_success(group='', python_version=None):
+    if group == '' and python_version == '3.4':
         run('coveralls')
     else:
         echo('Nothing to do.')
