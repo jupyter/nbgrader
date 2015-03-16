@@ -202,7 +202,8 @@ def publish_docs(github_token, git_name, git_email):
     run('git config user.name "{}"'.format(git_name.strip()))
     run('git config user.email "{}"'.format(git_email.strip()))
     run('git config credential.helper "store --file=.git/credentials"')
-    run('echo "https://{}:@github.com" > .git/credentials'.format(github_token.strip()), echo=False)
+    with open(".git/credentials", "w") as fh:
+        fh.write("https://{}:@github.com".format(github_token.strip()))
 
     # setup the remote
     run('git remote set-url --push origin https://github.com/jupyter/nbgrader.git')
@@ -217,6 +218,7 @@ def publish_docs(github_token, git_name, git_email):
     # switch to the docs branch, and get the latest version from master
     run('git checkout docs')
     run('rm -r *')
+    run('ls -a')
     run('git checkout {} -- docs'.format(commit))
     run('mv docs/* . && rmdir docs')
 
