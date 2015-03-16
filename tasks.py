@@ -246,6 +246,8 @@ def tests(group='', python_version=None, pull_request=None, github_token=None, g
         js_tests()
 
     elif group == 'docs':
+        print("Python version is: {}".format(python_version))
+        print("Pull request is: {}".format(pull_request))
         if python_version == '3.4' and pull_request == 'false':
             publish_docs(github_token, git_name, git_email)
         else:
