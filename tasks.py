@@ -1,4 +1,5 @@
 import os
+import pipes
 from invoke import task
 from invoke import run as _run
 from copy import deepcopy
@@ -199,9 +200,9 @@ def publish_docs(github_token, git_name, git_email):
     echo("Publishing documentation to 'docs' branch...")
 
     # configure git credentials
-    run('git config user.name "{}"'.format(git_name.strip()))
-    run('git config user.email "{}"'.format(git_email.strip()))
-    run('git config credential.helper "store --file=.git/credentials"')
+    run('git config user.name "{}"'.format(git_name.strip()), pty=False)
+    run('git config user.email "{}"'.format(git_email.strip()), pty=False)
+    run('git config credential.helper "store --file=.git/credentials"', pty=False)
     with open(".git/credentials", "w") as fh:
         fh.write("https://{}:@github.com".format(github_token.strip()))
     run('shasum .git/credentials')
@@ -227,7 +228,7 @@ def publish_docs(github_token, git_name, git_email):
 
     # commit the changes
     run('git add -A -f')
-    run('git commit -m "Update docs ({})"'.format(commit))
+    run('git commit -m "Update docs ({})"'.format(commit), pty=False)
 
     # push to origin
     run('git push -v origin docs')
