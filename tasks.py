@@ -202,13 +202,13 @@ def publish_docs(github_token, git_name, git_email):
     run('git remote set-url --push origin https://github.com/jupyter/nbgrader.git')
     run('git remote set-branches --add origin docs')
     run('git fetch -q')
-    run('git branch docs origin/docs')
 
     # configure git credentials
     run('git config user.name "{}"'.format(git_name.strip()), echo=False)
     run('git config user.email "{}"'.format(git_email.strip()), echo=False)
     run('git config credential.helper "store --file=.git/credentials"', echo=False)
     run('echo "https://{}:@github.com" > .git/credentials'.format(github_token.strip()), echo=False)
+    run('git branch docs origin/docs')
 
     # get the current commit
     ref = run('git rev-parse HEAD', pty=False, hide=True).stdout.strip()
