@@ -11,7 +11,7 @@ env:
     - GROUP=js
     - GROUP=
   global:
-    - secure: Zgf4+vp00UXdIlXaoPZfnA58c/O1l6bwJ6YVyz6/rTzBxFViHUYMVe8XoxKRhtfphZj+qrp33kQ/0oljn+rnyXyYmkpZe7MG0ouJ2rrQAm9LoK5R2BPDLA4rgGtunyys96se8Xp9F2cS4xo1rZLwD1PZPo2A8sWBpsCq6j0a2Tg=
+    - secure: "Z7rZ/XnMH3zJBIvUAnBsgz6vddTTs+HMpt6JzzqzqVxiAK0ulxoV9q5kFIn0vCVJ61lu8HaCFTN2StrPdIGvejbirdG8i4ZpBzzg4efD23FWDctA64tNtpr+WH3h3ZgdJr2mzEwloN3gd5M1EN8CTnpKUiYnx6Iw1j1+cFUhxfA="
 before_install:
   # Pierre Carrier's PPA for PhantomJS and CasperJS
   - time sudo add-apt-repository -y ppa:pcarrier/ppa
