@@ -246,9 +246,7 @@ def tests(group='', python_version=None, pull_request=None, github_token=None, g
         js_tests()
 
     elif group == 'docs':
-        print("Python version is: {}".format(python_version))
-        print("Pull request is: {}".format(pull_request))
-        if python_version == '3.4' and pull_request == 'false':
+        if python_version == '3.4':# and pull_request == 'false':
             publish_docs(github_token, git_name, git_email)
         else:
             docs(root='docs')
@@ -258,7 +256,7 @@ def tests(group='', python_version=None, pull_request=None, github_token=None, g
 
 @task
 def after_success(group='', python_version=None, pull_request=None):
-    if group == 'docs' and python_version == '3.4' and pull_request == 'false':
+    if group == 'docs' and python_version == '3.4':# and pull_request == 'false':
         run('git checkout docs')
         run('git push origin docs')
     elif group == '' and python_version == '3.4':
