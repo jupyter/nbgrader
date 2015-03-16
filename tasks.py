@@ -235,7 +235,8 @@ def publish_docs(github_token, git_name, git_email):
 
 @task
 def python_tests():
-    run("nosetests --with-coverage --cover-package nbgrader")
+    run("nosetests --with-coverage --cover-erase --cover-package nbgrader")
+    run("coverage combine")
 
 @task
 def js_tests():

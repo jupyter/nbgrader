@@ -9,7 +9,7 @@ class TestNbgraderSubmit(TestBase):
 
     def test_help(self):
         """Does the help display properly?"""
-        self._run_command(["nbgrader", "submit", "--help-all"])
+        self._run_command("nbgrader submit --help-all")
 
     def test_submit(self):
         """Does everything get properly submitted?"""

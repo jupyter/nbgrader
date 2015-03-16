@@ -1,7 +1,7 @@
 from tornado import ioloop
 from IPython.html.notebookapp import NotebookApp
 
-class FormGradeNotebookApp(NotebookApp):
+class FormgradeNotebookApp(NotebookApp):
     """A Subclass of the regular NotebookApp that can be spawned by the form grader."""
     open_browser = False
 
@@ -14,7 +14,7 @@ class FormGradeNotebookApp(NotebookApp):
     
 
 def main():
-    return FormGradeNotebookApp.launch_instance()
+    return FormgradeNotebookApp.launch_instance()
 
 
 if __name__ == "__main__":

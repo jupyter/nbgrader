@@ -110,13 +110,19 @@ print("hello")
 
     @staticmethod
     def _run_command(command, retcode=0):
+        root = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+        coveragerc = os.path.join(root, ".coveragerc")
+        command = 'COVERAGE_PROCESS_START="{}" '.format(coveragerc) + command
         proc = sp.Popen(command, shell=True, stdout=sp.PIPE, stderr=sp.STDOUT)
         true_retcode = proc.wait()
         output = proc.communicate()[0].decode()
         if true_retcode != retcode:
-            print(output)
             raise AssertionError(
                 "process returned an unexpected return code: {}".format(true_retcode))
+        if os.getcwd() != root:
+            coverage_files = glob.glob(".coverage.*")
+            for filename in coverage_files:
+                shutil.copyfile(filename, os.path.join(root, filename))
         return output
 
     @staticmethod

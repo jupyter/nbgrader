@@ -5,7 +5,7 @@ class TestNbgraderValidate(TestBase):
 
     def test_help(self):
         """Does the help display without error?"""
-        self._run_command(["nbgrader", "validate", "--help-all"])
+        self._run_command("nbgrader validate --help-all")
 
     def test_validate_unchanged(self):
         """Does the validation fail on an unchanged notebook?"""
