@@ -11,7 +11,7 @@ env:
     - GROUP=js
     - GROUP=
   global:
-    - secure: "Z7rZ/XnMH3zJBIvUAnBsgz6vddTTs+HMpt6JzzqzqVxiAK0ulxoV9q5kFIn0vCVJ61lu8HaCFTN2StrPdIGvejbirdG8i4ZpBzzg4efD23FWDctA64tNtpr+WH3h3ZgdJr2mzEwloN3gd5M1EN8CTnpKUiYnx6Iw1j1+cFUhxfA="
+    - secure: Ry2LhsYWOtVppoorTkOXyL6C6cEMw1bfqsHDka76kNSQzkn1HOpFOnVzjQk3kW3QxP9N60vcPlMtMln1jW1tsQRkh2mPT3EI0ugX18R5btR9R69CZSVo0At666HuQeZ6WN/a+pKWpaHYSFlXvSvlkLXkfW++AXbkShWvkD6Z0Hg=
 before_install:
   # Pierre Carrier's PPA for PhantomJS and CasperJS
   - time sudo add-apt-repository -y ppa:pcarrier/ppa
@@ -30,5 +30,5 @@ install:
   - if [[ $GROUP == 'js' ]]; then cp nbextensions/* $(ipython locate)/nbextensions/; fi
 script:
   - invoke tests --group="${GROUP}" --python-version="${TRAVIS_PYTHON_VERSION}" --pull-request="${TRAVIS_PULL_REQUEST}" --github-token="${GH_TOKEN}" --git-name="${GIT_NAME}" --git-email="${GIT_EMAIL}"
-after_success:  
+after_success:
   - invoke after_success --group="${GROUP}" --python-version="${TRAVIS_PYTHON_VERSION}" --pull-request="${TRAVIS_PULL_REQUEST}"
