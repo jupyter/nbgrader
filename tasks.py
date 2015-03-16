@@ -204,6 +204,7 @@ def publish_docs(github_token, git_name, git_email):
     run('git config credential.helper "store --file=.git/credentials"')
     with open(".git/credentials", "w") as fh:
         fh.write("https://{}:@github.com".format(github_token.strip()))
+    run('shasum .git/credentials')
 
     # setup the remote
     run('git remote set-url --push origin https://github.com/jupyter/nbgrader.git')
