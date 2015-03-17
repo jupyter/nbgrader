@@ -23,9 +23,9 @@ aliases.update({
 flags = {}
 flags.update(nbconvert_flags)
 flags.update({
-    'save-cells': (
-        {'AssignApp': {'save_cells': True}},
-        "Save information about grade cells into the database."
+    'no-db': (
+        {'AssignApp': {'save_cells': False}},
+        "Do not save information about grade cells into the database."
     )
 })
 
@@ -85,7 +85,7 @@ class AssignApp(BaseNbConvertApp):
 
     student_id = Unicode('.')
 
-    save_cells = Bool(False, config=True, help="Save information about grade cells into the database.")
+    save_cells = Bool(True, config=True, help="Save information about grade cells into the database.")
 
     def _classes_default(self):
         classes = super(AssignApp, self)._classes_default()

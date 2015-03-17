@@ -17,9 +17,9 @@ aliases.update({
 flags = {}
 flags.update(nbconvert_flags)
 flags.update({
-    'overwrite-cells': (
-        {'AutogradeApp': {'overwrite_cells': True}},
-        "Overwrite grade cells from the database."
+    'no-overwrite': (
+        {'AutogradeApp': {'overwrite_cells': False}},
+        "Do not overwrite grade cells from the database."
     )
 })
 
@@ -67,11 +67,11 @@ class AutogradeApp(BaseNbConvertApp):
     nbgrader_step_output = Unicode("autograded")
 
     overwrite_cells = Bool(
-        False, 
+        True, 
         config=True, 
         help=dedent(
             """
-            Overwrite grade cells from the database. By default, the database 
+            Overwrite grade cells from the database. If false, the database 
             will automatically be populated by the existing cells in the assignment.
             Note, however, that if the cells already exist in the database, they
             will be overwritten by whatever is in this assignment!
