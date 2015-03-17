@@ -21,7 +21,6 @@ aliases.update(nbgrader_aliases)
 aliases.update({
     'ip': 'FormgradeApp.ip',
     'port': 'FormgradeApp.port',
-    'db': 'FormgradeApp.db_url'
 })
 
 flags = {}
@@ -45,44 +44,21 @@ class FormgradeApp(BaseNbGraderApp):
         """
     ))
 
-    db_url = Unicode("sqlite:///gradebook.db", config=True, help="URL to database")
+    nbgrader_step_input = Unicode("autograded")
+    nbgrader_step_output = Unicode("")
+
     ip = Unicode("localhost", config=True, help="IP address for the server")
     port = Integer(5000, config=True, help="Port for the server")
-    base_directory = Unicode('.', config=True, help="Root server directory")
-    directory_format = Unicode('{notebook_id}.ipynb', config=True, help="""Format
-        string for the directory structure of the autograded notebooks""")
     authenticator_class = Type(NoAuth, klass=BaseAuth, config=True, help="""
         Authenticator used in all formgrade requests.""")
     authenticator_instance = Instance(BaseAuth, config=False)
+
+    base_directory = Unicode(os.path.abspath('.'))
 
     def _classes_default(self):
         classes = super(FormgradeApp, self)._classes_default()
         classes.append(HTMLExporter)
         return classes
-
-    def init_server_root(self):
-        # Specifying notebooks on the command-line overrides (rather than adds)
-        # the notebook list
-        if self.extra_args:
-            patterns = self.extra_args
-        else:
-            patterns = [self.base_directory]
-
-        if len(patterns) == 0:
-            self.base_directory = '.'
-
-        elif len(patterns) == 1:
-            self.base_directory = patterns[0]
-
-        else:
-            raise ValueError("Multiple files not supported")
-
-        self.base_directory = os.path.abspath(self.base_directory)
-
-        if not os.path.isdir(self.base_directory):
-            raise ValueError("Path is not a directory: {}".format(self.base_directory))
-
-        self.log.info("Server root is: {}".format(self.base_directory))
 
     def init_signal(self):
         signal.signal(signal.SIGINT, self._signal_stop)
@@ -103,7 +79,6 @@ class FormgradeApp(BaseNbGraderApp):
     def initialize(self, argv=None):
         super(FormgradeApp, self).initialize(argv)
         self.init_signal()
-        self.init_server_root()
 
     def start(self):
         super(FormgradeApp, self).start()
@@ -119,7 +94,8 @@ class FormgradeApp(BaseNbGraderApp):
 
         # now launch the formgrader
         app.notebook_dir = self.base_directory
-        app.notebook_dir_format = self.directory_format
+        app.notebook_dir_format = self.directory_structure
+        app.nbgrader_step = self.nbgrader_step_input
         app.exporter = HTMLExporter(config=self.config)
 
         url = "http://{:s}:{:d}/".format(self.ip, self.port)

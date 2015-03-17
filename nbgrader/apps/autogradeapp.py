@@ -6,14 +6,11 @@ from IPython.nbconvert.preprocessors import ClearOutputPreprocessor
 
 from nbgrader.apps.baseapp import (
     BaseNbConvertApp, nbconvert_aliases, nbconvert_flags)
-from nbgrader.preprocessors import (FindStudentID, SaveAutoGrades, Execute)
+from nbgrader.preprocessors import (SaveAutoGrades, Execute)
 
 aliases = {}
 aliases.update(nbconvert_aliases)
 aliases.update({
-    'assignment': 'AssignmentExporter.assignment_id',
-    'student': 'AssignmentExporter.student_id',
-    'db': 'AssignmentExporter.db_url',
     'timestamp': 'SaveAutoGrades.timestamp'
 })
 
@@ -66,6 +63,9 @@ class AutogradeApp(BaseNbConvertApp):
         """
     ))
 
+    nbgrader_step_input = Unicode("submitted")
+    nbgrader_step_output = Unicode("autograded")
+
     overwrite_cells = Bool(
         False, 
         config=True, 
@@ -82,7 +82,6 @@ class AutogradeApp(BaseNbConvertApp):
     def _classes_default(self):
         classes = super(AutogradeApp, self)._classes_default()
         classes.extend([
-            FindStudentID,
             ClearOutputPreprocessor,
             Execute,
             SaveAutoGrades
@@ -92,7 +91,6 @@ class AutogradeApp(BaseNbConvertApp):
     def build_extra_config(self):
         self.extra_config = Config()
         self.extra_config.Exporter.preprocessors = [
-            'nbgrader.preprocessors.FindStudentID',
             'IPython.nbconvert.preprocessors.ClearOutputPreprocessor'
         ]
         if self.overwrite_cells:

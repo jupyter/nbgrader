@@ -18,8 +18,6 @@ from nbgrader.preprocessors import (
 aliases = {}
 aliases.update(nbconvert_aliases)
 aliases.update({
-    'assignment': 'AssignmentExporter.assignment_id',
-    'db': 'AssignmentExporter.db_url'
 })
 
 flags = {}
@@ -81,6 +79,11 @@ class AssignApp(BaseNbConvertApp):
 
         """
     ))
+
+    nbgrader_step_input = Unicode("source")
+    nbgrader_step_output = Unicode("release")
+
+    student_id = Unicode('.')
 
     save_cells = Bool(False, config=True, help="Save information about grade cells into the database.")
 

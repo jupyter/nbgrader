@@ -173,14 +173,13 @@ def view_submission_files(submission_id, path):
     try:
         submission = app.gradebook.find_submission_notebook_by_id(submission_id)
         assignment_id = submission.assignment.assignment.name
-        notebook_id = submission.notebook.name
         student_id = submission.student.id
     except MissingEntry:
         abort(404)
 
     filename = os.path.join(app.notebook_dir, app.notebook_dir_format.format(
+        nbgrader_step=app.nbgrader_step,
         assignment_id=assignment_id,
-        notebook_id=notebook_id,
         student_id=student_id))
 
     dirname = os.path.split(filename)[0]
@@ -198,7 +197,9 @@ def view_submission(submission_id):
     except MissingEntry:
         abort(404)
 
-    filename = os.path.join(app.notebook_dir, app.notebook_dir_format.format(
+    notebook_dir_format = os.path.join(app.notebook_dir_format, "{notebook_id}.ipynb")
+    filename = os.path.join(app.notebook_dir, notebook_dir_format.format(
+        nbgrader_step=app.nbgrader_step,
         assignment_id=assignment_id,
         notebook_id=notebook_id,
         student_id=student_id))
