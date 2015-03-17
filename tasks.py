@@ -94,9 +94,7 @@ def check_docs_output(root='.'):
     echo("Checking that all docs were successfully executed...")
     for dirpath, dirnames, filenames in os.walk(root):
         # skip example directory -- those files are allowed to have errors
-        if _check_if_directory_in_path(dirpath, 'release_example'):
-            continue
-        if _check_if_directory_in_path(dirpath, 'grade_example'):
+        if _check_if_directory_in_path(dirpath, 'example'):
             continue
 
         for filename in sorted(filenames):
