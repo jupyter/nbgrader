@@ -1,21 +1,19 @@
-import tempfile
-import shutil
-
 from textwrap import dedent
 
 from IPython.config.loader import Config
 from IPython.utils.traitlets import Unicode, Dict
+from IPython.nbconvert.nbconvertapp import NbConvertApp
 from IPython.nbconvert.preprocessors import ClearOutputPreprocessor
 from nbgrader.preprocessors import DisplayAutoGrades, Execute
-from nbgrader.apps.baseapp import BaseNbConvertApp, nbconvert_flags, nbconvert_aliases
+from nbgrader.apps.baseapp import BaseApp, base_flags, base_aliases
 
 aliases = {}
-aliases.update(nbconvert_aliases)
+aliases.update(base_aliases)
 aliases.update({
 })
 
 flags = {}
-flags.update(nbconvert_flags)
+flags.update(base_flags)
 flags.update({
     'invert': (
         {'DisplayAutoGrades': {'invert': True}},
@@ -23,7 +21,7 @@ flags.update({
     )
 })
 
-class ValidateApp(BaseNbConvertApp):
+class ValidateApp(BaseApp, NbConvertApp):
 
     name = Unicode(u'nbgrader-validate')
     description = Unicode(u'Validate a notebook by running it')
@@ -61,6 +59,9 @@ class ValidateApp(BaseNbConvertApp):
         ])
         return classes
 
+    def _export_format_default(self):
+        return 'notebook'
+
     def build_extra_config(self):
         self.extra_config = Config()
         self.extra_config.Exporter.preprocessors = [
@@ -70,10 +71,10 @@ class ValidateApp(BaseNbConvertApp):
         ]
         self.config.merge(self.extra_config)
 
-    def convert_notebooks(self):
-        self.tmpdir = tempfile.mkdtemp()
-        self.writer.build_directory = self.tmpdir
-        try:
-            super(ValidateApp, self).convert_notebooks()
-        finally:
-            shutil.rmtree(self.tmpdir)
+    def init_single_notebook_resources(self, notebook_filename):
+        resources = super(ValidateApp, self).init_single_notebook_resources(notebook_filename)
+        resources['nbgrader'] = {}
+        return resources
+
+    def write_single_notebook(self, output, resources):
+        return

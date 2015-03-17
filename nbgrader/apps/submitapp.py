@@ -11,10 +11,10 @@ from textwrap import dedent
 from IPython.utils.traitlets import Unicode, List, Dict
 from IPython.config.application import catch_config_error
 
-from nbgrader.apps.baseapp import BaseNbGraderApp, nbgrader_aliases, nbgrader_flags
+from nbgrader.apps.baseapp import BaseApp, base_aliases, base_flags
 
 aliases = {}
-aliases.update(nbgrader_aliases)
+aliases.update(base_aliases)
 aliases.update({
     "assignment": "SubmitApp.assignment_id",
     "submit-dir": "SubmitApp.submissions_directory",
@@ -22,11 +22,11 @@ aliases.update({
 })
 
 flags = {}
-flags.update(nbgrader_flags)
+flags.update(base_flags)
 flags.update({
 })
 
-class SubmitApp(BaseNbGraderApp):
+class SubmitApp(BaseApp):
 
     name = Unicode(u'nbgrader-submit')
     description = Unicode(u'Submit a completed assignment')

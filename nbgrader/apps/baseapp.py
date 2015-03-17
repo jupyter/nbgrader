@@ -15,16 +15,12 @@ from IPython.config.application import catch_config_error
 from IPython.nbconvert.nbconvertapp import NbConvertApp
 
 # These are the aliases and flags for nbgrader apps that inherit only from
-# BaseNbGraderApp (and not BaseNbConvertApp)
-nbgrader_aliases = {
+# BaseApp (and not BaseNbGraderApp)
+base_aliases = {
     'log-level' : 'Application.log_level',
     'config' : 'BaseIPythonApplication.extra_config_file',
-    'student': 'BaseNbGraderApp.student_id',
-    'assignment': 'BaseNbGraderApp.assignment_id',
-    'notebook': 'BaseNbGraderApp.notebook_id',
-    'db': 'BaseNbGraderApp.db_url'
 }
-nbgrader_flags = {
+base_flags = {
     'debug': (
         {'Application' : {'log_level' : logging.DEBUG}},
         "set log level to logging.DEBUG (maximize logging output)"
@@ -34,6 +30,29 @@ nbgrader_flags = {
         "set log level to logging.CRITICAL (minimize logging output)"
     ),
 }
+
+# These are the aliases and flags for nbgrader apps that inherit only from
+# BaseNbGraderApp (and not BaseNbConvertApp)
+nbgrader_aliases = {}
+nbgrader_aliases.update(base_aliases)
+nbgrader_aliases.update({
+    'student': 'BaseNbGraderApp.student_id',
+    'assignment': 'BaseNbGraderApp.assignment_id',
+    'notebook': 'BaseNbGraderApp.notebook_id',
+    'db': 'BaseNbGraderApp.db_url'
+})
+nbgrader_flags = {}
+nbgrader_flags.update(base_flags)
+nbgrader_flags.update({
+    'debug': (
+        {'Application' : {'log_level' : logging.DEBUG}},
+        "set log level to logging.DEBUG (maximize logging output)"
+    ),
+    'quiet': (
+        {'Application' : {'log_level' : logging.CRITICAL}},
+        "set log level to logging.CRITICAL (minimize logging output)"
+    ),
+})
 
 # These are the aliases and flags for nbgrade apps that inherit from BaseNbConvertApp
 nbconvert_aliases = {}
@@ -45,7 +64,7 @@ nbconvert_flags.update(nbgrader_flags)
 nbconvert_flags.update({
 })
 
-class BaseNbGraderApp(BaseIPythonApplication):
+class BaseApp(BaseIPythonApplication):
     """A base class for all the nbgrader apps. This sets a few important defaults,
     like the IPython profile (nbgrader) and that this profile should be created
     automatically if it doesn't exist.
@@ -53,17 +72,40 @@ class BaseNbGraderApp(BaseIPythonApplication):
     Additionally, it defines a `build_extra_config` method that subclasses can
     override in order to specify extra config options.
 
-    """
+    """    
 
-    aliases = Dict(nbgrader_aliases)
-    flags = Dict(nbgrader_flags)
+    aliases = Dict(base_aliases)
+    flags = Dict(base_flags)
+
+    profile = Unicode('nbgrader', config=True, help="Default IPython profile to use")
+    auto_create = Bool(True, config=True, help="Whether to automatically generate the profile")
+
+    # The classes added here determine how configuration will be documented
+    classes = List()
+
+    def _classes_default(self):
+        return [ProfileDir]
+
+    def build_extra_config(self):
+        pass
+
+    @catch_config_error
+    def initialize(self, argv=None):
+        super(BaseApp, self).initialize(argv)
+        self.stage_default_config_file()
+        self.build_extra_config()
+
+
+class BaseNbGraderApp(BaseApp):
+    """A base class for all the nbgrader apps that depend on the nbgrader
+    directory structure.
+
+    """
 
     # must be overwritten by subclasses
     nbgrader_step_input = Unicode("")
     nbgrader_step_output = Unicode("")
 
-    profile = Unicode('nbgrader', config=True, help="Default IPython profile to use")
-    auto_create = Bool(True, config=True, help="Whether to automatically generate the profile")
     db_url = Unicode("sqlite:///gradebook.db", config=True, help="URL to the database")
 
     student_id = Unicode(
@@ -110,21 +152,6 @@ class BaseNbGraderApp(BaseIPythonApplication):
             """
         )
     )
-
-    # The classes added here determine how configuration will be documented
-    classes = List()
-
-    def _classes_default(self):
-        return [ProfileDir]
-
-    def build_extra_config(self):
-        pass
-
-    @catch_config_error
-    def initialize(self, argv=None):
-        super(BaseNbGraderApp, self).initialize(argv)
-        self.stage_default_config_file()
-        self.build_extra_config()
 
 
 class BaseNbConvertApp(BaseNbGraderApp, NbConvertApp):
