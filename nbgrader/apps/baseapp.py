@@ -78,7 +78,7 @@ class BaseNbGraderApp(BaseIPythonApplication):
     )
 
     assignment_id = Unicode(
-        "*",
+        "",
         config=True,
         help=dedent(
             """
@@ -147,6 +147,19 @@ class BaseNbConvertApp(BaseNbGraderApp, NbConvertApp):
         return 'notebook'
 
     def init_notebooks(self):
+        # the assignment can be set via extra args
+        if len(self.extra_args) > 1:
+            self.log.error("Only one argument (the assignment id) may be specified")
+            sys.exit(1)
+        elif len(self.extra_args) == 1 and self.assignment_id != "":
+            self.log.error("The assignment cannot both be specified in config and as an argument")
+            sys.exit(1)
+        elif len(self.extra_args) == 0 and self.assignment_id == "":
+            self.log.error("An assignment id must be specified, either as an argument or with --assignment")
+            sys.exit(1)
+        elif len(self.extra_args) == 1:
+            self.assignment_id = self.extra_args[0]
+
         directory_structure = os.path.join(self.directory_structure, self.notebook_id + ".ipynb")
         fullglob = directory_structure.format(
             nbgrader_step=self.nbgrader_step_input,
@@ -158,7 +171,6 @@ class BaseNbConvertApp(BaseNbGraderApp, NbConvertApp):
         self.notebooks = glob.glob(fullglob)
         if len(self.notebooks) == 0:
             self.log.error("No notebooks were matched by '%s'", fullglob)
-            self.print_help()
             sys.exit(1)
 
     def init_single_notebook_resources(self, notebook_filename):

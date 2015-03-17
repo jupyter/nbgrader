@@ -64,7 +64,7 @@ target/
 docs/user_guide/example/autograded
 docs/user_guide/example/feedback
 docs/user_guide/example/release
-docs/user_guide/gradebook.db
+docs/user_guide/example/gradebook.db
 
 # components stuff
 node_modules
