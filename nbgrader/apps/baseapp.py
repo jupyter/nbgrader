@@ -231,6 +231,17 @@ class BaseNbConvertApp(BaseNbGraderApp, NbConvertApp):
         return resources
 
     def write_single_notebook(self, output, resources):
+        # detect other files in the source directory
+        source = resources['metadata']['path']
+        self.writer.files = []
+        for dirname, dirnames, filenames in os.walk(source):
+            for filename in filenames:
+                fullpath = os.path.join(dirname, filename)
+                if fullpath in self.notebooks:
+                    continue
+                self.writer.files.append(fullpath)
+
+        # configure the writer build directory
         self.writer.build_directory = self.directory_structure.format(
             nbgrader_step=self.nbgrader_step_output,
             student_id=resources['nbgrader']['student'],
