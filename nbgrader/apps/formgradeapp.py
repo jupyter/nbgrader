@@ -5,7 +5,7 @@ import socket
 from textwrap import dedent
 
 from IPython.config.loader import Config
-from IPython.utils.traitlets import Unicode, Integer, List, Dict
+from IPython.utils.traitlets import Unicode, Integer, List, Dict, Bool
 
 from IPython.nbconvert.exporters import HTMLExporter
 from IPython.config.application import catch_config_error
@@ -55,6 +55,11 @@ class FormgradeApp(BaseNbGraderApp):
     port = Integer(5000, config=True, help="Port for the server")
     base_directory = Unicode('.', config=True, help="Root server directory")
     directory_format = Unicode('{notebook_id}.ipynb', config=True, help="Format string for the directory structure of the autograded notebooks")
+    start_nbserver = Bool(True, config=True, help="Start a single notebook server that allows submissions to be viewed.")
+
+    @property
+    def notebook_server_exists(self):
+        return self._notebook_server_exists
 
     def _classes_default(self):
         classes = super(FormgradeApp, self)._classes_default()
@@ -100,15 +105,19 @@ class FormgradeApp(BaseNbGraderApp):
         super(FormgradeApp, self).start()
 
         # first launch a notebook server
-        app.notebook_server_ip = self.ip
-        app.notebook_server_port = str(random_port())
-        app.notebook_server = sp.Popen(
-            [
-                "python", os.path.join(os.path.dirname(__file__), "notebookapp.py"),
-                "--ip", app.notebook_server_ip,
-                "--port", app.notebook_server_port
-            ],
-            cwd=self.base_directory)
+        if self.start_nbserver:
+            app.notebook_server_ip = self.ip
+            app.notebook_server_port = str(random_port())
+            app.notebook_server = sp.Popen(
+                [
+                    "python", os.path.join(os.path.dirname(__file__), "notebookapp.py"),
+                    "--ip", app.notebook_server_ip,
+                    "--port", app.notebook_server_port
+                ],
+                cwd=self.base_directory)
+            self._notebook_server_exists = True
+        else:
+            self._notebook_server_exists = False
 
         # now launch the formgrader
         app.notebook_dir = self.base_directory

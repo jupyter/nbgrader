@@ -148,6 +148,9 @@ def view_submission(submission_id):
     if not os.path.exists(filename):
         abort(404)
 
+    if not app.notebook_server_exists:
+        abort(503, 'Submission viewing notebook server not started.')
+
     submissions = app.gradebook.notebook_submissions(notebook_id, assignment_id)
     submissions = sorted([x.id for x in submissions])
 
