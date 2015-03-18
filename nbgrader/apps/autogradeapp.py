@@ -11,7 +11,6 @@ from nbgrader.preprocessors import (SaveAutoGrades, Execute)
 aliases = {}
 aliases.update(nbconvert_aliases)
 aliases.update({
-    'timestamp': 'SaveAutoGrades.timestamp'
 })
 
 flags = {}

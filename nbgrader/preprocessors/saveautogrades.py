@@ -10,8 +10,6 @@ from textwrap import dedent
 class SaveAutoGrades(Preprocessor):
     """Preprocessor for saving out the autograder grades into a database"""
 
-    timestamp = Unicode("", config=True, help="Timestamp when this assignment was submitted")
-
     create_student = Bool(
         False, config=True, 
         help=dedent(
@@ -29,11 +27,6 @@ class SaveAutoGrades(Preprocessor):
         self.student_id = resources['nbgrader']['student']
         self.db_url = resources['nbgrader']['db_url']
 
-        if self.timestamp != "":
-            timestamp = dateutil.parser.parse(self.timestamp)
-        else:
-            timestamp = None
-
         # connect to the database
         self.gradebook = Gradebook(self.db_url)
 
@@ -42,7 +35,7 @@ class SaveAutoGrades(Preprocessor):
             self.gradebook.update_or_create_student(self.student_id)
 
         self.gradebook.update_or_create_submission(
-            self.assignment_id, self.student_id, timestamp=timestamp)
+            self.assignment_id, self.student_id)
 
         self.comment_index = 0
 
