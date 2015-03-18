@@ -148,9 +148,6 @@ def view_submission(submission_id):
     if not os.path.exists(filename):
         abort(404)
 
-    if not app.notebook_server_exists:
-        abort(503, 'Submission viewing notebook server not started.')
-
     submissions = app.gradebook.notebook_submissions(notebook_id, assignment_id)
     submissions = sorted([x.id for x in submissions])
 
@@ -172,11 +169,14 @@ def view_submission(submission_id):
         'prev': prev_submission,
         'index': ix,
         'total': len(submissions),
-        'notebook_path': "http://{}:{}/notebooks/{}".format(
+        'notebook_server_exists': app.notebook_server_exists
+    }
+
+    if app.notebook_server_exists:
+        resources['notebook_path'] = "http://{}:{}/notebooks/{}".format(
             app.notebook_server_ip,
             app.notebook_server_port,
             os.path.relpath(filename, app.notebook_dir))
-    }
 
     output, resources = app.exporter.from_filename(filename, resources=resources)
     return output

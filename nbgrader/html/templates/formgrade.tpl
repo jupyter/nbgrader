@@ -61,11 +61,15 @@ var assignment_id = "{{ resources.assignment_id }}";
             <li><a href="/assignments">Assignments</a></li>
             <li><a href="/assignments/{{ resources.assignment_id }}">{{ resources.assignment_id }}</a></li>
             <li><a href="/assignments/{{ resources.assignment_id }}/{{ resources.notebook_id }}">{{ resources.notebook_id }}</a></li>
+            {%- if resources.notebook_server_exists -%}
             <li class="active live-notebook">
               <a data-toggle="tooltip" data-placement="right" title="Open live notebook" target="_blank" href="{{ resources.notebook_path }}">
                 Submission #{{ resources.index + 1 }}
               </a>
             </li>
+            {%- else -%}
+              <li>Submission #{{ resources.index + 1 }}</li>
+            {%- endif -%}
           </ul>
         </ul>
       </div>
