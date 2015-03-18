@@ -585,6 +585,37 @@ class Gradebook(object):
 
         return student
 
+    def update_or_create_student(self, name, **kwargs):
+        """Update an existing student, or create it if it doesn't exist.
+
+        Parameters
+        ----------
+        name : string
+            the name of the student
+        **kwargs : dict
+            additional keyword arguments for the nbgrader.api.Student object
+
+        Returns
+        -------
+        nbgrader.api.Student object
+
+        """
+
+        try:
+            student = self.find_student(name)
+        except MissingEntry:
+            student = self.add_student(name, **kwargs)
+        else:
+            for attr in kwargs:
+                setattr(student, attr, kwargs[attr])
+            try:
+                self.db.commit()
+            except (IntegrityError, FlushError) as e:
+                self.db.rollback()
+                raise InvalidEntry(*e.args)
+
+        return student
+
     #### Assignments
 
     @property
