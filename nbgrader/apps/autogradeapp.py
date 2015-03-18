@@ -20,6 +20,10 @@ flags.update({
     'no-overwrite': (
         {'AutogradeApp': {'overwrite_cells': False}},
         "Do not overwrite grade cells from the database."
+    ),
+    'create': (
+        {'SaveAutoGrades': {'create_student': True}},
+        "Create the student at runtime if they do not exist in the db."
     )
 })
 

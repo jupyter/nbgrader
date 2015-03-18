@@ -1,9 +1,21 @@
 from IPython.nbconvert.preprocessors import Preprocessor
+from IPython.utils.traitlets import Bool
 from nbgrader import utils
 from nbgrader.api import Gradebook
+from textwrap import dedent
 
 class SaveCells(Preprocessor):
     """A preprocessor to save information about grade and solution cells."""
+
+    create_assignment = Bool(
+        False, config=True, 
+        help=dedent(
+            """
+            Whether to create the assignment at runtime if it does not 
+            already exist.
+            """
+        )
+    )
 
     def preprocess(self, nb, resources):
         # pull information from the resources
@@ -18,6 +30,12 @@ class SaveCells(Preprocessor):
 
         # connect to the database
         self.gradebook = Gradebook(self.db_url)
+
+        # create the assignment, if so directed
+        if self.create_assignment:
+            self.gradebook.update_or_create_assignment(self.assignment_id)
+
+        # create the notebook
         self.gradebook.update_or_create_notebook(
             self.notebook_id, self.assignment_id)
 

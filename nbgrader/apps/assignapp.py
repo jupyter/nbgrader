@@ -26,6 +26,10 @@ flags.update({
     'no-db': (
         {'AssignApp': {'save_cells': False}},
         "Do not save information about grade cells into the database."
+    ),
+    'create': (
+        {'SaveCells': {'create_assignment': True}},
+        "Create the assignment at runtime if it does not exist."
     )
 })
 
