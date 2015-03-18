@@ -8,8 +8,9 @@ from .base import TestBase
 class TestNbgraderSubmit(TestBase):
 
     def test_help(self):
-        """Does the help display properly?"""
-        self._run_command("nbgrader submit --help-all")
+        """Does the help display without error?"""
+        with self._temp_cwd():
+            self._run_command("nbgrader submit --help-all")
 
     def test_submit(self):
         """Does everything get properly submitted?"""
