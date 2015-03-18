@@ -57,10 +57,6 @@ class FormgradeApp(BaseNbGraderApp):
     directory_format = Unicode('{notebook_id}.ipynb', config=True, help="Format string for the directory structure of the autograded notebooks")
     start_nbserver = Bool(True, config=True, help="Start a single notebook server that allows submissions to be viewed.")
 
-    @property
-    def notebook_server_exists(self):
-        return self._notebook_server_exists
-
     def _classes_default(self):
         classes = super(FormgradeApp, self)._classes_default()
         classes.append(HTMLExporter)
@@ -115,9 +111,9 @@ class FormgradeApp(BaseNbGraderApp):
                     "--port", app.notebook_server_port
                 ],
                 cwd=self.base_directory)
-            self._notebook_server_exists = True
+            app.notebook_server_exists = True
         else:
-            self._notebook_server_exists = False
+            app.notebook_server_exists = False
 
         # now launch the formgrader
         app.notebook_dir = self.base_directory
