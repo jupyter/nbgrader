@@ -642,6 +642,37 @@ class Gradebook(object):
 
         return assignment
 
+    def update_or_create_assignment(self, name, **kwargs):
+        """Update an existing assignment, or create it if it doesn't exist.
+
+        Parameters
+        ----------
+        name : string
+            the name of the assignment
+        **kwargs : dict
+            additional keyword arguments for the nbgrader.api.Assignment object
+
+        Returns
+        -------
+        nbgrader.api.Assignment object
+
+        """
+
+        try:
+            assignment = self.find_assignment(name)
+        except MissingEntry:
+            assignment = self.add_assignment(name, **kwargs)
+        else:
+            for attr in kwargs:
+                setattr(assignment, attr, kwargs[attr])
+            try:
+                self.db.commit()
+            except (IntegrityError, FlushError) as e:
+                self.db.rollback()
+                raise InvalidEntry(*e.args)
+
+        return assignment
+
     #### Notebooks
 
     def add_notebook(self, name, assignment, **kwargs):
