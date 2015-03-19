@@ -21,7 +21,7 @@ install:
   - cd ~/ipython && pip install -f ~/travis-wheels/wheelhouse file://$PWD#egg=ipython[all] && cd -
   - pip install -r requirements.txt
   - pip install nose coverage coveralls requests!=2.4.2 invoke
-  - python setup.py install
+  - pip install -e .
   - if [[ $GROUP == 'js' ]]; then cp nbextensions/* $(ipython locate)/nbextensions/; fi
 script:
   - invoke tests --group="${GROUP}" --python-version="${TRAVIS_PYTHON_VERSION}" --pull-request="${TRAVIS_PULL_REQUEST}" --github-token="${GH_TOKEN}" --git-name="${GIT_NAME}" --git-email="${GIT_EMAIL}"
