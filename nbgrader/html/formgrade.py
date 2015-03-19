@@ -1,27 +1,49 @@
 import json
 import os
+from functools import wraps
 from nbgrader.api import MissingEntry
 from flask import Flask, request, abort, redirect, url_for, render_template, send_from_directory
 
 app = Flask(__name__, static_url_path='')
 
 
+def auth(f):
+    """Authenticated flask app route."""
+
+    @wraps(f)
+    def authenticated(*args, **kwargs):
+        result = app.auth.authenticate()
+        if result is True:
+            pass  # Success
+        elif result is False:
+            abort(403)  # Forbidden
+        else:
+            return result  # Redirect
+        return f(*args, **kwargs)
+
+    return authenticated
+
+
 @app.route("/static/<path:filename>")
+@auth
 def static_proxy(filename):
     return send_from_directory(os.path.join(app.root_path, 'static'), filename)
 
 
 @app.route("/fonts/<filename>")
+@auth
 def fonts(filename):
     return redirect(url_for('static', filename=os.path.join("fonts", filename)))
 
 
 @app.route("/")
+@auth
 def home():
     return redirect('/assignments/')
 
 
 @app.route("/assignments/")
+@auth
 def view_assignments():
     assignments = []
     for assignment in app.gradebook.assignments:
@@ -32,13 +54,17 @@ def view_assignments():
         assignments.append(x)
     return render_template("assignments.tpl", assignments=assignments)
 
+
 @app.route("/students/")
+@auth
 def view_students():
     students = app.gradebook.student_dicts()
     students.sort(key=lambda x: x["last_name"])
     return render_template("students.tpl", students=students)
 
+
 @app.route("/assignments/<assignment_id>/")
+@auth
 def view_assignment(assignment_id):
     try:
         assignment = app.gradebook.find_assignment(assignment_id)
@@ -59,7 +85,9 @@ def view_assignment(assignment_id):
         assignment=assignment,
         notebooks=notebooks)
 
+
 @app.route("/students/<student_id>/")
+@auth
 def view_student(student_id):
     try:
         student = app.gradebook.find_student(student_id)
@@ -75,7 +103,9 @@ def view_student(student_id):
         assignments=assignments,
         student=student)
 
+
 @app.route("/assignments/<assignment_id>/<notebook_id>/")
+@auth
 def view_assignment_notebook(assignment_id, notebook_id):
     try:
         app.gradebook.find_notebook(notebook_id, assignment_id)
@@ -94,7 +124,9 @@ def view_assignment_notebook(assignment_id, notebook_id):
         assignment_id=assignment_id,
         submissions=submissions)
 
+
 @app.route("/students/<student_id>/<assignment_id>/")
+@auth
 def view_student_assignment(student_id, assignment_id):
     try:
         assignment = app.gradebook.find_submission(assignment_id, student_id)
@@ -111,7 +143,9 @@ def view_student_assignment(student_id, assignment_id):
         submissions=submissions
     )
 
+
 @app.route("/submissions/<submission_id>/<path:path>")
+@auth
 def view_submission_files(submission_id, path):
     try:
         submission = app.gradebook.find_submission_notebook_by_id(submission_id)
@@ -131,6 +165,7 @@ def view_submission_files(submission_id, path):
 
 
 @app.route("/submissions/<submission_id>/")
+@auth
 def view_submission(submission_id):
     try:
         submission = app.gradebook.find_submission_notebook_by_id(submission_id)
@@ -161,6 +196,7 @@ def view_submission(submission_id):
     else:
         next_submission = submissions[ix + 1]
 
+    server_exists = app.auth.notebook_server_exists()
     resources = {
         'assignment_id': assignment_id,
         'notebook_id': notebook_id,
@@ -169,20 +205,19 @@ def view_submission(submission_id):
         'prev': prev_submission,
         'index': ix,
         'total': len(submissions),
-        'notebook_server_exists': app.notebook_server_exists
+        'notebook_server_exists': server_exists
     }
 
-    if app.notebook_server_exists:
-        resources['notebook_path'] = "http://{}:{}/notebooks/{}".format(
-            app.notebook_server_ip,
-            app.notebook_server_port,
-            os.path.relpath(filename, app.notebook_dir))
+    if server_exists:
+        relative_path = os.path.relpath(filename, app.notebook_dir)
+        resources['notebook_path'] = app.auth.get_notebool_url(relative_path)
 
     output, resources = app.exporter.from_filename(filename, resources=resources)
     return output
 
 
 @app.route("/api/grades")
+@auth
 def get_all_grades():
     submission_id = request.args["submission_id"]
 
@@ -195,6 +230,7 @@ def get_all_grades():
 
 
 @app.route("/api/comments")
+@auth
 def get_all_comments():
     submission_id = request.args["submission_id"]
 
@@ -207,6 +243,7 @@ def get_all_comments():
 
 
 @app.route("/api/grade/<_id>", methods=["GET", "PUT"])
+@auth
 def get_grade(_id):
     try:
         grade = app.gradebook.find_grade_by_id(_id)
@@ -221,6 +258,7 @@ def get_grade(_id):
 
 
 @app.route("/api/comment/<_id>", methods=["GET", "PUT"])
+@auth
 def get_comment(_id):
     try:
         comment = app.gradebook.find_comment_by_id(_id)

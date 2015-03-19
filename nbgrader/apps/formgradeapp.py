@@ -8,14 +8,17 @@ import time
 from textwrap import dedent
 
 from IPython.config.loader import Config
-from IPython.utils.traitlets import Unicode, Integer, List, Dict, Bool
+from IPython.utils.traitlets import Unicode, Integer, List, Dict, Bool, DottedObjectName, \
+    Instance
 
 from IPython.nbconvert.exporters import HTMLExporter
 from IPython.config.application import catch_config_error
+from IPython.utils.importstring import import_item
 
 from nbgrader.apps.baseapp import BaseNbGraderApp, nbgrader_aliases, nbgrader_flags
 from nbgrader.html.formgrade import app
 from nbgrader.api import Gradebook
+from nbgrader.auth.base import BaseAuth
 
 aliases = {}
 aliases.update(nbgrader_aliases)
@@ -57,8 +60,11 @@ class FormgradeApp(BaseNbGraderApp):
     ip = Unicode("localhost", config=True, help="IP address for the server")
     port = Integer(5000, config=True, help="Port for the server")
     base_directory = Unicode('.', config=True, help="Root server directory")
-    directory_format = Unicode('{notebook_id}.ipynb', config=True, help="Format string for the directory structure of the autograded notebooks")
-    start_nbserver = Bool(True, config=True, help="Start a single notebook server that allows submissions to be viewed.")
+    directory_format = Unicode('{notebook_id}.ipynb', config=True, help="""Format
+        string for the directory structure of the autograded notebooks""")
+    authenticator_class = DottedObjectName('nbgrader.auth.noauth.NoAuth', config=True, help="""
+        Authenticator used in all formgrade requests.""")
+    authenticator_instance = Instance(BaseAuth, config=False)
     nbserver_port = Integer(config=True, help="Port for the notebook server")
 
     def _classes_default(self):
@@ -129,6 +135,11 @@ class FormgradeApp(BaseNbGraderApp):
 
     def start(self):
         super(FormgradeApp, self).start()
+
+        # Init authenticator.
+        auth_class = import_item(str(self.authenticator_class))
+        self.authenticator_instance = auth_class(app, self.ip, self.base_directory)
+        app.auth = self.authenticator_instance
 
         # first launch a notebook server
         if self.start_nbserver:
