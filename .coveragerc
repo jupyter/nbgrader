@@ -1,8 +1,6 @@
 [run]
 parallel = True
 branch = True
-source =
-    /home/travis/nbgrader/nbgrader
 
 [report]
 include =
