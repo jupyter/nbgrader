@@ -124,10 +124,7 @@ print("hello")
             if len(coverage_files) == 0:
                 raise RuntimeError("No coverage files produced")
             for filename in coverage_files:
-                dest = os.path.join(root, filename)
-                if os.path.exists(dest):
-                    raise RuntimeError("Coverage file already exists: {}".format(dest))
-                shutil.copyfile(filename, dest)
+                shutil.copyfile(filename, os.path.join(root, filename))
         return output
 
     @staticmethod
