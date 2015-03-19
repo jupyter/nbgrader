@@ -122,9 +122,12 @@ print("hello")
         if os.getcwd() != root:
             coverage_files = glob.glob(".coverage.*")
             if len(coverage_files) == 0:
-                raise RuntimeError("No coverage files produced.")
+                raise RuntimeError("No coverage files produced")
             for filename in coverage_files:
-                shutil.copyfile(filename, os.path.join(root, filename))
+                dest = os.path.join(root, filename)
+                if os.path.exists(dest):
+                    raise RuntimeError("Coverage file already exists: {}".format(dest))
+                shutil.copyfile(filename, dest)
         return output
 
     @staticmethod
