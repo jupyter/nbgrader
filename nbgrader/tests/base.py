@@ -121,6 +121,8 @@ print("hello")
                 "process returned an unexpected return code: {}".format(true_retcode))
         if os.getcwd() != root:
             coverage_files = glob.glob(".coverage.*")
+            if len(coverage_files) == 0:
+                raise RuntimeError("No coverage files produced.")
             for filename in coverage_files:
                 shutil.copyfile(filename, os.path.join(root, filename))
         return output
