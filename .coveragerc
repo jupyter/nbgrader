@@ -1,9 +1,11 @@
 [run]
 parallel = True
 branch = True
-include = nbgrader
-omit = nbgrader/tests
 
 [report]
-include = nbgrader
-omit = nbgrader/tests
+include =
+    nbgrader
+omit =
+    nbgrader/tests
+    */python?.?/*
+    */site-packages/*
