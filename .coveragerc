@@ -1,15 +1,11 @@
 [run]
 parallel = True
 branch = True
-include =
-    /home/travis/nbgrader
-omit =
-    /home/travis/nbgrader/tests
-    /home/travis/virtualenv
+source =
+    /home/travis/nbgrader/nbgrader
 
 [report]
 include =
-    /home/travis/nbgrader
+    /home/travis/nbgrader/nbgrader
 omit =
-    /home/travis/nbgrader/tests
     /home/travis/virtualenv
