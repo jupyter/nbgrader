@@ -23,7 +23,6 @@ install:
   - pip install nose coverage coveralls requests!=2.4.2 invoke
   - python setup.py install
   - if [[ $GROUP == 'js' ]]; then cp nbextensions/* $(ipython locate)/nbextensions/; fi
-  - printf "import coverage\ncoverage.process_startup()\n" > "/home/travis/virtualenv/python${TRAVIS_PYTHON_VERSION}/lib/python${TRAVIS_PYTHON_VERSION}/sitecustomize.py"
 script:
   - invoke tests --group="${GROUP}" --python-version="${TRAVIS_PYTHON_VERSION}" --pull-request="${TRAVIS_PULL_REQUEST}" --github-token="${GH_TOKEN}" --git-name="${GIT_NAME}" --git-email="${GIT_EMAIL}"
 after_success:
