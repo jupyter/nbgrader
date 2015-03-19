@@ -2,6 +2,7 @@ language: python
 python:
   - 2.7
   - 3.4
+sudo: false
 branches:
   only:
     - master
@@ -13,17 +14,11 @@ env:
   global:
     - secure: Ry2LhsYWOtVppoorTkOXyL6C6cEMw1bfqsHDka76kNSQzkn1HOpFOnVzjQk3kW3QxP9N60vcPlMtMln1jW1tsQRkh2mPT3EI0ugX18R5btR9R69CZSVo0At666HuQeZ6WN/a+pKWpaHYSFlXvSvlkLXkfW++AXbkShWvkD6Z0Hg=
 before_install:
-  # Pierre Carrier's PPA for PhantomJS and CasperJS
-  - time sudo add-apt-repository -y ppa:pcarrier/ppa
-  - sudo apt-get update
-  - cd ~
-  - git clone --recursive https://github.com/ipython/ipython.git
-  - cd -
+  - 'if [[ $GROUP == js* ]]; then npm install -g casperjs; fi'
+  - cd ~ && git clone --quiet --depth 1 https://github.com/minrk/travis-wheels travis-wheels && cd -
+  - cd ~ && git clone --recursive https://github.com/ipython/ipython.git && cd -
 install:
-  - sudo apt-get install pandoc casperjs libzmq3-dev
-  # pin tornado < 4 for js tests while phantom is on super old webkit
-  - if [[ $GROUP == 'js' ]]; then pip install 'tornado<4'; fi
-  - cd ~/ipython && git submodule update && pip install -e ".[notebook]" && cd -
+  - cd ~/ipython && pip install -f ~/travis-wheels/wheelhouse file://$PWD#egg=ipython[all] && cd -
   - pip install -r requirements.txt
   - pip install nose coverage coveralls requests!=2.4.2 invoke
   - python setup.py install
