@@ -252,15 +252,10 @@ def python_tests():
         fh.write(dedent(
             """
             ### begin nbgrader changes
-            import os
-            print("COVERAGE_PROCESS_START={}".format(os.environ.get("COVERAGE_PROCESS_START", "")))
-            import coverage
-            coverage.process_startup()
+            import coverage; coverage.process_startup()
             ### end nbgrader changes
             """
         ).lstrip())
-
-    run("cat {}".format(os.path.join(site, "sitecustomize.py")))
 
     run("nosetests --with-coverage --cover-erase --cover-package nbgrader")
     run("ls -a .coverage*")
