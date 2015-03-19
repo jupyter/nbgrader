@@ -10,7 +10,6 @@ class TestNbgraderAssign(TestBase):
         """Does the help display without error?"""
         with self._temp_cwd():
             self._run_command("nbgrader assign --help-all")
-            assert False
 
     def test_single_file(self):
         """Can a single file be assigned?"""
