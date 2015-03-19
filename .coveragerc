@@ -4,4 +4,4 @@ branch = True
 
 [report]
 include =
-    /home/travis/nbgrader/nbgrader
+    nbgrader
