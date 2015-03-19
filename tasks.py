@@ -1,5 +1,5 @@
 import os
-import pipes
+import re
 from invoke import task
 from invoke import run as _run
 from copy import deepcopy
@@ -235,7 +235,31 @@ def publish_docs(github_token, git_name, git_email):
 
 @task
 def python_tests():
-    run("nosetests --with-coverage --cover-package nbgrader")
+    import distutils.sysconfig
+    site = distutils.sysconfig.get_python_lib()
+    sitecustomize_path = os.path.join(site, "sitecustomize.py")
+    if os.path.exists(sitecustomize_path):
+        with open(sitecustomize_path, "r") as fh:
+            sitecustomize = fh.read()
+        with open(sitecustomize_path, "w") as fh:
+            fh.write(re.sub(
+                "^### begin nbgrader changes$.*^### end nbgrader changes$[\n]",
+                "",
+                sitecustomize,
+                flags=re.MULTILINE | re.DOTALL))
+
+    with open(sitecustomize_path, "a") as fh:
+        fh.write(dedent(
+            """
+            ### begin nbgrader changes
+            import coverage; coverage.process_startup()
+            ### end nbgrader changes
+            """
+        ).lstrip())
+
+    run("nosetests --with-coverage --cover-erase --cover-package nbgrader")
+    run("ls -a .coverage*")
+    run("coverage combine")
 
 @task
 def js_tests():
