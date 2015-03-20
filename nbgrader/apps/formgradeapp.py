@@ -56,11 +56,15 @@ class FormgradeApp(BaseNbGraderApp):
     base_directory = Unicode('.', config=True, help="Root server directory")
     directory_format = Unicode('{notebook_id}.ipynb', config=True, help="Format string for the directory structure of the autograded notebooks")
     start_nbserver = Bool(True, config=True, help="Start a single notebook server that allows submissions to be viewed.")
+    nbserver_port = Integer(config=True, help="Port for the notebook server")
 
     def _classes_default(self):
         classes = super(FormgradeApp, self)._classes_default()
         classes.append(HTMLExporter)
         return classes
+
+    def _nbserver_port_default(self):
+        return random_port()
 
     def init_server_root(self):
         # Specifying notebooks on the command-line overrides (rather than adds)
@@ -103,7 +107,7 @@ class FormgradeApp(BaseNbGraderApp):
         # first launch a notebook server
         if self.start_nbserver:
             app.notebook_server_ip = self.ip
-            app.notebook_server_port = str(random_port())
+            app.notebook_server_port = str(self.nbserver_port)
             app.notebook_server = sp.Popen(
                 [
                     "python", os.path.join(os.path.dirname(__file__), "notebookapp.py"),
