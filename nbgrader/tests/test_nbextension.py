@@ -13,30 +13,36 @@ from selenium.webdriver.support import expected_conditions as EC
 
 class TestCreateAssignmentNbExtension(object):
 
-    def setup(self):
-        self.tempdir = tempfile.mkdtemp()
-        self.ipythondir = tempfile.mkdtemp()
-        self.origdir = os.getcwd()
-        os.chdir(self.tempdir)
-        shutil.copy(os.path.join(os.path.dirname(__file__), "files", "blank.ipynb"), "blank.ipynb")
+    @classmethod
+    def setup_class(cls):
+        cls.tempdir = tempfile.mkdtemp()
+        cls.ipythondir = tempfile.mkdtemp()
+        cls.origdir = os.getcwd()
+        os.chdir(cls.tempdir)
 
-        self.nbserver = sp.Popen([
+        cls.nbserver = sp.Popen([
             "ipython", "notebook",
-            "--ipython-dir", self.ipythondir,
+            "--ipython-dir", cls.ipythondir,
             "--no-browser",
             "--port", "9000"])#, stdout=sp.PIPE, stderr=sp.STDOUT)
+
+    @classmethod
+    def teardown_class(cls):
+        cls.nbserver.kill()
+
+        os.chdir(cls.origdir)
+        shutil.rmtree(cls.tempdir)
+        shutil.rmtree(cls.ipythondir)
+
+    def setup(self):
+        shutil.copy(os.path.join(os.path.dirname(__file__), "files", "blank.ipynb"), "blank.ipynb")
         self.browser = webdriver.PhantomJS()
         self.browser.get("http://localhost:9000/notebooks/blank.ipynb")
 
     def teardown(self):
         self.browser.quit()
-        self.nbserver.kill()
 
-        os.chdir(self.origdir)
-        shutil.rmtree(self.tempdir)
-        shutil.rmtree(self.ipythondir)
-
-    def test_create_assignment(self):
+    def _activate_toolbar(self, name="Create Assignment"):
         # wait for the celltoolbar menu to appear
         element = WebDriverWait(self.browser, 10).until(
             EC.element_to_be_clickable((By.CSS_SELECTOR, '#ctb_select')))
@@ -46,87 +52,122 @@ class TestCreateAssignmentNbExtension(object):
 
         # activate the Create Assignment toolbar
         select = Select(element)
-        select.select_by_visible_text("Create Assignment")
+        select.select_by_visible_text(name)
 
-        # wait for the toolbar(s) to appear
-        element = WebDriverWait(self.browser, 10).until(
-            EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".celltoolbar input")))
-        assert_equal(element[0].get_attribute("type"), "checkbox")
-
-        # does the nbgrader metadata exist?
-        metadata = self.browser.execute_script("return IPython.notebook.get_cell(0).metadata.nbgrader")
-        assert_equal(metadata, {})
-
-        # click the "solution?" checkbox
-        solution = self.browser.execute_script(
+    def _click_solution(self):
+        self.browser.execute_script(
             """
             var cell = IPython.notebook.get_cell(0);
             var elems = cell.element.find(".button_container");
             $(elems[3]).find("input").click();
-            return cell.metadata.nbgrader.solution;
             """
         )
-        assert solution
 
-        # unclick the "solution?" checkbox
-        solution = self.browser.execute_script(
-            """
-            var cell = IPython.notebook.get_cell(0);
-            var elems = cell.element.find(".button_container");
-            $(elems[3]).find("input").click();
-            return cell.metadata.nbgrader.solution;
-            """
-        )
-        assert not solution
-
-        # click the "grade?" checkbox
-        grade = self.browser.execute_script(
+    def _click_grade(self):        
+        self.browser.execute_script(
             """
             var cell = IPython.notebook.get_cell(0);
             var elems = cell.element.find(".button_container");
             $(elems[2]).find("input").click();
-            return cell.metadata.nbgrader.grade;
             """
         )
-        assert grade
 
-        # wait for the points and id fields to appear
-        element = WebDriverWait(self.browser, 10).until(
-            EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".nbgrader-points")))
-        element = WebDriverWait(self.browser, 10).until(
-            EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".nbgrader-id")))
-
-        # set the points
-        points = self.browser.execute_script(
+    def _set_points(self):
+        self.browser.execute_script(
             """
             var cell = IPython.notebook.get_cell(0);
             var elem = cell.element.find(".nbgrader-points-input");
             elem.val("2");
             elem.trigger("change");
-            return cell.metadata.nbgrader.points;
             """
         )
-        assert_equal(points, 2)
 
-        # set the id
-        grade_id = self.browser.execute_script(
+    def _set_grade_id(self):
+        self.browser.execute_script(
             """
             var cell = IPython.notebook.get_cell(0);
             var elem = cell.element.find(".nbgrader-id-input");
             elem.val("foo");
             elem.trigger("change");
-            return cell.metadata.nbgrader.grade_id;
             """
         )
-        assert_equal(grade_id, "foo")
 
-        # unclick the "grade?" checkbox
-        metadata = self.browser.execute_script(
+    def _get_metadata(self):
+        return self.browser.execute_script(
             """
             var cell = IPython.notebook.get_cell(0);
-            var elems = cell.element.find(".button_container");
-            $(elems[2]).find("input").click();
             return cell.metadata.nbgrader;
             """
         )
-        assert not metadata['grade']
+
+    def test_create_assignment(self):
+        self._activate_toolbar()
+        element = WebDriverWait(self.browser, 10).until(
+            EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".celltoolbar input")))
+        assert_equal(element[0].get_attribute("type"), "checkbox")
+
+        # does the nbgrader metadata exist?
+        assert_equal({}, self._get_metadata())
+
+        # click the "solution?" checkbox
+        self._click_solution()
+        assert self._get_metadata()['solution']
+
+        # unclick the "solution?" checkbox
+        self._click_solution()
+        assert not self._get_metadata()['solution']
+
+        # click the "grade?" checkbox
+        self._click_grade()
+        assert self._get_metadata()['grade']
+
+        # wait for the points and id fields to appear
+        WebDriverWait(self.browser, 10).until(
+            EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".nbgrader-points")))
+        WebDriverWait(self.browser, 10).until(
+            EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".nbgrader-id")))
+
+        # set the points
+        self._set_points()
+        assert_equal(2, self._get_metadata()['points'])
+
+        # set the id
+        self._set_grade_id()
+        assert_equal("foo", self._get_metadata()['grade_id'])
+
+        # unclick the "grade?" checkbox
+        self._click_grade()
+        assert not self._get_metadata()['grade']
+
+    def test_grade_cell_css(self):
+        self._activate_toolbar()
+
+        # click the "grade?" checkbox
+        self._click_grade()
+        elements = self.browser.find_elements(By.CSS_SELECTOR, ".nbgrader-grade-cell")
+        assert_equal(len(elements), 1)
+
+        # unclick the "grade?" checkbox
+        self._click_grade()
+        elements = self.browser.find_elements(By.CSS_SELECTOR, ".nbgrader-grade-cell")
+        assert_equal(len(elements), 0)
+
+        # click the "grade?" checkbox
+        self._click_grade()
+        elements = self.browser.find_elements(By.CSS_SELECTOR, ".nbgrader-grade-cell")
+        assert_equal(len(elements), 1)
+
+        # deactivate the toolbar
+        self._activate_toolbar("None")
+        elements = self.browser.find_elements(By.CSS_SELECTOR, ".nbgrader-grade-cell")
+        assert_equal(len(elements), 0)
+
+        # activate the toolbar
+        self._activate_toolbar()
+        elements = self.browser.find_elements(By.CSS_SELECTOR, ".nbgrader-grade-cell")
+        assert_equal(len(elements), 1)
+
+        # deactivate the toolbar
+        self._activate_toolbar("Edit Metadata")
+        elements = self.browser.find_elements(By.CSS_SELECTOR, ".nbgrader-grade-cell")
+        assert_equal(len(elements), 0)
