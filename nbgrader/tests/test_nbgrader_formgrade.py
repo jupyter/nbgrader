@@ -68,8 +68,7 @@ class TestNbgraderFormgrade(TestBase):
             '--FormgradeApp.directory_format="{student_id}/{notebook_id}.ipynb" '
             '--FormgradeApp.nbserver_port=9001 '
             '--port=9000 '
-            '--db="sqlite:///gradebook.db"',
-            stdout=None, stderr=None)
+            '--db="sqlite:///gradebook.db"')
         time.sleep(1)
         cls.browser = webdriver.PhantomJS()
 
