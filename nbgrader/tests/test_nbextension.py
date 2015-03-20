@@ -10,6 +10,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support.ui import Select
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.keys import Keys
 
 class TestCreateAssignmentNbExtension(object):
 
@@ -42,15 +43,17 @@ class TestCreateAssignmentNbExtension(object):
     def teardown(self):
         self.browser.quit()
 
-    def _activate_toolbar(self, name="Create Assignment"):
+    def _load_extension(self):
         # wait for the celltoolbar menu to appear
-        element = WebDriverWait(self.browser, 10).until(
+        WebDriverWait(self.browser, 10).until(
             EC.element_to_be_clickable((By.CSS_SELECTOR, '#ctb_select')))
 
         # load the nbextension
         self.browser.execute_script("IPython.load_extensions('nbgrader')")
 
+    def _activate_toolbar(self, name="Create Assignment"):
         # activate the Create Assignment toolbar
+        element = self.browser.find_element_by_css_selector("#ctb_select")
         select = Select(element)
         select.select_by_visible_text(name)
 
@@ -101,7 +104,10 @@ class TestCreateAssignmentNbExtension(object):
         )
 
     def test_create_assignment(self):
+        self._load_extension()
         self._activate_toolbar()
+
+        # make sure the toolbar appeared
         element = WebDriverWait(self.browser, 10).until(
             EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".celltoolbar input")))
         assert_equal(element[0].get_attribute("type"), "checkbox")
@@ -140,34 +146,55 @@ class TestCreateAssignmentNbExtension(object):
         assert not self._get_metadata()['grade']
 
     def test_grade_cell_css(self):
+        self._load_extension()
         self._activate_toolbar()
 
         # click the "grade?" checkbox
         self._click_grade()
-        elements = self.browser.find_elements(By.CSS_SELECTOR, ".nbgrader-grade-cell")
+        elements = self.browser.find_elements_by_css_selector(".nbgrader-grade-cell")
         assert_equal(len(elements), 1)
 
         # unclick the "grade?" checkbox
         self._click_grade()
-        elements = self.browser.find_elements(By.CSS_SELECTOR, ".nbgrader-grade-cell")
+        elements = self.browser.find_elements_by_css_selector(".nbgrader-grade-cell")
         assert_equal(len(elements), 0)
 
         # click the "grade?" checkbox
         self._click_grade()
-        elements = self.browser.find_elements(By.CSS_SELECTOR, ".nbgrader-grade-cell")
+        elements = self.browser.find_elements_by_css_selector(".nbgrader-grade-cell")
         assert_equal(len(elements), 1)
 
         # deactivate the toolbar
         self._activate_toolbar("None")
-        elements = self.browser.find_elements(By.CSS_SELECTOR, ".nbgrader-grade-cell")
+        elements = self.browser.find_elements_by_css_selector(".nbgrader-grade-cell")
         assert_equal(len(elements), 0)
 
         # activate the toolbar
         self._activate_toolbar()
-        elements = self.browser.find_elements(By.CSS_SELECTOR, ".nbgrader-grade-cell")
+        elements = self.browser.find_elements_by_css_selector(".nbgrader-grade-cell")
         assert_equal(len(elements), 1)
 
         # deactivate the toolbar
         self._activate_toolbar("Edit Metadata")
-        elements = self.browser.find_elements(By.CSS_SELECTOR, ".nbgrader-grade-cell")
+        elements = self.browser.find_elements_by_css_selector(".nbgrader-grade-cell")
         assert_equal(len(elements), 0)
+
+    def test_tabbing(self):
+        self._load_extension()
+        self._activate_toolbar()
+
+        # click the "grade?" checkbox
+        self._click_grade()
+
+        # click the id field
+        element = self.browser.find_element_by_css_selector(".nbgrader-id-input")
+        element.click()
+
+        # get the active element
+        element = self.browser.execute_script("return document.activeElement")
+        assert_equal("nbgrader-id-input", element.get_attribute("class"))
+
+        # press tab and check that the active element is correct
+        element.send_keys(Keys.TAB)
+        element = self.browser.execute_script("return document.activeElement")
+        assert_equal("nbgrader-points-input", element.get_attribute("class"))
