@@ -25,7 +25,7 @@ class TestCreateAssignmentNbExtension(object):
             "ipython", "notebook",
             "--ipython-dir", cls.ipythondir,
             "--no-browser",
-            "--port", "9000"])#, stdout=sp.PIPE, stderr=sp.STDOUT)
+            "--port", "9000"], stdout=sp.PIPE, stderr=sp.STDOUT)
 
     @classmethod
     def teardown_class(cls):
