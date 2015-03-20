@@ -262,16 +262,9 @@ def python_tests():
     run("coverage combine")
 
 @task
-def js_tests():
-    run("iptest js/{}".format(os.path.abspath("nbgrader/tests/js")))
-
-@task
 def tests(group='', python_version=None, pull_request=None, github_token="", git_name="", git_email=""):
     if group == '':
         python_tests()
-
-    elif group == 'js':
-        js_tests()
 
     elif group == 'docs':
         print("Pull request is: {}".format(pull_request))
