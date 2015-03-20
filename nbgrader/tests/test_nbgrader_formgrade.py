@@ -13,11 +13,6 @@ except ImportError:
     from urllib.parse import unquote # Python 3
 
 from selenium import webdriver
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support.ui import Select
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.common.keys import Keys
 
 class TestNbgraderFormgrade(TestBase):
 
@@ -31,9 +26,9 @@ class TestNbgraderFormgrade(TestBase):
         shutil.copy(os.path.join(user_guide, "release_example", "header.ipynb"), "header.ipynb")
 
         # create the gradebook
-        gb = Gradebook("sqlite:///gradebook.db")
-        gb.add_assignment("Problem Set 1")
-        gb.add_student("Bitdiddle", first_name="Ben", last_name="Bitdiddle")
+        cls.gb = Gradebook("sqlite:///gradebook.db")
+        cls.gb.add_assignment("Problem Set 1")
+        cls.gb.add_student("Bitdiddle", first_name="Ben", last_name="Bitdiddle")
 
         # run nbgrader assign
         cls._run_command(
@@ -77,6 +72,7 @@ class TestNbgraderFormgrade(TestBase):
     def teardown_class(cls):
         cls.browser.save_screenshot(os.path.join(cls.origdir, '.selenium.screenshot.png'))
         cls.browser.quit()
+        cls.formgrader.terminate()
         cls._copy_coverage_files()
 
         os.chdir(cls.origdir)
@@ -100,8 +96,11 @@ class TestNbgraderFormgrade(TestBase):
         element = self.browser.find_element_by_css_selector("ul.breadcrumb li.active")
         assert_equal(element.text, breadcrumbs[-1])
 
-    def _click_link(self, link_text):
-        element = self.browser.find_element_by_link_text(link_text)
+    def _click_link(self, link_text, partial=False):
+        if partial:
+            element = self.browser.find_element_by_partial_link_text(link_text)
+        else:
+            element = self.browser.find_element_by_link_text(link_text)
         element.click()
 
     def test_load_assignment_view(self):
@@ -120,11 +119,22 @@ class TestNbgraderFormgrade(TestBase):
         self._check_url("/assignments/Problem Set 1/Problem 1")
         self._check_breadcrumbs("Assignments", "Problem Set 1", "Problem 1")
 
+        # click on the "Submission #1" link
+        self._click_link("Submission #1")
+        submission = self.gb.find_submission_notebook("Problem 1", "Problem Set 1", "Bitdiddle")
+        self._check_url("/submissions/{}".format(submission.id))
+
         # go back and click on the "Problem 2" link
+        self.browser.back()
         self.browser.back()
         self._click_link("Problem 2")
         self._check_url("/assignments/Problem Set 1/Problem 2")
         self._check_breadcrumbs("Assignments", "Problem Set 1", "Problem 2")
+
+        # click on the "Submission #1" link
+        self._click_link("Submission #1")
+        submission = self.gb.find_submission_notebook("Problem 2", "Problem Set 1", "Bitdiddle")
+        self._check_url("/submissions/{}".format(submission.id))
 
     def test_load_student_view(self):
         # load the student view
@@ -141,3 +151,32 @@ class TestNbgraderFormgrade(TestBase):
         self._click_link("Problem Set 1")
         self._check_url("/students/Bitdiddle/Problem Set 1")
         self._check_breadcrumbs("Students", "Bitdiddle", "Problem Set 1")
+
+        # click on the "Problem 1" link
+        self._click_link("Problem 1")
+        submission = self.gb.find_submission_notebook("Problem 1", "Problem Set 1", "Bitdiddle")
+        self._check_url("/submissions/{}".format(submission.id))
+
+        # go back and click on the "Problem 2" link
+        self.browser.back()
+        self._click_link("Problem 2")
+        submission = self.gb.find_submission_notebook("Problem 2", "Problem Set 1", "Bitdiddle")
+        self._check_url("/submissions/{}".format(submission.id))
+
+    def test_switch_views(self):
+        # load the main page
+        self.browser.get("http://localhost:9000")
+
+        # click the "Change View" button
+        self._click_link("Change View", partial=True)
+
+        # click the "Students" option
+        self._click_link("Students")
+        self._check_url("/students")
+
+        # click the "Change View" button
+        self._click_link("Change View", partial=True)
+
+        # click the "Assignments" option
+        self._click_link("Assignments")
+        self._check_url("/assignments")
