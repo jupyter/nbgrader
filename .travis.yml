@@ -18,7 +18,7 @@ before_install:
   - cd ~ && git clone --quiet --depth 1 https://github.com/minrk/travis-wheels travis-wheels && cd -
   - cd ~ && git clone --recursive https://github.com/ipython/ipython.git && cd -
 install:
-  - cd ~/ipython && pip install -f ~/travis-wheels/wheelhouse file://$PWD#egg=ipython[all] && cd -
+  - cd ~/ipython && git checkout a4950d68199a4ccdf4ff23c5bb8b51cc7faaad7a && pip install -f ~/travis-wheels/wheelhouse file://$PWD#egg=ipython[all] && cd -
   - pip install -r requirements.txt
   - pip install nose coverage coveralls requests!=2.4.2 invoke
   - if [[ $GROUP == 'docs' ]]; then python setup.py install; else pip install -e .; fi
