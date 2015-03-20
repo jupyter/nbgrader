@@ -1,14 +1,16 @@
 """Base formgrade authenticator."""
-from IPython.config.configurable import Configurable
+from IPython.config.configurable import LoggingConfigurable
 
 
-class BaseAuth(Configurable):
+class BaseAuth(LoggingConfigurable):
     """Base formgrade authenticator."""
 
-    def __init__(self, app, ip, base_directory, **kwargs):
+    def __init__(self, app, ip, port, base_directory, **kwargs):
         super(BaseAuth, self).__init__(**kwargs)
         self._app = app
         self._ip = ip
+        self._port = port
+        self._base_url = 'http://{}:{}'.format(ip, port)
         self._base_directory = base_directory
 
     def authenticate(self):

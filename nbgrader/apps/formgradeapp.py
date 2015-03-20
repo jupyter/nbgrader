@@ -138,7 +138,7 @@ class FormgradeApp(BaseNbGraderApp):
 
         # Init authenticator.
         auth_class = import_item(str(self.authenticator_class))
-        self.authenticator_instance = auth_class(app, self.ip, self.base_directory)
+        self.authenticator_instance = auth_class(app, self.ip, self.port, self.base_directory, parent=self)
         app.auth = self.authenticator_instance
 
         # first launch a notebook server

@@ -2,10 +2,11 @@ import json
 import os
 from functools import wraps
 from nbgrader.api import MissingEntry
-from flask import Flask, request, abort, redirect, url_for, render_template, send_from_directory
+from flask import Flask, request, abort, redirect, url_for, render_template, \
+    send_from_directory, Blueprint, g
 
 app = Flask(__name__, static_url_path='')
-
+blueprint = Blueprint('formgrade', __name__)
 
 def auth(f):
     """Authenticated flask app route."""
@@ -24,25 +25,37 @@ def auth(f):
     return authenticated
 
 
-@app.route("/static/<path:filename>")
+@blueprint.url_defaults
+def bp_url_defaults(endpoint, values):
+    name = getattr(g, 'name', None)
+    if name is not None:
+        values.setdefault('name', name)
+
+
+@blueprint.url_value_preprocessor
+def bp_url_value_preprocessor(endpoint, values):
+    g.name = values.pop('name')
+
+
+@blueprint.route("/static/<path:filename>")
 @auth
 def static_proxy(filename):
     return send_from_directory(os.path.join(app.root_path, 'static'), filename)
 
 
-@app.route("/fonts/<filename>")
+@blueprint.route("/fonts/<filename>")
 @auth
 def fonts(filename):
-    return redirect(url_for('static', filename=os.path.join("fonts", filename)))
+    return redirect(url_for('.static', filename=os.path.join("fonts", filename)))
 
 
-@app.route("/")
+@blueprint.route("/")
 @auth
 def home():
-    return redirect('/assignments/')
+    return redirect(url_for('.view_assignments'))
 
 
-@app.route("/assignments/")
+@blueprint.route("/assignments/")
 @auth
 def view_assignments():
     assignments = []
@@ -55,7 +68,7 @@ def view_assignments():
     return render_template("assignments.tpl", assignments=assignments)
 
 
-@app.route("/students/")
+@blueprint.route("/students/")
 @auth
 def view_students():
     students = app.gradebook.student_dicts()
@@ -63,7 +76,7 @@ def view_students():
     return render_template("students.tpl", students=students)
 
 
-@app.route("/assignments/<assignment_id>/")
+@blueprint.route("/assignments/<assignment_id>/")
 @auth
 def view_assignment(assignment_id):
     try:
@@ -86,7 +99,7 @@ def view_assignment(assignment_id):
         notebooks=notebooks)
 
 
-@app.route("/students/<student_id>/")
+@blueprint.route("/students/<student_id>/")
 @auth
 def view_student(student_id):
     try:
@@ -104,7 +117,7 @@ def view_student(student_id):
         student=student)
 
 
-@app.route("/assignments/<assignment_id>/<notebook_id>/")
+@blueprint.route("/assignments/<assignment_id>/<notebook_id>/")
 @auth
 def view_assignment_notebook(assignment_id, notebook_id):
     try:
@@ -125,7 +138,7 @@ def view_assignment_notebook(assignment_id, notebook_id):
         submissions=submissions)
 
 
-@app.route("/students/<student_id>/<assignment_id>/")
+@blueprint.route("/students/<student_id>/<assignment_id>/")
 @auth
 def view_student_assignment(student_id, assignment_id):
     try:
@@ -144,7 +157,7 @@ def view_student_assignment(student_id, assignment_id):
     )
 
 
-@app.route("/submissions/<submission_id>/<path:path>")
+@blueprint.route("/submissions/<submission_id>/<path:path>")
 @auth
 def view_submission_files(submission_id, path):
     try:
@@ -164,7 +177,7 @@ def view_submission_files(submission_id, path):
     return send_from_directory(dirname, path)
 
 
-@app.route("/submissions/<submission_id>/")
+@blueprint.route("/submissions/<submission_id>/")
 @auth
 def view_submission(submission_id):
     try:
@@ -210,13 +223,13 @@ def view_submission(submission_id):
 
     if server_exists:
         relative_path = os.path.relpath(filename, app.notebook_dir)
-        resources['notebook_path'] = app.auth.get_notebool_url(relative_path)
+        resources['notebook_path'] = app.auth.get_notebook_url(relative_path)
 
     output, resources = app.exporter.from_filename(filename, resources=resources)
     return output
 
 
-@app.route("/api/grades")
+@blueprint.route("/api/grades")
 @auth
 def get_all_grades():
     submission_id = request.args["submission_id"]
@@ -229,7 +242,7 @@ def get_all_grades():
     return json.dumps([g.to_dict() for g in notebook.grades])
 
 
-@app.route("/api/comments")
+@blueprint.route("/api/comments")
 @auth
 def get_all_comments():
     submission_id = request.args["submission_id"]
@@ -242,7 +255,7 @@ def get_all_comments():
     return json.dumps([c.to_dict() for c in notebook.comments])
 
 
-@app.route("/api/grade/<_id>", methods=["GET", "PUT"])
+@blueprint.route("/api/grade/<_id>", methods=["GET", "PUT"])
 @auth
 def get_grade(_id):
     try:
@@ -257,7 +270,7 @@ def get_grade(_id):
     return json.dumps(grade.to_dict())
 
 
-@app.route("/api/comment/<_id>", methods=["GET", "PUT"])
+@blueprint.route("/api/comment/<_id>", methods=["GET", "PUT"])
 @auth
 def get_comment(_id):
     try:
@@ -272,5 +285,6 @@ def get_comment(_id):
     return json.dumps(comment.to_dict())
 
 
+app.register_blueprint(blueprint, url_defaults={'name': ''})
 if __name__ == "__main__":
     app.run(debug=True)
