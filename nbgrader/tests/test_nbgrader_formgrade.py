@@ -7,6 +7,7 @@ from .base import TestBase
 
 from nbgrader.api import Gradebook, MissingEntry
 from nose.tools import assert_equal
+from textwrap import dedent
 
 try:
     from urllib import unquote # Python 2
@@ -60,14 +61,26 @@ class TestNbgraderFormgrade(TestBase):
         # copy files and setup assignment
         cls._setup_assignment_hierarchy()
 
+        # create config file
+        with open("nbgrader_formgrade_config.py", "w") as fh:
+            fh.write(dedent(
+                """
+                c = get_config()
+                c.FormgradeApp.base_directory = "autograded"
+                c.FormgradeApp.directory_format = "{student_id}/{notebook_id}.ipynb"
+                c.FormgradeApp.nbserver_port = 9001
+                c.FormgradeApp.port = 9000
+                c.FormgradeApp.db_url = "sqlite:///gradebook.db"
+                """
+            ))
+
         # start the formgrader
         cls.formgrader = cls._start_subprocess(
-            'nbgrader formgrade '
-            '--FormgradeApp.base_directory=autograded '
-            '--FormgradeApp.directory_format="{student_id}/{notebook_id}.ipynb" '
-            '--FormgradeApp.nbserver_port=9001 '
-            '--port=9000 '
-            '--db="sqlite:///gradebook.db"', stdout=None, stderr=None)
+            ["nbgrader", "formgrade"],
+            shell=False, 
+            stdout=None, 
+            stderr=None)
+
         time.sleep(1)
         cls.browser = webdriver.PhantomJS()
 
