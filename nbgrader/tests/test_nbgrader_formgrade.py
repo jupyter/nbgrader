@@ -38,10 +38,9 @@ class TestNbgraderFormgrade(TestBase):
         os.chdir("class_files")
 
         # copy files from the user guide
-        user_guide = os.path.join(os.path.dirname(__file__), "..", "..", "docs", "user_guide")
-        shutil.copytree(os.path.join(user_guide, "release_example", "teacher"), "source")
-        shutil.copytree(os.path.join(user_guide, "grade_example", "submitted"), "submitted")
-        shutil.copy(os.path.join(user_guide, "release_example", "header.ipynb"), "header.ipynb")
+        user_guide = os.path.join(os.path.dirname(__file__), "..", "..", "docs", "user_guide", "example")
+        shutil.copytree(os.path.join(user_guide, "source"), "source")
+        shutil.copytree(os.path.join(user_guide, "submitted"), "submitted")
 
         # create the gradebook
         cls.gb = Gradebook("sqlite:///gradebook.db")
@@ -52,22 +51,11 @@ class TestNbgraderFormgrade(TestBase):
 
         # run nbgrader assign
         cls._run_command(
-            'nbgrader assign source/*.ipynb '
-            '--build-dir=release '
-            '--IncludeHeaderFooter.header=header.ipynb '
-            '--save-cells '
-            '--assignment="Problem Set 1" '
-            '--db="sqlite:///gradebook.db"')
+            'nbgrader assign "Problem Set 1" '
+            '--IncludeHeaderFooter.header=source/header.ipynb')
 
         # run the autograder
-        for student_id in os.listdir("submitted"):
-            cls._run_command(
-                'nbgrader autograde submitted/{student_id}/*.ipynb '
-                '--build-dir=autograded/{student_id} '
-                '--student={student_id} '
-                '--assignment="Problem Set 1" '
-                '--overwrite-cells '
-                '--db="sqlite:///gradebook.db"'.format(student_id=student_id))
+        cls._run_command('nbgrader autograde "Problem Set 1"')
 
     @classmethod
     def _setup_formgrade_config(cls):
@@ -76,11 +64,8 @@ class TestNbgraderFormgrade(TestBase):
             fh.write(dedent(
                 """
                 c = get_config()
-                c.FormgradeApp.base_directory = "autograded"
-                c.FormgradeApp.directory_format = "{student_id}/{notebook_id}.ipynb"
                 c.NoAuth.nbserver_port = 9001
                 c.FormgradeApp.port = 9000
-                c.FormgradeApp.db_url = "sqlite:///gradebook.db"
                 """
             ))
 
@@ -327,6 +312,6 @@ class TestNbgraderFormgrade(TestBase):
                 # check the live notebook link
                 self._click_link("Submission #{}".format(i + 1))
                 self.browser.switch_to_window(self.browser.window_handles[1])
-                self._wait_for_notebook_page(self.notebook_url("{}/{}.ipynb".format(submission.student.id, problem.name)))
+                self._wait_for_notebook_page(self.notebook_url("{}/Problem Set 1/{}.ipynb".format(submission.student.id, problem.name)))
                 self.browser.close()
                 self.browser.switch_to_window(self.browser.window_handles[0])
