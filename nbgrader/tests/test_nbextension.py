@@ -2,6 +2,7 @@ import subprocess as sp
 import tempfile
 import os
 import shutil
+from copy import copy
 
 from nose.tools import assert_equal
 
@@ -12,6 +13,9 @@ from selenium.webdriver.support.ui import Select
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.keys import Keys
 
+from nbgrader.install import main
+
+
 class TestCreateAssignmentNbExtension(object):
 
     @classmethod
@@ -21,11 +25,28 @@ class TestCreateAssignmentNbExtension(object):
         cls.origdir = os.getcwd()
         os.chdir(cls.tempdir)
 
+        # ensure IPython dir exists.
+        sp.call([
+            'ipython', 'profile', 'create', '--ipython-dir', cls.ipythondir])
+
+        # test the arg parsing
+        main(['--activate',
+              '--verbose',
+              '--path={}'.format(cls.ipythondir),
+              'default'])
+
+        # bug in IPython cannot use --profile-dir
+        # that does not set it for everything. 
+        # still this does not allow to have things that work.
+        env = copy(os.environ)
+        env['IPYTHONDIR'] = cls.ipythondir
+
         cls.nbserver = sp.Popen([
             "ipython", "notebook",
-            "--ipython-dir", cls.ipythondir,
             "--no-browser",
-            "--port", "9000"], stdout=sp.PIPE, stderr=sp.STDOUT)
+            "--port", "9000"], stdout=sp.PIPE, stderr=sp.STDOUT
+            ,env=env
+            )
 
     @classmethod
     def teardown_class(cls):
@@ -49,13 +70,14 @@ class TestCreateAssignmentNbExtension(object):
             EC.element_to_be_clickable((By.CSS_SELECTOR, '#ctb_select')))
 
         # load the nbextension
-        self.browser.execute_script("IPython.load_extensions('nbgrader')")
+        self.browser.execute_script("IPython.load_extensions('nbgrader/nbgrader')")
 
     def _activate_toolbar(self, name="Create Assignment"):
         # activate the Create Assignment toolbar
         element = self.browser.find_element_by_css_selector("#ctb_select")
         select = Select(element)
         select.select_by_visible_text(name)
+
 
     def _click_solution(self):
         self.browser.execute_script(
