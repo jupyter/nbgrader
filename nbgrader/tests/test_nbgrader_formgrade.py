@@ -77,6 +77,8 @@ class TestNbgraderFormgrade(TestBase):
         cls.browser.save_screenshot(os.path.join(cls.origdir, '.selenium.screenshot.png'))
         cls.browser.quit()
         cls.formgrader.terminate()
+        time.sleep(1)
+
         cls._copy_coverage_files()
 
         os.chdir(cls.origdir)
