@@ -217,25 +217,13 @@ class TestClearSolutions(TestBase):
         assert_equal(cell.source, "something something\nYOUR ANSWER HERE")
         assert cell.metadata.nbgrader['solution']
 
-    def _test_preprocess_notebook(self, name):
+    def test_preprocess_notebook(self):
         """Is the test notebook processed without error?"""
-        try:
-            self.preprocessor.preprocess(self.nbs[name], {})
-        except Exception:
-            print(traceback.print_exc())
-            raise AssertionError("{} failed to process".format(name))
-
-    def test_preprocess_nb(self):
-        for name in self.files:
-            yield self._test_preprocess_notebook, name
-
-    def _test_remove_celltoolbar(self, name):
-        """Is the celltoolbar removed?"""
-        nb = self.nbs[name]
-        nb.metadata['celltoolbar'] = 'Create Assignment'
-        nb = self.preprocessor.preprocess(nb, {})[0]
-        assert 'celltoolbar' not in nb.metadata, name
+        self.preprocessor.preprocess(self.nbs["test.ipynb"], {})
 
     def test_remove_celltoolbar(self):
-        for name in self.files:
-            yield self._test_remove_celltoolbar, name
+        """Is the celltoolbar removed?"""
+        nb = self.nbs["test.ipynb"]
+        nb.metadata['celltoolbar'] = 'Create Assignment'
+        nb = self.preprocessor.preprocess(nb, {})[0]
+        assert 'celltoolbar' not in nb.metadata

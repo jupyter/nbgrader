@@ -5,10 +5,10 @@ from nbgrader.preprocessors import LockCells
 from .base import TestBase
 
 
-class TestClearSolutions(TestBase):
+class TestLockCells(TestBase):
 
     def setup(self):
-        super(TestClearSolutions, self).setup()
+        super(TestLockCells, self).setup()
         self.preprocessor = LockCells()
 
     @staticmethod
@@ -85,19 +85,14 @@ class TestClearSolutions(TestBase):
         new_cell = self.preprocessor.preprocess_cell(cell, {}, 0)[0]
         assert self.deletable(new_cell)
 
-    def _test_preprocess_nb(self, name, lock_solution_cells, lock_grade_cells, lock_all_cells):
+    def _test_preprocess_nb(self, lock_solution_cells, lock_grade_cells, lock_all_cells):
         """Is the test notebook processed without error?"""
         self.preprocessor.lock_solution_cells = lock_solution_cells
         self.preprocessor.lock_grade_cells = lock_grade_cells
         self.preprocessor.lock_all_cells = lock_all_cells
-        try:
-            self.preprocessor.preprocess(self.nbs[name], {})
-        except Exception:
-            print(traceback.print_exc())
-            raise AssertionError("{} failed to process".format(name))
+        self.preprocessor.preprocess(self.nbs["test.ipynb"], {})
 
     def test_preprocess_nb(self):
-        for name in self.files:
-            args = itertools.product([True, False], [True, False], [True, False])
-            for lsc, lgc, lac in args:
-                yield self._test_preprocess_nb, name, lsc, lgc, lac
+        args = itertools.product([True, False], [True, False], [True, False])
+        for lsc, lgc, lac in args:
+            yield self._test_preprocess_nb, lsc, lgc, lac
