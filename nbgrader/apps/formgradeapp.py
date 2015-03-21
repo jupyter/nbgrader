@@ -1,6 +1,9 @@
 import os
 import subprocess as sp
 import socket
+import signal
+import sys
+import time
 
 from textwrap import dedent
 
@@ -56,11 +59,15 @@ class FormgradeApp(BaseNbGraderApp):
     base_directory = Unicode('.', config=True, help="Root server directory")
     directory_format = Unicode('{notebook_id}.ipynb', config=True, help="Format string for the directory structure of the autograded notebooks")
     start_nbserver = Bool(True, config=True, help="Start a single notebook server that allows submissions to be viewed.")
+    nbserver_port = Integer(config=True, help="Port for the notebook server")
 
     def _classes_default(self):
         classes = super(FormgradeApp, self)._classes_default()
         classes.append(HTMLExporter)
         return classes
+
+    def _nbserver_port_default(self):
+        return random_port()
 
     def init_server_root(self):
         # Specifying notebooks on the command-line overrides (rather than adds)
@@ -86,6 +93,28 @@ class FormgradeApp(BaseNbGraderApp):
 
         self.log.info("Server root is: {}".format(self.base_directory))
 
+    def init_signal(self):
+        signal.signal(signal.SIGINT, self._signal_stop)
+        signal.signal(signal.SIGTERM, self._signal_stop)
+
+    def _signal_stop(self, sig, frame):
+        self.log.critical("received signal %s, stopping", sig)
+
+        if app.notebook_server_exists:
+            app.notebook_server.send_signal(sig)
+            for i in range(10):
+                retcode = app.notebook_server.poll()
+                if retcode is not None:
+                    app.notebook_server_exists = False
+                    break
+                time.sleep(0.1)
+
+            if retcode is None:
+                self.log.critical("couldn't shutdown notebook server, force killing it")
+                app.notebook_server.kill()
+
+        sys.exit(-sig)
+
     def build_extra_config(self):
         self.extra_config = Config()
         self.extra_config.Exporter.template_file = 'formgrade'
@@ -95,6 +124,7 @@ class FormgradeApp(BaseNbGraderApp):
     @catch_config_error
     def initialize(self, argv=None):
         super(FormgradeApp, self).initialize(argv)
+        self.init_signal()
         self.init_server_root()
 
     def start(self):
@@ -103,7 +133,7 @@ class FormgradeApp(BaseNbGraderApp):
         # first launch a notebook server
         if self.start_nbserver:
             app.notebook_server_ip = self.ip
-            app.notebook_server_port = str(random_port())
+            app.notebook_server_port = str(self.nbserver_port)
             app.notebook_server = sp.Popen(
                 [
                     "python", os.path.join(os.path.dirname(__file__), "notebookapp.py"),

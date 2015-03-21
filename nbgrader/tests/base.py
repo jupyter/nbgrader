@@ -108,23 +108,34 @@ print("hello")
 
         return temp_dir
 
-    @staticmethod
-    def _run_command(command, retcode=0):
+    @classmethod
+    def _start_subprocess(cls, command, shell=True, stdout=sp.PIPE, stderr=sp.STDOUT):
         root = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
-        coveragerc = os.path.join(root, ".coveragerc")
-        command = 'COVERAGE_PROCESS_START="{}" '.format(coveragerc) + command
-        proc = sp.Popen(command, shell=True, stdout=sp.PIPE, stderr=sp.STDOUT)
-        true_retcode = proc.wait()
-        output = proc.communicate()[0].decode()
-        if true_retcode != retcode:
-            raise AssertionError(
-                "process returned an unexpected return code: {}".format(true_retcode))
+        env = os.environ.copy()
+        env['COVERAGE_PROCESS_START'] = os.path.join(root, ".coveragerc")
+        proc = sp.Popen(command, shell=shell, stdout=stdout, stderr=stderr, env=env)
+        return proc
+
+    @classmethod
+    def _copy_coverage_files(cls):
+        root = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))        
         if os.getcwd() != root:
             coverage_files = glob.glob(".coverage.*")
             if len(coverage_files) == 0:
                 raise RuntimeError("No coverage files produced")
             for filename in coverage_files:
                 shutil.copyfile(filename, os.path.join(root, filename))
+
+    @classmethod
+    def _run_command(cls, command, retcode=0):
+        proc = cls._start_subprocess(command)
+        true_retcode = proc.wait()
+        output = proc.communicate()[0].decode()
+        if true_retcode != retcode:
+            print(output)
+            raise AssertionError(
+                "process returned an unexpected return code: {}".format(true_retcode))
+        cls._copy_coverage_files()
         return output
 
     @staticmethod
