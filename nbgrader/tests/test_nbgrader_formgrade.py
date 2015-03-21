@@ -73,10 +73,19 @@ class TestNbgraderFormgrade(TestBase):
 
     @classmethod
     def teardown_class(cls):
-        cls.browser.save_screenshot(os.path.join(cls.origdir, '.selenium.screenshot.png'))
         cls.browser.quit()
         cls.formgrader.terminate()
-        cls.formgrader.communicate()
+
+        # wait for the formgrader to shut down
+        for i in range(10):
+            retcode = cls.formgrader.poll()
+            if retcode is not None:
+                break
+            time.sleep(0.1)
+
+        # not shutdown, force kill it
+        if retcode is None:
+            cls.formgrader.kill()
 
         cls._copy_coverage_files()
 

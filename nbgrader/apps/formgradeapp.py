@@ -3,6 +3,7 @@ import subprocess as sp
 import socket
 import signal
 import sys
+import time
 
 from textwrap import dedent
 
@@ -98,7 +99,20 @@ class FormgradeApp(BaseNbGraderApp):
 
     def _signal_stop(self, sig, frame):
         self.log.critical("received signal %s, stopping", sig)
-        app.notebook_server.send_signal(sig)
+
+        if app.notebook_server_exists:
+            app.notebook_server.send_signal(sig)
+            for i in range(10):
+                retcode = app.notebook_server.poll()
+                if retcode is not None:
+                    app.notebook_server_exists = False
+                    break
+                time.sleep(0.1)
+
+            if retcode is None:
+                self.log.critical("couldn't shutdown notebook server, force killing it")
+                app.notebook_server.kill()
+
         sys.exit(-sig)
 
     def build_extra_config(self):
