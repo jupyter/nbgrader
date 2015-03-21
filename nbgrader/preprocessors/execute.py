@@ -1,8 +1,9 @@
 import os
 
-from IPython.nbconvert.preprocessors import ExecutePreprocessor
 from IPython.nbformat.v4 import output_from_msg
 from IPython.kernel.manager import KernelManager
+
+from nbgrader.preprocessors import NbGraderPreprocessor
 
 try:
     from queue import Empty  # Py 3
@@ -10,7 +11,7 @@ except ImportError:
     from Queue import Empty  # Py 2
 
 
-class Execute(ExecutePreprocessor):
+class Execute(NbGraderPreprocessor):
 
     def preprocess(self, nb, resources):
         cwd = os.getcwd()

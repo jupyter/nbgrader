@@ -1,3 +1,4 @@
+from .base import NbGraderPreprocessor
 from .headerfooter import IncludeHeaderFooter
 from .lockcells import LockCells
 from .clearsolutions import ClearSolutions

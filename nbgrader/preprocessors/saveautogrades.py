@@ -1,13 +1,13 @@
-import dateutil.parser
+from IPython.utils.traitlets import Bool
 
-from IPython.nbconvert.preprocessors import Preprocessor
-from IPython.utils.traitlets import Unicode, Bool
 from nbgrader import utils
 from nbgrader.api import Gradebook
+from nbgrader.preprocessors import NbGraderPreprocessor
+
 from textwrap import dedent
 
 
-class SaveAutoGrades(Preprocessor):
+class SaveAutoGrades(NbGraderPreprocessor):
     """Preprocessor for saving out the autograder grades into a database"""
 
     create_student = Bool(

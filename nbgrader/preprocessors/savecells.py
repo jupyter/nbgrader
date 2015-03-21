@@ -1,10 +1,12 @@
-from IPython.nbconvert.preprocessors import Preprocessor
 from IPython.utils.traitlets import Bool
+
 from nbgrader import utils
 from nbgrader.api import Gradebook
+from nbgrader.preprocessors import NbGraderPreprocessor
+
 from textwrap import dedent
 
-class SaveCells(Preprocessor):
+class SaveCells(NbGraderPreprocessor):
     """A preprocessor to save information about grade and solution cells."""
 
     create_assignment = Bool(

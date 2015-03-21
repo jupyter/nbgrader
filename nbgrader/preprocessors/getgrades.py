@@ -1,9 +1,9 @@
-from IPython.nbconvert.preprocessors import Preprocessor
 from nbgrader import utils
 from nbgrader.api import Gradebook
+from nbgrader.preprocessors import NbGraderPreprocessor
 
 
-class GetGrades(Preprocessor):
+class GetGrades(NbGraderPreprocessor):
     """Preprocessor for saving grades from the database to the notebook"""
 
     def preprocess(self, nb, resources):

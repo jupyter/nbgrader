@@ -1,9 +1,10 @@
-from IPython.nbconvert.preprocessors import Preprocessor
 from IPython.nbformat.v4.nbbase import validate
+
 from nbgrader import utils
 from nbgrader.api import Gradebook
+from nbgrader.preprocessors import NbGraderPreprocessor
 
-class OverwriteCells(Preprocessor):
+class OverwriteCells(NbGraderPreprocessor):
     """A preprocessor to overwrite information about grade and solution cells."""
 
     def preprocess(self, nb, resources):

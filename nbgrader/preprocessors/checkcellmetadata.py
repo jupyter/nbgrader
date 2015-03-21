@@ -1,7 +1,7 @@
-from IPython.nbconvert.preprocessors import Preprocessor
 from nbgrader import utils
+from nbgrader.preprocessors import NbGraderPreprocessor
 
-class CheckCellMetadata(Preprocessor):
+class CheckCellMetadata(NbGraderPreprocessor):
     """A preprocessor for checking that grade ids are unique."""
 
     def preprocess(self, nb, resources):
