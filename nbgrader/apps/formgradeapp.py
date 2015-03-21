@@ -1,6 +1,8 @@
 import os
 import subprocess as sp
 import socket
+import signal
+import sys
 
 from textwrap import dedent
 
@@ -90,6 +92,15 @@ class FormgradeApp(BaseNbGraderApp):
 
         self.log.info("Server root is: {}".format(self.base_directory))
 
+    def init_signal(self):
+        signal.signal(signal.SIGINT, self._signal_stop)
+        signal.signal(signal.SIGTERM, self._signal_stop)
+
+    def _signal_stop(self, sig, frame):
+        self.log.critical("received signal %s, stopping", sig)
+        app.notebook_server.send_signal(sig)
+        sys.exit(0)
+
     def build_extra_config(self):
         self.extra_config = Config()
         self.extra_config.Exporter.template_file = 'formgrade'
@@ -99,6 +110,7 @@ class FormgradeApp(BaseNbGraderApp):
     @catch_config_error
     def initialize(self, argv=None):
         super(FormgradeApp, self).initialize(argv)
+        self.init_signal()
         self.init_server_root()
 
     def start(self):
