@@ -99,7 +99,7 @@ class FormgradeApp(BaseNbGraderApp):
     def _signal_stop(self, sig, frame):
         self.log.critical("received signal %s, stopping", sig)
         app.notebook_server.send_signal(sig)
-        sys.exit(0)
+        sys.exit(-sig)
 
     def build_extra_config(self):
         self.extra_config = Config()

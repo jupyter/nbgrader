@@ -54,7 +54,6 @@ class TestNbgraderFormgrade(TestBase):
     @classmethod
     def setup_class(cls):
         cls.tempdir = tempfile.mkdtemp()
-        cls.ipythondir = tempfile.mkdtemp()
         cls.origdir = os.getcwd()
         os.chdir(cls.tempdir)
 
@@ -77,13 +76,12 @@ class TestNbgraderFormgrade(TestBase):
         cls.browser.save_screenshot(os.path.join(cls.origdir, '.selenium.screenshot.png'))
         cls.browser.quit()
         cls.formgrader.terminate()
-        time.sleep(1)
+        cls.formgrader.communicate()
 
         cls._copy_coverage_files()
 
         os.chdir(cls.origdir)
         shutil.rmtree(cls.tempdir)
-        shutil.rmtree(cls.ipythondir)
 
     def test_help(self):
         self._run_command("nbgrader formgrade --help-all")
