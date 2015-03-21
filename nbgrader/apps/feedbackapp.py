@@ -2,11 +2,10 @@ import os
 from textwrap import dedent
 
 from IPython.config.loader import Config
-from IPython.utils.traitlets import Unicode, Dict
+from IPython.utils.traitlets import Unicode, Dict, List
 from IPython.nbconvert.exporters import HTMLExporter
 
-from nbgrader.apps.baseapp import (
-    BaseNbConvertApp, nbconvert_aliases, nbconvert_flags)
+from nbgrader.apps.baseapp import BaseNbConvertApp, nbconvert_aliases, nbconvert_flags
 from nbgrader.preprocessors import GetGrades
 
 aliases = {}
@@ -17,10 +16,6 @@ aliases.update({
 flags = {}
 flags.update(nbconvert_flags)
 flags.update({
-    'overwrite-cells': (
-        {'AutogradeApp': {'overwrite_cells': True}},
-        "Overwrite grade cells from the database."
-    )
 })
 
 class FeedbackApp(BaseNbConvertApp):
@@ -39,13 +34,16 @@ class FeedbackApp(BaseNbConvertApp):
     nbgrader_step_input = Unicode("autograded")
     nbgrader_step_output = Unicode("feedback")
 
+    preprocessors = List([
+        GetGrades
+    ])
+
     def _classes_default(self):
-        """This has to be in a method, for TerminalIPythonApp to be available."""
         classes = super(FeedbackApp, self)._classes_default()
-        classes.extend([
-            HTMLExporter,
-            GetGrades
-        ])
+        classes.append(HTMLExporter)
+        for pp in self.preprocessors:
+            if len(pp.class_traits(config=True)) > 0:
+                classes.append(pp)
         return classes
 
     def _export_format_default(self):
@@ -53,9 +51,7 @@ class FeedbackApp(BaseNbConvertApp):
 
     def build_extra_config(self):
         self.extra_config = Config()
-        self.extra_config.Exporter.preprocessors = [
-            'nbgrader.preprocessors.GetGrades'
-        ]
+        self.extra_config.Exporter.preprocessors = self.preprocessors
     
         if 'template_file' not in self.config.HTMLExporter:
             self.extra_config.HTMLExporter.template_file = 'feedback'

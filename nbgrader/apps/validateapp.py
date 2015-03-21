@@ -1,7 +1,7 @@
 from textwrap import dedent
 
 from IPython.config.loader import Config
-from IPython.utils.traitlets import Unicode, Dict
+from IPython.utils.traitlets import Unicode, Dict, List
 from IPython.nbconvert.nbconvertapp import NbConvertApp
 from IPython.nbconvert.preprocessors import ClearOutputPreprocessor
 from nbgrader.preprocessors import DisplayAutoGrades, Execute
@@ -47,16 +47,20 @@ class ValidateApp(BaseApp, NbConvertApp):
         """
     ))
 
+    preprocessors = List([
+        ClearOutputPreprocessor,
+        Execute,
+        DisplayAutoGrades
+    ])
+
     def _log_level_default(self):
         return 50
 
     def _classes_default(self):
         classes = super(ValidateApp, self)._classes_default()
-        classes.extend([
-            ClearOutputPreprocessor,
-            Execute,
-            DisplayAutoGrades
-        ])
+        for pp in self.preprocessors:
+            if len(pp.class_traits(config=True)) > 0:
+                classes.append(pp)
         return classes
 
     def _export_format_default(self):
@@ -64,11 +68,7 @@ class ValidateApp(BaseApp, NbConvertApp):
 
     def build_extra_config(self):
         self.extra_config = Config()
-        self.extra_config.Exporter.preprocessors = [
-            'IPython.nbconvert.preprocessors.ClearOutputPreprocessor',
-            'nbgrader.preprocessors.Execute',
-            'nbgrader.preprocessors.DisplayAutoGrades'
-        ]
+        self.extra_config.Exporter.preprocessors = self.preprocessors
         self.config.merge(self.extra_config)
 
     def init_single_notebook_resources(self, notebook_filename):

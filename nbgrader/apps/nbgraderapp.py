@@ -4,7 +4,8 @@
 from textwrap import dedent
 
 from IPython.utils.traitlets import Unicode
-from nbgrader.apps.baseapp import BaseNbGraderApp
+from nbgrader.apps import BaseNbGraderApp
+from nbgrader import preprocessors
 
 
 class NbGraderApp(BaseNbGraderApp):
@@ -46,6 +47,15 @@ class NbGraderApp(BaseNbGraderApp):
             "Submit a completed assignment"
         ),
     )
+
+    def _classes_default(self):
+        classes = super(NbGraderApp, self)._classes_default()
+        # include all preprocessors that have configurable options
+        for pp_name in preprocessors.__all__:
+            pp = getattr(preprocessors, pp_name)
+            if len(pp.class_traits(config=True)) > 0:
+                classes.append(pp)
+        return classes
 
     def start(self):
         # This starts subapps

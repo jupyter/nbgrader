@@ -10,3 +10,17 @@ from .overwritecells import OverwriteCells
 from .checkcellmetadata import CheckCellMetadata
 from .execute import Execute
 from .getgrades import GetGrades
+
+__all__ = [
+    "IncludeHeaderFooter",
+    "LockCells",
+    "ClearSolutions",
+    "SaveAutoGrades",
+    "DisplayAutoGrades",
+    "ComputeChecksums",
+    "SaveCells",
+    "OverwriteCells",
+    "CheckCellMetadata",
+    "Execute",
+    "GetGrades"
+]

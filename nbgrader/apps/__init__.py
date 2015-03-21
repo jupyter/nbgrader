@@ -1,5 +1,4 @@
-from .baseapp import BaseNbGraderApp, BaseNbConvertApp
-from .nbgraderapp import NbGraderApp
+from .baseapp import BaseApp, BaseNbGraderApp, BaseNbConvertApp
 from .assignapp import AssignApp
 from .autogradeapp import AutogradeApp
 from .feedbackapp import FeedbackApp
@@ -7,6 +6,7 @@ from .notebookapp import FormgradeNotebookApp
 from .formgradeapp import FormgradeApp
 from .submitapp import SubmitApp
 from .validateapp import ValidateApp
+from .nbgraderapp import NbGraderApp
 
 __all__ = [
     'BaseNbGraderApp',

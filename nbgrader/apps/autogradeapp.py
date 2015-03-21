@@ -1,12 +1,11 @@
 from textwrap import dedent
 
 from IPython.config.loader import Config
-from IPython.utils.traitlets import Unicode, Bool, Dict
+from IPython.utils.traitlets import Unicode, Bool, Dict, List
 from IPython.nbconvert.preprocessors import ClearOutputPreprocessor
 
-from nbgrader.apps.baseapp import (
-    BaseNbConvertApp, nbconvert_aliases, nbconvert_flags)
-from nbgrader.preprocessors import (SaveAutoGrades, Execute)
+from nbgrader.apps.baseapp import BaseNbConvertApp, nbconvert_aliases, nbconvert_flags
+from nbgrader.preprocessors import SaveAutoGrades, Execute, OverwriteCells, SaveCells
 
 aliases = {}
 aliases.update(nbconvert_aliases)
@@ -17,7 +16,7 @@ flags = {}
 flags.update(nbconvert_flags)
 flags.update({
     'no-overwrite': (
-        {'AutogradeApp': {'overwrite_cells': False}},
+        {'OverwriteCells': {'enabled': False}},
         "Do not overwrite grade cells from the database."
     ),
     'create': (
@@ -69,43 +68,22 @@ class AutogradeApp(BaseNbConvertApp):
     nbgrader_step_input = Unicode("submitted")
     nbgrader_step_output = Unicode("autograded")
 
-    overwrite_cells = Bool(
-        True, 
-        config=True, 
-        help=dedent(
-            """
-            Overwrite grade cells from the database. If false, the database 
-            will automatically be populated by the existing cells in the assignment.
-            Note, however, that if the cells already exist in the database, they
-            will be overwritten by whatever is in this assignment!
-            """
-        )
-    )
+    preprocessors = List([
+        ClearOutputPreprocessor,
+        OverwriteCells,
+        SaveCells,
+        Execute,
+        SaveAutoGrades
+    ])
 
     def _classes_default(self):
         classes = super(AutogradeApp, self)._classes_default()
-        classes.extend([
-            ClearOutputPreprocessor,
-            Execute,
-            SaveAutoGrades
-        ])
+        for pp in self.preprocessors:
+            if len(pp.class_traits(config=True)) > 0:
+                classes.append(pp)
         return classes
 
     def build_extra_config(self):
         self.extra_config = Config()
-        self.extra_config.Exporter.preprocessors = [
-            'IPython.nbconvert.preprocessors.ClearOutputPreprocessor'
-        ]
-        if self.overwrite_cells:
-            self.extra_config.Exporter.preprocessors.append(
-                'nbgrader.preprocessors.OverwriteCells'
-            )
-        else:
-            self.extra_config.Exporter.preprocessors.extend([
-                'nbgrader.preprocessors.SaveCells'
-            ])
-        self.extra_config.Exporter.preprocessors.extend([
-            'nbgrader.preprocessors.Execute',
-            'nbgrader.preprocessors.SaveAutoGrades'
-        ])
+        self.extra_config.Exporter.default_preprocessors = self.preprocessors
         self.config.merge(self.extra_config)

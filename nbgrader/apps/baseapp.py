@@ -14,6 +14,8 @@ from IPython.core.profiledir import ProfileDir
 from IPython.config.application import catch_config_error
 from IPython.nbconvert.nbconvertapp import NbConvertApp
 
+from nbgrader.config import NbGraderConfig
+
 # These are the aliases and flags for nbgrader apps that inherit only from
 # BaseApp (and not BaseNbGraderApp)
 base_aliases = {
@@ -36,10 +38,10 @@ base_flags = {
 nbgrader_aliases = {}
 nbgrader_aliases.update(base_aliases)
 nbgrader_aliases.update({
-    'student': 'BaseNbGraderApp.student_id',
-    'assignment': 'BaseNbGraderApp.assignment_id',
-    'notebook': 'BaseNbGraderApp.notebook_id',
-    'db': 'BaseNbGraderApp.db_url'
+    'student': 'NbGraderConfig.student_id',
+    'assignment': 'NbGraderConfig.assignment_id',
+    'notebook': 'NbGraderConfig.notebook_id',
+    'db': 'NbGraderConfig.db_url'
 })
 nbgrader_flags = {}
 nbgrader_flags.update(base_flags)
@@ -86,6 +88,9 @@ class BaseApp(BaseIPythonApplication):
     def _classes_default(self):
         return [ProfileDir]
 
+    def _config_file_name_default(self):
+        return u'nbgrader_config.py'
+
     def build_extra_config(self):
         pass
 
@@ -106,52 +111,19 @@ class BaseNbGraderApp(BaseApp):
     nbgrader_step_input = Unicode("")
     nbgrader_step_output = Unicode("")
 
-    db_url = Unicode("sqlite:///gradebook.db", config=True, help="URL to the database")
+    def _classes_default(self):
+        classes = super(BaseNbGraderApp, self)._classes_default()
+        classes.append(NbGraderConfig)
+        return classes
 
-    student_id = Unicode(
-        "*",
-        config=True,
-        help=dedent(
-            """
-            File glob to match student ids. This can be changed to filter by 
-            student id.
-            """
-        )
-    )
-
-    assignment_id = Unicode(
-        "",
-        config=True,
-        help=dedent(
-            """
-            File glob to match assignment names. This can be changed to filter 
-            by assignment id.
-            """
-        )
-    )
-
-    notebook_id = Unicode(
-        "*",
-        config=True,
-        help=dedent(
-            """
-            File glob to match notebook ids, excluding the '.ipynb' extension. 
-            This can be changed to filter by notebook id.
-            """
-        )
-    )
-
-    directory_structure = Unicode(
-        "{nbgrader_step}/{student_id}/{assignment_id}",
-        config=True,
-        help=dedent(
-            """
-            Format string for the directory structure that nbgrader works 
-            over during the grading process. This MUST contain named keys for 
-            'nbgrader_step', 'student_id', and 'assignment_id'.
-            """
-        )
-    )
+    def __init__(self, *args, **kwargs):
+        super(BaseNbGraderApp, self).__init__(*args, **kwargs)
+        config = NbGraderConfig(parent=self)
+        self.db_url = config.db_url
+        self.assignment_id = config.assignment_id
+        self.notebook_id = config.notebook_id
+        self.student_id = config.student_id
+        self.directory_structure = config.directory_structure
 
 
 class BaseNbConvertApp(BaseNbGraderApp, NbConvertApp):

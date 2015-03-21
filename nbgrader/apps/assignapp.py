@@ -1,7 +1,7 @@
 from textwrap import dedent
 
 from IPython.config.loader import Config
-from IPython.utils.traitlets import Unicode, Bool, Dict
+from IPython.utils.traitlets import Unicode, Bool, Dict, List
 from IPython.nbconvert.preprocessors import ClearOutputPreprocessor
 
 from nbgrader.apps.baseapp import (
@@ -24,7 +24,7 @@ flags = {}
 flags.update(nbconvert_flags)
 flags.update({
     'no-db': (
-        {'AssignApp': {'save_cells': False}},
+        {'SaveCells': {'enabled': False}},
         "Do not save information about grade cells into the database."
     ),
     'create': (
@@ -87,35 +87,28 @@ class AssignApp(BaseNbConvertApp):
     nbgrader_step_input = Unicode("source")
     nbgrader_step_output = Unicode("release")
 
-    student_id = Unicode('.')
-
-    save_cells = Bool(True, config=True, help="Save information about grade cells into the database.")
+    preprocessors = List([
+        IncludeHeaderFooter,
+        LockCells,
+        ClearSolutions,
+        ClearOutputPreprocessor,
+        CheckCellMetadata,
+        ComputeChecksums,
+        SaveCells
+    ])
 
     def _classes_default(self):
         classes = super(AssignApp, self)._classes_default()
-        classes.extend([
-            IncludeHeaderFooter,
-            LockCells,
-            ClearSolutions,
-            ClearOutputPreprocessor,
-            CheckCellMetadata,
-            ComputeChecksums,
-            SaveCells
-        ])
+        for pp in self.preprocessors:
+            if len(pp.class_traits(config=True)) > 0:
+                classes.append(pp)
         return classes
+
+    def __init__(self, *args, **kwargs):
+        super(AssignApp, self).__init__(*args, **kwargs)
+        self.student_id = '.'
 
     def build_extra_config(self):
         self.extra_config = Config()
-        self.extra_config.Exporter.preprocessors = [
-            'nbgrader.preprocessors.IncludeHeaderFooter',
-            'nbgrader.preprocessors.LockCells',
-            'nbgrader.preprocessors.ClearSolutions',
-            'IPython.nbconvert.preprocessors.ClearOutputPreprocessor',
-            'nbgrader.preprocessors.CheckCellMetadata',
-            'nbgrader.preprocessors.ComputeChecksums'
-        ]
-        if self.save_cells:
-            self.extra_config.Exporter.preprocessors.append(
-                'nbgrader.preprocessors.SaveCells'
-            )
+        self.extra_config.Exporter.default_preprocessors = self.preprocessors
         self.config.merge(self.extra_config)
