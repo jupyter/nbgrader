@@ -6,29 +6,27 @@ import glob
 import sys
 import re
 import os
-from textwrap import dedent
 
-from IPython.utils.traitlets import Unicode, List, Bool, Dict
+from IPython.utils.traitlets import Unicode, List, Bool, Dict, Enum
 from IPython.core.application import BaseIPythonApplication
-from IPython.core.profiledir import ProfileDir
 from IPython.config.application import catch_config_error
-from IPython.nbconvert.nbconvertapp import NbConvertApp
+from IPython.nbconvert.nbconvertapp import NbConvertApp, DottedOrNone
 
-from nbgrader.config import NbGraderConfig
+from nbgrader.config import BasicConfig, NbGraderConfig
 
 # These are the aliases and flags for nbgrader apps that inherit only from
 # BaseApp (and not BaseNbGraderApp)
 base_aliases = {
-    'log-level' : 'Application.log_level',
-    'config' : 'BaseIPythonApplication.extra_config_file',
+    'log-level' : 'BasicConfig.log_level',
+    'config' : 'BasicConfig.extra_config_file',
 }
 base_flags = {
     'debug': (
-        {'Application' : {'log_level' : logging.DEBUG}},
+        {'BasicConfig' : {'log_level' : logging.DEBUG}},
         "set log level to logging.DEBUG (maximize logging output)"
     ),
     'quiet': (
-        {'Application' : {'log_level' : logging.CRITICAL}},
+        {'BasicConfig' : {'log_level' : logging.CRITICAL}},
         "set log level to logging.CRITICAL (minimize logging output)"
     ),
 }
@@ -46,14 +44,6 @@ nbgrader_aliases.update({
 nbgrader_flags = {}
 nbgrader_flags.update(base_flags)
 nbgrader_flags.update({
-    'debug': (
-        {'Application' : {'log_level' : logging.DEBUG}},
-        "set log level to logging.DEBUG (maximize logging output)"
-    ),
-    'quiet': (
-        {'Application' : {'log_level' : logging.CRITICAL}},
-        "set log level to logging.CRITICAL (minimize logging output)"
-    ),
 })
 
 # These are the aliases and flags for nbgrade apps that inherit from BaseNbConvertApp
@@ -79,17 +69,38 @@ class BaseApp(BaseIPythonApplication):
     aliases = Dict(base_aliases)
     flags = Dict(base_flags)
 
-    profile = Unicode('nbgrader', config=True, help="Default IPython profile to use")
-    auto_create = Bool(True, config=True, help="Whether to automatically generate the profile")
+    # This is a hack in order to centralize the config options inherited from
+    # IPython. Rather than allowing them to be configured for each app separately,
+    # this makes them non-configurable for the apps themselves. Then, in the init,
+    # an instance of `BasicConfig` is created, which contains these options, and
+    # their values are set on the application instance. So, to configure these
+    # options, the `BasicConfig` class can be configured, rather than the 
+    # application itself.
+    profile = Unicode()
+    overwrite = Bool()
+    auto_create = Bool()
+    extra_config_file = Unicode()
+    log_level = 30
+    copy_config_files = Bool()
+    verbose_crash = Bool()
+    ipython_dir = Unicode()
+    log_datefmt = Unicode()
+    log_format = Unicode()
 
     # The classes added here determine how configuration will be documented
     classes = List()
 
     def _classes_default(self):
-        return [ProfileDir]
+        return [BasicConfig]
 
     def _config_file_name_default(self):
         return u'nbgrader_config.py'
+
+    def __init__(self, *args, **kwargs):
+        super(BaseApp, self).__init__(*args, **kwargs)
+        config = BasicConfig(parent=self)
+        for trait in config.traits(config=True):
+            setattr(self, trait, getattr(config, trait))
 
     def build_extra_config(self):
         pass
@@ -119,11 +130,8 @@ class BaseNbGraderApp(BaseApp):
     def __init__(self, *args, **kwargs):
         super(BaseNbGraderApp, self).__init__(*args, **kwargs)
         config = NbGraderConfig(parent=self)
-        self.db_url = config.db_url
-        self.assignment_id = config.assignment_id
-        self.notebook_id = config.notebook_id
-        self.student_id = config.student_id
-        self.directory_structure = config.directory_structure
+        for traitname, trait in config.traits(config=True).items():
+            setattr(self, traitname, trait)
 
 
 class BaseNbConvertApp(BaseNbGraderApp, NbConvertApp):
@@ -141,9 +149,10 @@ class BaseNbConvertApp(BaseNbGraderApp, NbConvertApp):
     flags = Dict(nbconvert_flags)
 
     use_output_suffix = Bool(False)
-
-    def _export_format_default(self):
-        return 'notebook'
+    postprocessor_class = DottedOrNone('')
+    notebooks = List([])
+    writer_class = DottedOrNone('FilesWriter')
+    output_base = Unicode('')
 
     def init_notebooks(self):
         # the assignment can be set via extra args

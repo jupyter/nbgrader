@@ -68,6 +68,8 @@ class AutogradeApp(BaseNbConvertApp):
     nbgrader_step_input = Unicode("submitted")
     nbgrader_step_output = Unicode("autograded")
 
+    export_format = 'notebook'
+
     preprocessors = List([
         ClearOutputPreprocessor,
         OverwriteCells,

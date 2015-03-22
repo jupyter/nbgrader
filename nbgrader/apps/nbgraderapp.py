@@ -4,8 +4,16 @@
 from textwrap import dedent
 
 from IPython.utils.traitlets import Unicode
-from nbgrader.apps import BaseNbGraderApp
 from nbgrader import preprocessors
+from nbgrader.apps import (
+    BaseNbGraderApp,
+    AssignApp,
+    AutogradeApp,
+    FormgradeApp,
+    FeedbackApp,
+    ValidateApp,
+    SubmitApp
+)
 
 
 class NbGraderApp(BaseNbGraderApp):
@@ -23,38 +31,45 @@ class NbGraderApp(BaseNbGraderApp):
 
     subcommands = dict(
         assign=(
-            'nbgrader.apps.assignapp.AssignApp',
+            AssignApp,
             "Create a students version of a notebook"
         ),
         autograde=(
-            'nbgrader.apps.autogradeapp.AutogradeApp',
+            AutogradeApp,
             "Autograde a notebook by running it"
         ),
         formgrade=(
-            'nbgrader.apps.formgradeapp.FormgradeApp',
+            FormgradeApp,
             "Grade a notebook using an HTML form"
         ),
         feedback=(
-            'nbgrader.apps.feedbackapp.FeedbackApp',
+            FeedbackApp,
             "Generate feedback"
         ),
         validate=(
-            'nbgrader.apps.validateapp.ValidateApp',
+            ValidateApp,
             "Validate a notebook"
         ),
         submit=(
-            'nbgrader.apps.submitapp.SubmitApp',
+            SubmitApp,
             "Submit a completed assignment"
         ),
     )
 
     def _classes_default(self):
         classes = super(NbGraderApp, self)._classes_default()
+
+        # include all the apps that have configurable options
+        for appname, (app, help) in self.subcommands.items():
+            if len(app.class_traits(config=True)) > 0:
+                classes.append(app)
+
         # include all preprocessors that have configurable options
         for pp_name in preprocessors.__all__:
             pp = getattr(preprocessors, pp_name)
             if len(pp.class_traits(config=True)) > 0:
                 classes.append(pp)
+
         return classes
 
     def start(self):

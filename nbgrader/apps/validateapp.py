@@ -1,8 +1,8 @@
 from textwrap import dedent
 
 from IPython.config.loader import Config
-from IPython.utils.traitlets import Unicode, Dict, List
-from IPython.nbconvert.nbconvertapp import NbConvertApp
+from IPython.utils.traitlets import Unicode, Dict, List, Bool
+from IPython.nbconvert.nbconvertapp import NbConvertApp, DottedOrNone
 from IPython.nbconvert.preprocessors import ClearOutputPreprocessor
 from nbgrader.preprocessors import DisplayAutoGrades, Execute
 from nbgrader.apps.baseapp import BaseApp, base_flags, base_aliases
@@ -53,6 +53,13 @@ class ValidateApp(BaseApp, NbConvertApp):
         DisplayAutoGrades
     ])
 
+    export_format = Unicode('notebook')
+    use_output_suffix = Bool(False)
+    postprocessor_class = DottedOrNone('')
+    notebooks = List([])
+    writer_class = DottedOrNone('FilesWriter')
+    output_base = Unicode('')
+
     def _log_level_default(self):
         return 50
 
@@ -62,9 +69,6 @@ class ValidateApp(BaseApp, NbConvertApp):
             if len(pp.class_traits(config=True)) > 0:
                 classes.append(pp)
         return classes
-
-    def _export_format_default(self):
-        return 'notebook'
 
     def build_extra_config(self):
         self.extra_config = Config()

@@ -87,6 +87,8 @@ class AssignApp(BaseNbConvertApp):
     nbgrader_step_input = Unicode("source")
     nbgrader_step_output = Unicode("release")
 
+    export_format = 'notebook'
+
     preprocessors = List([
         IncludeHeaderFooter,
         LockCells,
