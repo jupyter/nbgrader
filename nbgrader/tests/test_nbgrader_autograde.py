@@ -76,46 +76,7 @@ class TestNbgraderAutograde(TestBase):
             shutil.move('submitted-unchanged.ipynb', 'submitted/foo/ps1/p1.ipynb')
             os.makedirs('submitted/bar/ps1')
             shutil.move('submitted-changed.ipynb', 'submitted/bar/ps1/p1.ipynb')
-            self._run_command('nbgrader autograde ps1 --db="{}" --no-overwrite'.format(dbpath))
-
-            assert os.path.isfile("autograded/foo/ps1/p1.ipynb")
-            assert os.path.isfile("autograded/bar/ps1/p1.ipynb")
-
-            gb = Gradebook(dbpath)
-            notebook = gb.find_submission_notebook("p1", "ps1", "foo")
-            assert_equal(notebook.score, 1)
-            assert_equal(notebook.max_score, 4)
-            assert_equal(notebook.needs_manual_grade, False)
-
-            comment1 = gb.find_comment(0, "p1", "ps1", "foo")
-            comment2 = gb.find_comment(1, "p1", "ps1", "foo")
-            assert_equal(comment1.comment, "No response.")
-            assert_equal(comment2.comment, "No response.")
-
-            notebook = gb.find_submission_notebook("p1", "ps1", "bar")
-            assert_equal(notebook.score, 2)
-            assert_equal(notebook.max_score, 4)
-            assert_equal(notebook.needs_manual_grade, True)
-
-            comment1 = gb.find_comment(0, "p1", "ps1", "bar")
-            comment2 = gb.find_comment(1, "p1", "ps1", "bar")
-            assert_equal(comment1.comment, None)
-            assert_equal(comment2.comment, None)
-
-    def test_overwrite(self):
-        """Can a single file be graded and overwrite cells?"""
-        with self._temp_cwd(["files/submitted-unchanged.ipynb", "files/submitted-changed.ipynb"]):
-            dbpath = self._setup_db()
-
-            os.makedirs('source/ps1')
-            shutil.copy('submitted-unchanged.ipynb', 'source/ps1/p1.ipynb')
-            self._run_command('nbgrader assign ps1 --db="{}" '.format(dbpath))
-
-            os.makedirs('submitted/foo/ps1')
-            shutil.move('submitted-unchanged.ipynb', 'submitted/foo/ps1/p1.ipynb')
-            os.makedirs('submitted/bar/ps1')
-            shutil.move('submitted-changed.ipynb', 'submitted/bar/ps1/p1.ipynb')
-            self._run_command('nbgrader autograde ps1 --db="{}" --no-overwrite'.format(dbpath))
+            self._run_command('nbgrader autograde ps1 --db="{}"'.format(dbpath))
 
             assert os.path.isfile("autograded/foo/ps1/p1.ipynb")
             assert os.path.isfile("autograded/bar/ps1/p1.ipynb")

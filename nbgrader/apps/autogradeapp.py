@@ -5,7 +5,7 @@ from IPython.utils.traitlets import Unicode, Bool, Dict, List
 from IPython.nbconvert.preprocessors import ClearOutputPreprocessor
 
 from nbgrader.apps.baseapp import BaseNbConvertApp, nbconvert_aliases, nbconvert_flags
-from nbgrader.preprocessors import SaveAutoGrades, Execute, OverwriteCells, SaveCells
+from nbgrader.preprocessors import SaveAutoGrades, Execute, OverwriteCells
 
 aliases = {}
 aliases.update(nbconvert_aliases)
@@ -15,10 +15,6 @@ aliases.update({
 flags = {}
 flags.update(nbconvert_flags)
 flags.update({
-    'no-overwrite': (
-        {'OverwriteCells': {'enabled': False}},
-        "Do not overwrite grade cells from the database."
-    ),
     'create': (
         {'SaveAutoGrades': {'create_student': True}},
         "Create the student at runtime if they do not exist in the db."
@@ -73,7 +69,6 @@ class AutogradeApp(BaseNbConvertApp):
     preprocessors = List([
         ClearOutputPreprocessor,
         OverwriteCells,
-        SaveCells,
         Execute,
         SaveAutoGrades
     ])
