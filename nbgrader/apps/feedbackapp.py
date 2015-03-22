@@ -41,9 +41,6 @@ class FeedbackApp(BaseNbConvertApp):
     def _classes_default(self):
         classes = super(FeedbackApp, self)._classes_default()
         classes.append(HTMLExporter)
-        for pp in self.preprocessors:
-            if len(pp.class_traits(config=True)) > 0:
-                classes.append(pp)
         return classes
 
     def _export_format_default(self):

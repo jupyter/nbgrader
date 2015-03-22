@@ -60,7 +60,7 @@ class TestNbgraderFormgrade(TestBase):
     @classmethod
     def _setup_formgrade_config(cls):
         # create config file
-        with open("nbgrader_formgrade_config.py", "w") as fh:
+        with open("nbgrader_config.py", "w") as fh:
             fh.write(dedent(
                 """
                 c = get_config()

@@ -78,13 +78,6 @@ class AutogradeApp(BaseNbConvertApp):
         SaveAutoGrades
     ])
 
-    def _classes_default(self):
-        classes = super(AutogradeApp, self)._classes_default()
-        for pp in self.preprocessors:
-            if len(pp.class_traits(config=True)) > 0:
-                classes.append(pp)
-        return classes
-
     def build_extra_config(self):
         self.extra_config = Config()
         self.extra_config.Exporter.default_preprocessors = self.preprocessors

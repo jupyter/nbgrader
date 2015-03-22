@@ -61,7 +61,7 @@ class ValidateApp(BaseApp, NbConvertApp):
     output_base = Unicode('')
 
     def _log_level_default(self):
-        return 50
+        return 'ERROR'
 
     def _classes_default(self):
         classes = super(ValidateApp, self)._classes_default()

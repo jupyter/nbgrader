@@ -1,11 +1,25 @@
-import logging
-
 from IPython.config import Configurable
-from IPython.utils.traitlets import Unicode, Bool, Enum
+from IPython.utils.traitlets import Unicode, Bool, Enum, link
+from IPython.utils.path import get_ipython_dir
 
 from textwrap import dedent
 
-class BasicConfig(Configurable):
+
+class LinkedConfig(Configurable):
+    """A config class whose traits are linked to its parent's traits"""
+
+    def __init__(self, **kwargs):
+        super(LinkedConfig, self).__init__(**kwargs)
+
+        # link the trait values between the parent and the config
+        for trait in self.traits(config=True):
+            link((self, trait), (self.parent, trait))
+
+        # link the parent's config with our config
+        link((self.parent, 'config'), (self, 'config'))
+
+
+class BasicConfig(LinkedConfig):
     """Config options that inherited from IPython."""
 
     profile = Unicode('nbgrader', config=True, help="Default IPython profile to use")
@@ -49,6 +63,7 @@ class BasicConfig(Configurable):
     )
 
     ipython_dir = Unicode(
+        get_ipython_dir(),
         config=True,
         help=dedent(
             """
@@ -60,13 +75,6 @@ class BasicConfig(Configurable):
         )
     )
 
-    log_level = Enum(
-        (0, 10, 20, 30, 40, 50, 'DEBUG', 'INFO', 'WARN', 'ERROR', 'CRITICAL'),
-        default_value=logging.WARN,
-        config=True,
-        help="Set the log level by value or name."
-    )
-
     log_datefmt = Unicode(
         "%Y-%m-%d %H:%M:%S", 
         config=True,
@@ -74,13 +82,14 @@ class BasicConfig(Configurable):
     )
 
     log_format = Unicode(
-        "[%(name)s]%(highlevel)s %(message)s", 
+        "[%(name)s | %(levelname)s] %(message)s", 
         config=True,
         help="The Logging format template",
     )
 
 
-class NbGraderConfig(Configurable):
+class NbGraderConfig(LinkedConfig):
+    """Config options that are common across nbgrader apps"""
 
     db_url = Unicode("sqlite:///gradebook.db", config=True, help="URL to the database")
 

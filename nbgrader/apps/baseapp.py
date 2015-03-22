@@ -1,13 +1,12 @@
 #!/usr/bin/env python
 # encoding: utf-8
 
-import logging
 import glob
 import sys
 import re
 import os
 
-from IPython.utils.traitlets import Unicode, List, Bool, Dict, Enum
+from IPython.utils.traitlets import Unicode, List, Bool, Dict, Instance, Enum
 from IPython.core.application import BaseIPythonApplication
 from IPython.config.application import catch_config_error
 from IPython.nbconvert.nbconvertapp import NbConvertApp, DottedOrNone
@@ -17,17 +16,17 @@ from nbgrader.config import BasicConfig, NbGraderConfig
 # These are the aliases and flags for nbgrader apps that inherit only from
 # BaseApp (and not BaseNbGraderApp)
 base_aliases = {
-    'log-level' : 'BasicConfig.log_level',
+    'log-level' : 'Application.log_level',
     'config' : 'BasicConfig.extra_config_file',
 }
 base_flags = {
     'debug': (
-        {'BasicConfig' : {'log_level' : logging.DEBUG}},
-        "set log level to logging.DEBUG (maximize logging output)"
+        {'Application' : {'log_level' : 'DEBUG'}},
+        "set log level to DEBUG (maximize logging output)"
     ),
     'quiet': (
-        {'BasicConfig' : {'log_level' : logging.CRITICAL}},
-        "set log level to logging.CRITICAL (minimize logging output)"
+        {'Application' : {'log_level' : 'CRITICAL'}},
+        "set log level to CRITICAL (minimize logging output)"
     ),
 }
 
@@ -80,7 +79,6 @@ class BaseApp(BaseIPythonApplication):
     overwrite = Bool()
     auto_create = Bool()
     extra_config_file = Unicode()
-    log_level = 30
     copy_config_files = Bool()
     verbose_crash = Bool()
     ipython_dir = Unicode()
@@ -90,6 +88,9 @@ class BaseApp(BaseIPythonApplication):
     # The classes added here determine how configuration will be documented
     classes = List()
 
+    # Basic configuration instance
+    _basic_config = Instance(BasicConfig)
+
     def _classes_default(self):
         return [BasicConfig]
 
@@ -98,9 +99,7 @@ class BaseApp(BaseIPythonApplication):
 
     def __init__(self, *args, **kwargs):
         super(BaseApp, self).__init__(*args, **kwargs)
-        config = BasicConfig(parent=self)
-        for trait in config.traits(config=True):
-            setattr(self, trait, getattr(config, trait))
+        self._basic_config = BasicConfig(parent=self)
 
     def build_extra_config(self):
         pass
@@ -108,7 +107,6 @@ class BaseApp(BaseIPythonApplication):
     @catch_config_error
     def initialize(self, argv=None):
         super(BaseApp, self).initialize(argv)
-        self.stage_default_config_file()
         self.build_extra_config()
 
 
@@ -122,6 +120,17 @@ class BaseNbGraderApp(BaseApp):
     nbgrader_step_input = Unicode("")
     nbgrader_step_output = Unicode("")
 
+    # these must be defined, but then will actually be populated with values from
+    # the NbGraderConfig instance
+    db_url = Unicode()
+    student_id = Unicode()
+    assignment_id = Unicode()
+    notebook_id = Unicode()
+    directory_structure = Unicode()
+
+    # nbgrader configuration instance
+    _nbgrader_config = Instance(NbGraderConfig)
+
     def _classes_default(self):
         classes = super(BaseNbGraderApp, self)._classes_default()
         classes.append(NbGraderConfig)
@@ -129,9 +138,7 @@ class BaseNbGraderApp(BaseApp):
 
     def __init__(self, *args, **kwargs):
         super(BaseNbGraderApp, self).__init__(*args, **kwargs)
-        config = NbGraderConfig(parent=self)
-        for traitname, trait in config.traits(config=True).items():
-            setattr(self, traitname, trait)
+        self._nbgrader_config = NbGraderConfig(parent=self)
 
 
 class BaseNbConvertApp(BaseNbGraderApp, NbConvertApp):
@@ -153,6 +160,15 @@ class BaseNbConvertApp(BaseNbGraderApp, NbConvertApp):
     notebooks = List([])
     writer_class = DottedOrNone('FilesWriter')
     output_base = Unicode('')
+
+    preprocessors = List([])
+
+    def _classes_default(self):
+        classes = super(BaseNbConvertApp, self)._classes_default()
+        for pp in self.preprocessors:
+            if len(pp.class_traits(config=True)) > 0:
+                classes.append(pp)
+        return classes
 
     def init_notebooks(self):
         # the assignment can be set via extra args

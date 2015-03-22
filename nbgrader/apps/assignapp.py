@@ -99,13 +99,6 @@ class AssignApp(BaseNbConvertApp):
         SaveCells
     ])
 
-    def _classes_default(self):
-        classes = super(AssignApp, self)._classes_default()
-        for pp in self.preprocessors:
-            if len(pp.class_traits(config=True)) > 0:
-                classes.append(pp)
-        return classes
-
     def __init__(self, *args, **kwargs):
         super(AssignApp, self).__init__(*args, **kwargs)
         self.student_id = '.'
