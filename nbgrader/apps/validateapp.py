@@ -2,8 +2,7 @@ from textwrap import dedent
 
 from IPython.utils.traitlets import Unicode, Dict, List, Bool
 from IPython.nbconvert.nbconvertapp import NbConvertApp, DottedOrNone
-from IPython.nbconvert.preprocessors import ClearOutputPreprocessor
-from nbgrader.preprocessors import DisplayAutoGrades, Execute
+from nbgrader.preprocessors import DisplayAutoGrades, Execute, ClearOutput
 from nbgrader.apps.baseapp import BaseApp, base_flags, base_aliases
 
 aliases = {}
@@ -47,7 +46,7 @@ class ValidateApp(BaseApp, NbConvertApp):
     ))
 
     preprocessors = List([
-        ClearOutputPreprocessor,
+        ClearOutput,
         Execute,
         DisplayAutoGrades
     ])

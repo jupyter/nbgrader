@@ -1,10 +1,9 @@
 from textwrap import dedent
 
 from IPython.utils.traitlets import Unicode, Dict, List
-from IPython.nbconvert.preprocessors import ClearOutputPreprocessor
 
 from nbgrader.apps.baseapp import BaseNbConvertApp, nbconvert_aliases, nbconvert_flags
-from nbgrader.preprocessors import SaveAutoGrades, Execute, OverwriteCells
+from nbgrader.preprocessors import SaveAutoGrades, Execute, OverwriteCells, ClearOutput
 
 aliases = {}
 aliases.update(nbconvert_aliases)
@@ -40,7 +39,7 @@ class AutogradeApp(BaseNbConvertApp):
     export_format = 'notebook'
 
     preprocessors = List([
-        ClearOutputPreprocessor,
+        ClearOutput,
         OverwriteCells,
         Execute,
         SaveAutoGrades

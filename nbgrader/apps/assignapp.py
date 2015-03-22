@@ -1,7 +1,6 @@
 from textwrap import dedent
 
 from IPython.utils.traitlets import Unicode, Dict, List
-from IPython.nbconvert.preprocessors import ClearOutputPreprocessor
 
 from nbgrader.apps.baseapp import (
     BaseNbConvertApp, nbconvert_aliases, nbconvert_flags)
@@ -11,7 +10,8 @@ from nbgrader.preprocessors import (
     LockCells,
     ComputeChecksums,
     SaveCells,
-    CheckCellMetadata
+    CheckCellMetadata,
+    ClearOutput,
 )
 
 aliases = {}
@@ -99,7 +99,7 @@ class AssignApp(BaseNbConvertApp):
         IncludeHeaderFooter,
         LockCells,
         ClearSolutions,
-        ClearOutputPreprocessor,
+        ClearOutput,
         CheckCellMetadata,
         ComputeChecksums,
         SaveCells

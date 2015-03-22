@@ -10,6 +10,7 @@ from .overwritecells import OverwriteCells
 from .checkcellmetadata import CheckCellMetadata
 from .execute import Execute
 from .getgrades import GetGrades
+from .clearoutput import ClearOutput
 
 __all__ = [
     "IncludeHeaderFooter",
@@ -22,5 +23,6 @@ __all__ = [
     "OverwriteCells",
     "CheckCellMetadata",
     "Execute",
-    "GetGrades"
+    "GetGrades",
+    "ClearOutput"
 ]
