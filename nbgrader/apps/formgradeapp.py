@@ -64,8 +64,17 @@ class FormgradeApp(BaseNbGraderApp):
         """
     ))
 
-    nbgrader_step_input = Unicode("autograded", config=True)
-    nbgrader_step_output = Unicode("")
+    nbgrader_step_input = Unicode(
+        "autograded",
+        config=True,
+        help=dedent(
+            """
+            The input directory for this step of the grading process. This
+            corresponds to the `nbgrader_step` variable in the path defined by
+            `NbGraderConfig.directory_structure`.
+            """
+        )
+    )
 
     ip = Unicode("localhost", config=True, help="IP address for the server")
     port = Integer(5000, config=True, help="Port for the server")

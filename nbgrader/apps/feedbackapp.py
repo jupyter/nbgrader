@@ -52,8 +52,28 @@ class FeedbackApp(BaseNbConvertApp):
         """
     ))
 
-    nbgrader_step_input = Unicode("autograded", config=True)
-    nbgrader_step_output = Unicode("feedback", config=True)
+    nbgrader_step_input = Unicode(
+        "autograded",
+        config=True,
+        help=dedent(
+            """
+            The input directory for this step of the grading process. This
+            corresponds to the `nbgrader_step` variable in the path defined by
+            `NbGraderConfig.directory_structure`.
+            """
+        )
+    )
+    nbgrader_step_output = Unicode(
+        "feedback",
+        config=True,
+        help=dedent(
+            """
+            The output directory for this step of the grading process. This
+            corresponds to the `nbgrader_step` variable in the path defined by
+            `NbGraderConfig.directory_structure`.
+            """
+        )
+    )
 
     preprocessors = List([
         GetGrades

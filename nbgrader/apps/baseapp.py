@@ -133,8 +133,8 @@ class BaseNbGraderApp(BaseApp):
     """
 
     # must be overwritten by subclasses
-    nbgrader_step_input = Unicode("")
-    nbgrader_step_output = Unicode("")
+    nbgrader_step_input = Unicode()
+    nbgrader_step_output = Unicode()
 
     # these must be defined, but then will actually be populated with values from
     # the NbGraderConfig instance
