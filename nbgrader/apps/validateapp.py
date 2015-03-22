@@ -30,18 +30,14 @@ class ValidateApp(BaseApp, NbConvertApp):
     examples = Unicode(dedent(
         """
         You can run `nbgrader validate` on just a single file, e.g.:
-
-        > nbgrader validate "Problem 1.ipynb"
+            nbgrader validate "Problem 1.ipynb"
 
         Or, you can run it on multiple files using shell globs:
-
-        > nbgrader validate "Problem Set 1/*.ipynb"
+            nbgrader validate "Problem Set 1/*.ipynb"
 
         If you want to test instead that none of the tests pass (rather than that
-        all of the tests pass, which is the default), you can use the --invert
-        flag:
-
-        > nbgrader validate --invert "Problem 1.ipynb"
+        all of the tests pass, which is the default), you can use --invert:
+            nbgrader validate --invert "Problem 1.ipynb"
         """
     ))
 

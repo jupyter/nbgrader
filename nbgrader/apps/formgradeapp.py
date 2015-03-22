@@ -36,9 +36,31 @@ class FormgradeApp(BaseNbGraderApp):
 
     examples = Unicode(dedent(
         """
-        nbgrader formgrade .
-        nbgrader formgrade autograded/
-        nbgrader formgrade --ip=0.0.0.0 --port=80
+        Run the formgrader server application in order to manually grade
+        submissions that have already been autograded. Running the formgrader
+        allows *any* submission (from any assignment, for any student) to be
+        graded, as long as it has already been run through the autograder.
+
+        By default, the formgrader runs at http://localhost:5000. It also starts
+        an IPython notebook server, to allow students' notebooks to be open up
+        and run manually if so desired. The notebook server also runs on
+        localhost on a random port, though this port can be specified by setting
+        `FormgradeApp.nbserver_port`. The notebook server can be disabled entirely
+        by setting `FormgradeApp.start_nbserver=False`.
+
+        The formgrader must be run from the root of a nbgrader-compatible directory
+        structure, which by default looks like:
+
+            autograded/{student_id}/{assignment_id}/{notebook_id}.ipynb
+
+        To run the formgrader on the default IP and port:
+            nbgrader formgrade
+
+        To run the formgrader on a public-facing IP address:
+            nbgrader formgrade --ip 0.0.0.0
+
+        To run the formgrader a different port:
+            nbgrader formgrade --port 5001
         """
     ))
 

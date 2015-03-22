@@ -35,23 +35,30 @@ class SubmitApp(BaseApp):
 
     examples = Unicode(dedent(
         """
-        nbgrader submit "Problem Set 1/"
-        nbgrader submit "Problem Set 1/" --assignment ps01
+        To submit all files in the current directory under the name "ps01":
+            nbgrader submit --assignment ps01
+
+        To submit all files in the "Problem Set 1" directory under the name
+        "Problem Set 1":
+            nbgrader submit "Problem Set 1"
+
+        To submit all files in the "Problem Set 1" directory under the name "ps01":
+            nbgrader submit "Problem Set 1" --assignment ps01
         """
     ))
 
     student = Unicode(os.environ['USER'])
 
     timezone = Unicode(
-        "UTC", config=True, 
+        "UTC", config=True,
         help="Timezone for recording timestamps")
 
     timestamp_format = Unicode(
-        "%Y-%m-%d %H:%M:%S %Z", config=True, 
+        "%Y-%m-%d %H:%M:%S %Z", config=True,
         help="Format string for timestamps")
 
     assignment_directory = Unicode(
-        '.', config=True, 
+        '.', config=True,
         help=dedent(
             """
             The directory containing the assignment to be submitted.
@@ -59,7 +66,7 @@ class SubmitApp(BaseApp):
         )
     )
     assignment_id = Unicode(
-        '', config=True, 
+        '', config=True,
         help=dedent(
             """
             The name of the assignment. Defaults to the name of the assignment
@@ -69,7 +76,7 @@ class SubmitApp(BaseApp):
     )
     submissions_directory = Unicode(
         "{}/.nbgrader/submissions".format(os.environ['HOME']),
-        config=True, 
+        config=True,
         help=dedent(
             """
             The directory where the submission will be saved.
@@ -82,7 +89,7 @@ class SubmitApp(BaseApp):
             ".ipynb_checkpoints",
             "*.pyc",
             "__pycache__"
-        ], 
+        ],
         config=True,
         help=dedent(
             """
@@ -194,19 +201,19 @@ class SubmitApp(BaseApp):
         self.tmpdir = tempfile.mkdtemp()
         self.assignment_directory = os.path.abspath(self.assignment_directory)
         self.submissions_directory = os.path.abspath(self.submissions_directory)
-        
+
         try:
             path_to_copy = self.make_temp_copy()
             path_to_tarball = self.make_archive(path_to_copy)
             path_to_submission = self.submit(path_to_tarball)
-            
+
         except:
             raise
-            
+
         else:
             self.log.debug("Saved to '{}'".format(path_to_submission))
             print("'{}' submitted by {} at {}".format(
                 self.assignment_id, self.student, self.timestamp))
-            
+
         finally:
             shutil.rmtree(self.tmpdir)

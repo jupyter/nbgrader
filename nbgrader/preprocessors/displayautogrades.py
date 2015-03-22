@@ -16,7 +16,7 @@ class DisplayAutoGrades(NbGraderPreprocessor):
     invert = Bool(False, config=True, help="Complain when cells pass, rather than fail.")
 
     ignore_checksums = Bool(
-        False, config=True, 
+        False, config=True,
         help=dedent(
             """
             Don't complain if cell checksums have changed (if they are code

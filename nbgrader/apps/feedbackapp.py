@@ -26,7 +26,29 @@ class FeedbackApp(BaseNbConvertApp):
 
     examples = Unicode(dedent(
         """
+        Create HTML feedback for students after all the grading is finished.
+        This takes a single parameter, which is the assignment ID, and then (by
+        default) looks at the following directory structure:
 
+            autograded/*/{assignment_id}/*.ipynb
+
+        from which it generates feedback the the corresponding directories
+        according to:
+
+            feedback/{student_id}/{assignment_id}/{notebook_id}.html
+
+        Running `nbgrader feedback` requires that `nbgrader autograde` (and most
+        likely `nbgrader formgrade`) have been run and that all grading is
+        complete.
+
+        To generate feedback for all submissions for "Problem Set 1":
+            nbgrader feedback "Problem Set 1"
+
+        To generate feedback only for the student with ID 'Hacker':
+            nbgrader feedback "Problem Set 1" --student Hacker
+
+        To feedback for only the notebooks that start with '1':
+            nbgrader feedback "Problem Set 1" --notebook "1*"
         """
     ))
 
