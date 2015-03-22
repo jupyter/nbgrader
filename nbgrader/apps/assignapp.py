@@ -1,7 +1,10 @@
+import sys
+
 from textwrap import dedent
 
-from IPython.utils.traitlets import Unicode, Dict, List
+from IPython.utils.traitlets import Unicode, Dict, List, Bool
 
+from nbgrader.api import Gradebook, MissingEntry
 from nbgrader.apps.baseapp import (
     BaseNbConvertApp, nbconvert_aliases, nbconvert_flags)
 from nbgrader.preprocessors import (
@@ -27,7 +30,7 @@ flags.update({
         "Do not save information about grade cells into the database."
     ),
     'create': (
-        {'SaveCells': {'create_assignment': True}},
+        {'AssignApp': {'create_assignment': True}},
         "Create the assignment at runtime if it does not exist."
     )
 })
@@ -90,6 +93,16 @@ class AssignApp(BaseNbConvertApp):
         """
     ))
 
+    create_assignment = Bool(
+        False, config=True,
+        help=dedent(
+            """
+            Whether to create the assignment at runtime if it does not
+            already exist.
+            """
+        )
+    )
+
     nbgrader_step_input = Unicode("source", config=True)
     nbgrader_step_output = Unicode("release", config=True)
 
@@ -109,3 +122,23 @@ class AssignApp(BaseNbConvertApp):
         extra_config = super(AssignApp, self).build_extra_config()
         extra_config.NbGraderConfig.student_id = '.'
         return extra_config
+
+    def init_single_notebook_resources(self, notebook_filename):
+        resources = super(AssignApp, self).init_single_notebook_resources(notebook_filename)
+
+        # try to get the assignment from the database, and throw an error if it
+        # doesn't exist
+        db_url = resources['nbgrader']['db_url']
+        assignment_id = resources['nbgrader']['assignment']
+        gb = Gradebook(db_url)
+        try:
+            gb.find_assignment(assignment_id)
+        except MissingEntry:
+            if self.create_assignment:
+                self.log.warning("Creating assignment '%s'", assignment_id)
+                gb.add_assignment(assignment_id)
+            else:
+                self.log.error("No assignment called '%s' exists in the database", assignment_id)
+                sys.exit(1)
+
+        return resources

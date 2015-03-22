@@ -1,24 +1,10 @@
-from IPython.utils.traitlets import Bool
-
 from nbgrader import utils
 from nbgrader.api import Gradebook
 from nbgrader.preprocessors import NbGraderPreprocessor
 
-from textwrap import dedent
-
 
 class SaveAutoGrades(NbGraderPreprocessor):
     """Preprocessor for saving out the autograder grades into a database"""
-
-    create_student = Bool(
-        False, config=True, 
-        help=dedent(
-            """
-            Whether to create the student at runtime if it does not 
-            already exist.
-            """
-        )
-    )
 
     def preprocess(self, nb, resources):
         # pull information from the resources
@@ -29,10 +15,6 @@ class SaveAutoGrades(NbGraderPreprocessor):
 
         # connect to the database
         self.gradebook = Gradebook(self.db_url)
-
-        # create the student, if so requested
-        if self.create_student:
-            self.gradebook.update_or_create_student(self.student_id)
 
         self.gradebook.update_or_create_submission(
             self.assignment_id, self.student_id)
