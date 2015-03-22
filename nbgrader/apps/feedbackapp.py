@@ -1,7 +1,6 @@
 import os
 from textwrap import dedent
 
-from IPython.config.loader import Config
 from IPython.utils.traitlets import Unicode, Dict, List
 from IPython.nbconvert.exporters import HTMLExporter
 
@@ -27,12 +26,12 @@ class FeedbackApp(BaseNbConvertApp):
 
     examples = Unicode(dedent(
         """
-        nbgrader feedback student.ipynb --output student.ipynb
+
         """
     ))
 
-    nbgrader_step_input = Unicode("autograded")
-    nbgrader_step_output = Unicode("feedback")
+    nbgrader_step_input = Unicode("autograded", config=True)
+    nbgrader_step_output = Unicode("feedback", config=True)
 
     preprocessors = List([
         GetGrades
@@ -47,13 +46,12 @@ class FeedbackApp(BaseNbConvertApp):
         return 'html'
 
     def build_extra_config(self):
-        self.extra_config = Config()
-        self.extra_config.Exporter.preprocessors = self.preprocessors
-    
+        extra_config = super(FeedbackApp, self).build_extra_config()
+
         if 'template_file' not in self.config.HTMLExporter:
-            self.extra_config.HTMLExporter.template_file = 'feedback'
+            extra_config.HTMLExporter.template_file = 'feedback'
         if 'template_path' not in self.config.HTMLExporter:
             template_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../html/templates'))
-            self.extra_config.HTMLExporter.template_path = ['.', template_path]
+            extra_config.HTMLExporter.template_path = ['.', template_path]
 
-        self.config.merge(self.extra_config)
+        return extra_config

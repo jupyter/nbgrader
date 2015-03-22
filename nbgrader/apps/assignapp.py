@@ -1,7 +1,6 @@
 from textwrap import dedent
 
-from IPython.config.loader import Config
-from IPython.utils.traitlets import Unicode, Bool, Dict, List
+from IPython.utils.traitlets import Unicode, Dict, List
 from IPython.nbconvert.preprocessors import ClearOutputPreprocessor
 
 from nbgrader.apps.baseapp import (
@@ -36,56 +35,63 @@ flags.update({
 class AssignApp(BaseNbConvertApp):
 
     name = Unicode(u'nbgrader-assign')
-    description = Unicode(u'Prepare a student version of an assignment by removing solutions')
+    description = Unicode(u'Produce the version of an assignment to be released to students.')
 
     aliases = Dict(aliases)
     flags = Dict(flags)
 
     examples = Unicode(dedent(
         """
-        Running `nbgrader assign` on a file by itself will produce a student
-        version of that file in the same directory. In this case, it will produce
-        "Problem 1.nbconvert.ipynb":
-        
-        > nbgrader assign "Problem 1.ipynb"
+        Produce the version of the assignment that is intended to be released to
+        students. This performs several modifications to the original assignment:
 
-        If you want to override the .nbconvert part of the filename, you can use
-        the --output flag:
+            1. It inserts a header and/or footer to each notebook in the
+               assignment, if the header/footer are specified.
 
-        > nbgrader assign "Problem 1.ipynb" --output "Problem 1.student.ipynb"
+            2. It locks certain cells so that they cannot be deleted by students
+               accidentally (or on purpose!)
 
-        Or, you can put the student version in a different directory. In the
-        following example, there will be a file "student/Problem 1.ipynb" after
-        running `nbgrader assign`:
+            3. It removes solutions from the notebooks and replaces them with
+               code or text stubs saying (for example) "YOUR ANSWER HERE".
 
-        > nbgrader assign "Problem 1.ipynb" --build-dir=student
+            4. It clears all outputs from the cells of the notebooks.
 
-        You can also use shell globs, and copy files from one directory to another:
+            5. It computes checksums of the cells that contain tests for the
+               students' solutions, or that contain students' written answers.
+               This is done so that we can warn students if they have changed
+               the tests, or if they have failed to provide a response to a
+               written answer.
 
-        > nbgrader assign teacher/*.ipynb --build-dir=student
+            6. It saves the tests used to grade students' code into a database,
+               so that those tests can be replaced during autograding if they
+               were modified by the student (you can prevent this by passing the
+               --no-db flag).
 
-        If you need to copy dependent files over as well, you can do this with
-        the --files flag. In the following example, all the .jpg files in the 
-        teacher/images/ folder will be linked to the student/images/ folder:
+               Additionally, the assignment must already be present in the
+               database. To create it while running `nbgrader assign` if it
+               doesn't already exist, pass the --create flag.
 
-        > nbgrader assign teacher/*.ipynb --build-dir=student --files='["teacher/images/*.jpg"]'
+        `nbgrader assign` takes one argument (the name of the assignment), and
+        looks for notebooks in the 'source' directory by default, according to
+        the directory structure specified in `NbGraderConfig.directory_structure`.
+        The student version is then saved into the 'release' directory.
 
-        If you want to record the grade cells into the database (for use later
-        when running `nbgrader autograde`), you can use the --save-cells flag.
-        You will need to use this in combination with the --assignment flag to
-        indicate what the assignment is that this notebook is a part of:
+        Note that the directory structure requires the `student_id` to be given;
+        however, there is no student ID at this point in the process. Instead,
+        `nbgrader assign` sets the student ID to be '.' so by default, files are
+        read in according to:
 
-        > nbgrader assign "Problem 1.ipynb" --save-cells --assignment="Problem Set 1"
+            source/./{assignment_id}/{notebook_id}.ipynb
 
-        You can additionally specifiy the database name with --db:
+        and saved according to:
 
-        > nbgrader assign "Problem 1.ipynb" --save-cells --assignment="Problem Set 1" --db=myclass
+            release/./{assignment_id}/{notebook_id}.ipynb
 
         """
     ))
 
-    nbgrader_step_input = Unicode("source")
-    nbgrader_step_output = Unicode("release")
+    nbgrader_step_input = Unicode("source", config=True)
+    nbgrader_step_output = Unicode("release", config=True)
 
     export_format = 'notebook'
 
@@ -99,11 +105,7 @@ class AssignApp(BaseNbConvertApp):
         SaveCells
     ])
 
-    def __init__(self, *args, **kwargs):
-        super(AssignApp, self).__init__(*args, **kwargs)
-        self.student_id = '.'
-
     def build_extra_config(self):
-        self.extra_config = Config()
-        self.extra_config.Exporter.default_preprocessors = self.preprocessors
-        self.config.merge(self.extra_config)
+        extra_config = super(AssignApp, self).build_extra_config()
+        extra_config.NbGraderConfig.student_id = '.'
+        return extra_config

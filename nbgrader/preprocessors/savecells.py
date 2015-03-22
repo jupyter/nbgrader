@@ -1,3 +1,5 @@
+import sys
+
 from IPython.utils.traitlets import Bool
 
 from nbgrader import utils
@@ -10,10 +12,10 @@ class SaveCells(NbGraderPreprocessor):
     """A preprocessor to save information about grade and solution cells."""
 
     create_assignment = Bool(
-        False, config=True, 
+        False, config=True,
         help=dedent(
             """
-            Whether to create the assignment at runtime if it does not 
+            Whether to create the assignment at runtime if it does not
             already exist.
             """
         )
@@ -26,9 +28,11 @@ class SaveCells(NbGraderPreprocessor):
         self.db_url = resources['nbgrader']['db_url']
 
         if self.notebook_id == '':
-            raise ValueError("Invalid notebook id: {}".format(self.notebook_id))
+            self.log.error("Invalid notebook id: '%s'", self.notebook_id)
+            sys.exit(1)
         if self.assignment_id == '':
-            raise ValueError("Invalid assignment id: {}".format(self.assignment_id))
+            self.log.error("Invalid assignment id: '%s'", self.assignment_id)
+            sys.exit(1)
 
         # connect to the database
         self.gradebook = Gradebook(self.db_url)

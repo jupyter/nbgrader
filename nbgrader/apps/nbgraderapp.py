@@ -23,36 +23,86 @@ class NbGraderApp(BaseNbGraderApp):
     version = Unicode(u'0.1')
     examples = Unicode(dedent(
         """
-        nbgrader --help
-        nbgrader --help-all
-        nbgrader --log-level=DEBUG
+        The nbgrader application is a system for assigning and grading notebooks.
+        Each subcommand of this program corresponds to a different step in the
+        grading process. In order to facilitate the grading pipeline, nbgrader
+        places some constraints on how the assignments must be structured. By
+        default, the directory structure for the assignments must look like this:
+
+            {nbgrader_step}/{student_id}/{assignment_id}/{notebook_id}.ipynb
+
+        where 'nbgrader_step' is the step in the nbgrader pipeline, 'student_id'
+        is the ID of the student, 'assignment_id' is the name of the assignment,
+        and 'notebook_id' is the name of the notebook (excluding the extension).
+        For example, when running `nbgrader autograde "Problem Set 1"`, the
+        autograder will first look for all notebooks for all students in the
+        following directories:
+
+            submitted/*/Problem Set 1/*.ipynb
+
+        and it will write the autograded notebooks to the corresponding directory
+        and filename for each notebook and each student:
+
+            autograded/{student_id}/Problem Set 1/{notebook_id}.ipynb
+
+        These variables, as well as the overall directory structure, can be
+        configured through the `NbGraderConfig` class (run `nbgrader --help-all`
+        to see these options).
+
+        For more details on how each of the subcommands work, please see the help
+        for that command (e.g. `nbgrader assign --help-all`).
         """
     ))
 
     subcommands = dict(
         assign=(
             AssignApp,
-            "Create a students version of a notebook"
+            dedent(
+                """
+                Create the student version of an assignment. Intended for use by
+                instructors only.
+                """
+            ).strip()
         ),
         autograde=(
             AutogradeApp,
-            "Autograde a notebook by running it"
+            dedent(
+                """
+                Autograde submitted assignments. Intended for use by instructors
+                only.
+                """
+            ).strip()
         ),
         formgrade=(
             FormgradeApp,
-            "Grade a notebook using an HTML form"
+            dedent(
+                """
+                Manually grade assignments (after autograding). Intended for use
+                by instructors only.
+                """
+            ).strip()
         ),
         feedback=(
             FeedbackApp,
-            "Generate feedback"
+            dedent(
+                """
+                Generate feedback (after autograding and manual grading).
+                Intended for use by instructors only.
+                """
+            ).strip()
         ),
         validate=(
             ValidateApp,
-            "Validate a notebook"
+            dedent(
+                """
+                Validate a notebook in an assignment. Intended for use by
+                instructors and students.
+                """
+            ).strip()
         ),
         submit=(
             SubmitApp,
-            "Submit a completed assignment"
+            "Submit an assignment. Intended for use by students only."
         ),
     )
 

@@ -4,9 +4,7 @@ import sys
 
 from textwrap import dedent
 
-from IPython.config.loader import Config
-from IPython.utils.traitlets import Unicode, Integer, Dict, Type, \
-    Instance
+from IPython.utils.traitlets import Unicode, Integer, Dict, Type, Instance
 
 from IPython.nbconvert.exporters import HTMLExporter
 from IPython.config.application import catch_config_error
@@ -44,7 +42,7 @@ class FormgradeApp(BaseNbGraderApp):
         """
     ))
 
-    nbgrader_step_input = Unicode("autograded")
+    nbgrader_step_input = Unicode("autograded", config=True)
     nbgrader_step_output = Unicode("")
 
     ip = Unicode("localhost", config=True, help="IP address for the server")
@@ -70,10 +68,10 @@ class FormgradeApp(BaseNbGraderApp):
         sys.exit(-sig)
 
     def build_extra_config(self):
-        self.extra_config = Config()
-        self.extra_config.Exporter.template_file = 'formgrade'
-        self.extra_config.Exporter.template_path = [os.path.join(app.root_path, app.template_folder)]
-        self.config.merge(self.extra_config)
+        extra_config = super(FormgradeApp, self).build_extra_config()
+        extra_config.Exporter.template_file = 'formgrade'
+        extra_config.Exporter.template_path = [os.path.join(app.root_path, app.template_folder)]
+        return extra_config
 
     @catch_config_error
     def initialize(self, argv=None):

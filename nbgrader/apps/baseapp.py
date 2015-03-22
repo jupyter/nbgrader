@@ -1,17 +1,23 @@
 #!/usr/bin/env python
 # encoding: utf-8
 
+from __future__ import print_function
+
 import glob
 import sys
 import re
 import os
+import traceback
 
-from IPython.utils.traitlets import Unicode, List, Bool, Dict, Instance, Enum
+from IPython.utils.traitlets import Unicode, List, Bool, Dict, Instance
 from IPython.core.application import BaseIPythonApplication
 from IPython.config.application import catch_config_error
 from IPython.nbconvert.nbconvertapp import NbConvertApp, DottedOrNone
+from IPython.config.loader import Config
 
 from nbgrader.config import BasicConfig, NbGraderConfig
+
+from textwrap import dedent
 
 # These are the aliases and flags for nbgrader apps that inherit only from
 # BaseApp (and not BaseNbGraderApp)
@@ -63,24 +69,25 @@ class BaseApp(BaseIPythonApplication):
     Additionally, it defines a `build_extra_config` method that subclasses can
     override in order to specify extra config options.
 
-    """    
+    """
 
     aliases = Dict(base_aliases)
     flags = Dict(base_flags)
+
+    verbose_crash = Bool(False)
 
     # This is a hack in order to centralize the config options inherited from
     # IPython. Rather than allowing them to be configured for each app separately,
     # this makes them non-configurable for the apps themselves. Then, in the init,
     # an instance of `BasicConfig` is created, which contains these options, and
     # their values are set on the application instance. So, to configure these
-    # options, the `BasicConfig` class can be configured, rather than the 
+    # options, the `BasicConfig` class can be configured, rather than the
     # application itself.
     profile = Unicode()
     overwrite = Bool()
     auto_create = Bool()
     extra_config_file = Unicode()
     copy_config_files = Bool()
-    verbose_crash = Bool()
     ipython_dir = Unicode()
     log_datefmt = Unicode()
     log_format = Unicode()
@@ -102,12 +109,21 @@ class BaseApp(BaseIPythonApplication):
         self._basic_config = BasicConfig(parent=self)
 
     def build_extra_config(self):
-        pass
+        return Config()
+
+    def excepthook(self, etype, evalue, tb):
+        traceback.print_exception(etype, evalue, tb)
+        print(dedent(
+            """
+            If you suspect this is a nbgrader bug, please report it at:
+                https://github.com/jupyter/nbgrader/issues
+            """
+        ), file=sys.stderr)
 
     @catch_config_error
     def initialize(self, argv=None):
+        self.update_config(self.build_extra_config())
         super(BaseApp, self).initialize(argv)
-        self.build_extra_config()
 
 
 class BaseNbGraderApp(BaseApp):
@@ -169,6 +185,11 @@ class BaseNbConvertApp(BaseNbGraderApp, NbConvertApp):
             if len(pp.class_traits(config=True)) > 0:
                 classes.append(pp)
         return classes
+
+    def build_extra_config(self):
+        extra_config = super(BaseNbConvertApp, self).build_extra_config()
+        extra_config.Exporter.default_preprocessors = self.preprocessors
+        return extra_config
 
     def init_notebooks(self):
         # the assignment can be set via extra args

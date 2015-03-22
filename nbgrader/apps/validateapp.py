@@ -1,6 +1,5 @@
 from textwrap import dedent
 
-from IPython.config.loader import Config
 from IPython.utils.traitlets import Unicode, Dict, List, Bool
 from IPython.nbconvert.nbconvertapp import NbConvertApp, DottedOrNone
 from IPython.nbconvert.preprocessors import ClearOutputPreprocessor
@@ -25,10 +24,10 @@ class ValidateApp(BaseApp, NbConvertApp):
 
     name = Unicode(u'nbgrader-validate')
     description = Unicode(u'Validate a notebook by running it')
-    
+
     aliases = Dict(aliases)
     flags = Dict(flags)
-    
+
     examples = Unicode(dedent(
         """
         You can run `nbgrader validate` on just a single file, e.g.:
@@ -71,9 +70,9 @@ class ValidateApp(BaseApp, NbConvertApp):
         return classes
 
     def build_extra_config(self):
-        self.extra_config = Config()
-        self.extra_config.Exporter.preprocessors = self.preprocessors
-        self.config.merge(self.extra_config)
+        extra_config = super(ValidateApp, self).build_extra_config()
+        extra_config.Exporter.default_preprocessors = self.preprocessors
+        return extra_config
 
     def init_single_notebook_resources(self, notebook_filename):
         resources = super(ValidateApp, self).init_single_notebook_resources(notebook_filename)

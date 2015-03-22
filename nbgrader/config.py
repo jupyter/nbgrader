@@ -1,5 +1,5 @@
 from IPython.config import Configurable
-from IPython.utils.traitlets import Unicode, Bool, Enum, link
+from IPython.utils.traitlets import Unicode, Bool, link
 from IPython.utils.path import get_ipython_dir
 
 from textwrap import dedent
@@ -22,42 +22,40 @@ class LinkedConfig(Configurable):
 class BasicConfig(LinkedConfig):
     """Config options that inherited from IPython."""
 
-    profile = Unicode('nbgrader', config=True, help="Default IPython profile to use")
-    overwrite = Bool(False, config=True, help="Whether to overwrite existing config files when copying")
-    auto_create = Bool(True, config=True, help="Whether to automatically generate the profile")
+    profile = Unicode(
+        'nbgrader',
+        config=True,
+        help="Default IPython profile to use")
+
+    overwrite = Bool(
+        False,
+        config=True,
+        help="Whether to overwrite existing config files when copying")
+
+    auto_create = Bool(
+        True,
+        config=True,
+        help="Whether to automatically generate the profile")
 
     extra_config_file = Unicode(
         config=True,
         help=dedent(
             """
-            Path to an extra config file to load.
-        
-            If specified, load this config file in addition to any other IPython config.
+            Path to an extra config file to load. If specified, load this config
+            file in addition to any other IPython config.
             """
         )
     )
 
     copy_config_files = Bool(
-        False, 
+        False,
         config=True,
         help=dedent(
             """
             Whether to install the default config files into the profile dir.
-            If a new profile is being created, and IPython contains config files for that
-            profile, then they will be staged into the new directory.  Otherwise,
-            default config files will be automatically generated.
-            """
-        )
-    )
-    
-    verbose_crash = Bool(
-        False, 
-        config=True,
-        help=dedent(
-            """
-            Create a massive crash report when IPython encounters what may be an
-            internal error.  The default is to append a short message to the
-            usual traceback
+            If a new profile is being created, and IPython contains config files
+            for that profile, then they will be staged into the new directory.
+            Otherwise, default config files will be automatically generated.
             """
         )
     )
@@ -76,15 +74,15 @@ class BasicConfig(LinkedConfig):
     )
 
     log_datefmt = Unicode(
-        "%Y-%m-%d %H:%M:%S", 
+        "%Y-%m-%d %H:%M:%S",
         config=True,
         help="The date format used by logging formatters for %(asctime)s"
     )
 
     log_format = Unicode(
-        "[%(name)s | %(levelname)s] %(message)s", 
+        "[%(name)s | %(levelname)s] %(message)s",
         config=True,
-        help="The Logging format template",
+        help="The logging format template"
     )
 
 
@@ -98,8 +96,10 @@ class NbGraderConfig(LinkedConfig):
         config=True,
         help=dedent(
             """
-            File glob to match student ids. This can be changed to filter by 
-            student id.
+            File glob to match student IDs. This can be changed to filter by
+            student. Note: this is always changed to '.' when running `nbgrader
+            assign`, as the assign step doesn't have any student ID associated
+            with it.
             """
         )
     )
@@ -109,8 +109,9 @@ class NbGraderConfig(LinkedConfig):
         config=True,
         help=dedent(
             """
-            File glob to match assignment names. This can be changed to filter 
-            by assignment id.
+            The assignment name. This MUST be specified, either by setting the
+            config option, passing an argument on the command line, or using the
+            --assignment option on the command line.
             """
         )
     )
@@ -120,8 +121,8 @@ class NbGraderConfig(LinkedConfig):
         config=True,
         help=dedent(
             """
-            File glob to match notebook ids, excluding the '.ipynb' extension. 
-            This can be changed to filter by notebook id.
+            File glob to match notebook names, excluding the '.ipynb' extension.
+            This can be changed to filter by notebook.
             """
         )
     )
@@ -131,9 +132,11 @@ class NbGraderConfig(LinkedConfig):
         config=True,
         help=dedent(
             """
-            Format string for the directory structure that nbgrader works 
-            over during the grading process. This MUST contain named keys for 
-            'nbgrader_step', 'student_id', and 'assignment_id'.
+            Format string for the directory structure that nbgrader works
+            over during the grading process. This MUST contain named keys for
+            'nbgrader_step', 'student_id', and 'assignment_id'. It SHOULD NOT
+            contain a key for 'notebook_id', as this will be automatically joined
+            with the rest of the path.
             """
         )
     )

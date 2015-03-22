@@ -22,7 +22,7 @@ class TestNbgraderAssign(TestBase):
 
     def test_multiple_args(self):
         """Is there an error if multiple arguments are given?"""
-        self._run_command("nbgrader assign foo bar", 1)    
+        self._run_command("nbgrader assign foo bar", 1)
 
     def test_no_assignment(self):
         """Is an error thrown if the assignment doesn't exist?"""
