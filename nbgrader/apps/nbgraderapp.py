@@ -1,10 +1,15 @@
 #!/usr/bin/env python
 # encoding: utf-8
 
+import sys
+
 from textwrap import dedent
 
-from IPython.utils.traitlets import Unicode
+from IPython.utils.traitlets import Unicode, Dict
+from IPython.config.application import catch_config_error
+
 from nbgrader import preprocessors
+from nbgrader.apps.baseapp import nbgrader_aliases, nbgrader_flags
 from nbgrader.apps import (
     BaseNbGraderApp,
     AssignApp,
@@ -15,12 +20,30 @@ from nbgrader.apps import (
     SubmitApp
 )
 
+aliases = {}
+aliases.update(nbgrader_aliases)
+aliases.update({
+})
+
+flags = {}
+flags.update(nbgrader_flags)
+flags.update({
+    'generate-config': (
+        {'BasicConfig': {'overwrite': True}},
+        "Generate the default config file, possibly overwriting the old one in the process."
+    )
+})
+
 
 class NbGraderApp(BaseNbGraderApp):
 
     name = Unicode('nbgrader')
     description = Unicode(u'A system for assigning and grading notebooks')
     version = Unicode(u'0.1')
+
+    aliases = Dict(aliases)
+    flags = Dict(flags)
+
     examples = Unicode(dedent(
         """
         The nbgrader application is a system for assigning and grading notebooks.
@@ -122,7 +145,21 @@ class NbGraderApp(BaseNbGraderApp):
 
         return classes
 
+    @catch_config_error
+    def initialize(self, argv=None):
+        super(NbGraderApp, self).initialize(argv)
+
     def start(self):
+        # if we're generating a config file, then do only that
+        if self.overwrite:
+            self.stage_default_config_file()
+            sys.exit(0)
+
+        # check: is there a subapp given?
+        if self.subapp is None:
+            self.print_help()
+            sys.exit(1)
+
         # This starts subapps
         super(NbGraderApp, self).start()
 
