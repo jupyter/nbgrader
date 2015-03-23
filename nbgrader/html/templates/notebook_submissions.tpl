@@ -1,8 +1,8 @@
 {%- extends 'gradebook.tpl' -%}
 
 {%- block breadcrumb -%}
-<li><a href="../assignments">Assignments</a></li>
-<li><a href="../assignments/{{ assignment_id }}">{{ assignment_id }}</a></li>
+<li><a href="{{base_url}}/assignments">Assignments</a></li>
+<li><a href="{{base_url}}/assignments/{{ assignment_id }}">{{ assignment_id }}</a></li>
 <li class="active">{{ notebook_id }}</li>
 {%- endblock -%}
 
@@ -28,7 +28,7 @@
 <tbody>
   {%- for submission in submissions -%}
   <tr>
-    <td><a href="../submissions/{{ submission.id }}">Submission #{{ submission.index + 1 }}</a></td>
+    <td><a href="{{base_url}}/submissions/{{ submission.id }}">Submission #{{ submission.index + 1 }}</a></td>
     <td class="center">
       {{ submission.score | float | round(2) }} / {{ submission.max_score | float | round(2) }}
     </td>

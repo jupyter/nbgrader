@@ -1,8 +1,8 @@
 {%- extends 'gradebook.tpl' -%}
 
 {%- block breadcrumb -%}
-<li><a href="../students">Students</a></li>
-<li><a href="../students/{{ student.id }}">{{ student.id }}</a></li>
+<li><a href="{{base_url}}/students">Students</a></li>
+<li><a href="{{base_url}}/students/{{ student.id }}">{{ student.id }}</a></li>
 <li class="active">{{ assignment_id }}</li>
 {%- endblock -%}
 
@@ -27,7 +27,7 @@
   {%- for submission in submissions -%}
   <tr>
     <td>
-      <a href="../submissions/{{ submission.id }}">
+      <a href="{{base_url}}/submissions/{{ submission.id }}">
         {{ submission.name }}
       </a>
     </td>

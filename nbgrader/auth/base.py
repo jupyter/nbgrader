@@ -13,6 +13,10 @@ class BaseAuth(LoggingConfigurable):
         self._base_url = 'http://{}:{}'.format(ip, port)
         self._base_directory = base_directory
 
+    @property
+    def base_url(self):
+        return self._base_url
+
     def authenticate(self):
         """Authenticate a request.
         Returns a boolean or flask redirect."""

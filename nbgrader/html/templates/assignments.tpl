@@ -25,7 +25,7 @@
 <tbody>
   {%- for assignment in assignments -%}
   <tr>
-    <td><a href="../assignments/{{ assignment.name }}">{{ assignment.name }}</a></td>
+    <td><a href="{{base_url}}/assignments/{{ assignment.name }}">{{ assignment.name }}</a></td>
     <td class="center">{{ assignment.duedate }}</td>
     <td class="center">{{ assignment.num_submissions }}</td>
     <td class="center">{{ assignment.average_score | float | round(2) }}</td>

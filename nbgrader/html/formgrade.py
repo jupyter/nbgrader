@@ -65,7 +65,10 @@ def view_assignments():
         x["average_code_score"] = app.gradebook.average_assignment_code_score(assignment.name)
         x["average_written_score"] = app.gradebook.average_assignment_written_score(assignment.name)
         assignments.append(x)
-    return render_template("assignments.tpl", assignments=assignments)
+    return render_template(
+        "assignments.tpl",
+        assignments=assignments,
+        base_url=app.auth.base_url)
 
 
 @blueprint.route("/students/")
@@ -73,7 +76,10 @@ def view_assignments():
 def view_students():
     students = app.gradebook.student_dicts()
     students.sort(key=lambda x: x["last_name"])
-    return render_template("students.tpl", students=students)
+    return render_template(
+        "students.tpl",
+        students=students,
+        base_url=app.auth.base_url)
 
 
 @blueprint.route("/assignments/<assignment_id>/")
@@ -96,7 +102,8 @@ def view_assignment(assignment_id):
     return render_template(
         "assignment_notebooks.tpl",
         assignment=assignment,
-        notebooks=notebooks)
+        notebooks=notebooks,
+        base_url=app.auth.base_url)
 
 
 @blueprint.route("/students/<student_id>/")
@@ -114,7 +121,8 @@ def view_student(student_id):
     return render_template(
         "student_assignments.tpl",
         assignments=assignments,
-        student=student)
+        student=student,
+        base_url=app.auth.base_url)
 
 
 @blueprint.route("/assignments/<assignment_id>/<notebook_id>/")
@@ -135,7 +143,8 @@ def view_assignment_notebook(assignment_id, notebook_id):
         "notebook_submissions.tpl",
         notebook_id=notebook_id,
         assignment_id=assignment_id,
-        submissions=submissions)
+        submissions=submissions,
+        base_url=app.auth.base_url)
 
 
 @blueprint.route("/students/<student_id>/<assignment_id>/")
@@ -153,7 +162,8 @@ def view_student_assignment(student_id, assignment_id):
         "student_submissions.tpl",
         assignment_id=assignment_id,
         student=assignment.student.to_dict(),
-        submissions=submissions
+        submissions=submissions,
+        base_url=app.auth.base_url
     )
 
 
@@ -218,7 +228,8 @@ def view_submission(submission_id):
         'prev': prev_submission,
         'index': ix,
         'total': len(submissions),
-        'notebook_server_exists': server_exists
+        'notebook_server_exists': server_exists,
+        'base_url': app.auth.base_url
     }
 
     if server_exists:
