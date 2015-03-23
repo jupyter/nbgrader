@@ -68,7 +68,7 @@ class TestNbgraderFormgrade(TestBase):
                 c = get_config()
                 c.FormgradeApp.base_directory = "autograded"
                 c.FormgradeApp.directory_format = "{student_id}/{notebook_id}.ipynb"
-                c.FormgradeApp.nbserver_port = 9001
+                c.NoAuth.nbserver_port = 9001
                 c.FormgradeApp.port = 9000
                 c.FormgradeApp.db_url = "sqlite:///gradebook.db"
                 """
