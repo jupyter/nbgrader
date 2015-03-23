@@ -29,3 +29,7 @@ class BaseAuth(LoggingConfigurable):
     def get_notebook_url(self, relative_path):
         """Gets the notebook's url."""
         raise NotImplemented
+
+    def stop(self, sig):
+        """Stops the notebook server."""
+        pass

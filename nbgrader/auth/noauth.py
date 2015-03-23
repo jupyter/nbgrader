@@ -2,7 +2,8 @@
 import socket
 import os
 import subprocess as sp
-from IPython.utils.traitlets import Bool
+import time
+from IPython.utils.traitlets import Bool, Integer
 
 from .base import BaseAuth
 
@@ -21,6 +22,10 @@ class NoAuth(BaseAuth):
 
     start_nbserver = Bool(True, config=True, help=""""Start a single notebook
         server that allows submissions to be viewed.""")
+    nbserver_port = Integer(config=True, help="Port for the notebook server")
+
+    def _nbserver_port_default(self):
+        return random_port()
 
     def __init__(self, *args, **kwargs):
         super(NoAuth, self).__init__(*args, **kwargs)
@@ -28,7 +33,7 @@ class NoAuth(BaseAuth):
         # first launch a notebook server
         if self.start_nbserver:
             self._notebook_server_ip = self._ip
-            self._notebook_server_port = str(random_port())
+            self._notebook_server_port = str(self.nbserver_port)
             self._notebook_server = sp.Popen(
                 [
                     "python", os.path.join(os.path.dirname(__file__), "..", "apps", "notebookapp.py"),
@@ -50,3 +55,18 @@ class NoAuth(BaseAuth):
             self._notebook_server_ip,
             self._notebook_server_port,
             relative_path)
+
+    def stop(self, sig):
+        """Stops the notebook server."""
+        if self.notebook_server_exists():
+            self._notebook_server.send_signal(sig)
+            for i in range(10):
+                retcode = self._notebook_server.poll()
+                if retcode is not None:
+                    self._notebook_server_exists = False
+                    break
+                time.sleep(0.1)
+
+            if retcode is None:
+                self.log.critical("couldn't shutdown notebook server, force killing it")
+                self._notebook_server.kill()
