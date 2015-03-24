@@ -10,7 +10,7 @@ from .test_nbgrader_formgrade import TestNbgraderFormgrade
 class TestNbgraderFormgradeHubAuth(TestNbgraderFormgrade):
 
     base_formgrade_url = "http://localhost:8000/hub/formgrade/"
-    base_notebook_url = "http://localhost:8000/hub/jhamrick/notebooks/"
+    base_notebook_url = "http://localhost:8000/user/foobar/notebooks/class_files/autograded/"
 
     @classmethod
     def _setup_formgrade_config(cls):
@@ -25,12 +25,13 @@ class TestNbgraderFormgradeHubAuth(TestNbgraderFormgrade):
                 c.FormgradeApp.db_url = "sqlite:///gradebook.db"
                 c.FormgradeApp.authenticator_class = "nbgrader.auth.hubauth.HubAuth"
                 c.HubAuth.graders = ["foobar"]
+                c.HubAuth.notebook_url_prefix = "class_files/autograded"
                 """
             ))
 
     @classmethod
     def _start_jupyterhub(cls):
-        with open("jupyterhub_config.py", "w") as fh:
+        with open(os.path.join(cls.tempdir, "jupyterhub_config.py"), "w") as fh:
             fh.write(dedent(
                 """
                 c = get_config()
@@ -44,7 +45,8 @@ class TestNbgraderFormgradeHubAuth(TestNbgraderFormgrade):
             ["jupyterhub"],
             shell=False,
             stdout=None,
-            stderr=None)
+            stderr=None,
+            cwd=cls.tempdir)
 
         time.sleep(1)
 
@@ -52,7 +54,7 @@ class TestNbgraderFormgradeHubAuth(TestNbgraderFormgrade):
     def _start_formgrader(cls):
         cls._start_jupyterhub()
 
-        token = sp.check_output(['jupyterhub', 'token']).decode().strip()
+        token = sp.check_output(['jupyterhub', 'token'], cwd=cls.tempdir).decode().strip()
         os.environ['JPY_API_TOKEN'] = token
         os.environ['CONFIGPROXY_AUTH_TOKEN'] = 'foo'
         super(TestNbgraderFormgradeHubAuth, cls)._start_formgrader()

@@ -32,6 +32,10 @@ class TestNbgraderFormgrade(TestBase):
 
     @classmethod
     def _setup_assignment_hierarchy(cls):
+        # create a "class files" directory
+        os.mkdir("class_files")
+        os.chdir("class_files")
+
         # copy files from the user guide
         user_guide = os.path.join(os.path.dirname(__file__), "..", "..", "docs", "user_guide")
         shutil.copytree(os.path.join(user_guide, "release_example", "teacher"), "source")
