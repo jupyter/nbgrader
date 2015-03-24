@@ -1,6 +1,7 @@
 import subprocess as sp
 import os
 import time
+import sys
 
 from textwrap import dedent
 
@@ -94,3 +95,7 @@ class TestNbgraderFormgradeHubAuth(TestNbgraderFormgrade):
 
 
 del TestNbgraderFormgrade
+
+# don't run tests if it's not python 3
+if sys.version_info[0] != 3:
+    del TestNbgraderFormgradeHubAuth

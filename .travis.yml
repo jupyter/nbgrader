@@ -13,10 +13,14 @@ env:
   global:
     - secure: Ry2LhsYWOtVppoorTkOXyL6C6cEMw1bfqsHDka76kNSQzkn1HOpFOnVzjQk3kW3QxP9N60vcPlMtMln1jW1tsQRkh2mPT3EI0ugX18R5btR9R69CZSVo0At666HuQeZ6WN/a+pKWpaHYSFlXvSvlkLXkfW++AXbkShWvkD6Z0Hg=
 before_install:
+  - if [[ $TRAVIS_PYTHON_VERSION == '3.4' ]]; then npm install; fi
+  - if [[ $TRAVIS_PYTHON_VERSION == '3.4' ]]; then npm install -g configurable-http-proxy; fi
   - cd ~ && git clone --quiet --depth 1 https://github.com/minrk/travis-wheels travis-wheels && cd -
   - cd ~ && git clone --recursive https://github.com/ipython/ipython.git && cd -
+  - if [[ $TRAVIS_PYTHON_VERSION == '3.4' ]]; then cd ~ && git clone --recursive https://github.com/jupyter/jupyterhub.git && cd -; fi
 install:
   - cd ~/ipython && git checkout a4950d68199a4ccdf4ff23c5bb8b51cc7faaad7a && pip install -f ~/travis-wheels/wheelhouse file://$PWD#egg=ipython[all] && cd -
+  - if [[ $TRAVIS_PYTHON_VERSION == '3.4' ]]; then cd ~/jupyterhub && pip install -f travis-wheels/wheelhouse -r dev-requirements.txt . && cd -; fi
   - pip install -r requirements.txt
   - pip install nose coverage coveralls invoke selenium
   - if [[ $GROUP == 'docs' ]]; then python setup.py install; else pip install -e .; fi
