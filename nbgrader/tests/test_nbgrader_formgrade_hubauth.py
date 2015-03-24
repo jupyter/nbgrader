@@ -83,7 +83,7 @@ class TestNbgraderFormgradeHubAuth(TestNbgraderFormgrade):
         # be met with a login page
         base = super(TestNbgraderFormgradeHubAuth, self).base_formgrade_url
         self.browser.get(base)
-        time.sleep(1)
+        self._wait_for_element("username_input")
         self._check_url("http://localhost:8000/hub/login?next={}".format(self.formgrade_url()))
 
         # fill out the form
@@ -91,7 +91,7 @@ class TestNbgraderFormgradeHubAuth(TestNbgraderFormgrade):
         self.browser.find_element_by_id("login_submit").click()
 
         # check the url
-        self._check_url(self.formgrade_url("assignments"))
+        self._wait_for_gradebook_page("assignments")
 
 
 del TestNbgraderFormgrade
