@@ -10,13 +10,22 @@ from nose.tools import assert_equal
 from textwrap import dedent
 
 try:
-    from urllib import unquote # Python 2
+    from urllib import urljoin, unquote # Python 2
 except ImportError:
-    from urllib.parse import unquote # Python 3
+    from urllib.parse import urljoin, unquote # Python 3
 
 from selenium import webdriver
 
 class TestNbgraderFormgrade(TestBase):
+
+    base_formgrade_url = "http://localhost:9000/"
+    base_notebook_url = "http://localhost:9001/notebooks/"
+
+    def formgrade_url(self, url=""):
+        return urljoin(self.base_formgrade_url, url).rstrip("/")
+
+    def notebook_url(self, url=""):
+        return urljoin(self.base_notebook_url, url).rstrip("/")
 
     @classmethod
     def _setup_assignment_hierarchy(cls):
@@ -53,14 +62,7 @@ class TestNbgraderFormgrade(TestBase):
                 '--db="sqlite:///gradebook.db"'.format(student_id=student_id))
 
     @classmethod
-    def setup_class(cls):
-        cls.tempdir = tempfile.mkdtemp()
-        cls.origdir = os.getcwd()
-        os.chdir(cls.tempdir)
-
-        # copy files and setup assignment
-        cls._setup_assignment_hierarchy()
-
+    def _setup_formgrade_config(cls):
         # create config file
         with open("nbgrader_formgrade_config.py", "w") as fh:
             fh.write(dedent(
@@ -74,19 +76,36 @@ class TestNbgraderFormgrade(TestBase):
                 """
             ))
 
-        # start the formgrader
+    @classmethod
+    def _start_formgrader(cls):
         cls.formgrader = cls._start_subprocess(
             ["nbgrader", "formgrade"],
-            shell=False, 
-            stdout=None, 
+            shell=False,
+            stdout=None,
             stderr=None)
 
         time.sleep(1)
+
+    @classmethod
+    def setup_class(cls):
+        cls.tempdir = tempfile.mkdtemp()
+        cls.origdir = os.getcwd()
+        os.chdir(cls.tempdir)
+
+        # copy files and setup assignment
+        cls._setup_assignment_hierarchy()
+
+        # create the config file
+        cls._setup_formgrade_config()
+
+        # start the formgrader
+        cls._start_formgrader()
+
+        # start the browser
         cls.browser = webdriver.PhantomJS()
 
     @classmethod
-    def teardown_class(cls):
-        cls.browser.quit()
+    def _stop_formgrader(cls):
         cls.formgrader.terminate()
 
         # wait for the formgrader to shut down
@@ -100,6 +119,12 @@ class TestNbgraderFormgrade(TestBase):
         if retcode is None:
             cls.formgrader.kill()
 
+    @classmethod
+    def teardown_class(cls):
+        cls.browser.save_screenshot(os.path.join(cls.origdir, '.selenium.screenshot.png'))
+        cls.browser.quit()
+        cls._stop_formgrader()
+
         cls._copy_coverage_files()
 
         os.chdir(cls.origdir)
@@ -110,8 +135,8 @@ class TestNbgraderFormgrade(TestBase):
 
     def _check_url(self, url):
         if not url.startswith("http"):
-            url = "http://localhost:9000/" + url.strip("/")
-        assert_equal(unquote(self.browser.current_url.rstrip("/")), url.strip("/"))
+            url = self.formgrade_url(url)
+        assert_equal(unquote(self.browser.current_url.rstrip("/")), url)
 
     def _check_breadcrumbs(self, *breadcrumbs):
         # check that breadcrumbs are correct
@@ -131,7 +156,7 @@ class TestNbgraderFormgrade(TestBase):
 
     def test_load_assignment_list(self):
         # load the main page and make sure it redirects
-        self.browser.get("http://localhost:9000")
+        self.browser.get(self.formgrade_url())
         self._check_url("/assignments")
         self._check_breadcrumbs("Assignments")
 
@@ -140,7 +165,7 @@ class TestNbgraderFormgrade(TestBase):
         self._check_url("/assignments/Problem Set 1")
 
     def test_load_assignment_notebook_list(self):
-        self.browser.get("http://localhost:9000/assignments/Problem Set 1")
+        self.browser.get(self.formgrade_url("assignments/Problem Set 1"))
         self._check_breadcrumbs("Assignments", "Problem Set 1")
 
         # click the "Assignments" link
@@ -156,7 +181,7 @@ class TestNbgraderFormgrade(TestBase):
 
     def test_load_assignment_notebook_submissions_list(self):
         for problem in self.gb.find_assignment("Problem Set 1").notebooks:
-            self.browser.get("http://localhost:9000/assignments/Problem Set 1/{}".format(problem.name))
+            self.browser.get(self.formgrade_url("assignments/Problem Set 1/{}".format(problem.name)))
             self._check_breadcrumbs("Assignments", "Problem Set 1", problem.name)
 
             # click the "Assignments" link
@@ -179,7 +204,7 @@ class TestNbgraderFormgrade(TestBase):
 
     def test_load_student_list(self):
         # load the student view
-        self.browser.get("http://localhost:9000/students")
+        self.browser.get(self.formgrade_url("students"))
         self._check_url("/students")
         self._check_breadcrumbs("Students")
 
@@ -194,7 +219,7 @@ class TestNbgraderFormgrade(TestBase):
 
     def test_load_student_assignment_list(self):
         for student in self.gb.students:
-            self.browser.get("http://localhost:9000/students/{}".format(student.id))
+            self.browser.get(self.formgrade_url("students/{}".format(student.id)))
             self._check_breadcrumbs("Students", student.id)
 
             try:
@@ -214,7 +239,7 @@ class TestNbgraderFormgrade(TestBase):
                 ## TODO: make sure link doesn't exist
                 continue
 
-            self.browser.get("http://localhost:9000/students/{}/Problem Set 1".format(student.id))
+            self.browser.get(self.formgrade_url("students/{}/Problem Set 1".format(student.id)))
             self._check_breadcrumbs("Students", student.id, "Problem Set 1")
 
             for problem in self.gb.find_assignment("Problem Set 1").notebooks:
@@ -225,7 +250,7 @@ class TestNbgraderFormgrade(TestBase):
 
     def test_switch_views(self):
         # load the main page
-        self.browser.get("http://localhost:9000")
+        self.browser.get(self.formgrade_url())
 
         # click the "Change View" button
         self._click_link("Change View", partial=True)
@@ -247,7 +272,7 @@ class TestNbgraderFormgrade(TestBase):
             submissions.sort(key=lambda x: x.id)
 
             for i, submission in enumerate(submissions):
-                self.browser.get("http://localhost:9000/submissions/{}".format(submission.id))
+                self.browser.get(self.formgrade_url("submissions/{}".format(submission.id)))
 
                 # click on the "Assignments" link
                 self._click_link("Assignments")
@@ -269,6 +294,6 @@ class TestNbgraderFormgrade(TestBase):
                 # check the live notebook link
                 self._click_link("Submission #{}".format(i + 1))
                 self.browser.switch_to_window(self.browser.window_handles[1])
-                self._check_url("http://localhost:9001/notebooks/{}/{}.ipynb".format(submission.student.id, problem.name))
+                self._check_url(self.notebook_url("{}/{}.ipynb".format(submission.student.id, problem.name)))
                 self.browser.close()
                 self.browser.switch_to_window(self.browser.window_handles[0])
