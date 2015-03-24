@@ -29,6 +29,10 @@ class HubAuth(BaseAuth):
     hubapi_port = Int(8081, config=True, help="Port of the hubapi server.")
     hubapi_cookie = Unicode("jupyter-hub-token", config=True, help="Name of the cookie used by JupyterHub")
 
+    notebook_url_prefix = Unicode(None, config=True, allow_none=True, help="""
+        Relative path of the formgrader with respect to the hub's user base
+        directory.  No trailing slash. i.e. "Documents" or "Documents/notebooks". """)
+
     def __init__(self, *args, **kwargs):
         super(HubAuth, self).__init__(*args, **kwargs)
 
@@ -110,7 +114,9 @@ class HubAuth(BaseAuth):
 
     def get_notebook_url(self, relative_path):
         """Gets the notebook's url."""
-        return "http://{}:{}/{}/notebooks/{}".format(
+        if self.notebook_url_prefix is not None:
+            relative_path = self.notebook_url_prefix + '/' + relative_path
+        return "http://{}:{}/user/{}/notebooks/{}".format(
             self.hub_address,
             self.hub_port,
             self._user,
