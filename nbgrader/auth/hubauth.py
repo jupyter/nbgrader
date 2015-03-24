@@ -73,7 +73,7 @@ class HubAuth(BaseAuth):
         cookie = request.cookies[self.hubapi_cookie]
 
         # Check with the Hub to see if the auth cookie is valid.
-        response = self._hubapi_request('/hub/api/authorizations/cookie/' + self.hubapi_cookie, body=cookie)
+        response = self._hubapi_request('/hub/api/authorizations/cookie/' + self.hubapi_cookie + '/' + cookie)
         if response.status_code == 200:
 
             #  Auth information recieved.
