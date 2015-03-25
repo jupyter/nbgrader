@@ -24,7 +24,7 @@ install:
   - pip install nose coverage coveralls invoke selenium
   - if [[ $GROUP == 'docs' ]]; then python setup.py install; else pip install -e .; fi
   - ipython profile create
-  - python -m nbgrader --activate --no-symlink --user default 
+  - python -m nbgrader --install --activate --no-symlink --user default 
 script:
   - invoke tests --group="${GROUP}" --python-version="${TRAVIS_PYTHON_VERSION}" --pull-request="${TRAVIS_PULL_REQUEST}" --github-token="${GH_TOKEN}" --git-name="${GIT_NAME}" --git-email="${GIT_EMAIL}"
 after_success:
