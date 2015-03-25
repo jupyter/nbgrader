@@ -30,7 +30,9 @@ class TestCreateAssignmentNbExtension(object):
             'ipython', 'profile', 'create', '--ipython-dir', cls.ipythondir])
 
         # test the arg parsing
-        main(['--activate',
+        main([
+              '--install'
+              '--activate',
               '--verbose',
               '--path={}'.format(cls.ipythondir),
               'default'])

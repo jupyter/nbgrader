@@ -17,7 +17,7 @@ from IPython.utils.py3compat import cast_unicode_py2
 
 
 def install(profile='default', symlink=True, user=False, prefix=None,
-            verbose=False, path=None, activate=False, deactivate=False):
+            verbose=False, ipython_dir=None):
     """Install and activate nbgrader on a profile
     """
 
@@ -27,30 +27,32 @@ def install(profile='default', symlink=True, user=False, prefix=None,
         print('I will try to symlink the extension instead of copying files')
     if prefix and verbose:
         print("I will install in prefix:", prefix)
-    if not path:
+    if not ipython_dir:
         nbextensions_dir = None
     else:
-        nbextensions_dir = os.path.join(path,'nbextensions')
+        nbextensions_dir = os.path.join(ipython_dir,'nbextensions')
+    print('nbextdir will be ', nbextensions_dir)
+
+    print('from !!!!', os.path.join(dname, 'nbextensions', 'nbgrader'))
     nbe.install_nbextension(os.path.join(dname, 'nbextensions', 'nbgrader'),
                             user=user,
                             prefix=prefix,
                             symlink=symlink,
                             nbextensions_dir=nbextensions_dir
                             )
-    _activate(profile, ipythondir=path)
 
 
 # TODO pass prefix as argument.
-def _activate(profile, ipythondir=None):
+def activate(profile=None, ipython_dir=None):
     """
     Manualy modify the frontend json-config to load nbgrader extension.
     """
 
-    if not ipythondir:
+    if not ipython_dir:
         pdir = ProfileDir.find_profile_dir_by_name(get_ipython_dir(), profile).location
     else :
-        ipythondir = os.path.expanduser(ipythondir)
-        pdir = ProfileDir.find_profile_dir_by_name(ipythondir, profile).location
+        ipython_dir = os.path.expanduser(ipython_dir)
+        pdir = ProfileDir.find_profile_dir_by_name(ipython_dir, profile).location
 
     json_dir = os.path.join(pdir, 'nbconfig')
     json_file = os.path.join(pdir, 'nbconfig', 'notebook.json')
@@ -74,7 +76,7 @@ def _activate(profile, ipythondir=None):
         f.write(cast_unicode_py2(json.dumps(config, indent=2), 'utf-8'))
 
 
-def _deactivate(profile):
+def deactivate(profile=None, ipython_dir=None):
     """should be a matter of just unsetting the above keys
     """
     raise NotImplemented('deactivating a profile is not yet implemented.')
@@ -93,11 +95,14 @@ def main(argv=None):
                 description='''Install and activate nbgrader notebook extension for a given profile ''')
     parser.add_argument('profile', nargs='?', default=None, metavar=('<profile_name>'))
 
+    parser.add_argument("--install", help="Install nbgrader notebook extension for given profile",
+                        action="store_true")
+
     parser.add_argument("--activate", help="Activate nbgrader notebook extension for given profile",
-                        action="store_true", dest='activate')
+                        action="store_true")
 
     parser.add_argument("--deactivate", help="Deactivate nbgrader extension for given profile",
-                        action="store_true", dest='deactivate')
+                        action="store_true")
 
     parser.add_argument("-v", "--verbose", help="Increase verbosity",
                         action='store_true')
@@ -108,7 +113,7 @@ def main(argv=None):
     parser.add_argument("--no-symlink", help="Do not symlink at install time, but copy the files",
                         action="store_false", dest='symlink', default=True)
 
-    parser.add_argument("--path", help="Explicit path on where to install the extension",
+    parser.add_argument("--path", help="Explicit path to the ipython-dir to use",
                         action='store', default=None)
 
     parser.add_argument("--prefix", help="Prefix where to install extension",
@@ -118,19 +123,33 @@ def main(argv=None):
 
     help_and_exit = False
     if args.activate and args.deactivate:
-        print("Cannot activate and deactivate as the same time", file=sys.stderr)
-        sys.exit(1)
+        print("Cannot activate and deactivate extension as the same time", file=sys.stderr)
+        help_and_exit = True
+
+    if args.user and not args.install:
+        print("--user can only be used in conjunction with the --install flag.")
+        help_and_exit = True
+    
+    if not args.symlink and not args.install:
+        print("--no-symlink can only be used in conjunction with the --install flag.")
+        help_and_exit = True
 
     if not args.profile or help_and_exit:
         parser.print_help()
         sys.exit(1)
 
-    install(        path=args.path,
-                    user=args.user,
-                  prefix=args.prefix,
-                 profile=args.profile,
-                 symlink=args.symlink,
-                 verbose=args.verbose,
-                activate=args.activate,
-              deactivate=args.deactivate
-            )
+    if args.install:
+        install( ipython_dir=args.path,
+                        user=args.user,
+                      prefix=args.prefix,
+                     profile=args.profile,
+                     symlink=args.symlink,
+                     verbose=args.verbose,
+                )
+
+    if args.activate :
+        activate( ipython_dir=args.path,
+                      profile=args.profile) 
+    if args.deactivate :
+        deactivate( ipython_dir=args.path,
+                        profile=args.profile) 
