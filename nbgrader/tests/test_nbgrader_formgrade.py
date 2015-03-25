@@ -312,6 +312,6 @@ class TestNbgraderFormgrade(TestBase):
                 # check the live notebook link
                 self._click_link("Submission #{}".format(i + 1))
                 self.browser.switch_to_window(self.browser.window_handles[1])
-                self._wait_for_notebook_page(self.notebook_url("{}/Problem Set 1/{}.ipynb".format(submission.student.id, problem.name)))
+                self._wait_for_notebook_page(self.notebook_url("autograded/{}/Problem Set 1/{}.ipynb".format(submission.student.id, problem.name)))
                 self.browser.close()
                 self.browser.switch_to_window(self.browser.window_handles[0])
