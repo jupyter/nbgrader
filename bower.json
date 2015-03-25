@@ -1,0 +1,14 @@
+{
+  "name": "nbgrader-deps",
+  "version": "0.0.0",
+  "dependencies": {
+    "bootstrap": "components/bootstrap#~3.3",
+    "backbone": "components/backbone#~1.1.2",
+    "jquery": "components/jquery#~2.1.1",
+    "underscore": "components/underscore#~1.7"
+  },
+  "resolutions": {
+    "underscore": "~1.7",
+    "jquery": "~2.1.1"
+  }
+}

@@ -65,3 +65,13 @@ docs/user_guide/grade_example/autograded
 docs/user_guide/grade_example/feedback
 docs/user_guide/release_example/student
 docs/user_guide/nbgrader_example.db
+
+# components stuff
+node_modules
+nbgrader/html/static/components/bootstrap/less
+nbgrader/html/static/components/bootstrap/js/*
+!nbgrader/html/static/components/bootstrap/js/bootstrap.js
+!nbgrader/html/static/components/bootstrap/js/bootstrap.min.js
+nbgrader/html/static/components/jquery/jquery-migrate.min.js
+nbgrader/html/static/components/jquery/jquery-migrate.js
+

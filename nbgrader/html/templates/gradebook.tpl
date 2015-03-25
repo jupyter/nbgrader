@@ -2,12 +2,12 @@
 <head>
   <title>nbgrader formgrade</title>
 
-  <script src="{{base_url}}/static/lib/jquery-2.1.1.min.js"></script>
-  <script src="{{base_url}}/static/lib/underscore-min.js"></script>
-  <script src="{{base_url}}/static/lib/backbone-min.js"></script>
-  <script src="{{base_url}}/static/lib/bootstrap.min.js"></script>
+  <script src="{{base_url}}/static/components/jquery/jquery.min.js"></script>
+  <script src="{{base_url}}/static/components/underscore/underscore-min.js"></script>
+  <script src="{{base_url}}/static/components/backbone/backbone-min.js"></script>
+  <script src="{{base_url}}/static/components/bootstrap/js/bootstrap.min.js"></script>
 
-  <link rel="stylesheet" href="{{base_url}}/static/css/bootstrap.min.css">
+  <link rel="stylesheet" href="{{base_url}}/static/components/bootstrap/css/bootstrap.min.css" />
   <link rel="stylesheet" href="{{base_url}}/static/css/formgrade.css">
 </head>
 

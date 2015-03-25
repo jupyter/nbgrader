@@ -9,10 +9,10 @@
 <meta charset="utf-8" />
 <title>{{ resources.notebook_id }}</title>
 
-<script src="{{resources.base_url}}/static/lib/jquery-2.1.1.min.js"></script>
-<script src="{{resources.base_url}}/static/lib/underscore-min.js"></script>
-<script src="{{resources.base_url}}/static/lib/backbone-min.js"></script>
-<script src="{{resources.base_url}}/static/lib/bootstrap.min.js"></script>
+<script src="{{resources.base_url}}/static/components/jquery/jquery.min.js"></script>
+<script src="{{resources.base_url}}/static/components/underscore/underscore-min.js"></script>
+<script src="{{resources.base_url}}/static/components/backbone/backbone-min.js"></script>
+<script src="{{resources.base_url}}/static/components/bootstrap/js/bootstrap.min.js"></script>
 
 <script type="text/javascript">
 var submission_id = "{{ resources.submission_id }}";
@@ -23,7 +23,7 @@ var base_url = "{{resources.base_url}}";
 
 <script src="{{resources.base_url}}/static/js/formgrade.js"></script>
 
-<link rel="stylesheet" href="{{resources.base_url}}/static/css/bootstrap.min.css" />
+<link rel="stylesheet" href="{{resources.base_url}}/static/components/bootstrap/css/bootstrap.min.css" />
 
 {% for css in resources.inlining.css -%}
     <style type="text/css">
