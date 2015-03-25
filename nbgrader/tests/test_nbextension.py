@@ -19,7 +19,7 @@ from nbgrader.install import main
 def _assert_is_deactivated(config_file):
     with open(config_file, 'r') as fh:
         config = json.load(fh)
-    assert_raises(KeyError, config['load_extensions']['nbgrader/create_assignment'])
+    assert_raises(KeyError, lambda:config['load_extensions']['nbgrader/create_assignment'])
 
 def _assert_is_activated(config_file):
     with open(config_file, 'r') as fh:
