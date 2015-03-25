@@ -44,9 +44,6 @@ setup_args = dict(
         'nbgrader.tests',
         'nbgrader.exporters'
     ],
-    data_files= [ ('nbextensions/nbgrader',
-
-    ],
     package_data={
         'nbgrader': [
             'nbextensions/nbgrader/*.js',
