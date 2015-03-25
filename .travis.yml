@@ -6,7 +6,6 @@ sudo: false
 branches:
   only:
     - master
-    - auth
 env:
   matrix:
     - GROUP=docs
