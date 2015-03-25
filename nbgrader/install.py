@@ -16,6 +16,14 @@ from IPython.core.profiledir import ProfileDir
 from IPython.utils.py3compat import cast_unicode_py2
 
 
+def _get_profile_dir(profile, ipython_dir):
+    if not ipython_dir:
+        pdir = ProfileDir.find_profile_dir_by_name(get_ipython_dir(), profile).location
+    else:
+        ipython_dir = os.path.expanduser(ipython_dir)
+        pdir = ProfileDir.find_profile_dir_by_name(ipython_dir, profile).location
+    return pdir
+
 def install(profile='default', symlink=True, user=False, prefix=None,
             verbose=False, ipython_dir=None):
     """Install and activate nbgrader on a profile
@@ -43,24 +51,18 @@ def install(profile='default', symlink=True, user=False, prefix=None,
 # TODO pass prefix as argument.
 def activate(profile=None, ipython_dir=None):
     """
-    Manualy modify the frontend json-config to load nbgrader extension.
+    Manually modify the frontend json-config to load nbgrader extension.
     """
 
-    if not ipython_dir:
-        pdir = ProfileDir.find_profile_dir_by_name(get_ipython_dir(), profile).location
-    else :
-        ipython_dir = os.path.expanduser(ipython_dir)
-        pdir = ProfileDir.find_profile_dir_by_name(ipython_dir, profile).location
-
+    pdir = _get_profile_dir(profile, ipython_dir)
     json_dir = os.path.join(pdir, 'nbconfig')
-    json_file = os.path.join(pdir, 'nbconfig', 'notebook.json')
-    json_file = os.path.expanduser(json_file)
+    json_file = os.path.expanduser(os.path.join(json_dir, 'notebook.json'))
 
     try:
         with io.open(json_file, 'r') as f:
             config = json.loads(f.read())
     except IOError:
-        # file just don't exists yet. IPython might have never been launched.
+        # file doesn't exist yet. IPython might have never been launched.
         config = {}
 
     if not config.get('load_extensions', None):
@@ -75,9 +77,30 @@ def activate(profile=None, ipython_dir=None):
 
 
 def deactivate(profile=None, ipython_dir=None):
-    """should be a matter of just unsetting the above keys
     """
-    raise NotImplemented('deactivating a profile is not yet implemented.')
+    Manually modify the frontend json-config to load nbgrader extension.
+    """
+
+    pdir = _get_profile_dir(profile, ipython_dir)
+    json_dir = os.path.join(pdir, 'nbconfig')
+    json_file = os.path.expanduser(os.path.join(json_dir, 'notebook.json'))
+
+    try:
+        with io.open(json_file, 'r') as f:
+            config = json.loads(f.read())
+    except IOError:
+        # file doesn't exist yet. IPython might have never been launched.
+        return
+
+    if 'load_extensions' not in config:
+        return
+    if 'nbgrader/create_assignment' not in config['load_extensions']:
+        return
+
+    config['load_extensions']['nbgrader/create_assignment'] = False
+
+    with io.open(json_file, 'w+') as f:
+        f.write(cast_unicode_py2(json.dumps(config, indent=2), 'utf-8'))
 
 
 def main(argv=None):
