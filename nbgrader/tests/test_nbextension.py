@@ -34,6 +34,7 @@ class TestCreateAssignmentNbExtension(object):
               '--install'
               '--activate',
               '--verbose',
+              '--no-symlink',
               '--path={}'.format(cls.ipythondir),
               'default'])
 
