@@ -15,6 +15,9 @@ except ImportError:
     from urllib.parse import urljoin, unquote # Python 3
 
 from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 
 class TestNbgraderFormgrade(TestBase):
 
@@ -29,6 +32,10 @@ class TestNbgraderFormgrade(TestBase):
 
     @classmethod
     def _setup_assignment_hierarchy(cls):
+        # create a "class files" directory
+        os.mkdir("class_files")
+        os.chdir("class_files")
+
         # copy files from the user guide
         user_guide = os.path.join(os.path.dirname(__file__), "..", "..", "docs", "user_guide")
         shutil.copytree(os.path.join(user_guide, "release_example", "teacher"), "source")
@@ -154,44 +161,61 @@ class TestNbgraderFormgrade(TestBase):
             element = self.browser.find_element_by_link_text(link_text)
         element.click()
 
+    def _wait_for_element(self, element_id, time=10):
+        return WebDriverWait(self.browser, time).until(
+            EC.presence_of_element_located((By.ID, element_id))
+        )
+
+    def _wait_for_gradebook_page(self, url):
+        self._wait_for_element("gradebook")
+        self._check_url(url)
+
+    def _load_gradebook_page(self, url):
+        self.browser.get(self.formgrade_url(url))
+        self._wait_for_gradebook_page(url)
+
+    def _wait_for_notebook_page(self, url):
+        self._wait_for_element("notebook-container")
+        self._check_url(url)
+
     def test_load_assignment_list(self):
         # load the main page and make sure it redirects
         self.browser.get(self.formgrade_url())
-        self._check_url("assignments")
+        self._wait_for_gradebook_page("assignments")
         self._check_breadcrumbs("Assignments")
 
         # click on the "Problem Set 1" link
         self._click_link("Problem Set 1")
-        self._check_url("assignments/Problem Set 1")
+        self._wait_for_gradebook_page("assignments/Problem Set 1")
 
     def test_load_assignment_notebook_list(self):
-        self.browser.get(self.formgrade_url("assignments/Problem Set 1"))
+        self._load_gradebook_page("assignments/Problem Set 1")
         self._check_breadcrumbs("Assignments", "Problem Set 1")
 
         # click the "Assignments" link
         self._click_link("Assignments")
-        self._check_url("assignments")
+        self._wait_for_gradebook_page("assignments")
         self.browser.back()
 
         # click on the problem link
         for problem in self.gb.find_assignment("Problem Set 1").notebooks:
             self._click_link(problem.name)
-            self._check_url("assignments/Problem Set 1/{}".format(problem.name))
+            self._wait_for_gradebook_page("assignments/Problem Set 1/{}".format(problem.name))
             self.browser.back()
 
     def test_load_assignment_notebook_submissions_list(self):
         for problem in self.gb.find_assignment("Problem Set 1").notebooks:
-            self.browser.get(self.formgrade_url("assignments/Problem Set 1/{}".format(problem.name)))
+            self._load_gradebook_page("assignments/Problem Set 1/{}".format(problem.name))
             self._check_breadcrumbs("Assignments", "Problem Set 1", problem.name)
 
             # click the "Assignments" link
             self._click_link("Assignments")
-            self._check_url("assignments")
+            self._wait_for_gradebook_page("assignments")
             self.browser.back()
 
             # click the "Problem Set 1" link
             self._click_link("Problem Set 1")
-            self._check_url("assignments/Problem Set 1")
+            self._wait_for_gradebook_page("assignments/Problem Set 1")
             self.browser.back()
 
             submissions = problem.submissions
@@ -199,13 +223,12 @@ class TestNbgraderFormgrade(TestBase):
             for i in range(len(submissions)):
                 # click on the "Submission #i" link
                 self._click_link("Submission #{}".format(i + 1))
-                self._check_url("submissions/{}".format(submissions[i].id))
+                self._wait_for_notebook_page("submissions/{}".format(submissions[i].id))
                 self.browser.back()
 
     def test_load_student_list(self):
         # load the student view
-        self.browser.get(self.formgrade_url("students"))
-        self._check_url("students")
+        self._load_gradebook_page("students")
         self._check_breadcrumbs("Students")
 
         # click on student
@@ -214,12 +237,12 @@ class TestNbgraderFormgrade(TestBase):
             if len(student.submissions) == 0:
                 continue
             self._click_link("{}, {}".format(student.last_name, student.first_name))
-            self._check_url("students/{}".format(student.id))
+            self._wait_for_gradebook_page("students/{}".format(student.id))
             self.browser.back()
 
     def test_load_student_assignment_list(self):
         for student in self.gb.students:
-            self.browser.get(self.formgrade_url("students/{}".format(student.id)))
+            self._load_gradebook_page("students/{}".format(student.id))
             self._check_breadcrumbs("Students", student.id)
 
             try:
@@ -229,7 +252,7 @@ class TestNbgraderFormgrade(TestBase):
                 continue
 
             self._click_link("Problem Set 1")
-            self._check_url("students/{}/Problem Set 1".format(student.id))
+            self._wait_for_gradebook_page("students/{}/Problem Set 1".format(student.id))
 
     def test_load_student_assignment_submissions_list(self):
         for student in self.gb.students:
@@ -239,32 +262,33 @@ class TestNbgraderFormgrade(TestBase):
                 ## TODO: make sure link doesn't exist
                 continue
 
-            self.browser.get(self.formgrade_url("students/{}/Problem Set 1".format(student.id)))
+            self._load_gradebook_page("students/{}/Problem Set 1".format(student.id))
             self._check_breadcrumbs("Students", student.id, "Problem Set 1")
 
             for problem in self.gb.find_assignment("Problem Set 1").notebooks:
-                self._click_link(problem.name)
                 submission = self.gb.find_submission_notebook(problem.name, "Problem Set 1", student.id)
-                self._check_url("submissions/{}".format(submission.id))
+                self._click_link(problem.name)
+                self._wait_for_notebook_page("submissions/{}".format(submission.id))
                 self.browser.back()
+                self._wait_for_gradebook_page("students/{}/Problem Set 1".format(student.id))
 
     def test_switch_views(self):
         # load the main page
-        self.browser.get(self.formgrade_url())
+        self._load_gradebook_page("assignments")
 
         # click the "Change View" button
         self._click_link("Change View", partial=True)
 
         # click the "Students" option
         self._click_link("Students")
-        self._check_url("students")
+        self._wait_for_gradebook_page("students")
 
         # click the "Change View" button
         self._click_link("Change View", partial=True)
 
         # click the "Assignments" option
         self._click_link("Assignments")
-        self._check_url("assignments")
+        self._wait_for_gradebook_page("assignments")
 
     def test_formgrade_view_breadcrumbs(self):
         for problem in self.gb.find_assignment("Problem Set 1").notebooks:
@@ -273,27 +297,35 @@ class TestNbgraderFormgrade(TestBase):
 
             for i, submission in enumerate(submissions):
                 self.browser.get(self.formgrade_url("submissions/{}".format(submission.id)))
+                self._wait_for_notebook_page("submissions/{}".format(submission.id))
 
                 # click on the "Assignments" link
                 self._click_link("Assignments")
-                self._check_url("assignments")
+                self._wait_for_gradebook_page("assignments")
+
+                # go back
                 self.browser.back()
+                self._wait_for_notebook_page("submissions/{}".format(submission.id))
 
                 # click on the "Problem Set 1" link
-                self._check_url("submissions/{}".format(submission.id))
                 self._click_link("Problem Set 1")
-                self._check_url("assignments/Problem Set 1")
+                self._wait_for_gradebook_page("assignments/Problem Set 1")
+
+                # go back
                 self.browser.back()
+                self._wait_for_notebook_page("submissions/{}".format(submission.id))
 
                 # click on the problem link
-                self._check_url("submissions/{}".format(submission.id))
                 self._click_link(problem.name)
-                self._check_url("assignments/Problem Set 1/{}".format(problem.name))
+                self._wait_for_gradebook_page("assignments/Problem Set 1/{}".format(problem.name))
+
+                # go back
                 self.browser.back()
+                self._wait_for_notebook_page("submissions/{}".format(submission.id))
 
                 # check the live notebook link
                 self._click_link("Submission #{}".format(i + 1))
                 self.browser.switch_to_window(self.browser.window_handles[1])
-                self._check_url(self.notebook_url("{}/{}.ipynb".format(submission.student.id, problem.name)))
+                self._wait_for_notebook_page(self.notebook_url("{}/{}.ipynb".format(submission.student.id, problem.name)))
                 self.browser.close()
                 self.browser.switch_to_window(self.browser.window_handles[0])

@@ -36,7 +36,7 @@
       </div>
     </div>
   </nav>
-  <div class="container">
+  <div class="container" id="gradebook">
     <div class="panel panel-default">
       {%- block body -%}
       <div class="panel-body"></div>
