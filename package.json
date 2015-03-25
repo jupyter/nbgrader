@@ -1,0 +1,14 @@
+{
+ "name": "nbgrader-deps",
+ "version": "0.0.0",
+ "description": "nbgrader nodejs dependencies",
+ "author": "Jupyter Developers",
+ "license": "BSD",
+ "repository": {
+  "type": "git",
+  "url": "https://github.com/jupyter/nbgrader.git"
+ },
+ "devDependencies": {
+  "bower": "*"
+ }
+}

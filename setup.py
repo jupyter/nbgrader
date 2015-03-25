@@ -5,7 +5,19 @@
 # Distributed under the terms of the Modified BSD License.
 
 import sys
+import os
 from distutils.core import setup
+
+# get paths to all the static files and templates
+static_files = []
+for (dirname, dirnames, filenames) in os.walk("nbgrader/html/static"):
+    root = os.path.relpath(dirname, "nbgrader/html")
+    for filename in filenames:
+        static_files.append(os.path.join(root, filename))
+for (dirname, dirnames, filenames) in os.walk("nbgrader/html/templates"):
+    root = os.path.relpath(dirname, "nbgrader/html")
+    for filename in filenames:
+        static_files.append(os.path.join(root, filename))
 
 setup_args = dict(
     name                = 'nbgrader',
@@ -37,15 +49,7 @@ setup_args = dict(
             'nbextensions/*.js',
             'nbextensions/*.css'
         ],
-        'nbgrader.html': [
-            'static/css/*.css',
-            'static/css/*.map',
-            'static/fonts/*',
-            'static/js/*.js',
-            'static/lib/*.js',
-            'static/lib/*.map',
-            'templates/*.tpl',
-        ],
+        'nbgrader.html': static_files,
         'nbgrader.tests': [
             'files/*',
             'js/*'
