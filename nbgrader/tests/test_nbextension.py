@@ -31,7 +31,7 @@ class TestCreateAssignmentNbExtension(object):
 
         # test the arg parsing
         main([
-              '--install'
+              '--install',
               '--activate',
               '--verbose',
               '--no-symlink',
