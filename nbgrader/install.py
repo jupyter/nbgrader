@@ -67,7 +67,7 @@ def activate(profile=None, ipython_dir=None):
 
     if not config.get('load_extensions', None):
         config['load_extensions'] = {}
-    config['load_extensions']['nbgrader/nbgrader'] = True
+    config['load_extensions']['nbgrader/create_assignment'] = True
 
     if not os.path.exists(json_dir):
         os.mkdir(json_dir)
