@@ -1,7 +1,7 @@
 /*global $, Backbone, student, submission_id */
 
 var Grade = Backbone.Model.extend({
-    urlRoot: "/api/grade",
+    urlRoot: base_url + "/api/grade",
     initialize: function () {
         var elem = $("#" + this.get("name"));
         var glyph = $("#" + this.get("name") + "-saved");
@@ -47,11 +47,11 @@ var Grade = Backbone.Model.extend({
 
 var Grades = Backbone.Collection.extend({
     model: Grade,
-    url: "/api/grades"
+    url: base_url + "/api/grades"
 });
 
 var Comment = Backbone.Model.extend({
-    urlRoot: "/api/comment",
+    urlRoot: base_url + "/api/comment",
     initialize: function () {
         var elem = $($(".comment")[this.get("name")]);
         var glyph = $($(".comment-saved")[this.get("name")]);
@@ -81,7 +81,7 @@ var Comment = Backbone.Model.extend({
 
 var Comments = Backbone.Collection.extend({
     model: Comment,
-    url: "/api/comments"
+    url: base_url + "/api/comments"
 });
 
 var getIndex = function (elem) {

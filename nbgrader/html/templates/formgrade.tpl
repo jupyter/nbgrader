@@ -9,20 +9,21 @@
 <meta charset="utf-8" />
 <title>{{ resources.notebook_id }}</title>
 
-<script src="/static/lib/jquery-2.1.1.min.js"></script>
-<script src="/static/lib/underscore-min.js"></script>
-<script src="/static/lib/backbone-min.js"></script>
-<script src="/static/lib/bootstrap.min.js"></script>
+<script src="{{resources.base_url}}/static/lib/jquery-2.1.1.min.js"></script>
+<script src="{{resources.base_url}}/static/lib/underscore-min.js"></script>
+<script src="{{resources.base_url}}/static/lib/backbone-min.js"></script>
+<script src="{{resources.base_url}}/static/lib/bootstrap.min.js"></script>
 
 <script type="text/javascript">
 var submission_id = "{{ resources.submission_id }}";
 var notebook_id = "{{ resources.notebook_id }}";
 var assignment_id = "{{ resources.assignment_id }}";
+var base_url = "{{resources.base_url}}";
 </script>
 
-<script src="/static/js/formgrade.js"></script>
+<script src="{{resources.base_url}}/static/js/formgrade.js"></script>
 
-<link rel="stylesheet" href="/static/css/bootstrap.min.css" />
+<link rel="stylesheet" href="{{resources.base_url}}/static/css/bootstrap.min.css" />
 
 {% for css in resources.inlining.css -%}
     <style type="text/css">
@@ -33,7 +34,7 @@ var assignment_id = "{{ resources.assignment_id }}";
 <!-- Loading mathjax macro -->
 {{ mathjax() }}
 
-<link rel="stylesheet" href="/static/css/formgrade.css" />
+<link rel="stylesheet" href="{{resources.base_url}}/static/css/formgrade.css" />
 
 </head>
 {%- endblock header -%}
@@ -46,7 +47,7 @@ var assignment_id = "{{ resources.assignment_id }}";
         <ul class="nav navbar-nav navbar-left">
           {%- if resources.prev -%}
           <li class="previous">
-            <a data-toggle="tooltip" data-placement="right" title="{{ resources.index }} remaining" href="/submissions/{{ resources.prev }}">
+            <a data-toggle="tooltip" data-placement="right" title="{{ resources.index }} remaining" href="{{resources.base_url}}/submissions/{{ resources.prev }}">
             &larr; Prev
             </a>
           </li>
@@ -58,9 +59,9 @@ var assignment_id = "{{ resources.assignment_id }}";
       <div class="col-md-8">
         <ul class="nav text-center">
           <ul class="breadcrumb">
-            <li><a href="/assignments">Assignments</a></li>
-            <li><a href="/assignments/{{ resources.assignment_id }}">{{ resources.assignment_id }}</a></li>
-            <li><a href="/assignments/{{ resources.assignment_id }}/{{ resources.notebook_id }}">{{ resources.notebook_id }}</a></li>
+            <li><a href="{{resources.base_url}}/assignments">Assignments</a></li>
+            <li><a href="{{resources.base_url}}/assignments/{{ resources.assignment_id }}">{{ resources.assignment_id }}</a></li>
+            <li><a href="{{resources.base_url}}/assignments/{{ resources.assignment_id }}/{{ resources.notebook_id }}">{{ resources.notebook_id }}</a></li>
             {%- if resources.notebook_server_exists -%}
             <li class="active live-notebook">
               <a data-toggle="tooltip" data-placement="right" title="Open live notebook" target="_blank" href="{{ resources.notebook_path }}">
@@ -77,7 +78,7 @@ var assignment_id = "{{ resources.assignment_id }}";
         <ul class="nav navbar-nav navbar-right">
           {%- if resources.next -%}
           <li class="next">
-            <a data-toggle="tooltip" data-placement="left" title="{{ resources.total - (resources.index + 1) }} remaining" href="/submissions/{{ resources.next }}">
+            <a data-toggle="tooltip" data-placement="left" title="{{ resources.total - (resources.index + 1) }} remaining" href="{{resources.base_url}}/submissions/{{ resources.next }}">
             Next &rarr;
             </a>
           </li>

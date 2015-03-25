@@ -26,6 +26,7 @@ setup_args = dict(
     packages=[
         'nbgrader',
         'nbgrader.apps',
+        'nbgrader.auth',
         'nbgrader.html',
         'nbgrader.preprocessors',
         'nbgrader.tests',

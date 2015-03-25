@@ -1,14 +1,12 @@
 import os
-import subprocess as sp
-import socket
 import signal
 import sys
-import time
 
 from textwrap import dedent
 
 from IPython.config.loader import Config
-from IPython.utils.traitlets import Unicode, Integer, List, Dict, Bool
+from IPython.utils.traitlets import Unicode, Integer, Dict, Type, \
+    Instance
 
 from IPython.nbconvert.exporters import HTMLExporter
 from IPython.config.application import catch_config_error
@@ -16,6 +14,7 @@ from IPython.config.application import catch_config_error
 from nbgrader.apps.baseapp import BaseNbGraderApp, nbgrader_aliases, nbgrader_flags
 from nbgrader.html.formgrade import app
 from nbgrader.api import Gradebook
+from nbgrader.auth import BaseAuth, NoAuth
 
 aliases = {}
 aliases.update(nbgrader_aliases)
@@ -30,13 +29,6 @@ flags.update(nbgrader_flags)
 flags.update({
 })
 
-def random_port():
-    """get a single random port"""
-    sock = socket.socket()
-    sock.bind(('', 0))
-    port = sock.getsockname()[1]
-    sock.close()
-    return port
 
 class FormgradeApp(BaseNbGraderApp):
 
@@ -57,17 +49,16 @@ class FormgradeApp(BaseNbGraderApp):
     ip = Unicode("localhost", config=True, help="IP address for the server")
     port = Integer(5000, config=True, help="Port for the server")
     base_directory = Unicode('.', config=True, help="Root server directory")
-    directory_format = Unicode('{notebook_id}.ipynb', config=True, help="Format string for the directory structure of the autograded notebooks")
-    start_nbserver = Bool(True, config=True, help="Start a single notebook server that allows submissions to be viewed.")
-    nbserver_port = Integer(config=True, help="Port for the notebook server")
+    directory_format = Unicode('{notebook_id}.ipynb', config=True, help="""Format
+        string for the directory structure of the autograded notebooks""")
+    authenticator_class = Type(NoAuth, klass=BaseAuth, config=True, help="""
+        Authenticator used in all formgrade requests.""")
+    authenticator_instance = Instance(BaseAuth, config=False)
 
     def _classes_default(self):
         classes = super(FormgradeApp, self)._classes_default()
         classes.append(HTMLExporter)
         return classes
-
-    def _nbserver_port_default(self):
-        return random_port()
 
     def init_server_root(self):
         # Specifying notebooks on the command-line overrides (rather than adds)
@@ -99,20 +90,7 @@ class FormgradeApp(BaseNbGraderApp):
 
     def _signal_stop(self, sig, frame):
         self.log.critical("received signal %s, stopping", sig)
-
-        if app.notebook_server_exists:
-            app.notebook_server.send_signal(sig)
-            for i in range(10):
-                retcode = app.notebook_server.poll()
-                if retcode is not None:
-                    app.notebook_server_exists = False
-                    break
-                time.sleep(0.1)
-
-            if retcode is None:
-                self.log.critical("couldn't shutdown notebook server, force killing it")
-                app.notebook_server.kill()
-
+        self.authenticator_instance.stop(sig)
         sys.exit(-sig)
 
     def build_extra_config(self):
@@ -130,20 +108,14 @@ class FormgradeApp(BaseNbGraderApp):
     def start(self):
         super(FormgradeApp, self).start()
 
-        # first launch a notebook server
-        if self.start_nbserver:
-            app.notebook_server_ip = self.ip
-            app.notebook_server_port = str(self.nbserver_port)
-            app.notebook_server = sp.Popen(
-                [
-                    "python", os.path.join(os.path.dirname(__file__), "notebookapp.py"),
-                    "--ip", app.notebook_server_ip,
-                    "--port", app.notebook_server_port
-                ],
-                cwd=self.base_directory)
-            app.notebook_server_exists = True
-        else:
-            app.notebook_server_exists = False
+        # Init authenticator.
+        self.authenticator_instance = self.authenticator_class(
+            app,
+            self.ip,
+            self.port,
+            self.base_directory,
+            parent=self)
+        app.auth = self.authenticator_instance
 
         # now launch the formgrader
         app.notebook_dir = self.base_directory

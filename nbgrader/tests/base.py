@@ -109,11 +109,11 @@ print("hello")
         return temp_dir
 
     @classmethod
-    def _start_subprocess(cls, command, shell=True, stdout=sp.PIPE, stderr=sp.STDOUT):
+    def _start_subprocess(cls, command, shell=True, stdout=sp.PIPE, stderr=sp.STDOUT, cwd=None):
         root = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
         env = os.environ.copy()
         env['COVERAGE_PROCESS_START'] = os.path.join(root, ".coveragerc")
-        proc = sp.Popen(command, shell=shell, stdout=stdout, stderr=stderr, env=env)
+        proc = sp.Popen(command, shell=shell, stdout=stdout, stderr=stderr, env=env, cwd=cwd)
         return proc
 
     @classmethod

@@ -22,7 +22,7 @@
 <tbody>
   {%- for student in students -%}
   <tr>
-    <td><a href="/students/{{ student.id }}">{{ student.last_name }}, {{ student.first_name }}</a></td>
+    <td><a href="{{base_url}}/students/{{ student.id }}">{{ student.last_name }}, {{ student.first_name }}</a></td>
     <td class="center">{{ student.id }}
     <td class="center">{{ student.score | float | round(2) }} / {{ student.max_score | float | round(2) }}</td>
   </tr>
