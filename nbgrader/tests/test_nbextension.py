@@ -5,7 +5,7 @@ import shutil
 import json
 from copy import copy
 
-from nose.tools import assert_equal
+from nose.tools import assert_equal, assert_raises
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -15,6 +15,16 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.keys import Keys
 
 from nbgrader.install import main
+
+def _assert_is_deactivated(config_file):
+    with open(config_file, 'r') as fh:
+        config = json.load(fh)
+    assert_raises(KeyError, config['load_extensions']['nbgrader/create_assignment'])
+
+def _assert_is_activated(config_file):
+    with open(config_file, 'r') as fh:
+        config = json.load(fh)
+    assert config['load_extensions']['nbgrader/create_assignment']
 
 
 class TestCreateAssignmentNbExtension(object):
@@ -129,16 +139,13 @@ class TestCreateAssignmentNbExtension(object):
 
         # check that it is activated
         config_file = os.path.join(self.ipythondir, 'profile_default', 'nbconfig', 'notebook.json')
-        with open(config_file, 'r') as fh:
-            config = json.load(fh)
-        assert config['load_extensions']['nbgrader/create_assignment']
+        _assert_is_activated(config_file)
+
 
     def test_01_deactivate_extension(self):
         # check that it is activated
         config_file = os.path.join(self.ipythondir, 'profile_default', 'nbconfig', 'notebook.json')
-        with open(config_file, 'r') as fh:
-            config = json.load(fh)
-        assert config['load_extensions']['nbgrader/create_assignment']
+        _assert_is_activated(config_file)
 
         main([
             '--deactivate',
@@ -148,16 +155,12 @@ class TestCreateAssignmentNbExtension(object):
         ])
 
         # check that it is deactivated
-        with open(config_file, 'r') as fh:
-            config = json.load(fh)
-        assert not config.get('load_extensions', {}).get('nbgrader/create_assignment', False)
+        _assert_is_deactivated(config_file)
 
     def test_02_activate_extension(self):
         # check that it is deactivated
         config_file = os.path.join(self.ipythondir, 'profile_default', 'nbconfig', 'notebook.json')
-        with open(config_file, 'r') as fh:
-            config = json.load(fh)
-        assert not config.get('load_extensions', {}).get('nbgrader/create_assignment', False)
+        _assert_is_deactivated(config_file)
 
         main([
             '--activate',
@@ -167,9 +170,8 @@ class TestCreateAssignmentNbExtension(object):
         ])
 
         # check that it is activated
-        with open(config_file, 'r') as fh:
-            config = json.load(fh)
-        assert config['load_extensions']['nbgrader/create_assignment']
+        _assert_is_activated(config_file)
+
 
     def test_create_assignment(self):
         self._activate_toolbar()

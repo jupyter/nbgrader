@@ -97,7 +97,12 @@ def deactivate(profile=None, ipython_dir=None):
     if 'nbgrader/create_assignment' not in config['load_extensions']:
         return
 
-    config['load_extensions']['nbgrader/create_assignment'] = False
+    # deactivation require the delete the key.
+    del config['load_extensions']['nbgrader/create_assignment']
+
+    # prune if last extension.
+    if config['load_extensions']:
+        del config['load_extensions']
 
     with io.open(json_file, 'w+') as f:
         f.write(cast_unicode_py2(json.dumps(config, indent=2), 'utf-8'))
