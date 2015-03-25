@@ -10,7 +10,8 @@ from nose.tools import assert_equal
 from textwrap import dedent
 
 try:
-    from urllib import urljoin, unquote # Python 2
+    from urllib import unquote # Python 2
+    from urlparse import urljoin
 except ImportError:
     from urllib.parse import urljoin, unquote # Python 3
 
