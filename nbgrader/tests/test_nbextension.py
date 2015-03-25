@@ -2,6 +2,7 @@ import subprocess as sp
 import tempfile
 import os
 import shutil
+import json
 from copy import copy
 
 from nose.tools import assert_equal
@@ -26,20 +27,10 @@ class TestCreateAssignmentNbExtension(object):
         os.chdir(cls.tempdir)
 
         # ensure IPython dir exists.
-        sp.call([
-            'ipython', 'profile', 'create', '--ipython-dir', cls.ipythondir])
-
-        # test the arg parsing
-        main([
-              '--install',
-              '--activate',
-              '--verbose',
-              '--no-symlink',
-              '--path={}'.format(cls.ipythondir),
-              'default'])
+        sp.call(['ipython', 'profile', 'create', '--ipython-dir', cls.ipythondir])
 
         # bug in IPython cannot use --profile-dir
-        # that does not set it for everything. 
+        # that does not set it for everything.
         # still this does not allow to have things that work.
         env = copy(os.environ)
         env['IPYTHONDIR'] = cls.ipythondir
@@ -84,7 +75,7 @@ class TestCreateAssignmentNbExtension(object):
             """
         )
 
-    def _click_grade(self):        
+    def _click_grade(self):
         self.browser.execute_script(
             """
             var cell = IPython.notebook.get_cell(0);
@@ -120,6 +111,65 @@ class TestCreateAssignmentNbExtension(object):
             return cell.metadata.nbgrader;
             """
         )
+
+    def test_00_install_extension(self):
+        main([
+            '--install',
+            '--activate',
+            '--verbose',
+            '--no-symlink',
+            '--path={}'.format(self.ipythondir),
+            'default'
+        ])
+
+        # check the extension file were copied
+        nbextension_dir = os.path.join(self.ipythondir, "nbextensions", "nbgrader")
+        assert os.path.isfile(os.path.join(nbextension_dir, "create_assignment.js"))
+        assert os.path.isfile(os.path.join(nbextension_dir, "nbgrader.css"))
+
+        # check that it is activated
+        config_file = os.path.join(self.ipythondir, 'profile_default', 'nbconfig', 'notebook.json')
+        with open(config_file, 'r') as fh:
+            config = json.load(fh)
+        assert config['load_extensions']['nbgrader/create_assignment']
+
+    def test_01_deactivate_extension(self):
+        # check that it is activated
+        config_file = os.path.join(self.ipythondir, 'profile_default', 'nbconfig', 'notebook.json')
+        with open(config_file, 'r') as fh:
+            config = json.load(fh)
+        assert config['load_extensions']['nbgrader/create_assignment']
+
+        main([
+            '--deactivate',
+            '--verbose',
+            '--path={}'.format(self.ipythondir),
+            'default'
+        ])
+
+        # check that it is deactivated
+        with open(config_file, 'r') as fh:
+            config = json.load(fh)
+        assert not config.get('load_extensions', {}).get('nbgrader/create_assignment', False)
+
+    def test_02_activate_extension(self):
+        # check that it is deactivated
+        config_file = os.path.join(self.ipythondir, 'profile_default', 'nbconfig', 'notebook.json')
+        with open(config_file, 'r') as fh:
+            config = json.load(fh)
+        assert not config.get('load_extensions', {}).get('nbgrader/create_assignment', False)
+
+        main([
+            '--activate',
+            '--verbose',
+            '--path={}'.format(self.ipythondir),
+            'default'
+        ])
+
+        # check that it is activated
+        with open(config_file, 'r') as fh:
+            config = json.load(fh)
+        assert config['load_extensions']['nbgrader/create_assignment']
 
     def test_create_assignment(self):
         self._activate_toolbar()
