@@ -47,7 +47,7 @@ setup_args = dict(
     package_data={
         'nbgrader': [
             'nbextensions/nbgrader/*.js',
-            'nbextensions/nbgrader/*.css'))
+            'nbextensions/nbgrader/*.css'
         ],
         'nbgrader.html': static_files,
         'nbgrader.tests': [
