@@ -31,9 +31,7 @@ def install(profile='default', symlink=True, user=False, prefix=None,
         nbextensions_dir = None
     else:
         nbextensions_dir = os.path.join(ipython_dir,'nbextensions')
-    print('nbextdir will be ', nbextensions_dir)
 
-    print('from !!!!', os.path.join(dname, 'nbextensions', 'nbgrader'))
     nbe.install_nbextension(os.path.join(dname, 'nbextensions', 'nbgrader'),
                             user=user,
                             prefix=prefix,
