@@ -102,7 +102,7 @@ class BaseApp(BaseIPythonApplication):
         return [BasicConfig]
 
     def _config_file_name_default(self):
-        return u'nbgrader_config.py'
+        return u'nbgrader_config'
 
     def __init__(self, *args, **kwargs):
         super(BaseApp, self).__init__(*args, **kwargs)
@@ -133,8 +133,8 @@ class BaseNbGraderApp(BaseApp):
     """
 
     # must be overwritten by subclasses
-    nbgrader_step_input = Unicode()
-    nbgrader_step_output = Unicode()
+    nbgrader_input_step_name = Unicode()
+    nbgrader_output_step_name = Unicode()
 
     # these must be defined, but then will actually be populated with values from
     # the NbGraderConfig instance
@@ -207,7 +207,7 @@ class BaseNbConvertApp(BaseNbGraderApp, NbConvertApp):
 
         directory_structure = os.path.join(self.directory_structure, self.notebook_id + ".ipynb")
         fullglob = directory_structure.format(
-            nbgrader_step=self.nbgrader_step_input,
+            nbgrader_step=self.nbgrader_input_step_name,
             student_id=self.student_id,
             assignment_id=self.assignment_id,
             notebook_id=self.notebook_id
@@ -221,7 +221,7 @@ class BaseNbConvertApp(BaseNbGraderApp, NbConvertApp):
     def init_single_notebook_resources(self, notebook_filename):
         directory_structure = os.path.join(self.directory_structure, "(?P<notebook_id>.*).ipynb")
         regexp = directory_structure.format(
-            nbgrader_step=self.nbgrader_step_input,
+            nbgrader_step=self.nbgrader_input_step_name,
             student_id="(?P<student_id>.*)",
             assignment_id="(?P<assignment_id>.*)",
         )
@@ -261,7 +261,7 @@ class BaseNbConvertApp(BaseNbGraderApp, NbConvertApp):
 
         # configure the writer build directory
         self.writer.build_directory = self.directory_structure.format(
-            nbgrader_step=self.nbgrader_step_output,
+            nbgrader_step=self.nbgrader_output_step_name,
             student_id=resources['nbgrader']['student'],
             assignment_id=resources['nbgrader']['assignment'],
         )

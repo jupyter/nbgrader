@@ -31,7 +31,7 @@ flags.update({
     ),
     'create': (
         {'AssignApp': {'create_assignment': True}},
-        "Create the assignment at runtime if it does not exist."
+        "Create an entry for the assignment in the database, if one does not already exist."
     )
 })
 
@@ -59,11 +59,11 @@ class AssignApp(BaseNbConvertApp):
 
             4. It clears all outputs from the cells of the notebooks.
 
-            5. It computes checksums of the cells that contain tests for the
-               students' solutions, or that contain students' written answers.
-               This is done so that we can warn students if they have changed
-               the tests, or if they have failed to provide a response to a
-               written answer.
+            5. It saves information about the cell contents so that we can warn
+               students if they have changed the tests, or if they have failed
+               to provide a response to a written answer. Specifically, this is
+               done by computing a checksum of the cell contents and saving it
+               into the cell metadata.
 
             6. It saves the tests used to grade students' code into a database,
                so that those tests can be replaced during autograding if they
@@ -103,7 +103,7 @@ class AssignApp(BaseNbConvertApp):
         )
     )
 
-    nbgrader_step_input = Unicode(
+    nbgrader_input_step_name = Unicode(
         "source",
         config=True,
         help=dedent(
@@ -114,7 +114,7 @@ class AssignApp(BaseNbConvertApp):
             """
         )
     )
-    nbgrader_step_output = Unicode(
+    nbgrader_output_step_name = Unicode(
         "release",
         config=True,
         help=dedent(

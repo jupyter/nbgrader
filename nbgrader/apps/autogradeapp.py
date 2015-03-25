@@ -18,7 +18,7 @@ flags.update(nbconvert_flags)
 flags.update({
     'create': (
         {'AutogradeApp': {'create_student': True}},
-        "Create the student at runtime if they do not exist in the db."
+        "Create an entry for the student in the database, if one does not already exist."
     )
 })
 
@@ -73,7 +73,7 @@ class AutogradeApp(BaseNbConvertApp):
         )
     )
 
-    nbgrader_step_input = Unicode(
+    nbgrader_input_step_name = Unicode(
         "submitted",
         config=True,
         help=dedent(
@@ -84,7 +84,7 @@ class AutogradeApp(BaseNbConvertApp):
             """
         )
     )
-    nbgrader_step_output = Unicode(
+    nbgrader_output_step_name = Unicode(
         "autograded",
         config=True,
         help=dedent(

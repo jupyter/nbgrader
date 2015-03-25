@@ -52,7 +52,7 @@ class FeedbackApp(BaseNbConvertApp):
         """
     ))
 
-    nbgrader_step_input = Unicode(
+    nbgrader_input_step_name = Unicode(
         "autograded",
         config=True,
         help=dedent(
@@ -63,7 +63,7 @@ class FeedbackApp(BaseNbConvertApp):
             """
         )
     )
-    nbgrader_step_output = Unicode(
+    nbgrader_output_step_name = Unicode(
         "feedback",
         config=True,
         help=dedent(

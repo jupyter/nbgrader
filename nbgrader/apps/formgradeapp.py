@@ -64,7 +64,7 @@ class FormgradeApp(BaseNbGraderApp):
         """
     ))
 
-    nbgrader_step_input = Unicode(
+    nbgrader_input_step_name = Unicode(
         "autograded",
         config=True,
         help=dedent(
@@ -124,7 +124,7 @@ class FormgradeApp(BaseNbGraderApp):
         # now launch the formgrader
         app.notebook_dir = self.base_directory
         app.notebook_dir_format = self.directory_structure
-        app.nbgrader_step = self.nbgrader_step_input
+        app.nbgrader_step = self.nbgrader_input_step_name
         app.exporter = HTMLExporter(config=self.config)
 
         url = "http://{:s}:{:d}/".format(self.ip, self.port)
