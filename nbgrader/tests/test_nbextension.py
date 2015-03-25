@@ -47,9 +47,7 @@ class TestCreateAssignmentNbExtension(object):
         cls.nbserver = sp.Popen([
             "ipython", "notebook",
             "--no-browser",
-            "--port", "9000"], stdout=sp.PIPE, stderr=sp.STDOUT
-            ,env=env
-            )
+            "--port", "9000"], stdout=sp.PIPE, stderr=sp.STDOUT, env=env)
 
     @classmethod
     def teardown_class(cls):
@@ -67,20 +65,15 @@ class TestCreateAssignmentNbExtension(object):
     def teardown(self):
         self.browser.quit()
 
-    def _load_extension(self):
+    def _activate_toolbar(self, name="Create Assignment"):
         # wait for the celltoolbar menu to appear
         WebDriverWait(self.browser, 10).until(
             EC.element_to_be_clickable((By.CSS_SELECTOR, '#ctb_select')))
 
-        # load the nbextension
-        self.browser.execute_script("IPython.load_extensions('nbgrader/nbgrader')")
-
-    def _activate_toolbar(self, name="Create Assignment"):
         # activate the Create Assignment toolbar
         element = self.browser.find_element_by_css_selector("#ctb_select")
         select = Select(element)
         select.select_by_visible_text(name)
-
 
     def _click_solution(self):
         self.browser.execute_script(
@@ -129,7 +122,6 @@ class TestCreateAssignmentNbExtension(object):
         )
 
     def test_create_assignment(self):
-        self._load_extension()
         self._activate_toolbar()
 
         # make sure the toolbar appeared
@@ -171,7 +163,6 @@ class TestCreateAssignmentNbExtension(object):
         assert not self._get_metadata()['grade']
 
     def test_grade_cell_css(self):
-        self._load_extension()
         self._activate_toolbar()
 
         # click the "grade?" checkbox
@@ -205,7 +196,6 @@ class TestCreateAssignmentNbExtension(object):
         assert_equal(len(elements), 0)
 
     def test_tabbing(self):
-        self._load_extension()
         self._activate_toolbar()
 
         # click the "grade?" checkbox
