@@ -1,8 +1,8 @@
-from IPython.nbconvert.preprocessors import Preprocessor
 from nbgrader import utils
 from nbgrader.api import Gradebook
+from nbgrader.preprocessors import NbGraderPreprocessor
 
-class SaveCells(Preprocessor):
+class SaveCells(NbGraderPreprocessor):
     """A preprocessor to save information about grade and solution cells."""
 
     def preprocess(self, nb, resources):
@@ -12,12 +12,14 @@ class SaveCells(Preprocessor):
         self.db_url = resources['nbgrader']['db_url']
 
         if self.notebook_id == '':
-            raise ValueError("Invalid notebook id: {}".format(self.notebook_id))
+            raise ValueError("Invalid notebook id: '{}'".format(self.notebook_id))
         if self.assignment_id == '':
-            raise ValueError("Invalid assignment id: {}".format(self.assignment_id))
+            raise ValueError("Invalid assignment id: '{}'".format(self.assignment_id))
 
         # connect to the database
         self.gradebook = Gradebook(self.db_url)
+
+        # create the notebook
         self.gradebook.update_or_create_notebook(
             self.notebook_id, self.assignment_id)
 

@@ -1,10 +1,11 @@
-from IPython.nbconvert.preprocessors import Preprocessor
 from IPython.nbformat import read as read_nb
 from IPython.nbformat import current_nbformat
 from IPython.utils.traitlets import Unicode
 
+from nbgrader.preprocessors import NbGraderPreprocessor
 
-class IncludeHeaderFooter(Preprocessor):
+
+class IncludeHeaderFooter(NbGraderPreprocessor):
     """A preprocessor for adding header and/or footer cells to a notebook."""
 
     header = Unicode("", config=True, help="Path to header notebook")

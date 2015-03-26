@@ -41,8 +41,7 @@ setup_args = dict(
         'nbgrader.auth',
         'nbgrader.html',
         'nbgrader.preprocessors',
-        'nbgrader.tests',
-        'nbgrader.exporters'
+        'nbgrader.tests'
     ],
     package_data={
         'nbgrader': [

@@ -18,7 +18,7 @@ before_install:
   - cd ~ && git clone --recursive https://github.com/ipython/ipython.git && cd -
   - if [[ $TRAVIS_PYTHON_VERSION == '3.4' ]]; then cd ~ && git clone --recursive https://github.com/jupyter/jupyterhub.git && cd -; fi
 install:
-  - cd ~/ipython && git checkout a4950d68199a4ccdf4ff23c5bb8b51cc7faaad7a && pip install -f ~/travis-wheels/wheelhouse file://$PWD#egg=ipython[all] && cd -
+  - cd ~/ipython && git checkout d79d591836cc702b642e73f3366a3139273629cb && pip install -f ~/travis-wheels/wheelhouse file://$PWD#egg=ipython[all] && cd -
   - if [[ $TRAVIS_PYTHON_VERSION == '3.4' ]]; then cd ~/jupyterhub && pip install -f ~/travis-wheels/wheelhouse -r dev-requirements.txt . && cd -; fi
   - pip install -r requirements.txt
   - pip install nose coverage coveralls invoke selenium

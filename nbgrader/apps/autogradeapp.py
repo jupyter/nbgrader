@@ -1,110 +1,125 @@
+import sys
+
 from textwrap import dedent
 
-from IPython.config.loader import Config
-from IPython.utils.traitlets import Unicode, Bool, Dict
-from IPython.nbconvert.preprocessors import ClearOutputPreprocessor
+from IPython.utils.traitlets import Unicode, List, Bool
 
-from nbgrader.apps.baseapp import (
-    BaseNbConvertApp, nbconvert_aliases, nbconvert_flags)
-from nbgrader.preprocessors import (FindStudentID, SaveAutoGrades, Execute)
+from nbgrader.api import Gradebook, MissingEntry
+from nbgrader.apps.baseapp import BaseNbConvertApp, nbconvert_aliases, nbconvert_flags
+from nbgrader.preprocessors import SaveAutoGrades, Execute, OverwriteCells, ClearOutput
 
 aliases = {}
 aliases.update(nbconvert_aliases)
 aliases.update({
-    'assignment': 'AssignmentExporter.assignment_id',
-    'student': 'AssignmentExporter.student_id',
-    'db': 'AssignmentExporter.db_url',
-    'timestamp': 'SaveAutoGrades.timestamp'
 })
 
 flags = {}
 flags.update(nbconvert_flags)
 flags.update({
-    'overwrite-cells': (
-        {'AutogradeApp': {'overwrite_cells': True}},
-        "Overwrite grade cells from the database."
+    'create': (
+        {'AutogradeApp': {'create_student': True}},
+        "Create an entry for the student in the database, if one does not already exist."
     )
 })
 
 class AutogradeApp(BaseNbConvertApp):
 
-    name = Unicode(u'nbgrader-autograde')
-    description = Unicode(u'Autograde a notebook by running it')
-    aliases = Dict(aliases)
-    flags = Dict(flags)
+    name = u'nbgrader-autograde'
+    description = u'Autograde a notebook by running it'
 
-    examples = Unicode(dedent(
+    aliases = aliases
+    flags = flags
+
+    examples = """
+        Autograde submitted assignments. This takes one argument for the
+        assignment id, and then (by default) autogrades assignments from the
+        following directory structure:
+
+            submitted/*/{assignment_id}/*.ipynb
+
+        and saves the autograded files to the corresponding directory in:
+
+            autograded/{student_id}/{assignment_id}/{notebook_id}.ipynb
+
+        The student IDs must already exist in the database. If they do not, you
+        can tell `nbgrader autograde` to add them on the fly by passing the
+        --create flag.
+
+        Note that the assignment must also be present in the database. If it is
+        not, you should first create it using `nbgrader assign`. Then, during
+        autograding, the cells that contain tests for the students' answers will
+        be overwritten with the master version of the tests that is saved in the
+        database (this prevents students from modifying the tests in order to
+        improve their score).
+
+        To grade all submissions for "Problem Set 1":
+            nbgrader autograde "Problem Set 1"
+
+        To grade only the submission by student with ID 'Hacker':
+            nbgrader autograde "Problem Set 1" --student Hacker
+
+        To grade only the notebooks that start with '1':
+            nbgrader autograde "Problem Set 1" --notebook "1*"
         """
-        Running `nbgrader autograde` on a file by itself will produce a student
-        version of that file in the same directory. In this case, it will produce
-        "Problem 1.nbconvert.ipynb" (note that you need to specify the assignment
-        name and the student id):
-        
-        > nbgrader autograde "Problem 1.ipynb" --assignment="Problem Set 1" --student=student1
 
-        If you want to override the .nbconvert part of the filename, you can use
-        the --output flag:
-
-        > nbgrader autograde "Problem 1.ipynb" --output "Problem 1.graded.ipynb" --assignment="Problem Set 1" --student=student1
-
-        Or, you can put the graded version in a different directory. In the
-        following example, there will be a file "graded/Problem 1.ipynb" after
-        running `nbgrader autograde`:
-
-        > nbgrader autograde "Problem 1.ipynb" --build-dir=graded --assignment="Problem Set 1" --student=student1
-
-        You can also use shell globs, and copy files from one directory to another:
-
-        > nbgrader autograde submitted/*.ipynb --build-dir=graded --assignment="Problem Set 1" --student=student1
-
-        If you want to overwrite grade cells with the source and metadata that
-        was stored in the database when running `nbgrader assign` with --save-cells,
-        you can use the --overwrite-cells flag:
-
-        > nbgrader autograde "Problem 1.ipynb" --assignment="Problem Set 1" --student=student1 --overwrite-cells
-
-        """
-    ))
-
-    overwrite_cells = Bool(
-        False, 
-        config=True, 
+    create_student = Bool(
+        False, config=True,
         help=dedent(
             """
-            Overwrite grade cells from the database. By default, the database 
-            will automatically be populated by the existing cells in the assignment.
-            Note, however, that if the cells already exist in the database, they
-            will be overwritten by whatever is in this assignment!
+            Whether to create the student at runtime if it does not
+            already exist.
             """
         )
     )
 
-    def _classes_default(self):
-        classes = super(AutogradeApp, self)._classes_default()
-        classes.extend([
-            FindStudentID,
-            ClearOutputPreprocessor,
-            Execute,
-            SaveAutoGrades
-        ])
-        return classes
+    nbgrader_input_step_name = Unicode(
+        "submitted",
+        config=True,
+        help=dedent(
+            """
+            The input directory for this step of the grading process. This
+            corresponds to the `nbgrader_step` variable in the path defined by
+            `NbGraderConfig.directory_structure`.
+            """
+        )
+    )
+    nbgrader_output_step_name = Unicode(
+        "autograded",
+        config=True,
+        help=dedent(
+            """
+            The output directory for this step of the grading process. This
+            corresponds to the `nbgrader_step` variable in the path defined by
+            `NbGraderConfig.directory_structure`.
+            """
+        )
+    )
 
-    def build_extra_config(self):
-        self.extra_config = Config()
-        self.extra_config.Exporter.preprocessors = [
-            'nbgrader.preprocessors.FindStudentID',
-            'IPython.nbconvert.preprocessors.ClearOutputPreprocessor'
-        ]
-        if self.overwrite_cells:
-            self.extra_config.Exporter.preprocessors.append(
-                'nbgrader.preprocessors.OverwriteCells'
-            )
-        else:
-            self.extra_config.Exporter.preprocessors.extend([
-                'nbgrader.preprocessors.SaveCells'
-            ])
-        self.extra_config.Exporter.preprocessors.extend([
-            'nbgrader.preprocessors.Execute',
-            'nbgrader.preprocessors.SaveAutoGrades'
-        ])
-        self.config.merge(self.extra_config)
+    export_format = 'notebook'
+
+    preprocessors = List([
+        ClearOutput,
+        OverwriteCells,
+        Execute,
+        SaveAutoGrades
+    ])
+
+    def init_single_notebook_resources(self, notebook_filename):
+        resources = super(AutogradeApp, self).init_single_notebook_resources(notebook_filename)
+
+        # try to get the student from the database, and throw an error if it
+        # doesn't exist
+        db_url = resources['nbgrader']['db_url']
+        student_id = resources['nbgrader']['student']
+        gb = Gradebook(db_url)
+        try:
+            gb.find_student(student_id)
+        except MissingEntry:
+            if self.create_student:
+                self.log.warning("Creating student with ID '%s'", student_id)
+                gb.add_student(student_id)
+            else:
+                self.log.error("No student with ID '%s' exists in the database", student_id)
+                sys.exit(1)
+
+        return resources

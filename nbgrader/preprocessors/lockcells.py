@@ -1,8 +1,9 @@
-from IPython.nbconvert.preprocessors import Preprocessor
 from IPython.utils.traitlets import Bool
-from .. import utils
 
-class LockCells(Preprocessor):
+from nbgrader import utils
+from nbgrader.preprocessors import NbGraderPreprocessor
+
+class LockCells(NbGraderPreprocessor):
     """A preprocessor for making cells undeletable."""
 
     lock_solution_cells = Bool(True, config=True, help="Whether solution cells are undeletable")

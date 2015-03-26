@@ -1,9 +1,10 @@
+import sys
+
 from textwrap import dedent
 
-from IPython.config.loader import Config
-from IPython.utils.traitlets import Unicode, Bool, Dict
-from IPython.nbconvert.preprocessors import ClearOutputPreprocessor
+from IPython.utils.traitlets import Unicode, List, Bool
 
+from nbgrader.api import Gradebook, MissingEntry
 from nbgrader.apps.baseapp import (
     BaseNbConvertApp, nbconvert_aliases, nbconvert_flags)
 from nbgrader.preprocessors import (
@@ -12,103 +13,150 @@ from nbgrader.preprocessors import (
     LockCells,
     ComputeChecksums,
     SaveCells,
-    CheckCellMetadata
+    CheckCellMetadata,
+    ClearOutput,
 )
 
 aliases = {}
 aliases.update(nbconvert_aliases)
 aliases.update({
-    'assignment': 'AssignmentExporter.assignment_id',
-    'db': 'AssignmentExporter.db_url'
 })
 
 flags = {}
 flags.update(nbconvert_flags)
 flags.update({
-    'save-cells': (
-        {'AssignApp': {'save_cells': True}},
-        "Save information about grade cells into the database."
+    'no-db': (
+        {'SaveCells': {'enabled': False}},
+        "Do not save information about grade cells into the database."
+    ),
+    'create': (
+        {'AssignApp': {'create_assignment': True}},
+        "Create an entry for the assignment in the database, if one does not already exist."
     )
 })
 
 class AssignApp(BaseNbConvertApp):
 
-    name = Unicode(u'nbgrader-assign')
-    description = Unicode(u'Prepare a student version of an assignment by removing solutions')
+    name = u'nbgrader-assign'
+    description = u'Produce the version of an assignment to be released to students.'
 
-    aliases = Dict(aliases)
-    flags = Dict(flags)
+    aliases = aliases
+    flags = flags
 
-    examples = Unicode(dedent(
+    examples = """
+        Produce the version of the assignment that is intended to be released to
+        students. This performs several modifications to the original assignment:
+
+            1. It inserts a header and/or footer to each notebook in the
+               assignment, if the header/footer are specified.
+
+            2. It locks certain cells so that they cannot be deleted by students
+               accidentally (or on purpose!)
+
+            3. It removes solutions from the notebooks and replaces them with
+               code or text stubs saying (for example) "YOUR ANSWER HERE".
+
+            4. It clears all outputs from the cells of the notebooks.
+
+            5. It saves information about the cell contents so that we can warn
+               students if they have changed the tests, or if they have failed
+               to provide a response to a written answer. Specifically, this is
+               done by computing a checksum of the cell contents and saving it
+               into the cell metadata.
+
+            6. It saves the tests used to grade students' code into a database,
+               so that those tests can be replaced during autograding if they
+               were modified by the student (you can prevent this by passing the
+               --no-db flag).
+
+               Additionally, the assignment must already be present in the
+               database. To create it while running `nbgrader assign` if it
+               doesn't already exist, pass the --create flag.
+
+        `nbgrader assign` takes one argument (the name of the assignment), and
+        looks for notebooks in the 'source' directory by default, according to
+        the directory structure specified in `NbGraderConfig.directory_structure`.
+        The student version is then saved into the 'release' directory.
+
+        Note that the directory structure requires the `student_id` to be given;
+        however, there is no student ID at this point in the process. Instead,
+        `nbgrader assign` sets the student ID to be '.' so by default, files are
+        read in according to:
+
+            source/./{assignment_id}/{notebook_id}.ipynb
+
+        and saved according to:
+
+            release/./{assignment_id}/{notebook_id}.ipynb
+
         """
-        Running `nbgrader assign` on a file by itself will produce a student
-        version of that file in the same directory. In this case, it will produce
-        "Problem 1.nbconvert.ipynb":
-        
-        > nbgrader assign "Problem 1.ipynb"
 
-        If you want to override the .nbconvert part of the filename, you can use
-        the --output flag:
+    create_assignment = Bool(
+        False, config=True,
+        help=dedent(
+            """
+            Whether to create the assignment at runtime if it does not
+            already exist.
+            """
+        )
+    )
 
-        > nbgrader assign "Problem 1.ipynb" --output "Problem 1.student.ipynb"
+    nbgrader_input_step_name = Unicode(
+        "source",
+        config=True,
+        help=dedent(
+            """
+            The input directory for this step of the grading process. This
+            corresponds to the `nbgrader_step` variable in the path defined by
+            `NbGraderConfig.directory_structure`.
+            """
+        )
+    )
+    nbgrader_output_step_name = Unicode(
+        "release",
+        config=True,
+        help=dedent(
+            """
+            The output directory for this step of the grading process. This
+            corresponds to the `nbgrader_step` variable in the path defined by
+            `NbGraderConfig.directory_structure`.
+            """
+        )
+    )
 
-        Or, you can put the student version in a different directory. In the
-        following example, there will be a file "student/Problem 1.ipynb" after
-        running `nbgrader assign`:
+    export_format = 'notebook'
 
-        > nbgrader assign "Problem 1.ipynb" --build-dir=student
-
-        You can also use shell globs, and copy files from one directory to another:
-
-        > nbgrader assign teacher/*.ipynb --build-dir=student
-
-        If you need to copy dependent files over as well, you can do this with
-        the --files flag. In the following example, all the .jpg files in the 
-        teacher/images/ folder will be linked to the student/images/ folder:
-
-        > nbgrader assign teacher/*.ipynb --build-dir=student --files='["teacher/images/*.jpg"]'
-
-        If you want to record the grade cells into the database (for use later
-        when running `nbgrader autograde`), you can use the --save-cells flag.
-        You will need to use this in combination with the --assignment flag to
-        indicate what the assignment is that this notebook is a part of:
-
-        > nbgrader assign "Problem 1.ipynb" --save-cells --assignment="Problem Set 1"
-
-        You can additionally specifiy the database name with --db:
-
-        > nbgrader assign "Problem 1.ipynb" --save-cells --assignment="Problem Set 1" --db=myclass
-
-        """
-    ))
-
-    save_cells = Bool(False, config=True, help="Save information about grade cells into the database.")
-
-    def _classes_default(self):
-        classes = super(AssignApp, self)._classes_default()
-        classes.extend([
-            IncludeHeaderFooter,
-            LockCells,
-            ClearSolutions,
-            ClearOutputPreprocessor,
-            CheckCellMetadata,
-            ComputeChecksums,
-            SaveCells
-        ])
-        return classes
+    preprocessors = List([
+        IncludeHeaderFooter,
+        LockCells,
+        ClearSolutions,
+        ClearOutput,
+        CheckCellMetadata,
+        ComputeChecksums,
+        SaveCells
+    ])
 
     def build_extra_config(self):
-        self.extra_config = Config()
-        self.extra_config.Exporter.preprocessors = [
-            'nbgrader.preprocessors.IncludeHeaderFooter',
-            'nbgrader.preprocessors.LockCells',
-            'nbgrader.preprocessors.ClearSolutions',
-            'IPython.nbconvert.preprocessors.ClearOutputPreprocessor',
-            'nbgrader.preprocessors.CheckCellMetadata',
-            'nbgrader.preprocessors.ComputeChecksums'
-        ]
-        if self.save_cells:
-            self.extra_config.Exporter.preprocessors.append(
-                'nbgrader.preprocessors.SaveCells'
-            )
-        self.config.merge(self.extra_config)
+        extra_config = super(AssignApp, self).build_extra_config()
+        extra_config.NbGraderConfig.student_id = '.'
+        return extra_config
+
+    def init_single_notebook_resources(self, notebook_filename):
+        resources = super(AssignApp, self).init_single_notebook_resources(notebook_filename)
+
+        # try to get the assignment from the database, and throw an error if it
+        # doesn't exist
+        db_url = resources['nbgrader']['db_url']
+        assignment_id = resources['nbgrader']['assignment']
+        gb = Gradebook(db_url)
+        try:
+            gb.find_assignment(assignment_id)
+        except MissingEntry:
+            if self.create_assignment:
+                self.log.warning("Creating assignment '%s'", assignment_id)
+                gb.add_assignment(assignment_id)
+            else:
+                self.log.error("No assignment called '%s' exists in the database", assignment_id)
+                sys.exit(1)
+
+        return resources

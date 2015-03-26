@@ -1,7 +1,7 @@
+from .base import NbGraderPreprocessor
 from .headerfooter import IncludeHeaderFooter
 from .lockcells import LockCells
 from .clearsolutions import ClearSolutions
-from .findstudentid import FindStudentID
 from .saveautogrades import SaveAutoGrades
 from .displayautogrades import DisplayAutoGrades
 from .computechecksums import ComputeChecksums
@@ -10,3 +10,19 @@ from .overwritecells import OverwriteCells
 from .checkcellmetadata import CheckCellMetadata
 from .execute import Execute
 from .getgrades import GetGrades
+from .clearoutput import ClearOutput
+
+__all__ = [
+    "IncludeHeaderFooter",
+    "LockCells",
+    "ClearSolutions",
+    "SaveAutoGrades",
+    "DisplayAutoGrades",
+    "ComputeChecksums",
+    "SaveCells",
+    "OverwriteCells",
+    "CheckCellMetadata",
+    "Execute",
+    "GetGrades",
+    "ClearOutput"
+]

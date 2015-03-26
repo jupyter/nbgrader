@@ -1,7 +1,7 @@
-from IPython.nbconvert.preprocessors import Preprocessor
-from .. import utils
+from nbgrader import utils
+from nbgrader.preprocessors import NbGraderPreprocessor
 
-class ComputeChecksums(Preprocessor):
+class ComputeChecksums(NbGraderPreprocessor):
     """A preprocessor to compute checksums of grade cells."""
 
     def preprocess(self, nb, resources):

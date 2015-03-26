@@ -7,11 +7,11 @@ class FormgradeNotebookApp(NotebookApp):
 
     def _profile_default(self):
         return 'nbgrader'
-    
+
     def _confirm_exit(self):
         # disable the exit confirmation for background notebook processes
         ioloop.IOLoop.instance().stop()
-    
+
 
 def main():
     return FormgradeNotebookApp.launch_instance()

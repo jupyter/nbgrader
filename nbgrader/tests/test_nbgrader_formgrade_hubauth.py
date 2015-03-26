@@ -10,22 +10,19 @@ from .test_nbgrader_formgrade import TestNbgraderFormgrade
 class TestNbgraderFormgradeHubAuth(TestNbgraderFormgrade):
 
     base_formgrade_url = "http://localhost:8000/hub/formgrade/"
-    base_notebook_url = "http://localhost:8000/user/foobar/notebooks/class_files/autograded/"
+    base_notebook_url = "http://localhost:8000/user/foobar/notebooks/class_files/"
 
     @classmethod
     def _setup_formgrade_config(cls):
         # create config file
-        with open("nbgrader_formgrade_config.py", "w") as fh:
+        with open("nbgrader_config.py", "w") as fh:
             fh.write(dedent(
                 """
                 c = get_config()
-                c.FormgradeApp.base_directory = "autograded"
-                c.FormgradeApp.directory_format = "{student_id}/{notebook_id}.ipynb"
                 c.FormgradeApp.port = 9000
-                c.FormgradeApp.db_url = "sqlite:///gradebook.db"
                 c.FormgradeApp.authenticator_class = "nbgrader.auth.hubauth.HubAuth"
                 c.HubAuth.graders = ["foobar"]
-                c.HubAuth.notebook_url_prefix = "class_files/autograded"
+                c.HubAuth.notebook_url_prefix = "class_files"
                 """
             ))
 

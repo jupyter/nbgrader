@@ -1,13 +1,14 @@
-from IPython.nbconvert.preprocessors import Preprocessor
+import re
+
 from IPython.utils.traitlets import Unicode, Integer, Bool
+
 from nbgrader import utils
+from nbgrader.preprocessors import NbGraderPreprocessor
+
 from textwrap import fill, dedent
 
-import re
-ansi_escape = re.compile(r'\x1b[^m]*m')
 
-
-class DisplayAutoGrades(Preprocessor):
+class DisplayAutoGrades(NbGraderPreprocessor):
     """Preprocessor for displaying the autograder grades"""
 
     indent = Unicode("    ", config=True)
@@ -15,7 +16,7 @@ class DisplayAutoGrades(Preprocessor):
     invert = Bool(False, config=True, help="Complain when cells pass, rather than fail.")
 
     ignore_checksums = Bool(
-        False, config=True, 
+        False, config=True,
         help=dedent(
             """
             Don't complain if cell checksums have changed (if they are code
@@ -56,11 +57,13 @@ class DisplayAutoGrades(Preprocessor):
         config=True,
         help="Warning to display when a cell passes (when invert=True)")
 
+    ansi_escape = re.compile(r'\x1b[^m]*m')
+
     def _indent(self, val):
         lines = val.split("\n")
         new_lines = []
         for line in lines:
-            new_line = ansi_escape.sub('', self.indent + line)
+            new_line = self.ansi_escape.sub('', self.indent + line)
             if len(new_line) > (self.width - 3):
                 new_line = new_line[:(self.width - 3)] + "..."
             new_lines.append(new_line)

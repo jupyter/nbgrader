@@ -1,15 +1,10 @@
-import dateutil.parser
-
-from IPython.nbconvert.preprocessors import Preprocessor
-from IPython.utils.traitlets import Unicode
 from nbgrader import utils
 from nbgrader.api import Gradebook
+from nbgrader.preprocessors import NbGraderPreprocessor
 
 
-class SaveAutoGrades(Preprocessor):
+class SaveAutoGrades(NbGraderPreprocessor):
     """Preprocessor for saving out the autograder grades into a database"""
-
-    timestamp = Unicode("", config=True, help="Timestamp when this assignment was submitted")
 
     def preprocess(self, nb, resources):
         # pull information from the resources
@@ -18,15 +13,11 @@ class SaveAutoGrades(Preprocessor):
         self.student_id = resources['nbgrader']['student']
         self.db_url = resources['nbgrader']['db_url']
 
-        if self.timestamp != "":
-            timestamp = dateutil.parser.parse(self.timestamp)
-        else:
-            timestamp = None
-
         # connect to the database
         self.gradebook = Gradebook(self.db_url)
+
         self.gradebook.update_or_create_submission(
-            self.assignment_id, self.student_id, timestamp=timestamp)
+            self.assignment_id, self.student_id)
 
         self.comment_index = 0
 

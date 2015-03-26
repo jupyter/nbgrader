@@ -1,9 +1,10 @@
-from IPython.nbconvert.preprocessors import Preprocessor
 from IPython.utils.traitlets import Unicode
+
 from nbgrader import utils
+from nbgrader.preprocessors import NbGraderPreprocessor
 
 
-class ClearSolutions(Preprocessor):
+class ClearSolutions(NbGraderPreprocessor):
 
     code_stub = Unicode("# YOUR CODE HERE\nraise NotImplementedError()", config=True)
     text_stub = Unicode("YOUR ANSWER HERE", config=True)

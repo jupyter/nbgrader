@@ -4,9 +4,7 @@ import sys
 
 from textwrap import dedent
 
-from IPython.config.loader import Config
-from IPython.utils.traitlets import Unicode, Integer, Dict, Type, \
-    Instance
+from IPython.utils.traitlets import Unicode, Integer, Type, Instance
 
 from IPython.nbconvert.exporters import HTMLExporter
 from IPython.config.application import catch_config_error
@@ -21,7 +19,6 @@ aliases.update(nbgrader_aliases)
 aliases.update({
     'ip': 'FormgradeApp.ip',
     'port': 'FormgradeApp.port',
-    'db': 'FormgradeApp.db_url'
 })
 
 flags = {}
@@ -32,57 +29,64 @@ flags.update({
 
 class FormgradeApp(BaseNbGraderApp):
 
-    name = Unicode(u'nbgrader-formgrade')
-    description = Unicode(u'Grade a notebook using an HTML form')
-    aliases = Dict(aliases)
-    flags = Dict(flags)
+    name = u'nbgrader-formgrade'
+    description = u'Grade a notebook using an HTML form'
 
-    examples = Unicode(dedent(
-        """
-        nbgrader formgrade .
-        nbgrader formgrade autograded/
-        nbgrader formgrade --ip=0.0.0.0 --port=80
-        """
-    ))
+    aliases = aliases
+    flags = flags
 
-    db_url = Unicode("sqlite:///gradebook.db", config=True, help="URL to database")
+    examples = """
+        Run the formgrader server application in order to manually grade
+        submissions that have already been autograded. Running the formgrader
+        allows *any* submission (from any assignment, for any student) to be
+        graded, as long as it has already been run through the autograder.
+
+        By default, the formgrader runs at http://localhost:5000. It also starts
+        an IPython notebook server, to allow students' notebooks to be open up
+        and run manually if so desired. The notebook server also runs on
+        localhost on a random port, though this port can be specified by setting
+        `FormgradeApp.nbserver_port`. The notebook server can be disabled entirely
+        by setting `FormgradeApp.start_nbserver=False`.
+
+        The formgrader must be run from the root of a nbgrader-compatible directory
+        structure, which by default looks like:
+
+            autograded/{student_id}/{assignment_id}/{notebook_id}.ipynb
+
+        To run the formgrader on the default IP and port:
+            nbgrader formgrade
+
+        To run the formgrader on a public-facing IP address:
+            nbgrader formgrade --ip 0.0.0.0
+
+        To run the formgrader a different port:
+            nbgrader formgrade --port 5001
+        """
+
+    nbgrader_input_step_name = Unicode(
+        "autograded",
+        config=True,
+        help=dedent(
+            """
+            The input directory for this step of the grading process. This
+            corresponds to the `nbgrader_step` variable in the path defined by
+            `NbGraderConfig.directory_structure`.
+            """
+        )
+    )
+
     ip = Unicode("localhost", config=True, help="IP address for the server")
     port = Integer(5000, config=True, help="Port for the server")
-    base_directory = Unicode('.', config=True, help="Root server directory")
-    directory_format = Unicode('{notebook_id}.ipynb', config=True, help="""Format
-        string for the directory structure of the autograded notebooks""")
     authenticator_class = Type(NoAuth, klass=BaseAuth, config=True, help="""
         Authenticator used in all formgrade requests.""")
     authenticator_instance = Instance(BaseAuth, config=False)
+
+    base_directory = Unicode(os.path.abspath('.'))
 
     def _classes_default(self):
         classes = super(FormgradeApp, self)._classes_default()
         classes.append(HTMLExporter)
         return classes
-
-    def init_server_root(self):
-        # Specifying notebooks on the command-line overrides (rather than adds)
-        # the notebook list
-        if self.extra_args:
-            patterns = self.extra_args
-        else:
-            patterns = [self.base_directory]
-
-        if len(patterns) == 0:
-            self.base_directory = '.'
-
-        elif len(patterns) == 1:
-            self.base_directory = patterns[0]
-
-        else:
-            raise ValueError("Multiple files not supported")
-
-        self.base_directory = os.path.abspath(self.base_directory)
-
-        if not os.path.isdir(self.base_directory):
-            raise ValueError("Path is not a directory: {}".format(self.base_directory))
-
-        self.log.info("Server root is: {}".format(self.base_directory))
 
     def init_signal(self):
         signal.signal(signal.SIGINT, self._signal_stop)
@@ -94,16 +98,15 @@ class FormgradeApp(BaseNbGraderApp):
         sys.exit(-sig)
 
     def build_extra_config(self):
-        self.extra_config = Config()
-        self.extra_config.Exporter.template_file = 'formgrade'
-        self.extra_config.Exporter.template_path = [os.path.join(app.root_path, app.template_folder)]
-        self.config.merge(self.extra_config)
+        extra_config = super(FormgradeApp, self).build_extra_config()
+        extra_config.Exporter.template_file = 'formgrade'
+        extra_config.Exporter.template_path = [os.path.join(app.root_path, app.template_folder)]
+        return extra_config
 
     @catch_config_error
     def initialize(self, argv=None):
         super(FormgradeApp, self).initialize(argv)
         self.init_signal()
-        self.init_server_root()
 
     def start(self):
         super(FormgradeApp, self).start()
@@ -119,7 +122,8 @@ class FormgradeApp(BaseNbGraderApp):
 
         # now launch the formgrader
         app.notebook_dir = self.base_directory
-        app.notebook_dir_format = self.directory_format
+        app.notebook_dir_format = self.directory_structure
+        app.nbgrader_step = self.nbgrader_input_step_name
         app.exporter = HTMLExporter(config=self.config)
 
         url = "http://{:s}:{:d}/".format(self.ip, self.port)
