@@ -2,8 +2,10 @@ import subprocess as sp
 import tempfile
 import os
 import shutil
+import json
+from copy import copy
 
-from nose.tools import assert_equal
+from nose.tools import assert_equal, assert_raises
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -11,6 +13,19 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support.ui import Select
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.keys import Keys
+
+from nbgrader.install import main
+
+def _assert_is_deactivated(config_file):
+    with open(config_file, 'r') as fh:
+        config = json.load(fh)
+    assert_raises(KeyError, lambda:config['load_extensions']['nbgrader/create_assignment'])
+
+def _assert_is_activated(config_file):
+    with open(config_file, 'r') as fh:
+        config = json.load(fh)
+    assert config['load_extensions']['nbgrader/create_assignment']
+
 
 class TestCreateAssignmentNbExtension(object):
 
@@ -21,11 +36,19 @@ class TestCreateAssignmentNbExtension(object):
         cls.origdir = os.getcwd()
         os.chdir(cls.tempdir)
 
+        # ensure IPython dir exists.
+        sp.call(['ipython', 'profile', 'create', '--ipython-dir', cls.ipythondir])
+
+        # bug in IPython cannot use --profile-dir
+        # that does not set it for everything.
+        # still this does not allow to have things that work.
+        env = copy(os.environ)
+        env['IPYTHONDIR'] = cls.ipythondir
+
         cls.nbserver = sp.Popen([
             "ipython", "notebook",
-            "--ipython-dir", cls.ipythondir,
             "--no-browser",
-            "--port", "9000"], stdout=sp.PIPE, stderr=sp.STDOUT)
+            "--port", "9000"], stdout=sp.PIPE, stderr=sp.STDOUT, env=env)
 
     @classmethod
     def teardown_class(cls):
@@ -43,15 +66,11 @@ class TestCreateAssignmentNbExtension(object):
     def teardown(self):
         self.browser.quit()
 
-    def _load_extension(self):
+    def _activate_toolbar(self, name="Create Assignment"):
         # wait for the celltoolbar menu to appear
         WebDriverWait(self.browser, 10).until(
             EC.element_to_be_clickable((By.CSS_SELECTOR, '#ctb_select')))
 
-        # load the nbextension
-        self.browser.execute_script("IPython.load_extensions('nbgrader')")
-
-    def _activate_toolbar(self, name="Create Assignment"):
         # activate the Create Assignment toolbar
         element = self.browser.find_element_by_css_selector("#ctb_select")
         select = Select(element)
@@ -66,7 +85,7 @@ class TestCreateAssignmentNbExtension(object):
             """
         )
 
-    def _click_grade(self):        
+    def _click_grade(self):
         self.browser.execute_script(
             """
             var cell = IPython.notebook.get_cell(0);
@@ -103,8 +122,58 @@ class TestCreateAssignmentNbExtension(object):
             """
         )
 
+    def test_00_install_extension(self):
+        main([
+            '--install',
+            '--activate',
+            '--verbose',
+            '--no-symlink',
+            '--path={}'.format(self.ipythondir),
+            'default'
+        ])
+
+        # check the extension file were copied
+        nbextension_dir = os.path.join(self.ipythondir, "nbextensions", "nbgrader")
+        assert os.path.isfile(os.path.join(nbextension_dir, "create_assignment.js"))
+        assert os.path.isfile(os.path.join(nbextension_dir, "nbgrader.css"))
+
+        # check that it is activated
+        config_file = os.path.join(self.ipythondir, 'profile_default', 'nbconfig', 'notebook.json')
+        _assert_is_activated(config_file)
+
+
+    def test_01_deactivate_extension(self):
+        # check that it is activated
+        config_file = os.path.join(self.ipythondir, 'profile_default', 'nbconfig', 'notebook.json')
+        _assert_is_activated(config_file)
+
+        main([
+            '--deactivate',
+            '--verbose',
+            '--path={}'.format(self.ipythondir),
+            'default'
+        ])
+
+        # check that it is deactivated
+        _assert_is_deactivated(config_file)
+
+    def test_02_activate_extension(self):
+        # check that it is deactivated
+        config_file = os.path.join(self.ipythondir, 'profile_default', 'nbconfig', 'notebook.json')
+        _assert_is_deactivated(config_file)
+
+        main([
+            '--activate',
+            '--verbose',
+            '--path={}'.format(self.ipythondir),
+            'default'
+        ])
+
+        # check that it is activated
+        _assert_is_activated(config_file)
+
+
     def test_create_assignment(self):
-        self._load_extension()
         self._activate_toolbar()
 
         # make sure the toolbar appeared
@@ -146,7 +215,6 @@ class TestCreateAssignmentNbExtension(object):
         assert not self._get_metadata()['grade']
 
     def test_grade_cell_css(self):
-        self._load_extension()
         self._activate_toolbar()
 
         # click the "grade?" checkbox
@@ -180,7 +248,6 @@ class TestCreateAssignmentNbExtension(object):
         assert_equal(len(elements), 0)
 
     def test_tabbing(self):
-        self._load_extension()
         self._activate_toolbar()
 
         # click the "grade?" checkbox
