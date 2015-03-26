@@ -6,6 +6,8 @@ import json
 from copy import copy
 
 from nose.tools import assert_equal, assert_raises
+from IPython.utils.py3compat import cast_unicode_py2
+
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -16,15 +18,15 @@ from selenium.webdriver.common.keys import Keys
 
 from nbgrader.install import main
 
-def _assert_is_deactivated(config_file):
+def _assert_is_deactivated(config_file, key='nbgrader/create_assignment'):
     with open(config_file, 'r') as fh:
         config = json.load(fh)
-    assert_raises(KeyError, lambda:config['load_extensions']['nbgrader/create_assignment'])
+    assert_raises(KeyError, lambda:config['load_extensions'][key])
 
-def _assert_is_activated(config_file):
+def _assert_is_activated(config_file, key='nbgrader/create_assignment'):
     with open(config_file, 'r') as fh:
         config = json.load(fh)
-    assert config['load_extensions']['nbgrader/create_assignment']
+    assert config['load_extensions'][key]
 
 
 class TestCreateAssignmentNbExtension(object):
@@ -145,7 +147,21 @@ class TestCreateAssignmentNbExtension(object):
     def test_01_deactivate_extension(self):
         # check that it is activated
         config_file = os.path.join(self.ipythondir, 'profile_default', 'nbconfig', 'notebook.json')
+
         _assert_is_activated(config_file)
+
+        with open(config_file,'r') as fh:
+            config = json.load(fh)
+        # we already assert config exist, it's fine to
+        # assume 'load_extensions' is there.
+        okey = 'myother_ext'
+        config['load_extensions']['myother_ext'] = True
+
+        with open(config_file, 'w+') as f:
+            f.write(cast_unicode_py2(json.dumps(config, indent=2), 'utf-8'))
+
+        _assert_is_activated(config_file, key=okey)
+
 
         main([
             '--deactivate',
@@ -156,6 +172,17 @@ class TestCreateAssignmentNbExtension(object):
 
         # check that it is deactivated
         _assert_is_deactivated(config_file)
+        _assert_is_activated(config_file, key=okey)
+
+        with open(config_file,'r') as fh:
+            config = json.load(fh)
+
+        del config['load_extensions']['myother_ext']
+
+        with open(config_file, 'w+') as f:
+            f.write(cast_unicode_py2(json.dumps(config, indent=2), 'utf-8'))
+
+        _assert_is_deactivated(config_file, key=okey)
 
     def test_02_activate_extension(self):
         # check that it is deactivated
