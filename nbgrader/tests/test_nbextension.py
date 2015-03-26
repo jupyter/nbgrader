@@ -174,6 +174,16 @@ class TestCreateAssignmentNbExtension(object):
         _assert_is_deactivated(config_file)
         _assert_is_activated(config_file, key=okey)
 
+        with open(config_file,'r') as fh:
+            config = json.load(fh)
+
+        del config['load_extensions']['myother_ext']
+
+        with open(config_file, 'w+') as f:
+            f.write(cast_unicode_py2(json.dumps(config, indent=2), 'utf-8'))
+
+        _assert_is_deactivated(config_file, key=okey)
+
     def test_02_activate_extension(self):
         # check that it is deactivated
         config_file = os.path.join(self.ipythondir, 'profile_default', 'nbconfig', 'notebook.json')
