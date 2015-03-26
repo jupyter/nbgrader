@@ -4,7 +4,7 @@ import sys
 
 from textwrap import dedent
 
-from IPython.utils.traitlets import Unicode, Integer, Dict, Type, Instance
+from IPython.utils.traitlets import Unicode, Integer, Type, Instance
 
 from IPython.nbconvert.exporters import HTMLExporter
 from IPython.config.application import catch_config_error
@@ -29,13 +29,13 @@ flags.update({
 
 class FormgradeApp(BaseNbGraderApp):
 
-    name = Unicode(u'nbgrader-formgrade')
-    description = Unicode(u'Grade a notebook using an HTML form')
-    aliases = Dict(aliases)
-    flags = Dict(flags)
+    name = u'nbgrader-formgrade'
+    description = u'Grade a notebook using an HTML form'
 
-    examples = Unicode(dedent(
-        """
+    aliases = aliases
+    flags = flags
+
+    examples = """
         Run the formgrader server application in order to manually grade
         submissions that have already been autograded. Running the formgrader
         allows *any* submission (from any assignment, for any student) to be
@@ -62,7 +62,6 @@ class FormgradeApp(BaseNbGraderApp):
         To run the formgrader a different port:
             nbgrader formgrade --port 5001
         """
-    ))
 
     nbgrader_input_step_name = Unicode(
         "autograded",

@@ -2,7 +2,7 @@ import sys
 
 from textwrap import dedent
 
-from IPython.utils.traitlets import Unicode, Dict, List, Bool
+from IPython.utils.traitlets import Unicode, List, Bool
 
 from nbgrader.api import Gradebook, MissingEntry
 from nbgrader.apps.baseapp import (
@@ -37,14 +37,13 @@ flags.update({
 
 class AssignApp(BaseNbConvertApp):
 
-    name = Unicode(u'nbgrader-assign')
-    description = Unicode(u'Produce the version of an assignment to be released to students.')
+    name = u'nbgrader-assign'
+    description = u'Produce the version of an assignment to be released to students.'
 
-    aliases = Dict(aliases)
-    flags = Dict(flags)
+    aliases = aliases
+    flags = flags
 
-    examples = Unicode(dedent(
-        """
+    examples = """
         Produce the version of the assignment that is intended to be released to
         students. This performs several modifications to the original assignment:
 
@@ -91,7 +90,6 @@ class AssignApp(BaseNbConvertApp):
             release/./{assignment_id}/{notebook_id}.ipynb
 
         """
-    ))
 
     create_assignment = Bool(
         False, config=True,

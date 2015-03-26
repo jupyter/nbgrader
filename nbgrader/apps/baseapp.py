@@ -9,7 +9,7 @@ import re
 import os
 import traceback
 
-from IPython.utils.traitlets import Unicode, List, Bool, Dict, Instance
+from IPython.utils.traitlets import Unicode, List, Bool, Instance
 from IPython.core.application import BaseIPythonApplication
 from IPython.config.application import catch_config_error
 from IPython.nbconvert.nbconvertapp import NbConvertApp, DottedOrNone
@@ -71,8 +71,8 @@ class BaseApp(BaseIPythonApplication):
 
     """
 
-    aliases = Dict(base_aliases)
-    flags = Dict(base_flags)
+    aliases = base_aliases
+    flags = base_flags
 
     verbose_crash = Bool(False)
 
@@ -132,6 +132,9 @@ class BaseNbGraderApp(BaseApp):
 
     """
 
+    aliases = nbgrader_aliases
+    flags = nbgrader_flags
+
     # must be overwritten by subclasses
     nbgrader_input_step_name = Unicode()
     nbgrader_output_step_name = Unicode()
@@ -168,8 +171,8 @@ class BaseNbConvertApp(BaseNbGraderApp, NbConvertApp):
 
     """
 
-    aliases = Dict(nbconvert_aliases)
-    flags = Dict(nbconvert_flags)
+    aliases = nbconvert_aliases
+    flags = nbconvert_flags
 
     use_output_suffix = Bool(False)
     postprocessor_class = DottedOrNone('')

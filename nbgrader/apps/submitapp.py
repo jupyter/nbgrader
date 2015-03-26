@@ -8,7 +8,7 @@ from dateutil.tz import gettz
 
 from textwrap import dedent
 
-from IPython.utils.traitlets import Unicode, List, Dict
+from IPython.utils.traitlets import Unicode, List
 from IPython.config.application import catch_config_error
 
 from nbgrader.apps.baseapp import BaseApp, base_aliases, base_flags
@@ -28,13 +28,13 @@ flags.update({
 
 class SubmitApp(BaseApp):
 
-    name = Unicode(u'nbgrader-submit')
-    description = Unicode(u'Submit a completed assignment')
-    aliases = Dict(aliases)
-    flags = Dict(flags)
+    name = u'nbgrader-submit'
+    description = u'Submit a completed assignment'
 
-    examples = Unicode(dedent(
-        """
+    aliases = aliases
+    flags = flags
+
+    examples = """
         To submit all files in the current directory under the name "ps01":
             nbgrader submit --assignment ps01
 
@@ -45,7 +45,6 @@ class SubmitApp(BaseApp):
         To submit all files in the "Problem Set 1" directory under the name "ps01":
             nbgrader submit "Problem Set 1" --assignment ps01
         """
-    ))
 
     student = Unicode(os.environ['USER'])
 

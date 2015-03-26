@@ -5,7 +5,6 @@ import sys
 
 from textwrap import dedent
 
-from IPython.utils.traitlets import Unicode, Dict
 from IPython.config.application import catch_config_error
 
 from nbgrader import preprocessors
@@ -37,15 +36,14 @@ flags.update({
 
 class NbGraderApp(BaseNbGraderApp):
 
-    name = Unicode('nbgrader')
-    description = Unicode(u'A system for assigning and grading notebooks')
-    version = Unicode(u'0.1')
+    name = 'nbgrader'
+    description = u'A system for assigning and grading notebooks'
+    version = u'0.1'
 
-    aliases = Dict(aliases)
-    flags = Dict(flags)
+    aliases = aliases
+    flags = flags
 
-    examples = Unicode(dedent(
-        """
+    examples = """
         The nbgrader application is a system for assigning and grading notebooks.
         Each subcommand of this program corresponds to a different step in the
         grading process. In order to facilitate the grading pipeline, nbgrader
@@ -75,7 +73,6 @@ class NbGraderApp(BaseNbGraderApp):
         For more details on how each of the subcommands work, please see the help
         for that command (e.g. `nbgrader assign --help-all`).
         """
-    ))
 
     subcommands = dict(
         assign=(

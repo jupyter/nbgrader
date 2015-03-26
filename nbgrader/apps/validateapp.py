@@ -1,6 +1,4 @@
-from textwrap import dedent
-
-from IPython.utils.traitlets import Unicode, Dict, List, Bool
+from IPython.utils.traitlets import Unicode, List, Bool
 from IPython.nbconvert.nbconvertapp import NbConvertApp, DottedOrNone
 from nbgrader.preprocessors import DisplayAutoGrades, Execute, ClearOutput
 from nbgrader.apps.baseapp import BaseApp, base_flags, base_aliases
@@ -21,14 +19,13 @@ flags.update({
 
 class ValidateApp(BaseApp, NbConvertApp):
 
-    name = Unicode(u'nbgrader-validate')
-    description = Unicode(u'Validate a notebook by running it')
+    name = u'nbgrader-validate'
+    description = u'Validate a notebook by running it'
 
-    aliases = Dict(aliases)
-    flags = Dict(flags)
+    aliases = aliases
+    flags = flags
 
-    examples = Unicode(dedent(
-        """
+    examples = """
         You can run `nbgrader validate` on just a single file, e.g.:
             nbgrader validate "Problem 1.ipynb"
 
@@ -39,7 +36,6 @@ class ValidateApp(BaseApp, NbConvertApp):
         all of the tests pass, which is the default), you can use --invert:
             nbgrader validate --invert "Problem 1.ipynb"
         """
-    ))
 
     preprocessors = List([
         ClearOutput,

@@ -1,7 +1,7 @@
 import os
 from textwrap import dedent
 
-from IPython.utils.traitlets import Unicode, Dict, List
+from IPython.utils.traitlets import Unicode, List
 from IPython.nbconvert.exporters import HTMLExporter
 
 from nbgrader.apps.baseapp import BaseNbConvertApp, nbconvert_aliases, nbconvert_flags
@@ -19,13 +19,13 @@ flags.update({
 
 class FeedbackApp(BaseNbConvertApp):
 
-    name = Unicode(u'nbgrader-feedback')
-    description = Unicode(u'Generate feedback from a graded notebook')
-    aliases = Dict(aliases)
-    flags = Dict(flags)
+    name = u'nbgrader-feedback'
+    description = u'Generate feedback from a graded notebook'
 
-    examples = Unicode(dedent(
-        """
+    aliases = aliases
+    flags = flags
+
+    examples = """
         Create HTML feedback for students after all the grading is finished.
         This takes a single parameter, which is the assignment ID, and then (by
         default) looks at the following directory structure:
@@ -50,7 +50,6 @@ class FeedbackApp(BaseNbConvertApp):
         To feedback for only the notebooks that start with '1':
             nbgrader feedback "Problem Set 1" --notebook "1*"
         """
-    ))
 
     nbgrader_input_step_name = Unicode(
         "autograded",

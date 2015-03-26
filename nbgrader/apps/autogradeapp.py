@@ -2,7 +2,7 @@ import sys
 
 from textwrap import dedent
 
-from IPython.utils.traitlets import Unicode, Dict, List, Bool
+from IPython.utils.traitlets import Unicode, List, Bool
 
 from nbgrader.api import Gradebook, MissingEntry
 from nbgrader.apps.baseapp import BaseNbConvertApp, nbconvert_aliases, nbconvert_flags
@@ -24,13 +24,13 @@ flags.update({
 
 class AutogradeApp(BaseNbConvertApp):
 
-    name = Unicode(u'nbgrader-autograde')
-    description = Unicode(u'Autograde a notebook by running it')
-    aliases = Dict(aliases)
-    flags = Dict(flags)
+    name = u'nbgrader-autograde'
+    description = u'Autograde a notebook by running it'
 
-    examples = Unicode(dedent(
-        """
+    aliases = aliases
+    flags = flags
+
+    examples = """
         Autograde submitted assignments. This takes one argument for the
         assignment id, and then (by default) autogrades assignments from the
         following directory structure:
@@ -61,7 +61,6 @@ class AutogradeApp(BaseNbConvertApp):
         To grade only the notebooks that start with '1':
             nbgrader autograde "Problem Set 1" --notebook "1*"
         """
-    ))
 
     create_student = Bool(
         False, config=True,
