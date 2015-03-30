@@ -65,6 +65,11 @@ class TestGradebook(object):
         assert_equal(a.name, 'bar', "incorrect name")
         assert_equal(a.duedate, now, "incorrect duedate")
 
+        # try adding with a string timestamp
+        a = self.gb.add_assignment('baz', duedate=now.isoformat())
+        assert_equal(a.name, 'baz', "incorrect name")
+        assert_equal(a.duedate, now, "incorrect duedate")
+
     def test_add_duplicate_assignment(self):
         self.gb.add_assignment('foo')
         assert_raises(InvalidEntry, self.gb.add_assignment, 'foo')
@@ -410,3 +415,4 @@ class TestGradebook(object):
         assert_equal(
             sorted(submissions, key=lambda x: x["id"]),
             sorted([x.to_dict() for x in notebook.submissions], key=lambda x: x["id"]))
+

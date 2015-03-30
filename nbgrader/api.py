@@ -1,6 +1,6 @@
 from __future__ import division
 
-from sqlalchemy import (create_engine, ForeignKey, Column, String, Text, 
+from sqlalchemy import (create_engine, ForeignKey, Column, String, Text,
     DateTime, Interval, Float, Enum, UniqueConstraint)
 from sqlalchemy.orm import sessionmaker, scoped_session, relationship, column_property
 from sqlalchemy.orm.exc import NoResultFound, FlushError
@@ -11,6 +11,8 @@ from sqlalchemy.sql import and_
 from sqlalchemy import select, func, exists, case, literal_column
 
 from uuid import uuid4
+
+import dateutil.parser
 
 Base = declarative_base()
 
@@ -640,7 +642,8 @@ class Gradebook(object):
         nbgrader.api.Assignment object
 
         """
-
+        if 'duedate' in kwargs and isinstance(kwargs['duedate'], str):
+            kwargs['duedate'] = dateutil.parser.parse(kwargs['duedate'])
         assignment = Assignment(name=name, **kwargs)
         self.db.add(assignment)
         try:

@@ -737,5 +737,3 @@ class TestApi(object):
             [x[0] for x in self.db.query(api.Notebook.num_submissions).all()],
             [2])
 
-
-

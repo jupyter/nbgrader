@@ -1,4 +1,6 @@
 import sys
+import os
+import dateutil.parser
 
 from textwrap import dedent
 
@@ -121,5 +123,14 @@ class AutogradeApp(BaseNbConvertApp):
             else:
                 self.log.error("No student with ID '%s' exists in the database", student_id)
                 sys.exit(1)
+
+        # try to read in a timestamp from file
+        timestamp_path = os.path.join(os.path.dirname(notebook_filename), 'timestamp.txt')
+        if os.path.exists(timestamp_path):
+            with open(timestamp_path, 'r') as fh:
+                timestamp = fh.read().strip()
+            timestamp = dateutil.parser.parse(timestamp)
+            self.log.info("Submitted at %s", timestamp)
+            resources['nbgrader']['timestamp'] = timestamp
 
         return resources
