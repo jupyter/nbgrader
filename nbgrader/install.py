@@ -49,7 +49,7 @@ def install(profile='default', symlink=True, user=False, prefix=None,
 
 
 # TODO pass prefix as argument.
-def activate(profile=None, ipython_dir=None):
+def activate(profile='default', ipython_dir=None):
     """
     Manually modify the frontend json-config to load nbgrader extension.
     """
@@ -76,7 +76,7 @@ def activate(profile=None, ipython_dir=None):
         f.write(cast_unicode_py2(json.dumps(config, indent=2), 'utf-8'))
 
 
-def deactivate(profile=None, ipython_dir=None):
+def deactivate(profile='default', ipython_dir=None):
     """
     Manually modify the frontend json-config to load nbgrader extension.
     """
