@@ -119,7 +119,7 @@ def main(argv=None):
     prog = '{} -m nbgrader'.format(os.path.basename(sys.executable))
     parser = argparse.ArgumentParser(prog=prog,
                 description='''Install and activate nbgrader notebook extension for a given profile ''')
-    parser.add_argument('profile', nargs='?', default=None, metavar=('<profile_name>'))
+    parser.add_argument('profile', nargs='?', default='default', metavar=('<profile_name>'))
 
     parser.add_argument("--install", help="Install nbgrader notebook extension for given profile",
                         action="store_true")
