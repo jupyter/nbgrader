@@ -160,6 +160,10 @@ def main(argv=None):
         print("--no-symlink can only be used in conjunction with the --install flag.")
         help_and_exit = True
 
+    if not (args.install or args.activate or args.deactivate):
+        print("\nUse one of `--activate`, `--deactivate` or `--install`. \n")
+        help_and_exit = True
+
     if not args.profile or help_and_exit:
         parser.print_help()
         sys.exit(1)
