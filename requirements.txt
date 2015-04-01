@@ -1,4 +1,4 @@
-ipython
+ipython>=3.0
 sqlalchemy
 Flask
 autopep8
