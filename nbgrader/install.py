@@ -24,7 +24,7 @@ def _get_profile_dir(profile, ipython_dir):
         pdir = ProfileDir.find_profile_dir_by_name(ipython_dir, profile).location
     return pdir
 
-def install(profile='default', symlink=True, user=False, prefix=None,
+def install(profile, symlink=True, user=False, prefix=None,
             verbose=False, ipython_dir=None):
     """Install and activate nbgrader on a profile
     """
@@ -49,7 +49,7 @@ def install(profile='default', symlink=True, user=False, prefix=None,
 
 
 # TODO pass prefix as argument.
-def activate(profile=None, ipython_dir=None):
+def activate(profile, ipython_dir=None):
     """
     Manually modify the frontend json-config to load nbgrader extension.
     """
@@ -76,7 +76,7 @@ def activate(profile=None, ipython_dir=None):
         f.write(cast_unicode_py2(json.dumps(config, indent=2), 'utf-8'))
 
 
-def deactivate(profile=None, ipython_dir=None):
+def deactivate(profile, ipython_dir=None):
     """
     Manually modify the frontend json-config to load nbgrader extension.
     """
@@ -119,7 +119,7 @@ def main(argv=None):
     prog = '{} -m nbgrader'.format(os.path.basename(sys.executable))
     parser = argparse.ArgumentParser(prog=prog,
                 description='''Install and activate nbgrader notebook extension for a given profile ''')
-    parser.add_argument('profile', nargs='?', default=None, metavar=('<profile_name>'))
+    parser.add_argument('profile', nargs='?', default='default', metavar=('<profile_name>'))
 
     parser.add_argument("--install", help="Install nbgrader notebook extension for given profile",
                         action="store_true")
@@ -160,22 +160,26 @@ def main(argv=None):
         print("--no-symlink can only be used in conjunction with the --install flag.")
         help_and_exit = True
 
+    if not (args.install or args.activate or args.deactivate):
+        print("\nUse one of `--activate`, `--deactivate` or `--install`. \n")
+        help_and_exit = True
+
     if not args.profile or help_and_exit:
         parser.print_help()
         sys.exit(1)
 
     if args.install:
-        install( ipython_dir=args.path,
+        install(     profile=args.profile,
+                 ipython_dir=args.path,
                         user=args.user,
                       prefix=args.prefix,
-                     profile=args.profile,
                      symlink=args.symlink,
                      verbose=args.verbose,
                 )
 
     if args.activate :
-        activate( ipython_dir=args.path,
-                      profile=args.profile) 
+        activate(   profile=args.profile,
+                ipython_dir=args.path) 
     if args.deactivate :
-        deactivate( ipython_dir=args.path,
-                        profile=args.profile) 
+        deactivate(     profile=args.profile,
+                    ipython_dir=args.path) 
