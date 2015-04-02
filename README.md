@@ -8,6 +8,34 @@ A system for assigning and grading notebooks.
 
 **Warning: nbgrader is not yet stable and is under active development. The following instructions are currently incomplete and may change!**
 
-Additional note: nbgrader depends on the master development version of IPython (currently 3.1.0). It will probably not work with older versions of IPython (even the most recent release).
-
 [Documentation can be found on nbviewer.](http://nbviewer.ipython.org/github/jupyter/nbgrader/tree/docs/Index.ipynb)
+
+## Dependencies
+
+To install nbgrader, you will need version 3.x of IPython. However, note that version 3.0 will **NOT** work -- you will need at least version 3.1. If you do not have version 3.1 of IPython installed (you can check with `ipython --version`), you can install it by:
+
+```bash
+git clone --recursive -b 3.x https://github.com/ipython/ipython.git && pip install -e "ipython[all]"
+```
+
+## Installation
+
+To install the most recent (development, and possibly unstable!) version of nbgrader, run:
+
+```bash
+pip install git+git://github.com/jupyter/nbgrader.git@master
+```
+
+You can then install and activate the nbgrader assignment toolbar extension with:
+
+```bash
+python -m nbgrader --install --activate default
+```
+
+Where `default` is the name of the profile you want to use for creating assignments. By default the extension will by symlink, so you shouldn't need to reinstalling it after upgrading nbgrader. Use `--no-symlink` to actually copy the file.
+
+To get help and see all the options you can pass while installing/activating the nbgrader notebook extension, use:
+
+```bash
+python -m nbgrader --help
+```

@@ -63,11 +63,3 @@ def compute_checksum(cell):
         m.update(str_to_bytes(cell.metadata.nbgrader['grade_id']))
 
     return m.hexdigest()
-
-def run(cmd):
-    """Run a command in the shell (mostly used for building docs)"""
-    p = sp.Popen(cmd, shell=True, stdout=sp.PIPE, stderr=sp.STDOUT)
-    stdout, stderr = p.communicate()
-    print(stdout.decode("utf-8"))
-    if p.returncode != 0:
-        raise RuntimeError("Command exited with code: {}".format(p.returncode))
