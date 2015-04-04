@@ -6,7 +6,9 @@ from .notebookapp import FormgradeNotebookApp
 from .formgradeapp import FormgradeApp
 from .submitapp import SubmitApp
 from .validateapp import ValidateApp
+from .pushapp import PushApp
 from .nbgraderapp import NbGraderApp
+
 
 __all__ = [
     'BaseNbGraderApp',
@@ -18,5 +20,6 @@ __all__ = [
     'FormgradeApp',
     'FormgradeNotebookApp',
     'SubmitApp',
-    'ValidateApp'
+    'ValidateApp',
+    'PushApp'
 ]

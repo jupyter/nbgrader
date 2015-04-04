@@ -16,7 +16,8 @@ from nbgrader.apps import (
     FormgradeApp,
     FeedbackApp,
     ValidateApp,
-    SubmitApp
+    SubmitApp,
+    PushApp
 )
 
 aliases = {}
@@ -123,6 +124,10 @@ class NbGraderApp(BaseNbGraderApp):
         submit=(
             SubmitApp,
             "Submit an assignment. Intended for use by students only."
+        ),
+        push=(
+            PushApp,
+            "Push an assignment to the the exchange."
         ),
     )
 
