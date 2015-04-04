@@ -1,10 +1,7 @@
 import os
 import pwd
 import shutil
-import tempfile
 import datetime
-import tarfile
-import glob
 from dateutil.tz import gettz
 import uuid
 
@@ -102,7 +99,7 @@ class PushApp(BaseApp):
     
     def check_directory(self, path, read=False, write=False, execute=False):
         """Does that path exist and can the current user rwx."""
-        if os.path.isdir(path) and check_mode(path, read=read, write=write, execute=execute):
+        if os.path.isdir(path) and self.check_mode(path, read=read, write=write, execute=execute):
             return True
         else:
             return False
@@ -129,7 +126,7 @@ class PushApp(BaseApp):
         """Parse the src argument, which is the directory/assignment to be copied."""
         raw_src = self.extra_args[0]
         self.src_path = os.path.abspath(raw_src)
-        self.assignment_id = self.path.split(self.src_path, -1)
+        self.assignment_id = os.path.split(self.src_path)[-1]
         self.src_username = self.current_username
         if not os.path.isdir(self.src_path):
             raise ValueError("The source directory doesn't exist: {}".format(raw_src))
@@ -147,7 +144,7 @@ class PushApp(BaseApp):
         self.dest_username = dest_args[0]
         self.course_id = dest_args[1]
         self.dest_username_path = os.path.join(self.exchange_directory, self.dest_username)
-        self.course_id_path = os.path.join(self.dest_username_path, self.dest_course_id)
+        self.course_id_path = os.path.join(self.dest_username_path, self.course_id)
         self.outbound_path = os.path.join(self.course_id_path, 'outbound')
         self.inbound_path = os.path.join(self.course_id_path, 'inbound')
         self.log.debug("dest_username: {}".format(self.dest_username))
@@ -163,13 +160,13 @@ class PushApp(BaseApp):
     def ensure_directories(self):        
         if self.outbound:
             if not os.path.isdir(self.dest_username_path):
-                os.mkdir(self.dest_username_path, 0755)
+                os.mkdir(self.dest_username_path, 0o755)
             if not os.path.isdir(self.course_id_path):
-                os.mkdir(self.course_id_path, 0755)
+                os.mkdir(self.course_id_path, 0o755)
             if not os.path.isdir(self.outbound_path):
-                os.mkdir(self.outbound_path, 0755)
+                os.mkdir(self.outbound_path, 0o755)
             if not os.path.isdir(self.inbound_path):
-                os.mkdir(self.inbound_path, 0733)
+                os.mkdir(self.inbound_path, 0o733)
         else:
             if not os.path.isdir(self.dest_username_path):
                 raise ValueError("User doesn't exist: {}".format(self.dest_username))
@@ -182,13 +179,13 @@ class PushApp(BaseApp):
             
     
     def calculate_dest_path(self):
-        if outbound:
+        if self.outbound:
             self.dest_path = os.path.join(self.outbound_path, self.assignment_id)
         else:
             # If inbound, we save the assignment directory with the username, the assignment_id and
             # a uuid. The uuid prevents students from overwriting other students submission.
             self.dest_assignment_id = '-'.join([self.src_username, self.assignment_id, uuid.uuid4()])
-            self.dest_path = os.path.join(self.inbound_path, dest_assignment_id)
+            self.dest_path = os.path.join(self.inbound_path, self.dest_assignment_id)
         self.log.debug("dest_path: {}".format(self.dest_path))
 
     
@@ -204,7 +201,7 @@ class PushApp(BaseApp):
         self.do_copy(self.src_path, self.dest_path)
 
         # If inbound, save the timestamp in a file for the autograder.
-        if not outbound:
+        if not self.outbound:
             with open(os.path.join(self.dest_path, "timestamp.txt"), "w") as fh:
                 fh.write(self.timestamp)
 
