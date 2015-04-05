@@ -114,10 +114,9 @@ class ReleaseApp(BaseNbGraderApp):
         self.set_timestamp()
 
     def init_src(self):
-        self.src_path = os.path.abspath(os.path.join('released', self.assignment_id))
+        self.src_path = os.path.abspath(os.path.join(self.release_directory, self.assignment_id))
         if not os.path.isdir(self.src_path):
-            self.log.error("The source directory doesn't exist: {}".format(self.src_path))
-            sys.exit(1)
+            self.fail("The source directory doesn't exist: {}".format(self.src_path))
         self.log.debug("src_path: {}".format(self.src_path))
         self.log.debug("assignment_id: {}".format(self.assignment_id))
         self.log.debug("course_id: {}".format(self.course_id))
