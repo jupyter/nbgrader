@@ -1,10 +1,9 @@
 import sys
 import os
-import dateutil.parser
 
 from textwrap import dedent
 
-from IPython.utils.traitlets import Unicode, List, Bool
+from IPython.utils.traitlets import List, Bool
 
 from nbgrader.api import Gradebook, MissingEntry
 from nbgrader.apps.baseapp import BaseNbConvertApp, nbconvert_aliases, nbconvert_flags
@@ -114,8 +113,6 @@ class AutogradeApp(BaseNbConvertApp):
         if os.path.exists(timestamp_path):
             with open(timestamp_path, 'r') as fh:
                 timestamp = fh.read().strip()
-            timestamp = dateutil.parser.parse(timestamp)
-            self.log.info("Submitted at %s", timestamp)
             resources['nbgrader']['timestamp'] = timestamp
 
         return resources

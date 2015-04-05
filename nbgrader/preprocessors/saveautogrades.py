@@ -27,8 +27,9 @@ class SaveAutoGrades(NbGraderPreprocessor):
             self.assignment_id, self.student_id, **kwargs)
 
         # if the submission is late, print out how many seconds late it is
+        self.log.info("%s submitted at %s", submission, timestamp)
         if timestamp and submission.total_seconds_late > 0:
-            self.log.info("%s is %s seconds late", submission, submission.total_seconds_late)
+            self.log.warning("%s is %s seconds late", submission, submission.total_seconds_late)
 
         self.comment_index = 0
 
