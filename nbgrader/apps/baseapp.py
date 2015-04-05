@@ -9,6 +9,9 @@ import re
 import os
 import traceback
 import logging
+import datetime
+from dateutil.tz import gettz
+import shutil
 
 from IPython.utils.traitlets import Unicode, List, Bool, Instance
 from IPython.core.application import BaseIPythonApplication
@@ -17,6 +20,7 @@ from IPython.nbconvert.nbconvertapp import NbConvertApp, DottedOrNone
 from IPython.config.loader import Config
 
 from nbgrader.config import BasicConfig, NbGraderConfig
+from nbgrader.utils import check_directory
 
 from textwrap import dedent
 
@@ -170,6 +174,93 @@ class BaseNbGraderApp(BaseApp):
     def __init__(self, *args, **kwargs):
         super(BaseNbGraderApp, self).__init__(*args, **kwargs)
         self._nbgrader_config = NbGraderConfig(parent=self)
+
+        
+class TransferApp(BaseNbGraderApp):
+    """A base class for the release, collect, fetch and submit apps.
+    
+    All of these apps involve transfering files between an instructor or students
+    files and the nbgrader exchange.
+    """
+    
+    timezone = Unicode(
+        "UTC", config=True,
+        help="Timezone for recording timestamps"
+    )
+
+    timestamp_format = Unicode(
+        "%Y-%m-%d %H:%M:%S %Z", config=True,
+        help="Format string for timestamps"
+    )
+
+    def set_timestamp(self):
+        """Set the timestap."""
+        tz = gettz(self.timezone)
+        if tz is None:
+            self.fail("Invalid timezone: {}".format(self.timezone))
+        self.timestamp = datetime.datetime.now(tz).strftime(self.timestamp_format)
+    
+    ignore = List(
+        [
+            ".ipynb_checkpoints",
+            "*.pyc",
+            "__pycache__"
+        ],
+        config=True,
+        help=dedent(
+            """
+            List of file names or file globs to be ignored when copying directories.
+            """
+        )
+    )
+    
+    exchange_directory = Unicode(
+        "/srv/nbgrader/exchange",
+        config=True,
+        help="The preexisting exchange directory writable to everyone."
+    )
+
+    def ensure_exchange_directory(self):
+        """See if the exchange directory exists and is writable, fail if not."""
+        if not check_directory(self.exchange_directory, write=True, execute=True):
+            self.fail("Unwritable directory, please contact your instructor: {}".format(self.exchange_directory))
+
+    def init_args(self):
+        pass
+
+    @catch_config_error
+    def initialize(self, argv=None):
+        super(TransferApp, self).initialize(argv)
+        self.init_args()
+        self.ensure_exchange_directory()
+        self.set_timestamp()
+
+    def init_src(self):
+        """"""
+        raise NotImplemented
+    
+    def init_dest(self):
+        """"""
+        raise NotImplemented
+    
+    def ensure_directories(self):
+        """"""
+        raise NotImplemented
+    
+    def copy_files(self):
+        """"""
+        raise NotImplemented
+
+    def do_copy(self, src, dest):
+        """Copy the src dir to the dest dir omitting the self.ignore globs."""
+        shutil.copytree(src, dest, ignore=shutil.ignore_patterns(*self.ignore))
+
+    def start(self):
+        super(TransferApp, self).start() 
+        self.init_src()
+        self.init_dest()
+        self.ensure_directories()
+        self.copy_files()
 
 
 class BaseNbConvertApp(BaseNbGraderApp, NbConvertApp):

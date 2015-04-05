@@ -207,8 +207,9 @@ class NbGraderConfig(LinkedConfig):
         config=True,
         help=dedent(
             """
-            The course name. This MUST be specified, either by setting the
-            config option, or using the --course option on the command line.
+            A key that is unique per instructor and course. This MUST be
+            specified, either by setting the config option, or using the
+            --course option on the command line.
             """
         )
     )
