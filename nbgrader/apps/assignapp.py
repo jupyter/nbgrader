@@ -101,28 +101,13 @@ class AssignApp(BaseNbConvertApp):
         )
     )
 
-    nbgrader_input_step_name = Unicode(
-        "source",
-        config=True,
-        help=dedent(
-            """
-            The input directory for this step of the grading process. This
-            corresponds to the `nbgrader_step` variable in the path defined by
-            `NbGraderConfig.directory_structure`.
-            """
-        )
-    )
-    nbgrader_output_step_name = Unicode(
-        "release",
-        config=True,
-        help=dedent(
-            """
-            The output directory for this step of the grading process. This
-            corresponds to the `nbgrader_step` variable in the path defined by
-            `NbGraderConfig.directory_structure`.
-            """
-        )
-    )
+    @property
+    def _input_directory(self):
+        return self.source_directory
+
+    @property
+    def _output_directory(self):
+        return self.release_directory
 
     export_format = 'notebook'
 

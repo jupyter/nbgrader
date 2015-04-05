@@ -135,10 +135,6 @@ class BaseNbGraderApp(BaseApp):
     aliases = nbgrader_aliases
     flags = nbgrader_flags
 
-    # must be overwritten by subclasses
-    nbgrader_input_step_name = Unicode()
-    nbgrader_output_step_name = Unicode()
-
     # these must be defined, but then will actually be populated with values from
     # the NbGraderConfig instance
     db_url = Unicode()
@@ -146,6 +142,11 @@ class BaseNbGraderApp(BaseApp):
     assignment_id = Unicode()
     notebook_id = Unicode()
     directory_structure = Unicode()
+    source_directory = Unicode()
+    release_directory = Unicode()
+    submitted_directory = Unicode()
+    autograded_directory = Unicode()
+    feedback_directory = Unicode()
 
     # nbgrader configuration instance
     _nbgrader_config = Instance(NbGraderConfig)
@@ -189,6 +190,14 @@ class BaseNbConvertApp(BaseNbGraderApp, NbConvertApp):
                 classes.append(pp)
         return classes
 
+    @property
+    def _input_directory(self):
+        raise NotImplementedError
+
+    @property
+    def _output_directory(self):
+        raise NotImplementedError
+
     def build_extra_config(self):
         extra_config = super(BaseNbConvertApp, self).build_extra_config()
         extra_config.Exporter.default_preprocessors = self.preprocessors
@@ -210,7 +219,7 @@ class BaseNbConvertApp(BaseNbGraderApp, NbConvertApp):
 
         directory_structure = os.path.join(self.directory_structure, self.notebook_id + ".ipynb")
         fullglob = directory_structure.format(
-            nbgrader_step=self.nbgrader_input_step_name,
+            nbgrader_step=self._input_directory,
             student_id=self.student_id,
             assignment_id=self.assignment_id,
             notebook_id=self.notebook_id
@@ -224,7 +233,7 @@ class BaseNbConvertApp(BaseNbGraderApp, NbConvertApp):
     def init_single_notebook_resources(self, notebook_filename):
         directory_structure = os.path.join(self.directory_structure, "(?P<notebook_id>.*).ipynb")
         regexp = directory_structure.format(
-            nbgrader_step=self.nbgrader_input_step_name,
+            nbgrader_step=self._input_directory,
             student_id="(?P<student_id>.*)",
             assignment_id="(?P<assignment_id>.*)",
         )
@@ -264,7 +273,7 @@ class BaseNbConvertApp(BaseNbGraderApp, NbConvertApp):
 
         # configure the writer build directory
         self.writer.build_directory = self.directory_structure.format(
-            nbgrader_step=self.nbgrader_output_step_name,
+            nbgrader_step=self._output_directory,
             student_id=resources['nbgrader']['student'],
             assignment_id=resources['nbgrader']['assignment'],
         )
