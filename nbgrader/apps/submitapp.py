@@ -57,4 +57,4 @@ class SubmitApp(TransferApp):
         self.do_copy(self.src_path, self.dest_path)
         with open(os.path.join(self.dest_path, "timestamp.txt"), "w") as fh:
             fh.write(self.timestamp)
-        self.log.info("Submitted as: {} {}".format(self.course_id, self.assignment_filename))
+        self.log.info("Submitted as: {} {} {}".format(self.course_id, self.assignment_id, str(self.timestamp)))

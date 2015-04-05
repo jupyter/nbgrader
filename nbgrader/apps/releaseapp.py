@@ -45,6 +45,8 @@ class ReleaseApp(TransferApp):
     def init_args(self):
         if len(self.extra_args) == 1:
             self.assignment_id = self.extra_args[0]
+        else:
+            self.fail("Invalid number of argument, call as `nbgrader release ASSIGNMENT`.")
 
     def init_src(self):
         self.src_path = os.path.abspath(os.path.join(self.release_directory, self.assignment_id))

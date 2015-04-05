@@ -33,7 +33,7 @@ class FetchApp(TransferApp):
             self.course_id = self.extra_args[0]
             self.assignment_id = self.extra_args[1]
         else:
-            self.fail("Invalid number of args, call as `nbgrader fetch course_id assignment_id`")
+            self.fail("Invalid number of args, call as `nbgrader fetch COURSE ASSIGNMENT`")
 
     def init_src(self):
         self.course_path = os.path.join(self.exchange_directory, self.course_id)
@@ -46,6 +46,8 @@ class FetchApp(TransferApp):
     
     def init_dest(self):
         self.dest_path = os.path.abspath(os.path.join('.', self.assignment_id))
+        if os.path.isdir(self.dest_path):
+            self.fail("You already have a copy of the assignment in this directory: {}".format(self.assignment_id))
 
     def copy_files(self):
         self.log.info("Source: {}".format(self.src_path))
