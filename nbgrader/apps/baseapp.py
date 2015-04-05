@@ -156,6 +156,20 @@ class BaseNbGraderApp(BaseApp):
     # nbgrader configuration instance
     _nbgrader_config = Instance(NbGraderConfig)
 
+    ignore = List(
+        [
+            ".ipynb_checkpoints",
+            "*.pyc",
+            "__pycache__"
+        ],
+        config=True,
+        help=dedent(
+            """
+            List of file names or file globs to be ignored when copying directories.
+            """
+        )
+    )
+    
     def _classes_default(self):
         classes = super(BaseNbGraderApp, self)._classes_default()
         classes.append(NbGraderConfig)
@@ -201,21 +215,7 @@ class TransferApp(BaseNbGraderApp):
         if tz is None:
             self.fail("Invalid timezone: {}".format(self.timezone))
         self.timestamp = datetime.datetime.now(tz).strftime(self.timestamp_format)
-    
-    ignore = List(
-        [
-            ".ipynb_checkpoints",
-            "*.pyc",
-            "__pycache__"
-        ],
-        config=True,
-        help=dedent(
-            """
-            List of file names or file globs to be ignored when copying directories.
-            """
-        )
-    )
-    
+
     exchange_directory = Unicode(
         "/srv/nbgrader/exchange",
         config=True,
@@ -291,11 +291,6 @@ class BaseNbConvertApp(BaseNbGraderApp, NbConvertApp):
     output_base = Unicode('')
 
     preprocessors = List([])
-
-    def fail(self, msg):
-        """Log the error msg using self.log.error and exit using sys.exit(1)."""
-        self.log.error(msg)
-        sys.exit(1)
     
     def _classes_default(self):
         classes = super(BaseNbConvertApp, self)._classes_default()

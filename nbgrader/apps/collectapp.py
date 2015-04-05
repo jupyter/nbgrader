@@ -2,13 +2,11 @@ import os
 import glob
 import shutil
 from collections import defaultdict
-import dateutil
-import dateutil.parser
 
 from IPython.utils.traitlets import Unicode, List, Bool
 
 from nbgrader.apps.baseapp import TransferApp, transfer_aliases, transfer_flags
-from nbgrader.utils import check_mode
+from nbgrader.utils import check_mode, parse_utc
 
 
 aliases = {}
@@ -57,11 +55,12 @@ class CollectApp(TransferApp):
 
     def _path_to_record(self, path):
         filename = os.path.split(path)[1]
-        filename_list = filename.split('+')
+        # Only split twice on +, giving three components. This allows usernames with +.
+        filename_list = filename.rsplit('+', 2)
         if len(filename_list) != 3:
             self.fail("Invalid filename: {}".format(filename))
         username = filename_list[0]
-        timestamp = dateutil.parser.parse(filename_list[2])
+        timestamp = parse_utc(filename_list[2])
         return {'username': username, 'filename': filename, 'timestamp': timestamp}
     
     def _sort_by_timestamp(self, records):
@@ -91,7 +90,7 @@ class CollectApp(TransferApp):
         if os.path.exists(timestamp_path):
             with open(timestamp_path, 'r') as fh:
                 timestamp = fh.read().strip()
-            return dateutil.parser.parse(timestamp)
+            return parse_utc(timestamp)
         else:
             return None
             

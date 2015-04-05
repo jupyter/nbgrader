@@ -28,7 +28,7 @@ flags.update({
     ),
     'remove': (
         {'ReleaseApp' : {'remove': True}},
-        "Only remove existing files in the exchange."
+        "Unrelease an assignment by removing it from the exchange."
     ),
 })
 
@@ -46,7 +46,7 @@ class ReleaseApp(TransferApp):
 
     force = Bool(False, config=True, help="Force overwrite existing files in the exchange.")
 
-    remove = Bool(False, config=True, help="Only remove existing files in the exchange.")
+    remove = Bool(False, config=True, help="Unrelease an assignment by removing it from the exchange.")
 
     def init_args(self):
         if len(self.extra_args) == 1:
@@ -58,7 +58,13 @@ class ReleaseApp(TransferApp):
         self.src_path = os.path.abspath(os.path.join(self.release_directory, self.assignment_id))
         if not os.path.isdir(self.src_path):
             self.log.error("Assignment not found: {}/{}".format(self.release_directory, self.assignment_id))
-            self.fail("You have to run `nbgrader release` from your main nbgrader directory.")
+            if os.path.isdir(os.path.join(self.source_directory, self.assignment_id)):
+                # Looks like the instructor forgot to assign
+                self.fail("Assignment found in ./{} but not ./{}, run `nbgrader assign` first.".format(
+                    self.source_directory, self.release_directory
+                )) 
+            else:
+                self.fail("You have to run `nbgrader release {}` from your main nbgrader directory.".format(self.assignment_id))
     
     def init_dest(self):
         self.course_path = os.path.join(self.exchange_directory, self.course_id)
