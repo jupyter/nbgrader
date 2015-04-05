@@ -1,13 +1,15 @@
 import os
-import dateutil.parser
+import sys
 
 from textwrap import dedent
 
 from IPython.utils.traitlets import List, Bool
+from IPython.utils.path import link_or_copy
 
-from nbgrader.api import Gradebook, MissingEntry
 from nbgrader.apps.baseapp import BaseNbConvertApp, nbconvert_aliases, nbconvert_flags
-from nbgrader.preprocessors import SaveAutoGrades, Execute, OverwriteCells, ClearOutput
+from nbgrader.preprocessors import ClearOutput, OverwriteCells, SaveAutoGrades, Execute
+from nbgrader.api import Gradebook, MissingEntry
+from nbgrader import utils
 
 aliases = {}
 aliases.update(nbconvert_aliases)
@@ -76,9 +78,14 @@ class AutogradeApp(BaseNbConvertApp):
         )
     )
 
+    _sanitizing = True
+
     @property
     def _input_directory(self):
-        return self.submitted_directory
+        if self._sanitizing:
+            return self.submitted_directory
+        else:
+            return self.autograded_directory
 
     @property
     def _output_directory(self):
@@ -86,12 +93,15 @@ class AutogradeApp(BaseNbConvertApp):
 
     export_format = 'notebook'
 
-    preprocessors = List([
+    sanitize_preprocessors = List([
         ClearOutput,
-        OverwriteCells,
+        OverwriteCells
+    ])
+    autograde_preprocessors = List([
         Execute,
         SaveAutoGrades
     ])
+    preprocessors = List([])
 
     def init_assignment(self, assignment_id, student_id):
         super(AutogradeApp, self).init_assignment(assignment_id, student_id)
@@ -122,3 +132,43 @@ class AutogradeApp(BaseNbConvertApp):
 
         else:
             submission = gb.update_or_create_submission(assignment_id, student_id)
+
+        # copy files over from the source directory
+        if self._sanitizing:
+            dest_path = self._format_dest(assignment_id, student_id)
+
+            # find all the files in the source directory
+            source_path = self.directory_structure.format(
+                nbgrader_step=self.source_directory,
+                student_id='.',
+                assignment_id=assignment_id)
+            source_files = utils.find_all_files(source_path, self.ignore + ["*.ipynb"])
+
+            # copy them to the build directory
+            for filename in source_files:
+                dest = os.path.join(dest_path, os.path.relpath(filename, source_path))
+                path = os.path.dirname(dest)
+                self.writer._makedir(path)
+                if not os.path.normpath(dest) == os.path.normpath(filename):
+                    self.log.info("Linking %s -> %s", filename, dest)
+                    link_or_copy(filename, dest)
+
+    def _init_preprocessors(self):
+        self.exporter._preprocessors = []
+        if self._sanitizing:
+            preprocessors = self.sanitize_preprocessors
+        else:
+            preprocessors = self.autograde_preprocessors
+
+        for pp in preprocessors:
+            self.exporter.register_preprocessor(pp)
+
+    def convert_single_notebook(self, notebook_filename):
+        self._sanitizing = True
+        self._init_preprocessors()
+        super(AutogradeApp, self).convert_single_notebook(notebook_filename)
+
+        notebook_filename = os.path.join(self.writer.build_directory, os.path.basename(notebook_filename))
+        self._sanitizing = False
+        self._init_preprocessors()
+        super(AutogradeApp, self).convert_single_notebook(notebook_filename)
