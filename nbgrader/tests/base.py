@@ -131,8 +131,8 @@ print("hello")
         proc = cls._start_subprocess(command)
         true_retcode = proc.wait()
         output = proc.communicate()[0].decode()
+        print(output)
         if true_retcode != retcode:
-            print(output)
             raise AssertionError(
                 "process returned an unexpected return code: {}".format(true_retcode))
         cls._copy_coverage_files()
