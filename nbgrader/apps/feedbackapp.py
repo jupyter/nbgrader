@@ -51,28 +51,13 @@ class FeedbackApp(BaseNbConvertApp):
             nbgrader feedback "Problem Set 1" --notebook "1*"
         """
 
-    nbgrader_input_step_name = Unicode(
-        "autograded",
-        config=True,
-        help=dedent(
-            """
-            The input directory for this step of the grading process. This
-            corresponds to the `nbgrader_step` variable in the path defined by
-            `NbGraderConfig.directory_structure`.
-            """
-        )
-    )
-    nbgrader_output_step_name = Unicode(
-        "feedback",
-        config=True,
-        help=dedent(
-            """
-            The output directory for this step of the grading process. This
-            corresponds to the `nbgrader_step` variable in the path defined by
-            `NbGraderConfig.directory_structure`.
-            """
-        )
-    )
+    @property
+    def _input_directory(self):
+        return self.autograded_directory
+
+    @property
+    def _output_directory(self):
+        return self.feedback_directory
 
     preprocessors = List([
         GetGrades

@@ -63,18 +63,6 @@ class FormgradeApp(BaseNbGraderApp):
             nbgrader formgrade --port 5001
         """
 
-    nbgrader_input_step_name = Unicode(
-        "autograded",
-        config=True,
-        help=dedent(
-            """
-            The input directory for this step of the grading process. This
-            corresponds to the `nbgrader_step` variable in the path defined by
-            `NbGraderConfig.directory_structure`.
-            """
-        )
-    )
-
     ip = Unicode("localhost", config=True, help="IP address for the server")
     port = Integer(5000, config=True, help="Port for the server")
     authenticator_class = Type(NoAuth, klass=BaseAuth, config=True, help="""
@@ -123,7 +111,7 @@ class FormgradeApp(BaseNbGraderApp):
         # now launch the formgrader
         app.notebook_dir = self.base_directory
         app.notebook_dir_format = self.directory_structure
-        app.nbgrader_step = self.nbgrader_input_step_name
+        app.nbgrader_step = self.autograded_directory
         app.exporter = HTMLExporter(config=self.config)
 
         url = "http://{:s}:{:d}/".format(self.ip, self.port)

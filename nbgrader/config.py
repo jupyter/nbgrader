@@ -140,3 +140,64 @@ class NbGraderConfig(LinkedConfig):
             """
         )
     )
+
+    source_directory = Unicode(
+        'source',
+        config=True,
+        help=dedent(
+            """
+            The name of the directory that contains the master/instructor
+            version of assignments. This corresponds to the `nbgrader_step`
+            variable in the `directory_structure` config option.
+            """
+        )
+    )
+
+    release_directory = Unicode(
+        'release',
+        config=True,
+        help=dedent(
+            """
+            The name of the directory that contains the version of the
+            assignment that will be released to students. This corresponds to
+            the `nbgrader_step` variable in the `directory_structure` config
+            option.
+            """
+        )
+    )
+
+    submitted_directory = Unicode(
+        'submitted',
+        config=True,
+        help=dedent(
+            """
+            The name of the directory that contains assignments that have been
+            submitted by students for grading. This corresponds to the
+            `nbgrader_step` variable in the `directory_structure` config option.
+            """
+        )
+    )
+
+    autograded_directory = Unicode(
+        'autograded',
+        config=True,
+        help=dedent(
+            """
+            The name of the directory that contains assignment submissions after
+            they have been autograded. This corresponds to the `nbgrader_step`
+            variable in the `directory_structure` config option.
+            """
+        )
+    )
+
+    feedback_directory = Unicode(
+        'feedback',
+        config=True,
+        help=dedent(
+            """
+            The name of the directory that contains assignment feedback after
+            grading has been completed. This corresponds to the `nbgrader_step`
+            variable in the `directory_structure` config option.
+            """
+        )
+    )
