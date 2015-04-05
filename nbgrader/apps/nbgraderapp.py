@@ -16,8 +16,10 @@ from nbgrader.apps import (
     FormgradeApp,
     FeedbackApp,
     ValidateApp,
-    SubmitApp,
-    PushApp
+    ReleaseApp,
+#    CollectApp,
+#    FetchApp,
+#    SubmitApp,
 )
 
 aliases = {}
@@ -121,14 +123,42 @@ class NbGraderApp(BaseNbGraderApp):
                 """
             ).strip()
         ),
-        submit=(
-            SubmitApp,
-            "Submit an assignment. Intended for use by students only."
+        release=(
+            ReleaseApp,
+            dedent(
+                """
+                Release an assignment to students through the nbgrader exchange.
+                Intended for use by instructors only.
+                """
+            ).strip()
         ),
-        push=(
-            PushApp,
-            "Push an assignment to the the exchange."
-        ),
+        #collect=(
+        #    CollectApp,
+        #    dedent(
+        #        """
+        #        Collect an assignment from students through the nbgrader exchange.
+        #        Intended for use by instructors only.
+        #        """
+        #    ).strip()
+        #),
+        #fetch=(
+        #    FetchApp,
+        #    dedent(
+        #        """
+        #        Fetch an assignment from an instructor through the nbgrader exchange.
+        #        Intended for use by students only.
+        #        """
+        #    ).strip()
+        #),
+        #submit=(
+        #    SubmitApp,
+        #    dedent(
+        #        """
+        #        Submit an assignment to an instructor through the nbgrader exchange.
+        #        Intended for use by students only.
+        #        """
+        #    ).strip()
+        #),
     )
 
     def _classes_default(self):

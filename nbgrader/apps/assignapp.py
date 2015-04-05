@@ -141,7 +141,6 @@ class AssignApp(BaseNbConvertApp):
                 self.log.warning("Creating assignment '%s'", assignment_id)
                 gb.add_assignment(assignment_id)
             else:
-                self.log.error("No assignment called '%s' exists in the database", assignment_id)
-                sys.exit(1)
+                self.fail("No assignment called '%s' exists in the database", assignment_id)
 
         return resources

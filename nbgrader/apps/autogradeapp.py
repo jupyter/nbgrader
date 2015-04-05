@@ -105,8 +105,7 @@ class AutogradeApp(BaseNbConvertApp):
                 self.log.warning("Creating student with ID '%s'", student_id)
                 gb.add_student(student_id)
             else:
-                self.log.error("No student with ID '%s' exists in the database", student_id)
-                sys.exit(1)
+                self.fail("No student with ID '%s' exists in the database", student_id)
 
         # try to read in a timestamp from file
         timestamp_path = os.path.join(os.path.dirname(notebook_filename), 'timestamp.txt')

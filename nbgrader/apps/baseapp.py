@@ -8,6 +8,7 @@ import sys
 import re
 import os
 import traceback
+import logging
 
 from IPython.utils.traitlets import Unicode, List, Bool, Instance
 from IPython.core.application import BaseIPythonApplication
@@ -44,7 +45,8 @@ nbgrader_aliases.update({
     'student': 'NbGraderConfig.student_id',
     'assignment': 'NbGraderConfig.assignment_id',
     'notebook': 'NbGraderConfig.notebook_id',
-    'db': 'NbGraderConfig.db_url'
+    'db': 'NbGraderConfig.db_url',
+    'course': 'NbGraderConfig.course_id'
 })
 nbgrader_flags = {}
 nbgrader_flags.update(base_flags)
@@ -74,6 +76,14 @@ class BaseApp(BaseIPythonApplication):
     aliases = base_aliases
     flags = base_flags
 
+    def _log_level_default(self):
+        return logging.INFO
+    
+    def fail(self, msg):
+        """Log the error msg using self.log.error and exit using sys.exit(1)."""
+        self.log.error(msg)
+        sys.exit(1)
+    
     verbose_crash = Bool(False)
 
     # This is a hack in order to centralize the config options inherited from
@@ -147,7 +157,8 @@ class BaseNbGraderApp(BaseApp):
     submitted_directory = Unicode()
     autograded_directory = Unicode()
     feedback_directory = Unicode()
-
+    course_id = Unicode()
+    
     # nbgrader configuration instance
     _nbgrader_config = Instance(NbGraderConfig)
 
@@ -183,6 +194,11 @@ class BaseNbConvertApp(BaseNbGraderApp, NbConvertApp):
 
     preprocessors = List([])
 
+    def fail(self, msg):
+        """Log the error msg using self.log.error and exit using sys.exit(1)."""
+        self.log.error(msg)
+        sys.exit(1)
+    
     def _classes_default(self):
         classes = super(BaseNbConvertApp, self)._classes_default()
         for pp in self.preprocessors:
@@ -206,14 +222,11 @@ class BaseNbConvertApp(BaseNbGraderApp, NbConvertApp):
     def init_notebooks(self):
         # the assignment can be set via extra args
         if len(self.extra_args) > 1:
-            self.log.error("Only one argument (the assignment id) may be specified")
-            sys.exit(1)
+            self.fail("Only one argument (the assignment id) may be specified")
         elif len(self.extra_args) == 1 and self.assignment_id != "":
-            self.log.error("The assignment cannot both be specified in config and as an argument")
-            sys.exit(1)
+            self.fail("The assignment cannot both be specified in config and as an argument")
         elif len(self.extra_args) == 0 and self.assignment_id == "":
-            self.log.error("An assignment id must be specified, either as an argument or with --assignment")
-            sys.exit(1)
+            self.fail("An assignment id must be specified, either as an argument or with --assignment")
         elif len(self.extra_args) == 1:
             self.assignment_id = self.extra_args[0]
 
@@ -227,8 +240,7 @@ class BaseNbConvertApp(BaseNbGraderApp, NbConvertApp):
 
         self.notebooks = glob.glob(fullglob)
         if len(self.notebooks) == 0:
-            self.log.error("No notebooks were matched by '%s'", fullglob)
-            sys.exit(1)
+            self.fail("No notebooks were matched by '%s'", fullglob)
 
     def init_single_notebook_resources(self, notebook_filename):
         directory_structure = os.path.join(self.directory_structure, "(?P<notebook_id>.*).ipynb")

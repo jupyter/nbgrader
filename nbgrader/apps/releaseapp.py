@@ -1,46 +1,46 @@
 import os
-import pwd
 import shutil
 import datetime
 from dateutil.tz import gettz
-import uuid
 
 from textwrap import dedent
 
-from IPython.utils.traitlets import Unicode, List
+from IPython.utils.traitlets import Unicode, List, Bool
 from IPython.config.application import catch_config_error
 
-from nbgrader.apps.baseapp import BaseApp, base_aliases, base_flags
+from nbgrader.apps.baseapp import BaseNbGraderApp, nbgrader_aliases, nbgrader_flags
+from nbgrader.utils import check_mode, check_directory, get_username, self_owned, find_owner
 
 aliases = {}
-aliases.update(base_aliases)
+aliases.update(nbgrader_aliases)
 aliases.update({
     "timezone": "SubmitApp.timezone"
 })
 
 flags = {}
-flags.update(base_flags)
+flags.update(nbgrader_flags)
+flags.update({
+    'force': (
+        {'ReleaseApp' : {'force' : True}},
+        "Force overwrite of existing files in the exchange."
+    ),
+    'remove': (
+        {'ReleaseApp' : {'remove': True}},
+        "Only remove existing files in the exchange."
+    ),
+})
 
 
-def get_username():
-    """Get the username of the current process."""
-    return pwd.getpwuid(os.getuid())[0]
+class ReleaseApp(BaseNbGraderApp):
 
-
-class PushApp(BaseApp):
-
-    name = u'nbgrader-push'
-    description = u'Push a directory to the nbgrader exchange'
+    name = u'nbgrader-release'
+    description = u'Release an assignment to the nbgrader exchange'
 
     aliases = aliases
     flags = flags
 
     examples = """
-        To publish an assignment as an instructor:
-            nbgrader push "Problem Set 1" instructor_username.phys202
-
-        to turn in an assignment as a student:
-            nbgrader push "Problem Set 1" instructor_username.phys202
+        Here we go...
         """
 
     timezone = Unicode(
@@ -66,149 +66,109 @@ class PushApp(BaseApp):
         )
     )
 
+    force = Bool(False, config=True, help="Force overwrite existing files in the exchange.")
+
+    remove = Bool(False, config=True, help="Only remove existing files in the exchange.")
+    
     exchange_directory = Unicode("/srv/nbgrader/exchange", config=True)
     
     current_username = Unicode(get_username())
-    
-    @property
-    def outbound(self):
-        """Is push being used in outbound mode.
-        
-        The `nbgrader push` command runs in two different modes:
-        
-        1. In outbound mode, an instructor is distributing an assignment to
-           students.
-        2. In inbound mode, a student is turning in an assignent to an
-           instructor.
-           
-        The two modes are distinguished by whether or not the src (current)
-        and dest usernames are the same (same=outbound).
-        """
-        return self.src_username == self.dest_username
-    
-    def check_mode(self, path, read=False, write=False, execute=False):
-        """Can the current user can rwx the path."""
-        mode = 0
-        if read:
-            mode |= os.R_OK
-        if write:
-            mode |= os.W_OK
-        if execute:
-            mode |= os.X_OK
-        return os.access(path, mode)
-    
-    def check_directory(self, path, read=False, write=False, execute=False):
-        """Does that path exist and can the current user rwx."""
-        if os.path.isdir(path) and self.check_mode(path, read=read, write=write, execute=execute):
-            return True
-        else:
-            return False
 
+    def _current_username_changed(self, name, new):
+        self.course_key = self._compute_course_key(new, self.course_id)
+    
+    course_key = Unicode('', config=True, help="A key that is unique per instructor and course.")
+    
+    def _course_key_default(self):
+        return self._compute_course_key(self.current_username, self.course_id)
+
+    def _course_id_changed(self, name, new):
+        self.course_key = self._compute_course_key(self.current_username, new)
+    
+    def _compute_course_key(self, username, course_id):
+        return username + '-' + course_id
+    
+    def init_assignment(self):
+        if len(self.extra_args) == 1:
+            self.assignment_id = self.extra_args[0]
+    
     def ensure_exchange_directory(self):
         """See if the exchange directory exists and is writable, raise if not."""
-        if not self.check_directory(self.exchange_directory, write=True, execute=True):
-            raise IOError("Unwritable directory, please contact your instructor: {}".format(self.exchange_directory))
+        if not check_directory(self.exchange_directory, write=True, execute=True):
+            self.log.error("Unwritable directory, please contact your instructor: {}".format(self.exchange_directory))
+            sys.exit(1)
 
     def set_timestamp(self):
         """Set the timestap."""
         tz = gettz(self.timezone)
         if tz is None:
-            raise ValueError("Invalid timezone: {}".format(self.timezone))
+            self.log.error("Invalid timezone: {}".format(self.timezone))
+            sys.exit(1)
         self.timestamp = datetime.datetime.now(tz).strftime(self.timestamp_format)
         
     @catch_config_error
     def initialize(self, argv=None):
-        super(PushApp, self).initialize(argv)
+        super(BaseNbGraderApp, self).initialize(argv)
+        self.init_assignment()
         self.ensure_exchange_directory()
         self.set_timestamp()
 
-    def parse_src(self):
-        """Parse the src argument, which is the directory/assignment to be copied."""
-        raw_src = self.extra_args[0]
-        self.src_path = os.path.abspath(raw_src)
-        self.assignment_id = os.path.split(self.src_path)[-1]
-        self.src_username = self.current_username
+    def init_src(self):
+        self.src_path = os.path.abspath(os.path.join('released', self.assignment_id))
         if not os.path.isdir(self.src_path):
-            raise ValueError("The source directory doesn't exist: {}".format(raw_src))
-        self.log.debug("src_username: {}".format(self.src_username))
+            self.log.error("The source directory doesn't exist: {}".format(self.src_path))
+            sys.exit(1)
         self.log.debug("src_path: {}".format(self.src_path))
         self.log.debug("assignment_id: {}".format(self.assignment_id))
-        self.log.info("Source: username={} assignment={}".format(self.src_username, self.src_path))
-        
-    def parse_dest(self):
-        """Parse the dest argument, which is a dotted username.course_id."""
-        raw_dest = self.extra_args[1]
-        dest_args = raw_dest.split('.')
-        if len(dest_args) != 2:
-            raise ValueError("Destination not provided in username.course format: {}".format(raw_dest))
-        self.dest_username = dest_args[0]
-        self.course_id = dest_args[1]
-        self.dest_username_path = os.path.join(self.exchange_directory, self.dest_username)
-        self.course_id_path = os.path.join(self.dest_username_path, self.course_id)
-        self.outbound_path = os.path.join(self.course_id_path, 'outbound')
-        self.inbound_path = os.path.join(self.course_id_path, 'inbound')
-        self.log.debug("dest_username: {}".format(self.dest_username))
         self.log.debug("course_id: {}".format(self.course_id))
-        self.log.info("Destination: username={} and course={}".format(self.dest_username, self.course_id))
     
-    def parse_src_dest(self):
-        if len(self.extra_args) != 2:
-            raise ValueError("You must provide a source and target.")
-        self.parse_src()
-        self.parse_dest()
-    
-    def ensure_directories(self):        
-        if self.outbound:
-            if not os.path.isdir(self.dest_username_path):
-                os.mkdir(self.dest_username_path, 0o755)
-            if not os.path.isdir(self.course_id_path):
-                os.mkdir(self.course_id_path, 0o755)
-            if not os.path.isdir(self.outbound_path):
-                os.mkdir(self.outbound_path, 0o755)
-            if not os.path.isdir(self.inbound_path):
-                os.mkdir(self.inbound_path, 0o733)
-        else:
-            if not os.path.isdir(self.dest_username_path):
-                raise ValueError("User doesn't exist: {}".format(self.dest_username))
-            if not os.path.isdir(self.course_id_path):
-                raise ValueError("Course doesn't exist: {}".format(self.course_id))
-            if not os.path.isdir(self.inbound_path):
-                raise ValueError("Inbound path not found, please see your instructor: {}".format(self.inbound_path))
-            if not self.check_mode(self.inbound_path, write=True, execute=True):
-                raise ValueError("Incorrect permissions on inbound path, please see your instructor: {}".format(self.inbound_path))
-            
-    
-    def calculate_dest_path(self):
-        if self.outbound:
-            self.dest_path = os.path.join(self.outbound_path, self.assignment_id)
-        else:
-            # If inbound, we save the assignment directory with the username, the assignment_id and
-            # a uuid. The uuid prevents students from overwriting other students submission.
-            self.dest_assignment_id = '-'.join([self.src_username, self.assignment_id, uuid.uuid4()])
-            self.dest_path = os.path.join(self.inbound_path, self.dest_assignment_id)
+    def init_dest(self):
+        self.course_key_path = os.path.join(self.exchange_directory, self.course_key)
+        self.outbound_path = os.path.join(self.course_key_path, 'outbound')
+        self.inbound_path = os.path.join(self.course_key_path, 'inbound')
+        self.dest_path = os.path.join(self.outbound_path, self.assignment_id)
+        self.log.debug("course_key: {}".format(self.course_key))
         self.log.debug("dest_path: {}".format(self.dest_path))
 
+    def ensure_directory(self, path, mode):
+        """Ensure that the path exists, has the right mode and is self owned."""
+        if not os.path.isdir(path):
+            os.mkdir(path)
+            # For some reason, Python won't create a directory with a mode of 0o733
+            # so we have to create and then chmod.
+            os.chmod(path, mode)
+        else:
+            if not self_owned(path):
+                self.log.error("You don't own the directory: {}".format(path))
+                sys.exit(1)
     
-    def do_copy(self, src, dest):
-        """Copy the src directory to (not in) the dest directory.
-        
-        This works recursively and will ignore the globs defined in self.ignore.
-        """
-        shutil.copytree(src, dest, ignore=shutil.ignore_patterns(*self.ignore))
-        self.log.debug("Copying {} -> {}".format(src, dest))
-    
-    def copy_files(self):
-        self.do_copy(self.src_path, self.dest_path)
+    def ensure_directories(self):
+        """Ensure the dest directories exist and have the right mode/owner."""
+        self.ensure_directory(self.course_key_path, 0o755)
+        self.ensure_directory(self.outbound_path, 0o755)
+        self.ensure_directory(self.inbound_path, 0o733)
 
-        # If inbound, save the timestamp in a file for the autograder.
-        if not self.outbound:
-            with open(os.path.join(self.dest_path, "timestamp.txt"), "w") as fh:
-                fh.write(self.timestamp)
+    def copy_files(self):
+        if self.remove:
+            if os.path.isdir(self.dest_path):
+                self.log.info("Removing old files: {}".format(self.dest_path))
+                shutil.rmtree(self.dest_path)
+        else:
+            if os.path.isdir(self.dest_path):
+                if self.force:
+                    self.log.info("Overwriting files: {}".format(self.dest_path))
+                    shutil.rmtree(self.dest_path)
+                else:
+                    self.fail("Destination already exists, add --force to overwrite: {}".format(self.dest_path))
+
+            shutil.copytree(self.src_path, self.dest_path, ignore=shutil.ignore_patterns(*self.ignore))
+            self.log.info("Source: {}".format(self.src_path))
+            self.log.info("Destination: {}".format(self.dest_path))
 
     def start(self):
-        super(PushApp, self).start()        
-        self.parse_src_dest()
+        super(BaseNbGraderApp, self).start() 
+        self.init_src()
+        self.init_dest()
         self.ensure_directories()
-        self.calculate_dest_path()
         self.copy_files()
 

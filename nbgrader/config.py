@@ -201,3 +201,14 @@ class NbGraderConfig(LinkedConfig):
             """
         )
     )
+    
+    course_id = Unicode(
+        '',
+        config=True,
+        help=dedent(
+            """
+            The course name. This MUST be specified, either by setting the
+            config option, or using the --course option on the command line.
+            """
+        )
+    )
