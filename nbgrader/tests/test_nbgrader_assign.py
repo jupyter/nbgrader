@@ -84,3 +84,24 @@ class TestNbgraderAssign(TestBase):
 
             notebook = gb.find_notebook("test", "ps1")
             assert_equal(len(notebook.grade_cells), 8)
+
+    def test_force(self):
+        """Ensure the force option works properly"""
+        with self._temp_cwd(["files/test.ipynb"]):
+            os.makedirs('source/ps1')
+            shutil.move("test.ipynb", "source/ps1/test.ipynb")
+            with open("source/ps1/foo.txt", "w") as fh:
+                fh.write("foo")
+
+            self._run_command('nbgrader assign ps1 --create')
+            assert os.path.isfile("release/ps1/test.ipynb")
+            assert os.path.isfile("release/ps1/foo.txt")
+
+            # this should fail, because it already exists
+            self._run_command('nbgrader assign ps1', 1)
+
+            # force overwrite
+            os.remove("source/ps1/foo.txt")
+            self._run_command('nbgrader assign ps1 --force')
+            assert os.path.isfile("release/ps1/test.ipynb")
+            assert not os.path.isfile("release/ps1/foo.txt")
