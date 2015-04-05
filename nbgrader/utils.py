@@ -1,6 +1,6 @@
 import hashlib
 import autopep8
-import subprocess as sp
+import dateutil.parser
 
 from IPython.utils.py3compat import str_to_bytes
 
@@ -63,3 +63,11 @@ def compute_checksum(cell):
         m.update(str_to_bytes(cell.metadata.nbgrader['grade_id']))
 
     return m.hexdigest()
+
+def parse_utc(ts):
+    """Parses a timestamp into datetime format, converting it to UTC if necessary."""
+    if isinstance(ts, str):
+        ts = dateutil.parser.parse(ts)
+    if ts.tzinfo is not None:
+        ts = (ts - ts.utcoffset()).replace(tzinfo=None)
+    return ts

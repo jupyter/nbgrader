@@ -12,7 +12,7 @@ class TestNbgraderAutograde(TestBase):
     def _setup_db(self):
         dbpath = self._init_db()
         gb = Gradebook(dbpath)
-        gb.add_assignment("ps1", duedate=datetime.datetime.now())
+        gb.add_assignment("ps1", duedate="2015-02-02 14:58:23.948203 PST")
         gb.add_student("foo")
         gb.add_student("bar")
         return dbpath
@@ -116,12 +116,12 @@ class TestNbgraderAutograde(TestBase):
             os.makedirs('submitted/foo/ps1')
             shutil.move('submitted-unchanged.ipynb', 'submitted/foo/ps1/p1.ipynb')
             with open('submitted/foo/ps1/timestamp.txt', 'w') as fh:
-                fh.write(datetime.datetime.now().isoformat())
+                fh.write("2015-02-02 15:58:23.948203 PST")
 
             os.makedirs('submitted/bar/ps1')
             shutil.move('submitted-changed.ipynb', 'submitted/bar/ps1/p1.ipynb')
             with open('submitted/bar/ps1/timestamp.txt', 'w') as fh:
-                fh.write((datetime.datetime.now() - datetime.timedelta(days=1)).isoformat())
+                fh.write("2015-02-01 14:58:23.948203 PST")
 
             self._run_command('nbgrader autograde ps1 --db="{}"'.format(dbpath))
 
@@ -135,3 +135,6 @@ class TestNbgraderAutograde(TestBase):
             assert submission.total_seconds_late > 0
             submission = gb.find_submission('ps1', 'bar')
             assert submission.total_seconds_late == 0
+
+            # make sure it still works to run it a second time
+            self._run_command('nbgrader autograde ps1 --db="{}"'.format(dbpath))

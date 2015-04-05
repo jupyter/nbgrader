@@ -1,5 +1,7 @@
 from __future__ import division
 
+from nbgrader import utils
+
 from sqlalchemy import (create_engine, ForeignKey, Column, String, Text,
     DateTime, Interval, Float, Enum, UniqueConstraint)
 from sqlalchemy.orm import sessionmaker, scoped_session, relationship, column_property
@@ -11,8 +13,6 @@ from sqlalchemy.sql import and_
 from sqlalchemy import select, func, exists, case, literal_column
 
 from uuid import uuid4
-
-import dateutil.parser
 
 Base = declarative_base()
 
@@ -642,8 +642,8 @@ class Gradebook(object):
         nbgrader.api.Assignment object
 
         """
-        if 'duedate' in kwargs and isinstance(kwargs['duedate'], str):
-            kwargs['duedate'] = dateutil.parser.parse(kwargs['duedate'])
+        if 'duedate' in kwargs:
+            kwargs['duedate'] = utils.parse_utc(kwargs['duedate'])
         assignment = Assignment(name=name, **kwargs)
         self.db.add(assignment)
         try:
@@ -698,7 +698,10 @@ class Gradebook(object):
             assignment = self.add_assignment(name, **kwargs)
         else:
             for attr in kwargs:
-                setattr(assignment, attr, kwargs[attr])
+                if attr == 'duedate':
+                    setattr(assignment, attr, utils.parse_utc(kwargs[attr]))
+                else:
+                    setattr(assignment, attr, kwargs[attr])
             try:
                 self.db.commit()
             except (IntegrityError, FlushError) as e:
@@ -1019,6 +1022,9 @@ class Gradebook(object):
 
         """
 
+        if 'timestamp' in kwargs:
+            kwargs['timestamp'] = utils.parse_utc(kwargs['timestamp'])
+
         try:
             submission = SubmittedAssignment(
                 assignment=self.find_assignment(assignment),
@@ -1098,7 +1104,10 @@ class Gradebook(object):
             submission = self.add_submission(assignment, student, **kwargs)
         else:
             for attr in kwargs:
-                setattr(submission, attr, kwargs[attr])
+                if attr == 'timestamp':
+                    setattr(submission, attr, utils.parse_utc(kwargs[attr]))
+                else:
+                    setattr(submission, attr, kwargs[attr])
             try:
                 self.db.commit()
             except (IntegrityError, FlushError) as e:
