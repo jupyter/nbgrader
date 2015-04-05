@@ -116,7 +116,8 @@ class ReleaseApp(BaseNbGraderApp):
     def init_src(self):
         self.src_path = os.path.abspath(os.path.join(self.release_directory, self.assignment_id))
         if not os.path.isdir(self.src_path):
-            self.fail("The source directory doesn't exist: {}".format(self.src_path))
+            self.log.error("Assignment not found: {}/{}".format(self.release_directory, self.assignment_id))
+            self.fail("You have to run `nbgrader release` from your main nbgrader directory.")
         self.log.debug("src_path: {}".format(self.src_path))
         self.log.debug("assignment_id: {}".format(self.assignment_id))
         self.log.debug("course_id: {}".format(self.course_id))
@@ -150,20 +151,22 @@ class ReleaseApp(BaseNbGraderApp):
     def copy_files(self):
         if self.remove:
             if os.path.isdir(self.dest_path):
-                self.log.info("Removing old files: {}".format(self.dest_path))
+                self.log.info("Removing old files: {} {}".format(self.course_key, self.assignment_id))
                 shutil.rmtree(self.dest_path)
+            else:
+                self.log.info("No existing files exist for: {} {}".format(self.course_key, self.assignment_id))
         else:
             if os.path.isdir(self.dest_path):
                 if self.force:
-                    self.log.info("Overwriting files: {}".format(self.dest_path))
+                    self.log.info("Overwriting files: {} {}".format(self.course_key, self.assignment_id))
                     shutil.rmtree(self.dest_path)
                 else:
-                    self.fail("Destination already exists, add --force to overwrite: {}".format(self.dest_path))
-
+                    self.fail("Destination already exists, add --force to overwrite: {} {}".format(self.course_key, self.assignment_id))
             shutil.copytree(self.src_path, self.dest_path, ignore=shutil.ignore_patterns(*self.ignore))
             self.log.info("Source: {}".format(self.src_path))
             self.log.info("Destination: {}".format(self.dest_path))
-
+            self.log.info("Released as: {} {}".format(self.course_key, self.assignment_id))
+            
     def start(self):
         super(BaseNbGraderApp, self).start() 
         self.init_src()
