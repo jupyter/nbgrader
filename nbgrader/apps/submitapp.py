@@ -1,4 +1,10 @@
 import os
+from stat import (
+    S_IRUSR, S_IWUSR, S_IXUSR,
+    S_IRGRP, S_IWGRP, S_IXGRP,
+    S_IROTH, S_IWOTH, S_IXOTH,
+    S_ISVTX, S_ISGID
+)
 
 from IPython.utils.traitlets import Unicode, List, Bool
 
@@ -57,4 +63,6 @@ class SubmitApp(TransferApp):
         self.do_copy(self.src_path, self.dest_path)
         with open(os.path.join(self.dest_path, "timestamp.txt"), "w") as fh:
             fh.write(self.timestamp)
+        # Make this 0777=ugo=rwx so the instructor can delete later. Hidden from other users by the timestamp.
+        os.chmod(self.dest_path, S_IRUSR|S_IWUSR|S_IXUSR|S_IRGRP|S_IWGRP|S_IXGRP|S_IROTH|S_IWOTH|S_IXOTH)
         self.log.info("Submitted as: {} {} {}".format(self.course_id, self.assignment_id, str(self.timestamp)))

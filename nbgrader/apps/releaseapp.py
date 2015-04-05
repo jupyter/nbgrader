@@ -1,6 +1,12 @@
 import os
 import sys
 import shutil
+from stat import (
+    S_IRUSR, S_IWUSR, S_IXUSR,
+    S_IRGRP, S_IWGRP, S_IXGRP,
+    S_IROTH, S_IWOTH, S_IXOTH,
+    S_ISVTX, S_ISGID
+)
 
 from IPython.utils.traitlets import Unicode, List, Bool
 
@@ -59,9 +65,12 @@ class ReleaseApp(TransferApp):
         self.outbound_path = os.path.join(self.course_path, 'outbound')
         self.inbound_path = os.path.join(self.course_path, 'inbound')
         self.dest_path = os.path.join(self.outbound_path, self.assignment_id)
-        self.ensure_directory(self.course_path, 0o755)
-        self.ensure_directory(self.outbound_path, 0o755)
-        self.ensure_directory(self.inbound_path, 0o733)
+        # 0755
+        self.ensure_directory(self.course_path, S_IRUSR|S_IWUSR|S_IXUSR|S_IRGRP|S_IXGRP|S_IROTH|S_IXOTH)
+        # 0755
+        self.ensure_directory(self.outbound_path, S_IRUSR|S_IWUSR|S_IXUSR|S_IRGRP|S_IXGRP|S_IROTH|S_IXOTH)
+        # 0733 with set GID so student submission will have the instructors group
+        self.ensure_directory(self.inbound_path, S_ISGID|S_IRUSR|S_IWUSR|S_IXUSR|S_IWGRP|S_IXGRP|S_IWOTH|S_IXOTH)
 
     def ensure_directory(self, path, mode):
         """Ensure that the path exists, has the right mode and is self owned."""
