@@ -9,6 +9,7 @@ from .releaseapp import ReleaseApp
 from .collectapp import CollectApp
 from .fetchapp import FetchApp
 from .submitapp import SubmitApp
+from .listapp import ListApp
 from .nbgraderapp import NbGraderApp
 
 
@@ -26,4 +27,5 @@ __all__ = [
     'CollectApp',
     'FetchApp',
     'SubmitApp',
+    'ListApp',
 ]

@@ -20,6 +20,7 @@ from nbgrader.apps import (
     CollectApp,
     FetchApp,
     SubmitApp,
+    ListApp
 )
 
 aliases = {}
@@ -156,6 +157,15 @@ class NbGraderApp(BaseNbGraderApp):
                 """
                 Submit an assignment to an instructor through the nbgrader exchange.
                 Intended for use by students only.
+                """
+            ).strip()
+        ),
+        list=(
+            ListApp,
+            dedent(
+                """
+                List inbound or outbound assignments in the nbgrader exchange.
+                Intended for use by instructors and students.
                 """
             ).strip()
         ),
