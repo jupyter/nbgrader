@@ -18,7 +18,7 @@ from nbgrader.apps import (
     ValidateApp,
     ReleaseApp,
 #    CollectApp,
-#    FetchApp,
+    FetchApp,
     SubmitApp,
 )
 
@@ -141,15 +141,15 @@ class NbGraderApp(BaseNbGraderApp):
         #        """
         #    ).strip()
         #),
-        #fetch=(
-        #    FetchApp,
-        #    dedent(
-        #        """
-        #        Fetch an assignment from an instructor through the nbgrader exchange.
-        #        Intended for use by students only.
-        #        """
-        #    ).strip()
-        #),
+        fetch=(
+            FetchApp,
+            dedent(
+                """
+                Fetch an assignment from an instructor through the nbgrader exchange.
+                Intended for use by students only.
+                """
+            ).strip()
+        ),
         submit=(
             SubmitApp,
             dedent(

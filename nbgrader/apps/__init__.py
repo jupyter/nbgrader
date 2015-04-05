@@ -7,7 +7,7 @@ from .formgradeapp import FormgradeApp
 from .validateapp import ValidateApp
 from .releaseapp import ReleaseApp
 #from .collectapp import CollectApp
-#from .fetchapp import FetchApp
+from .fetchapp import FetchApp
 from .submitapp import SubmitApp
 from .nbgraderapp import NbGraderApp
 
@@ -24,6 +24,6 @@ __all__ = [
     'ValidateApp',
     'ReleaseApp',
 #    'CollectApp',
-#    'FetchApp',
+    'FetchApp',
     'SubmitApp',
 ]

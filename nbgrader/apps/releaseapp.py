@@ -4,17 +4,17 @@ import shutil
 
 from IPython.utils.traitlets import Unicode, List, Bool
 
-from nbgrader.apps.baseapp import TransferApp, nbgrader_aliases, nbgrader_flags
+from nbgrader.apps.baseapp import TransferApp, transfer_aliases, transfer_flags
 from nbgrader.utils import self_owned
 
+
 aliases = {}
-aliases.update(nbgrader_aliases)
+aliases.update(transfer_aliases)
 aliases.update({
-    "timezone": "SubmitApp.timezone"
 })
 
 flags = {}
-flags.update(nbgrader_flags)
+flags.update(transfer_flags)
 flags.update({
     'force': (
         {'ReleaseApp' : {'force' : True}},
@@ -25,7 +25,6 @@ flags.update({
         "Only remove existing files in the exchange."
     ),
 })
-
 
 class ReleaseApp(TransferApp):
 
@@ -58,6 +57,9 @@ class ReleaseApp(TransferApp):
         self.outbound_path = os.path.join(self.course_path, 'outbound')
         self.inbound_path = os.path.join(self.course_path, 'inbound')
         self.dest_path = os.path.join(self.outbound_path, self.assignment_id)
+        self.ensure_directory(self.course_path, 0o755)
+        self.ensure_directory(self.outbound_path, 0o755)
+        self.ensure_directory(self.inbound_path, 0o733)
 
     def ensure_directory(self, path, mode):
         """Ensure that the path exists, has the right mode and is self owned."""
@@ -69,12 +71,6 @@ class ReleaseApp(TransferApp):
         else:
             if not self_owned(path):
                 self.fail("You don't own the directory: {}".format(path))
-    
-    def ensure_directories(self):
-        """Ensure the dest directories exist and have the right mode/owner."""
-        self.ensure_directory(self.course_path, 0o755)
-        self.ensure_directory(self.outbound_path, 0o755)
-        self.ensure_directory(self.inbound_path, 0o733)
 
     def copy_files(self):
         if self.remove:
@@ -90,9 +86,9 @@ class ReleaseApp(TransferApp):
                     shutil.rmtree(self.dest_path)
                 else:
                     self.fail("Destination already exists, add --force to overwrite: {} {}".format(self.course_id, self.assignment_id))
-            self.do_copy(self.src_path, self.dest_path)
             self.log.info("Source: {}".format(self.src_path))
             self.log.info("Destination: {}".format(self.dest_path))
+            self.do_copy(self.src_path, self.dest_path)
             self.log.info("Released as: {} {}".format(self.course_id, self.assignment_id))
             
 

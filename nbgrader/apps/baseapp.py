@@ -41,32 +41,6 @@ base_flags = {
     ),
 }
 
-# These are the aliases and flags for nbgrader apps that inherit only from
-# BaseNbGraderApp (and not BaseNbConvertApp)
-nbgrader_aliases = {}
-nbgrader_aliases.update(base_aliases)
-nbgrader_aliases.update({
-    'student': 'NbGraderConfig.student_id',
-    'assignment': 'NbGraderConfig.assignment_id',
-    'notebook': 'NbGraderConfig.notebook_id',
-    'db': 'NbGraderConfig.db_url',
-    'course': 'NbGraderConfig.course_id'
-})
-nbgrader_flags = {}
-nbgrader_flags.update(base_flags)
-nbgrader_flags.update({
-})
-
-# These are the aliases and flags for nbgrade apps that inherit from BaseNbConvertApp
-nbconvert_aliases = {}
-nbconvert_aliases.update(nbgrader_aliases)
-nbconvert_aliases.update({
-})
-nbconvert_flags = {}
-nbconvert_flags.update(nbgrader_flags)
-nbconvert_flags.update({
-})
-
 class BaseApp(BaseIPythonApplication):
     """A base class for all the nbgrader apps. This sets a few important defaults,
     like the IPython profile (nbgrader) and that this profile should be created
@@ -140,6 +114,22 @@ class BaseApp(BaseIPythonApplication):
         super(BaseApp, self).initialize(argv)
 
 
+# These are the aliases and flags for nbgrader apps that inherit only from
+# BaseNbGraderApp (and not BaseNbConvertApp)
+nbgrader_aliases = {}
+nbgrader_aliases.update(base_aliases)
+nbgrader_aliases.update({
+    'student': 'NbGraderConfig.student_id',
+    'assignment': 'NbGraderConfig.assignment_id',
+    'notebook': 'NbGraderConfig.notebook_id',
+    'db': 'NbGraderConfig.db_url',
+    'course': 'NbGraderConfig.course_id'
+})
+nbgrader_flags = {}
+nbgrader_flags.update(base_flags)
+nbgrader_flags.update({
+})
+        
 class BaseNbGraderApp(BaseApp):
     """A base class for all the nbgrader apps that depend on the nbgrader
     directory structure.
@@ -175,6 +165,18 @@ class BaseNbGraderApp(BaseApp):
         super(BaseNbGraderApp, self).__init__(*args, **kwargs)
         self._nbgrader_config = NbGraderConfig(parent=self)
 
+        
+# These are the aliases and flags for nbgrader apps that inherit only from
+# TransferApp
+transfer_aliases = {}
+transfer_aliases.update(nbgrader_aliases)
+transfer_aliases.update({
+    "timezone": "TransferApp.timezone"
+})
+transfer_flags = {}
+transfer_flags.update(nbgrader_flags)
+transfer_flags.update({
+})
         
 class TransferApp(BaseNbGraderApp):
     """A base class for the release, collect, fetch and submit apps.
@@ -243,10 +245,6 @@ class TransferApp(BaseNbGraderApp):
         """"""
         raise NotImplemented
     
-    def ensure_directories(self):
-        """"""
-        raise NotImplemented
-    
     def copy_files(self):
         """"""
         raise NotImplemented
@@ -259,9 +257,18 @@ class TransferApp(BaseNbGraderApp):
         super(TransferApp, self).start() 
         self.init_src()
         self.init_dest()
-        self.ensure_directories()
         self.copy_files()
 
+
+# These are the aliases and flags for nbgrade apps that inherit from BaseNbConvertApp
+nbconvert_aliases = {}
+nbconvert_aliases.update(nbgrader_aliases)
+nbconvert_aliases.update({
+})
+nbconvert_flags = {}
+nbconvert_flags.update(nbgrader_flags)
+nbconvert_flags.update({
+})
 
 class BaseNbConvertApp(BaseNbGraderApp, NbConvertApp):
     """A base class for all the nbgrader apps that utilize nbconvert. This
