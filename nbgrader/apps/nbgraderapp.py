@@ -19,7 +19,7 @@ from nbgrader.apps import (
     ReleaseApp,
 #    CollectApp,
 #    FetchApp,
-#    SubmitApp,
+    SubmitApp,
 )
 
 aliases = {}
@@ -150,15 +150,15 @@ class NbGraderApp(BaseNbGraderApp):
         #        """
         #    ).strip()
         #),
-        #submit=(
-        #    SubmitApp,
-        #    dedent(
-        #        """
-        #        Submit an assignment to an instructor through the nbgrader exchange.
-        #        Intended for use by students only.
-        #        """
-        #    ).strip()
-        #),
+        submit=(
+            SubmitApp,
+            dedent(
+                """
+                Submit an assignment to an instructor through the nbgrader exchange.
+                Intended for use by students only.
+                """
+            ).strip()
+        ),
     )
 
     def _classes_default(self):

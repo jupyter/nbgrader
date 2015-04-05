@@ -2,8 +2,6 @@ import os
 import sys
 import shutil
 
-from textwrap import dedent
-
 from IPython.utils.traitlets import Unicode, List, Bool
 
 from nbgrader.apps.baseapp import TransferApp, nbgrader_aliases, nbgrader_flags
@@ -70,8 +68,7 @@ class ReleaseApp(TransferApp):
             os.chmod(path, mode)
         else:
             if not self_owned(path):
-                self.log.error("You don't own the directory: {}".format(path))
-                sys.exit(1)
+                self.fail("You don't own the directory: {}".format(path))
     
     def ensure_directories(self):
         """Ensure the dest directories exist and have the right mode/owner."""
