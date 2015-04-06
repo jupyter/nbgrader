@@ -93,8 +93,35 @@ class TestNbgraderFormgradeHubAuth(TestNbgraderFormgrade):
         self._wait_for_gradebook_page("assignments")
 
 
+class TestNbgraderHubToken(TestNbgraderFormgradeHubAuth):
+
+    @classmethod
+    def _setup_formgrade_config(cls):
+        # create config file
+        with open("nbgrader_config.py", "w") as fh:
+            fh.write(dedent(
+                """
+                c = get_config()
+                c.FormgradeApp.port = 9000
+                c.FormgradeApp.authenticator_class = "nbgrader.auth.hubauth.HubAuth"
+                c.HubAuth.graders = ["foobar"]
+                c.HubAuth.notebook_url_prefix = "class_files"
+                c.HubAuth.proxy_token = 'foo'
+                c.HubAuth.generate_hubapi_token = True
+                c.HubAuth.hub_db = '{}/jupyterhub.sqlite'
+                """.format(cls.tempdir)
+            ))
+
+    @classmethod
+    def _start_formgrader(cls):
+        cls._start_jupyterhub()
+        # Call parent's parent's _start_formgrader method.
+        super(TestNbgraderFormgradeHubAuth, cls)._start_formgrader()
+
+
 del TestNbgraderFormgrade
 
 # don't run tests if it's not python 3
 if sys.version_info[0] != 3:
     del TestNbgraderFormgradeHubAuth
+    del TestNbgraderHubToken
