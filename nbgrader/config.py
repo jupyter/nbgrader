@@ -201,3 +201,15 @@ class NbGraderConfig(LinkedConfig):
             """
         )
     )
+    
+    course_id = Unicode(
+        '',
+        config=True,
+        help=dedent(
+            """
+            A key that is unique per instructor and course. This MUST be
+            specified, either by setting the config option, or using the
+            --course option on the command line.
+            """
+        )
+    )

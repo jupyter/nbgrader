@@ -1,15 +1,17 @@
+import os
 import hashlib
 import autopep8
 import dateutil.parser
+import pwd
 
 from IPython.utils.py3compat import str_to_bytes
+
 
 def is_grade(cell):
     """Returns True if the cell is a grade cell."""
     if 'nbgrader' not in cell.metadata:
         return False
     return cell.metadata['nbgrader'].get('grade', False)
-
 
 def is_solution(cell):
     """Returns True if the cell is a solution cell."""
@@ -71,3 +73,33 @@ def parse_utc(ts):
     if ts.tzinfo is not None:
         ts = (ts - ts.utcoffset()).replace(tzinfo=None)
     return ts
+
+def check_mode(path, read=False, write=False, execute=False):
+    """Can the current user can rwx the path."""
+    mode = 0
+    if read:
+        mode |= os.R_OK
+    if write:
+        mode |= os.W_OK
+    if execute:
+        mode |= os.X_OK
+    return os.access(path, mode)
+
+def check_directory(path, read=False, write=False, execute=False):
+    """Does that path exist and can the current user rwx."""
+    if os.path.isdir(path) and check_mode(path, read=read, write=write, execute=execute):
+        return True
+    else:
+        return False
+
+def get_username():
+    """Get the username of the current process."""
+    return pwd.getpwuid(os.getuid())[0]
+
+def find_owner(path):
+    """Get the username of the owner of path."""
+    return pwd.getpwuid(os.stat(os.path.abspath(path)).st_uid).pw_name
+
+def self_owned(path):
+    """Is the path owned by the current user of this process?"""
+    return get_username() == find_owner(os.path.abspath(path))

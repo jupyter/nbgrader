@@ -1,218 +1,89 @@
 import os
-import shutil
-import tempfile
-import datetime
-import tarfile
-import glob
-from dateutil.tz import gettz
+from stat import (
+    S_IRUSR, S_IWUSR, S_IXUSR,
+    S_IRGRP, S_IWGRP, S_IXGRP,
+    S_IROTH, S_IWOTH, S_IXOTH,
+    S_ISVTX, S_ISGID
+)
 
-from textwrap import dedent
+from nbgrader.apps.baseapp import TransferApp, transfer_aliases, transfer_flags
+from nbgrader.utils import get_username, check_mode
 
-from IPython.utils.traitlets import Unicode, List
-from IPython.config.application import catch_config_error
-
-from nbgrader.apps.baseapp import BaseApp, base_aliases, base_flags
 
 aliases = {}
-aliases.update(base_aliases)
+aliases.update(transfer_aliases)
 aliases.update({
-    "assignment": "SubmitApp.assignment_id",
-    "submit-dir": "SubmitApp.submissions_directory",
-    "timezone": "SubmitApp.timezone"
 })
 
 flags = {}
-flags.update(base_flags)
+flags.update(transfer_flags)
 flags.update({
 })
 
-class SubmitApp(BaseApp):
+class SubmitApp(TransferApp):
 
     name = u'nbgrader-submit'
-    description = u'Submit a completed assignment'
+    description = u'Submit an assignment to the nbgrader exchange'
 
     aliases = aliases
     flags = flags
 
     examples = """
-        To submit all files in the current directory under the name "ps01":
-            nbgrader submit --assignment ps01
+        Submit an assignment for grading. For the usage of students.
+        
+        You must run this command from the directory containing the assignments
+        sub-directory. For example, if you want to submit an assignment named
+        `assignment1`, that must be a sub-directory of your current working directory.
+        If you are inside the `assignment1` directory, it won't work.
+        
+        To fetch an assignment you must first know the `course_id` for your course.
+        If you don't know it, ask your instructor.
 
-        To submit all files in the "Problem Set 1" directory under the name
-        "Problem Set 1":
-            nbgrader submit "Problem Set 1"
-
-        To submit all files in the "Problem Set 1" directory under the name "ps01":
-            nbgrader submit "Problem Set 1" --assignment ps01
+        To submit `assignment1` to the course `phys101`:
+        
+            nbgrader submit assignment1 phys101
+        
+        You can submit an assignment multiple times and the instructor will always
+        get the most recent version. Your assignment submission are timestamped
+        so instructors can tell when you turned it in. No other students will
+        be able to see your submissions.
         """
-
-    student = Unicode(os.environ['USER'])
-
-    timezone = Unicode(
-        "UTC", config=True,
-        help="Timezone for recording timestamps")
-
-    timestamp_format = Unicode(
-        "%Y-%m-%d %H:%M:%S %Z", config=True,
-        help="Format string for timestamps")
-
-    assignment_directory = Unicode(
-        '.', config=True,
-        help=dedent(
-            """
-            The directory containing the assignment to be submitted.
-            """
-        )
-    )
-    assignment_id = Unicode(
-        '', config=True,
-        help=dedent(
-            """
-            The name of the assignment. Defaults to the name of the assignment
-            directory.
-            """
-        )
-    )
-    submissions_directory = Unicode(
-        "{}/.nbgrader/submissions".format(os.environ['HOME']),
-        config=True,
-        help=dedent(
-            """
-            The directory where the submission will be saved.
-            """
-        )
-    )
-
-    ignore = List(
-        [
-            ".ipynb_checkpoints",
-            "*.pyc",
-            "__pycache__"
-        ],
-        config=True,
-        help=dedent(
-            """
-            List of file names or file globs to be ignored when creating the
-            submission.
-            """
-        )
-    )
-
-    @catch_config_error
-    def initialize(self, argv=None):
-        super(SubmitApp, self).initialize(argv)
-
-        if not os.path.exists(self.submissions_directory):
-            os.makedirs(self.submissions_directory)
-
-        self.init_assignment_root()
-
-        if self.assignment_id == '':
-            self.assignment_id = os.path.basename(self.assignment_directory)
-
-        # record the timestamp
-        tz = gettz(self.timezone)
-        if tz is None:
-            raise ValueError("Invalid timezone: {}".format(self.timezone))
-        self.timestamp = datetime.datetime.now(tz).strftime(self.timestamp_format)
-
-    def init_assignment_root(self):
-        # Specifying notebooks on the command-line overrides (rather than adds)
-        # the notebook list
-        if self.extra_args:
-            patterns = self.extra_args
+    
+    def init_args(self):
+        if len(self.extra_args) == 2:
+            # The first argument (assignment_id) is processed in init_src
+            self.course_id = self.extra_args[1]
         else:
-            patterns = [self.assignment_directory]
+            self.fail("Invalid number of args, call as `nbgrader submit assignment_id course_id`")
 
-        if len(patterns) == 0:
-            pass
+    def init_src(self):
+        self.src_path = os.path.abspath(self.extra_args[0])
+        self.assignment_id = os.path.split(self.src_path)[-1]
+        if not os.path.isdir(self.src_path):
+            self.fail("Assignment not found: {}".format(self.src_path))
+    
+    def init_dest(self):
+        self.course_path = os.path.join(self.exchange_directory, self.course_id)
+        self.inbound_path = os.path.join(self.course_path, 'inbound')
+        self.assignment_filename = get_username() + '+' + self.assignment_id + '+' + self.timestamp
+        self.dest_path = os.path.join(self.inbound_path, self.assignment_filename)
+        if not os.path.isdir(self.inbound_path):
+            self.fail("Inbound directory doesn't exist: {}".format(self.inbound_path))
+        if not check_mode(self.inbound_path, write=True, execute=True):
+            self.fail("You don't have write permissions to the directory: {}".format(self.inbound_path))
 
-        elif len(patterns) == 1:
-            self.assignment_directory = patterns[0]
-
-        else:
-            raise ValueError("You must specify the name of a directory")
-
-        self.assignment_directory = os.path.abspath(self.assignment_directory)
-
-        if not os.path.isdir(self.assignment_directory):
-            raise ValueError("Path is not a directory: {}".format(self.assignment_directory))
-
-    def _is_ignored(self, filename):
-        dirname = os.path.dirname(filename)
-        for expr in self.ignore:
-            globs = glob.glob(os.path.join(dirname, expr))
-            if filename in globs:
-                self.log.debug("Ignoring file: {}".format(filename))
-                return True
-        return False
-
-    def make_temp_copy(self):
-        """Copy the submission to a temporary directory. Returns the path to the
-        temporary copy of the submission."""
-        # copy everything to a temporary directory
-        pth = os.path.join(self.tmpdir, self.assignment_id)
-        shutil.copytree(self.assignment_directory, pth)
-        os.chdir(self.tmpdir)
-
-        # get the user name, write it to file
-        with open(os.path.join(self.assignment_id, "user.txt"), "w") as fh:
-            fh.write(self.student)
-
-        # save the submission time
-        with open(os.path.join(self.assignment_id, "timestamp.txt"), "w") as fh:
+    def copy_files(self):
+        self.log.info("Source: {}".format(self.src_path))
+        self.log.info("Destination: {}".format(self.dest_path))
+        self.do_copy(self.src_path, self.dest_path)
+        with open(os.path.join(self.dest_path, "timestamp.txt"), "w") as fh:
             fh.write(self.timestamp)
+        # Make this 0777=ugo=rwx so the instructor can delete later. Hidden from other users by the timestamp.
+        os.chmod(
+            self.dest_path,
+            S_IRUSR|S_IWUSR|S_IXUSR|S_IRGRP|S_IWGRP|S_IXGRP|S_IROTH|S_IWOTH|S_IXOTH
+        )
+        self.log.info("Submitted as: {} {} {}".format(
+            self.course_id, self.assignment_id, str(self.timestamp)
+        ))
 
-        return pth
-
-    def make_archive(self, path_to_submission):
-        """Make a tarball of the submission. Returns the path to the created
-        archive."""
-        root, submission = os.path.split(path_to_submission)
-        os.chdir(root)
-
-        archive = os.path.join(self.tmpdir, "{}.tar.gz".format(self.assignment_id))
-        tf = tarfile.open(archive, "w:gz")
-
-        for (dirname, dirnames, filenames) in os.walk(submission):
-            if self._is_ignored(dirname):
-                continue
-
-            for filename in filenames:
-                pth = os.path.join(dirname, filename)
-                if not self._is_ignored(pth):
-                    self.log.debug("Adding '{}' to submission".format(pth))
-                    tf.add(pth)
-
-        tf.close()
-        return archive
-
-    def submit(self, path_to_tarball):
-        """Submit the assignment."""
-        archive = "{}.tar.gz".format(self.assignment_id)
-        target = os.path.join(self.submissions_directory, archive)
-        shutil.copy(path_to_tarball, target)
-        self.log.debug("Saved to {}".format(target))
-        return target
-
-    def start(self):
-        super(SubmitApp, self).start()
-        self.tmpdir = tempfile.mkdtemp()
-        self.assignment_directory = os.path.abspath(self.assignment_directory)
-        self.submissions_directory = os.path.abspath(self.submissions_directory)
-
-        try:
-            path_to_copy = self.make_temp_copy()
-            path_to_tarball = self.make_archive(path_to_copy)
-            path_to_submission = self.submit(path_to_tarball)
-
-        except:
-            raise
-
-        else:
-            self.log.debug("Saved to '{}'".format(path_to_submission))
-            print("'{}' submitted by {} at {}".format(
-                self.assignment_id, self.student, self.timestamp))
-
-        finally:
-            shutil.rmtree(self.tmpdir)

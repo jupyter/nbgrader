@@ -1,5 +1,5 @@
-import sys
 import os
+import dateutil.parser
 
 from textwrap import dedent
 
@@ -54,12 +54,15 @@ class AutogradeApp(BaseNbConvertApp):
         improve their score).
 
         To grade all submissions for "Problem Set 1":
+        
             nbgrader autograde "Problem Set 1"
 
         To grade only the submission by student with ID 'Hacker':
+        
             nbgrader autograde "Problem Set 1" --student Hacker
 
         To grade only the notebooks that start with '1':
+        
             nbgrader autograde "Problem Set 1" --notebook "1*"
         """
 
@@ -105,14 +108,15 @@ class AutogradeApp(BaseNbConvertApp):
                 self.log.warning("Creating student with ID '%s'", student_id)
                 gb.add_student(student_id)
             else:
-                self.log.error("No student with ID '%s' exists in the database", student_id)
-                sys.exit(1)
+                self.fail("No student with ID '%s' exists in the database", student_id)
 
         # try to read in a timestamp from file
         timestamp_path = os.path.join(os.path.dirname(notebook_filename), 'timestamp.txt')
         if os.path.exists(timestamp_path):
             with open(timestamp_path, 'r') as fh:
                 timestamp = fh.read().strip()
+            timestamp = dateutil.parser.parse(timestamp)
+            self.log.info("Submitted at %s", timestamp)
             resources['nbgrader']['timestamp'] = timestamp
 
         return resources

@@ -8,6 +8,10 @@ import sys
 import re
 import os
 import traceback
+import logging
+import datetime
+from dateutil.tz import gettz
+import shutil
 
 from IPython.utils.traitlets import Unicode, List, Bool, Instance
 from IPython.core.application import BaseIPythonApplication
@@ -16,6 +20,7 @@ from IPython.nbconvert.nbconvertapp import NbConvertApp, DottedOrNone
 from IPython.config.loader import Config
 
 from nbgrader.config import BasicConfig, NbGraderConfig
+from nbgrader.utils import check_directory
 
 from textwrap import dedent
 
@@ -36,31 +41,6 @@ base_flags = {
     ),
 }
 
-# These are the aliases and flags for nbgrader apps that inherit only from
-# BaseNbGraderApp (and not BaseNbConvertApp)
-nbgrader_aliases = {}
-nbgrader_aliases.update(base_aliases)
-nbgrader_aliases.update({
-    'student': 'NbGraderConfig.student_id',
-    'assignment': 'NbGraderConfig.assignment_id',
-    'notebook': 'NbGraderConfig.notebook_id',
-    'db': 'NbGraderConfig.db_url'
-})
-nbgrader_flags = {}
-nbgrader_flags.update(base_flags)
-nbgrader_flags.update({
-})
-
-# These are the aliases and flags for nbgrade apps that inherit from BaseNbConvertApp
-nbconvert_aliases = {}
-nbconvert_aliases.update(nbgrader_aliases)
-nbconvert_aliases.update({
-})
-nbconvert_flags = {}
-nbconvert_flags.update(nbgrader_flags)
-nbconvert_flags.update({
-})
-
 class BaseApp(BaseIPythonApplication):
     """A base class for all the nbgrader apps. This sets a few important defaults,
     like the IPython profile (nbgrader) and that this profile should be created
@@ -74,6 +54,14 @@ class BaseApp(BaseIPythonApplication):
     aliases = base_aliases
     flags = base_flags
 
+    def _log_level_default(self):
+        return logging.INFO
+    
+    def fail(self, msg):
+        """Log the error msg using self.log.error and exit using sys.exit(1)."""
+        self.log.error(msg)
+        sys.exit(1)
+    
     verbose_crash = Bool(False)
 
     # This is a hack in order to centralize the config options inherited from
@@ -126,6 +114,22 @@ class BaseApp(BaseIPythonApplication):
         super(BaseApp, self).initialize(argv)
 
 
+# These are the aliases and flags for nbgrader apps that inherit only from
+# BaseNbGraderApp (and not BaseNbConvertApp)
+nbgrader_aliases = {}
+nbgrader_aliases.update(base_aliases)
+nbgrader_aliases.update({
+    'student': 'NbGraderConfig.student_id',
+    'assignment': 'NbGraderConfig.assignment_id',
+    'notebook': 'NbGraderConfig.notebook_id',
+    'db': 'NbGraderConfig.db_url',
+    'course': 'NbGraderConfig.course_id'
+})
+nbgrader_flags = {}
+nbgrader_flags.update(base_flags)
+nbgrader_flags.update({
+})
+        
 class BaseNbGraderApp(BaseApp):
     """A base class for all the nbgrader apps that depend on the nbgrader
     directory structure.
@@ -147,10 +151,25 @@ class BaseNbGraderApp(BaseApp):
     submitted_directory = Unicode()
     autograded_directory = Unicode()
     feedback_directory = Unicode()
-
+    course_id = Unicode()
+    
     # nbgrader configuration instance
     _nbgrader_config = Instance(NbGraderConfig)
 
+    ignore = List(
+        [
+            ".ipynb_checkpoints",
+            "*.pyc",
+            "__pycache__"
+        ],
+        config=True,
+        help=dedent(
+            """
+            List of file names or file globs to be ignored when copying directories.
+            """
+        )
+    )
+    
     def _classes_default(self):
         classes = super(BaseNbGraderApp, self)._classes_default()
         classes.append(NbGraderConfig)
@@ -160,6 +179,96 @@ class BaseNbGraderApp(BaseApp):
         super(BaseNbGraderApp, self).__init__(*args, **kwargs)
         self._nbgrader_config = NbGraderConfig(parent=self)
 
+        
+# These are the aliases and flags for nbgrader apps that inherit only from
+# TransferApp
+transfer_aliases = {}
+transfer_aliases.update(nbgrader_aliases)
+transfer_aliases.update({
+    "timezone": "TransferApp.timezone"
+})
+transfer_flags = {}
+transfer_flags.update(nbgrader_flags)
+transfer_flags.update({
+})
+        
+class TransferApp(BaseNbGraderApp):
+    """A base class for the list, release, collect, fetch, and submit apps.
+    
+    All of these apps involve transfering files between an instructor or students
+    files and the nbgrader exchange.
+    """
+    
+    timezone = Unicode(
+        "UTC", config=True,
+        help="Timezone for recording timestamps"
+    )
+
+    timestamp_format = Unicode(
+        "%Y-%m-%d %H:%M:%S %Z", config=True,
+        help="Format string for timestamps"
+    )
+
+    def set_timestamp(self):
+        """Set the timestap using the configured timezone."""
+        tz = gettz(self.timezone)
+        if tz is None:
+            self.fail("Invalid timezone: {}".format(self.timezone))
+        self.timestamp = datetime.datetime.now(tz).strftime(self.timestamp_format)
+
+    exchange_directory = Unicode(
+        "/srv/nbgrader/exchange",
+        config=True,
+        help="The nbgrader exchange directory writable to everyone. MUST be preexisting."
+    )
+
+    def ensure_exchange_directory(self):
+        """See if the exchange directory exists and is writable, fail if not."""
+        if not check_directory(self.exchange_directory, write=True, execute=True):
+            self.fail("Unwritable directory, please contact your instructor: {}".format(self.exchange_directory))
+
+    def init_args(self):
+        pass
+
+    @catch_config_error
+    def initialize(self, argv=None):
+        super(TransferApp, self).initialize(argv)
+        self.init_args()
+        self.ensure_exchange_directory()
+        self.set_timestamp()
+
+    def init_src(self):
+        """Compute and check the source paths for the transfer."""
+        raise NotImplemented
+    
+    def init_dest(self):
+        """Compute and check the destination paths for the transfer."""
+        raise NotImplemented
+    
+    def copy_files(self):
+        """Actually to the file transfer."""
+        raise NotImplemented
+
+    def do_copy(self, src, dest):
+        """Copy the src dir to the dest dir omitting the self.ignore globs."""
+        shutil.copytree(src, dest, ignore=shutil.ignore_patterns(*self.ignore))
+
+    def start(self):
+        super(TransferApp, self).start() 
+        self.init_src()
+        self.init_dest()
+        self.copy_files()
+
+
+# These are the aliases and flags for nbgrade apps that inherit from BaseNbConvertApp
+nbconvert_aliases = {}
+nbconvert_aliases.update(nbgrader_aliases)
+nbconvert_aliases.update({
+})
+nbconvert_flags = {}
+nbconvert_flags.update(nbgrader_flags)
+nbconvert_flags.update({
+})
 
 class BaseNbConvertApp(BaseNbGraderApp, NbConvertApp):
     """A base class for all the nbgrader apps that utilize nbconvert. This
@@ -182,7 +291,7 @@ class BaseNbConvertApp(BaseNbGraderApp, NbConvertApp):
     output_base = Unicode('')
 
     preprocessors = List([])
-
+    
     def _classes_default(self):
         classes = super(BaseNbConvertApp, self)._classes_default()
         for pp in self.preprocessors:
@@ -206,14 +315,11 @@ class BaseNbConvertApp(BaseNbGraderApp, NbConvertApp):
     def init_notebooks(self):
         # the assignment can be set via extra args
         if len(self.extra_args) > 1:
-            self.log.error("Only one argument (the assignment id) may be specified")
-            sys.exit(1)
+            self.fail("Only one argument (the assignment id) may be specified")
         elif len(self.extra_args) == 1 and self.assignment_id != "":
-            self.log.error("The assignment cannot both be specified in config and as an argument")
-            sys.exit(1)
+            self.fail("The assignment cannot both be specified in config and as an argument")
         elif len(self.extra_args) == 0 and self.assignment_id == "":
-            self.log.error("An assignment id must be specified, either as an argument or with --assignment")
-            sys.exit(1)
+            self.fail("An assignment id must be specified, either as an argument or with --assignment")
         elif len(self.extra_args) == 1:
             self.assignment_id = self.extra_args[0]
 
@@ -227,8 +333,7 @@ class BaseNbConvertApp(BaseNbGraderApp, NbConvertApp):
 
         self.notebooks = glob.glob(fullglob)
         if len(self.notebooks) == 0:
-            self.log.error("No notebooks were matched by '%s'", fullglob)
-            sys.exit(1)
+            self.fail("No notebooks were matched by '%s'", fullglob)
 
     def init_single_notebook_resources(self, notebook_filename):
         directory_structure = os.path.join(self.directory_structure, "(?P<notebook_id>.*).ipynb")

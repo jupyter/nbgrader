@@ -1,8 +1,6 @@
-import sys
-
 from textwrap import dedent
 
-from IPython.utils.traitlets import Unicode, List, Bool
+from IPython.utils.traitlets import List, Bool
 
 from nbgrader.api import Gradebook, MissingEntry
 from nbgrader.apps.baseapp import (
@@ -141,7 +139,6 @@ class AssignApp(BaseNbConvertApp):
                 self.log.warning("Creating assignment '%s'", assignment_id)
                 gb.add_assignment(assignment_id)
             else:
-                self.log.error("No assignment called '%s' exists in the database", assignment_id)
-                sys.exit(1)
+                self.fail("No assignment called '%s' exists in the database", assignment_id)
 
         return resources

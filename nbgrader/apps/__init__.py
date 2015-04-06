@@ -4,9 +4,14 @@ from .autogradeapp import AutogradeApp
 from .feedbackapp import FeedbackApp
 from .notebookapp import FormgradeNotebookApp
 from .formgradeapp import FormgradeApp
-from .submitapp import SubmitApp
 from .validateapp import ValidateApp
+from .releaseapp import ReleaseApp
+from .collectapp import CollectApp
+from .fetchapp import FetchApp
+from .submitapp import SubmitApp
+from .listapp import ListApp
 from .nbgraderapp import NbGraderApp
+
 
 __all__ = [
     'BaseNbGraderApp',
@@ -17,6 +22,10 @@ __all__ = [
     'FeedbackApp',
     'FormgradeApp',
     'FormgradeNotebookApp',
+    'ValidateApp',
+    'ReleaseApp',
+    'CollectApp',
+    'FetchApp',
     'SubmitApp',
-    'ValidateApp'
+    'ListApp',
 ]

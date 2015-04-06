@@ -2,8 +2,6 @@ import os
 import signal
 import sys
 
-from textwrap import dedent
-
 from IPython.utils.traitlets import Unicode, Integer, Type, Instance
 
 from IPython.nbconvert.exporters import HTMLExporter

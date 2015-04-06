@@ -16,7 +16,11 @@ from nbgrader.apps import (
     FormgradeApp,
     FeedbackApp,
     ValidateApp,
-    SubmitApp
+    ReleaseApp,
+    CollectApp,
+    FetchApp,
+    SubmitApp,
+    ListApp
 )
 
 aliases = {}
@@ -120,9 +124,50 @@ class NbGraderApp(BaseNbGraderApp):
                 """
             ).strip()
         ),
+        release=(
+            ReleaseApp,
+            dedent(
+                """
+                Release an assignment to students through the nbgrader exchange.
+                Intended for use by instructors only.
+                """
+            ).strip()
+        ),
+        collect=(
+            CollectApp,
+            dedent(
+                """
+                Collect an assignment from students through the nbgrader exchange.
+                Intended for use by instructors only.
+                """
+            ).strip()
+        ),
+        fetch=(
+            FetchApp,
+            dedent(
+                """
+                Fetch an assignment from an instructor through the nbgrader exchange.
+                Intended for use by students only.
+                """
+            ).strip()
+        ),
         submit=(
             SubmitApp,
-            "Submit an assignment. Intended for use by students only."
+            dedent(
+                """
+                Submit an assignment to an instructor through the nbgrader exchange.
+                Intended for use by students only.
+                """
+            ).strip()
+        ),
+        list=(
+            ListApp,
+            dedent(
+                """
+                List inbound or outbound assignments in the nbgrader exchange.
+                Intended for use by instructors and students.
+                """
+            ).strip()
         ),
     )
 
