@@ -70,7 +70,7 @@ class HubAuth(BaseAuth):
         plan on running more than one formgrade server behind one JupyterHub
         instance.""")
     def _remap_url_default(self):
-        return '/hub/' + self.config.course_id
+        return '/hub/' + self.parent.course_id
     def _remap_url_changed(self, name, old, new):
         self.remap_url = new.rstrip('/')
 
