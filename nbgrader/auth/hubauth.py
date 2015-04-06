@@ -34,6 +34,8 @@ class HubAuth(BaseAuth):
     notebook_url_prefix = Unicode(None, config=True, allow_none=True, help="""
         Relative path of the formgrader with respect to the hub's user base
         directory.  No trailing slash. i.e. "Documents" or "Documents/notebooks". """)
+    def _notebook_url_prefix_changed(self, name, old, new):
+        self.notebook_url_prefix = new.strip('/')
     
     hub_base_url = Unicode(config=True, help="Base URL of the hub server.")
     def _hub_base_url_default(self):
@@ -69,6 +71,8 @@ class HubAuth(BaseAuth):
         instance.""")
     def _remap_url_default(self):
         return '/hub/' + self.config.course_id
+    def _remap_url_changed(self, name, old, new):
+        self.remap_url = new.rstrip('/')
 
     def __init__(self, *args, **kwargs):
         super(HubAuth, self).__init__(*args, **kwargs)
