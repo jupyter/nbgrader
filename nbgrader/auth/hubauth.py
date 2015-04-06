@@ -62,10 +62,13 @@ class HubAuth(BaseAuth):
     def _proxy_token_default(self):
         return os.environ.get('CONFIGPROXY_AUTH_TOKEN', '')
 
-    remap_url = Unicode('/hub/formgrade', config=True, help="""Suffix appened to 
+    remap_url = Unicode(config=True, help="""Suffix appened to 
         `HubAuth.hub_base_url` to form the full URL to the formgrade server.  By
-        default this is '/hub/formgrade'.  Change this if you plan on running
-        more than one formgrade server behind one JupyterHub instance.""")
+        default this is '/hub/{{NbGraderConfig.course_id}}'.  Change this if you
+        plan on running more than one formgrade server behind one JupyterHub
+        instance.""")
+    def _remap_url_default(self):
+        return '/hub/' + self.config.course_id
 
     def __init__(self, *args, **kwargs):
         super(HubAuth, self).__init__(*args, **kwargs)
