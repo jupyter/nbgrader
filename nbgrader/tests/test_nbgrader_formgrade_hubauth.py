@@ -9,7 +9,7 @@ from .test_nbgrader_formgrade import TestNbgraderFormgrade
 
 class TestNbgraderFormgradeHubAuth(TestNbgraderFormgrade):
 
-    base_formgrade_url = "http://localhost:8000/hub/formgrade/"
+    base_formgrade_url = "http://localhost:8000/hub/course123ABC/"
     base_notebook_url = "http://localhost:8000/user/foobar/notebooks/class_files/"
 
     @classmethod
@@ -19,6 +19,7 @@ class TestNbgraderFormgradeHubAuth(TestNbgraderFormgrade):
             fh.write(dedent(
                 """
                 c = get_config()
+                c.NbGraderConfig.course_id = 'course123ABC'
                 c.FormgradeApp.port = 9000
                 c.FormgradeApp.authenticator_class = "nbgrader.auth.hubauth.HubAuth"
                 c.HubAuth.graders = ["foobar"]
@@ -102,6 +103,7 @@ class TestNbgraderHubToken(TestNbgraderFormgradeHubAuth):
             fh.write(dedent(
                 """
                 c = get_config()
+                c.NbGraderConfig.course_id = 'course123ABC'
                 c.FormgradeApp.port = 9000
                 c.FormgradeApp.authenticator_class = "nbgrader.auth.hubauth.HubAuth"
                 c.HubAuth.graders = ["foobar"]
@@ -119,9 +121,30 @@ class TestNbgraderHubToken(TestNbgraderFormgradeHubAuth):
         super(TestNbgraderFormgradeHubAuth, cls)._start_formgrader()
 
 
+class TestFormgradeCustomHubURL(TestNbgraderFormgradeHubAuth):
+
+    base_formgrade_url = "http://localhost:8000/hub/grader/"
+
+    @classmethod
+    def _setup_formgrade_config(cls):
+        # create config file
+        with open("nbgrader_config.py", "w") as fh:
+            fh.write(dedent(
+                """
+                c = get_config()
+                c.NbGraderConfig.course_id = 'course123ABC'
+                c.FormgradeApp.port = 9000
+                c.FormgradeApp.authenticator_class = "nbgrader.auth.hubauth.HubAuth"
+                c.HubAuth.graders = ["foobar"]
+                c.HubAuth.notebook_url_prefix = "class_files"
+                c.HubAuth.remap_url = '/hub/grader'
+                """
+            ))
+
 del TestNbgraderFormgrade
 
 # don't run tests if it's not python 3
 if sys.version_info[0] != 3:
     del TestNbgraderFormgradeHubAuth
     del TestNbgraderHubToken
+    del TestFormgradeCustomHubURL
