@@ -129,6 +129,8 @@ class AssignApp(BaseNbConvertApp):
         return extra_config
 
     def init_assignment(self, assignment_id, student_id):
+        super(AssignApp, self).init_assignment(assignment_id, student_id)
+
         # try to get the assignment from the database, and throw an error if it
         # doesn't exist
         gb = Gradebook(self.db_url)

@@ -94,6 +94,8 @@ class AutogradeApp(BaseNbConvertApp):
     ])
 
     def init_assignment(self, assignment_id, student_id):
+        super(AutogradeApp, self).init_assignment(assignment_id, student_id)
+
         # try to get the student from the database, and throw an error if it
         # doesn't exist
         gb = Gradebook(self.db_url)
@@ -107,11 +109,7 @@ class AutogradeApp(BaseNbConvertApp):
                 self.fail("No student with ID '%s' exists in the database", student_id)
 
         # try to read in a timestamp from file
-        src_path = self.directory_structure.format(
-            nbgrader_step=self._input_directory,
-            assignment_id=assignment_id,
-            student_id=student_id)
-
+        src_path = self._format_source(assignment_id, student_id)
         timestamp = self._get_existing_timestamp(src_path)
         if timestamp:
             submission = gb.update_or_create_submission(

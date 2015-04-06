@@ -17,6 +17,7 @@ from IPython.core.application import BaseIPythonApplication
 from IPython.config.application import catch_config_error
 from IPython.nbconvert.nbconvertapp import NbConvertApp, DottedOrNone
 from IPython.config.loader import Config
+from IPython.utils.path import link_or_copy, ensure_dir_exists
 
 from nbgrader.config import BasicConfig, NbGraderConfig
 from nbgrader.utils import check_directory, parse_utc
@@ -324,6 +325,20 @@ class BaseNbConvertApp(BaseNbGraderApp, NbConvertApp):
     def _output_directory(self):
         raise NotImplementedError
 
+    def _format_source(self, assignment_id, student_id):
+        return self.directory_structure.format(
+            nbgrader_step=self._input_directory,
+            student_id=student_id,
+            assignment_id=assignment_id
+        )
+
+    def _format_dest(self, assignment_id, student_id):
+        return self.directory_structure.format(
+            nbgrader_step=self._output_directory,
+            student_id=student_id,
+            assignment_id=assignment_id
+        )
+
     def build_extra_config(self):
         extra_config = super(BaseNbConvertApp, self).build_extra_config()
         extra_config.Exporter.default_preprocessors = self.preprocessors
@@ -340,14 +355,9 @@ class BaseNbConvertApp(BaseNbGraderApp, NbConvertApp):
         elif len(self.extra_args) == 1:
             self.assignment_id = self.extra_args[0]
 
-        fullglob = self.directory_structure.format(
-            nbgrader_step=self._input_directory,
-            student_id=self.student_id,
-            assignment_id=self.assignment_id
-        )
-
         self.assignments = {}
         self.notebooks = []
+        fullglob = self._format_source(self.assignment_id, self.student_id)
         for assignment in glob.glob(fullglob):
             self.assignments[assignment] = glob.glob(os.path.join(assignment, self.notebook_id + ".ipynb"))
             if len(self.assignments[assignment]) == 0:
@@ -357,12 +367,9 @@ class BaseNbConvertApp(BaseNbGraderApp, NbConvertApp):
             self.fail("No notebooks were matched by '%s'", fullglob)
 
     def init_single_notebook_resources(self, notebook_filename):
-        directory_structure = os.path.join(self.directory_structure, "(?P<notebook_id>.*).ipynb")
-        regexp = directory_structure.format(
-            nbgrader_step=self._input_directory,
-            student_id="(?P<student_id>.*)",
-            assignment_id="(?P<assignment_id>.*)",
-        )
+        regexp = os.path.join(
+            self._format_source("(?P<assignment_id>.*)", "(?P<student_id>.*)"),
+            "(?P<notebook_id>.*).ipynb")
 
         m = re.match(regexp, notebook_filename)
         if m is None:
@@ -387,22 +394,9 @@ class BaseNbConvertApp(BaseNbGraderApp, NbConvertApp):
         return resources
 
     def write_single_notebook(self, output, resources):
-        # detect other files in the source directory
-        source = resources['metadata']['path']
-        self.writer.files = []
-        for dirname, dirnames, filenames in os.walk(source):
-            for filename in filenames:
-                fullpath = os.path.join(dirname, filename)
-                if fullpath in self.notebooks:
-                    continue
-                self.writer.files.append(fullpath)
-
         # configure the writer build directory
-        self.writer.build_directory = self.directory_structure.format(
-            nbgrader_step=self._output_directory,
-            student_id=resources['nbgrader']['student'],
-            assignment_id=resources['nbgrader']['assignment'],
-        )
+        self.writer.build_directory = self._format_dest(
+            resources['nbgrader']['assignment'], resources['nbgrader']['student'])
 
         return super(BaseNbConvertApp, self).write_single_notebook(output, resources)
 
@@ -412,10 +406,7 @@ class BaseNbConvertApp(BaseNbGraderApp, NbConvertApp):
         initialization was successful).
 
         """
-        dest = self.directory_structure.format(
-            nbgrader_step=self._output_directory,
-            student_id=student_id,
-            assignment_id=assignment_id)
+        dest = self._format_dest(assignment_id, student_id)
 
         # the destination doesn't exist, so we haven't processed it
         if not os.path.exists(dest):
@@ -427,11 +418,7 @@ class BaseNbConvertApp(BaseNbGraderApp, NbConvertApp):
             shutil.rmtree(dest)
             return True
 
-        src = self.directory_structure.format(
-            nbgrader_step=self._input_directory,
-            student_id=student_id,
-            assignment_id=assignment_id)
-
+        src = self._format_source(assignment_id, student_id)
         new_timestamp = self._get_existing_timestamp(src)
         old_timestamp = self._get_existing_timestamp(dest)
 
@@ -451,7 +438,24 @@ class BaseNbConvertApp(BaseNbGraderApp, NbConvertApp):
         notebooks in an assignment.
 
         """
-        pass
+        source = self._format_source(assignment_id, student_id)
+        dest = self._format_dest(assignment_id, student_id)
+
+        # detect other files in the source directory
+        for dirname, dirnames, filenames in os.walk(source):
+            for filename in filenames:
+                fullpath = os.path.join(dirname, filename)
+                if fullpath in self.notebooks:
+                    continue
+
+                # Make sure folder exists.
+                dest = os.path.join(dest, os.path.relpath(fullpath, source))
+                ensure_dir_exists(os.path.dirname(dest))
+
+                # Copy if destination is different.
+                if not os.path.normpath(dest) == os.path.normpath(fullpath):
+                    self.log.info("Linking %s -> %s", filename, dest)
+                    link_or_copy(fullpath, dest)
 
     def convert_notebooks(self):
         for assignment in self.assignments:
@@ -469,7 +473,7 @@ class BaseNbConvertApp(BaseNbGraderApp, NbConvertApp):
             should_process = self.init_destination(gd['assignment_id'], gd['student_id'])
             if not should_process:
                 continue
-            self.init_assignment(gd['assignment_id'], gd['student_id'])
 
             self.notebooks = self.assignments[assignment]
+            self.init_assignment(gd['assignment_id'], gd['student_id'])
             super(BaseNbConvertApp, self).convert_notebooks()
