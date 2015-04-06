@@ -93,14 +93,10 @@ class AutogradeApp(BaseNbConvertApp):
         SaveAutoGrades
     ])
 
-    def init_single_notebook_resources(self, notebook_filename):
-        resources = super(AutogradeApp, self).init_single_notebook_resources(notebook_filename)
-
+    def init_assignment(self, assignment_id, student_id):
         # try to get the student from the database, and throw an error if it
         # doesn't exist
-        db_url = resources['nbgrader']['db_url']
-        student_id = resources['nbgrader']['student']
-        gb = Gradebook(db_url)
+        gb = Gradebook(self.db_url)
         try:
             gb.find_student(student_id)
         except MissingEntry:
@@ -111,12 +107,17 @@ class AutogradeApp(BaseNbConvertApp):
                 self.fail("No student with ID '%s' exists in the database", student_id)
 
         # try to read in a timestamp from file
-        timestamp_path = os.path.join(os.path.dirname(notebook_filename), 'timestamp.txt')
-        if os.path.exists(timestamp_path):
-            with open(timestamp_path, 'r') as fh:
-                timestamp = fh.read().strip()
-            timestamp = dateutil.parser.parse(timestamp)
-            self.log.info("Submitted at %s", timestamp)
-            resources['nbgrader']['timestamp'] = timestamp
+        src_path = self.directory_structure.format(
+            nbgrader_step=self._input_directory,
+            assignment_id=assignment_id,
+            student_id=student_id)
 
-        return resources
+        timestamp = self._get_existing_timestamp(src_path)
+        if timestamp:
+            submission = gb.update_or_create_submission(
+                assignment_id, student_id, timestamp=timestamp)
+            self.log.info("%s submitted at %s", submission, timestamp)
+
+            # if the submission is late, print out how many seconds late it is
+            if timestamp and submission.total_seconds_late > 0:
+                self.log.warning("%s is %s seconds late", submission, submission.total_seconds_late)

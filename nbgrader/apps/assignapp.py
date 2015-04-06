@@ -128,14 +128,10 @@ class AssignApp(BaseNbConvertApp):
         extra_config.NbGraderConfig.student_id = '.'
         return extra_config
 
-    def init_single_notebook_resources(self, notebook_filename):
-        resources = super(AssignApp, self).init_single_notebook_resources(notebook_filename)
-
+    def init_assignment(self, assignment_id, student_id):
         # try to get the assignment from the database, and throw an error if it
         # doesn't exist
-        db_url = resources['nbgrader']['db_url']
-        assignment_id = resources['nbgrader']['assignment']
-        gb = Gradebook(db_url)
+        gb = Gradebook(self.db_url)
         try:
             gb.find_assignment(assignment_id)
         except MissingEntry:
@@ -144,5 +140,3 @@ class AssignApp(BaseNbConvertApp):
                 gb.add_assignment(assignment_id)
             else:
                 self.fail("No assignment called '%s' exists in the database", assignment_id)
-
-        return resources
