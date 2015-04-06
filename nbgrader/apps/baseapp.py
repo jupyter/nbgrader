@@ -414,8 +414,15 @@ class BaseNbConvertApp(BaseNbGraderApp, NbConvertApp):
 
         # if we have specified --force, then always remove existing stuff
         if self.force:
-            self.log.warning("Removing existing assignment: {}".format(dest))
-            shutil.rmtree(dest)
+            if self.notebook_id == "*":
+                self.log.warning("Removing existing assignment: {}".format(dest))
+                shutil.rmtree(dest)
+            else:
+                for notebook in self.notebooks:
+                    path = os.path.join(dest, os.path.basename(notebook))
+                    if os.path.exists(path):
+                        self.log.warning("Removing existing notebook: {}".format(path))
+                        os.remove(path)
             return True
 
         src = self._format_source(assignment_id, student_id)
@@ -425,8 +432,15 @@ class BaseNbConvertApp(BaseNbGraderApp, NbConvertApp):
         # if --force hasn't been specified, but the source assignment is newer,
         # then we want to overwrite it
         if new_timestamp is not None and old_timestamp is not None and new_timestamp > old_timestamp:
-            self.log.warning("Updating existing assignment: {}".format(dest))
-            shutil.rmtree(dest)
+            if self.notebook_id == "*":
+                self.log.warning("Updating existing assignment: {}".format(dest))
+                shutil.rmtree(dest)
+            else:
+                for notebook in self.notebooks:
+                    path = os.path.join(dest, os.path.basename(notebook))
+                    if os.path.exists(path):
+                        self.log.warning("Updating existing notebook: {}".format(path))
+                        os.remove(path)
             return True
 
         # otherwise, we should skip the assignment
@@ -445,7 +459,7 @@ class BaseNbConvertApp(BaseNbGraderApp, NbConvertApp):
         for dirname, dirnames, filenames in os.walk(source):
             for filename in filenames:
                 fullpath = os.path.join(dirname, filename)
-                if fullpath in self.notebooks:
+                if fullpath.endswith(".ipynb"):
                     continue
 
                 # Make sure folder exists.
@@ -459,12 +473,9 @@ class BaseNbConvertApp(BaseNbGraderApp, NbConvertApp):
 
     def convert_notebooks(self):
         for assignment in self.assignments:
-            regexp = self.directory_structure.format(
-                nbgrader_step=self._input_directory,
-                student_id="(?P<student_id>.*)",
-                assignment_id="(?P<assignment_id>.*)",
-            )
+            self.notebooks = self.assignments[assignment]
 
+            regexp = self._format_source("(?P<assignment_id>.*)", "(?P<student_id>.*)")
             m = re.match(regexp, assignment)
             if m is None:
                 raise RuntimeError("Could not match '%s' with regexp '%s'", assignment, regexp)
@@ -474,6 +485,5 @@ class BaseNbConvertApp(BaseNbGraderApp, NbConvertApp):
             if not should_process:
                 continue
 
-            self.notebooks = self.assignments[assignment]
             self.init_assignment(gd['assignment_id'], gd['student_id'])
             super(BaseNbConvertApp, self).convert_notebooks()
