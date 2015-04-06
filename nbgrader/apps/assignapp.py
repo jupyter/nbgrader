@@ -35,10 +35,6 @@ flags.update({
         {'AssignApp': {'create_assignment': True}},
         "Create an entry for the assignment in the database, if one does not already exist."
     ),
-    'force': (
-        {'AssignApp': {'force': True}},
-        "Overwrite an existing assignment if it already exists."
-    ),
 })
 
 class AssignApp(BaseNbConvertApp):
@@ -107,16 +103,6 @@ class AssignApp(BaseNbConvertApp):
         )
     )
 
-    force = Bool(
-        False, config=True,
-        help=dedent(
-            """
-            If the assignment already exists in the release directory, force
-            overwriting it completely.
-            """
-        )
-    )
-
     @property
     def _input_directory(self):
         return self.source_directory
@@ -160,19 +146,3 @@ class AssignApp(BaseNbConvertApp):
                 self.fail("No assignment called '%s' exists in the database", assignment_id)
 
         return resources
-
-    def convert_notebooks(self):
-        dest_path = self.directory_structure.format(
-            nbgrader_step=self._output_directory,
-            student_id=self.student_id,
-            assignment_id=self.assignment_id
-        )
-
-        if os.path.exists(dest_path):
-            if self.force:
-                self.log.warning("Removing existing directory %s", dest_path)
-                shutil.rmtree(dest_path)
-            else:
-                self.fail("Assignment already exists, use --force to overwrite: %s", dest_path)
-
-        super(AssignApp, self).convert_notebooks()

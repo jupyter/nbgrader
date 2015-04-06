@@ -10,19 +10,19 @@ import os
 import traceback
 import logging
 import datetime
-from dateutil.tz import gettz
 import shutil
 
-from IPython.utils.traitlets import Unicode, List, Bool, Instance
+from IPython.utils.traitlets import Unicode, List, Bool, Instance, Dict
 from IPython.core.application import BaseIPythonApplication
 from IPython.config.application import catch_config_error
 from IPython.nbconvert.nbconvertapp import NbConvertApp, DottedOrNone
 from IPython.config.loader import Config
 
 from nbgrader.config import BasicConfig, NbGraderConfig
-from nbgrader.utils import check_directory
+from nbgrader.utils import check_directory, parse_utc
 
 from textwrap import dedent
+from dateutil.tz import gettz
 
 # These are the aliases and flags for nbgrader apps that inherit only from
 # BaseApp (and not BaseNbGraderApp)
@@ -56,12 +56,12 @@ class BaseApp(BaseIPythonApplication):
 
     def _log_level_default(self):
         return logging.INFO
-    
-    def fail(self, msg):
+
+    def fail(self, msg, *args):
         """Log the error msg using self.log.error and exit using sys.exit(1)."""
-        self.log.error(msg)
+        self.log.error(msg, *args)
         sys.exit(1)
-    
+
     verbose_crash = Bool(False)
 
     # This is a hack in order to centralize the config options inherited from
@@ -175,6 +175,16 @@ class BaseNbGraderApp(BaseApp):
         classes.append(NbGraderConfig)
         return classes
 
+    def _get_existing_timestamp(self, dest_path):
+        """Get the timestamp, as a datetime object, of an existing submission."""
+        timestamp_path = os.path.join(dest_path, 'timestamp.txt')
+        if os.path.exists(timestamp_path):
+            with open(timestamp_path, 'r') as fh:
+                timestamp = fh.read().strip()
+            return parse_utc(timestamp)
+        else:
+            return None
+
     def __init__(self, *args, **kwargs):
         super(BaseNbGraderApp, self).__init__(*args, **kwargs)
         self._nbgrader_config = NbGraderConfig(parent=self)
@@ -268,6 +278,10 @@ nbconvert_aliases.update({
 nbconvert_flags = {}
 nbconvert_flags.update(nbgrader_flags)
 nbconvert_flags.update({
+    'force': (
+        {'BaseNbConvertApp': {'force': True}},
+        "Overwrite an assignment/submission if it already exists."
+    ),
 })
 
 class BaseNbConvertApp(BaseNbGraderApp, NbConvertApp):
@@ -287,11 +301,14 @@ class BaseNbConvertApp(BaseNbGraderApp, NbConvertApp):
     use_output_suffix = Bool(False)
     postprocessor_class = DottedOrNone('')
     notebooks = List([])
+    assignments = Dict({})
     writer_class = DottedOrNone('FilesWriter')
     output_base = Unicode('')
 
     preprocessors = List([])
-    
+
+    force = Bool(False, config=True, help="Whether to overwrite existing assignments/submissions")
+
     def _classes_default(self):
         classes = super(BaseNbConvertApp, self)._classes_default()
         for pp in self.preprocessors:
@@ -323,16 +340,20 @@ class BaseNbConvertApp(BaseNbGraderApp, NbConvertApp):
         elif len(self.extra_args) == 1:
             self.assignment_id = self.extra_args[0]
 
-        directory_structure = os.path.join(self.directory_structure, self.notebook_id + ".ipynb")
-        fullglob = directory_structure.format(
+        fullglob = self.directory_structure.format(
             nbgrader_step=self._input_directory,
             student_id=self.student_id,
-            assignment_id=self.assignment_id,
-            notebook_id=self.notebook_id
+            assignment_id=self.assignment_id
         )
 
-        self.notebooks = glob.glob(fullglob)
-        if len(self.notebooks) == 0:
+        self.assignments = {}
+        self.notebooks = []
+        for assignment in glob.glob(fullglob):
+            self.assignments[assignment] = glob.glob(os.path.join(assignment, self.notebook_id + ".ipynb"))
+            if len(self.assignments[assignment]) == 0:
+                self.fail("No notebooks were matched in '%s'", assignment)
+
+        if len(self.assignments) == 0:
             self.fail("No notebooks were matched by '%s'", fullglob)
 
     def init_single_notebook_resources(self, notebook_filename):
@@ -384,3 +405,71 @@ class BaseNbConvertApp(BaseNbGraderApp, NbConvertApp):
         )
 
         return super(BaseNbConvertApp, self).write_single_notebook(output, resources)
+
+    def init_destination(self, assignment_id, student_id):
+        """Initialize the destination for an assignment. Returns whether the
+        assignment should actually be processed or not (i.e. whether the
+        initialization was successful).
+
+        """
+        dest = self.directory_structure.format(
+            nbgrader_step=self._output_directory,
+            student_id=student_id,
+            assignment_id=assignment_id)
+
+        # the destination doesn't exist, so we haven't processed it
+        if not os.path.exists(dest):
+            return True
+
+        # if we have specified --force, then always remove existing stuff
+        if self.force:
+            self.log.warning("Removing existing assignment: {}".format(dest))
+            shutil.rmtree(dest)
+            return True
+
+        src = self.directory_structure.format(
+            nbgrader_step=self._input_directory,
+            student_id=student_id,
+            assignment_id=assignment_id)
+
+        new_timestamp = self._get_existing_timestamp(src)
+        old_timestamp = self._get_existing_timestamp(dest)
+
+        # if --force hasn't been specified, but the source assignment is newer,
+        # then we want to overwrite it
+        if new_timestamp is not None and old_timestamp is not None and new_timestamp > old_timestamp:
+            self.log.warning("Updating existing assignment: {}".format(dest))
+            shutil.rmtree(dest)
+            return True
+
+        # otherwise, we should skip the assignment
+        self.log.info("Skipping existing assignment: {}".format(dest))
+        return False
+
+    def init_assignment(self, assignment_id, student_id):
+        """Initializes resources/dependencies/etc. that are common to all
+        notebooks in an assignment.
+
+        """
+        pass
+
+    def convert_notebooks(self):
+        for assignment in self.assignments:
+            regexp = self.directory_structure.format(
+                nbgrader_step=self._input_directory,
+                student_id="(?P<student_id>.*)",
+                assignment_id="(?P<assignment_id>.*)",
+            )
+
+            m = re.match(regexp, assignment)
+            if m is None:
+                raise RuntimeError("Could not match '%s' with regexp '%s'", assignment, regexp)
+            gd = m.groupdict()
+
+            should_process = self.init_destination(gd['assignment_id'], gd['student_id'])
+            if not should_process:
+                continue
+            self.init_assignment(gd['assignment_id'], gd['student_id'])
+
+            self.notebooks = self.assignments[assignment]
+            super(BaseNbConvertApp, self).convert_notebooks()
