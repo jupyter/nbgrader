@@ -1,7 +1,6 @@
 import os
-from textwrap import dedent
 
-from IPython.utils.traitlets import Unicode, List
+from IPython.utils.traitlets import List
 from IPython.nbconvert.exporters import HTMLExporter
 
 from nbgrader.apps.baseapp import BaseNbConvertApp, nbconvert_aliases, nbconvert_flags

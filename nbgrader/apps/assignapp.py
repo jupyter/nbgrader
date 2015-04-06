@@ -1,8 +1,6 @@
-import sys
-
 from textwrap import dedent
 
-from IPython.utils.traitlets import Unicode, List, Bool
+from IPython.utils.traitlets import List, Bool
 
 from nbgrader.api import Gradebook, MissingEntry
 from nbgrader.apps.baseapp import (

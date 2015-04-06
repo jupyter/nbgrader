@@ -1,10 +1,9 @@
-import sys
 import os
 import dateutil.parser
 
 from textwrap import dedent
 
-from IPython.utils.traitlets import Unicode, List, Bool
+from IPython.utils.traitlets import List, Bool
 
 from nbgrader.api import Gradebook, MissingEntry
 from nbgrader.apps.baseapp import BaseNbConvertApp, nbconvert_aliases, nbconvert_flags
@@ -55,12 +54,15 @@ class AutogradeApp(BaseNbConvertApp):
         improve their score).
 
         To grade all submissions for "Problem Set 1":
+        
             nbgrader autograde "Problem Set 1"
 
         To grade only the submission by student with ID 'Hacker':
+        
             nbgrader autograde "Problem Set 1" --student Hacker
 
         To grade only the notebooks that start with '1':
+        
             nbgrader autograde "Problem Set 1" --notebook "1*"
         """
 

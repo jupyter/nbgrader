@@ -1,9 +1,7 @@
 import os
 
-from IPython.utils.traitlets import Unicode, List, Bool
-
 from nbgrader.apps.baseapp import TransferApp, transfer_aliases, transfer_flags
-from nbgrader.utils import get_username, check_mode
+from nbgrader.utils import check_mode
 
 
 aliases = {}
@@ -25,7 +23,26 @@ class FetchApp(TransferApp):
     flags = flags
 
     examples = """
-        Here we go...
+        Fetch an assignment that an instructor has released. For the usage of students.
+        
+        You can run this command from any directory, but usually, you will have a
+        directory where you are keeping your course assignments.
+        
+        To fetch an assignment you must first know the `course_id` for your course.
+        If you don't know it, ask your instructor.
+        
+        To show the list of assignments available for fetching (assume the `course_id`
+        is `phys101`):
+        
+            nbgrader list phys101
+        
+        To fetch an assignment by name into the current directory:
+        
+            nbgrader fetch phys101 assignment1
+        
+        This will create an new directory named `assignment1` where you can work
+        on the assignment. When you are done, use the `nbgrader submit` command
+        to turn in the assignment.
         """
     
     def init_args(self):

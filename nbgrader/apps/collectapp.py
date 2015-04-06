@@ -3,7 +3,7 @@ import glob
 import shutil
 from collections import defaultdict
 
-from IPython.utils.traitlets import Unicode, List, Bool
+from IPython.utils.traitlets import Bool
 
 from nbgrader.apps.baseapp import TransferApp, transfer_aliases, transfer_flags
 from nbgrader.utils import check_mode, parse_utc
@@ -38,9 +38,36 @@ class CollectApp(TransferApp):
     flags = flags
 
     examples = """
-        Here we go...
+        Collect assignments students have submitted. For the usage of instructors.
+        
+        This command is run from the top-level nbgrader folder. Before running
+        this command, you must set the unique `course_id` for the course. It must be
+        unique for each instructor/course combination. To set it in the config
+        file add a line to the `nbgrader_config.py` file:
+        
+            c.NbGraderConfig.course_id = 'phys101'
+        
+        To pass the `course_id` at the command line, add `--course=phys101` to any
+        of the below commands.
+        
+        To collect `assignment1` for all students:
+        
+            nbgrader collect assignment1
+        
+        To collect `assignment1` for only `student1`:
+        
+            nbgrader collect --student=student1 assignment1
+            
+        Collected assignments will go into the `submitted` folder with the proper
+        directory structure to start grading. All submissions are timestamped and
+        students can turn an assignment in multiple times. The `collect` command
+        will always get the most recent submission from each student, but it will
+        never overwrite an existing submission unless you provide the `--update`
+        flag:
+        
+            nbgrader collect --update assignment1
         """
-    
+
     update = Bool(
         False,
         config=True,
@@ -122,6 +149,10 @@ class CollectApp(TransferApp):
                 self.do_copy(src_path, dest_path)
             else:
                 if self.update:
-                    self.log.info("No newer submission to collect: {} {}".format(student_id, self.assignment_id))
+                    self.log.info("No newer submission to collect: {} {}".format(
+                        student_id, self.assignment_id
+                    ))
                 else:
-                    self.log.info("Submission already exists, use --update to update: {} {}".format(student_id, self.assignment_id))
+                    self.log.info("Submission already exists, use --update to update: {} {}".format(
+                        student_id, self.assignment_id
+                    ))

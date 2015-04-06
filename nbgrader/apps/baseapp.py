@@ -193,7 +193,7 @@ transfer_flags.update({
 })
         
 class TransferApp(BaseNbGraderApp):
-    """A base class for the release, collect, fetch and submit apps.
+    """A base class for the list, release, collect, fetch, and submit apps.
     
     All of these apps involve transfering files between an instructor or students
     files and the nbgrader exchange.
@@ -210,7 +210,7 @@ class TransferApp(BaseNbGraderApp):
     )
 
     def set_timestamp(self):
-        """Set the timestap."""
+        """Set the timestap using the configured timezone."""
         tz = gettz(self.timezone)
         if tz is None:
             self.fail("Invalid timezone: {}".format(self.timezone))
@@ -219,7 +219,7 @@ class TransferApp(BaseNbGraderApp):
     exchange_directory = Unicode(
         "/srv/nbgrader/exchange",
         config=True,
-        help="The preexisting exchange directory writable to everyone."
+        help="The nbgrader exchange directory writable to everyone. MUST be preexisting."
     )
 
     def ensure_exchange_directory(self):
@@ -238,15 +238,15 @@ class TransferApp(BaseNbGraderApp):
         self.set_timestamp()
 
     def init_src(self):
-        """"""
+        """Compute and check the source paths for the transfer."""
         raise NotImplemented
     
     def init_dest(self):
-        """"""
+        """Compute and check the destination paths for the transfer."""
         raise NotImplemented
     
     def copy_files(self):
-        """"""
+        """Actually to the file transfer."""
         raise NotImplemented
 
     def do_copy(self, src, dest):

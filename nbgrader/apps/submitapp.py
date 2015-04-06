@@ -6,8 +6,6 @@ from stat import (
     S_ISVTX, S_ISGID
 )
 
-from IPython.utils.traitlets import Unicode, List, Bool
-
 from nbgrader.apps.baseapp import TransferApp, transfer_aliases, transfer_flags
 from nbgrader.utils import get_username, check_mode
 
@@ -31,7 +29,24 @@ class SubmitApp(TransferApp):
     flags = flags
 
     examples = """
-        Here we go...
+        Submit an assignment for grading. For the usage of students.
+        
+        You must run this command from the directory containing the assignments
+        sub-directory. For example, if you want to submit an assignment named
+        `assignment1`, that must be a sub-directory of your current working directory.
+        If you are inside the `assignment1` directory, it won't work.
+        
+        To fetch an assignment you must first know the `course_id` for your course.
+        If you don't know it, ask your instructor.
+
+        To submit `assignment1` to the course `phys101`:
+        
+            nbgrader submit assignment1 phys101
+        
+        You can submit an assignment multiple times and the instructor will always
+        get the most recent version. Your assignment submission are timestamped
+        so instructors can tell when you turned it in. No other students will
+        be able to see your submissions.
         """
     
     def init_args(self):
@@ -64,5 +79,11 @@ class SubmitApp(TransferApp):
         with open(os.path.join(self.dest_path, "timestamp.txt"), "w") as fh:
             fh.write(self.timestamp)
         # Make this 0777=ugo=rwx so the instructor can delete later. Hidden from other users by the timestamp.
-        os.chmod(self.dest_path, S_IRUSR|S_IWUSR|S_IXUSR|S_IRGRP|S_IWGRP|S_IXGRP|S_IROTH|S_IWOTH|S_IXOTH)
-        self.log.info("Submitted as: {} {} {}".format(self.course_id, self.assignment_id, str(self.timestamp)))
+        os.chmod(
+            self.dest_path,
+            S_IRUSR|S_IWUSR|S_IXUSR|S_IRGRP|S_IWGRP|S_IXGRP|S_IROTH|S_IWOTH|S_IXOTH
+        )
+        self.log.info("Submitted as: {} {} {}".format(
+            self.course_id, self.assignment_id, str(self.timestamp)
+        ))
+
