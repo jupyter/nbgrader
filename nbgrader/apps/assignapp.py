@@ -173,7 +173,6 @@ class AssignApp(BaseNbConvertApp):
                 self.log.warning("Removing existing directory %s", dest_path)
                 shutil.rmtree(dest_path)
             else:
-                self.log.error("Assignment already exists, use --force to overwrite: %s", dest_path)
-                sys.exit(1)
+                self.fail("Assignment already exists, use --force to overwrite: %s", dest_path)
 
         super(AssignApp, self).convert_notebooks()
