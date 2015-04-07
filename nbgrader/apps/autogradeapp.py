@@ -119,3 +119,6 @@ class AutogradeApp(BaseNbConvertApp):
             # if the submission is late, print out how many seconds late it is
             if timestamp and submission.total_seconds_late > 0:
                 self.log.warning("%s is %s seconds late", submission, submission.total_seconds_late)
+
+        else:
+            submission = gb.update_or_create_submission(assignment_id, student_id)

@@ -32,6 +32,7 @@ class TestSaveAutoGrades(TestBase):
         nb = new_notebook()
         nb.cells.append(cell)
         self.preprocessor1.preprocess(nb, self.resources)
+        self.gb.add_submission("ps0", "bar")
         self.preprocessor2.preprocess(nb, self.resources)
 
         grade_cell = self.gb.find_grade("foo", "test", "ps0", "bar")
@@ -48,6 +49,7 @@ class TestSaveAutoGrades(TestBase):
         nb = new_notebook()
         nb.cells.append(cell)
         self.preprocessor1.preprocess(nb, self.resources)
+        self.gb.add_submission("ps0", "bar")
         self.preprocessor2.preprocess(nb, self.resources)
 
         grade_cell = self.gb.find_grade("foo", "test", "ps0", "bar")
@@ -63,6 +65,7 @@ class TestSaveAutoGrades(TestBase):
         nb = new_notebook()
         nb.cells.append(cell)
         self.preprocessor1.preprocess(nb, self.resources)
+        self.gb.add_submission("ps0", "bar")
         self.preprocessor2.preprocess(nb, self.resources)
 
         grade_cell = self.gb.find_grade("foo", "test", "ps0", "bar")
@@ -78,6 +81,7 @@ class TestSaveAutoGrades(TestBase):
         nb = new_notebook()
         nb.cells.append(cell)
         self.preprocessor1.preprocess(nb, self.resources)
+        self.gb.add_submission("ps0", "bar")
         cell.source = "hello!"
         self.preprocessor2.preprocess(nb, self.resources)
 
@@ -94,6 +98,7 @@ class TestSaveAutoGrades(TestBase):
         nb = new_notebook()
         nb.cells.append(cell)
         self.preprocessor1.preprocess(nb, self.resources)
+        self.gb.add_submission("ps0", "bar")
         self.preprocessor2.preprocess(nb, self.resources)
 
         comment = self.gb.find_comment(0, "test", "ps0", "bar")
@@ -105,6 +110,7 @@ class TestSaveAutoGrades(TestBase):
         nb = new_notebook()
         nb.cells.append(cell)
         self.preprocessor1.preprocess(nb, self.resources)
+        self.gb.add_submission("ps0", "bar")
         cell.source = "hello!"
         self.preprocessor2.preprocess(nb, self.resources)
 
@@ -117,6 +123,7 @@ class TestSaveAutoGrades(TestBase):
         nb = new_notebook()
         nb.cells.append(cell)
         self.preprocessor1.preprocess(nb, self.resources)
+        self.gb.add_submission("ps0", "bar")
         self.preprocessor2.preprocess(nb, self.resources)
 
         comment = self.gb.find_comment(0, "test", "ps0", "bar")
@@ -128,6 +135,7 @@ class TestSaveAutoGrades(TestBase):
         nb = new_notebook()
         nb.cells.append(cell)
         self.preprocessor1.preprocess(nb, self.resources)
+        self.gb.add_submission("ps0", "bar")
         cell.source = "hello!"
         self.preprocessor2.preprocess(nb, self.resources)
 

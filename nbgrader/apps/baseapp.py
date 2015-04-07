@@ -458,13 +458,13 @@ class BaseNbConvertApp(BaseNbGraderApp, NbConvertApp):
         # detect other files in the source directory
         for filename in find_all_files(source, self.ignore + ["*.ipynb"]):
             # Make sure folder exists.
-            dest = os.path.join(dest, os.path.relpath(filename, source))
-            ensure_dir_exists(os.path.dirname(dest))
+            path = os.path.join(dest, os.path.relpath(filename, source))
+            ensure_dir_exists(os.path.dirname(path))
 
             # Copy if destination is different.
-            if not os.path.normpath(dest) == os.path.normpath(filename):
-                self.log.info("Linking %s -> %s", filename, dest)
-                link_or_copy(filename, dest)
+            if not os.path.normpath(path) == os.path.normpath(filename):
+                self.log.info("Linking %s -> %s", filename, path)
+                link_or_copy(filename, path)
 
     def convert_notebooks(self):
         for assignment in self.assignments:

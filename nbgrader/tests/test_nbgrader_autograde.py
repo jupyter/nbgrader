@@ -138,3 +138,48 @@ class TestNbgraderAutograde(TestBase):
 
             # make sure it still works to run it a second time
             self._run_command('nbgrader autograde ps1 --db="{}"'.format(dbpath))
+
+    def test_force(self):
+        """Ensure the force option works properly"""
+        with self._temp_cwd(["files/submitted-unchanged.ipynb"]):
+            dbpath = self._setup_db()
+
+            os.makedirs('source/ps1/data')
+            shutil.copy('submitted-unchanged.ipynb', 'source/ps1/p1.ipynb')
+            with open("source/ps1/foo.txt", "w") as fh:
+                fh.write("foo")
+            with open("source/ps1/data/bar.txt", "w") as fh:
+                fh.write("bar")
+            self._run_command('nbgrader assign ps1 --db="{}" '.format(dbpath))
+
+            os.makedirs('submitted/foo/ps1/data')
+            shutil.move('submitted-unchanged.ipynb', 'submitted/foo/ps1/p1.ipynb')
+            with open("submitted/foo/ps1/foo.txt", "w") as fh:
+                fh.write("foo")
+            with open("submitted/foo/ps1/data/bar.txt", "w") as fh:
+                fh.write("bar")
+            with open("submitted/foo/ps1/blah.pyc", "w") as fh:
+                fh.write("asdf")
+            self._run_command('nbgrader autograde ps1 --db="{}"'.format(dbpath))
+
+            assert os.path.isfile("autograded/foo/ps1/p1.ipynb")
+            assert os.path.isfile("autograded/foo/ps1/foo.txt")
+            assert os.path.isfile("autograded/foo/ps1/data/bar.txt")
+            assert not os.path.isfile("autograded/foo/ps1/blah.pyc")
+
+            # check that it skips the existing directory
+            os.remove("autograded/foo/ps1/foo.txt")
+            self._run_command('nbgrader autograde ps1 --db="{}"'.format(dbpath))
+            assert not os.path.isfile("autograded/foo/ps1/foo.txt")
+
+            # force overwrite the supplemental files
+            self._run_command('nbgrader autograde ps1 --db="{}" --force'.format(dbpath))
+            assert os.path.isfile("autograded/foo/ps1/foo.txt")
+
+            # force overwrite
+            os.remove("submitted/foo/ps1/foo.txt")
+            self._run_command('nbgrader autograde ps1 --db="{}" --force'.format(dbpath))
+            assert os.path.isfile("autograded/foo/ps1/p1.ipynb")
+            assert not os.path.isfile("autograded/foo/ps1/foo.txt")
+            assert os.path.isfile("autograded/foo/ps1/data/bar.txt")
+            assert not os.path.isfile("autograded/foo/ps1/blah.pyc")
