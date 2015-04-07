@@ -21,6 +21,8 @@ from nbgrader.preprocessors import (
 
 aliases = {}
 aliases.update(nbconvert_aliases)
+del aliases['student']
+del aliases['notebook']
 aliases.update({
 })
 
@@ -126,6 +128,7 @@ class AssignApp(BaseNbConvertApp):
     def build_extra_config(self):
         extra_config = super(AssignApp, self).build_extra_config()
         extra_config.NbGraderConfig.student_id = '.'
+        extra_config.NbGraderConfig.notebook_id = '*'
         return extra_config
 
     def init_assignment(self, assignment_id, student_id):
