@@ -51,7 +51,6 @@ setup_args = dict(
         'nbgrader.html': static_files,
         'nbgrader.tests': [
             'files/*',
-            'js/*'
         ]
     },
     scripts = ['scripts/nbgrader']
