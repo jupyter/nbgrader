@@ -406,7 +406,7 @@ class BaseNbConvertApp(BaseNbGraderApp, NbConvertApp):
         initialization was successful).
 
         """
-        dest = self._format_dest(assignment_id, student_id)
+        dest = os.path.normpath(self._format_dest(assignment_id, student_id))
 
         # the destination doesn't exist, so we haven't processed it
         if not os.path.exists(dest):
