@@ -20,7 +20,7 @@ from IPython.config.loader import Config
 from IPython.utils.path import link_or_copy, ensure_dir_exists
 
 from nbgrader.config import BasicConfig, NbGraderConfig
-from nbgrader.utils import check_directory, parse_utc
+from nbgrader.utils import check_directory, parse_utc, find_all_files
 
 from textwrap import dedent
 from dateutil.tz import gettz
@@ -456,20 +456,15 @@ class BaseNbConvertApp(BaseNbGraderApp, NbConvertApp):
         dest = self._format_dest(assignment_id, student_id)
 
         # detect other files in the source directory
-        for dirname, dirnames, filenames in os.walk(source):
-            for filename in filenames:
-                fullpath = os.path.join(dirname, filename)
-                if fullpath.endswith(".ipynb"):
-                    continue
+        for filename in find_all_files(source, self.ignore + ["*.ipynb"]):
+            # Make sure folder exists.
+            dest = os.path.join(dest, os.path.relpath(filename, source))
+            ensure_dir_exists(os.path.dirname(dest))
 
-                # Make sure folder exists.
-                dest = os.path.join(dest, os.path.relpath(fullpath, source))
-                ensure_dir_exists(os.path.dirname(dest))
-
-                # Copy if destination is different.
-                if not os.path.normpath(dest) == os.path.normpath(fullpath):
-                    self.log.info("Linking %s -> %s", filename, dest)
-                    link_or_copy(fullpath, dest)
+            # Copy if destination is different.
+            if not os.path.normpath(dest) == os.path.normpath(filename):
+                self.log.info("Linking %s -> %s", filename, dest)
+                link_or_copy(filename, dest)
 
     def convert_notebooks(self):
         for assignment in self.assignments:
