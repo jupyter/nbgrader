@@ -2,6 +2,7 @@ import os
 
 from IPython.utils.traitlets import List
 from IPython.nbconvert.exporters import HTMLExporter
+from IPython.nbconvert.preprocessors import CSSHTMLHeaderPreprocessor
 
 from nbgrader.apps.baseapp import BaseNbConvertApp, nbconvert_aliases, nbconvert_flags
 from nbgrader.preprocessors import GetGrades
@@ -59,7 +60,8 @@ class FeedbackApp(BaseNbConvertApp):
         return self.feedback_directory
 
     preprocessors = List([
-        GetGrades
+        GetGrades,
+        CSSHTMLHeaderPreprocessor
     ])
 
     def _classes_default(self):
