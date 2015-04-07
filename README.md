@@ -29,10 +29,10 @@ pip install git+git://github.com/jupyter/nbgrader.git@master
 You can then install and activate the nbgrader assignment toolbar extension with:
 
 ```bash
-python -m nbgrader --install --activate default
+python -m nbgrader --install --activate
 ```
 
-Where `default` is the name of the profile you want to use for creating assignments. By default the extension will by symlink, so you shouldn't need to reinstalling it after upgrading nbgrader. Use `--no-symlink` to actually copy the file.
+By default the extension will by symlink, so you shouldn't need to reinstalling it after upgrading nbgrader. Use `--no-symlink` to actually copy the file.
 
 To get help and see all the options you can pass while installing/activating the nbgrader notebook extension, use:
 
