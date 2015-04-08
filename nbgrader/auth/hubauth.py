@@ -34,6 +34,8 @@ class HubAuth(BaseAuth):
     notebook_url_prefix = Unicode(None, config=True, allow_none=True, help="""
         Relative path of the formgrader with respect to the hub's user base
         directory.  No trailing slash. i.e. "Documents" or "Documents/notebooks". """)
+    def _notebook_url_prefix_changed(self, name, old, new):
+        self.notebook_url_prefix = new.strip('/')
     
     hub_base_url = Unicode(config=True, help="Base URL of the hub server.")
     def _hub_base_url_default(self):
@@ -62,6 +64,16 @@ class HubAuth(BaseAuth):
     def _proxy_token_default(self):
         return os.environ.get('CONFIGPROXY_AUTH_TOKEN', '')
 
+    remap_url = Unicode(config=True, help="""Suffix appened to 
+        `HubAuth.hub_base_url` to form the full URL to the formgrade server.  By
+        default this is '/hub/{{NbGraderConfig.course_id}}'.  Change this if you
+        plan on running more than one formgrade server behind one JupyterHub
+        instance.""")
+    def _remap_url_default(self):
+        return '/hub/nbgrader/' + self.parent.course_id
+    def _remap_url_changed(self, name, old, new):
+        self.remap_url = new.rstrip('/')
+
     def __init__(self, *args, **kwargs):
         super(HubAuth, self).__init__(*args, **kwargs)
 
@@ -71,15 +83,15 @@ class HubAuth(BaseAuth):
 
         # Register self as a route of the configurable-http-proxy and then
         # update the base_url to point to the new path.
-        response = self._proxy_request('/api/routes/hub/formgrade', method='POST', body={
+        response = self._proxy_request('/api/routes' + self.remap_url, method='POST', body={
             'target': self._base_url
         })
         if response.status_code != 201:
             raise Exception('Error while trying to add JupyterHub route. {}: {}'.format(response.status_code, response.text))
-        self._base_url = self.hub_base_url + '/hub/formgrade'
+        self._base_url = self.hub_base_url + self.remap_url
 
         # Redirect all formgrade request to the correct API method.
-        self._app.register_blueprint(blueprint, static_url_path='/hub/formgrade/static', url_prefix='/hub/formgrade', url_defaults={'name': 'hub'})
+        self._app.register_blueprint(blueprint, static_url_path=self.remap_url + '/static', url_prefix=self.remap_url, url_defaults={'name': 'hub'})
 
     def authenticate(self):
         """Authenticate a request.
@@ -88,7 +100,7 @@ class HubAuth(BaseAuth):
         # If auth cookie doesn't exist, redirect to the login page with
         # next set to redirect back to the this page.
         if 'jupyter-hub-token' not in request.cookies:
-            return redirect(self.hub_base_url + '/hub/login?next=' + self.hub_base_url + '/hub/formgrade')
+            return redirect(self.hub_base_url + '/hub/login?next=' + self.hub_base_url + self.remap_url)
         cookie = request.cookies[self.hubapi_cookie]
 
         # Check with the Hub to see if the auth cookie is valid.
@@ -120,7 +132,7 @@ class HubAuth(BaseAuth):
             abort(500, "Failed to check authorization")
         else:
             # Auth invalid, reauthenticate.
-            return redirect(self.hub_base_url + '/hub/login?next=' + self.hub_base_url + '/hub/formgrade')
+            return redirect(self.hub_base_url + '/hub/login?next=' + self.hub_base_url + self.remap_url)
         return False
 
     def notebook_server_exists(self):
