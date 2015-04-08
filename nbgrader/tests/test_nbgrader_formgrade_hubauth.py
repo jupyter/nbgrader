@@ -9,7 +9,7 @@ from .test_nbgrader_formgrade import TestNbgraderFormgrade
 
 class TestNbgraderFormgradeHubAuth(TestNbgraderFormgrade):
 
-    base_formgrade_url = "http://localhost:8000/hub/course123ABC/"
+    base_formgrade_url = "http://localhost:8000/hub/nbgrader/course123ABC/"
     base_notebook_url = "http://localhost:8000/user/foobar/notebooks/class_files/"
 
     @classmethod
