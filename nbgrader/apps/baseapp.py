@@ -18,6 +18,7 @@ from IPython.config.application import catch_config_error
 from IPython.nbconvert.nbconvertapp import NbConvertApp, DottedOrNone
 from IPython.config.loader import Config
 from IPython.utils.path import link_or_copy, ensure_dir_exists
+from IPython.nbconvert.exporters.export import exporter_map
 
 from nbgrader.config import BasicConfig, NbGraderConfig
 from nbgrader.utils import check_directory, parse_utc, find_all_files
@@ -409,8 +410,16 @@ class BaseNbConvertApp(BaseNbGraderApp, NbConvertApp):
         dest = os.path.normpath(self._format_dest(assignment_id, student_id))
 
         # the destination doesn't exist, so we haven't processed it
-        if not os.path.exists(dest):
-            return True
+        if self.notebook_id == "*":
+            if not os.path.exists(dest):
+                return True
+        else:
+            # if any of the notebooks don't exist, then we want to process them
+            for notebook in self.notebooks:
+                filename = os.path.splitext(os.path.basename(notebook))[0] + self.exporter.file_extension
+                path = os.path.join(dest, filename)
+                if not os.path.exists(path):
+                    return True
 
         # if we have specified --force, then always remove existing stuff
         if self.force:
@@ -419,7 +428,8 @@ class BaseNbConvertApp(BaseNbGraderApp, NbConvertApp):
                 shutil.rmtree(dest)
             else:
                 for notebook in self.notebooks:
-                    path = os.path.join(dest, os.path.basename(notebook))
+                    filename = os.path.splitext(os.path.basename(notebook))[0] + self.exporter.file_extension
+                    path = os.path.join(dest, filename)
                     if os.path.exists(path):
                         self.log.warning("Removing existing notebook: {}".format(path))
                         os.remove(path)
@@ -437,7 +447,8 @@ class BaseNbConvertApp(BaseNbGraderApp, NbConvertApp):
                 shutil.rmtree(dest)
             else:
                 for notebook in self.notebooks:
-                    path = os.path.join(dest, os.path.basename(notebook))
+                    filename = os.path.splitext(os.path.basename(notebook))[0] + self.exporter.file_extension
+                    path = os.path.join(dest, filename)
                     if os.path.exists(path):
                         self.log.warning("Updating existing notebook: {}".format(path))
                         os.remove(path)
@@ -468,17 +479,22 @@ class BaseNbConvertApp(BaseNbGraderApp, NbConvertApp):
 
     def convert_notebooks(self):
         for assignment in sorted(self.assignments.keys()):
+            # initialize the list of notebooks and the exporter
             self.notebooks = self.assignments[assignment]
+            self.exporter = exporter_map[self.export_format](config=self.config)
 
+            # parse out the assignment and student ids
             regexp = self._format_source("(?P<assignment_id>.*)", "(?P<student_id>.*)")
             m = re.match(regexp, assignment)
             if m is None:
                 raise RuntimeError("Could not match '%s' with regexp '%s'", assignment, regexp)
             gd = m.groupdict()
 
+            # determine whether we actually even want to process this submission
             should_process = self.init_destination(gd['assignment_id'], gd['student_id'])
             if not should_process:
                 continue
 
+            # initialize the destination and convert
             self.init_assignment(gd['assignment_id'], gd['student_id'])
             super(BaseNbConvertApp, self).convert_notebooks()

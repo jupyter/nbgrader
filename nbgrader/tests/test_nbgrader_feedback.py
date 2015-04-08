@@ -80,3 +80,60 @@ class TestNbgraderFeedback(TestBase):
             assert not os.path.isfile("feedback/foo/ps1/foo.txt")
             assert os.path.isfile("feedback/foo/ps1/data/bar.txt")
             assert not os.path.isfile("feedback/foo/ps1/blah.pyc")
+
+    def test_filter_notebook(self):
+        """Does feedback filter by notebook properly?"""
+        with self._temp_cwd(["files/submitted-unchanged.ipynb"]):
+            dbpath = self._setup_db()
+
+            os.makedirs('source/ps1/data')
+            shutil.copy('submitted-unchanged.ipynb', 'source/ps1/p1.ipynb')
+            with open("source/ps1/foo.txt", "w") as fh:
+                fh.write("foo")
+            with open("source/ps1/data/bar.txt", "w") as fh:
+                fh.write("bar")
+            self._run_command('nbgrader assign ps1 --db="{}" '.format(dbpath))
+
+            os.makedirs('submitted/foo/ps1/data')
+            shutil.move('submitted-unchanged.ipynb', 'submitted/foo/ps1/p1.ipynb')
+            with open("submitted/foo/ps1/foo.txt", "w") as fh:
+                fh.write("foo")
+            with open("submitted/foo/ps1/data/bar.txt", "w") as fh:
+                fh.write("bar")
+            with open("submitted/foo/ps1/blah.pyc", "w") as fh:
+                fh.write("asdf")
+            self._run_command('nbgrader autograde ps1 --db="{}"'.format(dbpath))
+            self._run_command('nbgrader feedback ps1 --db="{}" --notebook "p1"'.format(dbpath))
+
+            assert os.path.isfile("feedback/foo/ps1/p1.html")
+            assert os.path.isfile("feedback/foo/ps1/foo.txt")
+            assert os.path.isfile("feedback/foo/ps1/data/bar.txt")
+            assert not os.path.isfile("feedback/foo/ps1/blah.pyc")
+
+            # check that removing the notebook still causes it to run
+            os.remove("feedback/foo/ps1/p1.html")
+            os.remove("feedback/foo/ps1/foo.txt")
+            self._run_command('nbgrader feedback ps1 --db="{}" --notebook "p1"'.format(dbpath))
+
+            assert os.path.isfile("feedback/foo/ps1/p1.html")
+            assert os.path.isfile("feedback/foo/ps1/foo.txt")
+            assert os.path.isfile("feedback/foo/ps1/data/bar.txt")
+            assert not os.path.isfile("feedback/foo/ps1/blah.pyc")
+
+            # check that running it again doesn't do anything
+            os.remove("feedback/foo/ps1/foo.txt")
+            self._run_command('nbgrader feedback ps1 --db="{}" --notebook "p1"'.format(dbpath))
+
+            assert os.path.isfile("feedback/foo/ps1/p1.html")
+            assert not os.path.isfile("feedback/foo/ps1/foo.txt")
+            assert os.path.isfile("feedback/foo/ps1/data/bar.txt")
+            assert not os.path.isfile("feedback/foo/ps1/blah.pyc")
+
+            # check that removing the notebook doesn't cause it to run
+            os.remove("feedback/foo/ps1/p1.html")
+            self._run_command('nbgrader feedback ps1 --db="{}"'.format(dbpath))
+
+            assert not os.path.isfile("feedback/foo/ps1/p1.html")
+            assert not os.path.isfile("feedback/foo/ps1/foo.txt")
+            assert os.path.isfile("feedback/foo/ps1/data/bar.txt")
+            assert not os.path.isfile("feedback/foo/ps1/blah.pyc")
