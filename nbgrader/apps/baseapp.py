@@ -467,7 +467,7 @@ class BaseNbConvertApp(BaseNbGraderApp, NbConvertApp):
                 link_or_copy(filename, path)
 
     def convert_notebooks(self):
-        for assignment in self.assignments:
+        for assignment in sorted(self.assignments.keys()):
             self.notebooks = self.assignments[assignment]
 
             regexp = self._format_source("(?P<assignment_id>.*)", "(?P<student_id>.*)")
