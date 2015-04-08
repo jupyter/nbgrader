@@ -490,11 +490,30 @@ class BaseNbConvertApp(BaseNbGraderApp, NbConvertApp):
                 raise RuntimeError("Could not match '%s' with regexp '%s'", assignment, regexp)
             gd = m.groupdict()
 
-            # determine whether we actually even want to process this submission
-            should_process = self.init_destination(gd['assignment_id'], gd['student_id'])
-            if not should_process:
-                continue
+            try:
+                # determine whether we actually even want to process this submission
+                should_process = self.init_destination(gd['assignment_id'], gd['student_id'])
+                if not should_process:
+                    continue
 
-            # initialize the destination and convert
-            self.init_assignment(gd['assignment_id'], gd['student_id'])
-            super(BaseNbConvertApp, self).convert_notebooks()
+                # initialize the destination and convert
+                self.init_assignment(gd['assignment_id'], gd['student_id'])
+                super(BaseNbConvertApp, self).convert_notebooks()
+
+            except:
+                self.log.error("There was an error processing assignment: %s", assignment)
+
+                dest = self._format_dest(gd['assignment_id'], gd['student_id'])
+                if self.notebook_id == "*":
+                    if os.path.exists(dest):
+                        self.log.warning("Removing failed assignment: {}".format(dest))
+                        shutil.rmtree(dest)
+                else:
+                    for notebook in self.notebooks:
+                        filename = os.path.splitext(os.path.basename(notebook))[0] + self.exporter.file_extension
+                        path = os.path.join(dest, filename)
+                        if os.path.exists(path):
+                            self.log.warning("Removing failed notebook: {}".format(path))
+                            os.remove(path)
+
+                raise
