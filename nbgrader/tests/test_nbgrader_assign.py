@@ -88,20 +88,34 @@ class TestNbgraderAssign(TestBase):
     def test_force(self):
         """Ensure the force option works properly"""
         with self._temp_cwd(["files/test.ipynb"]):
-            os.makedirs('source/ps1')
+            os.makedirs('source/ps1/data')
             shutil.move("test.ipynb", "source/ps1/test.ipynb")
             with open("source/ps1/foo.txt", "w") as fh:
                 fh.write("foo")
+            with open("source/ps1/data/bar.txt", "w") as fh:
+                fh.write("bar")
+            with open("source/ps1/blah.pyc", "w") as fh:
+                fh.write("asdf")
 
             self._run_command('nbgrader assign ps1 --create')
             assert os.path.isfile("release/ps1/test.ipynb")
             assert os.path.isfile("release/ps1/foo.txt")
+            assert os.path.isfile("release/ps1/data/bar.txt")
+            assert not os.path.isfile("release/ps1/blah.pyc")
 
-            # this should fail, because it already exists
-            self._run_command('nbgrader assign ps1', 1)
+            # check that it skips the existing directory
+            os.remove("release/ps1/foo.txt")
+            self._run_command('nbgrader assign ps1')
+            assert not os.path.isfile("release/ps1/foo.txt")
+
+            # force overwrite the supplemental files
+            self._run_command('nbgrader assign ps1 --force')
+            assert os.path.isfile("release/ps1/foo.txt")
 
             # force overwrite
             os.remove("source/ps1/foo.txt")
             self._run_command('nbgrader assign ps1 --force')
             assert os.path.isfile("release/ps1/test.ipynb")
+            assert os.path.isfile("release/ps1/data/bar.txt")
             assert not os.path.isfile("release/ps1/foo.txt")
+            assert not os.path.isfile("release/ps1/blah.pyc")

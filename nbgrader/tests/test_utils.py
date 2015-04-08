@@ -1,3 +1,5 @@
+import os
+
 from IPython.nbformat.v4 import new_output
 from nose.tools import assert_equal, assert_not_equal, assert_raises
 from nbgrader import utils
@@ -162,3 +164,32 @@ class TestUtils(TestBase):
         cell2 = self._create_solution_cell("hello", "code")
         cell2.metadata.nbgrader["solution"] = False
         assert_not_equal(utils.compute_checksum(cell1), utils.compute_checksum(cell2))
+
+    def test_is_ignored(self):
+        with self._temp_cwd():
+            os.mkdir("foo")
+            with open("foo/bar.txt", "w") as fh:
+                fh.write("bar")
+
+            assert not utils.is_ignored("foo")
+            assert utils.is_ignored("foo/bar.txt", ["*.txt"])
+            assert utils.is_ignored("foo/bar.txt", ["bar.txt"])
+            assert utils.is_ignored("foo/bar.txt", ["*"])
+            assert not utils.is_ignored("foo/bar.txt", ["*.csv"])
+            assert not utils.is_ignored("foo/bar.txt", ["foo"])
+            assert not utils.is_ignored("foo/bar.txt", ["foo/*"])
+
+    def test_find_all_files(self):
+        with self._temp_cwd():
+            os.makedirs("foo/bar")
+            with open("foo/baz.txt", "w") as fh:
+                fh.write("baz")
+            with open("foo/bar/baz.txt", "w") as fh:
+                fh.write("baz")
+
+            assert_equal(utils.find_all_files("foo"), ["foo/baz.txt", "foo/bar/baz.txt"])
+            assert_equal(utils.find_all_files("foo", ["bar"]), ["foo/baz.txt"])
+            assert_equal(utils.find_all_files("foo/bar"), ["foo/bar/baz.txt"])
+            assert_equal(utils.find_all_files("foo/bar", ["*.txt"]), [])
+            assert_equal(utils.find_all_files("."), ["./foo/baz.txt", "./foo/bar/baz.txt"])
+            assert_equal(utils.find_all_files(".", ["bar"]), ["./foo/baz.txt"])

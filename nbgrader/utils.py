@@ -3,6 +3,7 @@ import hashlib
 import autopep8
 import dateutil.parser
 import pwd
+import glob
 
 from IPython.utils.py3compat import str_to_bytes
 
@@ -103,3 +104,31 @@ def find_owner(path):
 def self_owned(path):
     """Is the path owned by the current user of this process?"""
     return get_username() == find_owner(os.path.abspath(path))
+
+def is_ignored(filename, ignore_globs=None):
+    """Determines whether a filename should be ignored, based on whether it
+    matches any file glob in the given list. Note that this only matches on the
+    base filename itself, not the full path."""
+    if ignore_globs is None:
+        return False
+    dirname = os.path.dirname(filename)
+    for expr in ignore_globs:
+        globs = glob.glob(os.path.join(dirname, expr))
+        if filename in globs:
+            return True
+    return False
+
+def find_all_files(path, exclude=None):
+    """Recursively finds all filenames rooted at `path`, optionally excluding
+    some based on filename globs."""
+    files = []
+    for dirname, dirnames, filenames in os.walk(path):
+        if is_ignored(dirname, exclude):
+            continue
+        for filename in filenames:
+            fullpath = os.path.join(dirname, filename)
+            if is_ignored(fullpath, exclude):
+                continue
+            else:
+                files.append(fullpath)
+    return files

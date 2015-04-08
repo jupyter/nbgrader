@@ -111,16 +111,6 @@ class CollectApp(TransferApp):
         if not os.path.isdir(submit_dir):
             os.mkdir(submit_dir)
 
-    def _get_existing_timestamp(self, dest_path):
-        """Get the timestamp, as a datetime object, of an existing submission."""
-        timestamp_path = os.path.join(dest_path, 'timestamp.txt')
-        if os.path.exists(timestamp_path):
-            with open(timestamp_path, 'r') as fh:
-                timestamp = fh.read().strip()
-            return parse_utc(timestamp)
-        else:
-            return None
-            
     def copy_files(self):
         for rec in self.src_records:
             student_id = rec['username']

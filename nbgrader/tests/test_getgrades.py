@@ -33,6 +33,7 @@ class TestGetGrades(TestBase):
         nb = new_notebook()
         nb.cells.append(cell)
         self.preprocessor1.preprocess(nb, self.resources)
+        self.gb.add_submission("ps0", "bar")
         self.preprocessor2.preprocess(nb, self.resources)
         self.preprocessor3.preprocess(nb, self.resources)
 
@@ -47,6 +48,7 @@ class TestGetGrades(TestBase):
         nb = new_notebook()
         nb.cells.append(cell)
         self.preprocessor1.preprocess(nb, self.resources)
+        self.gb.add_submission("ps0", "bar")
         self.preprocessor2.preprocess(nb, self.resources)
         self.preprocessor3.preprocess(nb, self.resources)
 
@@ -60,6 +62,7 @@ class TestGetGrades(TestBase):
         nb = new_notebook()
         nb.cells.append(cell)
         self.preprocessor1.preprocess(nb, self.resources)
+        self.gb.add_submission("ps0", "bar")
         self.preprocessor2.preprocess(nb, self.resources)
         self.preprocessor3.preprocess(nb, self.resources)
 
@@ -73,6 +76,7 @@ class TestGetGrades(TestBase):
         nb = new_notebook()
         nb.cells.append(cell)
         self.preprocessor1.preprocess(nb, self.resources)
+        self.gb.add_submission("ps0", "bar")
         cell.source = "hello!"
         self.preprocessor2.preprocess(nb, self.resources)
         self.preprocessor3.preprocess(nb, self.resources)
@@ -87,6 +91,7 @@ class TestGetGrades(TestBase):
         nb = new_notebook()
         nb.cells.append(cell)
         self.preprocessor1.preprocess(nb, self.resources)
+        self.gb.add_submission("ps0", "bar")
         self.preprocessor2.preprocess(nb, self.resources)
         self.preprocessor3.preprocess(nb, self.resources)
 
@@ -103,6 +108,7 @@ class TestGetGrades(TestBase):
         nb = new_notebook()
         nb.cells.append(cell)
         self.preprocessor1.preprocess(nb, self.resources)
+        self.gb.add_submission("ps0", "bar")
         cell.source = "hello!"
         self.preprocessor2.preprocess(nb, self.resources)
         self.preprocessor3.preprocess(nb, self.resources)

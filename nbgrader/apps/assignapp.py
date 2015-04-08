@@ -21,6 +21,8 @@ from nbgrader.preprocessors import (
 
 aliases = {}
 aliases.update(nbconvert_aliases)
+del aliases['student']
+del aliases['notebook']
 aliases.update({
 })
 
@@ -34,10 +36,6 @@ flags.update({
     'create': (
         {'AssignApp': {'create_assignment': True}},
         "Create an entry for the assignment in the database, if one does not already exist."
-    ),
-    'force': (
-        {'AssignApp': {'force': True}},
-        "Overwrite an existing assignment if it already exists."
     ),
 })
 
@@ -107,16 +105,6 @@ class AssignApp(BaseNbConvertApp):
         )
     )
 
-    force = Bool(
-        False, config=True,
-        help=dedent(
-            """
-            If the assignment already exists in the release directory, force
-            overwriting it completely.
-            """
-        )
-    )
-
     @property
     def _input_directory(self):
         return self.source_directory
@@ -140,16 +128,15 @@ class AssignApp(BaseNbConvertApp):
     def build_extra_config(self):
         extra_config = super(AssignApp, self).build_extra_config()
         extra_config.NbGraderConfig.student_id = '.'
+        extra_config.NbGraderConfig.notebook_id = '*'
         return extra_config
 
-    def init_single_notebook_resources(self, notebook_filename):
-        resources = super(AssignApp, self).init_single_notebook_resources(notebook_filename)
+    def init_assignment(self, assignment_id, student_id):
+        super(AssignApp, self).init_assignment(assignment_id, student_id)
 
         # try to get the assignment from the database, and throw an error if it
         # doesn't exist
-        db_url = resources['nbgrader']['db_url']
-        assignment_id = resources['nbgrader']['assignment']
-        gb = Gradebook(db_url)
+        gb = Gradebook(self.db_url)
         try:
             gb.find_assignment(assignment_id)
         except MissingEntry:
@@ -158,21 +145,3 @@ class AssignApp(BaseNbConvertApp):
                 gb.add_assignment(assignment_id)
             else:
                 self.fail("No assignment called '%s' exists in the database", assignment_id)
-
-        return resources
-
-    def convert_notebooks(self):
-        dest_path = self.directory_structure.format(
-            nbgrader_step=self._output_directory,
-            student_id=self.student_id,
-            assignment_id=self.assignment_id
-        )
-
-        if os.path.exists(dest_path):
-            if self.force:
-                self.log.warning("Removing existing directory %s", dest_path)
-                shutil.rmtree(dest_path)
-            else:
-                self.fail("Assignment already exists, use --force to overwrite: %s", dest_path)
-
-        super(AssignApp, self).convert_notebooks()
