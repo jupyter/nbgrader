@@ -737,3 +737,19 @@ class TestApi(object):
             [x[0] for x in self.db.query(api.Notebook.num_submissions).all()],
             [2])
 
+    def test_student_max_score(self):
+        now = datetime.datetime.now()
+        a = api.Assignment(name='foo', duedate=now)
+        n = api.Notebook(name='blah', assignment=a)
+        gc1 = api.GradeCell(
+            name='foo', max_score=10, notebook=n, cell_type="markdown")
+        gc2 = api.GradeCell(
+            name='bar', max_score=5, notebook=n, cell_type="code")
+        self.db.add(a)
+        self.db.commit()
+
+        s = api.Student(id="12345", first_name='Jane', last_name='Doe', email='janedoe@nowhere')
+        self.db.add(s)
+        self.db.commit()
+
+        assert_equal(s.max_score, 15)

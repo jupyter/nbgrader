@@ -393,9 +393,6 @@ SubmittedAssignment.max_score = column_property(
 
 Student.max_score = column_property(
     select([func.coalesce(func.sum(Assignment.max_score), 0.0)])\
-        .where(and_(
-            Student.id == SubmittedAssignment.student_id,
-            Assignment.id == SubmittedAssignment.assignment_id))\
         .correlate_except(Assignment), deferred=True)
 
 
