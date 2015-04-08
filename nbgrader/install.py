@@ -16,18 +16,7 @@ from IPython.utils.py3compat import cast_unicode_py2
 
 flags = {}
 flags.update(base_flags)
-del flags['symlink']
-del flags['s']
-del flags['user']
 flags.update({
-    "no-symlink" : (
-        {"NbGraderExtensionApp" : {"symlink" : False}},
-        "Copy files instead of creating symlink"
-    ),
-    "system" : (
-        {"NBExtensionApp" : {"user" : False}},
-        "Install to the system IPython directory"
-    ),
     "install" : (
         {"NbGraderExtensionApp" : {"install" : True}},
         "Install the nbgrader nbextension"
@@ -94,16 +83,6 @@ class NbGraderExtensionApp(NBExtensionApp):
         False,
         config=True,
         help="Deactivate the nbgrader extension in the given profile (incompatible with the `activate` option)")
-
-    symlink = Bool(
-        True,
-        config=True,
-        help="Create symlinks instead of copying files")
-
-    user = Bool(
-        True,
-        config=True,
-        help="Whether to do a user install")
 
     destination = Unicode('')
 

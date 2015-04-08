@@ -127,7 +127,7 @@ class TestCreateAssignmentNbExtension(TestBase):
 
     def test_00_install_extension(self):
         self._run_command(
-            "python -m nbgrader --install --activate --no-symlink "
+            "python -m nbgrader --install --activate --user "
             "--ipython-dir={}".format(self.ipythondir))
 
         # check the extension file were copied
