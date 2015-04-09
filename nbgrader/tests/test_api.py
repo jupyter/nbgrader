@@ -753,3 +753,81 @@ class TestApi(object):
         self.db.commit()
 
         assert_equal(s.max_score, 15)
+
+    def test_query_grade_cell_types(self):
+        self._init_submissions()
+
+        assert_equal(
+            self.db.query(api.Grade)\
+                .filter(api.Grade.cell_type == "code")\
+                .order_by(api.Grade.id)\
+                .all(),
+            self.db.query(api.Grade)\
+                .join(api.GradeCell)\
+                .filter(api.GradeCell.cell_type == "code")\
+                .order_by(api.Grade.id)\
+                .all())
+
+        assert_equal(
+            self.db.query(api.Grade)\
+                .filter(api.Grade.cell_type == "markdown")\
+                .order_by(api.Grade.id)\
+                .all(),
+            self.db.query(api.Grade)\
+                .join(api.GradeCell)\
+                .filter(api.GradeCell.cell_type == "markdown")\
+                .order_by(api.Grade.id)\
+                .all())
+
+    def test_query_failed_tests_failed(self):
+        grades = self._init_submissions()
+
+        for grade in grades:
+            if grade.cell.cell_type == "code":
+                grade.auto_score = 0
+        self.db.commit()
+
+        # have all the cells failed?
+        assert_equal(
+            self.db.query(api.Grade)\
+                .filter(api.Grade.failed_tests)\
+                .order_by(api.Grade.id)\
+                .all(),
+            self.db.query(api.Grade)\
+                .filter(api.Grade.cell_type == "code")\
+                .order_by(api.Grade.id)\
+                .all()
+        )
+
+        # have all the notebooks failed?
+        assert_equal(
+            self.db.query(api.SubmittedNotebook)\
+                .filter(api.SubmittedNotebook.failed_tests)\
+                .order_by(api.SubmittedNotebook.id)\
+                .all(),
+            self.db.query(api.SubmittedNotebook)\
+                .order_by(api.SubmittedNotebook.id)\
+                .all()
+        )
+
+    def test_query_failed_tests_ok(self):
+        all_grades = self._init_submissions()
+
+        for grade in all_grades:
+            if grade.cell.cell_type == "code":
+                grade.auto_score = grade.max_score
+        self.db.commit()
+
+        # are all the grades ok?
+        assert_equal(
+            self.db.query(api.Grade)\
+                .filter(api.Grade.failed_tests)\
+                .all(),
+            [])
+
+        # are all the notebooks ok?
+        assert_equal(
+            self.db.query(api.SubmittedNotebook)\
+                .filter(api.SubmittedNotebook.failed_tests)\
+                .all(),
+            [])
