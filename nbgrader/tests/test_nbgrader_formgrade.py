@@ -315,3 +315,17 @@ class TestNbgraderFormgrade(TestBase):
                 self._wait_for_notebook_page(self.notebook_url("autograded/{}/Problem Set 1/{}.ipynb".format(submission.student.id, problem.name)))
                 self.browser.close()
                 self.browser.switch_to_window(self.browser.window_handles[0])
+
+    def test_formgrade_images(self):
+        submissions = self.gb.find_notebook("Problem 1", "Problem Set 1").submissions
+        submissions.sort(key=lambda x: x.id)
+
+        for submission in submissions:
+            self.browser.get(self.formgrade_url("submissions/{}".format(submission.id)))
+            self._wait_for_notebook_page("submissions/{}".format(submission.id))
+
+            images = self.browser.find_elements_by_tag_name("img")
+            for image in images:
+                # check that the image is loaded, and that it has a width
+                assert self.browser.execute_script("return arguments[0].complete", image)
+                assert self.browser.execute_script("return arguments[0].naturalWidth", image) > 0
