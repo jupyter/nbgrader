@@ -329,4 +329,3 @@ class TestNbgraderFormgrade(TestBase):
                 # check that the image is loaded, and that it has a width
                 assert self.browser.execute_script("return arguments[0].complete", image)
                 assert self.browser.execute_script("return arguments[0].naturalWidth", image) > 0
-                import ipdb; ipdb.set_trace(0)
