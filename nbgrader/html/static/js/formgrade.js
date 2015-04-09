@@ -121,13 +121,36 @@ var nextAssignment = function () {
     }
 };
 
+var nextIncorrectAssignment = function () {
+    if (next_incorrect_href) {
+        window.location = next_incorrect_href + "#" + getIndex(last_selected);
+    }
+};
+
 var prevAssignment = function () {
     href = $("li.previous a").attr("href");
     if (href) {
         window.location = href + "#" + getIndex(last_selected);
     }
 };
-    
+
+var prevIncorrectAssignment = function () {
+    if (prev_incorrect_href) {
+        window.location = prev_incorrect_href + "#" + getIndex(last_selected);
+    }
+};
+
+var save_and_navigate = function(callback) {
+    elem = document.activeElement;
+    if (elem.tagName === "INPUT" || elem.tagName === "TEXTAREA") {
+        $(document).on("finished_saving", callback);
+        $(elem).blur();
+        $(elem).trigger("change");
+    } else {
+        callback();
+    }
+};
+
 $(window).load(function () {
     grades = new Grades();
     grades.fetch({
@@ -150,14 +173,14 @@ $(window).load(function () {
     // disable link selection on tabs
     $('a').attr('tabindex', '-1');
 
-    $("input, textarea").on('keydown', function(e) { 
+    $("input, textarea").on('keydown', function(e) {
         var keyCode = e.keyCode || e.which;
 
         if (keyCode === 9) { // tab
             e.preventDefault();
             e.stopPropagation();
             selectNext(e.currentTarget, e.shiftKey);
-            
+
         } else if (keyCode === 27) { // escape
             $(e.currentTarget).blur();
         }
@@ -171,29 +194,16 @@ $(window).load(function () {
         if (keyCode === 9) { // tab
             e.preventDefault();
             selectNext(last_selected, e.shiftKey);
-
         } else if (keyCode === 13) { // enter
             last_selected.select();
-
+        } else if (keyCode == 39 && e.shiftKey && e.ctrlKey) { // shift + control + right arrow
+            save_and_navigate(nextIncorrectAssignment);
+        } else if (keyCode == 37 && e.shiftKey && e.ctrlKey) { // shift + control + left arrow
+            save_and_navigate(prevIncorrectAssignment);
         } else if (keyCode == 39 && e.shiftKey) { // shift + right arrow
-            elem = document.activeElement;
-            if (elem.tagName === "INPUT" || elem.tagName === "TEXTAREA") {
-                $(document).on("finished_saving", nextAssignment);
-                $(elem).blur();
-                $(elem).trigger("change");
-            } else {
-                nextAssignment();
-            }
-
+            save_and_navigate(nextAssignment);
         } else if (keyCode == 37 && e.shiftKey) { // shift + left arrow
-            elem = document.activeElement;
-            if (elem.tagName === "INPUT" || elem.tagName === "TEXTAREA") {
-                $(document).on("finished_saving", prevAssignment);
-                $(elem).blur();
-                $(elem).trigger("change");
-            } else {
-                prevAssignment();
-            }
+            save_and_navigate(prevAssignment);
         }
     });
 

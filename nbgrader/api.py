@@ -247,7 +247,8 @@ class SubmittedNotebook(Base):
             "max_code_score": self.max_code_score,
             "written_score": self.written_score,
             "max_written_score": self.max_written_score,
-            "needs_manual_grade": self.needs_manual_grade
+            "needs_manual_grade": self.needs_manual_grade,
+            "failed_tests": self.failed_tests
         }
 
     def __repr__(self):
@@ -289,7 +290,9 @@ class Grade(Base):
             "auto_score": self.auto_score,
             "manual_score": self.manual_score,
             "max_score": self.max_score,
-            "needs_manual_grade": self.needs_manual_grade
+            "needs_manual_grade": self.needs_manual_grade,
+            "failed_tests": self.failed_tests,
+            "cell_type": self.cell_type
         }
 
     def __repr__(self):
@@ -503,6 +506,26 @@ Notebook.num_submissions = column_property(
     select([func.count(SubmittedNotebook.id)])\
         .where(SubmittedNotebook.notebook_id == Notebook.id)\
         .correlate_except(SubmittedNotebook), deferred=True)
+
+
+## Cell type
+
+Grade.cell_type = column_property(
+    select([GradeCell.cell_type])\
+        .where(Grade.cell_id == GradeCell.id)\
+        .correlate_except(GradeCell), deferred=True)
+
+
+## Failed tests
+
+Grade.failed_tests = column_property(
+    (Grade.auto_score < Grade.max_score) & (Grade.cell_type == "code"))
+
+SubmittedNotebook.failed_tests = column_property(
+    exists().where(and_(
+        Grade.notebook_id == SubmittedNotebook.id,
+        Grade.failed_tests))\
+    .correlate_except(Grade), deferred=True)
 
 
 class Gradebook(object):
@@ -1591,17 +1614,30 @@ class Gradebook(object):
          .group_by(SubmittedNotebook.id)\
          .subquery()
 
+        # subquery for failed tests
+        failed_tests = self.db.query(
+            SubmittedNotebook.id,
+            exists().where(Grade.failed_tests).label("failed_tests")
+        ).join(SubmittedAssignment, Assignment, Notebook)\
+         .filter(
+             Grade.notebook_id == SubmittedNotebook.id,
+             Grade.failed_tests)\
+         .group_by(SubmittedNotebook.id)\
+         .subquery()
+
         # full query
         submissions = self.db.query(
             SubmittedNotebook.id, Notebook.name, Student.id,
             func.sum(Grade.score), func.sum(GradeCell.max_score),
             code_scores.c.code_score, code_scores.c.max_code_score,
             written_scores.c.written_score, written_scores.c.max_written_score,
-            func.coalesce(manual_grade.c.needs_manual_grade, False)
+            func.coalesce(manual_grade.c.needs_manual_grade, False),
+            func.coalesce(failed_tests.c.failed_tests, False)
         ).join(SubmittedAssignment, Notebook, Assignment, Student, Grade, GradeCell)\
          .outerjoin(code_scores, SubmittedNotebook.id == code_scores.c.id)\
          .outerjoin(written_scores, SubmittedNotebook.id == written_scores.c.id)\
          .outerjoin(manual_grade, SubmittedNotebook.id == manual_grade.c.id)\
+         .outerjoin(failed_tests, SubmittedNotebook.id == failed_tests.c.id)\
          .filter(and_(
              Notebook.name == notebook_id,
              Assignment.name == assignment_id,
@@ -1617,6 +1653,7 @@ class Gradebook(object):
             "score", "max_score", 
             "code_score", "max_code_score", 
             "written_score", "max_written_score",
-            "needs_manual_grade"
+            "needs_manual_grade",
+            "failed_tests"
         ]
         return [dict(zip(keys, x)) for x in submissions]
