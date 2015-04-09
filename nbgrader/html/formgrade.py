@@ -177,12 +177,11 @@ def view_submission_files(submission_id, path):
     except MissingEntry:
         abort(404)
 
-    filename = os.path.join(app.notebook_dir, app.notebook_dir_format.format(
+    dirname = os.path.join(app.notebook_dir, app.notebook_dir_format.format(
         nbgrader_step=app.nbgrader_step,
         assignment_id=assignment_id,
         student_id=student_id))
 
-    dirname = os.path.split(filename)[0]
     return send_from_directory(dirname, path)
 
 
