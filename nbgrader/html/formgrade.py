@@ -221,7 +221,7 @@ def view_submission(submission_id):
         next_submission = submission_ids[ix + 1]
 
     # find previous and next incorrect submission
-    incorrect_ids = set([x.id for x in submissions if x.code_score < x.max_code_score])
+    incorrect_ids = set([x.id for x in submissions if x.failed_tests])
     incorrect_ids.add(submission.id)
     incorrect_ids = sorted(incorrect_ids)
     ix_incorrect = incorrect_ids.index(submission.id)

@@ -21,6 +21,7 @@
     <th class="center">Code Score</th>
     <th class="center">Written Score</th>
     <th class="center">Manual grade?</th>
+    <th class="center">Tests failed?</th>
   </tr>
 </thead>
 <tbody>
@@ -36,6 +37,11 @@
     <td class="center">{{ submission.written_score | float | round(2) }} / {{ submission.max_written_score | float | round(2) }}</td>
     <td class="center">
       {%- if submission.needs_manual_grade -%}
+      <span class="glyphicon glyphicon-ok"></span>
+      {%- endif -%}
+    </td>
+    <td class="center">
+      {%- if submission.failed_tests -%}
       <span class="glyphicon glyphicon-ok"></span>
       {%- endif -%}
     </td>
