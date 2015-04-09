@@ -207,17 +207,32 @@ def view_submission(submission_id):
         abort(404)
 
     submissions = app.gradebook.notebook_submissions(notebook_id, assignment_id)
-    submissions = sorted([x.id for x in submissions])
 
-    ix = submissions.index(submission.id)
+    # find previous and next submission
+    submission_ids = sorted([x.id for x in submissions])
+    ix = submission_ids.index(submission.id)
     if ix == 0:
         prev_submission = None
     else:
-        prev_submission = submissions[ix - 1]
+        prev_submission = submission_ids[ix - 1]
     if ix == (len(submissions) - 1):
         next_submission = None
     else:
-        next_submission = submissions[ix + 1]
+        next_submission = submission_ids[ix + 1]
+
+    # find previous and next incorrect submission
+    incorrect_ids = set([x.id for x in submissions if x.code_score < x.max_code_score])
+    incorrect_ids.add(submission.id)
+    incorrect_ids = sorted(incorrect_ids)
+    ix_incorrect = incorrect_ids.index(submission.id)
+    if ix_incorrect == 0:
+        prev_incorrect = None
+    else:
+        prev_incorrect = incorrect_ids[ix_incorrect - 1]
+    if ix_incorrect == (len(incorrect_ids) - 1):
+        next_incorrect = None
+    else:
+        next_incorrect = incorrect_ids[ix_incorrect + 1]
 
     server_exists = app.auth.notebook_server_exists()
     resources = {
@@ -226,6 +241,8 @@ def view_submission(submission_id):
         'submission_id': submission.id,
         'next': next_submission,
         'prev': prev_submission,
+        'next_incorrect': next_incorrect,
+        'prev_incorrect': prev_incorrect,
         'index': ix,
         'total': len(submissions),
         'notebook_server_exists': server_exists,

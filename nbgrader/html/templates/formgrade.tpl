@@ -19,6 +19,18 @@ var submission_id = "{{ resources.submission_id }}";
 var notebook_id = "{{ resources.notebook_id }}";
 var assignment_id = "{{ resources.assignment_id }}";
 var base_url = "{{resources.base_url}}";
+
+{%- if resources.next_incorrect -%}
+var next_incorrect_href = "{{resources.base_url}}/submissions/{{ resources.next_incorrect }}";
+{%- else -%}
+var next_incorrect_href;
+{%- endif -%}
+
+{%- if resources.prev_incorrect -%}
+var prev_incorrect_href = "{{resources.base_url}}/submissions/{{ resources.prev_incorrect }}";
+{%- else -%}
+var prev_incorrect_href;
+{%- endif -%}
 </script>
 
 <script src="{{resources.base_url}}/static/js/formgrade.js"></script>
