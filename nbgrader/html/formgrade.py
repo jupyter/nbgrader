@@ -75,7 +75,7 @@ def view_assignments():
 @auth
 def view_students():
     students = app.gradebook.student_dicts()
-    students.sort(key=lambda x: x.get("last_name", "no last name"))
+    students.sort(key=lambda x: x.get("last_name") or "no last name")
     return render_template(
         "students.tpl",
         students=students,
@@ -115,7 +115,7 @@ def view_student(student_id):
         abort(404)
 
     assignments = [x.to_dict() for x in student.submissions]
-    assignments.sort(key=lambda x: x.get("duedate", "no due date"))
+    assignments.sort(key=lambda x: x.get("duedate") or "no due date")
     student = student.to_dict()
 
     return render_template(
