@@ -177,6 +177,7 @@ class TestNbgraderAutograde(TestBase):
             assert os.path.isfile("autograded/foo/ps1/foo.txt")
 
             # force overwrite
+            os.remove("source/ps1/foo.txt")
             os.remove("submitted/foo/ps1/foo.txt")
             self._run_command('nbgrader autograde ps1 --db="{}" --force'.format(dbpath))
             assert os.path.isfile("autograded/foo/ps1/p1.ipynb")
@@ -239,3 +240,35 @@ class TestNbgraderAutograde(TestBase):
             assert not os.path.isfile("autograded/foo/ps1/foo.txt")
             assert os.path.isfile("autograded/foo/ps1/data/bar.txt")
             assert not os.path.isfile("autograded/foo/ps1/blah.pyc")
+
+    def test_grade_overwrite_files(self):
+        """Are dependent files properly linked and overwritten?"""
+        with self._temp_cwd(["files/submitted-unchanged.ipynb"]):
+            dbpath = self._setup_db()
+
+            os.makedirs('source/ps1')
+            shutil.copy('submitted-unchanged.ipynb', 'source/ps1/p1.ipynb')
+            with open("source/ps1/data.csv", "w") as fh:
+                fh.write("some,data\n")
+            self._run_command('nbgrader assign ps1 --db="{}" '.format(dbpath))
+
+            os.makedirs('submitted/foo/ps1')
+            shutil.move('submitted-unchanged.ipynb', 'submitted/foo/ps1/p1.ipynb')
+            with open('submitted/foo/ps1/timestamp.txt', 'w') as fh:
+                fh.write("2015-02-02 15:58:23.948203 PST")
+            with open("submitted/foo/ps1/data.csv", "w") as fh:
+                fh.write("some,other,data\n")
+            self._run_command('nbgrader autograde ps1 --db="{}"'.format(dbpath))
+
+            print(os.listdir("autograded/foo/ps1"))
+            assert os.path.isfile("autograded/foo/ps1/p1.ipynb")
+            assert os.path.isfile("autograded/foo/ps1/timestamp.txt")
+            assert os.path.isfile("autograded/foo/ps1/data.csv")
+
+            with open("autograded/foo/ps1/timestamp.txt", "r") as fh:
+                contents = fh.read()
+            assert_equal(contents, "2015-02-02 15:58:23.948203 PST")
+
+            with open("autograded/foo/ps1/data.csv", "r") as fh:
+                contents = fh.read()
+            assert_equal(contents, "some,data\n")
