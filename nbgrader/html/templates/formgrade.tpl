@@ -19,18 +19,6 @@ var submission_id = "{{ resources.submission_id }}";
 var notebook_id = "{{ resources.notebook_id }}";
 var assignment_id = "{{ resources.assignment_id }}";
 var base_url = "{{resources.base_url}}";
-
-{%- if resources.next_incorrect -%}
-var next_incorrect_href = "{{resources.base_url}}/submissions/{{ resources.next_incorrect }}";
-{%- else -%}
-var next_incorrect_href;
-{%- endif -%}
-
-{%- if resources.prev_incorrect -%}
-var prev_incorrect_href = "{{resources.base_url}}/submissions/{{ resources.prev_incorrect }}";
-{%- else -%}
-var prev_incorrect_href;
-{%- endif -%}
 </script>
 
 <script src="{{resources.base_url}}/static/js/formgrade.js"></script>
@@ -59,7 +47,7 @@ var prev_incorrect_href;
         <ul class="nav navbar-nav navbar-left">
           {%- if resources.prev -%}
           <li class="previous">
-            <a data-toggle="tooltip" data-placement="right" title="{{ resources.index }} remaining" href="{{resources.base_url}}/submissions/{{ resources.prev }}">
+            <a data-toggle="tooltip" data-placement="right" title="{{ resources.index }} remaining" href="{{resources.base_url}}/submissions/prev">
             &larr; Prev
             </a>
           </li>
@@ -90,7 +78,7 @@ var prev_incorrect_href;
         <ul class="nav navbar-nav navbar-right">
           {%- if resources.next -%}
           <li class="next">
-            <a data-toggle="tooltip" data-placement="left" title="{{ resources.total - (resources.index + 1) }} remaining" href="{{resources.base_url}}/submissions/{{ resources.next }}">
+            <a data-toggle="tooltip" data-placement="left" title="{{ resources.total - (resources.index + 1) }} remaining" href="{{resources.base_url}}/submissions/next">
             Next &rarr;
             </a>
           </li>
