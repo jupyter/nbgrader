@@ -1,18 +1,16 @@
 import os
-import shutil
 import tarfile
 
-from .base import TestBase
-from .. import run_command, temp_cwd
+from .. import run_command
+from .base import BaseTestApp
 
-root = os.path.dirname(__file__)
 
-class TestNbgraderSubmit(TestBase):
+class TestNbGraderSubmit(BaseTestApp):
 
     def test_help(self):
         """Does the help display without error?"""
-        with temp_cwd():
-            run_command("nbgrader submit --help-all")
+        run_command("nbgrader submit --help-all")
+
 
     def test_submit(self):
         """Does everything get properly submitted?"""
@@ -27,6 +25,7 @@ class TestNbgraderSubmit(TestBase):
         #     tf = tarfile.open('../Problem Set 1.tar.gz', 'r:gz')
         #     names = sorted(['Problem Set 1/Problem 1.ipynb', 'Problem Set 1/timestamp.txt', 'Problem Set 1/user.txt'])
         #     assert sorted(tf.getnames()) == names
+
 
     def test_submit_custom_assignment(self):
         """Does everything get properly submitted with a custom assignment name?"""

@@ -1,275 +1,207 @@
 import os
-import shutil
 
 from nbgrader.api import Gradebook
 
-from .base import TestBase
-from .. import run_command, temp_cwd
+from .. import run_command
+from .base import BaseTestApp
 
-root = os.path.dirname(__file__)
 
-class TestNbgraderAutograde(TestBase):
-
-    def _setup_db(self):
-        dbpath = self._init_db()
-        gb = Gradebook(dbpath)
-        gb.add_assignment("ps1", duedate="2015-02-02 14:58:23.948203 PST")
-        gb.add_student("foo")
-        gb.add_student("bar")
-        return dbpath
+class TestNbGraderAutograde(BaseTestApp):
 
     def test_help(self):
         """Does the help display without error?"""
-        with temp_cwd():
-            run_command("nbgrader autograde --help-all")
+        run_command("nbgrader autograde --help-all")
 
-    def test_missing_student(self):
+    def test_missing_student(self, gradebook):
         """Is an error thrown when the student is missing?"""
-        with temp_cwd([os.path.join(root, "files/submitted-changed.ipynb")]):
-            dbpath = self._setup_db()
+        self._copy_file("files/submitted-changed.ipynb", "source/ps1/p1.ipynb")
+        run_command('nbgrader assign ps1 --db="{}" '.format(gradebook))
 
-            os.makedirs('source/ps1')
-            shutil.copy('submitted-changed.ipynb', 'source/ps1/p1.ipynb')
-            run_command('nbgrader assign ps1 --db="{}" '.format(dbpath))
+        self._copy_file("files/submitted-changed.ipynb", "submitted/baz/ps1/p1.ipynb")
+        run_command('nbgrader autograde ps1 --db="{}" '.format(gradebook), retcode=1)
 
-            os.makedirs('submitted/baz/ps1')
-            shutil.move('submitted-changed.ipynb', 'submitted/baz/ps1/p1.ipynb')
-            run_command('nbgrader autograde ps1 --db="{}" '.format(dbpath), retcode=1)
-
-    def test_add_missing_student(self):
+    def test_add_missing_student(self, gradebook):
         """Can a missing student be added?"""
-        with temp_cwd([os.path.join(root, "files/submitted-changed.ipynb")]):
-            dbpath = self._setup_db()
+        self._copy_file("files/submitted-changed.ipynb", "source/ps1/p1.ipynb")
+        run_command('nbgrader assign ps1 --db="{}" '.format(gradebook))
 
-            os.makedirs('source/ps1')
-            shutil.copy('submitted-changed.ipynb', 'source/ps1/p1.ipynb')
-            run_command('nbgrader assign ps1 --db="{}" '.format(dbpath))
+        self._copy_file("files/submitted-changed.ipynb", "submitted/baz/ps1/p1.ipynb")
+        run_command('nbgrader autograde ps1 --db="{}" --create'.format(gradebook))
 
-            os.makedirs('submitted/baz/ps1')
-            shutil.move('submitted-changed.ipynb', 'submitted/baz/ps1/p1.ipynb')
-            run_command('nbgrader autograde ps1 --db="{}" --create'.format(dbpath))
+        assert os.path.isfile("autograded/baz/ps1/p1.ipynb")
 
-            assert os.path.isfile("autograded/baz/ps1/p1.ipynb")
-
-    def test_missing_assignment(self):
+    def test_missing_assignment(self, gradebook):
         """Is an error thrown when the assignment is missing?"""
-        with temp_cwd([os.path.join(root, "files/submitted-changed.ipynb")]):
-            dbpath = self._setup_db()
+        self._copy_file("files/submitted-changed.ipynb", "source/ps1/p1.ipynb")
+        run_command('nbgrader assign ps1 --db="{}" '.format(gradebook))
 
-            os.makedirs('source/ps1')
-            shutil.copy('submitted-changed.ipynb', 'source/ps1/p1.ipynb')
-            run_command('nbgrader assign ps1 --db="{}" '.format(dbpath))
+        self._copy_file("files/submitted-changed.ipynb", "submitted/ps2/foo/p1.ipynb")
+        run_command('nbgrader autograde ps2 --db="{}" '.format(gradebook), retcode=1)
 
-            os.makedirs('submitted/ps2/foo')
-            shutil.move('submitted-changed.ipynb', 'submitted/ps2/foo/p1.ipynb')
-            run_command('nbgrader autograde ps2 --db="{}" '.format(dbpath), retcode=1)
-
-    def test_grade(self):
+    def test_grade(self, gradebook):
         """Can files be graded?"""
-        with temp_cwd([os.path.join(root, "files/submitted-unchanged.ipynb"), os.path.join(root, "files/submitted-changed.ipynb")]):
-            dbpath = self._setup_db()
+        self._copy_file("files/submitted-unchanged.ipynb", "source/ps1/p1.ipynb")
+        run_command('nbgrader assign ps1 --db="{}" '.format(gradebook))
 
-            os.makedirs('source/ps1')
-            shutil.copy('submitted-unchanged.ipynb', 'source/ps1/p1.ipynb')
-            run_command('nbgrader assign ps1 --db="{}" '.format(dbpath))
+        self._copy_file("files/submitted-unchanged.ipynb", "submitted/foo/ps1/p1.ipynb")
+        self._copy_file("files/submitted-changed.ipynb", "submitted/bar/ps1/p1.ipynb")
+        run_command('nbgrader autograde ps1 --db="{}"'.format(gradebook))
 
-            os.makedirs('submitted/foo/ps1')
-            shutil.move('submitted-unchanged.ipynb', 'submitted/foo/ps1/p1.ipynb')
-            os.makedirs('submitted/bar/ps1')
-            shutil.move('submitted-changed.ipynb', 'submitted/bar/ps1/p1.ipynb')
-            run_command('nbgrader autograde ps1 --db="{}"'.format(dbpath))
+        assert os.path.isfile("autograded/foo/ps1/p1.ipynb")
+        assert not os.path.isfile("autograded/foo/ps1/timestamp.txt")
+        assert os.path.isfile("autograded/bar/ps1/p1.ipynb")
+        assert not os.path.isfile("autograded/bar/ps1/timestamp.txt")
 
-            assert os.path.isfile("autograded/foo/ps1/p1.ipynb")
-            assert not os.path.isfile("autograded/foo/ps1/timestamp.txt")
-            assert os.path.isfile("autograded/bar/ps1/p1.ipynb")
-            assert not os.path.isfile("autograded/bar/ps1/timestamp.txt")
+        gb = Gradebook(gradebook)
+        notebook = gb.find_submission_notebook("p1", "ps1", "foo")
+        assert notebook.score == 1
+        assert notebook.max_score == 4
+        assert notebook.needs_manual_grade == False
 
-            gb = Gradebook(dbpath)
-            notebook = gb.find_submission_notebook("p1", "ps1", "foo")
-            assert notebook.score == 1
-            assert notebook.max_score == 4
-            assert notebook.needs_manual_grade == False
+        comment1 = gb.find_comment(0, "p1", "ps1", "foo")
+        comment2 = gb.find_comment(1, "p1", "ps1", "foo")
+        assert comment1.comment == "No response."
+        assert comment2.comment == "No response."
 
-            comment1 = gb.find_comment(0, "p1", "ps1", "foo")
-            comment2 = gb.find_comment(1, "p1", "ps1", "foo")
-            assert comment1.comment == "No response."
-            assert comment2.comment == "No response."
+        notebook = gb.find_submission_notebook("p1", "ps1", "bar")
+        assert notebook.score == 2
+        assert notebook.max_score == 4
+        assert notebook.needs_manual_grade == True
 
-            notebook = gb.find_submission_notebook("p1", "ps1", "bar")
-            assert notebook.score == 2
-            assert notebook.max_score == 4
-            assert notebook.needs_manual_grade == True
+        comment1 = gb.find_comment(0, "p1", "ps1", "bar")
+        comment2 = gb.find_comment(1, "p1", "ps1", "bar")
+        assert comment1.comment == None
+        assert comment2.comment == None
 
-            comment1 = gb.find_comment(0, "p1", "ps1", "bar")
-            comment2 = gb.find_comment(1, "p1", "ps1", "bar")
-            assert comment1.comment == None
-            assert comment2.comment == None
-
-    def test_grade_timestamp(self):
+    def test_grade_timestamp(self, gradebook):
         """Is a timestamp correctly read in?"""
-        with temp_cwd([os.path.join(root, "files/submitted-unchanged.ipynb"), os.path.join(root, "files/submitted-changed.ipynb")]):
-            dbpath = self._setup_db()
+        self._copy_file("files/submitted-unchanged.ipynb", "source/ps1/p1.ipynb")
+        run_command('nbgrader assign ps1 --db="{}" '.format(gradebook))
 
-            os.makedirs('source/ps1')
-            shutil.copy('submitted-unchanged.ipynb', 'source/ps1/p1.ipynb')
-            run_command('nbgrader assign ps1 --db="{}" '.format(dbpath))
+        self._copy_file("files/submitted-unchanged.ipynb", "submitted/foo/ps1/p1.ipynb")
+        self._make_file('submitted/foo/ps1/timestamp.txt', "2015-02-02 15:58:23.948203 PST")
 
-            os.makedirs('submitted/foo/ps1')
-            shutil.move('submitted-unchanged.ipynb', 'submitted/foo/ps1/p1.ipynb')
-            with open('submitted/foo/ps1/timestamp.txt', 'w') as fh:
-                fh.write("2015-02-02 15:58:23.948203 PST")
+        self._copy_file("files/submitted-changed.ipynb", "submitted/bar/ps1/p1.ipynb")
+        self._make_file('submitted/bar/ps1/timestamp.txt', "2015-02-01 14:58:23.948203 PST")
 
-            os.makedirs('submitted/bar/ps1')
-            shutil.move('submitted-changed.ipynb', 'submitted/bar/ps1/p1.ipynb')
-            with open('submitted/bar/ps1/timestamp.txt', 'w') as fh:
-                fh.write("2015-02-01 14:58:23.948203 PST")
+        run_command('nbgrader autograde ps1 --db="{}"'.format(gradebook))
 
-            run_command('nbgrader autograde ps1 --db="{}"'.format(dbpath))
+        assert os.path.isfile("autograded/foo/ps1/p1.ipynb")
+        assert os.path.isfile("autograded/foo/ps1/timestamp.txt")
+        assert os.path.isfile("autograded/bar/ps1/p1.ipynb")
+        assert os.path.isfile("autograded/bar/ps1/timestamp.txt")
 
-            assert os.path.isfile("autograded/foo/ps1/p1.ipynb")
-            assert os.path.isfile("autograded/foo/ps1/timestamp.txt")
-            assert os.path.isfile("autograded/bar/ps1/p1.ipynb")
-            assert os.path.isfile("autograded/bar/ps1/timestamp.txt")
+        gb = Gradebook(gradebook)
+        submission = gb.find_submission('ps1', 'foo')
+        assert submission.total_seconds_late > 0
+        submission = gb.find_submission('ps1', 'bar')
+        assert submission.total_seconds_late == 0
 
-            gb = Gradebook(dbpath)
-            submission = gb.find_submission('ps1', 'foo')
-            assert submission.total_seconds_late > 0
-            submission = gb.find_submission('ps1', 'bar')
-            assert submission.total_seconds_late == 0
+        # make sure it still works to run it a second time
+        run_command('nbgrader autograde ps1 --db="{}"'.format(gradebook))
 
-            # make sure it still works to run it a second time
-            run_command('nbgrader autograde ps1 --db="{}"'.format(dbpath))
-
-    def test_force(self):
+    def test_force(self, gradebook):
         """Ensure the force option works properly"""
-        with temp_cwd([os.path.join(root, "files/submitted-unchanged.ipynb")]):
-            dbpath = self._setup_db()
+        self._copy_file("files/submitted-unchanged.ipynb", "source/ps1/p1.ipynb")
+        self._make_file("source/ps1/foo.txt", "foo")
+        self._make_file("source/ps1/data/bar.txt", "bar")
+        run_command('nbgrader assign ps1 --db="{}" '.format(gradebook))
 
-            os.makedirs('source/ps1/data')
-            shutil.copy('submitted-unchanged.ipynb', 'source/ps1/p1.ipynb')
-            with open("source/ps1/foo.txt", "w") as fh:
-                fh.write("foo")
-            with open("source/ps1/data/bar.txt", "w") as fh:
-                fh.write("bar")
-            run_command('nbgrader assign ps1 --db="{}" '.format(dbpath))
+        self._copy_file("files/submitted-unchanged.ipynb", "submitted/foo/ps1/p1.ipynb")
+        self._make_file("submitted/foo/ps1/foo.txt", "foo")
+        self._make_file("submitted/foo/ps1/data/bar.txt", "bar")
+        self._make_file("submitted/foo/ps1/blah.pyc", "asdf")
+        run_command('nbgrader autograde ps1 --db="{}"'.format(gradebook))
 
-            os.makedirs('submitted/foo/ps1/data')
-            shutil.move('submitted-unchanged.ipynb', 'submitted/foo/ps1/p1.ipynb')
-            with open("submitted/foo/ps1/foo.txt", "w") as fh:
-                fh.write("foo")
-            with open("submitted/foo/ps1/data/bar.txt", "w") as fh:
-                fh.write("bar")
-            with open("submitted/foo/ps1/blah.pyc", "w") as fh:
-                fh.write("asdf")
-            run_command('nbgrader autograde ps1 --db="{}"'.format(dbpath))
+        assert os.path.isfile("autograded/foo/ps1/p1.ipynb")
+        assert os.path.isfile("autograded/foo/ps1/foo.txt")
+        assert os.path.isfile("autograded/foo/ps1/data/bar.txt")
+        assert not os.path.isfile("autograded/foo/ps1/blah.pyc")
 
-            assert os.path.isfile("autograded/foo/ps1/p1.ipynb")
-            assert os.path.isfile("autograded/foo/ps1/foo.txt")
-            assert os.path.isfile("autograded/foo/ps1/data/bar.txt")
-            assert not os.path.isfile("autograded/foo/ps1/blah.pyc")
+        # check that it skips the existing directory
+        os.remove("autograded/foo/ps1/foo.txt")
+        run_command('nbgrader autograde ps1 --db="{}"'.format(gradebook))
+        assert not os.path.isfile("autograded/foo/ps1/foo.txt")
 
-            # check that it skips the existing directory
-            os.remove("autograded/foo/ps1/foo.txt")
-            run_command('nbgrader autograde ps1 --db="{}"'.format(dbpath))
-            assert not os.path.isfile("autograded/foo/ps1/foo.txt")
+        # force overwrite the supplemental files
+        run_command('nbgrader autograde ps1 --db="{}" --force'.format(gradebook))
+        assert os.path.isfile("autograded/foo/ps1/foo.txt")
 
-            # force overwrite the supplemental files
-            run_command('nbgrader autograde ps1 --db="{}" --force'.format(dbpath))
-            assert os.path.isfile("autograded/foo/ps1/foo.txt")
+        # force overwrite
+        os.remove("source/ps1/foo.txt")
+        os.remove("submitted/foo/ps1/foo.txt")
+        run_command('nbgrader autograde ps1 --db="{}" --force'.format(gradebook))
+        assert os.path.isfile("autograded/foo/ps1/p1.ipynb")
+        assert not os.path.isfile("autograded/foo/ps1/foo.txt")
+        assert os.path.isfile("autograded/foo/ps1/data/bar.txt")
+        assert not os.path.isfile("autograded/foo/ps1/blah.pyc")
 
-            # force overwrite
-            os.remove("source/ps1/foo.txt")
-            os.remove("submitted/foo/ps1/foo.txt")
-            run_command('nbgrader autograde ps1 --db="{}" --force'.format(dbpath))
-            assert os.path.isfile("autograded/foo/ps1/p1.ipynb")
-            assert not os.path.isfile("autograded/foo/ps1/foo.txt")
-            assert os.path.isfile("autograded/foo/ps1/data/bar.txt")
-            assert not os.path.isfile("autograded/foo/ps1/blah.pyc")
-
-    def test_filter_notebook(self):
+    def test_filter_notebook(self, gradebook):
         """Does autograding filter by notebook properly?"""
-        with temp_cwd([os.path.join(root, "files/submitted-unchanged.ipynb")]):
-            dbpath = self._setup_db()
+        self._copy_file("files/submitted-unchanged.ipynb", "source/ps1/p1.ipynb")
+        self._make_file("source/ps1/foo.txt", "foo")
+        self._make_file("source/ps1/data/bar.txt", "bar")
+        run_command('nbgrader assign ps1 --db="{}" '.format(gradebook))
 
-            os.makedirs('source/ps1/data')
-            shutil.copy('submitted-unchanged.ipynb', 'source/ps1/p1.ipynb')
-            with open("source/ps1/foo.txt", "w") as fh:
-                fh.write("foo")
-            with open("source/ps1/data/bar.txt", "w") as fh:
-                fh.write("bar")
-            run_command('nbgrader assign ps1 --db="{}" '.format(dbpath))
+        self._copy_file("files/submitted-unchanged.ipynb", "submitted/foo/ps1/p1.ipynb")
+        self._make_file("submitted/foo/ps1/foo.txt", "foo")
+        self._make_file("submitted/foo/ps1/data/bar.txt", "bar")
+        self._make_file("submitted/foo/ps1/blah.pyc", "asdf")
+        run_command('nbgrader autograde ps1 --db="{}" --notebook "p1"'.format(gradebook))
 
-            os.makedirs('submitted/foo/ps1/data')
-            shutil.move('submitted-unchanged.ipynb', 'submitted/foo/ps1/p1.ipynb')
-            with open("submitted/foo/ps1/foo.txt", "w") as fh:
-                fh.write("foo")
-            with open("submitted/foo/ps1/data/bar.txt", "w") as fh:
-                fh.write("bar")
-            with open("submitted/foo/ps1/blah.pyc", "w") as fh:
-                fh.write("asdf")
-            run_command('nbgrader autograde ps1 --db="{}" --notebook "p1"'.format(dbpath))
+        assert os.path.isfile("autograded/foo/ps1/p1.ipynb")
+        assert os.path.isfile("autograded/foo/ps1/foo.txt")
+        assert os.path.isfile("autograded/foo/ps1/data/bar.txt")
+        assert not os.path.isfile("autograded/foo/ps1/blah.pyc")
 
-            assert os.path.isfile("autograded/foo/ps1/p1.ipynb")
-            assert os.path.isfile("autograded/foo/ps1/foo.txt")
-            assert os.path.isfile("autograded/foo/ps1/data/bar.txt")
-            assert not os.path.isfile("autograded/foo/ps1/blah.pyc")
+        # check that removing the notebook still causes the autograder to run
+        os.remove("autograded/foo/ps1/p1.ipynb")
+        os.remove("autograded/foo/ps1/foo.txt")
+        run_command('nbgrader autograde ps1 --db="{}" --notebook "p1"'.format(gradebook))
 
-            # check that removing the notebook still causes the autograder to run
-            os.remove("autograded/foo/ps1/p1.ipynb")
-            os.remove("autograded/foo/ps1/foo.txt")
-            run_command('nbgrader autograde ps1 --db="{}" --notebook "p1"'.format(dbpath))
+        assert os.path.isfile("autograded/foo/ps1/p1.ipynb")
+        assert os.path.isfile("autograded/foo/ps1/foo.txt")
+        assert os.path.isfile("autograded/foo/ps1/data/bar.txt")
+        assert not os.path.isfile("autograded/foo/ps1/blah.pyc")
 
-            assert os.path.isfile("autograded/foo/ps1/p1.ipynb")
-            assert os.path.isfile("autograded/foo/ps1/foo.txt")
-            assert os.path.isfile("autograded/foo/ps1/data/bar.txt")
-            assert not os.path.isfile("autograded/foo/ps1/blah.pyc")
+        # check that running it again doesn't do anything
+        os.remove("autograded/foo/ps1/foo.txt")
+        run_command('nbgrader autograde ps1 --db="{}" --notebook "p1"'.format(gradebook))
 
-            # check that running it again doesn't do anything
-            os.remove("autograded/foo/ps1/foo.txt")
-            run_command('nbgrader autograde ps1 --db="{}" --notebook "p1"'.format(dbpath))
+        assert os.path.isfile("autograded/foo/ps1/p1.ipynb")
+        assert not os.path.isfile("autograded/foo/ps1/foo.txt")
+        assert os.path.isfile("autograded/foo/ps1/data/bar.txt")
+        assert not os.path.isfile("autograded/foo/ps1/blah.pyc")
 
-            assert os.path.isfile("autograded/foo/ps1/p1.ipynb")
-            assert not os.path.isfile("autograded/foo/ps1/foo.txt")
-            assert os.path.isfile("autograded/foo/ps1/data/bar.txt")
-            assert not os.path.isfile("autograded/foo/ps1/blah.pyc")
+        # check that removing the notebook doesn't caus the autograder to run
+        os.remove("autograded/foo/ps1/p1.ipynb")
+        run_command('nbgrader autograde ps1 --db="{}"'.format(gradebook))
 
-            # check that removing the notebook doesn't caus the autograder to run
-            os.remove("autograded/foo/ps1/p1.ipynb")
-            run_command('nbgrader autograde ps1 --db="{}"'.format(dbpath))
+        assert not os.path.isfile("autograded/foo/ps1/p1.ipynb")
+        assert not os.path.isfile("autograded/foo/ps1/foo.txt")
+        assert os.path.isfile("autograded/foo/ps1/data/bar.txt")
+        assert not os.path.isfile("autograded/foo/ps1/blah.pyc")
 
-            assert not os.path.isfile("autograded/foo/ps1/p1.ipynb")
-            assert not os.path.isfile("autograded/foo/ps1/foo.txt")
-            assert os.path.isfile("autograded/foo/ps1/data/bar.txt")
-            assert not os.path.isfile("autograded/foo/ps1/blah.pyc")
-
-    def test_grade_overwrite_files(self):
+    def test_grade_overwrite_files(self, gradebook):
         """Are dependent files properly linked and overwritten?"""
-        with temp_cwd([os.path.join(root, "files/submitted-unchanged.ipynb")]):
-            dbpath = self._setup_db()
+        self._copy_file("files/submitted-unchanged.ipynb", "source/ps1/p1.ipynb")
+        self._make_file("source/ps1/data.csv", "some,data\n")
+        run_command('nbgrader assign ps1 --db="{}" '.format(gradebook))
 
-            os.makedirs('source/ps1')
-            shutil.copy('submitted-unchanged.ipynb', 'source/ps1/p1.ipynb')
-            with open("source/ps1/data.csv", "w") as fh:
-                fh.write("some,data\n")
-            run_command('nbgrader assign ps1 --db="{}" '.format(dbpath))
+        self._copy_file("files/submitted-unchanged.ipynb", "submitted/foo/ps1/p1.ipynb")
+        self._make_file('submitted/foo/ps1/timestamp.txt', "2015-02-02 15:58:23.948203 PST")
+        self._make_file("submitted/foo/ps1/data.csv", "some,other,data\n")
+        run_command('nbgrader autograde ps1 --db="{}"'.format(gradebook))
 
-            os.makedirs('submitted/foo/ps1')
-            shutil.move('submitted-unchanged.ipynb', 'submitted/foo/ps1/p1.ipynb')
-            with open('submitted/foo/ps1/timestamp.txt', 'w') as fh:
-                fh.write("2015-02-02 15:58:23.948203 PST")
-            with open("submitted/foo/ps1/data.csv", "w") as fh:
-                fh.write("some,other,data\n")
-            run_command('nbgrader autograde ps1 --db="{}"'.format(dbpath))
+        print(os.listdir("autograded/foo/ps1"))
+        assert os.path.isfile("autograded/foo/ps1/p1.ipynb")
+        assert os.path.isfile("autograded/foo/ps1/timestamp.txt")
+        assert os.path.isfile("autograded/foo/ps1/data.csv")
 
-            print(os.listdir("autograded/foo/ps1"))
-            assert os.path.isfile("autograded/foo/ps1/p1.ipynb")
-            assert os.path.isfile("autograded/foo/ps1/timestamp.txt")
-            assert os.path.isfile("autograded/foo/ps1/data.csv")
+        with open("autograded/foo/ps1/timestamp.txt", "r") as fh:
+            contents = fh.read()
+        assert contents == "2015-02-02 15:58:23.948203 PST"
 
-            with open("autograded/foo/ps1/timestamp.txt", "r") as fh:
-                contents = fh.read()
-            assert contents == "2015-02-02 15:58:23.948203 PST"
-
-            with open("autograded/foo/ps1/data.csv", "r") as fh:
-                contents = fh.read()
-            assert contents == "some,data\n"
+        with open("autograded/foo/ps1/data.csv", "r") as fh:
+            contents = fh.read()
+        assert contents == "some,data\n"
