@@ -12,6 +12,8 @@ import logging
 import datetime
 import shutil
 
+from tornado.log import LogFormatter
+
 from IPython.utils.traitlets import Unicode, List, Bool, Instance, Dict
 from IPython.core.application import BaseIPythonApplication
 from IPython.config.application import catch_config_error
@@ -55,6 +57,8 @@ class BaseApp(BaseIPythonApplication):
 
     aliases = base_aliases
     flags = base_flags
+
+    _log_formatter_cls = LogFormatter
 
     def _log_level_default(self):
         return logging.INFO
