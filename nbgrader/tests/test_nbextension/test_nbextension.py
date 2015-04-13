@@ -15,8 +15,9 @@ from selenium.webdriver.support.ui import Select
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.keys import Keys
 
-from .base import TestBase
-from .utils import run_command
+from ..utils import run_command
+
+root = os.path.dirname(__file__)
 
 
 def _assert_is_deactivated(config_file, key='nbgrader/create_assignment'):
@@ -32,7 +33,7 @@ def _assert_is_activated(config_file, key='nbgrader/create_assignment'):
     assert config['load_extensions'][key]
 
 
-class TestCreateAssignmentNbExtension(TestBase):
+class TestCreateAssignmentNbExtension(object):
 
     @classmethod
     def setup_class(cls):
@@ -64,7 +65,7 @@ class TestCreateAssignmentNbExtension(TestBase):
         shutil.rmtree(cls.ipythondir)
 
     def setup(self):
-        shutil.copy(os.path.join(os.path.dirname(__file__), "files", "blank.ipynb"), "blank.ipynb")
+        shutil.copy(os.path.join(root, "files", "blank.ipynb"), "blank.ipynb")
         self.browser = webdriver.PhantomJS()
         self.browser.get("http://localhost:9000/notebooks/blank.ipynb")
 
