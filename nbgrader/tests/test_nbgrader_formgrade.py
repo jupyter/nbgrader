@@ -17,6 +17,7 @@ except ImportError:
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
@@ -163,6 +164,10 @@ class TestNbgraderFormgrade(TestBase):
     def _wait_for_notebook_page(self, url):
         self._wait_for_element("notebook-container")
         self._check_url(url)
+
+    def _send_keys_to_active_element(self, *keys):
+        element = self.browser.execute_script("return document.activeElement")
+        element.send_keys(*keys)
 
     def test_load_assignment_list(self):
         # load the main page and make sure it redirects
@@ -329,3 +334,110 @@ class TestNbgraderFormgrade(TestBase):
                 # check that the image is loaded, and that it has a width
                 assert self.browser.execute_script("return arguments[0].complete", image)
                 assert self.browser.execute_script("return arguments[0].naturalWidth", image) > 0
+
+    def test_next_prev_assignments(self):
+        problem = self.gb.find_notebook("Problem 1", "Problem Set 1")
+        submissions = problem.submissions
+        submissions.sort(key=lambda x: x.id)
+
+        # verify that we have the right number of submissions, and that one
+        # failed tests and the other didn't
+        assert len(submissions) == 2
+        if submissions[0].failed_tests:
+            assert not submissions[1].failed_tests
+        else:
+            assert submissions[1].failed_tests
+
+        # Load the first submission
+        self.browser.get(self.formgrade_url("submissions/{}".format(submissions[0].id)))
+        self._wait_for_notebook_page("submissions/{}".format(submissions[0].id))
+
+        # Move to the next submission
+        self._send_keys_to_active_element(Keys.SHIFT, Keys.ARROW_RIGHT)
+        self._wait_for_notebook_page("submissions/{}".format(submissions[1].id))
+
+        # Move to the next submission (should return to notebook list)
+        self._send_keys_to_active_element(Keys.SHIFT, Keys.ARROW_RIGHT)
+        self._wait_for_gradebook_page("assignments/Problem Set 1/Problem 1")
+
+        # Go back
+        self.browser.back()
+        self._wait_for_notebook_page("submissions/{}".format(submissions[1].id))
+
+        # Move to the previous submission
+        self._send_keys_to_active_element(Keys.SHIFT, Keys.ARROW_LEFT)
+        self._wait_for_notebook_page("submissions/{}".format(submissions[0].id))
+
+        # Move to the previous submission (should return to the notebook list)
+        self._send_keys_to_active_element(Keys.SHIFT, Keys.ARROW_LEFT)
+        self._wait_for_gradebook_page("assignments/Problem Set 1/Problem 1")
+
+        # Go back
+        self.browser.back()
+        self._wait_for_notebook_page("submissions/{}".format(submissions[0].id))
+
+        if submissions[0].failed_tests:
+            print("Go to the next failed submission (should return to the notebook list)")
+            self._send_keys_to_active_element(Keys.SHIFT, Keys.CONTROL, Keys.ARROW_RIGHT)
+            self._wait_for_gradebook_page("assignments/Problem Set 1/Problem 1")
+
+            print("Go back")
+            self.browser.back()
+            self._wait_for_notebook_page("submissions/{}".format(submissions[0].id))
+
+            print("Go to the previous failed submission (should return to the notebook list)")
+            self._send_keys_to_active_element(Keys.SHIFT, Keys.CONTROL, Keys.ARROW_LEFT)
+            self._wait_for_gradebook_page("assignments/Problem Set 1/Problem 1")
+
+            print("Go back")
+            self.browser.back()
+            self._wait_for_notebook_page("submissions/{}".format(submissions[0].id))
+
+            print("Go to the other notebook")
+            self._send_keys_to_active_element(Keys.SHIFT, Keys.ARROW_RIGHT)
+            self._wait_for_notebook_page("submissions/{}".format(submissions[1].id))
+
+            print("Go to the next failed submission (should return to the notebook list)")
+            self._send_keys_to_active_element(Keys.SHIFT, Keys.CONTROL, Keys.ARROW_RIGHT)
+            self._wait_for_gradebook_page("assignments/Problem Set 1/Problem 1")
+
+            print("Go back")
+            self.browser.back()
+            self._wait_for_notebook_page("submissions/{}".format(submissions[1].id))
+
+            print("Go to the previous failed submission")
+            self._send_keys_to_active_element(Keys.SHIFT, Keys.CONTROL, Keys.ARROW_LEFT)
+            self._wait_for_notebook_page("submissions/{}".format(submissions[0].id))
+
+        else:
+            print("Go to the next failed submission")
+            self._send_keys_to_active_element(Keys.SHIFT, Keys.CONTROL, Keys.ARROW_RIGHT)
+            self._wait_for_notebook_page("submissions/{}".format(submissions[1].id))
+
+            print("Go back")
+            self.browser.back()
+            self._wait_for_notebook_page("submissions/{}".format(submissions[0].id))
+
+            print("Go to the previous failed submission (should return to the notebook list)")
+            self._send_keys_to_active_element(Keys.SHIFT, Keys.CONTROL, Keys.ARROW_LEFT)
+            self._wait_for_gradebook_page("assignments/Problem Set 1/Problem 1")
+
+            print("Go back")
+            self.browser.back()
+            self._wait_for_notebook_page("submissions/{}".format(submissions[0].id))
+
+            print("Go to the other notebook")
+            self._send_keys_to_active_element(Keys.SHIFT, Keys.ARROW_RIGHT)
+            self._wait_for_notebook_page("submissions/{}".format(submissions[1].id))
+
+            print("Go to the next failed submission (should return to the notebook list)")
+            self._send_keys_to_active_element(Keys.SHIFT, Keys.CONTROL, Keys.ARROW_RIGHT)
+            self._wait_for_gradebook_page("assignments/Problem Set 1/Problem 1")
+
+            print("Go back")
+            self.browser.back()
+            self._wait_for_notebook_page("submissions/{}".format(submissions[1].id))
+
+            print("Go to the previous failed submission (should return to the notebook list)")
+            self._send_keys_to_active_element(Keys.SHIFT, Keys.CONTROL, Keys.ARROW_LEFT)
+            self._wait_for_gradebook_page("assignments/Problem Set 1/Problem 1")
