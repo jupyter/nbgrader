@@ -2,7 +2,6 @@ import os
 import shutil
 import tarfile
 
-from nose.tools import assert_equal
 from .base import TestBase
 
 class TestNbgraderSubmit(TestBase):
@@ -24,7 +23,7 @@ class TestNbgraderSubmit(TestBase):
 
         #     tf = tarfile.open('../Problem Set 1.tar.gz', 'r:gz')
         #     names = sorted(['Problem Set 1/Problem 1.ipynb', 'Problem Set 1/timestamp.txt', 'Problem Set 1/user.txt'])
-        #     assert_equal(sorted(tf.getnames()), names, "incorrect tarfile names")
+        #     assert sorted(tf.getnames()) == names
 
     def test_submit_custom_assignment(self):
         """Does everything get properly submitted with a custom assignment name?"""
@@ -38,4 +37,4 @@ class TestNbgraderSubmit(TestBase):
 
         #     tf = tarfile.open('../foo.tar.gz', 'r:gz')
         #     names = sorted(['foo/Problem 1.ipynb', 'foo/timestamp.txt', 'foo/user.txt'])
-        #     assert_equal(sorted(tf.getnames()), names, "incorrect tarfile names")
+        #     assert sorted(tf.getnames()) == names
