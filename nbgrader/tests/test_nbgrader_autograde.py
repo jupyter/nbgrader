@@ -177,6 +177,7 @@ class TestNbgraderAutograde(TestBase):
             assert os.path.isfile("autograded/foo/ps1/foo.txt")
 
             # force overwrite
+            os.remove("source/ps1/foo.txt")
             os.remove("submitted/foo/ps1/foo.txt")
             self._run_command('nbgrader autograde ps1 --db="{}" --force'.format(dbpath))
             assert os.path.isfile("autograded/foo/ps1/p1.ipynb")

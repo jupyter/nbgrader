@@ -1,10 +1,9 @@
 import os
-import sys
 
 from textwrap import dedent
 
 from IPython.utils.traitlets import List, Bool
-from IPython.utils.path import link_or_copy
+from IPython.utils.path import link_or_copy, ensure_dir_exists
 
 from nbgrader.apps.baseapp import BaseNbConvertApp, nbconvert_aliases, nbconvert_flags
 from nbgrader.preprocessors import ClearOutput, OverwriteCells, SaveAutoGrades, Execute
@@ -134,24 +133,21 @@ class AutogradeApp(BaseNbConvertApp):
             submission = gb.update_or_create_submission(assignment_id, student_id)
 
         # copy files over from the source directory
-        if self._sanitizing:
-            dest_path = self._format_dest(assignment_id, student_id)
+        self.log.info("Overwriting files with master versions from the source directory")
+        dest_path = self._format_dest(assignment_id, student_id)
+        source_path = self.directory_structure.format(
+            nbgrader_step=self.source_directory,
+            student_id='.',
+            assignment_id=assignment_id)
+        source_files = utils.find_all_files(source_path, self.ignore + ["*.ipynb"])
 
-            # find all the files in the source directory
-            source_path = self.directory_structure.format(
-                nbgrader_step=self.source_directory,
-                student_id='.',
-                assignment_id=assignment_id)
-            source_files = utils.find_all_files(source_path, self.ignore + ["*.ipynb"])
-
-            # copy them to the build directory
-            for filename in source_files:
-                dest = os.path.join(dest_path, os.path.relpath(filename, source_path))
-                path = os.path.dirname(dest)
-                self.writer._makedir(path)
-                if not os.path.normpath(dest) == os.path.normpath(filename):
-                    self.log.info("Linking %s -> %s", filename, dest)
-                    link_or_copy(filename, dest)
+        # copy them to the build directory
+        for filename in source_files:
+            dest = os.path.join(dest_path, os.path.relpath(filename, source_path))
+            ensure_dir_exists(os.path.dirname(dest))
+            if not os.path.normpath(dest) == os.path.normpath(filename):
+                self.log.info("Linking %s -> %s", filename, dest)
+                link_or_copy(filename, dest)
 
     def _init_preprocessors(self):
         self.exporter._preprocessors = []
@@ -164,11 +160,15 @@ class AutogradeApp(BaseNbConvertApp):
             self.exporter.register_preprocessor(pp)
 
     def convert_single_notebook(self, notebook_filename):
+        self.log.info("Sanitizing %s", notebook_filename)
         self._sanitizing = True
         self._init_preprocessors()
         super(AutogradeApp, self).convert_single_notebook(notebook_filename)
 
         notebook_filename = os.path.join(self.writer.build_directory, os.path.basename(notebook_filename))
+        self.log.info("Autograding %s", notebook_filename)
         self._sanitizing = False
         self._init_preprocessors()
         super(AutogradeApp, self).convert_single_notebook(notebook_filename)
+
+        self._sanitizing = True
