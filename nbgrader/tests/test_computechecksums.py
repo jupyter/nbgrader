@@ -1,6 +1,5 @@
 from nbgrader.preprocessors import ComputeChecksums
 from nbgrader.utils import compute_checksum
-from nose.tools import assert_equal, assert_not_equal
 from .base import TestBase
 
 
@@ -30,9 +29,9 @@ class TestComputeChecksums(TestBase):
         cell2 = self._create_grade_cell("", "markdown", "foo", 1)
         cell2 = self.preprocessor.preprocess_cell(cell2, {}, 0)[0]
 
-        assert_equal(cell1.metadata.nbgrader["checksum"], compute_checksum(cell1))
-        assert_equal(cell2.metadata.nbgrader["checksum"], compute_checksum(cell2))
-        assert_not_equal(cell1.metadata.nbgrader["checksum"], cell2.metadata.nbgrader["checksum"])
+        assert cell1.metadata.nbgrader["checksum"] == compute_checksum(cell1)
+        assert cell2.metadata.nbgrader["checksum"] == compute_checksum(cell2)
+        assert cell1.metadata.nbgrader["checksum"] != cell2.metadata.nbgrader["checksum"]
 
     def test_checksum_solution_cell_type(self):
         """Test that the checksum is computed for solution cells of different cell types"""
@@ -41,9 +40,9 @@ class TestComputeChecksums(TestBase):
         cell2 = self._create_solution_cell("", "markdown")
         cell2 = self.preprocessor.preprocess_cell(cell2, {}, 0)[0]
 
-        assert_equal(cell1.metadata.nbgrader["checksum"], compute_checksum(cell1))
-        assert_equal(cell2.metadata.nbgrader["checksum"], compute_checksum(cell2))
-        assert_not_equal(cell1.metadata.nbgrader["checksum"], cell2.metadata.nbgrader["checksum"])
+        assert cell1.metadata.nbgrader["checksum"] == compute_checksum(cell1)
+        assert cell2.metadata.nbgrader["checksum"] == compute_checksum(cell2)
+        assert cell1.metadata.nbgrader["checksum"] != cell2.metadata.nbgrader["checksum"]
 
     def test_checksum_points(self):
         """Test that the checksum is computed for grade cells with different points"""
@@ -52,9 +51,9 @@ class TestComputeChecksums(TestBase):
         cell2 = self._create_grade_cell("", "code", "foo", 2)
         cell2 = self.preprocessor.preprocess_cell(cell2, {}, 0)[0]
 
-        assert_equal(cell1.metadata.nbgrader["checksum"], compute_checksum(cell1))
-        assert_equal(cell2.metadata.nbgrader["checksum"], compute_checksum(cell2))
-        assert_not_equal(cell1.metadata.nbgrader["checksum"], cell2.metadata.nbgrader["checksum"])
+        assert cell1.metadata.nbgrader["checksum"] == compute_checksum(cell1)
+        assert cell2.metadata.nbgrader["checksum"] == compute_checksum(cell2)
+        assert cell1.metadata.nbgrader["checksum"] != cell2.metadata.nbgrader["checksum"]
 
     def test_checksum_grade_id(self):
         """Test that the checksum is computed for grade cells with different ids"""
@@ -63,9 +62,9 @@ class TestComputeChecksums(TestBase):
         cell2 = self._create_grade_cell("", "code", "bar", 1)
         cell2 = self.preprocessor.preprocess_cell(cell2, {}, 0)[0]
 
-        assert_equal(cell1.metadata.nbgrader["checksum"], compute_checksum(cell1))
-        assert_equal(cell2.metadata.nbgrader["checksum"], compute_checksum(cell2))
-        assert_not_equal(cell1.metadata.nbgrader["checksum"], cell2.metadata.nbgrader["checksum"])
+        assert cell1.metadata.nbgrader["checksum"] == compute_checksum(cell1)
+        assert cell2.metadata.nbgrader["checksum"] == compute_checksum(cell2)
+        assert cell1.metadata.nbgrader["checksum"] != cell2.metadata.nbgrader["checksum"]
 
     def test_checksum_grade_source(self):
         """Test that the checksum is computed for grade cells with different sources"""
@@ -74,9 +73,9 @@ class TestComputeChecksums(TestBase):
         cell2 = self._create_grade_cell("b", "code", "foo", 1)
         cell2 = self.preprocessor.preprocess_cell(cell2, {}, 0)[0]
 
-        assert_equal(cell1.metadata.nbgrader["checksum"], compute_checksum(cell1))
-        assert_equal(cell2.metadata.nbgrader["checksum"], compute_checksum(cell2))
-        assert_not_equal(cell1.metadata.nbgrader["checksum"], cell2.metadata.nbgrader["checksum"])
+        assert cell1.metadata.nbgrader["checksum"] == compute_checksum(cell1)
+        assert cell2.metadata.nbgrader["checksum"] == compute_checksum(cell2)
+        assert cell1.metadata.nbgrader["checksum"] != cell2.metadata.nbgrader["checksum"]
 
     def test_checksum_solution_source(self):
         """Test that the checksum is computed for solution cells with different sources"""
@@ -85,9 +84,9 @@ class TestComputeChecksums(TestBase):
         cell2 = self._create_solution_cell("b", "code")
         cell2 = self.preprocessor.preprocess_cell(cell2, {}, 0)[0]
 
-        assert_equal(cell1.metadata.nbgrader["checksum"], compute_checksum(cell1))
-        assert_equal(cell2.metadata.nbgrader["checksum"], compute_checksum(cell2))
-        assert_not_equal(cell1.metadata.nbgrader["checksum"], cell2.metadata.nbgrader["checksum"])
+        assert cell1.metadata.nbgrader["checksum"] == compute_checksum(cell1)
+        assert cell2.metadata.nbgrader["checksum"] == compute_checksum(cell2)
+        assert cell1.metadata.nbgrader["checksum"] != cell2.metadata.nbgrader["checksum"]
 
     def test_checksum_grade_and_solution(self):
         """Test that a checksum is created for grade cells that are also solution cells"""
@@ -97,6 +96,6 @@ class TestComputeChecksums(TestBase):
         cell2.metadata.nbgrader["solution"] = True
         cell2 = self.preprocessor.preprocess_cell(cell2, {}, 0)[0]
 
-        assert_equal(cell1.metadata.nbgrader["checksum"], compute_checksum(cell1))
-        assert_equal(cell2.metadata.nbgrader["checksum"], compute_checksum(cell2))
-        assert_not_equal(cell1.metadata.nbgrader["checksum"], cell2.metadata.nbgrader["checksum"])
+        assert cell1.metadata.nbgrader["checksum"] == compute_checksum(cell1)
+        assert cell2.metadata.nbgrader["checksum"] == compute_checksum(cell2)
+        assert cell1.metadata.nbgrader["checksum"] != cell2.metadata.nbgrader["checksum"]
