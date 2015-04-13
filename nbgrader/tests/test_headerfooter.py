@@ -1,5 +1,4 @@
 from nbgrader.preprocessors import IncludeHeaderFooter
-from nose.tools import assert_equal
 
 from .base import TestBase
 
@@ -14,7 +13,7 @@ class TestIncludeHeaderFooter(TestBase):
         """Are the cells the same if there is no header/footer?"""
         orig_nb = self.nbs["test.ipynb"]
         nb = self.preprocessor.preprocess(orig_nb, {})[0]
-        assert_equal(nb, orig_nb)
+        assert nb == orig_nb
 
     def test_concatenate_header(self):
         """Is the header prepended correctly?"""
@@ -23,7 +22,7 @@ class TestIncludeHeaderFooter(TestBase):
         orig_nb = self.nbs["test.ipynb"]
         orig_cells = orig_nb.cells[:]
         nb = self.preprocessor.preprocess(orig_nb, {})[0]
-        assert_equal(nb.cells, (cells + orig_cells))
+        assert nb.cells == (cells + orig_cells)
 
     def test_concatenate_footer(self):
         """Is the footer appended correctly?"""
@@ -32,7 +31,7 @@ class TestIncludeHeaderFooter(TestBase):
         orig_nb = self.nbs["test.ipynb"]
         orig_cells = orig_nb.cells[:]
         nb = self.preprocessor.preprocess(orig_nb, {})[0]
-        assert_equal(nb.cells, (orig_cells + cells))
+        assert nb.cells == (orig_cells + cells)
 
     def test_concatenate_header_and_footer(self):
         """Are the header and footer appended correctly?"""
@@ -43,4 +42,4 @@ class TestIncludeHeaderFooter(TestBase):
         orig_nb = self.nbs["test.ipynb"]
         orig_cells = orig_nb.cells[:]
         nb = self.preprocessor.preprocess(orig_nb, {})[0]
-        assert_equal(nb.cells, (header_cells + orig_cells + footer_cells))
+        assert nb.cells == (header_cells + orig_cells + footer_cells)
