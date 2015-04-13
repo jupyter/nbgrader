@@ -1,4 +1,3 @@
-from nose.tools import assert_equal
 from nbgrader.preprocessors import SaveCells
 from nbgrader.api import Gradebook
 from IPython.nbformat.v4 import new_notebook
@@ -32,10 +31,10 @@ class TestSaveCells(TestBase):
 
         gb = self.preprocessor.gradebook
         grade_cell = gb.find_grade_cell("foo", "test", "ps0")
-        assert_equal(grade_cell.max_score, 1, "max_score is incorrect")
-        assert_equal(grade_cell.source, "hello", "source is incorrect")
-        assert_equal(grade_cell.checksum, cell.metadata.nbgrader["checksum"], "checksum is incorrect")
-        assert_equal(grade_cell.cell_type, "code", "cell_type is incorrect")
+        assert grade_cell.max_score == 1
+        assert grade_cell.source == "hello"
+        assert grade_cell.checksum == cell.metadata.nbgrader["checksum"]
+        assert grade_cell.cell_type == "code"
 
     def test_save_markdown_grade_cell(self):
         cell = self._create_grade_cell("hello", "markdown", "foo", 1)
@@ -46,10 +45,10 @@ class TestSaveCells(TestBase):
 
         gb = self.preprocessor.gradebook
         grade_cell = gb.find_grade_cell("foo", "test", "ps0")
-        assert_equal(grade_cell.max_score, 1, "max_score is incorrect")
-        assert_equal(grade_cell.source, "hello", "source is incorrect")
-        assert_equal(grade_cell.checksum, cell.metadata.nbgrader["checksum"], "checksum is incorrect")
-        assert_equal(grade_cell.cell_type, "markdown", "cell_type is incorrect")
+        assert grade_cell.max_score == 1
+        assert grade_cell.source == "hello"
+        assert grade_cell.checksum == cell.metadata.nbgrader["checksum"]
+        assert grade_cell.cell_type == "markdown"
 
     def test_save_code_solution_cell(self):
         cell = self._create_solution_cell("hello", "code")
@@ -60,9 +59,9 @@ class TestSaveCells(TestBase):
 
         gb = self.preprocessor.gradebook
         solution_cell = gb.find_solution_cell(0, "test", "ps0")
-        assert_equal(solution_cell.source, "hello", "source is incorrect")
-        assert_equal(solution_cell.checksum, cell.metadata.nbgrader["checksum"], "checksum is incorrect")
-        assert_equal(solution_cell.cell_type, "code", "cell_type is incorrect")
+        assert solution_cell.source == "hello"
+        assert solution_cell.checksum == cell.metadata.nbgrader["checksum"]
+        assert solution_cell.cell_type == "code"
 
     def test_save_markdown_solution_cell(self):
         cell = self._create_solution_cell("hello", "markdown")
@@ -73,9 +72,9 @@ class TestSaveCells(TestBase):
 
         gb = self.preprocessor.gradebook
         solution_cell = gb.find_solution_cell(0, "test", "ps0")
-        assert_equal(solution_cell.source, "hello", "source is incorrect")
-        assert_equal(solution_cell.checksum, cell.metadata.nbgrader["checksum"], "checksum is incorrect")
-        assert_equal(solution_cell.cell_type, "markdown", "cell_type is incorrect")
+        assert solution_cell.source == "hello"
+        assert solution_cell.checksum == cell.metadata.nbgrader["checksum"]
+        assert solution_cell.cell_type == "markdown"
 
     def test_save_code_grade_and_solution_cell(self):
         cell = self._create_grade_and_solution_cell("hello", "code", "foo", 1)
@@ -86,15 +85,15 @@ class TestSaveCells(TestBase):
 
         gb = self.preprocessor.gradebook
         grade_cell = gb.find_grade_cell("foo", "test", "ps0")
-        assert_equal(grade_cell.max_score, 1, "max_score is incorrect")
-        assert_equal(grade_cell.source, "hello", "source is incorrect")
-        assert_equal(grade_cell.checksum, cell.metadata.nbgrader["checksum"], "checksum is incorrect")
-        assert_equal(grade_cell.cell_type, "code", "cell_type is incorrect")
+        assert grade_cell.max_score == 1
+        assert grade_cell.source == "hello"
+        assert grade_cell.checksum == cell.metadata.nbgrader["checksum"]
+        assert grade_cell.cell_type == "code"
 
         solution_cell = gb.find_solution_cell(0, "test", "ps0")
-        assert_equal(solution_cell.source, "hello", "source is incorrect")
-        assert_equal(solution_cell.checksum, cell.metadata.nbgrader["checksum"], "checksum is incorrect")
-        assert_equal(solution_cell.cell_type, "code", "cell_type is incorrect")
+        assert solution_cell.source == "hello"
+        assert solution_cell.checksum == cell.metadata.nbgrader["checksum"]
+        assert solution_cell.cell_type == "code"
 
     def test_save_markdown_grade_and_solution_cell(self):
         cell = self._create_grade_and_solution_cell("hello", "markdown", "foo", 1)
@@ -105,12 +104,12 @@ class TestSaveCells(TestBase):
 
         gb = self.preprocessor.gradebook
         grade_cell = gb.find_grade_cell("foo", "test", "ps0")
-        assert_equal(grade_cell.max_score, 1, "max_score is incorrect")
-        assert_equal(grade_cell.source, "hello", "source is incorrect")
-        assert_equal(grade_cell.checksum, cell.metadata.nbgrader["checksum"], "checksum is incorrect")
-        assert_equal(grade_cell.cell_type, "markdown", "cell_type is incorrect")
-        
+        assert grade_cell.max_score == 1
+        assert grade_cell.source == "hello"
+        assert grade_cell.checksum == cell.metadata.nbgrader["checksum"]
+        assert grade_cell.cell_type == "markdown"
+
         solution_cell = gb.find_solution_cell(0, "test", "ps0")
-        assert_equal(solution_cell.source, "hello", "source is incorrect")
-        assert_equal(solution_cell.checksum, cell.metadata.nbgrader["checksum"], "checksum is incorrect")
-        assert_equal(solution_cell.cell_type, "markdown", "cell_type is incorrect")
+        assert solution_cell.source == "hello"
+        assert solution_cell.checksum == cell.metadata.nbgrader["checksum"]
+        assert solution_cell.cell_type == "markdown"
