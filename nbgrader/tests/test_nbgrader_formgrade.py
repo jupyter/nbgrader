@@ -6,7 +6,6 @@ import time
 from .base import TestBase
 
 from nbgrader.api import Gradebook, MissingEntry
-from nose.tools import assert_equal
 from textwrap import dedent
 
 try:
@@ -130,16 +129,16 @@ class TestNbgraderFormgrade(TestBase):
     def _check_url(self, url):
         if not url.startswith("http"):
             url = self.formgrade_url(url)
-        assert_equal(unquote(self.browser.current_url.rstrip("/")), url)
+        assert unquote(self.browser.current_url.rstrip("/")) == url
 
     def _check_breadcrumbs(self, *breadcrumbs):
         # check that breadcrumbs are correct
         elements = self.browser.find_elements_by_css_selector("ul.breadcrumb li")
-        assert_equal(tuple([e.text for e in elements]), breadcrumbs)
+        assert tuple([e.text for e in elements]) == breadcrumbs
 
         # check that the active breadcrumb is correct
         element = self.browser.find_element_by_css_selector("ul.breadcrumb li.active")
-        assert_equal(element.text, breadcrumbs[-1])
+        assert element.text == breadcrumbs[-1]
 
     def _click_link(self, link_text, partial=False):
         if partial:
