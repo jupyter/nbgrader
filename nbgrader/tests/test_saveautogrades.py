@@ -1,4 +1,3 @@
-from nose.tools import assert_equal
 from nbgrader.preprocessors import SaveCells, SaveAutoGrades
 from nbgrader.api import Gradebook
 from IPython.nbformat.v4 import new_notebook, new_output
@@ -36,10 +35,10 @@ class TestSaveAutoGrades(TestBase):
         self.preprocessor2.preprocess(nb, self.resources)
 
         grade_cell = self.gb.find_grade("foo", "test", "ps0", "bar")
-        assert_equal(grade_cell.score, 1)
-        assert_equal(grade_cell.max_score, 1)
-        assert_equal(grade_cell.auto_score, 1)
-        assert_equal(grade_cell.manual_score, None)
+        assert grade_cell.score == 1
+        assert grade_cell.max_score == 1
+        assert grade_cell.auto_score == 1
+        assert grade_cell.manual_score == None
         assert not grade_cell.needs_manual_grade
 
     def test_grade_incorrect_code(self):
@@ -53,10 +52,10 @@ class TestSaveAutoGrades(TestBase):
         self.preprocessor2.preprocess(nb, self.resources)
 
         grade_cell = self.gb.find_grade("foo", "test", "ps0", "bar")
-        assert_equal(grade_cell.score, 0)
-        assert_equal(grade_cell.max_score, 1)
-        assert_equal(grade_cell.auto_score, 0)
-        assert_equal(grade_cell.manual_score, None)
+        assert grade_cell.score == 0
+        assert grade_cell.max_score == 1
+        assert grade_cell.auto_score == 0
+        assert grade_cell.manual_score == None
         assert not grade_cell.needs_manual_grade
 
     def test_grade_unchanged_markdown(self):
@@ -69,10 +68,10 @@ class TestSaveAutoGrades(TestBase):
         self.preprocessor2.preprocess(nb, self.resources)
 
         grade_cell = self.gb.find_grade("foo", "test", "ps0", "bar")
-        assert_equal(grade_cell.score, 0)
-        assert_equal(grade_cell.max_score, 1)
-        assert_equal(grade_cell.auto_score, 0)
-        assert_equal(grade_cell.manual_score, None)
+        assert grade_cell.score == 0
+        assert grade_cell.max_score == 1
+        assert grade_cell.auto_score == 0
+        assert grade_cell.manual_score == None
         assert not grade_cell.needs_manual_grade
 
     def test_grade_changed_markdown(self):
@@ -86,10 +85,10 @@ class TestSaveAutoGrades(TestBase):
         self.preprocessor2.preprocess(nb, self.resources)
 
         grade_cell = self.gb.find_grade("foo", "test", "ps0", "bar")
-        assert_equal(grade_cell.score, 0)
-        assert_equal(grade_cell.max_score, 1)
-        assert_equal(grade_cell.auto_score, None)
-        assert_equal(grade_cell.manual_score, None)
+        assert grade_cell.score == 0
+        assert grade_cell.max_score == 1
+        assert grade_cell.auto_score == None
+        assert grade_cell.manual_score == None
         assert grade_cell.needs_manual_grade
 
     def test_comment_unchanged_code(self):
@@ -102,7 +101,7 @@ class TestSaveAutoGrades(TestBase):
         self.preprocessor2.preprocess(nb, self.resources)
 
         comment = self.gb.find_comment(0, "test", "ps0", "bar")
-        assert_equal(comment.comment, "No response.")
+        assert comment.comment == "No response."
 
     def test_comment_changed_code(self):
         """Is a changed code cell given the correct comment?"""
@@ -115,7 +114,7 @@ class TestSaveAutoGrades(TestBase):
         self.preprocessor2.preprocess(nb, self.resources)
 
         comment = self.gb.find_comment(0, "test", "ps0", "bar")
-        assert_equal(comment.comment, None)
+        assert comment.comment == None
 
     def test_comment_unchanged_markdown(self):
         """Is an unchanged markdown cell given the correct comment?"""
@@ -127,7 +126,7 @@ class TestSaveAutoGrades(TestBase):
         self.preprocessor2.preprocess(nb, self.resources)
 
         comment = self.gb.find_comment(0, "test", "ps0", "bar")
-        assert_equal(comment.comment, "No response.")
+        assert comment.comment == "No response."
 
     def test_comment_changed_markdown(self):
         """Is a changed markdown cell given the correct comment?"""
@@ -140,4 +139,4 @@ class TestSaveAutoGrades(TestBase):
         self.preprocessor2.preprocess(nb, self.resources)
 
         comment = self.gb.find_comment(0, "test", "ps0", "bar")
-        assert_equal(comment.comment, None)
+        assert comment.comment == None
