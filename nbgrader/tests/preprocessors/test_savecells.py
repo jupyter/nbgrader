@@ -3,6 +3,7 @@ from nbgrader.api import Gradebook
 from IPython.nbformat.v4 import new_notebook
 
 from .base import TestBase
+from .. import create_grade_cell, create_solution_cell, create_grade_and_solution_cell
 
 
 class TestSaveCells(TestBase):
@@ -23,7 +24,7 @@ class TestSaveCells(TestBase):
         }
 
     def test_save_code_grade_cell(self):
-        cell = self._create_grade_cell("hello", "code", "foo", 1)
+        cell = create_grade_cell("hello", "code", "foo", 1)
         nb = new_notebook()
         nb.cells.append(cell)
 
@@ -37,7 +38,7 @@ class TestSaveCells(TestBase):
         assert grade_cell.cell_type == "code"
 
     def test_save_markdown_grade_cell(self):
-        cell = self._create_grade_cell("hello", "markdown", "foo", 1)
+        cell = create_grade_cell("hello", "markdown", "foo", 1)
         nb = new_notebook()
         nb.cells.append(cell)
 
@@ -51,7 +52,7 @@ class TestSaveCells(TestBase):
         assert grade_cell.cell_type == "markdown"
 
     def test_save_code_solution_cell(self):
-        cell = self._create_solution_cell("hello", "code")
+        cell = create_solution_cell("hello", "code")
         nb = new_notebook()
         nb.cells.append(cell)
 
@@ -64,7 +65,7 @@ class TestSaveCells(TestBase):
         assert solution_cell.cell_type == "code"
 
     def test_save_markdown_solution_cell(self):
-        cell = self._create_solution_cell("hello", "markdown")
+        cell = create_solution_cell("hello", "markdown")
         nb = new_notebook()
         nb.cells.append(cell)
 
@@ -77,7 +78,7 @@ class TestSaveCells(TestBase):
         assert solution_cell.cell_type == "markdown"
 
     def test_save_code_grade_and_solution_cell(self):
-        cell = self._create_grade_and_solution_cell("hello", "code", "foo", 1)
+        cell = create_grade_and_solution_cell("hello", "code", "foo", 1)
         nb = new_notebook()
         nb.cells.append(cell)
 
@@ -96,7 +97,7 @@ class TestSaveCells(TestBase):
         assert solution_cell.cell_type == "code"
 
     def test_save_markdown_grade_and_solution_cell(self):
-        cell = self._create_grade_and_solution_cell("hello", "markdown", "foo", 1)
+        cell = create_grade_and_solution_cell("hello", "markdown", "foo", 1)
         nb = new_notebook()
         nb.cells.append(cell)
 

@@ -18,7 +18,7 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
-from ..utils import run_command, start_subprocess, copy_coverage_files
+from .. import run_command, start_subprocess, copy_coverage_files
 
 root = os.path.dirname(__file__)
 

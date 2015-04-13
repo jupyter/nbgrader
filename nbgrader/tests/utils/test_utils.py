@@ -4,13 +4,16 @@ import pytest
 from IPython.nbformat.v4 import new_output
 from nbgrader import utils
 
-from .base import TestBase
-from .utils import temp_cwd
+from .. import (
+    temp_cwd,
+    create_code_cell,
+    create_grade_cell, create_solution_cell,
+    create_grade_and_solution_cell)
 
-class TestUtils(TestBase):
+class TestUtils(object):
 
     def test_is_grade(self):
-        cell = self._create_code_cell()
+        cell = create_code_cell()
         assert not utils.is_grade(cell)
         cell.metadata['nbgrader'] = {}
         assert not utils.is_grade(cell)
@@ -20,7 +23,7 @@ class TestUtils(TestBase):
         assert utils.is_grade(cell)
 
     def test_is_solution(self):
-        cell = self._create_code_cell()
+        cell = create_code_cell()
         assert not utils.is_solution(cell)
         cell.metadata['nbgrader'] = {}
         assert not utils.is_solution(cell)
@@ -30,7 +33,7 @@ class TestUtils(TestBase):
         assert utils.is_solution(cell)
 
     def test_determine_grade_code_grade(self):
-        cell = self._create_grade_cell('print("test")', "code", "foo", 10)
+        cell = create_grade_cell('print("test")', "code", "foo", 10)
         cell.outputs = []
         assert utils.determine_grade(cell) == (10, 10)
 
@@ -38,20 +41,20 @@ class TestUtils(TestBase):
         assert utils.determine_grade(cell) == (0, 10)
 
     def test_determine_grade_markdown_grade(self):
-        cell = self._create_grade_cell('test', "markdown", "foo", 10)
+        cell = create_grade_cell('test', "markdown", "foo", 10)
         assert utils.determine_grade(cell) == (None, 10)
 
     def test_determine_grade_solution(self):
-        cell = self._create_solution_cell('test', "code")
+        cell = create_solution_cell('test', "code")
         with pytest.raises(ValueError):
             utils.determine_grade(cell)
 
-        cell = self._create_solution_cell('test', "markdown")
+        cell = create_solution_cell('test', "markdown")
         with pytest.raises(ValueError):
             utils.determine_grade(cell)
 
     def test_determine_grade_code_grade_and_solution(self):
-        cell = self._create_grade_and_solution_cell('test', "code", "foo", 10)
+        cell = create_grade_and_solution_cell('test', "code", "foo", 10)
         cell.outputs = []
         assert utils.determine_grade(cell) == (10, 10)
 
@@ -59,112 +62,112 @@ class TestUtils(TestBase):
         assert utils.determine_grade(cell) == (0, 10)
 
     def test_determine_grade_markdown_grade_and_solution(self):
-        cell = self._create_grade_and_solution_cell('test', "markdown", "foo", 10)
+        cell = create_grade_and_solution_cell('test', "markdown", "foo", 10)
         assert utils.determine_grade(cell) == (0, 10)
 
-        cell = self._create_grade_and_solution_cell('test', "markdown", "foo", 10)
+        cell = create_grade_and_solution_cell('test', "markdown", "foo", 10)
         cell.source = 'test!'
         assert utils.determine_grade(cell) == (None, 10)
 
     def test_compute_checksum_identical(self):
         # is the same for two identical cells?
-        cell1 = self._create_grade_cell("hello", "code", "foo", 1)
-        cell2 = self._create_grade_cell("hello", "code", "foo", 1)
+        cell1 = create_grade_cell("hello", "code", "foo", 1)
+        cell2 = create_grade_cell("hello", "code", "foo", 1)
         assert utils.compute_checksum(cell1) == utils.compute_checksum(cell2)
 
-        cell1 = self._create_solution_cell("hello", "code")
-        cell2 = self._create_solution_cell("hello", "code")
+        cell1 = create_solution_cell("hello", "code")
+        cell2 = create_solution_cell("hello", "code")
         assert utils.compute_checksum(cell1) == utils.compute_checksum(cell2)
 
     def test_compute_checksum_cell_type(self):
         # does the cell type make a difference?
-        cell1 = self._create_grade_cell("hello", "code", "foo", 1)
-        cell2 = self._create_grade_cell("hello", "markdown", "foo", 1)
+        cell1 = create_grade_cell("hello", "code", "foo", 1)
+        cell2 = create_grade_cell("hello", "markdown", "foo", 1)
         assert utils.compute_checksum(cell1) != utils.compute_checksum(cell2)
 
-        cell1 = self._create_solution_cell("hello", "code")
-        cell2 = self._create_solution_cell("hello", "markdown")
+        cell1 = create_solution_cell("hello", "code")
+        cell2 = create_solution_cell("hello", "markdown")
         assert utils.compute_checksum(cell1) != utils.compute_checksum(cell2)
 
     def test_compute_checksum_whitespace(self):
         # does whitespace make no difference?
-        cell1 = self._create_grade_cell("hello", "code", "foo", 1)
-        cell2 = self._create_grade_cell("hello ", "code", "foo", 1)
+        cell1 = create_grade_cell("hello", "code", "foo", 1)
+        cell2 = create_grade_cell("hello ", "code", "foo", 1)
         assert utils.compute_checksum(cell1) == utils.compute_checksum(cell2)
 
-        cell1 = self._create_grade_cell("hello", "markdown", "foo", 1)
-        cell2 = self._create_grade_cell("hello ", "markdown", "foo", 1)
+        cell1 = create_grade_cell("hello", "markdown", "foo", 1)
+        cell2 = create_grade_cell("hello ", "markdown", "foo", 1)
         assert utils.compute_checksum(cell1) == utils.compute_checksum(cell2)
 
-        cell1 = self._create_solution_cell("hello", "code")
-        cell2 = self._create_solution_cell("hello ", "code")
+        cell1 = create_solution_cell("hello", "code")
+        cell2 = create_solution_cell("hello ", "code")
         assert utils.compute_checksum(cell1) == utils.compute_checksum(cell2)
 
-        cell1 = self._create_solution_cell("hello", "markdown")
-        cell2 = self._create_solution_cell("hello ", "markdown")
+        cell1 = create_solution_cell("hello", "markdown")
+        cell2 = create_solution_cell("hello ", "markdown")
         assert utils.compute_checksum(cell1) == utils.compute_checksum(cell2)
 
     def test_compute_checksum_source(self):
         # does the source make a difference?
-        cell1 = self._create_grade_cell("print('hello')", "code", "foo", 1)
-        cell2 = self._create_grade_cell("print( 'hello' )", "code", "foo", 1)
+        cell1 = create_grade_cell("print('hello')", "code", "foo", 1)
+        cell2 = create_grade_cell("print( 'hello' )", "code", "foo", 1)
         assert utils.compute_checksum(cell1) == utils.compute_checksum(cell2)
 
-        cell1 = self._create_grade_cell("print('hello')", "code", "foo", 1)
-        cell2 = self._create_grade_cell("print( 'hello!' )", "code", "foo", 1)
+        cell1 = create_grade_cell("print('hello')", "code", "foo", 1)
+        cell2 = create_grade_cell("print( 'hello!' )", "code", "foo", 1)
         assert utils.compute_checksum(cell1) != utils.compute_checksum(cell2)
 
-        cell1 = self._create_grade_cell("print('hello')", "markdown", "foo", 1)
-        cell2 = self._create_grade_cell("print( 'hello' )", "markdown", "foo", 1)
+        cell1 = create_grade_cell("print('hello')", "markdown", "foo", 1)
+        cell2 = create_grade_cell("print( 'hello' )", "markdown", "foo", 1)
         assert utils.compute_checksum(cell1) != utils.compute_checksum(cell2)
 
-        cell1 = self._create_solution_cell("print('hello')", "code")
-        cell2 = self._create_solution_cell("print( 'hello' )", "code")
+        cell1 = create_solution_cell("print('hello')", "code")
+        cell2 = create_solution_cell("print( 'hello' )", "code")
         assert utils.compute_checksum(cell1) == utils.compute_checksum(cell2)
 
-        cell1 = self._create_solution_cell("print('hello')", "code")
-        cell2 = self._create_solution_cell("print( 'hello!' )", "code")
+        cell1 = create_solution_cell("print('hello')", "code")
+        cell2 = create_solution_cell("print( 'hello!' )", "code")
         assert utils.compute_checksum(cell1) != utils.compute_checksum(cell2)
 
-        cell1 = self._create_solution_cell("print('hello')", "markdown")
-        cell2 = self._create_solution_cell("print( 'hello' )", "markdown")
+        cell1 = create_solution_cell("print('hello')", "markdown")
+        cell2 = create_solution_cell("print( 'hello' )", "markdown")
         assert utils.compute_checksum(cell1) != utils.compute_checksum(cell2)
 
     def test_compute_checksum_points(self):
         # does the number of points make a difference (only for grade cells)?
-        cell1 = self._create_grade_cell("hello", "code", "foo", 2)
-        cell2 = self._create_grade_cell("hello", "code", "foo", 1)
+        cell1 = create_grade_cell("hello", "code", "foo", 2)
+        cell2 = create_grade_cell("hello", "code", "foo", 1)
         assert utils.compute_checksum(cell1) != utils.compute_checksum(cell2)
 
-        cell1 = self._create_grade_cell("hello", "code", "foo", 2)
-        cell2 = self._create_grade_cell("hello", "code", "foo", 1)
+        cell1 = create_grade_cell("hello", "code", "foo", 2)
+        cell2 = create_grade_cell("hello", "code", "foo", 1)
         cell1.metadata.nbgrader["grade"] = False
         cell2.metadata.nbgrader["grade"] = False
         assert utils.compute_checksum(cell1) == utils.compute_checksum(cell2)
 
     def test_compute_checksum_grade_id(self):
         # does the grade id make a difference (only for grade cells)?
-        cell1 = self._create_grade_cell("hello", "code", "foo", 1)
-        cell2 = self._create_grade_cell("hello", "code", "bar", 1)
+        cell1 = create_grade_cell("hello", "code", "foo", 1)
+        cell2 = create_grade_cell("hello", "code", "bar", 1)
         assert utils.compute_checksum(cell1) != utils.compute_checksum(cell2)
 
-        cell1 = self._create_grade_cell("hello", "code", "foo", 1)
-        cell2 = self._create_grade_cell("hello", "code", "bar", 1)
+        cell1 = create_grade_cell("hello", "code", "foo", 1)
+        cell2 = create_grade_cell("hello", "code", "bar", 1)
         cell1.metadata.nbgrader["grade"] = False
         cell2.metadata.nbgrader["grade"] = False
         assert utils.compute_checksum(cell1) == utils.compute_checksum(cell2)
 
     def test_compute_checksum_grade_cell(self):
         # does it make a difference if grade=True?
-        cell1 = self._create_grade_cell("hello", "code", "foo", 1)
-        cell2 = self._create_grade_cell("hello", "code", "foo", 1)
+        cell1 = create_grade_cell("hello", "code", "foo", 1)
+        cell2 = create_grade_cell("hello", "code", "foo", 1)
         cell2.metadata.nbgrader["grade"] = False
         assert utils.compute_checksum(cell1) != utils.compute_checksum(cell2)
 
     def test_compute_checksum_solution_cell(self):
         # does it make a difference if solution=True?
-        cell1 = self._create_solution_cell("hello", "code")
-        cell2 = self._create_solution_cell("hello", "code")
+        cell1 = create_solution_cell("hello", "code")
+        cell2 = create_solution_cell("hello", "code")
         cell2.metadata.nbgrader["solution"] = False
         assert utils.compute_checksum(cell1) != utils.compute_checksum(cell2)
 

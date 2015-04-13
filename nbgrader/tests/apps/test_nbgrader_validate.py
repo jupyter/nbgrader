@@ -1,7 +1,7 @@
 import os
 
 from .base import TestBase
-from ..utils import temp_cwd, run_command
+from .. import temp_cwd, run_command
 
 root = os.path.dirname(__file__)
 

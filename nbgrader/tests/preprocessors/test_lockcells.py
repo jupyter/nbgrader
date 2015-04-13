@@ -1,8 +1,8 @@
-import traceback
 import itertools
 from nbgrader.preprocessors import LockCells
 
 from .base import TestBase
+from .. import create_code_cell
 
 
 class TestLockCells(TestBase):
@@ -20,7 +20,7 @@ class TestLockCells(TestBase):
         self.preprocessor.lock_solution_cells = True
         self.preprocessor.lock_grade_cells = False
         self.preprocessor.lock_all_cells = False
-        cell = self._create_code_cell()
+        cell = create_code_cell()
         cell.metadata['nbgrader'] = {}
         cell.metadata['nbgrader']['solution'] = True
         assert self.deletable(cell)
@@ -32,7 +32,7 @@ class TestLockCells(TestBase):
         self.preprocessor.lock_solution_cells = False
         self.preprocessor.lock_grade_cells = False
         self.preprocessor.lock_all_cells = False
-        cell = self._create_code_cell()
+        cell = create_code_cell()
         cell.metadata['nbgrader'] = {}
         cell.metadata['nbgrader']['solution'] = True
         assert self.deletable(cell)
@@ -44,7 +44,7 @@ class TestLockCells(TestBase):
         self.preprocessor.lock_solution_cells = False
         self.preprocessor.lock_grade_cells = True
         self.preprocessor.lock_all_cells = False
-        cell = self._create_code_cell()
+        cell = create_code_cell()
         cell.metadata['nbgrader'] = {}
         cell.metadata['nbgrader']['grade'] = True
         assert self.deletable(cell)
@@ -56,7 +56,7 @@ class TestLockCells(TestBase):
         self.preprocessor.lock_solution_cells = False
         self.preprocessor.lock_grade_cells = False
         self.preprocessor.lock_all_cells = False
-        cell = self._create_code_cell()
+        cell = create_code_cell()
         cell.metadata['nbgrader'] = {}
         cell.metadata['nbgrader']['grade'] = True
         assert self.deletable(cell)
@@ -68,7 +68,7 @@ class TestLockCells(TestBase):
         self.preprocessor.lock_solution_cells = False
         self.preprocessor.lock_grade_cells = False
         self.preprocessor.lock_all_cells = True
-        cell = self._create_code_cell()
+        cell = create_code_cell()
         cell.metadata['nbgrader'] = {}
         assert self.deletable(cell)
         new_cell = self.preprocessor.preprocess_cell(cell, {}, 0)[0]
@@ -79,7 +79,7 @@ class TestLockCells(TestBase):
         self.preprocessor.lock_solution_cells = False
         self.preprocessor.lock_grade_cells = False
         self.preprocessor.lock_all_cells = False
-        cell = self._create_code_cell()
+        cell = create_code_cell()
         cell.metadata['nbgrader'] = {}
         assert self.deletable(cell)
         new_cell = self.preprocessor.preprocess_cell(cell, {}, 0)[0]

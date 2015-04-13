@@ -15,7 +15,7 @@ from selenium.webdriver.support.ui import Select
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.keys import Keys
 
-from ..utils import run_command
+from .. import run_command
 
 root = os.path.dirname(__file__)
 

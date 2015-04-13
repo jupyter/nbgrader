@@ -4,6 +4,7 @@ from nbgrader.utils import compute_checksum
 from IPython.nbformat.v4 import new_notebook
 
 from .base import TestBase
+from .. import create_grade_cell, create_solution_cell, create_grade_and_solution_cell
 
 
 class TestOverwriteCells(TestBase):
@@ -26,7 +27,7 @@ class TestOverwriteCells(TestBase):
 
     def test_overwrite_points(self):
         """Are points overwritten for grade cells?"""
-        cell = self._create_grade_cell("hello", "code", "foo", 1)
+        cell = create_grade_cell("hello", "code", "foo", 1)
         nb = new_notebook()
         nb.cells.append(cell)
         nb, resources = self.preprocessor1.preprocess(nb, self.resources)
@@ -38,7 +39,7 @@ class TestOverwriteCells(TestBase):
 
     def test_overwrite_grade_source(self):
         """Is the source overwritten for grade cells?"""
-        cell = self._create_grade_cell("hello", "code", "foo", 1)
+        cell = create_grade_cell("hello", "code", "foo", 1)
         nb = new_notebook()
         nb.cells.append(cell)
         nb, resources = self.preprocessor1.preprocess(nb, self.resources)
@@ -50,7 +51,7 @@ class TestOverwriteCells(TestBase):
 
     def test_dont_overwrite_grade_and_solution_source(self):
         """Is the source not overwritten for grade+solution cells?"""
-        cell = self._create_grade_and_solution_cell("hello", "code", "foo", 1)
+        cell = create_grade_and_solution_cell("hello", "code", "foo", 1)
         nb = new_notebook()
         nb.cells.append(cell)
         nb, resources = self.preprocessor1.preprocess(nb, self.resources)
@@ -62,7 +63,7 @@ class TestOverwriteCells(TestBase):
 
     def test_dont_overwrite_solution_source(self):
         """Is the source not overwritten for solution cells?"""
-        cell = self._create_solution_cell("hello", "code")
+        cell = create_solution_cell("hello", "code")
         nb = new_notebook()
         nb.cells.append(cell)
         nb, resources = self.preprocessor1.preprocess(nb, self.resources)
@@ -74,7 +75,7 @@ class TestOverwriteCells(TestBase):
 
     def test_overwrite_grade_cell_type(self):
         """Is the cell type overwritten for grade cells?"""
-        cell = self._create_grade_cell("hello", "code", "foo", 1)
+        cell = create_grade_cell("hello", "code", "foo", 1)
         nb = new_notebook()
         nb.cells.append(cell)
         nb, resources = self.preprocessor1.preprocess(nb, self.resources)
@@ -84,9 +85,9 @@ class TestOverwriteCells(TestBase):
 
         assert cell.cell_type == "code"
 
-    def test_overwrite_grade_cell_type(self):
+    def test_overwrite_solution_cell_type(self):
         """Is the cell type overwritten for solution cells?"""
-        cell = self._create_solution_cell("hello", "code")
+        cell = create_solution_cell("hello", "code")
         nb = new_notebook()
         nb.cells.append(cell)
         nb, resources = self.preprocessor1.preprocess(nb, self.resources)
@@ -98,7 +99,7 @@ class TestOverwriteCells(TestBase):
 
     def test_overwrite_grade_checksum(self):
         """Is the checksum overwritten for grade cells?"""
-        cell = self._create_grade_cell("hello", "code", "foo", 1)
+        cell = create_grade_cell("hello", "code", "foo", 1)
         nb = new_notebook()
         nb.cells.append(cell)
         nb, resources = self.preprocessor1.preprocess(nb, self.resources)
@@ -110,7 +111,7 @@ class TestOverwriteCells(TestBase):
 
     def test_overwrite_solution_checksum(self):
         """Is the checksum overwritten for solution cells?"""
-        cell = self._create_solution_cell("hello", "code")
+        cell = create_solution_cell("hello", "code")
         nb = new_notebook()
         nb.cells.append(cell)
         nb, resources = self.preprocessor1.preprocess(nb, self.resources)

@@ -3,7 +3,7 @@ import shutil
 import tarfile
 
 from .base import TestBase
-from ..utils import run_command, temp_cwd
+from .. import run_command, temp_cwd
 
 root = os.path.dirname(__file__)
 

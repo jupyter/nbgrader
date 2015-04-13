@@ -6,7 +6,7 @@ import sys
 from textwrap import dedent
 
 from .test_nbgrader_formgrade import TestNbgraderFormgrade
-from ..utils import start_subprocess
+from .. import start_subprocess
 
 class TestNbgraderFormgradeHubAuth(TestNbgraderFormgrade):
 
@@ -34,8 +34,8 @@ class TestNbgraderFormgradeHubAuth(TestNbgraderFormgrade):
             fh.write(dedent(
                 """
                 c = get_config()
-                c.JupyterHub.authenticator_class = 'nbgrader.tests.test_formgrader.fakeuser.FakeUserAuth'
-                c.JupyterHub.spawner_class = 'nbgrader.tests.test_formgrader.fakeuser.FakeUserSpawner'
+                c.JupyterHub.authenticator_class = 'nbgrader.tests.formgrader.fakeuser.FakeUserAuth'
+                c.JupyterHub.spawner_class = 'nbgrader.tests.formgrader.fakeuser.FakeUserSpawner'
                 """
             ))
 
