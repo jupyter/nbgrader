@@ -1,4 +1,3 @@
-from nose.tools import assert_equal
 from nbgrader.preprocessors import SaveCells, SaveAutoGrades, GetGrades
 from nbgrader.api import Gradebook
 from IPython.nbformat.v4 import new_notebook, new_output
@@ -37,8 +36,8 @@ class TestGetGrades(TestBase):
         self.preprocessor2.preprocess(nb, self.resources)
         self.preprocessor3.preprocess(nb, self.resources)
 
-        assert_equal(cell.metadata.nbgrader['score'], 1)
-        assert_equal(cell.metadata.nbgrader['points'], 1)
+        assert cell.metadata.nbgrader['score'] == 1
+        assert cell.metadata.nbgrader['points'] == 1
         assert 'comment' not in cell.metadata.nbgrader
 
     def test_save_incorrect_code(self):
@@ -52,8 +51,8 @@ class TestGetGrades(TestBase):
         self.preprocessor2.preprocess(nb, self.resources)
         self.preprocessor3.preprocess(nb, self.resources)
 
-        assert_equal(cell.metadata.nbgrader['score'], 0)
-        assert_equal(cell.metadata.nbgrader['points'], 1)
+        assert cell.metadata.nbgrader['score'] == 0
+        assert cell.metadata.nbgrader['points'] == 1
         assert 'comment' not in cell.metadata.nbgrader
 
     def test_save_unchanged_code(self):
@@ -67,8 +66,8 @@ class TestGetGrades(TestBase):
         self.preprocessor3.preprocess(nb, self.resources)
 
         comment = self.gb.find_comment(0, "test", "ps0", "bar")
-        assert_equal(cell.metadata.nbgrader['comment'], comment.to_dict())
-        assert_equal(cell.metadata.nbgrader['comment']['comment'], "No response.")
+        assert cell.metadata.nbgrader['comment'] == comment.to_dict()
+        assert cell.metadata.nbgrader['comment']['comment'] == "No response."
 
     def test_save_changed_code(self):
         """Is an unchanged code cell given the correct comment?"""
@@ -82,8 +81,8 @@ class TestGetGrades(TestBase):
         self.preprocessor3.preprocess(nb, self.resources)
 
         comment = self.gb.find_comment(0, "test", "ps0", "bar")
-        assert_equal(cell.metadata.nbgrader['comment'], comment.to_dict())
-        assert_equal(cell.metadata.nbgrader['comment']['comment'], None)
+        assert cell.metadata.nbgrader['comment'] == comment.to_dict()
+        assert cell.metadata.nbgrader['comment']['comment'] == None
 
     def test_save_unchanged_markdown(self):
         """Is an unchanged markdown cell correctly graded?"""
@@ -97,10 +96,10 @@ class TestGetGrades(TestBase):
 
         comment = self.gb.find_comment(0, "test", "ps0", "bar")
 
-        assert_equal(cell.metadata.nbgrader['score'], 0)
-        assert_equal(cell.metadata.nbgrader['points'], 1)
-        assert_equal(cell.metadata.nbgrader['comment'], comment.to_dict())
-        assert_equal(cell.metadata.nbgrader['comment']['comment'], "No response.")
+        assert cell.metadata.nbgrader['score'] == 0
+        assert cell.metadata.nbgrader['points'] == 1
+        assert cell.metadata.nbgrader['comment'] == comment.to_dict()
+        assert cell.metadata.nbgrader['comment']['comment'] == "No response."
 
     def test_save_changed_markdown(self):
         """Is a changed markdown cell correctly graded?"""
@@ -113,9 +112,9 @@ class TestGetGrades(TestBase):
         self.preprocessor2.preprocess(nb, self.resources)
         self.preprocessor3.preprocess(nb, self.resources)
 
-        assert_equal(cell.metadata.nbgrader['score'], 0)
-        assert_equal(cell.metadata.nbgrader['points'], 1)
+        assert cell.metadata.nbgrader['score'] == 0
+        assert cell.metadata.nbgrader['points'] == 1
 
         comment = self.gb.find_comment(0, "test", "ps0", "bar")
-        assert_equal(cell.metadata.nbgrader['comment'], comment.to_dict())
-        assert_equal(cell.metadata.nbgrader['comment']['comment'], None)
+        assert cell.metadata.nbgrader['comment'] == comment.to_dict()
+        assert cell.metadata.nbgrader['comment']['comment'] == None
