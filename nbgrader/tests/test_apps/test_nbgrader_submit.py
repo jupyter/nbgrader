@@ -3,7 +3,9 @@ import shutil
 import tarfile
 
 from .base import TestBase
-from .utils import run_command, temp_cwd
+from ..utils import run_command, temp_cwd
+
+root = os.path.dirname(__file__)
 
 class TestNbgraderSubmit(TestBase):
 
@@ -15,7 +17,7 @@ class TestNbgraderSubmit(TestBase):
     def test_submit(self):
         """Does everything get properly submitted?"""
         pass # TODO: fix these for the new submit command
-        # with temp_cwd(["files/submitted-changed.ipynb"]):
+        # with temp_cwd([os.path.join(root, "files/submitted-changed.ipynb")]):
         #     os.mkdir('Problem Set 1')
         #     shutil.move('submitted-changed.ipynb', 'Problem Set 1/Problem 1.ipynb')
         #     os.chdir('Problem Set 1')
@@ -29,7 +31,7 @@ class TestNbgraderSubmit(TestBase):
     def test_submit_custom_assignment(self):
         """Does everything get properly submitted with a custom assignment name?"""
         pass # TODO: fix these for the new submit command
-        # with temp_cwd(["files/submitted-changed.ipynb"]):
+        # with temp_cwd([os.path.join(root, "files/submitted-changed.ipynb")]):
         #     os.mkdir('Problem Set 1')
         #     shutil.move('submitted-changed.ipynb', 'Problem Set 1/Problem 1.ipynb')
         #     os.chdir('Problem Set 1')

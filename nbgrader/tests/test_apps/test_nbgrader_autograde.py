@@ -4,7 +4,9 @@ import shutil
 from nbgrader.api import Gradebook
 
 from .base import TestBase
-from .utils import run_command, temp_cwd
+from ..utils import run_command, temp_cwd
+
+root = os.path.dirname(__file__)
 
 class TestNbgraderAutograde(TestBase):
 
@@ -23,7 +25,7 @@ class TestNbgraderAutograde(TestBase):
 
     def test_missing_student(self):
         """Is an error thrown when the student is missing?"""
-        with temp_cwd(["files/submitted-changed.ipynb"]):
+        with temp_cwd([os.path.join(root, "files/submitted-changed.ipynb")]):
             dbpath = self._setup_db()
 
             os.makedirs('source/ps1')
@@ -36,7 +38,7 @@ class TestNbgraderAutograde(TestBase):
 
     def test_add_missing_student(self):
         """Can a missing student be added?"""
-        with temp_cwd(["files/submitted-changed.ipynb"]):
+        with temp_cwd([os.path.join(root, "files/submitted-changed.ipynb")]):
             dbpath = self._setup_db()
 
             os.makedirs('source/ps1')
@@ -51,7 +53,7 @@ class TestNbgraderAutograde(TestBase):
 
     def test_missing_assignment(self):
         """Is an error thrown when the assignment is missing?"""
-        with temp_cwd(["files/submitted-changed.ipynb"]):
+        with temp_cwd([os.path.join(root, "files/submitted-changed.ipynb")]):
             dbpath = self._setup_db()
 
             os.makedirs('source/ps1')
@@ -64,7 +66,7 @@ class TestNbgraderAutograde(TestBase):
 
     def test_grade(self):
         """Can files be graded?"""
-        with temp_cwd(["files/submitted-unchanged.ipynb", "files/submitted-changed.ipynb"]):
+        with temp_cwd([os.path.join(root, "files/submitted-unchanged.ipynb"), os.path.join(root, "files/submitted-changed.ipynb")]):
             dbpath = self._setup_db()
 
             os.makedirs('source/ps1')
@@ -105,7 +107,7 @@ class TestNbgraderAutograde(TestBase):
 
     def test_grade_timestamp(self):
         """Is a timestamp correctly read in?"""
-        with temp_cwd(["files/submitted-unchanged.ipynb", "files/submitted-changed.ipynb"]):
+        with temp_cwd([os.path.join(root, "files/submitted-unchanged.ipynb"), os.path.join(root, "files/submitted-changed.ipynb")]):
             dbpath = self._setup_db()
 
             os.makedirs('source/ps1')
@@ -140,7 +142,7 @@ class TestNbgraderAutograde(TestBase):
 
     def test_force(self):
         """Ensure the force option works properly"""
-        with temp_cwd(["files/submitted-unchanged.ipynb"]):
+        with temp_cwd([os.path.join(root, "files/submitted-unchanged.ipynb")]):
             dbpath = self._setup_db()
 
             os.makedirs('source/ps1/data')
@@ -186,7 +188,7 @@ class TestNbgraderAutograde(TestBase):
 
     def test_filter_notebook(self):
         """Does autograding filter by notebook properly?"""
-        with temp_cwd(["files/submitted-unchanged.ipynb"]):
+        with temp_cwd([os.path.join(root, "files/submitted-unchanged.ipynb")]):
             dbpath = self._setup_db()
 
             os.makedirs('source/ps1/data')
@@ -242,7 +244,7 @@ class TestNbgraderAutograde(TestBase):
 
     def test_grade_overwrite_files(self):
         """Are dependent files properly linked and overwritten?"""
-        with temp_cwd(["files/submitted-unchanged.ipynb"]):
+        with temp_cwd([os.path.join(root, "files/submitted-unchanged.ipynb")]):
             dbpath = self._setup_db()
 
             os.makedirs('source/ps1')

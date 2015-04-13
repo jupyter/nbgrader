@@ -4,8 +4,9 @@ import shutil
 from nbgrader.api import Gradebook
 
 from .base import TestBase
-from .utils import run_command, temp_cwd
+from ..utils import run_command, temp_cwd
 
+root = os.path.dirname(__file__)
 
 class TestNbgraderFeedback(TestBase):
 
@@ -23,7 +24,7 @@ class TestNbgraderFeedback(TestBase):
 
     def test_single_file(self):
         """Can feedback be generated for an unchanged assignment?"""
-        with temp_cwd(["files/submitted-unchanged.ipynb"]):
+        with temp_cwd([os.path.join(root, "files/submitted-unchanged.ipynb")]):
             dbpath = self._setup_db()
 
             os.makedirs('source/ps1')
@@ -39,7 +40,7 @@ class TestNbgraderFeedback(TestBase):
 
     def test_force(self):
         """Ensure the force option works properly"""
-        with temp_cwd(["files/submitted-unchanged.ipynb"]):
+        with temp_cwd([os.path.join(root, "files/submitted-unchanged.ipynb")]):
             dbpath = self._setup_db()
 
             os.makedirs('source/ps1/data')
@@ -86,7 +87,7 @@ class TestNbgraderFeedback(TestBase):
 
     def test_filter_notebook(self):
         """Does feedback filter by notebook properly?"""
-        with temp_cwd(["files/submitted-unchanged.ipynb"]):
+        with temp_cwd([os.path.join(root, "files/submitted-unchanged.ipynb")]):
             dbpath = self._setup_db()
 
             os.makedirs('source/ps1/data')

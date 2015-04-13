@@ -4,7 +4,9 @@ import shutil
 from nbgrader.api import Gradebook
 
 from .base import TestBase
-from .utils import run_command, temp_cwd
+from ..utils import run_command, temp_cwd
+
+root = os.path.dirname(__file__)
 
 class TestNbgraderAssign(TestBase):
 
@@ -73,7 +75,7 @@ class TestNbgraderAssign(TestBase):
 
     def test_save_cells(self):
         """Ensure cells are saved into the database"""
-        with temp_cwd(["files/test.ipynb"]):
+        with temp_cwd([os.path.join(root, "files/test.ipynb")]):
             os.makedirs('source/ps1')
             shutil.move("test.ipynb", "source/ps1/test.ipynb")
 
@@ -88,7 +90,7 @@ class TestNbgraderAssign(TestBase):
 
     def test_force(self):
         """Ensure the force option works properly"""
-        with temp_cwd(["files/test.ipynb"]):
+        with temp_cwd([os.path.join(root, "files/test.ipynb")]):
             os.makedirs('source/ps1/data')
             shutil.move("test.ipynb", "source/ps1/test.ipynb")
             with open("source/ps1/foo.txt", "w") as fh:
