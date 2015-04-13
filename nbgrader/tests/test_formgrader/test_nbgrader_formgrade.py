@@ -18,10 +18,11 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
-from .base import TestBase
-from .utils import run_command, start_subprocess, copy_coverage_files
+from ..utils import run_command, start_subprocess, copy_coverage_files
 
-class TestNbgraderFormgrade(TestBase):
+root = os.path.dirname(__file__)
+
+class TestNbgraderFormgrade(object):
 
     base_formgrade_url = "http://localhost:9000/"
     base_notebook_url = "http://localhost:9001/notebooks/"
@@ -39,9 +40,8 @@ class TestNbgraderFormgrade(TestBase):
         os.chdir("class_files")
 
         # copy files from the user guide
-        user_guide = os.path.join(os.path.dirname(__file__), "..", "..", "docs", "user_guide", "example")
-        shutil.copytree(os.path.join(user_guide, "source"), "source")
-        shutil.copytree(os.path.join(user_guide, "submitted"), "submitted")
+        shutil.copytree(os.path.join(root, "files", "source"), "source")
+        shutil.copytree(os.path.join(root, "files", "submitted"), "submitted")
 
         # create the gradebook
         cls.gb = Gradebook("sqlite:///gradebook.db")
