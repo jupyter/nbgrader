@@ -3,8 +3,9 @@ import pytest
 
 from IPython.nbformat.v4 import new_output
 from nbgrader import utils
-from .base import TestBase
 
+from .base import TestBase
+from .utils import temp_cwd
 
 class TestUtils(TestBase):
 
@@ -168,7 +169,7 @@ class TestUtils(TestBase):
         assert utils.compute_checksum(cell1) != utils.compute_checksum(cell2)
 
     def test_is_ignored(self):
-        with self._temp_cwd():
+        with temp_cwd():
             os.mkdir("foo")
             with open("foo/bar.txt", "w") as fh:
                 fh.write("bar")
@@ -182,7 +183,7 @@ class TestUtils(TestBase):
             assert not utils.is_ignored("foo/bar.txt", ["foo/*"])
 
     def test_find_all_files(self):
-        with self._temp_cwd():
+        with temp_cwd():
             os.makedirs("foo/bar")
             with open("foo/baz.txt", "w") as fh:
                 fh.write("baz")

@@ -6,6 +6,7 @@ import sys
 from textwrap import dedent
 
 from .test_nbgrader_formgrade import TestNbgraderFormgrade
+from .utils import start_subprocess
 
 class TestNbgraderFormgradeHubAuth(TestNbgraderFormgrade):
 
@@ -39,7 +40,7 @@ class TestNbgraderFormgradeHubAuth(TestNbgraderFormgrade):
             ))
 
         os.environ['CONFIGPROXY_AUTH_TOKEN'] = 'foo'
-        cls.jupyterhub = cls._start_subprocess(
+        cls.jupyterhub = start_subprocess(
             ["jupyterhub"],
             shell=False,
             stdout=None,

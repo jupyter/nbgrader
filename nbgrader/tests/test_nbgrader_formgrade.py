@@ -3,8 +3,6 @@ import shutil
 import tempfile
 import time
 
-from .base import TestBase
-
 from nbgrader.api import Gradebook, MissingEntry
 from textwrap import dedent
 
@@ -19,6 +17,9 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+
+from .base import TestBase
+from .utils import run_command, start_subprocess, copy_coverage_files
 
 class TestNbgraderFormgrade(TestBase):
 
@@ -50,12 +51,12 @@ class TestNbgraderFormgrade(TestBase):
         cls.gb.add_student("Reasoner", first_name="Louis", last_name="R")
 
         # run nbgrader assign
-        cls._run_command(
+        run_command(
             'nbgrader assign "Problem Set 1" '
             '--IncludeHeaderFooter.header=source/header.ipynb')
 
         # run the autograder
-        cls._run_command('nbgrader autograde "Problem Set 1"')
+        run_command('nbgrader autograde "Problem Set 1"')
 
     @classmethod
     def _setup_formgrade_config(cls):
@@ -71,7 +72,7 @@ class TestNbgraderFormgrade(TestBase):
 
     @classmethod
     def _start_formgrader(cls):
-        cls.formgrader = cls._start_subprocess(
+        cls.formgrader = start_subprocess(
             ["nbgrader", "formgrade"],
             shell=False,
             stdout=None,
@@ -118,13 +119,13 @@ class TestNbgraderFormgrade(TestBase):
         cls.browser.quit()
         cls._stop_formgrader()
 
-        cls._copy_coverage_files()
+        copy_coverage_files()
 
         os.chdir(cls.origdir)
         shutil.rmtree(cls.tempdir)
 
     def test_help(self):
-        self._run_command("nbgrader formgrade --help-all")
+        run_command("nbgrader formgrade --help-all")
 
     def _check_url(self, url):
         if not url.startswith("http"):

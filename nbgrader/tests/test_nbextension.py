@@ -16,6 +16,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.keys import Keys
 
 from .base import TestBase
+from .utils import run_command
 
 
 def _assert_is_deactivated(config_file, key='nbgrader/create_assignment'):
@@ -127,7 +128,7 @@ class TestCreateAssignmentNbExtension(TestBase):
         )
 
     def test_00_install_extension(self):
-        self._run_command(
+        run_command(
             "python -m nbgrader --install --activate --user "
             "--ipython-dir={}".format(self.ipythondir))
 
@@ -158,7 +159,7 @@ class TestCreateAssignmentNbExtension(TestBase):
 
         _assert_is_activated(config_file, key=okey)
 
-        self._run_command(
+        run_command(
             "python -m nbgrader --deactivate "
             "--ipython-dir={}".format(self.ipythondir))
 
@@ -181,7 +182,7 @@ class TestCreateAssignmentNbExtension(TestBase):
         config_file = os.path.join(self.ipythondir, 'profile_default', 'nbconfig', 'notebook.json')
         _assert_is_deactivated(config_file)
 
-        self._run_command(
+        run_command(
             "python -m nbgrader --activate "
             "--ipython-dir={}".format(self.ipythondir))
 
