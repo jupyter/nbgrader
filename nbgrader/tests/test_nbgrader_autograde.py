@@ -1,11 +1,8 @@
 from .base import TestBase
 from nbgrader.api import Gradebook
 
-from nose.tools import assert_equal
-
 import os
 import shutil
-import datetime
 
 class TestNbgraderAutograde(TestBase):
 
@@ -85,24 +82,24 @@ class TestNbgraderAutograde(TestBase):
 
             gb = Gradebook(dbpath)
             notebook = gb.find_submission_notebook("p1", "ps1", "foo")
-            assert_equal(notebook.score, 1)
-            assert_equal(notebook.max_score, 4)
-            assert_equal(notebook.needs_manual_grade, False)
+            assert notebook.score == 1
+            assert notebook.max_score == 4
+            assert notebook.needs_manual_grade == False
 
             comment1 = gb.find_comment(0, "p1", "ps1", "foo")
             comment2 = gb.find_comment(1, "p1", "ps1", "foo")
-            assert_equal(comment1.comment, "No response.")
-            assert_equal(comment2.comment, "No response.")
+            assert comment1.comment == "No response."
+            assert comment2.comment == "No response."
 
             notebook = gb.find_submission_notebook("p1", "ps1", "bar")
-            assert_equal(notebook.score, 2)
-            assert_equal(notebook.max_score, 4)
-            assert_equal(notebook.needs_manual_grade, True)
+            assert notebook.score == 2
+            assert notebook.max_score == 4
+            assert notebook.needs_manual_grade == True
 
             comment1 = gb.find_comment(0, "p1", "ps1", "bar")
             comment2 = gb.find_comment(1, "p1", "ps1", "bar")
-            assert_equal(comment1.comment, None)
-            assert_equal(comment2.comment, None)
+            assert comment1.comment == None
+            assert comment2.comment == None
 
     def test_grade_timestamp(self):
         """Is a timestamp correctly read in?"""
@@ -267,8 +264,8 @@ class TestNbgraderAutograde(TestBase):
 
             with open("autograded/foo/ps1/timestamp.txt", "r") as fh:
                 contents = fh.read()
-            assert_equal(contents, "2015-02-02 15:58:23.948203 PST")
+            assert contents == "2015-02-02 15:58:23.948203 PST"
 
             with open("autograded/foo/ps1/data.csv", "r") as fh:
                 contents = fh.read()
-            assert_equal(contents, "some,data\n")
+            assert contents == "some,data\n"
