@@ -115,29 +115,19 @@ var comments;
 var last_selected;
 
 var nextAssignment = function () {
-    href = $("li.next a").attr("href");
-    if (href) {
-       window.location = href + "#" + getIndex(last_selected);
-    }
+    window.location = base_url + '/submissions/' + submission_id + '/next' + "#" + getIndex(last_selected);
 };
 
 var nextIncorrectAssignment = function () {
-    if (next_incorrect_href) {
-        window.location = next_incorrect_href + "#" + getIndex(last_selected);
-    }
+    window.location = base_url + '/submissions/' + submission_id + '/next_incorrect' + "#" + getIndex(last_selected);
 };
 
 var prevAssignment = function () {
-    href = $("li.previous a").attr("href");
-    if (href) {
-        window.location = href + "#" + getIndex(last_selected);
-    }
+    window.location = base_url + '/submissions/' + submission_id + '/prev' + "#" + getIndex(last_selected);
 };
 
 var prevIncorrectAssignment = function () {
-    if (prev_incorrect_href) {
-        window.location = prev_incorrect_href + "#" + getIndex(last_selected);
-    }
+    window.location = base_url + '/submissions/' + submission_id + '/prev_incorrect' + "#" + getIndex(last_selected);
 };
 
 var save_and_navigate = function(callback) {

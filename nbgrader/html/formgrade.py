@@ -185,6 +185,94 @@ def view_submission_files(submission_id, path):
     return send_from_directory(dirname, path)
 
 
+@blueprint.route("/submissions/<submission_id>/next")
+@auth
+def view_next_submission(submission_id):
+    try:
+        submission = app.gradebook.find_submission_notebook_by_id(submission_id)
+        assignment_id = submission.assignment.assignment.name
+        notebook_id = submission.notebook.name
+    except MissingEntry:
+        abort(404)
+
+    submissions = app.gradebook.notebook_submissions(notebook_id, assignment_id)
+
+    # find next submission
+    submission_ids = sorted([x.id for x in submissions])
+    ix = submission_ids.index(submission.id)
+    if ix == (len(submissions) - 1):
+        return redirect(url_for('.view_assignment_notebook', assignment_id=assignment_id, notebook_id=notebook_id))
+    else:
+        return redirect(url_for('.view_submission', submission_id=submission_ids[ix + 1]))
+
+
+@blueprint.route("/submissions/<submission_id>/next_incorrect")
+@auth
+def view_next_incorrect_submission(submission_id):
+    try:
+        submission = app.gradebook.find_submission_notebook_by_id(submission_id)
+        assignment_id = submission.assignment.assignment.name
+        notebook_id = submission.notebook.name
+    except MissingEntry:
+        abort(404)
+
+    submissions = app.gradebook.notebook_submission_dicts(notebook_id, assignment_id)
+
+    # find next incorrect submission
+    incorrect_ids = set([x['id'] for x in submissions if x['failed_tests']])
+    incorrect_ids.add(submission.id)
+    incorrect_ids = sorted(incorrect_ids)
+    ix_incorrect = incorrect_ids.index(submission.id)
+    if ix_incorrect == (len(incorrect_ids) - 1):
+        return redirect(url_for('.view_assignment_notebook', assignment_id=assignment_id, notebook_id=notebook_id))
+    else:
+        return redirect(url_for('.view_submission', submission_id=incorrect_ids[ix_incorrect + 1]))
+
+
+@blueprint.route("/submissions/<submission_id>/prev")
+@auth
+def view_prev_submission(submission_id):
+    try:
+        submission = app.gradebook.find_submission_notebook_by_id(submission_id)
+        assignment_id = submission.assignment.assignment.name
+        notebook_id = submission.notebook.name
+    except MissingEntry:
+        abort(404)
+
+    submissions = app.gradebook.notebook_submissions(notebook_id, assignment_id)
+
+    # find previous submission
+    submission_ids = sorted([x.id for x in submissions])
+    ix = submission_ids.index(submission.id)
+    if ix == 0:
+        return redirect(url_for('.view_assignment_notebook', assignment_id=assignment_id, notebook_id=notebook_id))
+    else:
+        return redirect(url_for('.view_submission', submission_id=submission_ids[ix - 1]))
+
+
+@blueprint.route("/submissions/<submission_id>/prev_incorrect")
+@auth
+def view_prev_incorrect_submission(submission_id):
+    try:
+        submission = app.gradebook.find_submission_notebook_by_id(submission_id)
+        assignment_id = submission.assignment.assignment.name
+        notebook_id = submission.notebook.name
+    except MissingEntry:
+        abort(404)
+
+    submissions = app.gradebook.notebook_submission_dicts(notebook_id, assignment_id)
+
+    # find previous incorrect submission
+    incorrect_ids = set([x['id'] for x in submissions if x['failed_tests']])
+    incorrect_ids.add(submission.id)
+    incorrect_ids = sorted(incorrect_ids)
+    ix_incorrect = incorrect_ids.index(submission.id)
+    if ix_incorrect == 0:
+        return redirect(url_for('.view_assignment_notebook', assignment_id=assignment_id, notebook_id=notebook_id))
+    else:
+        return redirect(url_for('.view_submission', submission_id=incorrect_ids[ix_incorrect - 1]))
+
+
 @blueprint.route("/submissions/<submission_id>/")
 @auth
 def view_submission(submission_id):
@@ -207,42 +295,13 @@ def view_submission(submission_id):
         abort(404)
 
     submissions = app.gradebook.notebook_submissions(notebook_id, assignment_id)
-
-    # find previous and next submission
     submission_ids = sorted([x.id for x in submissions])
     ix = submission_ids.index(submission.id)
-    if ix == 0:
-        prev_submission = None
-    else:
-        prev_submission = submission_ids[ix - 1]
-    if ix == (len(submissions) - 1):
-        next_submission = None
-    else:
-        next_submission = submission_ids[ix + 1]
-
-    # find previous and next incorrect submission
-    incorrect_ids = set([x.id for x in submissions if x.failed_tests])
-    incorrect_ids.add(submission.id)
-    incorrect_ids = sorted(incorrect_ids)
-    ix_incorrect = incorrect_ids.index(submission.id)
-    if ix_incorrect == 0:
-        prev_incorrect = None
-    else:
-        prev_incorrect = incorrect_ids[ix_incorrect - 1]
-    if ix_incorrect == (len(incorrect_ids) - 1):
-        next_incorrect = None
-    else:
-        next_incorrect = incorrect_ids[ix_incorrect + 1]
-
     server_exists = app.auth.notebook_server_exists()
     resources = {
         'assignment_id': assignment_id,
         'notebook_id': notebook_id,
         'submission_id': submission.id,
-        'next': next_submission,
-        'prev': prev_submission,
-        'next_incorrect': next_incorrect,
-        'prev_incorrect': prev_incorrect,
         'index': ix,
         'total': len(submissions),
         'notebook_server_exists': server_exists,
