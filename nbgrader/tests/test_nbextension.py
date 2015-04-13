@@ -3,9 +3,9 @@ import tempfile
 import os
 import shutil
 import json
+import pytest
 
 from copy import copy
-from nose.tools import assert_equal, assert_raises
 from IPython.utils.py3compat import cast_unicode_py2
 
 from selenium import webdriver
@@ -21,7 +21,8 @@ from .base import TestBase
 def _assert_is_deactivated(config_file, key='nbgrader/create_assignment'):
     with open(config_file, 'r') as fh:
         config = json.load(fh)
-    assert_raises(KeyError, lambda: config['load_extensions'][key])
+    with pytest.raises(KeyError):
+        config['load_extensions'][key]
 
 
 def _assert_is_activated(config_file, key='nbgrader/create_assignment'):
@@ -193,10 +194,10 @@ class TestCreateAssignmentNbExtension(TestBase):
         # make sure the toolbar appeared
         element = WebDriverWait(self.browser, 10).until(
             EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".celltoolbar input")))
-        assert_equal(element[0].get_attribute("type"), "checkbox")
+        assert element[0].get_attribute("type") == "checkbox"
 
         # does the nbgrader metadata exist?
-        assert_equal({}, self._get_metadata())
+        assert {} == self._get_metadata()
 
         # click the "solution?" checkbox
         self._click_solution()
@@ -218,11 +219,11 @@ class TestCreateAssignmentNbExtension(TestBase):
 
         # set the points
         self._set_points()
-        assert_equal(2, self._get_metadata()['points'])
+        assert 2 == self._get_metadata()['points']
 
         # set the id
         self._set_grade_id()
-        assert_equal("foo", self._get_metadata()['grade_id'])
+        assert "foo" == self._get_metadata()['grade_id']
 
         # unclick the "grade?" checkbox
         self._click_grade()
@@ -234,32 +235,32 @@ class TestCreateAssignmentNbExtension(TestBase):
         # click the "grade?" checkbox
         self._click_grade()
         elements = self.browser.find_elements_by_css_selector(".nbgrader-grade-cell")
-        assert_equal(len(elements), 1)
+        assert len(elements) == 1
 
         # unclick the "grade?" checkbox
         self._click_grade()
         elements = self.browser.find_elements_by_css_selector(".nbgrader-grade-cell")
-        assert_equal(len(elements), 0)
+        assert len(elements) == 0
 
         # click the "grade?" checkbox
         self._click_grade()
         elements = self.browser.find_elements_by_css_selector(".nbgrader-grade-cell")
-        assert_equal(len(elements), 1)
+        assert len(elements) == 1
 
         # deactivate the toolbar
         self._activate_toolbar("None")
         elements = self.browser.find_elements_by_css_selector(".nbgrader-grade-cell")
-        assert_equal(len(elements), 0)
+        assert len(elements) == 0
 
         # activate the toolbar
         self._activate_toolbar()
         elements = self.browser.find_elements_by_css_selector(".nbgrader-grade-cell")
-        assert_equal(len(elements), 1)
+        assert len(elements) == 1
 
         # deactivate the toolbar
         self._activate_toolbar("Edit Metadata")
         elements = self.browser.find_elements_by_css_selector(".nbgrader-grade-cell")
-        assert_equal(len(elements), 0)
+        assert len(elements) == 0
 
     def test_tabbing(self):
         self._activate_toolbar()
@@ -273,9 +274,9 @@ class TestCreateAssignmentNbExtension(TestBase):
 
         # get the active element
         element = self.browser.execute_script("return document.activeElement")
-        assert_equal("nbgrader-id-input", element.get_attribute("class"))
+        assert "nbgrader-id-input" == element.get_attribute("class")
 
         # press tab and check that the active element is correct
         element.send_keys(Keys.TAB)
         element = self.browser.execute_script("return document.activeElement")
-        assert_equal("nbgrader-points-input", element.get_attribute("class"))
+        assert "nbgrader-points-input" == element.get_attribute("class")
