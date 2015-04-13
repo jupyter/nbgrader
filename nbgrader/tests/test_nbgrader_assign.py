@@ -1,6 +1,5 @@
 from .base import TestBase
-from nbgrader.api import Gradebook, MissingEntry
-from nose.tools import assert_equal, assert_raises
+from nbgrader.api import Gradebook
 
 import os
 import shutil
@@ -83,7 +82,7 @@ class TestNbgraderAssign(TestBase):
             self._run_command('nbgrader assign ps1 --db="{}"'.format(dbpath))
 
             notebook = gb.find_notebook("test", "ps1")
-            assert_equal(len(notebook.grade_cells), 8)
+            assert len(notebook.grade_cells) == 8
 
     def test_force(self):
         """Ensure the force option works properly"""
