@@ -1,4 +1,3 @@
-from nose.tools import assert_equal
 from nbgrader.preprocessors import SaveCells, OverwriteCells
 from nbgrader.api import Gradebook
 from nbgrader.utils import compute_checksum
@@ -35,7 +34,7 @@ class TestOverwriteCells(TestBase):
         cell.metadata.nbgrader["points"] = 2
         nb, resources = self.preprocessor2.preprocess(nb, self.resources)
 
-        assert_equal(cell.metadata.nbgrader["points"], 1)
+        assert cell.metadata.nbgrader["points"] == 1
 
     def test_overwrite_grade_source(self):
         """Is the source overwritten for grade cells?"""
@@ -47,7 +46,7 @@ class TestOverwriteCells(TestBase):
         cell.source = "hello!"
         nb, resources = self.preprocessor2.preprocess(nb, self.resources)
 
-        assert_equal(cell.source, "hello")
+        assert cell.source == "hello"
 
     def test_dont_overwrite_grade_and_solution_source(self):
         """Is the source not overwritten for grade+solution cells?"""
@@ -59,6 +58,8 @@ class TestOverwriteCells(TestBase):
         cell.source = "hello!"
         nb, resources = self.preprocessor2.preprocess(nb, self.resources)
 
+        assert cell.source == "hello!"
+
     def test_dont_overwrite_solution_source(self):
         """Is the source not overwritten for solution cells?"""
         cell = self._create_solution_cell("hello", "code")
@@ -69,7 +70,7 @@ class TestOverwriteCells(TestBase):
         cell.source = "hello!"
         nb, resources = self.preprocessor2.preprocess(nb, self.resources)
 
-        assert_equal(cell.source, "hello!")
+        assert cell.source == "hello!"
 
     def test_overwrite_grade_cell_type(self):
         """Is the cell type overwritten for grade cells?"""
@@ -81,7 +82,7 @@ class TestOverwriteCells(TestBase):
         cell.cell_type = "markdown"
         nb, resources = self.preprocessor2.preprocess(nb, self.resources)
 
-        assert_equal(cell.cell_type, "code")
+        assert cell.cell_type == "code"
 
     def test_overwrite_grade_cell_type(self):
         """Is the cell type overwritten for solution cells?"""
@@ -93,7 +94,7 @@ class TestOverwriteCells(TestBase):
         cell.cell_type = "markdown"
         nb, resources = self.preprocessor2.preprocess(nb, self.resources)
 
-        assert_equal(cell.cell_type, "code")
+        assert cell.cell_type == "code"
 
     def test_overwrite_grade_checksum(self):
         """Is the checksum overwritten for grade cells?"""
@@ -105,7 +106,7 @@ class TestOverwriteCells(TestBase):
         cell.metadata.nbgrader["checksum"] = "1234"
         nb, resources = self.preprocessor2.preprocess(nb, self.resources)
 
-        assert_equal(cell.metadata.nbgrader["checksum"], compute_checksum(cell))
+        assert cell.metadata.nbgrader["checksum"] == compute_checksum(cell)
 
     def test_overwrite_solution_checksum(self):
         """Is the checksum overwritten for solution cells?"""
@@ -117,5 +118,5 @@ class TestOverwriteCells(TestBase):
         cell.metadata.nbgrader["checksum"] = "1234"
         nb, resources = self.preprocessor2.preprocess(nb, self.resources)
 
-        assert_equal(cell.metadata.nbgrader["checksum"], compute_checksum(cell))
+        assert cell.metadata.nbgrader["checksum"] == compute_checksum(cell)
 
