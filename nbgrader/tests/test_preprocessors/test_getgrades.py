@@ -1,3 +1,5 @@
+import shutil
+
 from nbgrader.preprocessors import SaveCells, SaveAutoGrades, GetGrades
 from nbgrader.api import Gradebook
 from IPython.nbformat.v4 import new_notebook, new_output
