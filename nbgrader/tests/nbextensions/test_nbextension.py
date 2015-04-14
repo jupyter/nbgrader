@@ -1,284 +1,163 @@
-import subprocess as sp
-import tempfile
-import os
-import shutil
-import json
-import pytest
-
-from copy import copy
-from IPython.utils.py3compat import cast_unicode_py2
-
-from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support.ui import Select
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.keys import Keys
 
-from .. import run_command
 
-root = os.path.dirname(__file__)
+def _activate_toolbar(browser, name="Create Assignment"):
+    # wait for the celltoolbar menu to appear
+    WebDriverWait(browser, 10).until(
+        EC.element_to_be_clickable((By.CSS_SELECTOR, '#ctb_select')))
 
-
-def _assert_is_deactivated(config_file, key='nbgrader/create_assignment'):
-    with open(config_file, 'r') as fh:
-        config = json.load(fh)
-    with pytest.raises(KeyError):
-        config['load_extensions'][key]
-
-
-def _assert_is_activated(config_file, key='nbgrader/create_assignment'):
-    with open(config_file, 'r') as fh:
-        config = json.load(fh)
-    assert config['load_extensions'][key]
+    # activate the Create Assignment toolbar
+    element = browser.find_element_by_css_selector("#ctb_select")
+    select = Select(element)
+    select.select_by_visible_text(name)
 
 
-class TestCreateAssignmentNbExtension(object):
+def _click_solution(browser):
+    browser.execute_script(
+        """
+        var cell = IPython.notebook.get_cell(0);
+        var elems = cell.element.find(".button_container");
+        $(elems[3]).find("input").click();
+        """
+    )
 
-    @classmethod
-    def setup_class(cls):
-        cls.tempdir = tempfile.mkdtemp()
-        cls.ipythondir = tempfile.mkdtemp()
-        cls.origdir = os.getcwd()
-        os.chdir(cls.tempdir)
 
-        # ensure IPython dir exists.
-        sp.call(['ipython', 'profile', 'create', '--ipython-dir', cls.ipythondir])
+def _click_grade(browser):
+    browser.execute_script(
+        """
+        var cell = IPython.notebook.get_cell(0);
+        var elems = cell.element.find(".button_container");
+        $(elems[2]).find("input").click();
+        """
+    )
 
-        # bug in IPython cannot use --profile-dir
-        # that does not set it for everything.
-        # still this does not allow to have things that work.
-        env = copy(os.environ)
-        env['IPYTHONDIR'] = cls.ipythondir
 
-        cls.nbserver = sp.Popen([
-            "ipython", "notebook",
-            "--no-browser",
-            "--port", "9000"], stdout=sp.PIPE, stderr=sp.STDOUT, env=env)
+def _set_points(browser):
+    browser.execute_script(
+        """
+        var cell = IPython.notebook.get_cell(0);
+        var elem = cell.element.find(".nbgrader-points-input");
+        elem.val("2");
+        elem.trigger("change");
+        """
+    )
 
-    @classmethod
-    def teardown_class(cls):
-        cls.nbserver.kill()
 
-        os.chdir(cls.origdir)
-        shutil.rmtree(cls.tempdir)
-        shutil.rmtree(cls.ipythondir)
+def _set_grade_id(browser):
+    browser.execute_script(
+        """
+        var cell = IPython.notebook.get_cell(0);
+        var elem = cell.element.find(".nbgrader-id-input");
+        elem.val("foo");
+        elem.trigger("change");
+        """
+    )
 
-    def setup(self):
-        shutil.copy(os.path.join(root, "files", "blank.ipynb"), "blank.ipynb")
-        self.browser = webdriver.PhantomJS()
-        self.browser.get("http://localhost:9000/notebooks/blank.ipynb")
 
-    def teardown(self):
-        self.browser.quit()
+def _get_metadata(browser):
+    return browser.execute_script(
+        """
+        var cell = IPython.notebook.get_cell(0);
+        return cell.metadata.nbgrader;
+        """
+    )
 
-    def _activate_toolbar(self, name="Create Assignment"):
-        # wait for the celltoolbar menu to appear
-        WebDriverWait(self.browser, 10).until(
-            EC.element_to_be_clickable((By.CSS_SELECTOR, '#ctb_select')))
 
-        # activate the Create Assignment toolbar
-        element = self.browser.find_element_by_css_selector("#ctb_select")
-        select = Select(element)
-        select.select_by_visible_text(name)
+def test_create_assignment(browser):
+    _activate_toolbar(browser)
 
-    def _click_solution(self):
-        self.browser.execute_script(
-            """
-            var cell = IPython.notebook.get_cell(0);
-            var elems = cell.element.find(".button_container");
-            $(elems[3]).find("input").click();
-            """
-        )
+    # make sure the toolbar appeared
+    element = WebDriverWait(browser, 10).until(
+        EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".celltoolbar input")))
+    assert element[0].get_attribute("type") == "checkbox"
 
-    def _click_grade(self):
-        self.browser.execute_script(
-            """
-            var cell = IPython.notebook.get_cell(0);
-            var elems = cell.element.find(".button_container");
-            $(elems[2]).find("input").click();
-            """
-        )
+    # does the nbgrader metadata exist?
+    assert {} == _get_metadata(browser)
 
-    def _set_points(self):
-        self.browser.execute_script(
-            """
-            var cell = IPython.notebook.get_cell(0);
-            var elem = cell.element.find(".nbgrader-points-input");
-            elem.val("2");
-            elem.trigger("change");
-            """
-        )
+    # click the "solution?" checkbox
+    _click_solution(browser)
+    assert _get_metadata(browser)['solution']
 
-    def _set_grade_id(self):
-        self.browser.execute_script(
-            """
-            var cell = IPython.notebook.get_cell(0);
-            var elem = cell.element.find(".nbgrader-id-input");
-            elem.val("foo");
-            elem.trigger("change");
-            """
-        )
+    # unclick the "solution?" checkbox
+    _click_solution(browser)
+    assert not _get_metadata(browser)['solution']
 
-    def _get_metadata(self):
-        return self.browser.execute_script(
-            """
-            var cell = IPython.notebook.get_cell(0);
-            return cell.metadata.nbgrader;
-            """
-        )
+    # click the "grade?" checkbox
+    _click_grade(browser)
+    assert _get_metadata(browser)['grade']
 
-    def test_00_install_extension(self):
-        run_command(
-            "python -m nbgrader --install --activate --user "
-            "--ipython-dir={}".format(self.ipythondir))
+    # wait for the points and id fields to appear
+    WebDriverWait(browser, 10).until(
+        EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".nbgrader-points")))
+    WebDriverWait(browser, 10).until(
+        EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".nbgrader-id")))
 
-        # check the extension file were copied
-        nbextension_dir = os.path.join(self.ipythondir, "nbextensions", "nbgrader")
-        assert os.path.isfile(os.path.join(nbextension_dir, "create_assignment.js"))
-        assert os.path.isfile(os.path.join(nbextension_dir, "nbgrader.css"))
+    # set the points
+    _set_points(browser)
+    assert 2 == _get_metadata(browser)['points']
 
-        # check that it is activated
-        config_file = os.path.join(self.ipythondir, 'profile_default', 'nbconfig', 'notebook.json')
-        _assert_is_activated(config_file)
+    # set the id
+    _set_grade_id(browser)
+    assert "foo" == _get_metadata(browser)['grade_id']
 
-    def test_01_deactivate_extension(self):
-        # check that it is activated
-        config_file = os.path.join(self.ipythondir, 'profile_default', 'nbconfig', 'notebook.json')
+    # unclick the "grade?" checkbox
+    _click_grade(browser)
+    assert not _get_metadata(browser)['grade']
 
-        _assert_is_activated(config_file)
 
-        with open(config_file,'r') as fh:
-            config = json.load(fh)
-        # we already assert config exist, it's fine to
-        # assume 'load_extensions' is there.
-        okey = 'myother_ext'
-        config['load_extensions']['myother_ext'] = True
+def test_grade_cell_css(browser):
+    _activate_toolbar(browser)
 
-        with open(config_file, 'w+') as f:
-            f.write(cast_unicode_py2(json.dumps(config, indent=2), 'utf-8'))
+    # click the "grade?" checkbox
+    _click_grade(browser)
+    elements = browser.find_elements_by_css_selector(".nbgrader-grade-cell")
+    assert len(elements) == 1
 
-        _assert_is_activated(config_file, key=okey)
+    # unclick the "grade?" checkbox
+    _click_grade(browser)
+    elements = browser.find_elements_by_css_selector(".nbgrader-grade-cell")
+    assert len(elements) == 0
 
-        run_command(
-            "python -m nbgrader --deactivate "
-            "--ipython-dir={}".format(self.ipythondir))
+    # click the "grade?" checkbox
+    _click_grade(browser)
+    elements = browser.find_elements_by_css_selector(".nbgrader-grade-cell")
+    assert len(elements) == 1
 
-        # check that it is deactivated
-        _assert_is_deactivated(config_file)
-        _assert_is_activated(config_file, key=okey)
+    # deactivate the toolbar
+    _activate_toolbar(browser, "None")
+    elements = browser.find_elements_by_css_selector(".nbgrader-grade-cell")
+    assert len(elements) == 0
 
-        with open(config_file,'r') as fh:
-            config = json.load(fh)
+    # activate the toolbar
+    _activate_toolbar(browser)
+    elements = browser.find_elements_by_css_selector(".nbgrader-grade-cell")
+    assert len(elements) == 1
 
-        del config['load_extensions']['myother_ext']
+    # deactivate the toolbar
+    _activate_toolbar(browser, "Edit Metadata")
+    elements = browser.find_elements_by_css_selector(".nbgrader-grade-cell")
+    assert len(elements) == 0
 
-        with open(config_file, 'w+') as f:
-            f.write(cast_unicode_py2(json.dumps(config, indent=2), 'utf-8'))
 
-        _assert_is_deactivated(config_file, key=okey)
+def test_tabbing(browser):
+    _activate_toolbar(browser)
 
-    def test_02_activate_extension(self):
-        # check that it is deactivated
-        config_file = os.path.join(self.ipythondir, 'profile_default', 'nbconfig', 'notebook.json')
-        _assert_is_deactivated(config_file)
+    # click the "grade?" checkbox
+    _click_grade(browser)
 
-        run_command(
-            "python -m nbgrader --activate "
-            "--ipython-dir={}".format(self.ipythondir))
+    # click the id field
+    element = browser.find_element_by_css_selector(".nbgrader-id-input")
+    element.click()
 
-        # check that it is activated
-        _assert_is_activated(config_file)
+    # get the active element
+    element = browser.execute_script("return document.activeElement")
+    assert "nbgrader-id-input" == element.get_attribute("class")
 
-    def test_create_assignment(self):
-        self._activate_toolbar()
-
-        # make sure the toolbar appeared
-        element = WebDriverWait(self.browser, 10).until(
-            EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".celltoolbar input")))
-        assert element[0].get_attribute("type") == "checkbox"
-
-        # does the nbgrader metadata exist?
-        assert {} == self._get_metadata()
-
-        # click the "solution?" checkbox
-        self._click_solution()
-        assert self._get_metadata()['solution']
-
-        # unclick the "solution?" checkbox
-        self._click_solution()
-        assert not self._get_metadata()['solution']
-
-        # click the "grade?" checkbox
-        self._click_grade()
-        assert self._get_metadata()['grade']
-
-        # wait for the points and id fields to appear
-        WebDriverWait(self.browser, 10).until(
-            EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".nbgrader-points")))
-        WebDriverWait(self.browser, 10).until(
-            EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".nbgrader-id")))
-
-        # set the points
-        self._set_points()
-        assert 2 == self._get_metadata()['points']
-
-        # set the id
-        self._set_grade_id()
-        assert "foo" == self._get_metadata()['grade_id']
-
-        # unclick the "grade?" checkbox
-        self._click_grade()
-        assert not self._get_metadata()['grade']
-
-    def test_grade_cell_css(self):
-        self._activate_toolbar()
-
-        # click the "grade?" checkbox
-        self._click_grade()
-        elements = self.browser.find_elements_by_css_selector(".nbgrader-grade-cell")
-        assert len(elements) == 1
-
-        # unclick the "grade?" checkbox
-        self._click_grade()
-        elements = self.browser.find_elements_by_css_selector(".nbgrader-grade-cell")
-        assert len(elements) == 0
-
-        # click the "grade?" checkbox
-        self._click_grade()
-        elements = self.browser.find_elements_by_css_selector(".nbgrader-grade-cell")
-        assert len(elements) == 1
-
-        # deactivate the toolbar
-        self._activate_toolbar("None")
-        elements = self.browser.find_elements_by_css_selector(".nbgrader-grade-cell")
-        assert len(elements) == 0
-
-        # activate the toolbar
-        self._activate_toolbar()
-        elements = self.browser.find_elements_by_css_selector(".nbgrader-grade-cell")
-        assert len(elements) == 1
-
-        # deactivate the toolbar
-        self._activate_toolbar("Edit Metadata")
-        elements = self.browser.find_elements_by_css_selector(".nbgrader-grade-cell")
-        assert len(elements) == 0
-
-    def test_tabbing(self):
-        self._activate_toolbar()
-
-        # click the "grade?" checkbox
-        self._click_grade()
-
-        # click the id field
-        element = self.browser.find_element_by_css_selector(".nbgrader-id-input")
-        element.click()
-
-        # get the active element
-        element = self.browser.execute_script("return document.activeElement")
-        assert "nbgrader-id-input" == element.get_attribute("class")
-
-        # press tab and check that the active element is correct
-        element.send_keys(Keys.TAB)
-        element = self.browser.execute_script("return document.activeElement")
-        assert "nbgrader-points-input" == element.get_attribute("class")
+    # press tab and check that the active element is correct
+    element.send_keys(Keys.TAB)
+    element = browser.execute_script("return document.activeElement")
+    assert "nbgrader-points-input" == element.get_attribute("class")
