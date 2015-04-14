@@ -73,9 +73,9 @@ def create_grade_and_solution_cell(source, cell_type, grade_id, points):
     return cell
 
 
-def start_subprocess(command, shell=True, stdout=sp.PIPE, stderr=sp.STDOUT, **kwargs):
+def start_subprocess(command, **kwargs):
     kwargs['env'] = kwargs.get('env', os.environ.copy())
-    proc = sp.Popen(command, shell=shell, stdout=stdout, stderr=stderr, **kwargs)
+    proc = sp.Popen(command, **kwargs)
     return proc
 
 
@@ -90,9 +90,10 @@ def copy_coverage_files():
 
 
 def run_command(command, retcode=0):
-    proc = start_subprocess(command)
+    proc = start_subprocess(command, shell=True, stdout=sp.PIPE, stderr=sp.STDOUT)
     true_retcode = proc.wait()
     output = proc.communicate()[0].decode()
+    output = output.replace("Coverage.py warning: No data was collected.\n", "")
     print(output)
     if true_retcode != retcode:
         raise AssertionError(

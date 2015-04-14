@@ -20,7 +20,6 @@ def _assert_is_activated(config_file, key='nbgrader/create_assignment'):
     assert config['load_extensions'][key]
 
 
-@pytest.mark.first
 def test_install_extension(ipythondir):
     run_command(
         "python -m nbgrader --install --activate "
@@ -39,7 +38,6 @@ def test_install_extension(ipythondir):
     _assert_is_activated(config_file)
 
 
-@pytest.mark.second
 def test_deactivate_extension(ipythondir):
     # check that it is activated
     config_file = os.path.join(ipythondir, 'profile_default', 'nbconfig', 'notebook.json')
@@ -76,7 +74,6 @@ def test_deactivate_extension(ipythondir):
     _assert_is_deactivated(config_file, key=okey)
 
 
-@pytest.mark.third
 def test_activate_extension(ipythondir):
     # check that it is deactivated
     config_file = os.path.join(ipythondir, 'profile_default', 'nbconfig', 'notebook.json')

@@ -42,13 +42,7 @@ class DefaultManager(object):
         pass
 
     def _start_formgrader(self):
-        self.formgrader = start_subprocess(
-            ["nbgrader", "formgrade"],
-            shell=False,
-            stdout=None,
-            stderr=None,
-            env=self.env)
-
+        self.formgrader = start_subprocess(["nbgrader", "formgrade"], env=self.env)
         time.sleep(self.startup_wait)
 
     def start(self):
@@ -114,9 +108,6 @@ class HubAuthManager(DefaultManager):
         self.env['CONFIGPROXY_AUTH_TOKEN'] = 'foo'
         self.jupyterhub = start_subprocess(
             ["jupyterhub"],
-            shell=False,
-            stdout=None,
-            stderr=None,
             cwd=self.tempdir,
             env=self.env)
 
