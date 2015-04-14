@@ -1,45 +1,52 @@
 import pytest
 from nbgrader.preprocessors import CheckCellMetadata
 
-from .base import TestBase
+from .base import BaseTestPreprocessor
+
+@pytest.fixture
+def preprocessor():
+    return CheckCellMetadata()
 
 
-class TestCheckCellMetadata(TestBase):
+class TestCheckCellMetadata(BaseTestPreprocessor):
 
-    def setup(self):
-        super(TestCheckCellMetadata, self).setup()
-        self.preprocessor = CheckCellMetadata()
-
-    def test_duplicate_grade_ids(self):
+    def test_duplicate_grade_ids(self, preprocessor):
         """Check that an error is raised when there are duplicate grade ids"""
+        nb = self._read_nb("files/duplicate-grade-ids.ipynb")
         with pytest.raises(RuntimeError):
-            self.preprocessor.preprocess(self.nbs["duplicate-grade-ids.ipynb"], {})
+            preprocessor.preprocess(nb, {})
 
-    def test_blank_grade_id(self):
+    def test_blank_grade_id(self, preprocessor):
         """Check that an error is raised when the grade id is blank"""
+        nb = self._read_nb("files/blank-grade-id.ipynb")
         with pytest.raises(RuntimeError):
-            self.preprocessor.preprocess(self.nbs["blank-grade-id.ipynb"], {})
+            preprocessor.preprocess(nb, {})
 
-    def test_blank_points(self):
+    def test_blank_points(self, preprocessor):
         """Check that an error is raised if the points are blank"""
+        nb = self._read_nb("files/blank-points.ipynb")
         with pytest.raises(RuntimeError):
-            self.preprocessor.preprocess(self.nbs["blank-points.ipynb"], {})
+            preprocessor.preprocess(nb, {})
 
-    def test_no_duplicate_grade_ids(self):
+    def test_no_duplicate_grade_ids(self, preprocessor):
         """Check that no errors are raised when grade ids are unique and not blank"""
-        self.preprocessor.preprocess(self.nbs["test.ipynb"], {})
+        nb = self._read_nb("files/test.ipynb")
+        preprocessor.preprocess(nb, {})
 
-    def test_code_cell_solution_grade(self):
+    def test_code_cell_solution_grade(self, preprocessor):
         """Check that an error is raised when a code cell is marked as both solution and grade"""
+        nb = self._read_nb("files/bad-code-cell.ipynb")
         with pytest.raises(RuntimeError):
-            self.preprocessor.preprocess(self.nbs["bad-code-cell.ipynb"], {})
+            preprocessor.preprocess(nb, {})
 
-    def test_markdown_cell_grade(self):
+    def test_markdown_cell_grade(self, preprocessor):
         """Check that an error is raised when a markdown cell is only marked as grade"""
+        nb = self._read_nb("files/bad-markdown-cell-1.ipynb")
         with pytest.raises(RuntimeError):
-            self.preprocessor.preprocess(self.nbs["bad-markdown-cell-1.ipynb"], {})
+            preprocessor.preprocess(nb, {})
 
-    def test_markdown_cell_solution(self):
+    def test_markdown_cell_solution(self, preprocessor):
         """Check that an error is raised when a markdown cell is only marked as solution"""
+        nb = self._read_nb("files/bad-markdown-cell-2.ipynb")
         with pytest.raises(RuntimeError):
-            self.preprocessor.preprocess(self.nbs["bad-markdown-cell-2.ipynb"], {})
+            preprocessor.preprocess(nb, {})

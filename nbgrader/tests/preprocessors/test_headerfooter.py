@@ -1,45 +1,49 @@
+import pytest
+import os
+
 from nbgrader.preprocessors import IncludeHeaderFooter
 
-from .base import TestBase
+from .base import BaseTestPreprocessor
 
 
-class TestIncludeHeaderFooter(TestBase):
+@pytest.fixture
+def preprocessor():
+    return IncludeHeaderFooter()
 
-    def setup(self):
-        super(TestIncludeHeaderFooter, self).setup()
-        self.preprocessor = IncludeHeaderFooter()
 
-    def test_concatenate_nothing(self):
+class TestIncludeHeaderFooter(BaseTestPreprocessor):
+
+    def test_concatenate_nothing(self, preprocessor):
         """Are the cells the same if there is no header/footer?"""
-        orig_nb = self.nbs["test.ipynb"]
-        nb = self.preprocessor.preprocess(orig_nb, {})[0]
+        orig_nb = self._read_nb("files/test.ipynb")
+        nb = preprocessor.preprocess(orig_nb, {})[0]
         assert nb == orig_nb
 
-    def test_concatenate_header(self):
+    def test_concatenate_header(self, preprocessor):
         """Is the header prepended correctly?"""
-        self.preprocessor.header = self.files["header.ipynb"]
-        cells = self.nbs["header.ipynb"].cells[:]
-        orig_nb = self.nbs["test.ipynb"]
+        preprocessor.header = os.path.join(os.path.dirname(__file__), "files/header.ipynb")
+        cells = self._read_nb("files/header.ipynb").cells[:]
+        orig_nb = self._read_nb("files/test.ipynb")
         orig_cells = orig_nb.cells[:]
-        nb = self.preprocessor.preprocess(orig_nb, {})[0]
+        nb = preprocessor.preprocess(orig_nb, {})[0]
         assert nb.cells == (cells + orig_cells)
 
-    def test_concatenate_footer(self):
+    def test_concatenate_footer(self, preprocessor):
         """Is the footer appended correctly?"""
-        self.preprocessor.footer = self.files["header.ipynb"]
-        cells = self.nbs["header.ipynb"].cells[:]
-        orig_nb = self.nbs["test.ipynb"]
+        preprocessor.footer = os.path.join(os.path.dirname(__file__), "files/header.ipynb")
+        cells = self._read_nb("files/header.ipynb").cells[:]
+        orig_nb = self._read_nb("files/test.ipynb")
         orig_cells = orig_nb.cells[:]
-        nb = self.preprocessor.preprocess(orig_nb, {})[0]
+        nb = preprocessor.preprocess(orig_nb, {})[0]
         assert nb.cells == (orig_cells + cells)
 
-    def test_concatenate_header_and_footer(self):
+    def test_concatenate_header_and_footer(self, preprocessor):
         """Are the header and footer appended correctly?"""
-        self.preprocessor.header = self.files["header.ipynb"]
-        self.preprocessor.footer = self.files["header.ipynb"]
-        header_cells = self.nbs["header.ipynb"].cells[:]
-        footer_cells = self.nbs["header.ipynb"].cells[:]
-        orig_nb = self.nbs["test.ipynb"]
+        preprocessor.header = os.path.join(os.path.dirname(__file__), "files/header.ipynb")
+        preprocessor.footer = os.path.join(os.path.dirname(__file__), "files/header.ipynb")
+        header_cells = self._read_nb("files/header.ipynb").cells[:]
+        footer_cells = self._read_nb("files/header.ipynb").cells[:]
+        orig_nb = self._read_nb("files/test.ipynb")
         orig_cells = orig_nb.cells[:]
-        nb = self.preprocessor.preprocess(orig_nb, {})[0]
+        nb = preprocessor.preprocess(orig_nb, {})[0]
         assert nb.cells == (header_cells + orig_cells + footer_cells)
