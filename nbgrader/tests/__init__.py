@@ -88,10 +88,7 @@ def temp_cwd(copy_filenames=None):
 
 
 def start_subprocess(command, shell=True, stdout=sp.PIPE, stderr=sp.STDOUT, **kwargs):
-    root = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
-    env = kwargs.get('env', os.environ.copy())
-    env['COVERAGE_PROCESS_START'] = os.path.join(root, ".coveragerc")
-    kwargs['env'] = env
+    kwargs['env'] = kwargs.get('env', os.environ.copy())
     proc = sp.Popen(command, shell=shell, stdout=stdout, stderr=stderr, **kwargs)
     return proc
 
@@ -100,7 +97,7 @@ def copy_coverage_files():
     root = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
     if os.getcwd() != root:
         coverage_files = glob.glob(".coverage.*")
-        if len(coverage_files) == 0:
+        if len(coverage_files) == 0 and 'COVERAGE_PROCESS_START' in os.environ:
             raise RuntimeError("No coverage files produced")
         for filename in coverage_files:
             shutil.copyfile(filename, os.path.join(root, filename))
