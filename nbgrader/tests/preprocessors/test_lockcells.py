@@ -1,8 +1,8 @@
 import pytest
-from nbgrader.preprocessors import LockCells
 
-from .base import BaseTestPreprocessor
-from .. import create_code_cell
+from nbgrader.preprocessors import LockCells
+from nbgrader.tests.preprocessors.base import BaseTestPreprocessor
+from nbgrader.tests import create_code_cell
 
 
 @pytest.fixture

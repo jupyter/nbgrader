@@ -1,9 +1,8 @@
 import os
 
 from nbgrader.api import Gradebook
-
-from .. import run_command
-from .base import BaseTestApp
+from nbgrader.tests import run_command
+from nbgrader.tests.apps.base import BaseTestApp
 
 
 class TestNbGraderAutograde(BaseTestApp):

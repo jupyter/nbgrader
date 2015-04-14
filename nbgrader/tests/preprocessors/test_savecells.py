@@ -1,11 +1,12 @@
 import pytest
 
-from nbgrader.preprocessors import SaveCells
-from nbgrader.api import Gradebook
 from IPython.nbformat.v4 import new_notebook
 
-from .base import BaseTestPreprocessor
-from .. import create_grade_cell, create_solution_cell, create_grade_and_solution_cell
+from nbgrader.preprocessors import SaveCells
+from nbgrader.api import Gradebook
+from nbgrader.tests.preprocessors.base import BaseTestPreprocessor
+from nbgrader.tests import (
+    create_grade_cell, create_solution_cell, create_grade_and_solution_cell)
 
 
 @pytest.fixture

@@ -1,7 +1,7 @@
 import os
 
-from .. import run_command
-from .base import BaseTestApp
+from nbgrader.tests import run_command
+from nbgrader.tests.apps.base import BaseTestApp
 
 
 class TestNbGraderFeedback(BaseTestApp):

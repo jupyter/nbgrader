@@ -7,8 +7,8 @@ import sys
 from nbgrader.api import Gradebook
 from selenium import webdriver
 
-from .. import run_command
-from . import manager
+from nbgrader.tests import run_command
+from nbgrader.tests.formgrader import manager
 
 
 @pytest.fixture(scope="module")

@@ -6,14 +6,13 @@ try:
 except ImportError:
     from urllib.parse import urljoin, unquote # Python 3
 
-from nbgrader.api import MissingEntry
-
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
-from .. import run_command
+from nbgrader.api import MissingEntry
+from nbgrader.tests import run_command
 
 
 def test_help():

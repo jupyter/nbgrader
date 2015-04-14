@@ -3,7 +3,6 @@ import glob
 import shutil
 import subprocess as sp
 
-from IPython.utils.tempdir import TemporaryWorkingDirectory
 from IPython.nbformat.v4 import new_code_cell, new_markdown_cell
 
 from nbgrader.utils import compute_checksum
@@ -72,19 +71,6 @@ def create_grade_and_solution_cell(source, cell_type, grade_id, points):
     cell.metadata.nbgrader["checksum"] = compute_checksum(cell)
 
     return cell
-
-
-def temp_cwd(copy_filenames=None):
-    temp_dir = TemporaryWorkingDirectory()
-
-    if copy_filenames is not None:
-        files_path = os.path.dirname(__file__)
-        for pattern in copy_filenames:
-            for match in glob.glob(os.path.join(files_path, pattern)):
-                dest = os.path.join(temp_dir.name, os.path.basename(match))
-                shutil.copyfile(match, dest)
-
-    return temp_dir
 
 
 def start_subprocess(command, shell=True, stdout=sp.PIPE, stderr=sp.STDOUT, **kwargs):

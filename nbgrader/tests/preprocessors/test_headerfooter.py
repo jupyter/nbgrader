@@ -2,8 +2,7 @@ import pytest
 import os
 
 from nbgrader.preprocessors import IncludeHeaderFooter
-
-from .base import BaseTestPreprocessor
+from nbgrader.tests.preprocessors.base import BaseTestPreprocessor
 
 
 @pytest.fixture

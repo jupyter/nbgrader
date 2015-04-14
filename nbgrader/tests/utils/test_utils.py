@@ -4,9 +4,9 @@ import tempfile
 import shutil
 
 from IPython.nbformat.v4 import new_output
-from nbgrader import utils
 
-from .. import (
+from nbgrader import utils
+from nbgrader.tests import (
     create_code_cell,
     create_grade_cell, create_solution_cell,
     create_grade_and_solution_cell)
