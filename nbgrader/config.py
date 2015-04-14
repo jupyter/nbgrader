@@ -80,7 +80,7 @@ class BasicConfig(LinkedConfig):
     )
 
     log_format = Unicode(
-        "[%(name)s | %(levelname)s] %(message)s",
+        "%(color)s[%(name)s | %(levelname)s]%(end_color)s %(message)s",
         config=True,
         help="The logging format template"
     )
