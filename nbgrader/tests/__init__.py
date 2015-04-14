@@ -87,11 +87,12 @@ def temp_cwd(copy_filenames=None):
     return temp_dir
 
 
-def start_subprocess(command, shell=True, stdout=sp.PIPE, stderr=sp.STDOUT, cwd=None):
+def start_subprocess(command, shell=True, stdout=sp.PIPE, stderr=sp.STDOUT, **kwargs):
     root = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
-    env = os.environ.copy()
+    env = kwargs.get('env', os.environ.copy())
     env['COVERAGE_PROCESS_START'] = os.path.join(root, ".coveragerc")
-    proc = sp.Popen(command, shell=shell, stdout=stdout, stderr=stderr, env=env, cwd=cwd)
+    kwargs['env'] = env
+    proc = sp.Popen(command, shell=shell, stdout=stdout, stderr=stderr, **kwargs)
     return proc
 
 
