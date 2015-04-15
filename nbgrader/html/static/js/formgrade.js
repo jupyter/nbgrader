@@ -185,7 +185,9 @@ $(window).load(function () {
             e.preventDefault();
             selectNext(last_selected, e.shiftKey);
         } else if (keyCode === 13) { // enter
-            last_selected.select();
+            if (last_selected[0] !== document.activeElement) {
+                last_selected.select();
+            }
         } else if (keyCode == 39 && e.shiftKey && e.ctrlKey) { // shift + control + right arrow
             save_and_navigate(nextIncorrectAssignment);
         } else if (keyCode == 37 && e.shiftKey && e.ctrlKey) { // shift + control + left arrow
