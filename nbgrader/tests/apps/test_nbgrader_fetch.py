@@ -6,6 +6,13 @@ from nbgrader.tests.apps.base import BaseTestApp
 
 class TestNbGraderFetch(BaseTestApp):
 
+    def _release(self, assignment, exchange):
+        self._copy_file("files/test.ipynb", "release/ps1/p1.ipynb")
+        run_command(
+            'nbgrader release {} '
+            '--NbGraderConfig.course_id=abc101 '
+            '--TransferApp.exchange_directory={} '.format(assignment, exchange))
+
     def _fetch(self, assignment, exchange, flags="", retcode=0):
         run_command(
             'nbgrader fetch abc101 {} '
@@ -18,7 +25,7 @@ class TestNbGraderFetch(BaseTestApp):
         run_command("nbgrader fetch --help-all")
 
     def test_fetch(self, exchange):
-        self._copy_file("files/test.ipynb", os.path.join(exchange, "abc101/outbound/ps1/p1.ipynb"))
+        self._release("ps1", exchange)
         self._fetch("ps1", exchange)
         assert os.path.isfile("ps1/p1.ipynb")
 
