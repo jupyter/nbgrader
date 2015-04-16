@@ -8,7 +8,7 @@ from nbgrader.tests.apps.base import BaseTestApp
 
 class TestNbGraderSubmit(BaseTestApp):
 
-    def _release(self, assignment, exchange):
+    def _release_and_fetch(self, assignment, exchange):
         self._copy_file("files/test.ipynb", "release/ps1/p1.ipynb")
         run_command(
             'nbgrader release {} '
@@ -30,7 +30,7 @@ class TestNbGraderSubmit(BaseTestApp):
         run_command("nbgrader submit --help-all")
 
     def test_submit(self, exchange):
-        self._release("ps1", exchange)
+        self._release_and_fetch("ps1", exchange)
         self._submit("ps1", exchange)
 
         now = datetime.datetime.now()

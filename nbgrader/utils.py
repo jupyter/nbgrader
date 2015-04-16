@@ -69,7 +69,7 @@ def compute_checksum(cell):
 
 def parse_utc(ts):
     """Parses a timestamp into datetime format, converting it to UTC if necessary."""
-    if isinstance(ts, str):
+    if isinstance(ts, (str, unicode)):
         ts = dateutil.parser.parse(ts)
     if ts.tzinfo is not None:
         ts = (ts - ts.utcoffset()).replace(tzinfo=None)
