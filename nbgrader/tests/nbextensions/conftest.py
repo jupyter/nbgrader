@@ -74,7 +74,6 @@ def browser(request, tempdir, nbserver):
     capabilities = DesiredCapabilities.PHANTOMJS
     capabilities['loggingPrefs'] = {'browser': 'ALL'}
     browser = webdriver.PhantomJS(desired_capabilities=capabilities)
-    browser.get("http://localhost:9000/notebooks/blank.ipynb")
 
     def fin():
         console_messages = browser.get_log('browser')

@@ -1,5 +1,3 @@
-import time
-
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support.ui import Select
@@ -8,7 +6,10 @@ from selenium.webdriver.common.keys import Keys
 from selenium.common.exceptions import TimeoutException
 
 
-def _activate_toolbar(browser, name="Create Assignment", retries=5):
+def _load_notebook(browser, retries=5):
+    # go to the correct page
+    browser.get("http://localhost:9000/notebooks/blank.ipynb")
+
     def page_loaded(browser):
         return browser.execute_script(
             'return typeof IPython !== "undefined" && IPython.page !== undefined;')
@@ -20,9 +21,7 @@ def _activate_toolbar(browser, name="Create Assignment", retries=5):
         if retries > 0:
             print("Retrying page load...")
             # page timeout, but sometimes this happens, so try refreshing?
-            browser.refresh()
-            time.sleep(1)
-            _activate_toolbar(browser, name=name, retries=retries - 1)
+            _load_notebook(browser, retries=retries - 1)
         else:
             print("Failed to load the page too many times")
             raise
@@ -31,6 +30,7 @@ def _activate_toolbar(browser, name="Create Assignment", retries=5):
     WebDriverWait(browser, 10).until(
         EC.element_to_be_clickable((By.CSS_SELECTOR, '#ctb_select')))
 
+def _activate_toolbar(browser, name="Create Assignment"):
     # activate the Create Assignment toolbar
     element = browser.find_element_by_css_selector("#ctb_select")
     select = Select(element)
@@ -89,6 +89,7 @@ def _get_metadata(browser):
 
 
 def test_create_assignment(browser):
+    _load_notebook(browser)
     _activate_toolbar(browser)
 
     # make sure the toolbar appeared
@@ -131,6 +132,7 @@ def test_create_assignment(browser):
 
 
 def test_grade_cell_css(browser):
+    _load_notebook(browser)
     _activate_toolbar(browser)
 
     # click the "grade?" checkbox
@@ -165,6 +167,7 @@ def test_grade_cell_css(browser):
 
 
 def test_tabbing(browser):
+    _load_notebook(browser)
     _activate_toolbar(browser)
 
     # click the "grade?" checkbox
