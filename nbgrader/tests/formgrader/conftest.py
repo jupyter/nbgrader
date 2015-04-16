@@ -6,12 +6,13 @@ import sys
 
 from nbgrader.api import Gradebook
 from selenium import webdriver
+from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 
 from nbgrader.tests import run_command
 from nbgrader.tests.formgrader import manager
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="session")
 def tempdir(request):
     tempdir = tempfile.mkdtemp()
     origdir = os.getcwd()
@@ -25,7 +26,7 @@ def tempdir(request):
     return tempdir
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="session")
 def gradebook(request, tempdir):
     # create a "class files" directory
     origdir = os.getcwd()
@@ -73,13 +74,21 @@ def formgrader(request, gradebook, tempdir):
     man = getattr(manager, request.param)(tempdir)
     man.start()
 
-    browser = webdriver.PhantomJS()
+    capabilities = DesiredCapabilities.PHANTOMJS
+    capabilities['loggingPrefs'] = {'browser': 'ALL'}
+    browser = webdriver.PhantomJS(desired_capabilities=capabilities)
 
     request.cls.manager = man
     request.cls.gradebook = gradebook
     request.cls.browser = browser
 
     def fin():
+        console_messages = browser.get_log('browser')
+        if len(console_messages) > 0:
+            print("\n<-- CAPTURED JAVASCRIPT CONSOLE MESSAGES -->")
+            for message in console_messages:
+                print(message)
+            print("<------------------------------------------>")
         browser.save_screenshot(os.path.join(os.path.dirname(__file__), 'selenium.screenshot.png'))
         browser.quit()
         man.stop()

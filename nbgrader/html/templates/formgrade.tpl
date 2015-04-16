@@ -115,7 +115,7 @@ var base_url = "{{resources.base_url}}";
 {% endblock footer %}
 
 {% macro score(cell) -%}
-  <span id="{{ cell.metadata.nbgrader.grade_id }}-saved" class="glyphicon glyphicon-floppy-saved save-icon"></span>
+  <span id="{{ cell.metadata.nbgrader.grade_id }}-saved" class="glyphicon glyphicon-floppy-saved save-icon score-saved"></span>
   <div class="pull-right">
     <span class="btn-group btn-group-sm scoring-buttons" role="group">
       <button type="button" class="btn btn-success" id="{{ cell.metadata.nbgrader.grade_id }}-full-credit">Full credit</button>
