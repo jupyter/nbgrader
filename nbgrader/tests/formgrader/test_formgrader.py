@@ -44,8 +44,10 @@ class TestFormgrader(BaseTestFormgrade):
         self._click_link("Submission #1")
         self._wait_for_notebook_page("submissions/{}".format(submissions[0].id))
 
-        # small delay to give the grades a chance to load and stuff
-        time.sleep(0.1)
+        # wait for grades and comments to be loaded
+        def grades_and_comments_loaded(browser):
+            return browser.execute_script("return grades_loaded && comments_loaded;")
+        WebDriverWait(self.browser, 10).until(grades_and_comments_loaded)
 
     def test_formgrade_images(self):
         submissions = self.gradebook.find_notebook("Problem 1", "Problem Set 1").submissions
