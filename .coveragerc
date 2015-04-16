@@ -4,4 +4,6 @@ branch = True
 source = nbgrader
 
 [report]
-omit = /home/travis/virtualenv/python3.4.2/lib/python3.4/site-packages/*
+omit =
+    /home/travis/virtualenv/python3.4.2/lib/python3.4/site-packages/*
+    nbgrader/tests/formgrader/fakeuser.py

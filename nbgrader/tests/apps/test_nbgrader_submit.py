@@ -1,42 +1,64 @@
 import os
-import tarfile
+import datetime
+import time
 
+from nbgrader.utils import parse_utc
 from nbgrader.tests import run_command
 from nbgrader.tests.apps.base import BaseTestApp
 
 
 class TestNbGraderSubmit(BaseTestApp):
 
+    def _release_and_fetch(self, assignment, exchange):
+        self._copy_file("files/test.ipynb", "release/ps1/p1.ipynb")
+        run_command(
+            'nbgrader release {} '
+            '--NbGraderConfig.course_id=abc101 '
+            '--TransferApp.exchange_directory={} '.format(assignment, exchange))
+        run_command(
+            'nbgrader fetch abc101 {} '
+            '--TransferApp.exchange_directory={} '.format(assignment, exchange))
+
+    def _submit(self, assignment, exchange, flags="", retcode=0):
+        run_command(
+            'nbgrader submit {} abc101 '
+            '--TransferApp.exchange_directory={} '
+            '{}'.format(assignment, exchange, flags),
+            retcode=retcode)
+
     def test_help(self):
         """Does the help display without error?"""
         run_command("nbgrader submit --help-all")
 
+    def test_submit(self, exchange):
+        self._release_and_fetch("ps1", exchange)
+        now = datetime.datetime.now()
 
-    def test_submit(self):
-        """Does everything get properly submitted?"""
-        pass # TODO: fix these for the new submit command
-        # with temp_cwd([os.path.join(root, "files/submitted-changed.ipynb")]):
-        #     os.mkdir('Problem Set 1')
-        #     shutil.move('submitted-changed.ipynb', 'Problem Set 1/Problem 1.ipynb')
-        #     os.chdir('Problem Set 1')
-        #     run_command('nbgrader submit --log-level=DEBUG --submit-dir=..')
-        #     assert os.path.isfile("../Problem Set 1.tar.gz")
+        time.sleep(1)
+        self._submit("ps1", exchange)
 
-        #     tf = tarfile.open('../Problem Set 1.tar.gz', 'r:gz')
-        #     names = sorted(['Problem Set 1/Problem 1.ipynb', 'Problem Set 1/timestamp.txt', 'Problem Set 1/user.txt'])
-        #     assert sorted(tf.getnames()) == names
+        filename, = os.listdir(os.path.join(exchange, "abc101/inbound"))
+        username, assignment, timestamp1 = filename.split("+")
+        assert username == os.environ['USER']
+        assert assignment == "ps1"
+        assert parse_utc(timestamp1) > now
+        assert os.path.isfile(os.path.join(exchange, "abc101/inbound", filename, "p1.ipynb"))
+        assert os.path.isfile(os.path.join(exchange, "abc101/inbound", filename, "timestamp.txt"))
 
+        with open(os.path.join(exchange, "abc101/inbound", filename, "timestamp.txt"), "r") as fh:
+            assert fh.read() == timestamp1
 
-    def test_submit_custom_assignment(self):
-        """Does everything get properly submitted with a custom assignment name?"""
-        pass # TODO: fix these for the new submit command
-        # with temp_cwd([os.path.join(root, "files/submitted-changed.ipynb")]):
-        #     os.mkdir('Problem Set 1')
-        #     shutil.move('submitted-changed.ipynb', 'Problem Set 1/Problem 1.ipynb')
-        #     os.chdir('Problem Set 1')
-        #     run_command('nbgrader submit --log-level=DEBUG --submit-dir=.. --assignment=foo')
-        #     assert os.path.isfile("../foo.tar.gz")
+        time.sleep(1)
+        self._submit("ps1", exchange)
 
-        #     tf = tarfile.open('../foo.tar.gz', 'r:gz')
-        #     names = sorted(['foo/Problem 1.ipynb', 'foo/timestamp.txt', 'foo/user.txt'])
-        #     assert sorted(tf.getnames()) == names
+        assert len(os.listdir(os.path.join(exchange, "abc101/inbound"))) == 2
+        filename = sorted(os.listdir(os.path.join(exchange, "abc101/inbound")))[1]
+        username, assignment, timestamp2 = filename.split("+")
+        assert username == os.environ['USER']
+        assert assignment == "ps1"
+        assert parse_utc(timestamp2) > parse_utc(timestamp1)
+        assert os.path.isfile(os.path.join(exchange, "abc101/inbound", filename, "p1.ipynb"))
+        assert os.path.isfile(os.path.join(exchange, "abc101/inbound", filename, "timestamp.txt"))
+
+        with open(os.path.join(exchange, "abc101/inbound", filename, "timestamp.txt"), "r") as fh:
+            assert fh.read() == timestamp2
