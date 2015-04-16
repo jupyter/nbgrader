@@ -6,6 +6,13 @@ from selenium.webdriver.common.keys import Keys
 
 
 def _activate_toolbar(browser, name="Create Assignment"):
+    def page_loaded(browser):
+        return browser.execute_script(
+            'return typeof IPython !== "undefined" && IPython.page !== undefined;')
+
+    # wait for the page to load
+    WebDriverWait(browser, 30).until(page_loaded)
+
     # wait for the celltoolbar menu to appear
     WebDriverWait(browser, 10).until(
         EC.element_to_be_clickable((By.CSS_SELECTOR, '#ctb_select')))

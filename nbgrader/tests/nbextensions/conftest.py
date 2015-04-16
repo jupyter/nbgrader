@@ -6,6 +6,7 @@ import subprocess as sp
 
 from copy import copy
 from selenium import webdriver
+from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 
 from .. import run_command
 
@@ -65,10 +66,20 @@ def nbserver(request, tempdir, ipythondir):
 @pytest.fixture
 def browser(request, tempdir, nbserver):
     shutil.copy(os.path.join(os.path.dirname(__file__), "files", "blank.ipynb"), os.path.join(tempdir, "blank.ipynb"))
-    browser = webdriver.PhantomJS()
+
+    capabilities = DesiredCapabilities.PHANTOMJS
+    capabilities['loggingPrefs'] = {'browser': 'ALL'}
+    browser = webdriver.PhantomJS(desired_capabilities=capabilities)
     browser.get("http://localhost:9000/notebooks/blank.ipynb")
 
     def fin():
+        console_messages = browser.get_log('browser')
+        if len(console_messages) > 0:
+            print("\n<-- CAPTURED JAVASCRIPT CONSOLE MESSAGES -->")
+            for message in console_messages:
+                print(message)
+            print("<------------------------------------------>")
+        browser.save_screenshot(os.path.join(os.path.dirname(__file__), 'selenium.screenshot.png'))
         browser.quit()
     request.addfinalizer(fin)
 
