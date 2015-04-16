@@ -78,8 +78,8 @@ class TestNbGraderList(BaseTestApp):
         assert self._list(exchange, flags='--inbound') == dedent(
             """
             [ListApp | INFO] Submitted assignments:
-            [ListApp | INFO] abc101 jhamrick ps1 {}
-            """.format(timestamp)
+            [ListApp | INFO] abc101 {} ps1 {}
+            """.format(os.environ['USER'], timestamp)
         ).lstrip()
 
         self._submit("ps1", exchange)
@@ -88,9 +88,9 @@ class TestNbGraderList(BaseTestApp):
         assert self._list(exchange, flags='--inbound') == dedent(
             """
             [ListApp | INFO] Submitted assignments:
-            [ListApp | INFO] abc101 jhamrick ps1 {}
-            [ListApp | INFO] abc101 jhamrick ps1 {}
-            """.format(*timestamps)
+            [ListApp | INFO] abc101 {} ps1 {}
+            [ListApp | INFO] abc101 {} ps1 {}
+            """.format(os.environ['USER'], timestamps[0], os.environ['USER'], timestamps[1])
         ).lstrip()
 
     def test_list_remove_inbound(self, exchange):
