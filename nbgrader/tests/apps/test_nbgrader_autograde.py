@@ -204,3 +204,13 @@ class TestNbGraderAutograde(BaseTestApp):
         with open("autograded/foo/ps1/data.csv", "r") as fh:
             contents = fh.read()
         assert contents == "some,data\n"
+
+    def test_side_effects(self, gradebook):
+        self._copy_file("files/side-effects.ipynb", "source/ps1/p1.ipynb")
+        run_command('nbgrader assign ps1 --db="{}" '.format(gradebook))
+
+        self._copy_file("files/side-effects.ipynb", "submitted/foo/ps1/p1.ipynb")
+        run_command('nbgrader autograde ps1 --db="{}"'.format(gradebook))
+
+        assert os.path.isfile("autograded/foo/ps1/side-effect.txt")
+        assert not os.path.isfile("submitted/foo/ps1/side-effect.txt")
