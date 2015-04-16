@@ -104,7 +104,7 @@ class ListApp(TransferApp):
             pattern = os.path.join(self.inbound_path, '{}+{}+*'.format(student_id, assignment_id))
         else:
             pattern = os.path.join(self.outbound_path, '*')
-        self.assignments = glob.glob(pattern)
+        self.assignments = sorted(glob.glob(pattern))
 
     def copy_files(self):
         pass
