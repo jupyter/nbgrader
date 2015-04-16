@@ -119,7 +119,9 @@ var scrollTo = function (elem) {
 };
 
 var grades;
+var grades_loaded = false;
 var comments;
+var comments_loaded = false;
 var last_selected;
 
 var nextAssignment = function () {
@@ -154,6 +156,9 @@ $(window).load(function () {
     grades.fetch({
         data: {
             submission_id: submission_id
+        },
+        success: function () {
+            grades_loaded = true;
         }
     });
 
@@ -161,6 +166,9 @@ $(window).load(function () {
     comments.fetch({
         data: {
             submission_id: submission_id
+        },
+        success: function () {
+            comments_loaded = true;
         }
     });
 

@@ -26,7 +26,7 @@ class DefaultManager(object):
     base_formgrade_url = "http://localhost:9000/"
     base_notebook_url = "http://localhost:9001/notebooks/"
 
-    def __init__(self, tempdir, startup_wait=2, shutdown_wait=5):
+    def __init__(self, tempdir, startup_wait=5, shutdown_wait=5):
         self.tempdir = tempdir
         self.startup_wait = startup_wait
         self.shutdown_wait = shutdown_wait
@@ -91,7 +91,7 @@ class HubAuthManager(DefaultManager):
         c = get_config()
         c.JupyterHub.authenticator_class = 'nbgrader.tests.formgrader.fakeuser.FakeUserAuth'
         c.JupyterHub.spawner_class = 'nbgrader.tests.formgrader.fakeuser.FakeUserSpawner'
-        c.JupyterHub.log_level = "DEBUG"
+        c.JupyterHub.log_level = "WARN"
         """
     )
 
