@@ -255,7 +255,7 @@ def python_tests():
             """
         ).lstrip())
 
-    run("COVERAGE_PROCESS_START={} py.test --cov nbgrader --no-cov-on-fail".format(os.path.join(os.getcwd(), ".coveragerc")))
+    run("COVERAGE_PROCESS_START={} py.test --cov nbgrader --no-cov-on-fail -v -x --capture=no".format(os.path.join(os.getcwd(), ".coveragerc")))
     run("ls -a .coverage*")
     run("coverage combine")
 
