@@ -1,3 +1,5 @@
+import time
+
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support.ui import Select
@@ -6,7 +8,7 @@ from selenium.webdriver.common.keys import Keys
 from selenium.common.exceptions import TimeoutException
 
 
-def _activate_toolbar(browser, name="Create Assignment", try_again=True):
+def _activate_toolbar(browser, name="Create Assignment", retries=5):
     def page_loaded(browser):
         return browser.execute_script(
             'return typeof IPython !== "undefined" && IPython.page !== undefined;')
@@ -15,11 +17,14 @@ def _activate_toolbar(browser, name="Create Assignment", try_again=True):
     try:
         WebDriverWait(browser, 30).until(page_loaded)
     except TimeoutException:
-        if try_again:
+        if retries > 0:
+            print("Retrying page load...")
             # page timeout, but sometimes this happens, so try refreshing?
             browser.refresh()
-            _activate_toolbar(browser, name=name, try_again=False)
+            time.sleep(1)
+            _activate_toolbar(browser, name=name, retries=retries - 1)
         else:
+            print("Failed to load the page too many times")
             raise
 
     # wait for the celltoolbar menu to appear
