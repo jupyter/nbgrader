@@ -49,7 +49,8 @@ class NoAuth(BaseAuth):
                     "--ip", self._notebook_server_ip,
                     "--port", self._notebook_server_port
                 ],
-                cwd=self._base_directory)
+                cwd=self._base_directory,
+                env=os.environ.copy())
             self._notebook_server_exists = True
         else:
             self._notebook_server_exists = False
