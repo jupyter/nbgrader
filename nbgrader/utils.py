@@ -5,7 +5,7 @@ import dateutil.parser
 import pwd
 import glob
 
-from IPython.utils.py3compat import str_to_bytes
+from IPython.utils.py3compat import str_to_bytes, string_types
 
 
 def is_grade(cell):
@@ -69,7 +69,7 @@ def compute_checksum(cell):
 
 def parse_utc(ts):
     """Parses a timestamp into datetime format, converting it to UTC if necessary."""
-    if isinstance(ts, (str, unicode)):
+    if isinstance(ts, string_types):
         ts = dateutil.parser.parse(ts)
     if ts.tzinfo is not None:
         ts = (ts - ts.utcoffset()).replace(tzinfo=None)
