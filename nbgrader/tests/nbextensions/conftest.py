@@ -55,7 +55,7 @@ def nbserver(request, tempdir, ipythondir):
     nbserver = sp.Popen([
         "ipython", "notebook",
         "--no-browser",
-        "--port", "9000"], stdout=sp.PIPE, stderr=sp.STDOUT, env=env)
+        "--port", "9000"], env=env)
 
     def fin():
         nbserver.kill()
