@@ -1,5 +1,6 @@
 import os
 import datetime
+import time
 
 from nbgrader.utils import parse_utc
 from nbgrader.tests import run_command
@@ -31,9 +32,10 @@ class TestNbGraderSubmit(BaseTestApp):
 
     def test_submit(self, exchange):
         self._release_and_fetch("ps1", exchange)
-        self._submit("ps1", exchange)
-
         now = datetime.datetime.now()
+
+        time.sleep(1)
+        self._submit("ps1", exchange)
 
         filename, = os.listdir(os.path.join(exchange, "abc101/inbound"))
         username, assignment, timestamp1 = filename.split("+")
@@ -46,6 +48,7 @@ class TestNbGraderSubmit(BaseTestApp):
         with open(os.path.join(exchange, "abc101/inbound", filename, "timestamp.txt"), "r") as fh:
             assert fh.read() == timestamp1
 
+        time.sleep(1)
         self._submit("ps1", exchange)
 
         assert len(os.listdir(os.path.join(exchange, "abc101/inbound"))) == 2
