@@ -94,8 +94,8 @@ def run_command(command, retcode=0):
     true_retcode = proc.wait()
     output = proc.communicate()[0].decode()
     output = output.replace("Coverage.py warning: No data was collected.\n", "")
-    print(output)
     if true_retcode != retcode:
+        print(output)
         raise AssertionError(
             "process returned an unexpected return code: {}".format(true_retcode))
     copy_coverage_files()

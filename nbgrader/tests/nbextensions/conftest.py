@@ -3,6 +3,7 @@ import tempfile
 import os
 import shutil
 import subprocess as sp
+import logging
 
 from copy import copy
 from selenium import webdriver
@@ -66,6 +67,9 @@ def nbserver(request, tempdir, ipythondir):
 @pytest.fixture
 def browser(request, tempdir, nbserver):
     shutil.copy(os.path.join(os.path.dirname(__file__), "files", "blank.ipynb"), os.path.join(tempdir, "blank.ipynb"))
+
+    selenium_logger = logging.getLogger('selenium.webdriver.remote.remote_connection')
+    selenium_logger.setLevel(logging.WARNING)
 
     capabilities = DesiredCapabilities.PHANTOMJS
     capabilities['loggingPrefs'] = {'browser': 'ALL'}

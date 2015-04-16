@@ -3,6 +3,7 @@ import os
 import shutil
 import tempfile
 import sys
+import logging
 
 from nbgrader.api import Gradebook
 from selenium import webdriver
@@ -73,6 +74,9 @@ minversion = pytest.mark.skipif(
 def formgrader(request, gradebook, tempdir):
     man = getattr(manager, request.param)(tempdir)
     man.start()
+
+    selenium_logger = logging.getLogger('selenium.webdriver.remote.remote_connection')
+    selenium_logger.setLevel(logging.WARNING)
 
     capabilities = DesiredCapabilities.PHANTOMJS
     capabilities['loggingPrefs'] = {'browser': 'ALL'}

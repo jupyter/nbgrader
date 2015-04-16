@@ -3,15 +3,24 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support.ui import Select
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.keys import Keys
+from selenium.common.exceptions import TimeoutException
 
 
-def _activate_toolbar(browser, name="Create Assignment"):
+def _activate_toolbar(browser, name="Create Assignment", try_again=True):
     def page_loaded(browser):
         return browser.execute_script(
             'return typeof IPython !== "undefined" && IPython.page !== undefined;')
 
     # wait for the page to load
-    WebDriverWait(browser, 30).until(page_loaded)
+    try:
+        WebDriverWait(browser, 30).until(page_loaded)
+    except TimeoutException:
+        if try_again:
+            # page timeout, but sometimes this happens, so try refreshing?
+            browser.refresh()
+            _activate_toolbar(browser, name=name, try_again=False)
+        else:
+            raise
 
     # wait for the celltoolbar menu to appear
     WebDriverWait(browser, 10).until(
