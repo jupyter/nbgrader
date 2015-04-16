@@ -13,13 +13,17 @@ var Grade = Backbone.Model.extend({
             elem.val(that.get("max_score"));
             elem.trigger("change");
             elem.select();
+            elem.focus();
         });
         $("#" + this.get("name") + "-no-credit").click(function () {
             elem.val(0);
             elem.trigger("change");
             elem.select();
+            elem.focus();
         });
         elem.on("change", function (evt) {
+            console.log("Saving score " + that.get("name"));
+
             if (elem.val() === "") {
                 that.set("manual_score", null);
             } else {
@@ -38,6 +42,7 @@ var Grade = Backbone.Model.extend({
                     setTimeout(function () {
                         glyph.fadeOut();
                     }, 1000);
+                    console.log("Finished saving score " + that.get("name"));
                     $(document).trigger("finished_saving");
                 }
             });
@@ -59,6 +64,7 @@ var Comment = Backbone.Model.extend({
 
         var that = this;
         elem.on("change", function (evt) {
+            console.log("Saving comment " + that.get("name"));
             that.set("comment", elem.val());
 
             glyph.removeClass("glyphicon-floppy-saved");
@@ -72,6 +78,7 @@ var Comment = Backbone.Model.extend({
                     setTimeout(function () {
                         glyph.fadeOut();
                     }, 1000);
+                    console.log("Finished saving comment " + that.get("name"));
                     $(document).trigger("finished_saving");
                 }
             });
@@ -103,6 +110,7 @@ var selectNext = function (target, shift) {
         index = elems.length - 1;
     }
     $(elems[index]).select();
+    $(elems[index]).focus();
 };
 
 var scrollTo = function (elem) {
@@ -187,6 +195,7 @@ $(window).load(function () {
         } else if (keyCode === 13) { // enter
             if (last_selected[0] !== document.activeElement) {
                 last_selected.select();
+                last_selected.focus();
             }
         } else if (keyCode == 39 && e.shiftKey && e.ctrlKey) { // shift + control + right arrow
             save_and_navigate(nextIncorrectAssignment);
@@ -199,15 +208,15 @@ $(window).load(function () {
         }
     });
 
-    var index = parseInt(document.URL.split('#')[1]) || 0;
-    last_selected = $($("input, textarea")[index]);
-    last_selected.select();
-    $("body, html").stop().scrollTop(scrollTo(last_selected));
-
     $("input, textarea").focus(function (event) {
         last_selected = $(event.currentTarget);
         $("body, html").stop().animate({
             scrollTop: scrollTo(last_selected)
         }, 500);
     });
+
+    var index = parseInt(document.URL.split('#')[1]) || 0;
+    last_selected = $($("input, textarea")[index]);
+    last_selected.select();
+    last_selected.focus();
 });
