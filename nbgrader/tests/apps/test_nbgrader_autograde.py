@@ -192,7 +192,6 @@ class TestNbGraderAutograde(BaseTestApp):
         self._make_file("submitted/foo/ps1/data.csv", "some,other,data\n")
         run_command('nbgrader autograde ps1 --db="{}"'.format(gradebook))
 
-        print(os.listdir("autograded/foo/ps1"))
         assert os.path.isfile("autograded/foo/ps1/p1.ipynb")
         assert os.path.isfile("autograded/foo/ps1/timestamp.txt")
         assert os.path.isfile("autograded/foo/ps1/data.csv")
