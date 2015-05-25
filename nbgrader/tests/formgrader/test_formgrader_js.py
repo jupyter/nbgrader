@@ -390,3 +390,6 @@ class TestFormgraderJS(BaseTestFormgrade):
 
         # mark as flagged
         assert self._flag() == "Submission flagged"
+
+        # mark as unflagged
+        assert self._flag() == "Submission unflagged"
