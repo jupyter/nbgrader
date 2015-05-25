@@ -43,6 +43,13 @@ class TestFormgraderJS(BaseTestFormgrade):
     def _get_needs_manual_grade(self, index):
         return self.browser.execute_script('return formgrader.grades.at({:d}).get("needs_manual_grade");'.format(index))
 
+    def _flag(self):
+        self._send_keys_to_body(Keys.SHIFT, Keys.CONTROL, "f")
+        message = self.browser.find_element_by_id("statusmessage")
+        WebDriverWait(self.browser, 10).until(lambda browser: message.is_displayed())
+        WebDriverWait(self.browser, 10).until(lambda browser: not message.is_displayed())
+        return self.browser.execute_script("return $('#statusmessage').text();")
+
     def _get_active_element(self):
         return self.browser.execute_script("return document.activeElement;")
 
@@ -371,3 +378,15 @@ class TestFormgraderJS(BaseTestFormgrade):
         self._click_element("#help-dialog button.btn-primary")
         modal_not_present = lambda browser: browser.execute_script("""return $("#help-dialog").length === 0;""")
         WebDriverWait(self.browser, 30).until(modal_not_present)
+
+    def test_flag(self):
+        self._load_formgrade()
+
+        # mark as flagged
+        assert self._flag() == "Submission flagged"
+
+        # mark as unflagged
+        assert self._flag() == "Submission unflagged"
+
+        # mark as flagged
+        assert self._flag() == "Submission flagged"
