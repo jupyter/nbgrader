@@ -107,7 +107,7 @@ var base_url = "{{resources.base_url}}";
 {% endblock footer %}
 
 {% macro score(cell) -%}
-  <span id="{{ cell.metadata.nbgrader.grade_id }}-saved" class="glyphicon glyphicon-floppy-saved save-icon score-saved"></span>
+  <span id="{{ cell.metadata.nbgrader.grade_id }}-saved" class="glyphicon glyphicon-ok save-icon score-saved"></span>
   <div class="pull-right">
     <span class="btn-group btn-group-sm scoring-buttons" role="group">
       <button type="button" class="btn btn-success" id="{{ cell.metadata.nbgrader.grade_id }}-full-credit">Full credit</button>
@@ -124,7 +124,7 @@ var base_url = "{{resources.base_url}}";
 <div class="panel-heading">
 {%- if cell.metadata.nbgrader.solution -%}
   <span class="nbgrader-label">Student's answer</span>
-  <span class="glyphicon glyphicon-floppy-saved comment-saved save-icon"></span>
+  <span class="glyphicon glyphicon-ok comment-saved save-icon"></span>
   {%- if cell.metadata.nbgrader.grade -%}
   {{ score(cell) }}
   {%- endif -%}
