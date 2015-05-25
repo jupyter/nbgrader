@@ -31,14 +31,14 @@ var Grade = Backbone.Model.extend({
             }
 
             elem.val(that.get("manual_score"));
-            glyph.removeClass("glyphicon-floppy-saved");
+            glyph.removeClass("glyphicon-ok");
             glyph.addClass("glyphicon-refresh");
             glyph.fadeIn(10);
 
             that.save("manual_score", that.get("manual_score"), {
                 success: function () {
                     glyph.removeClass("glyphicon-refresh");
-                    glyph.addClass("glyphicon-floppy-saved");
+                    glyph.addClass("glyphicon-ok");
                     setTimeout(function () {
                         glyph.fadeOut();
                     }, 1000);
@@ -67,14 +67,14 @@ var Comment = Backbone.Model.extend({
             console.log("Saving comment " + that.get("name"));
             that.set("comment", elem.val());
 
-            glyph.removeClass("glyphicon-floppy-saved");
+            glyph.removeClass("glyphicon-ok");
             glyph.addClass("glyphicon-refresh");
             glyph.fadeIn(10);
 
             that.save("comment", that.get("comment"), {
                 success: function () {
                     glyph.removeClass("glyphicon-refresh");
-                    glyph.addClass("glyphicon-floppy-saved");
+                    glyph.addClass("glyphicon-ok");
                     setTimeout(function () {
                         glyph.fadeOut();
                     }, 1000);
