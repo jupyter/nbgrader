@@ -5,6 +5,7 @@ function KeyboardManager () {
         13: 'enter',
         190: '.',
         188: ','
+        70: 'f'
     };
 
     this.handlers = new Object();

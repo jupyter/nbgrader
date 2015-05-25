@@ -24,6 +24,7 @@
     <th class="center">Written Score</th>
     <th class="center">Needs manual grade?</th>
     <th class="center">Tests failed?</th>
+    <th class="center">Flagged?</th>
   </tr>
 </thead>
 <tbody>
@@ -47,6 +48,11 @@
     <td class="center">
       {%- if submission.failed_tests -%}
       <span class="glyphicon glyphicon-ok"></span>
+      {%- endif -%}
+    </td>
+    <td class="center">
+      {%- if submission.flagged -%}
+      <span class="glyphicon glyphicon-flag"></span>
       {%- endif -%}
     </td>
   </tr>

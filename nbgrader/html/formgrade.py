@@ -428,6 +428,20 @@ def get_comment(_id):
     return json.dumps(comment.to_dict())
 
 
+@blueprint.route("/api/submission/<submission_id>/flag")
+@auth
+def flag_submission(submission_id):
+    try:
+        submission = app.gradebook.find_submission_notebook_by_id(submission_id)
+    except MissingEntry:
+        abort(404)
+
+    submission.flagged = not submission.flagged
+    app.gradebook.db.commit()
+
+    return json.dumps(submission.to_dict())
+
+
 app.register_blueprint(blueprint, url_defaults={'name': ''})
 if __name__ == "__main__":
     app.run(debug=True)
