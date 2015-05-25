@@ -470,6 +470,7 @@ class SubmittedNotebook(Base):
 
     #: Unique id of :attr:`~nbgrader.api.SubmittedNotebook.assignment`
     assignment_id = Column(String(32), ForeignKey('submitted_assignment.id'))
+    flagged = Column(Boolean, default=False)
 
     #: The master version of this notebook, represesnted by a
     #: :class:`~nbgrader.api.Notebook` object
@@ -544,7 +545,8 @@ class SubmittedNotebook(Base):
             "written_score": self.written_score,
             "max_written_score": self.max_written_score,
             "needs_manual_grade": self.needs_manual_grade,
-            "failed_tests": self.failed_tests
+            "failed_tests": self.failed_tests,
+            "flagged": self.flagged
         }
 
     def __repr__(self):
@@ -2131,7 +2133,8 @@ class Gradebook(object):
             code_scores.c.code_score, code_scores.c.max_code_score,
             written_scores.c.written_score, written_scores.c.max_written_score,
             func.coalesce(manual_grade.c.needs_manual_grade, False),
-            func.coalesce(failed_tests.c.failed_tests, False)
+            func.coalesce(failed_tests.c.failed_tests, False),
+            SubmittedNotebook.flagged
         ).join(SubmittedAssignment, Notebook, Assignment, Student, Grade, GradeCell)\
          .outerjoin(code_scores, SubmittedNotebook.id == code_scores.c.id)\
          .outerjoin(written_scores, SubmittedNotebook.id == written_scores.c.id)\
@@ -2153,6 +2156,6 @@ class Gradebook(object):
             "code_score", "max_code_score", 
             "written_score", "max_written_score",
             "needs_manual_grade",
-            "failed_tests"
+            "failed_tests", "flagged"
         ]
         return [dict(zip(keys, x)) for x in submissions]
