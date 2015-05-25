@@ -92,8 +92,12 @@ var Comments = Backbone.Collection.extend({
 });
 
 var getIndex = function (elem) {
-    var elems = $("input, textarea");
-    return elems.index(elem);
+    if (elem !== undefined) {
+        var elems = $("input, textarea");
+        return elems.index(elem);
+    } else {
+        return parseInt(document.URL.split('#')[1]) || 0;
+    }
 };
 
 var selectNext = function (target, shift) {
@@ -224,7 +228,11 @@ $(window).load(function () {
     });
 
     var index = parseInt(document.URL.split('#')[1]) || 0;
-    last_selected = $($("input, textarea")[index]);
-    last_selected.select();
-    last_selected.focus();
+    if (index < 0) { index = 0; }
+
+    if ($("input, textarea").length > index) {
+        last_selected = $($("input, textarea")[index]);
+        last_selected.select();
+        last_selected.focus();
+    }
 });
