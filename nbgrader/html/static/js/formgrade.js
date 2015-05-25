@@ -118,7 +118,7 @@ var selectNext = function (target, shift) {
 };
 
 var scrollTo = function (elem) {
-    var target = elem.closest(".nbgrader_cell");
+    var target = elem.parents(".nbgrader_cell");
     return target.offset().top - $(window).height() * 0.33 + 60;
 };
 
@@ -206,8 +206,13 @@ $(window).load(function () {
             selectNext(last_selected, e.shiftKey);
         } else if (keyCode === 13) { // enter
             if (last_selected[0] !== document.activeElement) {
-                last_selected.select();
-                last_selected.focus();
+                $("body, html").scrollTop(scrollTo(last_selected));
+                MathJax.Hub.Startup.signal.Interest(function (message) {
+                    if (message === "End") {
+                        last_selected.select();
+                        last_selected.focus();
+                    }
+                });
             }
         } else if (keyCode == 39 && e.shiftKey && e.ctrlKey) { // shift + control + right arrow
             save_and_navigate(nextIncorrectAssignment);
