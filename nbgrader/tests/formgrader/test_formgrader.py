@@ -1,5 +1,4 @@
 import pytest
-import time
 
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
@@ -13,6 +12,9 @@ class TestFormgrader(BaseTestFormgrade):
     def _send_keys_to_body(self, *keys):
         body = self.browser.find_element_by_tag_name("body")
         body.send_keys(*keys)
+
+    def _click_element(self, name):
+        self.browser.find_element_by_css_selector(name).click()
 
     def _get_comment_box(self, index):
         return self.browser.find_elements_by_css_selector(".comment")[index]
@@ -68,6 +70,52 @@ class TestFormgrader(BaseTestFormgrade):
         submissions = problem.submissions
         submissions.sort(key=lambda x: x.id)
 
+        # test navigating both with the arrow keys and with clicking the
+        # next/previous links
+        next_functions = [
+            (self._send_keys_to_body, Keys.SHIFT, Keys.ARROW_RIGHT),
+            (self._click_element, ".next a")
+        ]
+        prev_functions = [
+            (self._send_keys_to_body, Keys.SHIFT, Keys.ARROW_LEFT),
+            (self._click_element, ".previous a")
+        ]
+
+        for n, p in zip(next_functions, prev_functions):
+            # first element is the function, the other elements are the arguments
+            # to that function
+            next_function = lambda: n[0](*n[1:])
+            prev_function = lambda: p[0](*p[1:])
+
+            # Load the first submission
+            self.browser.get(self.formgrade_url("submissions/{}".format(submissions[0].id)))
+            self._wait_for_notebook_page("submissions/{}".format(submissions[0].id))
+
+            # Move to the next submission
+            next_function()
+            self._wait_for_notebook_page("submissions/{}".format(submissions[1].id))
+
+            # Move to the next submission (should return to notebook list)
+            next_function()
+            self._wait_for_gradebook_page("assignments/Problem Set 1/Problem 1")
+
+            # Go back
+            self.browser.back()
+            self._wait_for_notebook_page("submissions/{}".format(submissions[1].id))
+
+            # Move to the previous submission
+            prev_function()
+            self._wait_for_notebook_page("submissions/{}".format(submissions[0].id))
+
+            # Move to the previous submission (should return to the notebook list)
+            prev_function()
+            self._wait_for_gradebook_page("assignments/Problem Set 1/Problem 1")
+
+    def test_next_prev_failed_assignments(self):
+        problem = self.gradebook.find_notebook("Problem 1", "Problem Set 1")
+        submissions = problem.submissions
+        submissions.sort(key=lambda x: x.id)
+
         # verify that we have the right number of submissions, and that one
         # failed tests and the other didn't
         assert len(submissions) == 2
@@ -78,30 +126,6 @@ class TestFormgrader(BaseTestFormgrade):
 
         # Load the first submission
         self.browser.get(self.formgrade_url("submissions/{}".format(submissions[0].id)))
-        self._wait_for_notebook_page("submissions/{}".format(submissions[0].id))
-
-        # Move to the next submission
-        self._send_keys_to_body(Keys.SHIFT, Keys.ARROW_RIGHT)
-        self._wait_for_notebook_page("submissions/{}".format(submissions[1].id))
-
-        # Move to the next submission (should return to notebook list)
-        self._send_keys_to_body(Keys.SHIFT, Keys.ARROW_RIGHT)
-        self._wait_for_gradebook_page("assignments/Problem Set 1/Problem 1")
-
-        # Go back
-        self.browser.back()
-        self._wait_for_notebook_page("submissions/{}".format(submissions[1].id))
-
-        # Move to the previous submission
-        self._send_keys_to_body(Keys.SHIFT, Keys.ARROW_LEFT)
-        self._wait_for_notebook_page("submissions/{}".format(submissions[0].id))
-
-        # Move to the previous submission (should return to the notebook list)
-        self._send_keys_to_body(Keys.SHIFT, Keys.ARROW_LEFT)
-        self._wait_for_gradebook_page("assignments/Problem Set 1/Problem 1")
-
-        # Go back
-        self.browser.back()
         self._wait_for_notebook_page("submissions/{}".format(submissions[0].id))
 
         if submissions[0].failed_tests:
