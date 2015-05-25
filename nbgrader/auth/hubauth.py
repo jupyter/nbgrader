@@ -109,7 +109,6 @@ class HubAuth(BaseAuth):
 
             #  Auth information recieved.
             data = response.json()
-            self.log.info(data)
             if 'name' in data:
                 user = data['name']
 
