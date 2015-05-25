@@ -109,8 +109,8 @@ class HubAuth(BaseAuth):
 
             #  Auth information recieved.
             data = response.json()
-            if 'user' in data:
-                user = data['user']
+            if 'name' in data:
+                user = data['name']
 
                 # Check if the user name is registered as a grader.
                 if user in self.graders:
