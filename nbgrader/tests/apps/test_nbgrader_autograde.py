@@ -213,3 +213,14 @@ class TestNbGraderAutograde(BaseTestApp):
 
         assert os.path.isfile("autograded/foo/ps1/side-effect.txt")
         assert not os.path.isfile("submitted/foo/ps1/side-effect.txt")
+
+    def test_skip_extra_notebooks(self, gradebook):
+        self._copy_file("files/submitted-unchanged.ipynb", "source/ps1/p1.ipynb")
+        run_command('nbgrader assign ps1 --db="{}" '.format(gradebook))
+
+        self._copy_file("files/submitted-unchanged.ipynb", "submitted/foo/ps1/p1 copy.ipynb")
+        self._copy_file("files/submitted-changed.ipynb", "submitted/foo/ps1/p1.ipynb")
+        run_command('nbgrader autograde ps1 --db="{}"'.format(gradebook))
+
+        assert os.path.isfile("autograded/foo/ps1/p1.ipynb")
+        assert not os.path.isfile("autograded/foo/ps1/p1 copy.ipynb")

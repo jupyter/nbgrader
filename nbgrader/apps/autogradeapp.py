@@ -149,6 +149,19 @@ class AutogradeApp(BaseNbConvertApp):
                 self.log.info("Linking %s -> %s", filename, dest)
                 link_or_copy(filename, dest)
 
+        # ignore notebooks that aren't in the database
+        notebooks = []
+        for notebook in self.notebooks:
+            notebook_id = os.path.splitext(os.path.basename(notebook))[0]
+            try:
+                gb.find_notebook(notebook_id, assignment_id)
+            except MissingEntry:
+                self.log.warning("Skipping unknown notebook: %s", notebook)
+                continue
+            else:
+                notebooks.append(notebook)
+        self.notebooks = notebooks
+
     def _init_preprocessors(self):
         self.exporter._preprocessors = []
         if self._sanitizing:
