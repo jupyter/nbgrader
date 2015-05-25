@@ -45,15 +45,11 @@ var base_url = "{{resources.base_url}}";
     <div class="container">
       <div class="col-md-2">
         <ul class="nav navbar-nav navbar-left">
-          {%- if resources.prev -%}
           <li class="previous">
-            <a data-toggle="tooltip" data-placement="right" title="{{ resources.index }} remaining" href="{{resources.base_url}}/submissions/prev">
+            <a data-toggle="tooltip" data-placement="right" title="{{ resources.index }} remaining" href="{{resources.base_url}}/submissions/{{ resources.submission_id }}/prev">
             &larr; Prev
             </a>
           </li>
-          {%- else -%}
-          <li class="previous disabled"><a>&larr; Prev</a></li>
-          {%- endif -%}
         </ul>
       </div>
       <div class="col-md-8">
@@ -76,15 +72,11 @@ var base_url = "{{resources.base_url}}";
       </div>
       <div class="col-md-2">
         <ul class="nav navbar-nav navbar-right">
-          {%- if resources.next -%}
           <li class="next">
-            <a data-toggle="tooltip" data-placement="left" title="{{ resources.total - (resources.index + 1) }} remaining" href="{{resources.base_url}}/submissions/next">
+            <a data-toggle="tooltip" data-placement="left" title="{{ resources.total - (resources.index + 1) }} remaining" href="{{resources.base_url}}/submissions/{{ resources.submission_id }}/next">
             Next &rarr;
             </a>
           </li>
-          {%- else -%}
-          <li class="next disabled"><a>Next &rarr;</a></li>
-          {%- endif -%}
         </ul>
       </div>
     </div>
