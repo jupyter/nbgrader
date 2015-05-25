@@ -507,7 +507,7 @@ class BaseNbConvertApp(BaseNbGraderApp, NbConvertApp):
             except:
                 self.log.error("There was an error processing assignment: %s", assignment)
 
-                dest = self._format_dest(gd['assignment_id'], gd['student_id'])
+                dest = os.path.normpath(self._format_dest(gd['assignment_id'], gd['student_id']))
                 if self.notebook_id == "*":
                     if os.path.exists(dest):
                         self.log.warning("Removing failed assignment: {}".format(dest))
