@@ -70,6 +70,18 @@ def test_find_nonexistant_student(gradebook):
         gradebook.find_student('12345')
 
 
+def test_remove_student(assignment):
+    assignment.add_student('hacker123')
+    assignment.add_submission('foo', 'hacker123')
+
+    assignment.remove_student('hacker123')
+
+    with pytest.raises(MissingEntry):
+        assignment.find_submission('foo', 'hacker123')
+    with pytest.raises(MissingEntry):
+        assignment.find_student('hacker123')
+
+
 #### Test assignments
 
 def test_add_assignment(gradebook):
@@ -111,6 +123,29 @@ def test_find_assignment(gradebook):
 def test_find_nonexistant_assignment(gradebook):
     with pytest.raises(MissingEntry):
         gradebook.find_assignment('foo')
+
+
+def test_remove_assignment(assignment):
+    assignment.add_student('hacker123')
+    assignment.add_submission('foo', 'hacker123')
+
+    notebooks = assignment.find_assignment('foo').notebooks
+    grade_cells = [x for nb in notebooks for x in nb.grade_cells]
+    solution_cells = [x for nb in notebooks for x in nb.solution_cells]
+
+    assignment.remove_assignment('foo')
+
+    for nb in notebooks:
+        assert assignment.db.query(api.SubmittedNotebook).filter(api.SubmittedNotebook.id == nb.id).all() == []
+    for grade_cell in grade_cells:
+        assert assignment.db.query(api.GradeCell).filter(api.GradeCell.id == grade_cell.id).all() == []
+    for solution_cell in solution_cells:
+        assert assignment.db.query(api.SolutionCell).filter(api.SolutionCell.id == solution_cell.id).all() == []
+
+    with pytest.raises(MissingEntry):
+        assignment.find_assignment('foo')
+
+    assert assignment.find_student('hacker123').submissions == []
 
 
 #### Test notebooks
@@ -363,6 +398,28 @@ def test_add_duplicate_submission(assignment):
     assignment.add_submission('foo', 'hacker123')
     with pytest.raises(InvalidEntry):
         assignment.add_submission('foo', 'hacker123')
+
+
+def test_remove_submission(assignment):
+    assignment.add_student('hacker123')
+    assignment.add_submission('foo', 'hacker123')
+
+    submission = assignment.find_submission('foo', 'hacker123')
+    notebooks = submission.notebooks
+    grades = [x for nb in notebooks for x in nb.grades]
+    comments = [x for nb in notebooks for x in nb.comments]
+
+    assignment.remove_submission('foo', 'hacker123')
+
+    for nb in notebooks:
+        assert assignment.db.query(api.SubmittedNotebook).filter(api.SubmittedNotebook.id == nb.id).all() == []
+    for grade in grades:
+        assert assignment.db.query(api.Grade).filter(api.Grade.id == grade.id).all() == []
+    for comment in comments:
+        assert assignment.db.query(api.Comment).filter(api.Comment.id == comment.id).all() == []
+
+    with pytest.raises(MissingEntry):
+        assignment.find_submission('foo', 'hacker123')
 
 
 ### Test average scores
