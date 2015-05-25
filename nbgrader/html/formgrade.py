@@ -291,9 +291,6 @@ def view_submission(submission_id):
         notebook_id=notebook_id,
         student_id=student_id))
 
-    if not os.path.exists(filename):
-        abort(404)
-
     submissions = app.gradebook.notebook_submissions(notebook_id, assignment_id)
     submission_ids = sorted([x.id for x in submissions])
     ix = submission_ids.index(submission.id)
@@ -311,6 +308,9 @@ def view_submission(submission_id):
     if server_exists:
         relative_path = os.path.relpath(filename, app.notebook_dir)
         resources['notebook_path'] = app.auth.get_notebook_url(relative_path)
+
+    if not os.path.exists(filename):
+        return render_template('formgrade_404.tpl', resources=resources), 404
 
     output, resources = app.exporter.from_filename(filename, resources=resources)
     return output
