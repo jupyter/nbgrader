@@ -55,10 +55,21 @@ class TestNbGraderList(BaseTestApp):
 
     def test_list_remove_outbound(self, exchange):
         self._release("ps1", exchange)
+        self._release("ps2", exchange)
         self._list(exchange, flags="--remove")
         assert self._list(exchange) == dedent(
             """
             [ListApp | INFO] Released assignments:
+            """
+        ).lstrip()
+
+        self._release("ps1", exchange)
+        self._release("ps2", exchange)
+        self._list(exchange, flags="--remove --assignment=ps1")
+        assert self._list(exchange) == dedent(
+            """
+            [ListApp | INFO] Released assignments:
+            [ListApp | INFO] abc101 ps2
             """
         ).lstrip()
 
@@ -96,11 +107,28 @@ class TestNbGraderList(BaseTestApp):
     def test_list_remove_inbound(self, exchange):
         self._release("ps1", exchange)
         self._fetch("ps1", exchange)
+        self._release("ps2", exchange)
+        self._fetch("ps2", exchange)
+
         self._submit("ps1", exchange)
+        self._submit("ps2", exchange)
 
         self._list(exchange, flags="--inbound --remove")
         assert self._list(exchange, flags='--inbound') == dedent(
             """
             [ListApp | INFO] Submitted assignments:
             """
+        ).lstrip()
+
+        self._submit("ps1", exchange)
+        self._submit("ps2", exchange)
+
+        self._list(exchange, flags="--inbound --remove --assignment=ps1")
+        filename, = sorted(os.listdir(os.path.join(exchange, "abc101/inbound")))
+        timestamp = filename.split("+")[2]
+        assert self._list(exchange, flags='--inbound') == dedent(
+            """
+            [ListApp | INFO] Submitted assignments:
+            [ListApp | INFO] abc101 {} ps2 {}
+            """.format(os.environ['USER'], timestamp)
         ).lstrip()
