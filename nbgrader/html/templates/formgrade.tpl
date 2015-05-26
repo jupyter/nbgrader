@@ -73,7 +73,7 @@ window.MathJax = {
       <button type="button" class="btn btn-danger" id="{{ cell.metadata.nbgrader.grade_id }}-no-credit">No credit</button>
     </span>
     <span>
-      <input class="score" id="{{ cell.metadata.nbgrader.grade_id }}" style="width: 4em;" type="number" /> / {{ cell.metadata.nbgrader.points | float | round(2) }}
+      <input class="score tabbable" id="{{ cell.metadata.nbgrader.grade_id }}" style="width: 4em;" type="number" /> / {{ cell.metadata.nbgrader.points | float | round(2) }}
     </span>
   </div>
 {%- endmacro %}
@@ -97,7 +97,7 @@ window.MathJax = {
 {% macro nbgrader_footer(cell) -%}
 {%- if cell.metadata.nbgrader.solution -%}
 <div class="panel-footer">
-  <div><textarea class="comment" placeholder="Comments"></textarea></div>
+  <div><textarea class="comment tabbable" placeholder="Comments"></textarea></div>
 </div>
 {%- endif -%}
 {%- endmacro %}

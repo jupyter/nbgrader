@@ -93,7 +93,7 @@ var Comments = Backbone.Collection.extend({
 
 var getIndex = function (elem) {
     if (elem !== undefined) {
-        var elems = $("input, textarea");
+        var elems = $(".tabbable");
         return elems.index(elem);
     } else {
         return parseInt(document.URL.split('#')[1]) || 0;
@@ -102,7 +102,7 @@ var getIndex = function (elem) {
 
 var selectNext = function (target, shift) {
     var index, elems;
-    elems = $("input, textarea");
+    elems = $(".tabbable");
     if (shift) {
         index = getIndex(target) - 1;
     } else {
@@ -119,7 +119,11 @@ var selectNext = function (target, shift) {
 
 var scrollTo = function (elem) {
     var target = elem.parents(".nbgrader_cell");
-    return target.offset().top - $(window).height() * 0.33 + 60;
+    if (target.length == 0) {
+        return $("body").offset().top;
+    } else {
+        return target.offset().top - $(window).height() * 0.33 + 60;
+    }
 };
 
 var grades;
@@ -181,9 +185,9 @@ $(window).load(function () {
     $("li.live-notebook a").tooltip({container: 'body'});
 
     // disable link selection on tabs
-    $('a').attr('tabindex', '-1');
+    $('a:not(.tabbable)').attr('tabindex', '-1');
 
-    $("input, textarea").on('keydown', function(e) {
+    $(".tabbable").on('keydown', function(e) {
         var keyCode = e.keyCode || e.which;
 
         if (keyCode === 9) { // tab
@@ -225,7 +229,7 @@ $(window).load(function () {
         }
     });
 
-    $("input, textarea").focus(function (event) {
+    $(".tabbable").focus(function (event) {
         last_selected = $(event.currentTarget);
         $("body, html").stop().animate({
             scrollTop: scrollTo(last_selected)
@@ -235,8 +239,8 @@ $(window).load(function () {
     var index = parseInt(document.URL.split('#')[1]) || 0;
     if (index < 0) { index = 0; }
 
-    if ($("input, textarea").length > index) {
-        last_selected = $($("input, textarea")[index]);
+    if ($(".tabbable").length > index) {
+        last_selected = $($(".tabbable")[index]);
         last_selected.select();
         last_selected.focus();
     }

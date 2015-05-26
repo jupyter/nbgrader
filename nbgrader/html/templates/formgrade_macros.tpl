@@ -25,7 +25,7 @@ var base_url = "{{resources.base_url}}";
       <div class="col-md-2">
         <ul class="nav navbar-nav navbar-left">
           <li class="previous">
-            <a data-toggle="tooltip" data-placement="right" title="{{ resources.index }} remaining" href="{{resources.base_url}}/submissions/{{ resources.submission_id }}/prev">
+            <a data-toggle="tooltip" data-trigger="hover" data-placement="right" title="{{ resources.index }} remaining" href="{{resources.base_url}}/submissions/{{ resources.submission_id }}/prev">
             &larr; Prev
             </a>
           </li>
@@ -52,7 +52,7 @@ var base_url = "{{resources.base_url}}";
       <div class="col-md-2">
         <ul class="nav navbar-nav navbar-right">
           <li class="next">
-            <a data-toggle="tooltip" data-placement="left" title="{{ resources.total - (resources.index + 1) }} remaining" href="{{resources.base_url}}/submissions/{{ resources.submission_id }}/next">
+            <a class="tabbable" data-trigger="hover" data-toggle="tooltip" data-placement="left" title="{{ resources.total - (resources.index + 1) }} remaining" href="{{resources.base_url}}/submissions/{{ resources.submission_id }}/next">
             Next &rarr;
             </a>
           </li>
