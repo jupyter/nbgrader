@@ -6,11 +6,30 @@ from nbgrader.preprocessors import NbGraderPreprocessor
 
 class ClearSolutions(NbGraderPreprocessor):
 
-    code_stub = Unicode("# YOUR CODE HERE\nraise NotImplementedError()", config=True)
-    text_stub = Unicode("YOUR ANSWER HERE", config=True)
-    comment_mark = Unicode("#", config=True)
-    begin_solution_delimeter = Unicode("## BEGIN SOLUTION", config=True)
-    end_solution_delimeter = Unicode("## END SOLUTION", config=True)
+    code_stub = Unicode(
+        "# YOUR CODE HERE\nraise NotImplementedError()",
+        config=True,
+        help="The code snippet that will replace code solutions")
+
+    text_stub = Unicode(
+        "YOUR ANSWER HERE",
+        config=True,
+        help="The text snippet that will replace written solutions")
+
+    comment_mark = Unicode(
+        "#",
+        config=True,
+        help="The comment mark to prefix solution delimiters")
+
+    begin_solution_delimeter = Unicode(
+        "## BEGIN SOLUTION",
+        config=True,
+        help="The delimiter marking the beginning of a solution (excluding comment mark)")
+
+    end_solution_delimeter = Unicode(
+        "## END SOLUTION",
+        config=True,
+        help="The delimiter marking the end of a solution (excluding comment mark)")
 
     @property
     def begin_solution(self):
