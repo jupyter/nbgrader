@@ -481,6 +481,7 @@ def test_average_notebook_score(assignment):
 def test_student_dicts(assignment):
     assignment.add_student('hacker123')
     assignment.add_student('bitdiddle')
+    assignment.add_student('louisreasoner')
     assignment.add_submission('foo', 'hacker123')
     assignment.add_submission('foo', 'bitdiddle')
 
