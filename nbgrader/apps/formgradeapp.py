@@ -2,6 +2,8 @@ import os
 import signal
 import sys
 
+from textwrap import dedent
+
 from IPython.utils.traitlets import Unicode, Integer, Type, Instance
 
 from IPython.nbconvert.exporters import HTMLExporter
@@ -69,6 +71,25 @@ class FormgradeApp(BaseNbGraderApp):
 
     base_directory = Unicode(os.path.abspath('.'))
 
+    mathjax_url = Unicode(
+        '',
+        config=True,
+        help=dedent(
+            """
+            URL or local path to mathjax installation. To install it locally,
+            install mathjax with IPython and then configure this variable to
+            use the local version.
+            """
+        )
+    )
+
+    def _mathjax_url_default(self):
+        url = os.path.join(self.ipython_dir, 'nbextensions', 'mathjax', 'MathJax.js')
+        if not os.path.exists(url):
+            url = 'https://cdn.mathjax.org/mathjax/latest/MathJax.js'
+        self.log.info("Serving MathJax from %s", url)
+        return url
+
     def _classes_default(self):
         classes = super(FormgradeApp, self)._classes_default()
         classes.append(HTMLExporter)
@@ -111,6 +132,7 @@ class FormgradeApp(BaseNbGraderApp):
         app.notebook_dir_format = self.directory_structure
         app.nbgrader_step = self.autograded_directory
         app.exporter = HTMLExporter(config=self.config)
+        app.mathjax_url = self.mathjax_url
 
         url = "http://{:s}:{:d}/".format(self.ip, self.port)
         self.log.info("Form grader running at {}".format(url))

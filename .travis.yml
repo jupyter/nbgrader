@@ -18,6 +18,7 @@ before_install:
   - if [[ $TRAVIS_PYTHON_VERSION == '3.4' ]]; then cd ~ && git clone --recursive https://github.com/jupyter/jupyterhub.git && cd -; fi
 install:
   - cd ~/ipython && pip install -f ~/travis-wheels/wheelhouse file://$PWD#egg=ipython[all] && cd -
+  - python -m IPython.external.mathjax
   - if [[ $TRAVIS_PYTHON_VERSION == '3.4' ]]; then cd ~/jupyterhub && pip install -f ~/travis-wheels/wheelhouse -r dev-requirements.txt . && cd -; fi
   - pip install -r requirements.txt
   - pip install nose pytest pytest-cov coverage coveralls invoke selenium
