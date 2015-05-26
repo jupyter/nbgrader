@@ -5,7 +5,8 @@
     "bootstrap": "components/bootstrap#~3.3",
     "backbone": "components/backbone#~1.1.2",
     "jquery": "components/jquery#~2.1.1",
-    "underscore": "components/underscore#~1.7"
+    "underscore": "components/underscore#~1.7",
+    "jquery-color": "jquery/jquery-color#~2.1.2"
   },
   "resolutions": {
     "underscore": "~1.7",
