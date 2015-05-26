@@ -24,7 +24,11 @@
 <tbody>
   {%- for assignment in assignments -%}
   <tr>
+    {%- if assignment.id is none -%}
+    <td>{{ assignment.name }} (no submission)</td>
+    {%- else -%}
     <td><a href="{{base_url}}/students/{{ student.id }}/{{ assignment.name }}">{{ assignment.name }}</a></td>
+    {%- endif -%}
     <td class="center">
       {{ assignment.score | float | round(2) }} / {{ assignment.max_score | float | round(2) }}
     </td>

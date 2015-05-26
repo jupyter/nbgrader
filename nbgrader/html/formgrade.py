@@ -120,13 +120,35 @@ def view_student(student_id):
     except MissingEntry:
         abort(404)
 
-    assignments = [x.to_dict() for x in student.submissions]
-    assignments.sort(key=lambda x: x.get("duedate") or "no due date")
+    submissions = []
+    for assignment in app.gradebook.assignments:
+        try:
+            submission = app.gradebook.find_submission(assignment.name, student.id).to_dict()
+        except MissingEntry:
+            submission = {
+                "id": None,
+                "name": assignment.name,
+                "student": student.id,
+                "duedate": None,
+                "timestamp": None,
+                "extension": None,
+                "total_seconds_late": 0,
+                "score": 0,
+                "max_score": assignment.max_score,
+                "code_score": 0,
+                "max_code_score": assignment.max_code_score,
+                "written_score": 0,
+                "max_written_score": assignment.max_written_score,
+                "needs_manual_grade": False
+            }
+        submissions.append(submission)
+
+    submissions.sort(key=lambda x: x.get("duedate") or "no due date")
     student = student.to_dict()
 
     return render_template(
         "student_assignments.tpl",
-        assignments=assignments,
+        assignments=submissions,
         student=student,
         base_url=app.auth.base_url)
 
