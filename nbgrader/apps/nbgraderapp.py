@@ -2,10 +2,12 @@
 # encoding: utf-8
 
 import sys
+import os
 
 from textwrap import dedent
 
 from IPython.config.application import catch_config_error
+from IPython.utils.traitlets import Bool
 
 from nbgrader import preprocessors
 from nbgrader.apps.baseapp import nbgrader_aliases, nbgrader_flags
@@ -32,9 +34,13 @@ flags = {}
 flags.update(nbgrader_flags)
 flags.update({
     'generate-config': (
-        {'BasicConfig': {'overwrite': True}},
-        "Generate the default config file, possibly overwriting the old one in the process."
-    )
+        {'NbGraderApp' : {'generate_config': True}},
+        "Generate a config file."
+    ),
+    'overwrite': (
+        {'BasicConfig' : {'overwrite': True}},
+        "Overwrite existing config files."
+    ),
 })
 
 
@@ -171,6 +177,8 @@ class NbGraderApp(BaseNbGraderApp):
         ),
     )
 
+    generate_config = Bool(False, config=True, help="Generate a new config file")
+
     def _classes_default(self):
         classes = super(NbGraderApp, self)._classes_default()
 
@@ -193,8 +201,16 @@ class NbGraderApp(BaseNbGraderApp):
 
     def start(self):
         # if we're generating a config file, then do only that
-        if self.overwrite:
-            self.stage_default_config_file()
+        if self.generate_config:
+            s = self.generate_config_file()
+            filename = "nbgrader_config.py"
+
+            if os.path.exists(filename) and not self.overwrite:
+                self.fail("Config file '{}' already exists (run with --overwrite to overwrite it)".format(filename))
+
+            with open(filename, 'w') as fh:
+                fh.write(s)
+            self.log.info("New config file saved to '{}'".format(filename))
             sys.exit(0)
 
         # check: is there a subapp given?

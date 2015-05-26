@@ -11,9 +11,20 @@ from textwrap import fill, dedent
 class DisplayAutoGrades(NbGraderPreprocessor):
     """Preprocessor for displaying the autograder grades"""
 
-    indent = Unicode("    ", config=True)
-    width = Integer(90, config=True)
-    invert = Bool(False, config=True, help="Complain when cells pass, rather than fail.")
+    indent = Unicode(
+        "    ",
+        config=True,
+        help="A string containing whitespace that will be used to indent code and errors")
+
+    width = Integer(
+        90,
+        config=True,
+        help="Maximum line width for displaying code/errors")
+
+    invert = Bool(
+        False,
+        config=True,
+        help="Complain when cells pass, rather than fail.")
 
     ignore_checksums = Bool(
         False, config=True,
