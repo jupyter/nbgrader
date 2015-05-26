@@ -1,3 +1,5 @@
+import time
+
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support.ui import Select
@@ -68,14 +70,14 @@ def _set_points(browser, points=2, index=0):
     )
 
 
-def _set_grade_id(browser):
+def _set_grade_id(browser, grade_id="foo", index=0):
     browser.execute_script(
         """
-        var cell = IPython.notebook.get_cell(0);
+        var cell = IPython.notebook.get_cell({});
         var elem = cell.element.find(".nbgrader-id-input");
-        elem.val("foo");
+        elem.val("{}");
         elem.trigger("change");
-        """
+        """.format(index, grade_id)
     )
 
 
@@ -202,6 +204,7 @@ def test_total_points(browser):
     # click the "grade?" checkbox and set the points to two
     _click_grade(browser)
     _set_points(browser)
+    _set_grade_id(browser)
     assert _get_total_points(browser) == 2
 
     # unclick the "grade?" checkbox and make sure the total points is zero
@@ -220,12 +223,19 @@ def test_total_points(browser):
     # click the "grade?" checkbox
     _click_grade(browser, index=1)
     _set_points(browser, points=1, index=1)
+    _set_grade_id(browser, grade_id="bar", index=1)
     assert _get_total_points(browser) == 3
 
     # delete the new cell
-    element.send_keys("dd")
-    assert _get_total_points(browser) == 2
+    element = browser.find_elements_by_css_selector(".cell")[0]
+    element.click()
+    element.send_keys(Keys.ESCAPE)
+    element.send_keys("d")
+    element.send_keys("d")
+    assert _get_total_points(browser) == 1
 
     # delete the first cell
-    element.send_keys("dd")
+    element = browser.find_elements_by_css_selector(".cell")[0]
+    element.send_keys("d")
+    element.send_keys("d")
     assert _get_total_points(browser) == 0
