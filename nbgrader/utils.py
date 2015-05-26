@@ -45,7 +45,7 @@ def determine_grade(cell):
 def compute_checksum(cell):
     m = hashlib.md5()
     # add the cell source and type
-    m.update(cell.source)
+    m.update(str_to_bytes(cell.source))
     m.update(str_to_bytes(cell.cell_type))
 
     # add whether it's a grade cell and/or solution cell
