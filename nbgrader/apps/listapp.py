@@ -98,12 +98,14 @@ class ListApp(TransferApp):
         self.course_path = os.path.join(self.exchange_directory, self.course_id)
         self.outbound_path = os.path.join(self.course_path, 'outbound')
         self.inbound_path = os.path.join(self.course_path, 'inbound')
+
+        assignment_id = self.assignment_id if self.assignment_id else '*'
         if self.inbound:
             student_id = self.student_id if self.student_id else '*'
-            assignment_id = self.assignment_id if self.assignment_id else '*'
             pattern = os.path.join(self.inbound_path, '{}+{}+*'.format(student_id, assignment_id))
         else:
-            pattern = os.path.join(self.outbound_path, '*')
+            pattern = os.path.join(self.outbound_path, assignment_id)
+
         self.assignments = sorted(glob.glob(pattern))
 
     def copy_files(self):
