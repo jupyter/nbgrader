@@ -10,7 +10,7 @@ class BaseAuth(LoggingConfigurable):
         self._app = app
         self._ip = ip
         self._port = port
-        self._base_url = 'http://{}:{}'.format(ip, port)
+        self._base_url = ''
         self._base_directory = base_directory
 
     @property
