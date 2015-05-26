@@ -49,6 +49,12 @@ def fonts(filename):
     return redirect(url_for('.static', filename=os.path.join("fonts", filename)))
 
 
+@blueprint.route("/mathjax/<path:filename>")
+@auth
+def mathjax(filename):
+    return send_from_directory(os.path.dirname(app.mathjax_url), filename)
+
+
 @blueprint.route("/")
 @auth
 def home():
@@ -295,6 +301,12 @@ def view_submission(submission_id):
     submission_ids = sorted([x.id for x in submissions])
     ix = submission_ids.index(submission.id)
     server_exists = app.auth.notebook_server_exists()
+
+    if app.mathjax_url.startswith("http"):
+        mathjax_url = app.mathjax_url
+    else:
+        mathjax_url = url_for(".mathjax", filename='MathJax.js')
+
     resources = {
         'assignment_id': assignment_id,
         'notebook_id': notebook_id,
@@ -302,7 +314,8 @@ def view_submission(submission_id):
         'index': ix,
         'total': len(submissions),
         'notebook_server_exists': server_exists,
-        'base_url': app.auth.base_url
+        'base_url': app.auth.base_url,
+        'mathjax_url': mathjax_url
     }
 
     if server_exists:
