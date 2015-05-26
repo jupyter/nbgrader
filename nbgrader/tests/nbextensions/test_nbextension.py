@@ -1,3 +1,5 @@
+import time
+
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support.ui import Select
@@ -47,35 +49,35 @@ def _click_solution(browser):
     )
 
 
-def _click_grade(browser):
+def _click_grade(browser, index=0):
     browser.execute_script(
         """
-        var cell = IPython.notebook.get_cell(0);
+        var cell = IPython.notebook.get_cell({});
         var elems = cell.element.find(".button_container");
         $(elems[2]).find("input").click();
-        """
+        """.format(index)
     )
 
 
-def _set_points(browser):
+def _set_points(browser, points=2, index=0):
     browser.execute_script(
         """
-        var cell = IPython.notebook.get_cell(0);
+        var cell = IPython.notebook.get_cell({});
         var elem = cell.element.find(".nbgrader-points-input");
-        elem.val("2");
+        elem.val("{}");
         elem.trigger("change");
-        """
+        """.format(index, points)
     )
 
 
-def _set_grade_id(browser):
+def _set_grade_id(browser, grade_id="foo", index=0):
     browser.execute_script(
         """
-        var cell = IPython.notebook.get_cell(0);
+        var cell = IPython.notebook.get_cell({});
         var elem = cell.element.find(".nbgrader-id-input");
-        elem.val("foo");
+        elem.val("{}");
         elem.trigger("change");
-        """
+        """.format(index, grade_id)
     )
 
 
@@ -86,6 +88,11 @@ def _get_metadata(browser):
         return cell.metadata.nbgrader;
         """
     )
+
+
+def _get_total_points(browser):
+    element = browser.find_element_by_id("nbgrader-total-points")
+    return float(element.get_attribute("value"))
 
 
 def test_create_assignment(browser):
@@ -185,3 +192,50 @@ def test_tabbing(browser):
     element.send_keys(Keys.TAB)
     element = browser.execute_script("return document.activeElement")
     assert "nbgrader-points-input" == element.get_attribute("class")
+
+
+def test_total_points(browser):
+    _load_notebook(browser)
+    _activate_toolbar(browser)
+
+    # make sure the total points is zero
+    assert _get_total_points(browser) == 0
+
+    # click the "grade?" checkbox and set the points to two
+    _click_grade(browser)
+    _set_points(browser)
+    _set_grade_id(browser)
+    assert _get_total_points(browser) == 2
+
+    # unclick the "grade?" checkbox and make sure the total points is zero
+    _click_grade(browser)
+    assert _get_total_points(browser) == 0
+
+    # click the "grade?" checkbox
+    _click_grade(browser)
+    assert _get_total_points(browser) == 2
+
+    # create a new cell
+    element = browser.find_element_by_tag_name("body")
+    element.send_keys(Keys.ESCAPE)
+    element.send_keys("b")
+
+    # click the "grade?" checkbox
+    _click_grade(browser, index=1)
+    _set_points(browser, points=1, index=1)
+    _set_grade_id(browser, grade_id="bar", index=1)
+    assert _get_total_points(browser) == 3
+
+    # delete the new cell
+    element = browser.find_elements_by_css_selector(".cell")[0]
+    element.click()
+    element.send_keys(Keys.ESCAPE)
+    element.send_keys("d")
+    element.send_keys("d")
+    assert _get_total_points(browser) == 1
+
+    # delete the first cell
+    element = browser.find_elements_by_css_selector(".cell")[0]
+    element.send_keys("d")
+    element.send_keys("d")
+    assert _get_total_points(browser) == 0

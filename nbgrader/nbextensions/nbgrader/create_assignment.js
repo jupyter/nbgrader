@@ -80,6 +80,15 @@ define([
         }
     });
 
+    // update total points when a cell is deleted
+    events.on("delete.Cell", function (evt, info) {
+        var cell = info.cell;
+        if (is_grade(cell)) {
+            total_points -= to_float(cell.metadata.nbgrader.points);
+            update_total();
+        }
+    });
+
     var to_float = function(val) {
         if (val === undefined || val === "") {
             return 0;
