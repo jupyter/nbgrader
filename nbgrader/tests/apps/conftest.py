@@ -42,6 +42,17 @@ def temp_cwd(request):
 
 
 @pytest.fixture
+def temp_dir(request):
+    path = tempfile.mkdtemp()
+
+    def fin():
+        shutil.rmtree(path)
+    request.addfinalizer(fin)
+
+    return path
+
+
+@pytest.fixture
 def exchange(request):
     path = tempfile.mkdtemp()
 
