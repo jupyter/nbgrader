@@ -6,7 +6,7 @@ from IPython.utils.traitlets import List, Bool
 from IPython.utils.path import link_or_copy, ensure_dir_exists
 
 from nbgrader.apps.baseapp import BaseNbConvertApp, nbconvert_aliases, nbconvert_flags
-from nbgrader.preprocessors import ClearOutput, OverwriteCells, SaveAutoGrades, Execute
+from nbgrader.preprocessors import ClearOutput, OverwriteCells, SaveAutoGrades, Execute, LimitOutput
 from nbgrader.api import Gradebook, MissingEntry
 from nbgrader import utils
 
@@ -98,6 +98,7 @@ class AutogradeApp(BaseNbConvertApp):
     ])
     autograde_preprocessors = List([
         Execute,
+        LimitOutput,
         SaveAutoGrades
     ])
     preprocessors = List([])

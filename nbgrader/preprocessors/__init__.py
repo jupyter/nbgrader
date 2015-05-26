@@ -11,6 +11,7 @@ from .checkcellmetadata import CheckCellMetadata
 from .execute import Execute
 from .getgrades import GetGrades
 from .clearoutput import ClearOutput
+from .limitoutput import LimitOutput
 
 __all__ = [
     "IncludeHeaderFooter",
@@ -24,5 +25,6 @@ __all__ = [
     "CheckCellMetadata",
     "Execute",
     "GetGrades",
-    "ClearOutput"
+    "ClearOutput",
+    "LimitOutput"
 ]
