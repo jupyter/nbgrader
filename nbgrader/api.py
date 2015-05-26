@@ -1629,15 +1629,20 @@ class Gradebook(object):
         is implemented using proper SQL joins and is much faster.
 
         """
+        # subquery the scores
+        scores = self.db.query(
+            Student.id,
+            func.sum(Grade.score).label("score")
+        ).join(SubmittedAssignment, SubmittedNotebook, Grade)\
+         .group_by(Student.id)\
+         .subquery()
+
+        # full query
         students = self.db.query(
-            Student.id, Student.first_name, Student.last_name, 
-            Student.email, func.sum(Grade.score), func.sum(GradeCell.max_score)
-        ).join(SubmittedAssignment, SubmittedNotebook, Grade, GradeCell)\
-         .filter(and_(
-             Student.id == SubmittedAssignment.student_id,
-             SubmittedAssignment.id == SubmittedNotebook.assignment_id,
-             SubmittedNotebook.id == Grade.notebook_id,
-             GradeCell.id == Grade.cell_id))\
+            Student.id, Student.first_name, Student.last_name,
+            Student.email, func.coalesce(scores.c.score, 0.0),
+            func.sum(GradeCell.max_score)
+        ).outerjoin(scores, Student.id == scores.c.id)\
          .group_by(Student.id)\
          .all()
 
