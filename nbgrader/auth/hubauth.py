@@ -84,7 +84,7 @@ class HubAuth(BaseAuth):
         # Register self as a route of the configurable-http-proxy and then
         # update the base_url to point to the new path.
         response = self._proxy_request('/api/routes' + self.remap_url, method='POST', body={
-            'target': self._base_url
+            'target': 'http://{}:{}'.format(self._ip, self._port)
         })
         if response.status_code != 201:
             raise Exception('Error while trying to add JupyterHub route. {}: {}'.format(response.status_code, response.text))

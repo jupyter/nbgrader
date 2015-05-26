@@ -4,7 +4,8 @@ import os
 import subprocess as sp
 import time
 import sys
-from IPython.utils.traitlets import Bool, Integer
+from textwrap import dedent
+from IPython.utils.traitlets import Bool, Integer, Unicode
 
 from .base import BaseAuth
 
@@ -40,6 +41,13 @@ class NoAuth(BaseAuth):
 
             notebookapp = os.path.normpath(os.path.join(
                 os.path.dirname(__file__), "..", "apps", "notebookapp.py"))
+
+            if self._ip == "0.0.0.0":
+                self.log.warning(
+                    "I will launch the notebook server on '0.0.0.0'. Note that this may prevent "
+                    "access to the notebooks because 0.0.0.0 is usually not an accessible "
+                    "IP address. You probably want to set the formgrader IP to something that "
+                    "is accessible from the outside world.")
 
             self._notebook_server_ip = self._ip
             self._notebook_server_port = str(self.nbserver_port)
