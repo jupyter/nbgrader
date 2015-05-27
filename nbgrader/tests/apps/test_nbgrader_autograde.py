@@ -248,7 +248,7 @@ class TestNbGraderAutograde(BaseTestApp):
 
         self._empty_notebook('submitted/foo/ps1/foo.ipynb')
         self._make_file("source/foo/ps1/foo.txt", "foo")
-        run_command("nbgrader autograde ps1 --create --NbGraderConfig.permissions=644")
+        run_command("nbgrader autograde ps1 --create --AutogradeApp.permissions=644")
 
         assert os.path.isfile("autograded/foo/ps1/foo.ipynb")
         assert os.path.isfile("autograded/foo/ps1/foo.txt")

@@ -158,7 +158,6 @@ class BaseNbGraderApp(BaseApp):
     autograded_directory = Unicode()
     feedback_directory = Unicode()
     course_id = Unicode()
-    permissions = Integer()
     
     # nbgrader configuration instance
     _nbgrader_config = Instance(NbGraderConfig)
@@ -315,6 +314,20 @@ class BaseNbConvertApp(BaseNbGraderApp, NbConvertApp):
     preprocessors = List([])
 
     force = Bool(False, config=True, help="Whether to overwrite existing assignments/submissions")
+
+    permissions = Integer(
+        config=True,
+        help=dedent(
+            """
+            Permissions to set on files output by nbgrader. The default is generally
+            read-only (444), with the exception of nbgrader assign, in which case the
+            user also has write permission.
+            """
+        )
+    )
+
+    def _permissions_default(self):
+        return 444
 
     def _classes_default(self):
         classes = super(BaseNbConvertApp, self)._classes_default()

@@ -124,7 +124,7 @@ class TestNbGraderFeedback(BaseTestApp):
 
         self._empty_notebook('submitted/foo/ps1/foo.ipynb')
         run_command("nbgrader autograde ps1 --create")
-        run_command("nbgrader feedback ps1 --NbGraderConfig.permissions=644")
+        run_command("nbgrader feedback ps1 --FeedbackApp.permissions=644")
 
         assert os.path.isfile("feedback/foo/ps1/foo.html")
         assert self._get_permissions("feedback/foo/ps1/foo.html") == "644"

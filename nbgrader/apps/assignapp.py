@@ -101,6 +101,9 @@ class AssignApp(BaseNbConvertApp):
         )
     )
 
+    def _permissions_default(self):
+        return 644
+
     @property
     def _input_directory(self):
         return self.source_directory
@@ -125,10 +128,6 @@ class AssignApp(BaseNbConvertApp):
         extra_config = super(AssignApp, self).build_extra_config()
         extra_config.NbGraderConfig.student_id = '.'
         extra_config.NbGraderConfig.notebook_id = '*'
-
-        if 'permissions' not in extra_config.NbGraderConfig:
-            extra_config.NbGraderConfig.permissions = 644
-
         return extra_config
 
     def init_assignment(self, assignment_id, student_id):

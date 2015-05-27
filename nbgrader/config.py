@@ -1,5 +1,5 @@
 from IPython.config import Configurable
-from IPython.utils.traitlets import Unicode, Bool, Integer, link
+from IPython.utils.traitlets import Unicode, Bool, link
 from IPython.utils.path import get_ipython_dir
 
 from textwrap import dedent
@@ -210,18 +210,6 @@ class NbGraderConfig(LinkedConfig):
             A key that is unique per instructor and course. This MUST be
             specified, either by setting the config option, or using the
             --course option on the command line.
-            """
-        )
-    )
-
-    permissions = Integer(
-        444,
-        config=True,
-        help=dedent(
-            """
-            Permissions to set on files output by nbgrader. The default is generally
-            read-only (444), with the exception of nbgrader assign, in which case the
-            user also has write permission.
             """
         )
     )

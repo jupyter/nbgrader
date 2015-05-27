@@ -117,7 +117,7 @@ class TestNbGraderAssign(BaseTestApp):
         """Are custom permissions properly set?"""
         self._empty_notebook('source/ps1/foo.ipynb')
         self._make_file("source/ps1/foo.txt", "foo")
-        run_command("nbgrader assign ps1 --create --NbGraderConfig.permissions=666")
+        run_command("nbgrader assign ps1 --create --AssignApp.permissions=666")
 
         assert os.path.isfile("release/ps1/foo.ipynb")
         assert os.path.isfile("release/ps1/foo.txt")
