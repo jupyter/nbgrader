@@ -16,6 +16,9 @@ class TestFormgrader(BaseTestFormgrade):
     def _click_element(self, name):
         self.browser.find_element_by_css_selector(name).click()
 
+    def _get_next_arrow(self):
+        return self.browser.find_element_by_css_selector(".next a")
+
     def _get_comment_box(self, index):
         return self.browser.find_elements_by_css_selector(".comment")[index]
 
@@ -197,7 +200,11 @@ class TestFormgrader(BaseTestFormgrade):
     def test_tabbing(self):
         self._load_formgrade()
 
+        # check that the next arrow is selected
+        assert self._get_active_element() == self._get_next_arrow()
+
         # check that the first comment box is selected
+        self._send_keys_to_body(Keys.TAB)
         assert self._get_active_element() == self._get_comment_box(0)
 
         # tab to the next and check that the first points is selected
@@ -228,9 +235,9 @@ class TestFormgrader(BaseTestFormgrade):
         self._send_keys_to_body(Keys.TAB)
         assert self._get_active_element() == self._get_comment_box(2)
 
-        # tab to the next and check that the first comment is selected
+        # tab to the next and check that the next arrow is selected
         self._send_keys_to_body(Keys.TAB)
-        assert self._get_active_element() == self._get_comment_box(0)
+        assert self._get_active_element() == self._get_next_arrow()
 
     @pytest.mark.parametrize("index", range(3))
     def test_save_comment(self, index):
