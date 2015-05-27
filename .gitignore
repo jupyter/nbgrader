@@ -76,3 +76,4 @@ nbgrader/html/static/components/bootstrap/js/*
 !nbgrader/html/static/components/bootstrap/js/bootstrap.min.js
 nbgrader/html/static/components/jquery/jquery-migrate.min.js
 nbgrader/html/static/components/jquery/jquery-migrate.js
+nbgrader/html/static/components/jquery-color/test

@@ -27,7 +27,17 @@ var Grade = Backbone.Model.extend({
             if (elem.val() === "") {
                 that.set("manual_score", null);
             } else {
-                that.set("manual_score", Math.min(Math.max(0, elem.val()), that.get("max_score")));
+                var val = elem.val();
+                var max_score = that.get("max_score");
+                if (val > max_score) {
+                    invalidValue(elem);
+                    that.set("manual_score", max_score);
+                } else if (val < 0) {
+                    invalidValue(elem);
+                    that.set("manual_score", 0);
+                } else {
+                    that.set("manual_score", val);
+                }
             }
 
             elem.val(that.get("manual_score"));
@@ -124,6 +134,20 @@ var scrollTo = function (elem) {
     } else {
         return target.offset().top - $(window).height() * 0.33 + 60;
     }
+};
+
+var invalidValue = function (elem) {
+    elem.animate({
+        "background-color": "#FF8888",
+        "border-color": "red"
+    }, 100, undefined, function () {
+        setTimeout(function () {
+            elem.animate({
+                "background-color": "white",
+                "border-color": "white"
+            }, 100);
+        }, 50);
+    });
 };
 
 var grades;

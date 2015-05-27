@@ -3,6 +3,7 @@
 <title>{{ resources.notebook_id }}</title>
 
 <script src="{{resources.base_url}}/static/components/jquery/jquery.min.js"></script>
+<script src="{{resources.base_url}}/static/components/jquery-color/jquery.color.js"></script>
 <script src="{{resources.base_url}}/static/components/underscore/underscore-min.js"></script>
 <script src="{{resources.base_url}}/static/components/backbone/backbone-min.js"></script>
 <script src="{{resources.base_url}}/static/components/bootstrap/js/bootstrap.min.js"></script>
