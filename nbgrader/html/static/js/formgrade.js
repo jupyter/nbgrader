@@ -106,7 +106,16 @@ var getIndex = function (elem) {
         var elems = $(".tabbable");
         return elems.index(elem);
     } else {
-        return parseInt(document.URL.split('#')[1]) || 0;
+        return parseInt(getParameterByName(index)) || 0;
+    }
+};
+
+var getSelectableIndex = function (elem) {
+    var target = elem.parents(".nbgrader_cell").find(".score");
+    if (target.length == 0) {
+        return getIndex(elem);
+    } else {
+        return getIndex(target);
     }
 };
 
@@ -150,26 +159,36 @@ var invalidValue = function (elem) {
     });
 };
 
+var getParameterByName = function (name) {
+    // http://stackoverflow.com/questions/901115/how-can-i-get-query-string-values-in-javascript
+    name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+    var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+        results = regex.exec(location.search);
+    return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+};
+
 var grades;
 var grades_loaded = false;
 var comments;
 var comments_loaded = false;
 var last_selected;
+var current_index = 0;
+var loaded = false;
 
 var nextAssignment = function () {
-    window.location = base_url + '/submissions/' + submission_id + '/next' + "#" + getIndex(last_selected);
+    window.location = base_url + '/submissions/' + submission_id + '/next' + "?index=" + current_index;
 };
 
 var nextIncorrectAssignment = function () {
-    window.location = base_url + '/submissions/' + submission_id + '/next_incorrect' + "#" + getIndex(last_selected);
+    window.location = base_url + '/submissions/' + submission_id + '/next_incorrect' + "?index=" + current_index;
 };
 
 var prevAssignment = function () {
-    window.location = base_url + '/submissions/' + submission_id + '/prev' + "#" + getIndex(last_selected);
+    window.location = base_url + '/submissions/' + submission_id + '/prev' + "?index=" + current_index;
 };
 
 var prevIncorrectAssignment = function () {
-    window.location = base_url + '/submissions/' + submission_id + '/prev_incorrect' + "#" + getIndex(last_selected);
+    window.location = base_url + '/submissions/' + submission_id + '/prev_incorrect' + "?index=" + current_index;
 };
 
 var save_and_navigate = function(callback) {
@@ -235,12 +254,8 @@ $(window).load(function () {
         } else if (keyCode === 13) { // enter
             if (last_selected[0] !== document.activeElement) {
                 $("body, html").scrollTop(scrollTo(last_selected));
-                MathJax.Hub.Startup.signal.Interest(function (message) {
-                    if (message === "End") {
-                        last_selected.select();
-                        last_selected.focus();
-                    }
-                });
+                last_selected.select();
+                last_selected.focus();
             }
         } else if (keyCode == 39 && e.shiftKey && e.ctrlKey) { // shift + control + right arrow
             save_and_navigate(nextIncorrectAssignment);
@@ -255,17 +270,23 @@ $(window).load(function () {
 
     $(".tabbable").focus(function (event) {
         last_selected = $(event.currentTarget);
+        current_index = getSelectableIndex(last_selected);
         $("body, html").stop().animate({
             scrollTop: scrollTo(last_selected)
         }, 500);
     });
 
-    var index = parseInt(document.URL.split('#')[1]) || 0;
-    if (index < 0) { index = 0; }
+    current_index = parseInt(getParameterByName('index')) || 0;
+    if (current_index < 0) { current_index = 0; }
 
-    if ($(".tabbable").length > index) {
-        last_selected = $($(".tabbable")[index]);
-        last_selected.select();
-        last_selected.focus();
+    if ($(".tabbable").length > current_index) {
+        last_selected = $($(".tabbable")[current_index]);
+        MathJax.Hub.Startup.signal.Interest(function (message) {
+            if (message === "End") {
+                last_selected.select();
+                last_selected.focus();
+                loaded = true;
+            }
+        });
     }
 });
