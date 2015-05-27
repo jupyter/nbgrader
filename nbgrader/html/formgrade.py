@@ -25,6 +25,13 @@ def auth(f):
     return authenticated
 
 
+def set_index(url, request):
+    if 'index' in request.args:
+        return "{}?index={}".format(url, request.args.get('index'))
+    else:
+        return url
+
+
 @blueprint.url_defaults
 def bp_url_defaults(endpoint, values):
     name = getattr(g, 'name', None)
@@ -231,7 +238,8 @@ def view_next_submission(submission_id):
     if ix == (len(submissions) - 1):
         return redirect(url_for('.view_assignment_notebook', assignment_id=assignment_id, notebook_id=notebook_id))
     else:
-        return redirect(url_for('.view_submission', submission_id=submission_ids[ix + 1]))
+        return redirect(set_index(
+            url_for('.view_submission', submission_id=submission_ids[ix + 1]), request))
 
 
 @blueprint.route("/submissions/<submission_id>/next_incorrect")
@@ -254,7 +262,8 @@ def view_next_incorrect_submission(submission_id):
     if ix_incorrect == (len(incorrect_ids) - 1):
         return redirect(url_for('.view_assignment_notebook', assignment_id=assignment_id, notebook_id=notebook_id))
     else:
-        return redirect(url_for('.view_submission', submission_id=incorrect_ids[ix_incorrect + 1]))
+        return redirect(set_index(
+            url_for('.view_submission', submission_id=incorrect_ids[ix_incorrect + 1]), request))
 
 
 @blueprint.route("/submissions/<submission_id>/prev")
@@ -275,7 +284,8 @@ def view_prev_submission(submission_id):
     if ix == 0:
         return redirect(url_for('.view_assignment_notebook', assignment_id=assignment_id, notebook_id=notebook_id))
     else:
-        return redirect(url_for('.view_submission', submission_id=submission_ids[ix - 1]))
+        return redirect(set_index(
+            url_for('.view_submission', submission_id=submission_ids[ix - 1]), request))
 
 
 @blueprint.route("/submissions/<submission_id>/prev_incorrect")
@@ -298,7 +308,8 @@ def view_prev_incorrect_submission(submission_id):
     if ix_incorrect == 0:
         return redirect(url_for('.view_assignment_notebook', assignment_id=assignment_id, notebook_id=notebook_id))
     else:
-        return redirect(url_for('.view_submission', submission_id=incorrect_ids[ix_incorrect - 1]))
+        return redirect(set_index(
+            url_for('.view_submission', submission_id=incorrect_ids[ix_incorrect - 1]), request))
 
 
 @blueprint.route("/submissions/<submission_id>/")
