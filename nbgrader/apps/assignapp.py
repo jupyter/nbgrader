@@ -1,7 +1,3 @@
-import sys
-import shutil
-import os
-
 from textwrap import dedent
 
 from IPython.utils.traitlets import List, Bool
@@ -104,6 +100,9 @@ class AssignApp(BaseNbConvertApp):
             """
         )
     )
+
+    def _permissions_default(self):
+        return 644
 
     @property
     def _input_directory(self):

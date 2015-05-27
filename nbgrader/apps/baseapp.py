@@ -14,7 +14,7 @@ import shutil
 
 from tornado.log import LogFormatter
 
-from IPython.utils.traitlets import Unicode, List, Bool, Instance, Dict
+from IPython.utils.traitlets import Unicode, List, Bool, Instance, Dict, Integer
 from IPython.core.application import BaseIPythonApplication
 from IPython.config.application import catch_config_error
 from IPython.nbconvert.nbconvertapp import NbConvertApp, DottedOrNone
@@ -315,6 +315,20 @@ class BaseNbConvertApp(BaseNbGraderApp, NbConvertApp):
 
     force = Bool(False, config=True, help="Whether to overwrite existing assignments/submissions")
 
+    permissions = Integer(
+        config=True,
+        help=dedent(
+            """
+            Permissions to set on files output by nbgrader. The default is generally
+            read-only (444), with the exception of nbgrader assign, in which case the
+            user also has write permission.
+            """
+        )
+    )
+
+    def _permissions_default(self):
+        return 444
+
     def _classes_default(self):
         classes = super(BaseNbConvertApp, self)._classes_default()
         for pp in self.preprocessors:
@@ -402,7 +416,6 @@ class BaseNbConvertApp(BaseNbGraderApp, NbConvertApp):
         # configure the writer build directory
         self.writer.build_directory = self._format_dest(
             resources['nbgrader']['assignment'], resources['nbgrader']['student'])
-
         return super(BaseNbConvertApp, self).write_single_notebook(output, resources)
 
     def init_destination(self, assignment_id, student_id):
@@ -481,6 +494,14 @@ class BaseNbConvertApp(BaseNbGraderApp, NbConvertApp):
                 self.log.info("Linking %s -> %s", filename, path)
                 link_or_copy(filename, path)
 
+    def set_permissions(self, assignment_id, student_id):
+        self.log.info("Setting destination file permissions to %s", self.permissions)
+        dest = os.path.normpath(self._format_dest(assignment_id, student_id))
+        permissions = int(str(self.permissions), 8)
+        for dirname, dirnames, filenames in os.walk(dest):
+            for filename in filenames:
+                os.chmod(os.path.join(dirname, filename), permissions)
+
     def convert_notebooks(self):
         for assignment in sorted(self.assignments.keys()):
             # initialize the list of notebooks and the exporter
@@ -503,6 +524,7 @@ class BaseNbConvertApp(BaseNbGraderApp, NbConvertApp):
                 # initialize the destination and convert
                 self.init_assignment(gd['assignment_id'], gd['student_id'])
                 super(BaseNbConvertApp, self).convert_notebooks()
+                self.set_permissions(gd['assignment_id'], gd['student_id'])
 
             except:
                 self.log.error("There was an error processing assignment: %s", assignment)

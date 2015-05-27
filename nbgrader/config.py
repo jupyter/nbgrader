@@ -201,7 +201,7 @@ class NbGraderConfig(LinkedConfig):
             """
         )
     )
-    
+
     course_id = Unicode(
         '',
         config=True,

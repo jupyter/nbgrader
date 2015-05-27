@@ -101,3 +101,25 @@ class TestNbGraderAssign(BaseTestApp):
         assert os.path.isfile("release/ps1/data/bar.txt")
         assert not os.path.isfile("release/ps1/foo.txt")
         assert not os.path.isfile("release/ps1/blah.pyc")
+
+    def test_permissions(self):
+        """Are permissions properly set?"""
+        self._empty_notebook('source/ps1/foo.ipynb')
+        self._make_file("source/ps1/foo.txt", "foo")
+        run_command("nbgrader assign ps1 --create")
+
+        assert os.path.isfile("release/ps1/foo.ipynb")
+        assert os.path.isfile("release/ps1/foo.txt")
+        assert self._get_permissions("release/ps1/foo.ipynb") == "644"
+        assert self._get_permissions("release/ps1/foo.txt") == "644"
+
+    def test_custom_permissions(self):
+        """Are custom permissions properly set?"""
+        self._empty_notebook('source/ps1/foo.ipynb')
+        self._make_file("source/ps1/foo.txt", "foo")
+        run_command("nbgrader assign ps1 --create --AssignApp.permissions=666")
+
+        assert os.path.isfile("release/ps1/foo.ipynb")
+        assert os.path.isfile("release/ps1/foo.txt")
+        assert self._get_permissions("release/ps1/foo.ipynb") == "666"
+        assert self._get_permissions("release/ps1/foo.txt") == "666"
