@@ -70,6 +70,8 @@ window.MathJax = {
   <div class="pull-right">
     <span class="btn-group btn-group-sm scoring-buttons" role="group">
       <button type="button" class="btn btn-success" id="{{ cell.metadata.nbgrader.grade_id }}-full-credit">Full credit</button>
+    </span>
+    <span class="btn-group btn-group-sm scoring-buttons" role="group">
       <button type="button" class="btn btn-danger" id="{{ cell.metadata.nbgrader.grade_id }}-no-credit">No credit</button>
     </span>
     <span>

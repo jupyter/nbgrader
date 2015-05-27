@@ -125,3 +125,27 @@ div.nbgrader_cell .input_area {
 .panel-heading {
     overflow: hidden;
 }
+
+.scoring-buttons button {
+  background-color: #337ab7;
+}
+
+.scoring-buttons button.btn-success {
+  background-color: rgba(92, 184, 92, .1);
+  border-color: rgb(47, 92, 47);
+}
+
+.scoring-buttons button.btn-success:hover {
+  background-color: #5cb85c;
+  border-color: #4cae4c;
+}
+
+.scoring-buttons button.btn-danger {
+  background-color: rgba(217, 83, 79, .2);
+  border-color: rgb(120, 45, 45);
+}
+
+.scoring-buttons button.btn-danger:hover {
+  background-color: #d9534f;
+  border-color: #d43f3a;
+}
