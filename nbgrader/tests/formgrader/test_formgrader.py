@@ -27,7 +27,7 @@ class TestFormgrader(BaseTestFormgrade):
 
     def _wait_for_formgrader(self, url):
         self._wait_for_notebook_page(url)
-        page_loaded = lambda browser: browser.execute_script('return loaded;')
+        page_loaded = lambda browser: browser.execute_script('return typeof loaded !== "undefined" && loaded;')
         WebDriverWait(self.browser, 10).until(page_loaded)
 
     def _save_comment(self, index):

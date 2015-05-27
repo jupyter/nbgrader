@@ -110,6 +110,15 @@ var getIndex = function (elem) {
     }
 };
 
+var getSelectableIndex = function (elem) {
+    var target = elem.parents(".nbgrader_cell").find(".score");
+    if (target.length == 0) {
+        return getIndex(elem);
+    } else {
+        return getIndex(target);
+    }
+};
+
 var selectNext = function (target, shift) {
     var index, elems;
     elems = $(".tabbable");
@@ -148,6 +157,7 @@ var invalidValue = function (elem) {
             }, 100);
         }, 50);
     });
+};
 
 var getParameterByName = function (name) {
     // http://stackoverflow.com/questions/901115/how-can-i-get-query-string-values-in-javascript
@@ -162,22 +172,23 @@ var grades_loaded = false;
 var comments;
 var comments_loaded = false;
 var last_selected;
+var current_index = 0;
 var loaded = false;
 
 var nextAssignment = function () {
-    window.location = base_url + '/submissions/' + submission_id + '/next' + "?index=" + getIndex(last_selected);
+    window.location = base_url + '/submissions/' + submission_id + '/next' + "?index=" + current_index;
 };
 
 var nextIncorrectAssignment = function () {
-    window.location = base_url + '/submissions/' + submission_id + '/next_incorrect' + "?index=" + getIndex(last_selected);
+    window.location = base_url + '/submissions/' + submission_id + '/next_incorrect' + "?index=" + current_index;
 };
 
 var prevAssignment = function () {
-    window.location = base_url + '/submissions/' + submission_id + '/prev' + "?index=" + getIndex(last_selected);
+    window.location = base_url + '/submissions/' + submission_id + '/prev' + "?index=" + current_index;
 };
 
 var prevIncorrectAssignment = function () {
-    window.location = base_url + '/submissions/' + submission_id + '/prev_incorrect' + "?index=" + getIndex(last_selected);
+    window.location = base_url + '/submissions/' + submission_id + '/prev_incorrect' + "?index=" + current_index;
 };
 
 var save_and_navigate = function(callback) {
@@ -258,22 +269,18 @@ $(window).load(function () {
     });
 
     $(".tabbable").focus(function (event) {
-        var target = $(event.currentTarget);
-        last_selected = $(event.currentTarget).parents(".nbgrader_cell").find(".score");
-        if (last_selected.length === 0) {
-            last_selected = $(event.currentTarget);
-        }
-
+        last_selected = $(event.currentTarget);
+        current_index = getSelectableIndex(last_selected);
         $("body, html").stop().animate({
             scrollTop: scrollTo(last_selected)
         }, 500);
     });
 
-    var index = parseInt(getParameterByName('index')) || 0;
-    if (index < 0) { index = 0; }
+    current_index = parseInt(getParameterByName('index')) || 0;
+    if (current_index < 0) { current_index = 0; }
 
-    if ($(".tabbable").length > index) {
-        last_selected = $($(".tabbable")[index]);
+    if ($(".tabbable").length > current_index) {
+        last_selected = $($(".tabbable")[current_index]);
         MathJax.Hub.Startup.signal.Interest(function (message) {
             if (message === "End") {
                 last_selected.select();
