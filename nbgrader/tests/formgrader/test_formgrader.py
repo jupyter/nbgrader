@@ -26,9 +26,28 @@ class TestFormgrader(BaseTestFormgrade):
         return self.browser.find_elements_by_css_selector(".score")[index]
 
     def _wait_for_formgrader(self, url):
-        self._wait_for_notebook_page(url)
-        page_loaded = lambda browser: browser.execute_script('return typeof loaded !== "undefined" && loaded;')
+        self._wait_for_element("notebook-container")
+        page_loaded = lambda browser: browser.execute_script(
+            """
+            if (!(typeof MathJax !== "undefined" && MathJax !== undefined && MathJax.loaded)) {
+                return false;
+            }
+            if (!(typeof formgrader !== "undefined" && formgrader !== undefined)) {
+                return false;
+            }
+
+            if (!(formgrader.grades !== undefined && formgrader.grades.loaded)) {
+                return false;
+            }
+
+            if (!(formgrader.comments !== undefined && formgrader.comments.loaded)) {
+                return false;
+            }
+
+            return true;
+            """)
         WebDriverWait(self.browser, 10).until(page_loaded)
+        self._check_url(url)
 
     def _save_comment(self, index):
         self._send_keys_to_body(Keys.ESCAPE)
@@ -46,7 +65,7 @@ class TestFormgrader(BaseTestFormgrade):
         return self.browser.execute_script("return document.activeElement;")
 
     def _get_index(self):
-        return self.browser.execute_script("return getIndex(document.activeElement);")
+        return self.browser.execute_script("return formgrader.getIndex(document.activeElement);")
 
     def _load_formgrade(self):
         problem = self.gradebook.find_notebook("Problem 1", "Problem Set 1")
@@ -55,12 +74,7 @@ class TestFormgrader(BaseTestFormgrade):
 
         self._load_gradebook_page("assignments/Problem Set 1/Problem 1")
         self._click_link("Submission #1")
-        self._wait_for_formgrader("submissions/{}".format(submissions[0].id))
-
-        # wait for grades and comments to be loaded
-        def grades_and_comments_loaded(browser):
-            return browser.execute_script("return grades_loaded && comments_loaded;")
-        WebDriverWait(self.browser, 10).until(grades_and_comments_loaded)
+        self._wait_for_formgrader("submissions/{}/?index=0".format(submissions[0].id))
 
     def test_formgrade_images(self):
         submissions = self.gradebook.find_notebook("Problem 1", "Problem Set 1").submissions
@@ -68,7 +82,7 @@ class TestFormgrader(BaseTestFormgrade):
 
         for submission in submissions:
             self.browser.get(self.formgrade_url("submissions/{}".format(submission.id)))
-            self._wait_for_formgrader("submissions/{}".format(submission.id))
+            self._wait_for_formgrader("submissions/{}/?index=0".format(submission.id))
 
             images = self.browser.find_elements_by_tag_name("img")
             for image in images:
@@ -91,12 +105,8 @@ class TestFormgrader(BaseTestFormgrade):
             (self._send_keys_to_body, Keys.SHIFT, Keys.ARROW_LEFT),
             (self._click_element, ".previous a")
         ]
-        query_strings = [
-            "/?index=0",
-            ""
-        ]
 
-        for n, p, query in zip(next_functions, prev_functions, query_strings):
+        for n, p in zip(next_functions, prev_functions):
             # first element is the function, the other elements are the arguments
             # to that function
             next_function = lambda: n[0](*n[1:])
@@ -104,11 +114,11 @@ class TestFormgrader(BaseTestFormgrade):
 
             # Load the first submission
             self.browser.get(self.formgrade_url("submissions/{}".format(submissions[0].id)))
-            self._wait_for_formgrader("submissions/{}".format(submissions[0].id))
+            self._wait_for_formgrader("submissions/{}/?index=0".format(submissions[0].id))
 
             # Move to the next submission
             next_function()
-            self._wait_for_formgrader("submissions/{}{}".format(submissions[1].id, query))
+            self._wait_for_formgrader("submissions/{}/?index=0".format(submissions[1].id))
 
             # Move to the next submission (should return to notebook list)
             next_function()
@@ -116,11 +126,11 @@ class TestFormgrader(BaseTestFormgrade):
 
             # Go back
             self.browser.back()
-            self._wait_for_formgrader("submissions/{}{}".format(submissions[1].id, query))
+            self._wait_for_formgrader("submissions/{}/?index=0".format(submissions[1].id))
 
             # Move to the previous submission
             prev_function()
-            self._wait_for_formgrader("submissions/{}{}".format(submissions[0].id, query))
+            self._wait_for_formgrader("submissions/{}/?index=0".format(submissions[0].id))
 
             # Move to the previous submission (should return to the notebook list)
             prev_function()
@@ -141,7 +151,7 @@ class TestFormgrader(BaseTestFormgrade):
 
         # Load the first submission
         self.browser.get(self.formgrade_url("submissions/{}".format(submissions[0].id)))
-        self._wait_for_formgrader("submissions/{}".format(submissions[0].id))
+        self._wait_for_formgrader("submissions/{}/?index=0".format(submissions[0].id))
 
         if submissions[0].failed_tests:
             # Go to the next failed submission (should return to the notebook list)
@@ -150,7 +160,7 @@ class TestFormgrader(BaseTestFormgrade):
 
             # Go back
             self.browser.back()
-            self._wait_for_formgrader("submissions/{}".format(submissions[0].id))
+            self._wait_for_formgrader("submissions/{}/?index=0".format(submissions[0].id))
 
             # Go to the previous failed submission (should return to the notebook list)
             self._send_keys_to_body(Keys.SHIFT, Keys.CONTROL, Keys.ARROW_LEFT)
@@ -158,7 +168,7 @@ class TestFormgrader(BaseTestFormgrade):
 
             # Go back
             self.browser.back()
-            self._wait_for_formgrader("submissions/{}".format(submissions[0].id))
+            self._wait_for_formgrader("submissions/{}/?index=0".format(submissions[0].id))
 
             # Go to the other notebook
             self._send_keys_to_body(Keys.SHIFT, Keys.ARROW_RIGHT)
@@ -183,7 +193,7 @@ class TestFormgrader(BaseTestFormgrade):
 
             # Go back
             self.browser.back()
-            self._wait_for_formgrader("submissions/{}".format(submissions[0].id))
+            self._wait_for_formgrader("submissions/{}/?index=0".format(submissions[0].id))
 
             # Go to the previous failed submission (should return to the notebook list)
             self._send_keys_to_body(Keys.SHIFT, Keys.CONTROL, Keys.ARROW_LEFT)
@@ -191,7 +201,7 @@ class TestFormgrader(BaseTestFormgrade):
 
             # Go back
             self.browser.back()
-            self._wait_for_formgrader("submissions/{}".format(submissions[0].id))
+            self._wait_for_formgrader("submissions/{}/?index=0".format(submissions[0].id))
 
             # Go to the other notebook
             self._send_keys_to_body(Keys.SHIFT, Keys.ARROW_RIGHT)
@@ -314,7 +324,7 @@ class TestFormgrader(BaseTestFormgrade):
 
         # Load the first submission
         self.browser.get(self.formgrade_url("submissions/{}".format(submissions[0].id)))
-        self._wait_for_formgrader("submissions/{}".format(submissions[0].id))
+        self._wait_for_formgrader("submissions/{}/?index=0".format(submissions[0].id))
 
         # Click the second comment box and navigate to the next submission
         self._get_comment_box(1).click()

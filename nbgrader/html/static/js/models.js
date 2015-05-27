@@ -122,7 +122,7 @@ var loadGrades = function (submission_id) {
             submission_id: submission_id
         },
         success: function () {
-            grades.grades_loaded = true;
+            grades.loaded = true;
         }
     });
     return grades;

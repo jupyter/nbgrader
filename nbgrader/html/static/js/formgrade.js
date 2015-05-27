@@ -8,36 +8,61 @@ function FormGrader (base_url, submission_id) {
 
     this.grades;
     this.comments;
+
+    this.keyboard_manager;
 }
 
 FormGrader.prototype.init = function () {
     this.grades = loadGrades(this.submission_id);
     this.comments = loadComments(this.submission_id);
 
+    // disable link selection on tabs
+    $('a:not(.tabbable)').attr('tabindex', '-1');
+
     this.configureTooltips();
-    this.configureTabbing();
-    this.configureNavigation();
     this.configureScrolling();
-}
+
+    this.keyboard_manager = new KeyboardManager(this);
+    this.keyboard_manager.register(this.selectNextInput, "body", "tab");
+    this.keyboard_manager.register(this.selectPrevInput, "body", "shift+tab");
+    this.keyboard_manager.register(this.defocusInput, ".tabbable", "esc");
+    this.keyboard_manager.register(this.focusInput, "body", "enter");
+    this.keyboard_manager.register(this.nextAssignment, "body", "shift+arrowright");
+    this.keyboard_manager.register(this.nextIncorrectAssignment, "body", "control+shift+arrowright");
+    this.keyboard_manager.register(this.prevAssignment, "body", "shift+arrowleft");
+    this.keyboard_manager.register(this.prevIncorrectAssignment, "body", "control+shift+arrowleft");
+};
 
 FormGrader.prototype.navigateTo = function (location) {
     return this.base_url + '/submissions/' + this.submission_id + '/' + location + '?index=' + this.current_index;
 };
 
 FormGrader.prototype.nextAssignment = function () {
-    window.location = this.navigateTo('next');
+    var that = this;
+    this.save(function () {
+        window.location = that.navigateTo('next');
+    });
 };
 
 FormGrader.prototype.nextIncorrectAssignment = function () {
-    window.location = this.navigateTo('next_incorrect');
+    var that = this;
+    this.save(function () {
+        window.location = that.navigateTo('next_incorrect');
+    });
 };
 
 FormGrader.prototype.prevAssignment = function () {
-    window.location = this.navigateTo('prev');
+    var that = this;
+    this.save(function () {
+        window.location = that.navigateTo('prev');
+    });
 };
 
 FormGrader.prototype.prevIncorrectAssignment = function () {
-    window.location = this.navigateTo('prev_incorrect');
+    var that = this;
+    this.save(function () {
+        window.location = that.navigateTo('prev_incorrect');
+    });
 };
 
 FormGrader.prototype.save = function (callback) {
@@ -69,14 +94,8 @@ FormGrader.prototype.getIndex = function (elem) {
     }
 };
 
-FormGrader.prototype.selectNext = function (target, shift) {
-    var index, elems;
-    elems = $(".tabbable");
-    if (shift) {
-        index = this.getIndex(target) - 1;
-    } else {
-        index = this.getIndex(target) + 1;
-    }
+FormGrader.prototype.selectInput = function (index) {
+    var elems = $(".tabbable");
     if (index === elems.length) {
         index = 0;
     } else if (index === -1) {
@@ -86,43 +105,37 @@ FormGrader.prototype.selectNext = function (target, shift) {
     $(elems[index]).focus();
 };
 
+FormGrader.prototype.selectNextInput = function (e) {
+    e.preventDefault();
+    e.stopPropagation();
+    this.selectInput(this.getIndex(this.last_selected) + 1);
+};
+
+FormGrader.prototype.selectPrevInput = function (e) {
+    e.preventDefault();
+    e.stopPropagation();
+    this.selectInput(this.getIndex(this.last_selected) - 1);
+};
+
+FormGrader.prototype.defocusInput = function (e) {
+    $(e.currentTarget).blur();
+};
+
+FormGrader.prototype.focusInput = function (e) {
+    if (this.last_selected[0] !== document.activeElement) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        $("body, html").scrollTop(this.getScrollPosition());
+        this.last_selected.select();
+        this.last_selected.focus();
+    }
+};
+
 FormGrader.prototype.configureTooltips = function () {
     $("li.previous a").tooltip({container: 'body'});
     $("li.next a").tooltip({container: 'body'});
     $("li.live-notebook a").tooltip({container: 'body'});
-};
-
-FormGrader.prototype.configureTabbing = function () {
-    var that = this;
-
-    // disable link selection on tabs
-    $('a:not(.tabbable)').attr('tabindex', '-1');
-
-    register_handler(".tabbable", "TAB", function (e) {
-        e.preventDefault();
-        e.stopPropagation();
-        that.selectNext(e.currentTarget, e.shiftKey);
-    });
-
-    register_handler("body", "TAB", function (e) {
-        e.preventDefault();
-        that.selectNext(that.last_selected, e.shiftKey);
-    });
-
-    register_handler(".tabbable", "ESCAPE", function (e) {
-        $(e.currentTarget).blur();
-    });
-
-    register_handler("body", "ENTER", function (e) {
-        if (that.last_selected[0] !== document.activeElement) {
-            e.preventDefault();
-            e.stopPropagation();
-
-            $("body, html").scrollTop(that.getScrollPosition());
-            that.last_selected.select();
-            that.last_selected.focus();
-        }
-    });
 };
 
 FormGrader.prototype.setIndexFromUrl = function () {
@@ -182,34 +195,6 @@ FormGrader.prototype.configureScrolling = function () {
             that.last_selected.select();
             that.last_selected.focus();
             MathJax.loaded = true;
-        }
-    });
-};
-
-FormGrader.prototype.configureNavigation = function () {
-    var that = this;
-
-    register_handler("body", "RIGHT_ARROW", function (e) {
-        if (e.shiftKey && e.ctrlKey) {
-            that.save(function () {
-                that.nextIncorrectAssignment();
-            });
-        } else if (e.shiftKey) {
-            that.save(function () {
-                that.nextAssignment();
-            });
-        }
-    });
-
-    register_handler("body", "LEFT_ARROW", function (e) {
-        if (e.shiftKey && e.ctrlKey) {
-            that.save(function () {
-                that.prevIncorrectAssignment();
-            });
-        } else if (e.shiftKey) {
-            that.save(function () {
-                that.prevAssignment();
-            });
         }
     });
 };
