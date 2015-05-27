@@ -1,6 +1,6 @@
 from textwrap import dedent
 
-from IPython.utils.traitlets import List, Bool, Integer
+from IPython.utils.traitlets import List, Bool
 
 from nbgrader.api import Gradebook, MissingEntry
 from nbgrader.apps.baseapp import (
