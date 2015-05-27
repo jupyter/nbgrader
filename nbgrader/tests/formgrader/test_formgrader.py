@@ -25,6 +25,11 @@ class TestFormgrader(BaseTestFormgrade):
     def _get_score_box(self, index):
         return self.browser.find_elements_by_css_selector(".score")[index]
 
+    def _wait_for_formgrader(self, url):
+        self._wait_for_notebook_page(url)
+        page_loaded = lambda browser: browser.execute_script('return loaded;')
+        WebDriverWait(self.browser, 10).until(page_loaded)
+
     def _save_comment(self, index):
         self._send_keys_to_body(Keys.ESCAPE)
         glyph = self.browser.find_elements_by_css_selector(".comment-saved")[index]
@@ -40,6 +45,9 @@ class TestFormgrader(BaseTestFormgrade):
     def _get_active_element(self):
         return self.browser.execute_script("return document.activeElement;")
 
+    def _get_index(self):
+        return self.browser.execute_script("return getIndex(document.activeElement);")
+
     def _load_formgrade(self):
         problem = self.gradebook.find_notebook("Problem 1", "Problem Set 1")
         submissions = problem.submissions
@@ -47,7 +55,7 @@ class TestFormgrader(BaseTestFormgrade):
 
         self._load_gradebook_page("assignments/Problem Set 1/Problem 1")
         self._click_link("Submission #1")
-        self._wait_for_notebook_page("submissions/{}".format(submissions[0].id))
+        self._wait_for_formgrader("submissions/{}".format(submissions[0].id))
 
         # wait for grades and comments to be loaded
         def grades_and_comments_loaded(browser):
@@ -60,7 +68,7 @@ class TestFormgrader(BaseTestFormgrade):
 
         for submission in submissions:
             self.browser.get(self.formgrade_url("submissions/{}".format(submission.id)))
-            self._wait_for_notebook_page("submissions/{}".format(submission.id))
+            self._wait_for_formgrader("submissions/{}".format(submission.id))
 
             images = self.browser.find_elements_by_tag_name("img")
             for image in images:
@@ -83,8 +91,12 @@ class TestFormgrader(BaseTestFormgrade):
             (self._send_keys_to_body, Keys.SHIFT, Keys.ARROW_LEFT),
             (self._click_element, ".previous a")
         ]
+        query_strings = [
+            "/?index=0",
+            ""
+        ]
 
-        for n, p in zip(next_functions, prev_functions):
+        for n, p, query in zip(next_functions, prev_functions, query_strings):
             # first element is the function, the other elements are the arguments
             # to that function
             next_function = lambda: n[0](*n[1:])
@@ -92,11 +104,11 @@ class TestFormgrader(BaseTestFormgrade):
 
             # Load the first submission
             self.browser.get(self.formgrade_url("submissions/{}".format(submissions[0].id)))
-            self._wait_for_notebook_page("submissions/{}".format(submissions[0].id))
+            self._wait_for_formgrader("submissions/{}".format(submissions[0].id))
 
             # Move to the next submission
             next_function()
-            self._wait_for_notebook_page("submissions/{}".format(submissions[1].id))
+            self._wait_for_formgrader("submissions/{}{}".format(submissions[1].id, query))
 
             # Move to the next submission (should return to notebook list)
             next_function()
@@ -104,11 +116,11 @@ class TestFormgrader(BaseTestFormgrade):
 
             # Go back
             self.browser.back()
-            self._wait_for_notebook_page("submissions/{}".format(submissions[1].id))
+            self._wait_for_formgrader("submissions/{}{}".format(submissions[1].id, query))
 
             # Move to the previous submission
             prev_function()
-            self._wait_for_notebook_page("submissions/{}".format(submissions[0].id))
+            self._wait_for_formgrader("submissions/{}{}".format(submissions[0].id, query))
 
             # Move to the previous submission (should return to the notebook list)
             prev_function()
@@ -129,7 +141,7 @@ class TestFormgrader(BaseTestFormgrade):
 
         # Load the first submission
         self.browser.get(self.formgrade_url("submissions/{}".format(submissions[0].id)))
-        self._wait_for_notebook_page("submissions/{}".format(submissions[0].id))
+        self._wait_for_formgrader("submissions/{}".format(submissions[0].id))
 
         if submissions[0].failed_tests:
             # Go to the next failed submission (should return to the notebook list)
@@ -138,7 +150,7 @@ class TestFormgrader(BaseTestFormgrade):
 
             # Go back
             self.browser.back()
-            self._wait_for_notebook_page("submissions/{}".format(submissions[0].id))
+            self._wait_for_formgrader("submissions/{}".format(submissions[0].id))
 
             # Go to the previous failed submission (should return to the notebook list)
             self._send_keys_to_body(Keys.SHIFT, Keys.CONTROL, Keys.ARROW_LEFT)
@@ -146,11 +158,11 @@ class TestFormgrader(BaseTestFormgrade):
 
             # Go back
             self.browser.back()
-            self._wait_for_notebook_page("submissions/{}".format(submissions[0].id))
+            self._wait_for_formgrader("submissions/{}".format(submissions[0].id))
 
             # Go to the other notebook
             self._send_keys_to_body(Keys.SHIFT, Keys.ARROW_RIGHT)
-            self._wait_for_notebook_page("submissions/{}".format(submissions[1].id))
+            self._wait_for_formgrader("submissions/{}/?index=0".format(submissions[1].id))
 
             # Go to the next failed submission (should return to the notebook list)
             self._send_keys_to_body(Keys.SHIFT, Keys.CONTROL, Keys.ARROW_RIGHT)
@@ -158,20 +170,20 @@ class TestFormgrader(BaseTestFormgrade):
 
             # Go back
             self.browser.back()
-            self._wait_for_notebook_page("submissions/{}".format(submissions[1].id))
+            self._wait_for_formgrader("submissions/{}/?index=0".format(submissions[1].id))
 
             # Go to the previous failed submission
             self._send_keys_to_body(Keys.SHIFT, Keys.CONTROL, Keys.ARROW_LEFT)
-            self._wait_for_notebook_page("submissions/{}".format(submissions[0].id))
+            self._wait_for_formgrader("submissions/{}/?index=0".format(submissions[0].id))
 
         else:
             # Go to the next failed submission
             self._send_keys_to_body(Keys.SHIFT, Keys.CONTROL, Keys.ARROW_RIGHT)
-            self._wait_for_notebook_page("submissions/{}".format(submissions[1].id))
+            self._wait_for_formgrader("submissions/{}/?index=0".format(submissions[1].id))
 
             # Go back
             self.browser.back()
-            self._wait_for_notebook_page("submissions/{}".format(submissions[0].id))
+            self._wait_for_formgrader("submissions/{}".format(submissions[0].id))
 
             # Go to the previous failed submission (should return to the notebook list)
             self._send_keys_to_body(Keys.SHIFT, Keys.CONTROL, Keys.ARROW_LEFT)
@@ -179,11 +191,11 @@ class TestFormgrader(BaseTestFormgrade):
 
             # Go back
             self.browser.back()
-            self._wait_for_notebook_page("submissions/{}".format(submissions[0].id))
+            self._wait_for_formgrader("submissions/{}".format(submissions[0].id))
 
             # Go to the other notebook
             self._send_keys_to_body(Keys.SHIFT, Keys.ARROW_RIGHT)
-            self._wait_for_notebook_page("submissions/{}".format(submissions[1].id))
+            self._wait_for_formgrader("submissions/{}/?index=0".format(submissions[1].id))
 
             # Go to the next failed submission (should return to the notebook list)
             self._send_keys_to_body(Keys.SHIFT, Keys.CONTROL, Keys.ARROW_RIGHT)
@@ -191,7 +203,7 @@ class TestFormgrader(BaseTestFormgrade):
 
             # Go back
             self.browser.back()
-            self._wait_for_notebook_page("submissions/{}".format(submissions[1].id))
+            self._wait_for_formgrader("submissions/{}/?index=0".format(submissions[1].id))
 
             # Go to the previous failed submission (should return to the notebook list)
             self._send_keys_to_body(Keys.SHIFT, Keys.CONTROL, Keys.ARROW_LEFT)
@@ -202,42 +214,52 @@ class TestFormgrader(BaseTestFormgrade):
 
         # check that the next arrow is selected
         assert self._get_active_element() == self._get_next_arrow()
+        assert self._get_index() == 0
 
         # check that the first comment box is selected
         self._send_keys_to_body(Keys.TAB)
         assert self._get_active_element() == self._get_comment_box(0)
+        assert self._get_index() == 1
 
         # tab to the next and check that the first points is selected
         self._send_keys_to_body(Keys.TAB)
         assert self._get_active_element() == self._get_score_box(0)
+        assert self._get_index() == 2
 
         # tab to the next and check that the second points is selected
         self._send_keys_to_body(Keys.TAB)
         assert self._get_active_element() == self._get_score_box(1)
+        assert self._get_index() == 3
 
         # tab to the next and check that the second comment is selected
         self._send_keys_to_body(Keys.TAB)
         assert self._get_active_element() == self._get_comment_box(1)
+        assert self._get_index() == 4
 
         # tab to the next and check that the third points is selected
         self._send_keys_to_body(Keys.TAB)
         assert self._get_active_element() == self._get_score_box(2)
+        assert self._get_index() == 5
 
         # tab to the next and check that the fourth points is selected
         self._send_keys_to_body(Keys.TAB)
         assert self._get_active_element() == self._get_score_box(3)
+        assert self._get_index() == 6
 
         # tab to the next and check that the fifth points is selected
         self._send_keys_to_body(Keys.TAB)
         assert self._get_active_element() == self._get_score_box(4)
+        assert self._get_index() == 7
 
         # tab to the next and check that the third comment is selected
         self._send_keys_to_body(Keys.TAB)
         assert self._get_active_element() == self._get_comment_box(2)
+        assert self._get_index() == 8
 
         # tab to the next and check that the next arrow is selected
         self._send_keys_to_body(Keys.TAB)
         assert self._get_active_element() == self._get_next_arrow()
+        assert self._get_index() == 0
 
     @pytest.mark.parametrize("index", range(3))
     def test_save_comment(self, index):
@@ -284,3 +306,35 @@ class TestFormgrader(BaseTestFormgrade):
         self._load_formgrade()
         elem = self._get_score_box(index)
         assert elem.get_attribute("value") == "{}".format((index + 1) / 10.0)
+
+    def test_same_part_navigation(self):
+        problem = self.gradebook.find_notebook("Problem 1", "Problem Set 1")
+        submissions = problem.submissions
+        submissions.sort(key=lambda x: x.id)
+
+        # Load the first submission
+        self.browser.get(self.formgrade_url("submissions/{}".format(submissions[0].id)))
+        self._wait_for_formgrader("submissions/{}".format(submissions[0].id))
+
+        # Click the second comment box and navigate to the next submission
+        self._get_comment_box(1).click()
+        self._send_keys_to_body(Keys.SHIFT, Keys.ARROW_RIGHT)
+        self._wait_for_formgrader("submissions/{}/?index=4".format(submissions[1].id))
+        assert self._get_active_element() == self._get_comment_box(1)
+
+        # Click the third score box and navigate to the previous submission
+        self._get_score_box(2).click()
+        self._send_keys_to_body(Keys.SHIFT, Keys.ARROW_LEFT)
+        self._wait_for_formgrader("submissions/{}/?index=5".format(submissions[0].id))
+        assert self._get_active_element() == self._get_score_box(2)
+
+        # Click the third comment box and navigate to the next submission
+        self._get_comment_box(2).click()
+        self._send_keys_to_body(Keys.SHIFT, Keys.ARROW_RIGHT)
+        self._wait_for_formgrader("submissions/{}/?index=7".format(submissions[1].id))
+        assert self._get_active_element() == self._get_score_box(4)
+
+        # Navigate to the previous submission
+        self._send_keys_to_body(Keys.SHIFT, Keys.ARROW_LEFT)
+        self._wait_for_formgrader("submissions/{}/?index=7".format(submissions[0].id))
+        assert self._get_active_element() == self._get_score_box(4)
