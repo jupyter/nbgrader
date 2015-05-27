@@ -254,7 +254,12 @@ $(window).load(function () {
     });
 
     $(".tabbable").focus(function (event) {
-        last_selected = $(event.currentTarget);
+        var target = $(event.currentTarget);
+        last_selected = $(event.currentTarget).parents(".nbgrader_cell").find(".score");
+        if (last_selected.length === 0) {
+            last_selected = $(event.currentTarget);
+        }
+
         $("body, html").stop().animate({
             scrollTop: scrollTo(last_selected)
         }, 500);
