@@ -1,10 +1,6 @@
-import sys
-import shutil
-import os
-
 from textwrap import dedent
 
-from IPython.utils.traitlets import List, Bool
+from IPython.utils.traitlets import List, Bool, Integer
 
 from nbgrader.api import Gradebook, MissingEntry
 from nbgrader.apps.baseapp import (
@@ -129,6 +125,10 @@ class AssignApp(BaseNbConvertApp):
         extra_config = super(AssignApp, self).build_extra_config()
         extra_config.NbGraderConfig.student_id = '.'
         extra_config.NbGraderConfig.notebook_id = '*'
+
+        if 'permissions' not in extra_config.NbGraderConfig:
+            extra_config.NbGraderConfig.permissions = 644
+
         return extra_config
 
     def init_assignment(self, assignment_id, student_id):
