@@ -1,6 +1,7 @@
 import os
 import shutil
 import pytest
+import stat
 
 from IPython.nbformat import write as write_nb
 from IPython.nbformat.v4 import new_notebook
@@ -30,3 +31,6 @@ class BaseTestApp(object):
             os.makedirs(os.path.dirname(full_dest))
         with open(full_dest, "w") as fh:
             fh.write(contents)
+
+    def _get_permissions(self, filename):
+        return oct(os.stat(filename).st_mode)[-3:]

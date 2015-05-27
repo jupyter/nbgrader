@@ -224,3 +224,33 @@ class TestNbGraderAutograde(BaseTestApp):
 
         assert os.path.isfile("autograded/foo/ps1/p1.ipynb")
         assert not os.path.isfile("autograded/foo/ps1/p1 copy.ipynb")
+
+    def test_permissions(self):
+        """Are permissions properly set?"""
+        self._empty_notebook('source/ps1/foo.ipynb')
+        self._make_file("source/ps1/foo.txt", "foo")
+        run_command("nbgrader assign ps1 --create")
+
+        self._empty_notebook('submitted/foo/ps1/foo.ipynb')
+        self._make_file("source/foo/ps1/foo.txt", "foo")
+        run_command("nbgrader autograde ps1 --create")
+
+        assert os.path.isfile("autograded/foo/ps1/foo.ipynb")
+        assert os.path.isfile("autograded/foo/ps1/foo.txt")
+        assert self._get_permissions("autograded/foo/ps1/foo.ipynb") == "444"
+        assert self._get_permissions("autograded/foo/ps1/foo.txt") == "444"
+
+    def test_custom_permissions(self):
+        """Are custom permissions properly set?"""
+        self._empty_notebook('source/ps1/foo.ipynb')
+        self._make_file("source/ps1/foo.txt", "foo")
+        run_command("nbgrader assign ps1 --create")
+
+        self._empty_notebook('submitted/foo/ps1/foo.ipynb')
+        self._make_file("source/foo/ps1/foo.txt", "foo")
+        run_command("nbgrader autograde ps1 --create --NbGraderConfig.permissions=644")
+
+        assert os.path.isfile("autograded/foo/ps1/foo.ipynb")
+        assert os.path.isfile("autograded/foo/ps1/foo.txt")
+        assert self._get_permissions("autograded/foo/ps1/foo.ipynb") == "644"
+        assert self._get_permissions("autograded/foo/ps1/foo.txt") == "644"

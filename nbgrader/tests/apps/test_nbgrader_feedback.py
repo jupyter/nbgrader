@@ -104,3 +104,27 @@ class TestNbGraderFeedback(BaseTestApp):
         assert not os.path.isfile("feedback/foo/ps1/foo.txt")
         assert os.path.isfile("feedback/foo/ps1/data/bar.txt")
         assert not os.path.isfile("feedback/foo/ps1/blah.pyc")
+
+    def test_permissions(self):
+        """Are permissions properly set?"""
+        self._empty_notebook('source/ps1/foo.ipynb')
+        run_command("nbgrader assign ps1 --create")
+
+        self._empty_notebook('submitted/foo/ps1/foo.ipynb')
+        run_command("nbgrader autograde ps1 --create")
+        run_command("nbgrader feedback ps1")
+
+        assert os.path.isfile("feedback/foo/ps1/foo.html")
+        assert self._get_permissions("feedback/foo/ps1/foo.html") == "444"
+
+    def test_custom_permissions(self):
+        """Are custom permissions properly set?"""
+        self._empty_notebook('source/ps1/foo.ipynb')
+        run_command("nbgrader assign ps1 --create")
+
+        self._empty_notebook('submitted/foo/ps1/foo.ipynb')
+        run_command("nbgrader autograde ps1 --create")
+        run_command("nbgrader feedback ps1 --NbGraderConfig.permissions=644")
+
+        assert os.path.isfile("feedback/foo/ps1/foo.html")
+        assert self._get_permissions("feedback/foo/ps1/foo.html") == "644"
