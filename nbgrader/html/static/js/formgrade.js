@@ -230,40 +230,41 @@ $(window).load(function () {
     // disable link selection on tabs
     $('a:not(.tabbable)').attr('tabindex', '-1');
 
-    $(".tabbable").on('keydown', function(e) {
-        var keyCode = e.keyCode || e.which;
+    register_handler(".tabbable", "TAB", function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        selectNext(e.currentTarget, e.shiftKey);
+    });
 
-        if (keyCode === 9) { // tab
-            e.preventDefault();
-            e.stopPropagation();
-            selectNext(e.currentTarget, e.shiftKey);
+    register_handler(".tabbable", "ESCAPE", function (e) {
+        $(e.currentTarget).blur();
+    });
 
-        } else if (keyCode === 27) { // escape
-            $(e.currentTarget).blur();
+    register_handler("body", "TAB", function (e) {
+        e.preventDefault();
+        selectNext(last_selected, e.shiftKey);
+    });
+
+    register_handler("body", "ENTER", function (e) {
+        if (last_selected[0] !== document.activeElement) {
+            $("body, html").scrollTop(scrollTo(last_selected));
+            last_selected.select();
+            last_selected.focus();
         }
     });
 
-    $("body").on('keydown', function(e) {
-        var keyCode = e.keyCode || e.which;
-        var href;
-        var elem;
-
-        if (keyCode === 9) { // tab
-            e.preventDefault();
-            selectNext(last_selected, e.shiftKey);
-        } else if (keyCode === 13) { // enter
-            if (last_selected[0] !== document.activeElement) {
-                $("body, html").scrollTop(scrollTo(last_selected));
-                last_selected.select();
-                last_selected.focus();
-            }
-        } else if (keyCode == 39 && e.shiftKey && e.ctrlKey) { // shift + control + right arrow
+    register_handler("body", "RIGHT_ARROW", function (e) {
+        if (e.shiftKey && e.ctrlKey) {
             save_and_navigate(nextIncorrectAssignment);
-        } else if (keyCode == 37 && e.shiftKey && e.ctrlKey) { // shift + control + left arrow
-            save_and_navigate(prevIncorrectAssignment);
-        } else if (keyCode == 39 && e.shiftKey) { // shift + right arrow
+        } else if (e.shiftKey) {
             save_and_navigate(nextAssignment);
-        } else if (keyCode == 37 && e.shiftKey) { // shift + left arrow
+        }
+    });
+
+    register_handler("body", "LEFT_ARROW", function (e) {
+        if (e.shiftKey && e.ctrlKey) {
+            save_and_navigate(prevIncorrectAssignment);
+        } else if (e.shiftKey) {
             save_and_navigate(prevAssignment);
         }
     });
