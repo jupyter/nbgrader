@@ -1,76 +1,91 @@
-var Grade = Backbone.Model.extend({
-    urlRoot: base_url + "/api/grade",
+var GradeUI = Backbone.View.extend({
+
+    events: {
+        "change .score": "save",
+        "click .full-credit": "assignFullCredit",
+        "click .no-credit": "assignNoCredit"
+    },
+
     initialize: function () {
-        var elem = $("#" + this.get("name"));
-        var glyph = $("#" + this.get("name") + "-saved");
-        elem.val(this.get("manual_score"));
-        elem.attr("placeholder", this.get("auto_score"));
+        this.$glyph = this.$el.find(".score-saved");
+        this.$score = this.$el.find(".score");
 
-        var that = this;
-        $("#" + this.get("name") + "-full-credit").click(function () {
-            elem.val(that.get("max_score"));
-            elem.trigger("change");
-            elem.select();
-            elem.focus();
-        });
-        $("#" + this.get("name") + "-no-credit").click(function () {
-            elem.val(0);
-            elem.trigger("change");
-            elem.select();
-            elem.focus();
-        });
+        this.listenTo(this.model, "change", this.render);
+        this.listenTo(this.model, "request", this.animateSaving);
+        this.listenTo(this.model, "sync", this.animateSaved);
 
-        var invalidValue = function (elem) {
-            elem.animate({
-                "background-color": "#FF8888",
-                "border-color": "red"
-            }, 100, undefined, function () {
-                setTimeout(function () {
-                    elem.animate({
-                        "background-color": "white",
-                        "border-color": "white"
-                    }, 100);
-                }, 50);
-            });
-        };
+        this.$score.attr("placeholder", this.model.get("auto_score"));
+        this.render();
+    },
 
-        elem.on("change", function (evt) {
-            console.log("Saving score " + that.get("name"));
+    render: function () {
+        this.$score.val(this.model.get("manual_score"));
+    },
 
-            if (elem.val() === "") {
-                that.set("manual_score", null);
+    save: function () {
+        if (this.$score.val() === "") {
+            this.model.save({"manual_score": null});
+        } else {
+            var val = this.$score.val();
+            var max_score = this.model.get("max_score");
+            if (val > max_score) {
+                this.animateInvalidValue();
+                this.model.save({"manual_score": max_score});
+            } else if (val < 0) {
+                this.animateInvalidValue();
+                this.model.save({"manual_score": 0});
             } else {
-                var val = elem.val();
-                var max_score = that.get("max_score");
-                if (val > max_score) {
-                    invalidValue(elem);
-                    that.set("manual_score", max_score);
-                } else if (val < 0) {
-                    invalidValue(elem);
-                    that.set("manual_score", 0);
-                } else {
-                    that.set("manual_score", val);
-                }
+                this.model.save({"manual_score": val});
             }
+        }
+    },
 
-            elem.val(that.get("manual_score"));
-            glyph.removeClass("glyphicon-ok");
-            glyph.addClass("glyphicon-refresh");
-            glyph.fadeIn(10);
+    animateSaving: function () {
+        this.$glyph.removeClass("glyphicon-ok");
+        this.$glyph.addClass("glyphicon-refresh");
+        this.$glyph.fadeIn(10);
+    },
 
-            that.save("manual_score", that.get("manual_score"), {
-                success: function () {
-                    glyph.removeClass("glyphicon-refresh");
-                    glyph.addClass("glyphicon-ok");
-                    setTimeout(function () {
-                        glyph.fadeOut();
-                    }, 1000);
-                    console.log("Finished saving score " + that.get("name"));
-                    $(document).trigger("finished_saving");
-                }
-            });
+    animateSaved: function () {
+        this.$glyph.removeClass("glyphicon-refresh");
+        this.$glyph.addClass("glyphicon-ok");
+        var that = this;
+        setTimeout(function () {
+            that.$glyph.fadeOut();
+        }, 1000);
+        $(document).trigger("finished_saving");
+    },
+
+    animateInvalidValue: function () {
+        var that = this;
+        this.$score.animate({
+            "background-color": "#FF8888",
+            "border-color": "red"
+        }, 100, undefined, function () {
+            setTimeout(function () {
+                that.$score.animate({
+                    "background-color": "white",
+                    "border-color": "white"
+                }, 100);
+            }, 50);
         });
+    },
+
+    assignFullCredit: function () {
+        this.model.save({"manual_score": this.model.get("max_score")});
+        this.$score.select();
+        this.$score.focus();
+    },
+
+    assignNoCredit: function () {
+        this.model.save({"manual_score": 0});
+        this.$score.select();
+        this.$score.focus();
     }
+});
+
+var Grade = Backbone.Model.extend({
+    urlRoot: base_url + "/api/grade"
 });
 
 var Grades = Backbone.Collection.extend({
@@ -78,66 +93,53 @@ var Grades = Backbone.Collection.extend({
     url: base_url + "/api/grades"
 });
 
-var Comment = Backbone.Model.extend({
-    urlRoot: base_url + "/api/comment",
+var CommentUI = Backbone.View.extend({
+
+    events: {
+        "change .comment": "save",
+    },
+
     initialize: function () {
-        var elem = $($(".comment")[this.get("name")]);
-        var glyph = $($(".comment-saved")[this.get("name")]);
-        elem.val(this.get("comment"));
+        this.$glyph = this.$el.find(".comment-saved");
+        this.$comment = this.$el.find(".comment");
 
+        this.listenTo(this.model, "change", this.render);
+        this.listenTo(this.model, "request", this.animateSaving);
+        this.listenTo(this.model, "sync", this.animateSaved);
+
+        this.render();
+    },
+
+    render: function () {
+        this.$comment.val(this.model.get("comment"));
+    },
+
+    save: function () {
+        this.model.save({"comment": this.$comment.val()});
+    },
+
+    animateSaving: function () {
+        this.$glyph.removeClass("glyphicon-ok");
+        this.$glyph.addClass("glyphicon-refresh");
+        this.$glyph.fadeIn(10);
+    },
+
+    animateSaved: function () {
+        this.$glyph.removeClass("glyphicon-refresh");
+        this.$glyph.addClass("glyphicon-ok");
         var that = this;
-        elem.on("change", function (evt) {
-            console.log("Saving comment " + that.get("name"));
-            that.set("comment", elem.val());
+        setTimeout(function () {
+            that.$glyph.fadeOut();
+        }, 1000);
+        $(document).trigger("finished_saving");
+    },
+});
 
-            glyph.removeClass("glyphicon-ok");
-            glyph.addClass("glyphicon-refresh");
-            glyph.fadeIn(10);
-
-            that.save("comment", that.get("comment"), {
-                success: function () {
-                    glyph.removeClass("glyphicon-refresh");
-                    glyph.addClass("glyphicon-ok");
-                    setTimeout(function () {
-                        glyph.fadeOut();
-                    }, 1000);
-                    console.log("Finished saving comment " + that.get("name"));
-                    $(document).trigger("finished_saving");
-                }
-            });
-        });
-    }
+var Comment = Backbone.Model.extend({
+    urlRoot: base_url + "/api/comment"
 });
 
 var Comments = Backbone.Collection.extend({
     model: Comment,
     url: base_url + "/api/comments"
 });
-
-var loadGrades = function (submission_id) {
-    var grades = new Grades();
-    grades.loaded = false;
-    grades.fetch({
-        data: {
-            submission_id: submission_id
-        },
-        success: function () {
-            grades.loaded = true;
-        }
-    });
-    return grades;
-};
-
-var loadComments = function (submission_id) {
-    var comments = new Comments();
-    comments.loaded = false;
-    comments.fetch({
-        data: {
-            submission_id: submission_id
-        },
-        success: function () {
-            comments.loaded = true;
-        }
-    });
-    return comments;
-};

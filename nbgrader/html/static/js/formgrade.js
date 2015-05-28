@@ -7,14 +7,16 @@ function FormGrader (base_url, submission_id) {
     this.last_selected;
 
     this.grades;
+    this.grade_uis;
     this.comments;
+    this.comment_uis;
 
     this.keyboard_manager;
 }
 
 FormGrader.prototype.init = function () {
-    this.grades = loadGrades(this.submission_id);
-    this.comments = loadComments(this.submission_id);
+    this.loadGrades();
+    this.loadComments();
 
     // disable link selection on tabs
     $('a:not(.tabbable)').attr('tabindex', '-1');
@@ -31,6 +33,52 @@ FormGrader.prototype.init = function () {
     this.keyboard_manager.register(this.nextIncorrectAssignment, "body", "control+shift+arrowright");
     this.keyboard_manager.register(this.prevAssignment, "body", "shift+arrowleft");
     this.keyboard_manager.register(this.prevIncorrectAssignment, "body", "control+shift+arrowleft");
+};
+
+FormGrader.prototype.loadGrades = function () {
+    var that = this;
+
+    this.grades = new Grades();
+    this.grade_uis = [];
+    this.grades.loaded = false;
+    this.grades.fetch({
+        data: {
+            "submission_id": this.submission_id
+        },
+        success: function () {
+            that.grades.loaded = true;
+            that.grades.each(function (model) {
+                var grade_ui = new GradeUI({
+                    "model": model,
+                    "el": $("#" + model.get("name")).parents(".nbgrader_cell")
+                });
+                that.grade_uis.push(grade_ui);
+            });
+        }
+    });
+};
+
+FormGrader.prototype.loadComments = function () {
+    var that = this;
+
+    this.comments = new Comments();
+    this.comment_uis = [];
+    this.comments.loaded = false;
+    this.comments.fetch({
+        data: {
+            "submission_id": this.submission_id
+        },
+        success: function () {
+            that.comments.loaded = true;
+            that.comments.each(function (model) {
+                var comment_ui = new CommentUI({
+                    "model": model,
+                    "el": $($(".comment")[model.get("name")]).parents(".nbgrader_cell")
+                });
+                that.comment_uis.push(comment_ui);
+            });
+        }
+    });
 };
 
 FormGrader.prototype.navigateTo = function (location) {
@@ -68,7 +116,9 @@ FormGrader.prototype.prevIncorrectAssignment = function () {
 FormGrader.prototype.save = function (callback) {
     var elem = document.activeElement;
     if (elem.tagName === "INPUT" || elem.tagName === "TEXTAREA") {
-        $(document).on("finished_saving", callback);
+        if (callback) {
+            $(document).on("finished_saving", callback);
+        }
         $(elem).blur();
         $(elem).trigger("change");
     } else {
