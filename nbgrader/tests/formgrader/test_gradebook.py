@@ -1,13 +1,10 @@
 import pytest
 
-from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.support.ui import WebDriverWait
-
 from nbgrader.api import MissingEntry
 from nbgrader.tests.formgrader.base import BaseTestFormgrade
 
 
-@pytest.mark.usefixtures("formgrader")
+@pytest.mark.usefixtures("all_formgraders")
 class TestGradebook(BaseTestFormgrade):
 
     def test_load_assignment_list(self):
@@ -55,7 +52,7 @@ class TestGradebook(BaseTestFormgrade):
             for i in range(len(submissions)):
                 # click on the "Submission #i" link
                 self._click_link("Submission #{}".format(i + 1))
-                self._wait_for_notebook_page("submissions/{}".format(submissions[i].id))
+                self._wait_for_formgrader("submissions/{}/?index=0".format(submissions[i].id))
                 self.browser.back()
 
     def test_load_student_list(self):
@@ -100,7 +97,7 @@ class TestGradebook(BaseTestFormgrade):
             for problem in self.gradebook.find_assignment("Problem Set 1").notebooks:
                 submission = self.gradebook.find_submission_notebook(problem.name, "Problem Set 1", student.id)
                 self._click_link(problem.name)
-                self._wait_for_notebook_page("submissions/{}".format(submission.id))
+                self._wait_for_formgrader("submissions/{}/?index=0".format(submission.id))
                 self.browser.back()
                 self._wait_for_gradebook_page("students/{}/Problem Set 1".format(student.id))
 
@@ -129,7 +126,7 @@ class TestGradebook(BaseTestFormgrade):
 
             for i, submission in enumerate(submissions):
                 self.browser.get(self.formgrade_url("submissions/{}".format(submission.id)))
-                self._wait_for_notebook_page("submissions/{}".format(submission.id))
+                self._wait_for_formgrader("submissions/{}/?index=0".format(submission.id))
 
                 # click on the "Assignments" link
                 self._click_link("Assignments")
@@ -137,7 +134,7 @@ class TestGradebook(BaseTestFormgrade):
 
                 # go back
                 self.browser.back()
-                self._wait_for_notebook_page("submissions/{}".format(submission.id))
+                self._wait_for_formgrader("submissions/{}/?index=0".format(submission.id))
 
                 # click on the "Problem Set 1" link
                 self._click_link("Problem Set 1")
@@ -145,7 +142,7 @@ class TestGradebook(BaseTestFormgrade):
 
                 # go back
                 self.browser.back()
-                self._wait_for_notebook_page("submissions/{}".format(submission.id))
+                self._wait_for_formgrader("submissions/{}/?index=0".format(submission.id))
 
                 # click on the problem link
                 self._click_link(problem.name)
@@ -153,7 +150,7 @@ class TestGradebook(BaseTestFormgrade):
 
                 # go back
                 self.browser.back()
-                self._wait_for_notebook_page("submissions/{}".format(submission.id))
+                self._wait_for_formgrader("submissions/{}/?index=0".format(submission.id))
 
                 # check the live notebook link
                 self._click_link("Submission #{}".format(i + 1))

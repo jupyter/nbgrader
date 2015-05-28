@@ -25,30 +25,6 @@ class TestFormgrader(BaseTestFormgrade):
     def _get_score_box(self, index):
         return self.browser.find_elements_by_css_selector(".score")[index]
 
-    def _wait_for_formgrader(self, url):
-        self._wait_for_element("notebook-container")
-        page_loaded = lambda browser: browser.execute_script(
-            """
-            if (!(typeof MathJax !== "undefined" && MathJax !== undefined && MathJax.loaded)) {
-                return false;
-            }
-            if (!(typeof formgrader !== "undefined" && formgrader !== undefined)) {
-                return false;
-            }
-
-            if (!(formgrader.grades !== undefined && formgrader.grades.loaded)) {
-                return false;
-            }
-
-            if (!(formgrader.comments !== undefined && formgrader.comments.loaded)) {
-                return false;
-            }
-
-            return true;
-            """)
-        WebDriverWait(self.browser, 10).until(page_loaded)
-        self._check_url(url)
-
     def _save_comment(self, index):
         self._send_keys_to_body(Keys.ESCAPE)
         glyph = self.browser.find_elements_by_css_selector(".comment-saved")[index]

@@ -67,11 +67,7 @@ minversion = pytest.mark.skipif(
     reason="JupyterHub tests require Python 3")
 
 # parameterize the formgrader to run under all managers
-@pytest.fixture(
-    scope="class",
-    params=[minversion(x) if x.startswith("Hub") else x for x in manager.__all__]
-)
-def formgrader(request, gradebook, tempdir):
+def _formgrader(request, gradebook, tempdir):
     man = getattr(manager, request.param)(tempdir)
     man.start()
 
@@ -97,3 +93,17 @@ def formgrader(request, gradebook, tempdir):
         browser.quit()
         man.stop()
     request.addfinalizer(fin)
+
+@pytest.fixture(
+    scope="class",
+    params=[minversion(x) if x.startswith("Hub") else x for x in manager.__all__]
+)
+def all_formgraders(request, gradebook, tempdir):
+    _formgrader(request, gradebook, tempdir)
+
+@pytest.fixture(
+    scope="class",
+    params=["DefaultManager"]
+)
+def formgrader(request, gradebook, tempdir):
+    _formgrader(request, gradebook, tempdir)
