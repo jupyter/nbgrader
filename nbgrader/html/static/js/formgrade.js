@@ -29,10 +29,10 @@ FormGrader.prototype.init = function () {
     this.keyboard_manager.register(_.bind(this.selectPrevInput, this),         "body",         "shift+tab");
     this.keyboard_manager.register(_.bind(this.defocusInput, this),            ".tabbable",    "esc");
     this.keyboard_manager.register(_.bind(this.focusInput, this),              "body",         "enter");
-    this.keyboard_manager.register(_.bind(this.nextAssignment, this),          "body",         "shift+arrowright");
-    this.keyboard_manager.register(_.bind(this.nextIncorrectAssignment, this), "body",         "control+shift+arrowright");
-    this.keyboard_manager.register(_.bind(this.prevAssignment, this),          "body",         "shift+arrowleft");
-    this.keyboard_manager.register(_.bind(this.prevIncorrectAssignment, this), "body",         "control+shift+arrowleft");
+    this.keyboard_manager.register(_.bind(this.nextAssignment, this),          "body",         "control+.");
+    this.keyboard_manager.register(_.bind(this.nextIncorrectAssignment, this), "body",         "control+shift+.");
+    this.keyboard_manager.register(_.bind(this.prevAssignment, this),          "body",         "control+,");
+    this.keyboard_manager.register(_.bind(this.prevIncorrectAssignment, this), "body",         "control+shift+,");
 };
 
 FormGrader.prototype.loadGrades = function () {

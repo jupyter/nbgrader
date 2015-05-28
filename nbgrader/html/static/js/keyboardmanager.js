@@ -3,8 +3,8 @@ function KeyboardManager () {
         9: 'tab',
         27: 'esc',
         13: 'enter',
-        39: 'arrowright',
-        37: 'arrowleft'
+        190: '.',
+        188: ','
     };
 
     this.handlers = new Object();
