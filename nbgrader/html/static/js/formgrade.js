@@ -24,15 +24,15 @@ FormGrader.prototype.init = function () {
     this.configureTooltips();
     this.configureScrolling();
 
-    this.keyboard_manager = new KeyboardManager(this);
-    this.keyboard_manager.register(this.selectNextInput, "body", "tab");
-    this.keyboard_manager.register(this.selectPrevInput, "body", "shift+tab");
-    this.keyboard_manager.register(this.defocusInput, ".tabbable", "esc");
-    this.keyboard_manager.register(this.focusInput, "body", "enter");
-    this.keyboard_manager.register(this.nextAssignment, "body", "shift+arrowright");
-    this.keyboard_manager.register(this.nextIncorrectAssignment, "body", "control+shift+arrowright");
-    this.keyboard_manager.register(this.prevAssignment, "body", "shift+arrowleft");
-    this.keyboard_manager.register(this.prevIncorrectAssignment, "body", "control+shift+arrowleft");
+    this.keyboard_manager = new KeyboardManager();
+    this.keyboard_manager.register(this.selectNextInput.bind(this),         "body",         "tab");
+    this.keyboard_manager.register(this.selectPrevInput.bind(this),         "body",         "shift+tab");
+    this.keyboard_manager.register(this.defocusInput.bind(this),            ".tabbable",    "esc");
+    this.keyboard_manager.register(this.focusInput.bind(this),              "body",         "enter");
+    this.keyboard_manager.register(this.nextAssignment.bind(this),          "body",         "shift+arrowright");
+    this.keyboard_manager.register(this.nextIncorrectAssignment.bind(this), "body",         "control+shift+arrowright");
+    this.keyboard_manager.register(this.prevAssignment.bind(this),          "body",         "shift+arrowleft");
+    this.keyboard_manager.register(this.prevIncorrectAssignment.bind(this), "body",         "control+shift+arrowleft");
 };
 
 FormGrader.prototype.loadGrades = function () {
@@ -86,30 +86,30 @@ FormGrader.prototype.navigateTo = function (location) {
 };
 
 FormGrader.prototype.nextAssignment = function () {
-    var that = this;
+    var url = this.navigateTo('next');
     this.save(function () {
-        window.location = that.navigateTo('next');
+        window.location = url;
     });
 };
 
 FormGrader.prototype.nextIncorrectAssignment = function () {
-    var that = this;
+    var url = this.navigateTo('next_incorrect');
     this.save(function () {
-        window.location = that.navigateTo('next_incorrect');
+        window.location = url;
     });
 };
 
 FormGrader.prototype.prevAssignment = function () {
-    var that = this;
+    var url = this.navigateTo('prev');
     this.save(function () {
-        window.location = that.navigateTo('prev');
+        window.location = url;
     });
 };
 
 FormGrader.prototype.prevIncorrectAssignment = function () {
-    var that = this;
+    var url = this.navigateTo('prev_incorrect');
     this.save(function () {
-        window.location = that.navigateTo('prev_incorrect');
+        window.location = url;
     });
 };
 

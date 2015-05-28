@@ -1,4 +1,4 @@
-function KeyboardManager (obj) {
+function KeyboardManager () {
     this.keycode_to_key = {
         9: 'tab',
         27: 'esc',
@@ -8,7 +8,6 @@ function KeyboardManager (obj) {
     };
 
     this.handlers = new Object();
-    this.obj = obj;
 }
 
 KeyboardManager.prototype.parseKeybinding = function (keybinding) {
@@ -69,9 +68,5 @@ KeyboardManager.prototype.register = function (handler, selector, keybinding) {
 
     keybinding = this.parseKeybinding(keybinding);
     keybinding = this.constructKeybinding(keybinding.key, keybinding.control, keybinding.shift);
-    if (this.obj) {
-        this.handlers[selector][keybinding] = handler.bind(this.obj);
-    } else {
-        this.handlers[selector][keybinding] = handler;
-    }
+    this.handlers[selector][keybinding] = handler;
 };
