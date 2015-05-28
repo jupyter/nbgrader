@@ -229,12 +229,14 @@ FormGrader.prototype.configureScrolling = function () {
     var that = this;
 
     $(".tabbable").focus(function (event) {
-        that.last_selected = $(event.currentTarget);
-        that.setCurrentIndex();
-        history.replaceState(history.state, "", that.navigateTo(""));
-        $("body, html").stop().animate({
-            scrollTop: that.getScrollPosition()
-        }, 500);
+        if (that.last_selected[0] !== event.currentTarget) {
+            that.last_selected = $(event.currentTarget);
+            that.setCurrentIndex();
+            history.replaceState(history.state, "", that.navigateTo(""));
+            $("body, html").stop().animate({
+                scrollTop: that.getScrollPosition()
+            }, 500);
+        }
     });
 
     this.setIndexFromUrl();
