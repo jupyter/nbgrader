@@ -7,6 +7,27 @@ from nbgrader.tests.formgrader.base import BaseTestFormgrade
 @pytest.mark.usefixtures("all_formgraders")
 class TestGradebook(BaseTestFormgrade):
 
+    def test_start(self):
+        # This is just a fake test, since starting up the browser and formgrader
+        # can take a little while. So if anything goes wrong there, this test
+        # will fail, rather than having it fail on some other test.
+        pass
+
+    def test_login(self):
+        if self.manager.jupyterhub is None:
+            return
+
+        self.browser.get(self.manager.base_formgrade_url)
+        self._wait_for_element("username_input")
+        self._check_url("http://localhost:8000/hub/login?next={}".format(self.formgrade_url()))
+
+        # fill out the form
+        self.browser.find_element_by_id("username_input").send_keys("foobar")
+        self.browser.find_element_by_id("login_submit").click()
+
+        # check the url
+        self._wait_for_gradebook_page("assignments")
+
     def test_load_assignment_list(self):
         # load the main page and make sure it redirects
         self.browser.get(self.formgrade_url())
@@ -158,3 +179,17 @@ class TestGradebook(BaseTestFormgrade):
                 self._wait_for_notebook_page(self.notebook_url("autograded/{}/Problem Set 1/{}.ipynb".format(submission.student.id, problem.name)))
                 self.browser.close()
                 self.browser.switch_to_window(self.browser.window_handles[0])
+
+    def test_formgrade_images(self):
+        submissions = self.gradebook.find_notebook("Problem 1", "Problem Set 1").submissions
+        submissions.sort(key=lambda x: x.id)
+
+        for submission in submissions:
+            self.browser.get(self.formgrade_url("submissions/{}".format(submission.id)))
+            self._wait_for_formgrader("submissions/{}/?index=0".format(submission.id))
+
+            images = self.browser.find_elements_by_tag_name("img")
+            for image in images:
+                # check that the image is loaded, and that it has a width
+                assert self.browser.execute_script("return arguments[0].complete", image)
+                assert self.browser.execute_script("return arguments[0].naturalWidth", image) > 0

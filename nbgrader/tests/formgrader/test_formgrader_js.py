@@ -7,7 +7,7 @@ from nbgrader.tests.formgrader.base import BaseTestFormgrade
 
 
 @pytest.mark.usefixtures("formgrader")
-class TestFormgrader(BaseTestFormgrade):
+class TestFormgraderJS(BaseTestFormgrade):
 
     def _send_keys_to_body(self, *keys):
         body = self.browser.find_element_by_tag_name("body")
@@ -52,19 +52,11 @@ class TestFormgrader(BaseTestFormgrade):
         self._click_link("Submission #1")
         self._wait_for_formgrader("submissions/{}/?index=0".format(submissions[0].id))
 
-    def test_formgrade_images(self):
-        submissions = self.gradebook.find_notebook("Problem 1", "Problem Set 1").submissions
-        submissions.sort(key=lambda x: x.id)
-
-        for submission in submissions:
-            self.browser.get(self.formgrade_url("submissions/{}".format(submission.id)))
-            self._wait_for_formgrader("submissions/{}/?index=0".format(submission.id))
-
-            images = self.browser.find_elements_by_tag_name("img")
-            for image in images:
-                # check that the image is loaded, and that it has a width
-                assert self.browser.execute_script("return arguments[0].complete", image)
-                assert self.browser.execute_script("return arguments[0].naturalWidth", image) > 0
+    def test_start(self):
+        # This is just a fake test, since starting up the browser and formgrader
+        # can take a little while. So if anything goes wrong there, this test
+        # will fail, rather than having it fail on some other test.
+        pass
 
     def test_next_prev_assignments(self):
         problem = self.gradebook.find_notebook("Problem 1", "Problem Set 1")

@@ -66,9 +66,11 @@ minversion = pytest.mark.skipif(
     sys.version_info[0] < 3,
     reason="JupyterHub tests require Python 3")
 
-# parameterize the formgrader to run under all managers
 def _formgrader(request, gradebook, tempdir):
-    man = getattr(manager, request.param)(tempdir)
+    if not hasattr(request, 'param'):
+        man = manager.DefaultManager(tempdir)
+    else:
+        man = getattr(manager, request.param)(tempdir)
     man.start()
 
     selenium_logger = logging.getLogger('selenium.webdriver.remote.remote_connection')
@@ -94,6 +96,7 @@ def _formgrader(request, gradebook, tempdir):
         man.stop()
     request.addfinalizer(fin)
 
+# parameterize the formgrader to run under all managers
 @pytest.fixture(
     scope="class",
     params=[minversion(x) if x.startswith("Hub") else x for x in manager.__all__]
@@ -101,9 +104,7 @@ def _formgrader(request, gradebook, tempdir):
 def all_formgraders(request, gradebook, tempdir):
     _formgrader(request, gradebook, tempdir)
 
-@pytest.fixture(
-    scope="class",
-    params=["DefaultManager"]
-)
+# parameterize the formgrader to run under all managers
+@pytest.fixture(scope="class")
 def formgrader(request, gradebook, tempdir):
     _formgrader(request, gradebook, tempdir)
