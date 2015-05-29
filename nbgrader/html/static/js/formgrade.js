@@ -25,14 +25,47 @@ FormGrader.prototype.init = function () {
     this.configureScrolling();
 
     this.keyboard_manager = new KeyboardManager();
-    this.keyboard_manager.register(_.bind(this.selectNextInput, this),         "body",         "tab");
-    this.keyboard_manager.register(_.bind(this.selectPrevInput, this),         "body",         "shift+tab");
-    this.keyboard_manager.register(_.bind(this.defocusInput, this),            ".tabbable",    "esc");
-    this.keyboard_manager.register(_.bind(this.focusInput, this),              "body",         "enter");
-    this.keyboard_manager.register(_.bind(this.nextAssignment, this),          "body",         "shift+arrowright");
-    this.keyboard_manager.register(_.bind(this.nextIncorrectAssignment, this), "body",         "control+shift+arrowright");
-    this.keyboard_manager.register(_.bind(this.prevAssignment, this),          "body",         "shift+arrowleft");
-    this.keyboard_manager.register(_.bind(this.prevIncorrectAssignment, this), "body",         "control+shift+arrowleft");
+    this.keyboard_manager.register({
+        "handler": _.bind(this.selectNextInput, this),
+        "keybinding": "tab",
+        "help": "Move to the next score or comment input"
+    });
+    this.keyboard_manager.register({
+        "handler": _.bind(this.selectPrevInput, this),
+        "keybinding": "shift-tab",
+        "help": "Move to the previous score or comment input"
+    });
+    this.keyboard_manager.register({
+        "handler": _.bind(this.defocusInput, this),
+        "selector": ".tabbable",
+        "keybinding": "escape",
+        "help": "Defocus and save the current score or comment input"
+    });
+    this.keyboard_manager.register({
+        "handler": _.bind(this.focusInput, this),
+        "keybinding": "enter",
+        "help": "Refocus the most recent score or comment input"
+    });
+    this.keyboard_manager.register({
+        "handler": _.bind(this.nextAssignment, this),
+        "keybinding": "control-.",
+        "help": "Move to the same score or comment input of the next submission"
+    });
+    this.keyboard_manager.register({
+        "handler": _.bind(this.nextIncorrectAssignment, this),
+        "keybinding": "control-shift-.",
+        "help": "Move to the same score or comment input of the next submission with failed tests"
+    });
+    this.keyboard_manager.register({
+        "handler": _.bind(this.prevAssignment, this),
+        "keybinding": "control-,",
+        "help": "Move to the same score or comment input of the previous submission"
+    });
+    this.keyboard_manager.register({
+        "handler": _.bind(this.prevIncorrectAssignment, this),
+        "keybinding": "control-shift-,",
+        "help": "Move to the same score or comment input of the previous submission with failed tests"
+    });
 };
 
 FormGrader.prototype.loadGrades = function () {

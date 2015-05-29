@@ -2,6 +2,8 @@ import pytest
 
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.by import By
 
 from nbgrader.tests.formgrader.base import BaseTestFormgrade
 
@@ -66,11 +68,11 @@ class TestFormgraderJS(BaseTestFormgrade):
         # test navigating both with the arrow keys and with clicking the
         # next/previous links
         next_functions = [
-            (self._send_keys_to_body, Keys.SHIFT, Keys.ARROW_RIGHT),
+            (self._send_keys_to_body, Keys.CONTROL, "."),
             (self._click_element, ".next a")
         ]
         prev_functions = [
-            (self._send_keys_to_body, Keys.SHIFT, Keys.ARROW_LEFT),
+            (self._send_keys_to_body, Keys.CONTROL, ","),
             (self._click_element, ".previous a")
         ]
 
@@ -123,7 +125,7 @@ class TestFormgraderJS(BaseTestFormgrade):
 
         if submissions[0].failed_tests:
             # Go to the next failed submission (should return to the notebook list)
-            self._send_keys_to_body(Keys.SHIFT, Keys.CONTROL, Keys.ARROW_RIGHT)
+            self._send_keys_to_body(Keys.CONTROL, Keys.SHIFT, ".")
             self._wait_for_gradebook_page("assignments/Problem Set 1/Problem 1")
 
             # Go back
@@ -131,7 +133,7 @@ class TestFormgraderJS(BaseTestFormgrade):
             self._wait_for_formgrader("submissions/{}/?index=0".format(submissions[0].id))
 
             # Go to the previous failed submission (should return to the notebook list)
-            self._send_keys_to_body(Keys.SHIFT, Keys.CONTROL, Keys.ARROW_LEFT)
+            self._send_keys_to_body(Keys.CONTROL, Keys.SHIFT, ",")
             self._wait_for_gradebook_page("assignments/Problem Set 1/Problem 1")
 
             # Go back
@@ -139,11 +141,11 @@ class TestFormgraderJS(BaseTestFormgrade):
             self._wait_for_formgrader("submissions/{}/?index=0".format(submissions[0].id))
 
             # Go to the other notebook
-            self._send_keys_to_body(Keys.SHIFT, Keys.ARROW_RIGHT)
+            self._send_keys_to_body(Keys.CONTROL, ".")
             self._wait_for_formgrader("submissions/{}/?index=0".format(submissions[1].id))
 
             # Go to the next failed submission (should return to the notebook list)
-            self._send_keys_to_body(Keys.SHIFT, Keys.CONTROL, Keys.ARROW_RIGHT)
+            self._send_keys_to_body(Keys.CONTROL, Keys.SHIFT, ".")
             self._wait_for_gradebook_page("assignments/Problem Set 1/Problem 1")
 
             # Go back
@@ -151,12 +153,12 @@ class TestFormgraderJS(BaseTestFormgrade):
             self._wait_for_formgrader("submissions/{}/?index=0".format(submissions[1].id))
 
             # Go to the previous failed submission
-            self._send_keys_to_body(Keys.SHIFT, Keys.CONTROL, Keys.ARROW_LEFT)
+            self._send_keys_to_body(Keys.CONTROL, Keys.SHIFT, ",")
             self._wait_for_formgrader("submissions/{}/?index=0".format(submissions[0].id))
 
         else:
             # Go to the next failed submission
-            self._send_keys_to_body(Keys.SHIFT, Keys.CONTROL, Keys.ARROW_RIGHT)
+            self._send_keys_to_body(Keys.CONTROL, Keys.SHIFT, ".")
             self._wait_for_formgrader("submissions/{}/?index=0".format(submissions[1].id))
 
             # Go back
@@ -164,7 +166,7 @@ class TestFormgraderJS(BaseTestFormgrade):
             self._wait_for_formgrader("submissions/{}/?index=0".format(submissions[0].id))
 
             # Go to the previous failed submission (should return to the notebook list)
-            self._send_keys_to_body(Keys.SHIFT, Keys.CONTROL, Keys.ARROW_LEFT)
+            self._send_keys_to_body(Keys.CONTROL, Keys.SHIFT, ",")
             self._wait_for_gradebook_page("assignments/Problem Set 1/Problem 1")
 
             # Go back
@@ -172,11 +174,11 @@ class TestFormgraderJS(BaseTestFormgrade):
             self._wait_for_formgrader("submissions/{}/?index=0".format(submissions[0].id))
 
             # Go to the other notebook
-            self._send_keys_to_body(Keys.SHIFT, Keys.ARROW_RIGHT)
+            self._send_keys_to_body(Keys.CONTROL, ".")
             self._wait_for_formgrader("submissions/{}/?index=0".format(submissions[1].id))
 
             # Go to the next failed submission (should return to the notebook list)
-            self._send_keys_to_body(Keys.SHIFT, Keys.CONTROL, Keys.ARROW_RIGHT)
+            self._send_keys_to_body(Keys.CONTROL, Keys.SHIFT, ".")
             self._wait_for_gradebook_page("assignments/Problem Set 1/Problem 1")
 
             # Go back
@@ -184,7 +186,7 @@ class TestFormgraderJS(BaseTestFormgrade):
             self._wait_for_formgrader("submissions/{}/?index=0".format(submissions[1].id))
 
             # Go to the previous failed submission (should return to the notebook list)
-            self._send_keys_to_body(Keys.SHIFT, Keys.CONTROL, Keys.ARROW_LEFT)
+            self._send_keys_to_body(Keys.CONTROL, Keys.SHIFT, ",")
             self._wait_for_gradebook_page("assignments/Problem Set 1/Problem 1")
 
     def test_tabbing(self):
@@ -296,23 +298,36 @@ class TestFormgraderJS(BaseTestFormgrade):
 
         # Click the second comment box and navigate to the next submission
         self._get_comment_box(1).click()
-        self._send_keys_to_body(Keys.SHIFT, Keys.ARROW_RIGHT)
+        self._send_keys_to_body(Keys.CONTROL, ".")
         self._wait_for_formgrader("submissions/{}/?index=4".format(submissions[1].id))
         assert self._get_active_element() == self._get_comment_box(1)
 
         # Click the third score box and navigate to the previous submission
         self._get_score_box(2).click()
-        self._send_keys_to_body(Keys.SHIFT, Keys.ARROW_LEFT)
+        self._send_keys_to_body(Keys.CONTROL, ",")
         self._wait_for_formgrader("submissions/{}/?index=5".format(submissions[0].id))
         assert self._get_active_element() == self._get_score_box(2)
 
         # Click the third comment box and navigate to the next submission
         self._get_comment_box(2).click()
-        self._send_keys_to_body(Keys.SHIFT, Keys.ARROW_RIGHT)
+        self._send_keys_to_body(Keys.CONTROL, ".")
         self._wait_for_formgrader("submissions/{}/?index=7".format(submissions[1].id))
         assert self._get_active_element() == self._get_score_box(4)
 
         # Navigate to the previous submission
-        self._send_keys_to_body(Keys.SHIFT, Keys.ARROW_LEFT)
+        self._send_keys_to_body(Keys.CONTROL, ",")
         self._wait_for_formgrader("submissions/{}/?index=7".format(submissions[0].id))
         assert self._get_active_element() == self._get_score_box(4)
+
+    def test_keyboard_help(self):
+        self._load_formgrade()
+
+        # show the help dialog
+        self._click_element(".help")
+        self._wait_for_element("help-dialog")
+        WebDriverWait(self.browser, 10).until(EC.visibility_of_element_located((By.CSS_SELECTOR, "#help-dialog button.btn-primary")))
+
+        # close it
+        self._click_element("#help-dialog button.btn-primary")
+        modal_not_present = lambda browser: browser.execute_script("""return $("#help-dialog").length === 0;""")
+        WebDriverWait(self.browser, 10).until(modal_not_present)
