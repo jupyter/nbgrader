@@ -53,7 +53,13 @@ def static_proxy(filename):
 @blueprint.route("/fonts/<filename>")
 @auth
 def fonts(filename):
-    return redirect(url_for('.static', filename=os.path.join("fonts", filename)))
+    return redirect(url_for('.static_proxy', filename=os.path.join("components", "bootstrap", "fonts", filename)))
+
+
+@blueprint.route("/submissions/components/<path:filename>")
+@auth
+def components(filename):
+    return redirect(url_for('.static_proxy', filename=os.path.join("components", filename)))
 
 
 @blueprint.route("/mathjax/<path:filename>")

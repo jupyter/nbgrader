@@ -1,107 +1,141 @@
-/*global $, Backbone, student, submission_id */
+function FormGrader (base_url, submission_id) {
 
-var Grade = Backbone.Model.extend({
-    urlRoot: base_url + "/api/grade",
-    initialize: function () {
-        var elem = $("#" + this.get("name"));
-        var glyph = $("#" + this.get("name") + "-saved");
-        elem.val(this.get("manual_score"));
-        elem.attr("placeholder", this.get("auto_score"));
+    this.base_url = base_url;
+    this.submission_id = submission_id;
 
-        var that = this;
-        $("#" + this.get("name") + "-full-credit").click(function () {
-            elem.val(that.get("max_score"));
-            elem.trigger("change");
-            elem.select();
-            elem.focus();
-        });
-        $("#" + this.get("name") + "-no-credit").click(function () {
-            elem.val(0);
-            elem.trigger("change");
-            elem.select();
-            elem.focus();
-        });
-        elem.on("change", function (evt) {
-            console.log("Saving score " + that.get("name"));
+    this.current_index;
+    this.last_selected;
 
-            if (elem.val() === "") {
-                that.set("manual_score", null);
-            } else {
-                var val = elem.val();
-                var max_score = that.get("max_score");
-                if (val > max_score) {
-                    invalidValue(elem);
-                    that.set("manual_score", max_score);
-                } else if (val < 0) {
-                    invalidValue(elem);
-                    that.set("manual_score", 0);
-                } else {
-                    that.set("manual_score", val);
-                }
-            }
+    this.grades;
+    this.grade_uis;
+    this.comments;
+    this.comment_uis;
 
-            elem.val(that.get("manual_score"));
-            glyph.removeClass("glyphicon-ok");
-            glyph.addClass("glyphicon-refresh");
-            glyph.fadeIn(10);
+    this.keyboard_manager;
+}
 
-            that.save("manual_score", that.get("manual_score"), {
-                success: function () {
-                    glyph.removeClass("glyphicon-refresh");
-                    glyph.addClass("glyphicon-ok");
-                    setTimeout(function () {
-                        glyph.fadeOut();
-                    }, 1000);
-                    console.log("Finished saving score " + that.get("name"));
-                    $(document).trigger("finished_saving");
-                }
+FormGrader.prototype.init = function () {
+    this.loadGrades();
+    this.loadComments();
+
+    // disable link selection on tabs
+    $('a:not(.tabbable)').attr('tabindex', '-1');
+
+    this.configureTooltips();
+    this.configureScrolling();
+
+    this.keyboard_manager = new KeyboardManager();
+    this.keyboard_manager.register(_.bind(this.selectNextInput, this),         "body",         "tab");
+    this.keyboard_manager.register(_.bind(this.selectPrevInput, this),         "body",         "shift+tab");
+    this.keyboard_manager.register(_.bind(this.defocusInput, this),            ".tabbable",    "esc");
+    this.keyboard_manager.register(_.bind(this.focusInput, this),              "body",         "enter");
+    this.keyboard_manager.register(_.bind(this.nextAssignment, this),          "body",         "shift+arrowright");
+    this.keyboard_manager.register(_.bind(this.nextIncorrectAssignment, this), "body",         "control+shift+arrowright");
+    this.keyboard_manager.register(_.bind(this.prevAssignment, this),          "body",         "shift+arrowleft");
+    this.keyboard_manager.register(_.bind(this.prevIncorrectAssignment, this), "body",         "control+shift+arrowleft");
+};
+
+FormGrader.prototype.loadGrades = function () {
+    var that = this;
+
+    this.grades = new Grades();
+    this.grade_uis = [];
+    this.grades.loaded = false;
+    this.grades.fetch({
+        data: {
+            "submission_id": this.submission_id
+        },
+        success: function () {
+            that.grades.loaded = true;
+            that.grades.each(function (model) {
+                var grade_ui = new GradeUI({
+                    "model": model,
+                    "el": $("#" + model.get("name")).parents(".nbgrader_cell")
+                });
+                that.grade_uis.push(grade_ui);
             });
-        });
-    }
-});
+        }
+    });
+};
 
-var Grades = Backbone.Collection.extend({
-    model: Grade,
-    url: base_url + "/api/grades"
-});
+FormGrader.prototype.loadComments = function () {
+    var that = this;
 
-var Comment = Backbone.Model.extend({
-    urlRoot: base_url + "/api/comment",
-    initialize: function () {
-        var elem = $($(".comment")[this.get("name")]);
-        var glyph = $($(".comment-saved")[this.get("name")]);
-        elem.val(this.get("comment"));
-
-        var that = this;
-        elem.on("change", function (evt) {
-            console.log("Saving comment " + that.get("name"));
-            that.set("comment", elem.val());
-
-            glyph.removeClass("glyphicon-ok");
-            glyph.addClass("glyphicon-refresh");
-            glyph.fadeIn(10);
-
-            that.save("comment", that.get("comment"), {
-                success: function () {
-                    glyph.removeClass("glyphicon-refresh");
-                    glyph.addClass("glyphicon-ok");
-                    setTimeout(function () {
-                        glyph.fadeOut();
-                    }, 1000);
-                    console.log("Finished saving comment " + that.get("name"));
-                    $(document).trigger("finished_saving");
-                }
+    this.comments = new Comments();
+    this.comment_uis = [];
+    this.comments.loaded = false;
+    this.comments.fetch({
+        data: {
+            "submission_id": this.submission_id
+        },
+        success: function () {
+            that.comments.loaded = true;
+            that.comments.each(function (model) {
+                var comment_ui = new CommentUI({
+                    "model": model,
+                    "el": $($(".comment")[model.get("name")]).parents(".nbgrader_cell")
+                });
+                that.comment_uis.push(comment_ui);
             });
-        });
+        }
+    });
+};
+
+FormGrader.prototype.navigateTo = function (location) {
+    return this.base_url + '/submissions/' + this.submission_id + '/' + location + '?index=' + this.current_index;
+};
+
+FormGrader.prototype.nextAssignment = function () {
+    var url = this.navigateTo('next');
+    this.save(function () {
+        window.location = url;
+    });
+};
+
+FormGrader.prototype.nextIncorrectAssignment = function () {
+    var url = this.navigateTo('next_incorrect');
+    this.save(function () {
+        window.location = url;
+    });
+};
+
+FormGrader.prototype.prevAssignment = function () {
+    var url = this.navigateTo('prev');
+    this.save(function () {
+        window.location = url;
+    });
+};
+
+FormGrader.prototype.prevIncorrectAssignment = function () {
+    var url = this.navigateTo('prev_incorrect');
+    this.save(function () {
+        window.location = url;
+    });
+};
+
+FormGrader.prototype.save = function (callback) {
+    var elem = document.activeElement;
+    if (elem.tagName === "INPUT" || elem.tagName === "TEXTAREA") {
+        if (callback) {
+            $(document).on("finished_saving", callback);
+        }
+        $(elem).blur();
+        $(elem).trigger("change");
+    } else {
+        callback();
     }
-});
+};
 
-var Comments = Backbone.Collection.extend({
-    model: Comment,
-    url: base_url + "/api/comments"
-});
+FormGrader.prototype.getScrollPosition = function () {
+    var target = this.last_selected.parents(".nbgrader_cell");
+    if (target.length == 0) {
+        return $("body").offset().top;
+    } else {
+        return target.offset().top - $(window).height() * 0.33 + 60;
+    }
+};
 
-var getIndex = function (elem) {
+FormGrader.prototype.getIndex = function (elem) {
     if (elem !== undefined) {
         var elems = $(".tabbable");
         return elems.index(elem);
@@ -110,23 +144,8 @@ var getIndex = function (elem) {
     }
 };
 
-var getSelectableIndex = function (elem) {
-    var target = elem.parents(".nbgrader_cell").find(".score");
-    if (target.length == 0) {
-        return getIndex(elem);
-    } else {
-        return getIndex(target);
-    }
-};
-
-var selectNext = function (target, shift) {
-    var index, elems;
-    elems = $(".tabbable");
-    if (shift) {
-        index = getIndex(target) - 1;
-    } else {
-        index = getIndex(target) + 1;
-    }
+FormGrader.prototype.selectInput = function (index) {
+    var elems = $(".tabbable");
     if (index === elems.length) {
         index = 0;
     } else if (index === -1) {
@@ -136,157 +155,101 @@ var selectNext = function (target, shift) {
     $(elems[index]).focus();
 };
 
-var scrollTo = function (elem) {
-    var target = elem.parents(".nbgrader_cell");
-    if (target.length == 0) {
-        return $("body").offset().top;
-    } else {
-        return target.offset().top - $(window).height() * 0.33 + 60;
+FormGrader.prototype.selectNextInput = function (e) {
+    e.preventDefault();
+    e.stopPropagation();
+    this.selectInput(this.getIndex(this.last_selected) + 1);
+};
+
+FormGrader.prototype.selectPrevInput = function (e) {
+    e.preventDefault();
+    e.stopPropagation();
+    this.selectInput(this.getIndex(this.last_selected) - 1);
+};
+
+FormGrader.prototype.defocusInput = function (e) {
+    $(e.currentTarget).blur();
+};
+
+FormGrader.prototype.focusInput = function (e) {
+    if (this.last_selected[0] !== document.activeElement) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        $("body, html").scrollTop(this.getScrollPosition());
+        this.last_selected.select();
+        this.last_selected.focus();
     }
 };
 
-var invalidValue = function (elem) {
-    elem.animate({
-        "background-color": "#FF8888",
-        "border-color": "red"
-    }, 100, undefined, function () {
-        setTimeout(function () {
-            elem.animate({
-                "background-color": "white",
-                "border-color": "white"
-            }, 100);
-        }, 50);
-    });
+FormGrader.prototype.configureTooltips = function () {
+    $("li.previous a").tooltip({container: 'body'});
+    $("li.next a").tooltip({container: 'body'});
+    $("li.live-notebook a").tooltip({container: 'body'});
 };
 
-var getParameterByName = function (name) {
+FormGrader.prototype.setIndexFromUrl = function () {
+    var name = "index";
+
     // http://stackoverflow.com/questions/901115/how-can-i-get-query-string-values-in-javascript
     name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
     var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
         results = regex.exec(location.search);
-    return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+    var index = results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+
+    this.setCurrentIndex(parseInt(index) || 0);
+    this.last_selected = $($(".tabbable")[this.current_index]);
 };
 
-var grades;
-var grades_loaded = false;
-var comments;
-var comments_loaded = false;
-var last_selected;
-var current_index = 0;
-var loaded = false;
+FormGrader.prototype.setCurrentIndex = function (index) {
+    // if an index is not provided, then we compute it based
+    // on whatver the most recently selected element was
+    if (index === undefined) {
+        var target = this.last_selected.parents(".nbgrader_cell").find(".score");
+        if (target.length == 0) {
+            this.current_index = this.getIndex(this.last_selected);
+        } else {
+            this.current_index = this.getIndex(target);
+        }
 
-var nextAssignment = function () {
-    window.location = base_url + '/submissions/' + submission_id + '/next' + "?index=" + current_index;
-};
-
-var nextIncorrectAssignment = function () {
-    window.location = base_url + '/submissions/' + submission_id + '/next_incorrect' + "?index=" + current_index;
-};
-
-var prevAssignment = function () {
-    window.location = base_url + '/submissions/' + submission_id + '/prev' + "?index=" + current_index;
-};
-
-var prevIncorrectAssignment = function () {
-    window.location = base_url + '/submissions/' + submission_id + '/prev_incorrect' + "?index=" + current_index;
-};
-
-var save_and_navigate = function(callback) {
-    elem = document.activeElement;
-    if (elem.tagName === "INPUT" || elem.tagName === "TEXTAREA") {
-        $(document).on("finished_saving", callback);
-        $(elem).blur();
-        $(elem).trigger("change");
+    // otherwise we do some value checking and just set the
+    // value directly
     } else {
-        callback();
+        if (index < 0) {
+            this.current_index = 0;
+        } else if (index > $(".tabbable").length) {
+            this.current_index = $(".tabbable").length;
+        } else {
+            this.current_index = index;
+        }
     }
 };
 
-$(window).load(function () {
-    grades = new Grades();
-    grades.fetch({
-        data: {
-            submission_id: submission_id
-        },
-        success: function () {
-            grades_loaded = true;
-        }
-    });
-
-    comments = new Comments();
-    comments.fetch({
-        data: {
-            submission_id: submission_id
-        },
-        success: function () {
-            comments_loaded = true;
-        }
-    });
-
-    $("li.previous a").tooltip({container: 'body'});
-    $("li.next a").tooltip({container: 'body'});
-    $("li.live-notebook a").tooltip({container: 'body'});
-
-    // disable link selection on tabs
-    $('a:not(.tabbable)').attr('tabindex', '-1');
-
-    $(".tabbable").on('keydown', function(e) {
-        var keyCode = e.keyCode || e.which;
-
-        if (keyCode === 9) { // tab
-            e.preventDefault();
-            e.stopPropagation();
-            selectNext(e.currentTarget, e.shiftKey);
-
-        } else if (keyCode === 27) { // escape
-            $(e.currentTarget).blur();
-        }
-    });
-
-    $("body").on('keydown', function(e) {
-        var keyCode = e.keyCode || e.which;
-        var href;
-        var elem;
-
-        if (keyCode === 9) { // tab
-            e.preventDefault();
-            selectNext(last_selected, e.shiftKey);
-        } else if (keyCode === 13) { // enter
-            if (last_selected[0] !== document.activeElement) {
-                $("body, html").scrollTop(scrollTo(last_selected));
-                last_selected.select();
-                last_selected.focus();
-            }
-        } else if (keyCode == 39 && e.shiftKey && e.ctrlKey) { // shift + control + right arrow
-            save_and_navigate(nextIncorrectAssignment);
-        } else if (keyCode == 37 && e.shiftKey && e.ctrlKey) { // shift + control + left arrow
-            save_and_navigate(prevIncorrectAssignment);
-        } else if (keyCode == 39 && e.shiftKey) { // shift + right arrow
-            save_and_navigate(nextAssignment);
-        } else if (keyCode == 37 && e.shiftKey) { // shift + left arrow
-            save_and_navigate(prevAssignment);
-        }
-    });
+FormGrader.prototype.configureScrolling = function () {
+    var that = this;
 
     $(".tabbable").focus(function (event) {
-        last_selected = $(event.currentTarget);
-        current_index = getSelectableIndex(last_selected);
+        that.last_selected = $(event.currentTarget);
+        that.setCurrentIndex();
+        history.replaceState(history.state, "", that.navigateTo(""));
         $("body, html").stop().animate({
-            scrollTop: scrollTo(last_selected)
+            scrollTop: that.getScrollPosition()
         }, 500);
     });
 
-    current_index = parseInt(getParameterByName('index')) || 0;
-    if (current_index < 0) { current_index = 0; }
+    this.setIndexFromUrl();
 
-    if ($(".tabbable").length > current_index) {
-        last_selected = $($(".tabbable")[current_index]);
-        MathJax.Hub.Startup.signal.Interest(function (message) {
-            if (message === "End") {
-                last_selected.select();
-                last_selected.focus();
-                loaded = true;
-            }
-        });
-    }
+    MathJax.loaded = false;
+    MathJax.Hub.Startup.signal.Interest(function (message) {
+        if (message === "End") {
+            that.last_selected.select();
+            that.last_selected.focus();
+            MathJax.loaded = true;
+        }
+    });
+};
+
+var formgrader = new FormGrader(base_url, submission_id);
+$(window).load(function () {
+    formgrader.init()
 });

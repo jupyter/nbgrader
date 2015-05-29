@@ -66,13 +66,13 @@ window.MathJax = {
 {% endblock footer %}
 
 {% macro score(cell) -%}
-  <span id="{{ cell.metadata.nbgrader.grade_id }}-saved" class="glyphicon glyphicon-ok save-icon score-saved"></span>
+  <span class="glyphicon glyphicon-ok save-icon score-saved"></span>
   <div class="pull-right">
     <span class="btn-group btn-group-sm scoring-buttons" role="group">
-      <button type="button" class="btn btn-success" id="{{ cell.metadata.nbgrader.grade_id }}-full-credit">Full credit</button>
+      <button type="button" class="btn btn-success full-credit">Full credit</button>
     </span>
     <span class="btn-group btn-group-sm scoring-buttons" role="group">
-      <button type="button" class="btn btn-danger" id="{{ cell.metadata.nbgrader.grade_id }}-no-credit">No credit</button>
+      <button type="button" class="btn btn-danger no-credit">No credit</button>
     </span>
     <span>
       <input class="score tabbable" id="{{ cell.metadata.nbgrader.grade_id }}" style="width: 4em;" type="number" /> / {{ cell.metadata.nbgrader.points | float | round(2) }}

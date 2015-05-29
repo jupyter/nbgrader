@@ -111,7 +111,7 @@ class HubAuthManager(DefaultManager):
             cwd=self.tempdir,
             env=self.env)
 
-        time.sleep(self.shutdown_wait)
+        time.sleep(self.startup_wait)
 
     def _start_formgrader(self):
         print("Getting token from jupyterhub")

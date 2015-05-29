@@ -15,6 +15,8 @@ var assignment_id = "{{ resources.assignment_id }}";
 var base_url = "{{resources.base_url}}";
 </script>
 
+<script src="{{resources.base_url}}/static/js/keyboardmanager.js"></script>
+<script src="{{resources.base_url}}/static/js/models.js"></script>
 <script src="{{resources.base_url}}/static/js/formgrade.js"></script>
 
 <link rel="stylesheet" href="{{resources.base_url}}/static/components/bootstrap/css/bootstrap.min.css" />
