@@ -92,6 +92,7 @@ KeyboardManager.prototype.showHelp = function () {
     var modal = $("<div/>")
         .addClass("modal")
         .addClass("fade")
+        .attr("id", "help-dialog")
         .attr("role", "dialog")
 
     var dialog = $("<div/>").addClass("modal-dialog");
