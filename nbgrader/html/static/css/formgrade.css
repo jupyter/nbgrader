@@ -180,3 +180,13 @@ div.nbgrader_cell .input_area {
 .striped > div:nth-child(odd) {
    background-color: #ddd;
  }
+
+ .modal {
+  z-index: 1050;
+ }
+
+.modal-backdrop {
+  bottom: 0;
+  position: fixed;
+  z-index: 1040;
+}

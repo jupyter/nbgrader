@@ -140,5 +140,5 @@ KeyboardManager.prototype.showHelp = function () {
     });
 
     $("body").append(modal);
-    modal.modal({"backdrop": "static"});
+    modal.modal();
 };
