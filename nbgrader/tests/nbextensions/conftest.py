@@ -4,6 +4,7 @@ import os
 import shutil
 import subprocess as sp
 import logging
+import time
 
 from copy import copy
 from selenium import webdriver
@@ -58,7 +59,15 @@ def nbserver(request, tempdir, ipythondir):
         "--port", "9000"], env=env)
 
     def fin():
-        nbserver.kill()
+        nbserver.send_signal(15) # SIGTERM
+        for i in range(10):
+            retcode = nbserver.poll()
+            if retcode is not None:
+                break
+            time.sleep(0.1)
+        if retcode is None:
+            print("couldn't shutdown notebook server, force killing it")
+            nbserver.kill()
     request.addfinalizer(fin)
 
     return nbserver
