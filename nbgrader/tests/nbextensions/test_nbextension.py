@@ -29,7 +29,7 @@ def _load_notebook(browser, retries=5):
             raise
 
     # wait for the celltoolbar menu to appear
-    WebDriverWait(browser, 10).until(
+    WebDriverWait(browser, 30).until(
         EC.element_to_be_clickable((By.CSS_SELECTOR, '#ctb_select')))
 
 def _activate_toolbar(browser, name="Create Assignment"):
@@ -100,7 +100,7 @@ def test_create_assignment(browser):
     _activate_toolbar(browser)
 
     # make sure the toolbar appeared
-    element = WebDriverWait(browser, 10).until(
+    element = WebDriverWait(browser, 30).until(
         EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".celltoolbar input")))
     assert element[0].get_attribute("type") == "checkbox"
 
@@ -120,9 +120,9 @@ def test_create_assignment(browser):
     assert _get_metadata(browser)['grade']
 
     # wait for the points and id fields to appear
-    WebDriverWait(browser, 10).until(
+    WebDriverWait(browser, 30).until(
         EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".nbgrader-points")))
-    WebDriverWait(browser, 10).until(
+    WebDriverWait(browser, 30).until(
         EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".nbgrader-id")))
 
     # set the points
