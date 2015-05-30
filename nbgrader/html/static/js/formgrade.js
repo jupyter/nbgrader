@@ -68,7 +68,7 @@ FormGrader.prototype.init = function () {
     });
     this.keyboard_manager.register({
         "handler": _.bind(this.flag, this),
-        "keybinding": "control+shift+f",
+        "keybinding": "control-shift-f",
         "help": "Flag the submission"
     });
 };
