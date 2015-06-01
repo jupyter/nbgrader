@@ -19,6 +19,7 @@
     <th class="center">Overall Score</th>
     <th class="center">Code Score</th>
     <th class="center">Written Score</th>
+    <th class="center">Manual grade?</th>
   </tr>
 </thead>
 <tbody>
@@ -37,6 +38,11 @@
     </td>
     <td class="center">
       {{ assignment.written_score | float | round(2) }} / {{ assignment.max_written_score | float | round(2) }}
+    </td>
+    <td class="center">
+      {%- if assignment.needs_manual_grade -%}
+      <span class="glyphicon glyphicon-ok"></span>
+      {%- endif -%}
     </td>
   </tr>
   {%- endfor -%}

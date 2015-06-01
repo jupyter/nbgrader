@@ -453,13 +453,23 @@ def test_query_needs_manual_grade_ungraded(submissions):
         .all()
     assert a == b
 
-    # do all the notebooks need grading?
+    # do all the submitted notebooks need grading?
     a = db.query(api.SubmittedNotebook)\
         .filter(api.SubmittedNotebook.needs_manual_grade)\
         .order_by(api.SubmittedNotebook.id)\
         .all()
     b = db.query(api.SubmittedNotebook)\
         .order_by(api.SubmittedNotebook.id)\
+        .all()
+    assert a == b
+
+    # do all the notebooks need grading?
+    a = db.query(api.Notebook)\
+        .filter(api.Notebook.needs_manual_grade)\
+        .order_by(api.Notebook.id)\
+        .all()
+    b = db.query(api.Notebook)\
+        .order_by(api.Notebook.id)\
         .all()
     assert a == b
 
@@ -486,9 +496,14 @@ def test_query_needs_manual_grade_autograded(submissions):
         .filter(api.Grade.needs_manual_grade)\
         .all()
 
-    # do none of the notebooks need grading?
+    # do none of the submitted notebooks need grading?
     assert [] == db.query(api.SubmittedNotebook)\
         .filter(api.SubmittedNotebook.needs_manual_grade)\
+        .all()
+
+    # do none of the notebooks need grading?
+    assert [] == db.query(api.Notebook)\
+        .filter(api.Notebook.needs_manual_grade)\
         .all()
 
     # do none of the assignments need grading?
@@ -510,9 +525,14 @@ def test_query_needs_manual_grade_manualgraded(submissions):
         .filter(api.Grade.needs_manual_grade)\
         .all()
 
-    # do none of the notebooks need grading?
+    # do none of the submitted notebooks need grading?
     assert [] == db.query(api.SubmittedNotebook)\
         .filter(api.SubmittedNotebook.needs_manual_grade)\
+        .all()
+
+    # do none of the notebooks need grading?
+    assert [] == db.query(api.Notebook)\
+        .filter(api.Notebook.needs_manual_grade)\
         .all()
 
     # do none of the assignments need grading?
