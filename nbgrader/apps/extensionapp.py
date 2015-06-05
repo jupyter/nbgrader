@@ -14,14 +14,10 @@ from nbgrader.apps.baseapp import BaseApp, format_excepthook, base_aliases, base
 
 install_flags = {}
 install_flags.update(extension_flags)
-install_flags.update({
-})
 install_aliases = {}
 install_aliases.update(extension_aliases)
 del install_aliases['destination']
 del install_aliases['ipython-dir']
-install_aliases.update({
-})
 class ExtensionInstallApp(NBExtensionApp):
 
     name = u'nbgrader-extension-install'
@@ -52,8 +48,6 @@ class ExtensionInstallApp(NBExtensionApp):
 
 activate_flags = {}
 activate_flags.update(base_flags)
-activate_flags.update({
-})
 activate_aliases = {}
 activate_aliases.update(base_aliases)
 activate_aliases.update({
@@ -106,8 +100,6 @@ class ExtensionActivateApp(BaseApp):
 
 deactivate_flags = {}
 deactivate_flags.update(base_flags)
-deactivate_flags.update({
-})
 deactivate_aliases = {}
 deactivate_aliases.update(base_aliases)
 deactivate_aliases.update({
