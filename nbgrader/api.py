@@ -72,6 +72,7 @@ class Notebook(Base):
             "max_score": self.max_score,
             "max_code_score": self.max_code_score,
             "max_written_score": self.max_written_score,
+            "needs_manual_grade": self.needs_manual_grade
         }
 
     def __repr__(self):
@@ -330,6 +331,13 @@ SubmittedNotebook.needs_manual_grade = column_property(
 SubmittedAssignment.needs_manual_grade = column_property(
     exists().where(and_(
         SubmittedNotebook.assignment_id == SubmittedAssignment.id,
+        Grade.notebook_id == SubmittedNotebook.id,
+        Grade.needs_manual_grade))\
+    .correlate_except(Grade), deferred=True)
+
+Notebook.needs_manual_grade = column_property(
+    exists().where(and_(
+        Notebook.id == SubmittedNotebook.notebook_id,
         Grade.notebook_id == SubmittedNotebook.id,
         Grade.needs_manual_grade))\
     .correlate_except(Grade), deferred=True)
