@@ -116,26 +116,26 @@ def test_compute_checksum_whitespace():
     # does whitespace make no difference?
     cell1 = create_grade_cell("hello", "code", "foo", 1)
     cell2 = create_grade_cell("hello ", "code", "foo", 1)
-    assert utils.compute_checksum(cell1) == utils.compute_checksum(cell2)
+    assert utils.compute_checksum(cell1) != utils.compute_checksum(cell2)
 
     cell1 = create_grade_cell("hello", "markdown", "foo", 1)
     cell2 = create_grade_cell("hello ", "markdown", "foo", 1)
-    assert utils.compute_checksum(cell1) == utils.compute_checksum(cell2)
+    assert utils.compute_checksum(cell1) != utils.compute_checksum(cell2)
 
     cell1 = create_solution_cell("hello", "code")
     cell2 = create_solution_cell("hello ", "code")
-    assert utils.compute_checksum(cell1) == utils.compute_checksum(cell2)
+    assert utils.compute_checksum(cell1) != utils.compute_checksum(cell2)
 
     cell1 = create_solution_cell("hello", "markdown")
     cell2 = create_solution_cell("hello ", "markdown")
-    assert utils.compute_checksum(cell1) == utils.compute_checksum(cell2)
+    assert utils.compute_checksum(cell1) != utils.compute_checksum(cell2)
 
 
 def test_compute_checksum_source():
     # does the source make a difference?
     cell1 = create_grade_cell("print('hello')", "code", "foo", 1)
     cell2 = create_grade_cell("print( 'hello' )", "code", "foo", 1)
-    assert utils.compute_checksum(cell1) == utils.compute_checksum(cell2)
+    assert utils.compute_checksum(cell1) != utils.compute_checksum(cell2)
 
     cell1 = create_grade_cell("print('hello')", "code", "foo", 1)
     cell2 = create_grade_cell("print( 'hello!' )", "code", "foo", 1)
@@ -147,7 +147,7 @@ def test_compute_checksum_source():
 
     cell1 = create_solution_cell("print('hello')", "code")
     cell2 = create_solution_cell("print( 'hello' )", "code")
-    assert utils.compute_checksum(cell1) == utils.compute_checksum(cell2)
+    assert utils.compute_checksum(cell1) != utils.compute_checksum(cell2)
 
     cell1 = create_solution_cell("print('hello')", "code")
     cell2 = create_solution_cell("print( 'hello!' )", "code")

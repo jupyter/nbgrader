@@ -1,6 +1,5 @@
 import os
 import hashlib
-import autopep8
 import dateutil.parser
 import pwd
 import glob
@@ -45,15 +44,8 @@ def determine_grade(cell):
 
 def compute_checksum(cell):
     m = hashlib.md5()
-
-    # if it's a code cell, then fix minor whitespace issues that might have been 
-    # added and then add cell contents; otherwise just add cell contents
-    if cell.cell_type == "code":
-        m.update(str_to_bytes(autopep8.fix_code(cell.source).rstrip()))
-    else:
-        m.update(str_to_bytes(cell.source.strip()))
-
-    # add the cell type
+    # add the cell source and type
+    m.update(str_to_bytes(cell.source))
     m.update(str_to_bytes(cell.cell_type))
 
     # add whether it's a grade cell and/or solution cell
