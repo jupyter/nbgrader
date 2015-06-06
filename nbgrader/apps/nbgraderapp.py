@@ -22,7 +22,8 @@ from nbgrader.apps import (
     CollectApp,
     FetchApp,
     SubmitApp,
-    ListApp
+    ListApp,
+    ExtensionApp
 )
 
 aliases = {}
@@ -175,6 +176,14 @@ class NbGraderApp(BaseNbGraderApp):
                 """
             ).strip()
         ),
+        extension=(
+            ExtensionApp,
+            dedent(
+                """
+                Install and activate the "Create Assignment" notebook extension.
+                """
+            ).strip()
+        )
     )
 
     generate_config = Bool(False, config=True, help="Generate a new config file")

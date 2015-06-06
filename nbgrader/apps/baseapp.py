@@ -45,6 +45,15 @@ base_flags = {
     ),
 }
 
+def format_excepthook(etype, evaule, tb):
+    traceback.print_exception(etype, evalue, tb)
+    print(dedent(
+        """
+        If you suspect this is a nbgrader bug, please report it at:
+            https://github.com/jupyter/nbgrader/issues
+        """
+    ), file=sys.stderr)
+
 class BaseApp(BaseIPythonApplication):
     """A base class for all the nbgrader apps. This sets a few important defaults,
     like the IPython profile (nbgrader) and that this profile should be created
@@ -106,13 +115,7 @@ class BaseApp(BaseIPythonApplication):
         return Config()
 
     def excepthook(self, etype, evalue, tb):
-        traceback.print_exception(etype, evalue, tb)
-        print(dedent(
-            """
-            If you suspect this is a nbgrader bug, please report it at:
-                https://github.com/jupyter/nbgrader/issues
-            """
-        ), file=sys.stderr)
+        format_excepthook(etype, evaule, tb)
 
     @catch_config_error
     def initialize(self, argv=None):

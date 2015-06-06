@@ -10,6 +10,7 @@ from .collectapp import CollectApp
 from .fetchapp import FetchApp
 from .submitapp import SubmitApp
 from .listapp import ListApp
+from .extensionapp import ExtensionApp
 from .nbgraderapp import NbGraderApp
 
 
@@ -28,4 +29,5 @@ __all__ = [
     'FetchApp',
     'SubmitApp',
     'ListApp',
+    'ExtensionApp',
 ]
