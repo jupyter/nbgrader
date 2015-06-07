@@ -39,46 +39,38 @@ def _activate_toolbar(browser, name="Create Assignment"):
     select.select_by_visible_text(name)
 
 
-def _click_solution(browser):
-    browser.execute_script(
-        """
-        var cell = IPython.notebook.get_cell(0);
-        var elems = cell.element.find(".button_container");
-        $(elems[3]).find("input").click();
-        """
-    )
+def _select_none(browser, index=0):
+    select = Select(browser.find_elements_by_css_selector('.celltoolbar select')[index])
+    select.select_by_value('')
 
 
-def _click_grade(browser, index=0):
-    browser.execute_script(
-        """
-        var cell = IPython.notebook.get_cell({});
-        var elems = cell.element.find(".button_container");
-        $(elems[2]).find("input").click();
-        """.format(index)
-    )
+def _select_manual(browser, index=0):
+    select = Select(browser.find_elements_by_css_selector('.celltoolbar select')[index])
+    select.select_by_value('manual')
+
+
+def _select_solution(browser, index=0):
+    select = Select(browser.find_elements_by_css_selector('.celltoolbar select')[index])
+    select.select_by_value('solution')
+
+
+def _select_tests(browser, index=0):
+    select = Select(browser.find_elements_by_css_selector('.celltoolbar select')[index])
+    select.select_by_value('tests')
 
 
 def _set_points(browser, points=2, index=0):
-    browser.execute_script(
-        """
-        var cell = IPython.notebook.get_cell({});
-        var elem = cell.element.find(".nbgrader-points-input");
-        elem.val("{}");
-        elem.trigger("change");
-        """.format(index, points)
-    )
+    elem = browser.find_elements_by_css_selector(".nbgrader-points-input")[index]
+    elem.clear()
+    elem.send_keys(points)
+    browser.find_elements_by_css_selector(".nbgrader-cell")[index].click()
 
 
-def _set_grade_id(browser, grade_id="foo", index=0):
-    browser.execute_script(
-        """
-        var cell = IPython.notebook.get_cell({});
-        var elem = cell.element.find(".nbgrader-id-input");
-        elem.val("{}");
-        elem.trigger("change");
-        """.format(index, grade_id)
-    )
+def _set_id(browser, cell_id="foo", index=0):
+    elem = browser.find_elements_by_css_selector(".nbgrader-id-input")[index]
+    elem.clear()
+    elem.send_keys(cell_id)
+    browser.find_elements_by_css_selector(".nbgrader-cell")[index].click()
 
 
 def _get_metadata(browser):
@@ -96,28 +88,20 @@ def _get_total_points(browser):
 
 
 @pytest.mark.js
-def test_create_assignment(browser):
+def test_manual_cell(browser):
     _load_notebook(browser)
     _activate_toolbar(browser)
 
     # make sure the toolbar appeared
-    element = WebDriverWait(browser, 30).until(
-        EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".celltoolbar input")))
-    assert element[0].get_attribute("type") == "checkbox"
+    WebDriverWait(browser, 30).until(
+        EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".celltoolbar select")))
 
     # does the nbgrader metadata exist?
     assert _get_metadata(browser) is None
 
-    # click the "solution?" checkbox
-    _click_solution(browser)
+    # make it manually graded
+    _select_manual(browser)
     assert _get_metadata(browser)['solution']
-
-    # unclick the "solution?" checkbox
-    _click_solution(browser)
-    assert not _get_metadata(browser)['solution']
-
-    # click the "grade?" checkbox
-    _click_grade(browser)
     assert _get_metadata(browser)['grade']
 
     # wait for the points and id fields to appear
@@ -131,11 +115,78 @@ def test_create_assignment(browser):
     assert 2 == _get_metadata(browser)['points']
 
     # set the id
-    _set_grade_id(browser)
+    _set_id(browser)
     assert "foo" == _get_metadata(browser)['grade_id']
 
-    # unclick the "grade?" checkbox
-    _click_grade(browser)
+    # make it nothing
+    _select_none(browser)
+    assert not _get_metadata(browser)['solution']
+    assert not _get_metadata(browser)['grade']
+
+
+def test_solution_cell(browser):
+    _load_notebook(browser)
+    _activate_toolbar(browser)
+
+    # make sure the toolbar appeared
+    WebDriverWait(browser, 30).until(
+        EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".celltoolbar select")))
+
+    # does the nbgrader metadata exist?
+    assert _get_metadata(browser) is None
+
+    # make it a solution cell
+    _select_solution(browser)
+    assert _get_metadata(browser)['solution']
+    assert not _get_metadata(browser)['grade']
+
+    # wait for the id field to appear
+    WebDriverWait(browser, 30).until(
+        EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".nbgrader-id")))
+
+    # set the id
+    _set_id(browser)
+    assert "foo" == _get_metadata(browser)['grade_id']
+
+    # make it nothing
+    _select_none(browser)
+    assert not _get_metadata(browser)['solution']
+    assert not _get_metadata(browser)['grade']
+
+
+def test_tests_cell(browser):
+    _load_notebook(browser)
+    _activate_toolbar(browser)
+
+    # make sure the toolbar appeared
+    WebDriverWait(browser, 30).until(
+        EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".celltoolbar select")))
+
+    # does the nbgrader metadata exist?
+    assert _get_metadata(browser) is None
+
+    # make it autograder tests
+    _select_tests(browser)
+    assert not _get_metadata(browser)['solution']
+    assert _get_metadata(browser)['grade']
+
+    # wait for the points and id fields to appear
+    WebDriverWait(browser, 30).until(
+        EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".nbgrader-points")))
+    WebDriverWait(browser, 30).until(
+        EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".nbgrader-id")))
+
+    # set the points
+    _set_points(browser)
+    assert 2 == _get_metadata(browser)['points']
+
+    # set the id
+    _set_id(browser)
+    assert "foo" == _get_metadata(browser)['grade_id']
+
+    # make it nothing
+    _select_none(browser)
+    assert not _get_metadata(browser)['solution']
     assert not _get_metadata(browser)['grade']
 
 
@@ -144,34 +195,54 @@ def test_grade_cell_css(browser):
     _load_notebook(browser)
     _activate_toolbar(browser)
 
-    # click the "grade?" checkbox
-    _click_grade(browser)
-    elements = browser.find_elements_by_css_selector(".nbgrader-grade-cell")
+    # make it manually graded
+    _select_manual(browser)
+    elements = browser.find_elements_by_css_selector(".nbgrader-cell")
     assert len(elements) == 1
 
-    # unclick the "grade?" checkbox
-    _click_grade(browser)
-    elements = browser.find_elements_by_css_selector(".nbgrader-grade-cell")
+    # make it nothing
+    _select_none(browser)
+    elements = browser.find_elements_by_css_selector(".nbgrader-cell")
     assert len(elements) == 0
 
-    # click the "grade?" checkbox
-    _click_grade(browser)
-    elements = browser.find_elements_by_css_selector(".nbgrader-grade-cell")
+    # make it a solution
+    _select_solution(browser)
+    elements = browser.find_elements_by_css_selector(".nbgrader-cell")
+    assert len(elements) == 1
+
+    # make it nothing
+    _select_none(browser)
+    elements = browser.find_elements_by_css_selector(".nbgrader-cell")
+    assert len(elements) == 0
+
+    # make it autograder tests
+    _select_tests(browser)
+    elements = browser.find_elements_by_css_selector(".nbgrader-cell")
+    assert len(elements) == 1
+
+    # make it nothing
+    _select_none(browser)
+    elements = browser.find_elements_by_css_selector(".nbgrader-cell")
+    assert len(elements) == 0
+
+    # make it autograder tests
+    _select_tests(browser)
+    elements = browser.find_elements_by_css_selector(".nbgrader-cell")
     assert len(elements) == 1
 
     # deactivate the toolbar
     _activate_toolbar(browser, "None")
-    elements = browser.find_elements_by_css_selector(".nbgrader-grade-cell")
+    elements = browser.find_elements_by_css_selector(".nbgrader-cell")
     assert len(elements) == 0
 
     # activate the toolbar
     _activate_toolbar(browser)
-    elements = browser.find_elements_by_css_selector(".nbgrader-grade-cell")
+    elements = browser.find_elements_by_css_selector(".nbgrader-cell")
     assert len(elements) == 1
 
     # deactivate the toolbar
     _activate_toolbar(browser, "Edit Metadata")
-    elements = browser.find_elements_by_css_selector(".nbgrader-grade-cell")
+    elements = browser.find_elements_by_css_selector(".nbgrader-cell")
     assert len(elements) == 0
 
 
@@ -180,21 +251,37 @@ def test_tabbing(browser):
     _load_notebook(browser)
     _activate_toolbar(browser)
 
-    # click the "grade?" checkbox
-    _click_grade(browser)
+    # make it manually graded
+    _select_manual(browser)
 
     # click the id field
-    element = browser.find_element_by_css_selector(".nbgrader-id-input")
+    element = browser.find_element_by_css_selector(".nbgrader-points-input")
     element.click()
 
     # get the active element
     element = browser.execute_script("return document.activeElement")
-    assert "nbgrader-id-input" == element.get_attribute("class")
+    assert "nbgrader-points-input" == element.get_attribute("class")
 
     # press tab and check that the active element is correct
     element.send_keys(Keys.TAB)
     element = browser.execute_script("return document.activeElement")
+    assert "nbgrader-id-input" == element.get_attribute("class")
+
+    # make it autograder tests
+    _select_tests(browser)
+
+    # click the id field
+    element = browser.find_element_by_css_selector(".nbgrader-points-input")
+    element.click()
+
+    # get the active element
+    element = browser.execute_script("return document.activeElement")
     assert "nbgrader-points-input" == element.get_attribute("class")
+
+    # press tab and check that the active element is correct
+    element.send_keys(Keys.TAB)
+    element = browser.execute_script("return document.activeElement")
+    assert "nbgrader-id-input" == element.get_attribute("class")
 
 
 @pytest.mark.js
@@ -205,18 +292,22 @@ def test_total_points(browser):
     # make sure the total points is zero
     assert _get_total_points(browser) == 0
 
-    # click the "grade?" checkbox and set the points to two
-    _click_grade(browser)
+    # make it autograder tests and set the points to two
+    _select_tests(browser)
     _set_points(browser)
-    _set_grade_id(browser)
+    _set_id(browser)
     assert _get_total_points(browser) == 2
 
-    # unclick the "grade?" checkbox and make sure the total points is zero
-    _click_grade(browser)
+    # make it a solution make sure the total points is zero
+    _select_solution(browser)
     assert _get_total_points(browser) == 0
 
-    # click the "grade?" checkbox
-    _click_grade(browser)
+    # make it autograder tests
+    _select_tests(browser)
+    assert _get_total_points(browser) == 2
+
+    # make it manually graded
+    _select_manual(browser)
     assert _get_total_points(browser) == 2
 
     # create a new cell
@@ -224,10 +315,19 @@ def test_total_points(browser):
     element.send_keys(Keys.ESCAPE)
     element.send_keys("b")
 
-    # click the "grade?" checkbox
-    _click_grade(browser, index=1)
+    # make sure the toolbar appeared
+    def find_toolbar(browser):
+        try:
+            browser.find_elements_by_css_selector(".celltoolbar select")[1]
+        except IndexError:
+            return False
+        return True
+    WebDriverWait(browser, 30).until(find_toolbar)
+
+    # make it a test cell
+    _select_tests(browser, index=1)
     _set_points(browser, points=1, index=1)
-    _set_grade_id(browser, grade_id="bar", index=1)
+    _set_id(browser, cell_id="bar", index=1)
     assert _get_total_points(browser) == 3
 
     # delete the new cell

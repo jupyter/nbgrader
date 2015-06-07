@@ -221,63 +221,74 @@ define([
     };
 
     var create_celltype_select = function (div, cell, celltoolbar) {
-        var options_list = [];
-        options_list.push(["-", ""]);
-        options_list.push(["Manually graded answer", "manual"]);
-        if (cell.cell_type == "code") {
-            options_list.push(["Autograded answer", "solution"]);
-            options_list.push(["Autograder tests", "tests"]);
-        }
+        // hack -- the DOM element for the celltoolbar is created before the
+        // cell type is actually set, so we need to wait until the cell type
+        // has been set before we can actually create the select menu
+        if (cell.cell_type === null) {
+            setTimeout(function () {
+                create_celltype_select(div, cell, celltoolbar);
+            }, 100);
 
-        var setter = function (cell, val) {
-            if (val === "") {
-                set_solution(cell, false);
-                set_grade(cell, false);
-            } else if (val === "manual") {
-                set_solution(cell, true);
-                set_grade(cell, true);
-            } else if (val === "solution") {
-                set_solution(cell, true);
-                set_grade(cell, false);
-            } else if (val === "tests") {
-                set_solution(cell, false);
-                set_grade(cell, true);
-            } else {
-                throw new Error("invalid nbgrader cell type: " + val);
+        } else {
+
+            var options_list = [];
+            options_list.push(["-", ""]);
+            options_list.push(["Manually graded answer", "manual"]);
+            if (cell.cell_type == "code") {
+                options_list.push(["Autograded answer", "solution"]);
+                options_list.push(["Autograder tests", "tests"]);
             }
-        };
 
-        var getter = function (cell) {
-            if (is_solution(cell) && is_grade(cell)) {
-                return "manual";
-            } else if (is_solution(cell) && cell.cell_type === "code") {
-                return "solution";
-            } else if (is_grade(cell) && cell.cell_type === "code") {
-                return "tests";
-            } else {
-                set_solution(cell, false);
-                set_grade(cell, false);
-                return "";
+            var setter = function (cell, val) {
+                if (val === "") {
+                    set_solution(cell, false);
+                    set_grade(cell, false);
+                } else if (val === "manual") {
+                    set_solution(cell, true);
+                    set_grade(cell, true);
+                } else if (val === "solution") {
+                    set_solution(cell, true);
+                    set_grade(cell, false);
+                } else if (val === "tests") {
+                    set_solution(cell, false);
+                    set_grade(cell, true);
+                } else {
+                    throw new Error("invalid nbgrader cell type: " + val);
+                }
+            };
+
+            var getter = function (cell) {
+                if (is_solution(cell) && is_grade(cell)) {
+                    return "manual";
+                } else if (is_solution(cell) && cell.cell_type === "code") {
+                    return "solution";
+                } else if (is_grade(cell) && cell.cell_type === "code") {
+                    return "tests";
+                } else {
+                    set_solution(cell, false);
+                    set_grade(cell, false);
+                    return "";
+                }
+            };
+
+            var select = $('<select/>');
+            for(var i=0; i < options_list.length; i++){
+                var opt = $('<option/>')
+                    .attr('value', options_list[i][1])
+                    .text(options_list[i][0]);
+                select.append(opt);
             }
-        };
-
-        var select = $('<select/>');
-        for(var i=0; i < options_list.length; i++){
-            var opt = $('<option/>')
-                .attr('value', options_list[i][1])
-                .text(options_list[i][0]);
-            select.append(opt);
-        }
-        select.val(getter(cell));
-        select.change(function () {
-            setter(cell, select.val());
-            celltoolbar.rebuild();
-            update_total();
+            select.val(getter(cell));
+            select.change(function () {
+                setter(cell, select.val());
+                celltoolbar.rebuild();
+                update_total();
+                display_cell(cell);
+                validate_ids();
+            });
             display_cell(cell);
-            validate_ids();
-        });
-        display_cell(cell);
-        $(div).append($('<span/>').append(select));
+            $(div).append($('<span/>').append(select));
+        }
     };
 
     /**
