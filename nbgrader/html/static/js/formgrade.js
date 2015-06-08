@@ -106,7 +106,7 @@ FormGrader.prototype.loadComments = function () {
             that.comments.each(function (model) {
                 var comment_ui = new CommentUI({
                     "model": model,
-                    "el": $($(".comment")[model.get("name")]).parents(".nbgrader_cell")
+                    "el": $("#" + model.get("name") + "-comment").parents(".nbgrader_cell")
                 });
                 that.comment_uis.push(comment_ui);
             });

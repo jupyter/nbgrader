@@ -100,7 +100,7 @@ window.MathJax = {
 {% macro nbgrader_footer(cell) -%}
 {%- if cell.metadata.nbgrader.solution -%}
 <div class="panel-footer">
-  <div><textarea class="comment tabbable" placeholder="Comments"></textarea></div>
+  <div><textarea id="{{ cell.metadata.nbgrader.grade_id }}-comment" class="comment tabbable" placeholder="Comments"></textarea></div>
 </div>
 {%- endif -%}
 {%- endmacro %}
