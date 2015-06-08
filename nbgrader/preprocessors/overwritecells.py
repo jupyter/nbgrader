@@ -16,8 +16,6 @@ class OverwriteCells(NbGraderPreprocessor):
         # connect to the database
         self.gradebook = Gradebook(self.db_url)
 
-        self.comment_index = 0
-
         nb, resources = super(OverwriteCells, self).preprocess(nb, resources)
 
         return nb, resources
@@ -63,7 +61,7 @@ class OverwriteCells(NbGraderPreprocessor):
 
         if utils.is_solution(cell):
             solution_cell = self.gradebook.find_solution_cell(
-                self.comment_index,
+                cell.metadata.nbgrader["grade_id"],
                 self.notebook_id,
                 self.assignment_id)
 
@@ -76,8 +74,6 @@ class OverwriteCells(NbGraderPreprocessor):
             cell.metadata.nbgrader['checksum'] = solution_cell.checksum
             self.update_cell_type(cell, solution_cell.cell_type)
 
-            self.log.debug("Overwrote solution cell #%s", self.comment_index)
-
-            self.comment_index += 1
+            self.log.debug("Overwrote solution cell #%s", solution_cell.name)
 
         return cell, resources

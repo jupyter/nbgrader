@@ -16,8 +16,6 @@ class GetGrades(NbGraderPreprocessor):
         # connect to the database
         self.gradebook = Gradebook(self.db_url)
 
-        self.comment_index = 0
-
         # process the cells
         nb, resources = super(GetGrades, self).preprocess(nb, resources)
 
@@ -38,16 +36,13 @@ class GetGrades(NbGraderPreprocessor):
 
         # retrieve or create the comment object from the database
         comment = self.gradebook.find_comment(
-            self.comment_index,
+            cell.metadata['nbgrader']['grade_id'],
             self.notebook_id,
             self.assignment_id,
             self.student_id)
 
         # save it in the notebook
         cell.metadata.nbgrader['comment'] = comment.to_dict()
-
-        # update the number of comments we have inserted
-        self.comment_index += 1
 
     def _get_score(self, cell, resources):
         grade = self.gradebook.find_grade(
