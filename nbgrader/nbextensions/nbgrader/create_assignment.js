@@ -224,6 +224,33 @@ define([
         }
     };
 
+    var is_locked = function (cell) {
+        if (is_solution(cell)) {
+            return false;
+        } else if (is_grade(cell)) {
+            return true;
+        } else if (cell.metadata.nbgrader === undefined) {
+            return false;
+        } else if (cell.metadata.nbgrader.locked === undefined) {
+            return false;
+        } else {
+            return cell.metadata.nbgrader.locked;
+        }
+    };
+
+    var set_locked = function (cell, val) {
+        if (cell.metadata.nbgrader === undefined) {
+            cell.metadata.nbgrader = {};
+        }
+        if (is_solution(cell)) {
+            cell.metadata.nbgrader.locked = false;
+        } else if (is_grade(cell)) {
+            cell.metadata.nbgrader.locked = true;
+        } else {
+            cell.metadata.nbgrader.locked = val;
+        }
+    };
+
     /**
      * Add a display class to the cell element, depending on the
      * nbgrader cell type.
@@ -252,20 +279,29 @@ define([
                 options_list.push(["Autograded answer", "solution"]);
                 options_list.push(["Autograder tests", "tests"]);
             }
+            options_list.push(["Read-only", "readonly"]);
 
             var setter = function (cell, val) {
                 if (val === "") {
                     set_solution(cell, false);
                     set_grade(cell, false);
+                    set_locked(cell, false);
                 } else if (val === "manual") {
                     set_solution(cell, true);
                     set_grade(cell, true);
+                    set_locked(cell, false);
                 } else if (val === "solution") {
                     set_solution(cell, true);
                     set_grade(cell, false);
+                    set_locked(cell, false);
                 } else if (val === "tests") {
                     set_solution(cell, false);
                     set_grade(cell, true);
+                    set_locked(cell, true);
+                } else if (val === "readonly") {
+                    set_solution(cell, false);
+                    set_grade(cell, false);
+                    set_locked(cell, true);
                 } else {
                     throw new Error("invalid nbgrader cell type: " + val);
                 }
@@ -278,6 +314,8 @@ define([
                     return "solution";
                 } else if (is_grade(cell) && cell.cell_type === "code") {
                     return "tests";
+                } else if (is_locked(cell)) {
+                    return "readonly";
                 } else {
                     return "";
                 }
@@ -296,6 +334,8 @@ define([
                 celltoolbar.rebuild();
                 update_total();
                 display_cell(cell);
+                validate_ids();
+                IPython.notebook.save_checkpoint();
             });
             display_cell(cell);
             $(div).append($('<span/>').append(select));
@@ -306,7 +346,7 @@ define([
      * Create the input text box for the problem or test id.
      */
     var create_id_input = function (div, cell, celltoolbar) {
-        if (!is_grade(cell) && !is_solution(cell)) {
+        if (!is_grade(cell) && !is_solution(cell) && !is_locked(cell)) {
             return;
         }
 
@@ -319,6 +359,8 @@ define([
         text.attr("value", get_grade_id(cell));
         text.change(function () {
             set_grade_id(cell, text.val());
+            validate_ids();
+            IPython.notebook.save_checkpoint();
         });
 
         local_div.addClass('nbgrader-id');
@@ -349,12 +391,26 @@ define([
             set_points(cell, text.val());
             text.val(get_points(cell));
             update_total();
+            IPython.notebook.save_checkpoint();
         });
 
         local_div.addClass('nbgrader-points');
         $(div).append(local_div.append($('<span/>').append(lbl)));
 
         IPython.keyboard_manager.register_events(text);
+    };
+
+    var create_lock_cell_button = function (div, cell, celltoolbar) {
+        var lock = $("<a />").addClass("lock-button");
+        if (is_locked(cell)) {
+            lock.append($("<li />").addClass("fa fa-lock"));
+            lock.tooltip({
+                placement: "right",
+                title: "Student changes will be overwritten"
+            });
+        }
+
+        $(div).addClass("lock-cell-container").append(lock);
     };
 
     /**
@@ -376,8 +432,10 @@ define([
         CellToolbar.register_callback('create_assignment.grading_options', create_celltype_select);
         CellToolbar.register_callback('create_assignment.id_input', create_id_input);
         CellToolbar.register_callback('create_assignment.points_input', create_points_input);
+        CellToolbar.register_callback('create_assignment.lock_cell', create_lock_cell_button);
 
         var preset = [
+            'create_assignment.lock_cell',
             'create_assignment.points_input',
             'create_assignment.id_input',
             'create_assignment.grading_options',

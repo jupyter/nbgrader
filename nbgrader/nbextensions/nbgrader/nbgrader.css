@@ -34,3 +34,25 @@ div.nbgrader-cell div.celltoolbar {
 div.nbgrader-cell div.text_cell_render, div.nbgrader-cell div.input_area {
     border: 1px solid #337ab7 !important;
 }
+
+div.lock-cell-container {
+    margin-right: auto;
+    padding-left: 0.5em;
+    line-height: 25px;
+    font-size: 1.4em;
+}
+
+.tooltip-inner {
+    max-width: 300px;
+}
+
+a.lock-button {
+    color: black
+}
+div.nbgrader-cell a.lock-button {
+    color: white;
+}
+
+a.lock-editable:hover {
+    cursor: pointer;
+}
