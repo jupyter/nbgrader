@@ -70,7 +70,7 @@ class TestNbGraderAssign(BaseTestApp):
         run_command('nbgrader assign ps1 --db="{}"'.format(db))
 
         notebook = gb.find_notebook("test", "ps1")
-        assert len(notebook.grade_cells) == 8
+        assert len(notebook.grade_cells) == 6
 
     def test_force(self):
         """Ensure the force option works properly"""

@@ -67,7 +67,7 @@ class TestGetGrades(BaseTestPreprocessor):
 
     def test_save_unchanged_code(self, preprocessors, gradebook, resources):
         """Is an unchanged code cell given the correct comment?"""
-        cell = create_solution_cell("hello", "code")
+        cell = create_solution_cell("hello", "code", "foo")
         nb = new_notebook()
         nb.cells.append(cell)
         preprocessors[0].preprocess(nb, resources)
@@ -75,13 +75,13 @@ class TestGetGrades(BaseTestPreprocessor):
         preprocessors[1].preprocess(nb, resources)
         preprocessors[2].preprocess(nb, resources)
 
-        comment = gradebook.find_comment(0, "test", "ps0", "bar")
+        comment = gradebook.find_comment("foo", "test", "ps0", "bar")
         assert cell.metadata.nbgrader['comment'] == comment.to_dict()
         assert cell.metadata.nbgrader['comment']['comment'] == "No response."
 
     def test_save_changed_code(self, preprocessors, gradebook, resources):
         """Is an unchanged code cell given the correct comment?"""
-        cell = create_solution_cell("hello", "code")
+        cell = create_solution_cell("hello", "code", "foo")
         nb = new_notebook()
         nb.cells.append(cell)
         preprocessors[0].preprocess(nb, resources)
@@ -90,7 +90,7 @@ class TestGetGrades(BaseTestPreprocessor):
         preprocessors[1].preprocess(nb, resources)
         preprocessors[2].preprocess(nb, resources)
 
-        comment = gradebook.find_comment(0, "test", "ps0", "bar")
+        comment = gradebook.find_comment("foo", "test", "ps0", "bar")
         assert cell.metadata.nbgrader['comment'] == comment.to_dict()
         assert cell.metadata.nbgrader['comment']['comment'] == None
 
@@ -104,7 +104,7 @@ class TestGetGrades(BaseTestPreprocessor):
         preprocessors[1].preprocess(nb, resources)
         preprocessors[2].preprocess(nb, resources)
 
-        comment = gradebook.find_comment(0, "test", "ps0", "bar")
+        comment = gradebook.find_comment("foo", "test", "ps0", "bar")
 
         assert cell.metadata.nbgrader['score'] == 0
         assert cell.metadata.nbgrader['points'] == 1
@@ -125,6 +125,6 @@ class TestGetGrades(BaseTestPreprocessor):
         assert cell.metadata.nbgrader['score'] == 0
         assert cell.metadata.nbgrader['points'] == 1
 
-        comment = gradebook.find_comment(0, "test", "ps0", "bar")
+        comment = gradebook.find_comment("foo", "test", "ps0", "bar")
         assert cell.metadata.nbgrader['comment'] == comment.to_dict()
         assert cell.metadata.nbgrader['comment']['comment'] == None

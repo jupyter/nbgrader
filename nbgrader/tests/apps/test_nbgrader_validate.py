@@ -12,7 +12,7 @@ class TestNbGraderValidate(BaseTestApp):
         """Does the validation fail on an unchanged notebook?"""
         self._copy_file("files/submitted-unchanged.ipynb", "submitted-unchanged.ipynb")
         output = run_command('nbgrader validate submitted-unchanged.ipynb')
-        assert output.split("\n")[0] == "VALIDATION FAILED ON 2 CELL(S)! If you submit your assignment as it is, you WILL NOT"
+        assert output.split("\n")[0] == "VALIDATION FAILED ON 3 CELL(S)! If you submit your assignment as it is, you WILL NOT"
 
     def test_validate_changed(self):
         """Does the validation pass on an changed notebook?"""

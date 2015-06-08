@@ -33,10 +33,9 @@ class TestCheckCellMetadata(BaseTestPreprocessor):
         preprocessor.preprocess(nb, {})
 
     def test_code_cell_solution_grade(self, preprocessor):
-        """Check that an error is raised when a code cell is marked as both solution and grade"""
-        nb = self._read_nb("files/bad-code-cell.ipynb")
-        with pytest.raises(RuntimeError):
-            preprocessor.preprocess(nb, {})
+        """Check that an error is not raised when a code cell is marked as both solution and grade"""
+        nb = self._read_nb("files/manually-graded-code-cell.ipynb")
+        preprocessor.preprocess(nb, {})
 
     def test_markdown_cell_grade(self, preprocessor):
         """Check that an error is raised when a markdown cell is only marked as grade"""

@@ -42,9 +42,9 @@ class TestComputeChecksums(BaseTestPreprocessor):
 
     def test_checksum_solution_cell_type(self, preprocessor):
         """Test that the checksum is computed for solution cells of different cell types"""
-        cell1 = create_solution_cell("", "code")
+        cell1 = create_solution_cell("", "code", "foo")
         cell1 = preprocessor.preprocess_cell(cell1, {}, 0)[0]
-        cell2 = create_solution_cell("", "markdown")
+        cell2 = create_solution_cell("", "markdown", "foo")
         cell2 = preprocessor.preprocess_cell(cell2, {}, 0)[0]
 
         assert cell1.metadata.nbgrader["checksum"] == compute_checksum(cell1)
@@ -86,9 +86,9 @@ class TestComputeChecksums(BaseTestPreprocessor):
 
     def test_checksum_solution_source(self, preprocessor):
         """Test that the checksum is computed for solution cells with different sources"""
-        cell1 = create_solution_cell("a", "code")
+        cell1 = create_solution_cell("a", "code", "foo")
         cell1 = preprocessor.preprocess_cell(cell1, {}, 0)[0]
-        cell2 = create_solution_cell("b", "code")
+        cell2 = create_solution_cell("b", "code", "foo")
         cell2 = preprocessor.preprocess_cell(cell2, {}, 0)[0]
 
         assert cell1.metadata.nbgrader["checksum"] == compute_checksum(cell1)

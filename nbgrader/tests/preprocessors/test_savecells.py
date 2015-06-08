@@ -63,27 +63,27 @@ class TestSaveCells(BaseTestPreprocessor):
         assert grade_cell.cell_type == "markdown"
 
     def test_save_code_solution_cell(self, preprocessor, resources):
-        cell = create_solution_cell("hello", "code")
+        cell = create_solution_cell("hello", "code", "foo")
         nb = new_notebook()
         nb.cells.append(cell)
 
         nb, resources = preprocessor.preprocess(nb, resources)
 
         gb = preprocessor.gradebook
-        solution_cell = gb.find_solution_cell(0, "test", "ps0")
+        solution_cell = gb.find_solution_cell("foo", "test", "ps0")
         assert solution_cell.source == "hello"
         assert solution_cell.checksum == cell.metadata.nbgrader["checksum"]
         assert solution_cell.cell_type == "code"
 
     def test_save_markdown_solution_cell(self, preprocessor, resources):
-        cell = create_solution_cell("hello", "markdown")
+        cell = create_solution_cell("hello", "markdown", "foo")
         nb = new_notebook()
         nb.cells.append(cell)
 
         nb, resources = preprocessor.preprocess(nb, resources)
 
         gb = preprocessor.gradebook
-        solution_cell = gb.find_solution_cell(0, "test", "ps0")
+        solution_cell = gb.find_solution_cell("foo", "test", "ps0")
         assert solution_cell.source == "hello"
         assert solution_cell.checksum == cell.metadata.nbgrader["checksum"]
         assert solution_cell.cell_type == "markdown"
@@ -102,7 +102,7 @@ class TestSaveCells(BaseTestPreprocessor):
         assert grade_cell.checksum == cell.metadata.nbgrader["checksum"]
         assert grade_cell.cell_type == "code"
 
-        solution_cell = gb.find_solution_cell(0, "test", "ps0")
+        solution_cell = gb.find_solution_cell("foo", "test", "ps0")
         assert solution_cell.source == "hello"
         assert solution_cell.checksum == cell.metadata.nbgrader["checksum"]
         assert solution_cell.cell_type == "code"
@@ -121,7 +121,7 @@ class TestSaveCells(BaseTestPreprocessor):
         assert grade_cell.checksum == cell.metadata.nbgrader["checksum"]
         assert grade_cell.cell_type == "markdown"
 
-        solution_cell = gb.find_solution_cell(0, "test", "ps0")
+        solution_cell = gb.find_solution_cell("foo", "test", "ps0")
         assert solution_cell.source == "hello"
         assert solution_cell.checksum == cell.metadata.nbgrader["checksum"]
         assert solution_cell.cell_type == "markdown"

@@ -40,7 +40,7 @@ def create_grade_cell(source, cell_type, grade_id, points):
     return cell
 
 
-def create_solution_cell(source, cell_type):
+def create_solution_cell(source, cell_type, grade_id):
     if cell_type == "markdown":
         cell = new_markdown_cell(source=source)
     elif cell_type == "code":
@@ -50,6 +50,7 @@ def create_solution_cell(source, cell_type):
 
     cell.metadata.nbgrader = {}
     cell.metadata.nbgrader["solution"] = True
+    cell.metadata.nbgrader["grade_id"] = grade_id
     cell.metadata.nbgrader["checksum"] = compute_checksum(cell)
 
     return cell

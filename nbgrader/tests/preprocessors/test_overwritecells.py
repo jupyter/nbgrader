@@ -73,7 +73,7 @@ class TestOverwriteCells(BaseTestPreprocessor):
 
     def test_dont_overwrite_solution_source(self, preprocessors, resources):
         """Is the source not overwritten for solution cells?"""
-        cell = create_solution_cell("hello", "code")
+        cell = create_solution_cell("hello", "code", "foo")
         nb = new_notebook()
         nb.cells.append(cell)
         nb, resources = preprocessors[0].preprocess(nb, resources)
@@ -97,7 +97,7 @@ class TestOverwriteCells(BaseTestPreprocessor):
 
     def test_overwrite_solution_cell_type(self, preprocessors, resources):
         """Is the cell type overwritten for solution cells?"""
-        cell = create_solution_cell("hello", "code")
+        cell = create_solution_cell("hello", "code", "foo")
         nb = new_notebook()
         nb.cells.append(cell)
         nb, resources = preprocessors[0].preprocess(nb, resources)
@@ -121,7 +121,7 @@ class TestOverwriteCells(BaseTestPreprocessor):
 
     def test_overwrite_solution_checksum(self, preprocessors, resources):
         """Is the checksum overwritten for solution cells?"""
-        cell = create_solution_cell("hello", "code")
+        cell = create_solution_cell("hello", "code", "foo")
         nb = new_notebook()
         nb.cells.append(cell)
         nb, resources = preprocessors[0].preprocess(nb, resources)

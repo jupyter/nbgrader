@@ -63,11 +63,11 @@ def test_determine_grade_markdown_grade():
 
 
 def test_determine_grade_solution():
-    cell = create_solution_cell('test', "code")
+    cell = create_solution_cell('test', "code", "foo")
     with pytest.raises(ValueError):
         utils.determine_grade(cell)
 
-    cell = create_solution_cell('test', "markdown")
+    cell = create_solution_cell('test', "markdown", "foo")
     with pytest.raises(ValueError):
         utils.determine_grade(cell)
 
@@ -75,10 +75,11 @@ def test_determine_grade_solution():
 def test_determine_grade_code_grade_and_solution():
     cell = create_grade_and_solution_cell('test', "code", "foo", 10)
     cell.outputs = []
-    assert utils.determine_grade(cell) == (10, 10)
+    assert utils.determine_grade(cell) == (0, 10)
 
     cell.outputs = [new_output('error', ename="NotImplementedError", evalue="", traceback=["error"])]
-    assert utils.determine_grade(cell) == (0, 10)
+    cell.source = 'test!'
+    assert utils.determine_grade(cell) == (None, 10)
 
 
 def test_determine_grade_markdown_grade_and_solution():
@@ -96,8 +97,8 @@ def test_compute_checksum_identical():
     cell2 = create_grade_cell("hello", "code", "foo", 1)
     assert utils.compute_checksum(cell1) == utils.compute_checksum(cell2)
 
-    cell1 = create_solution_cell("hello", "code")
-    cell2 = create_solution_cell("hello", "code")
+    cell1 = create_solution_cell("hello", "code", "foo")
+    cell2 = create_solution_cell("hello", "code", "foo")
     assert utils.compute_checksum(cell1) == utils.compute_checksum(cell2)
 
 
@@ -107,8 +108,8 @@ def test_compute_checksum_cell_type():
     cell2 = create_grade_cell("hello", "markdown", "foo", 1)
     assert utils.compute_checksum(cell1) != utils.compute_checksum(cell2)
 
-    cell1 = create_solution_cell("hello", "code")
-    cell2 = create_solution_cell("hello", "markdown")
+    cell1 = create_solution_cell("hello", "code", "foo")
+    cell2 = create_solution_cell("hello", "markdown", "foo")
     assert utils.compute_checksum(cell1) != utils.compute_checksum(cell2)
 
 
@@ -122,12 +123,12 @@ def test_compute_checksum_whitespace():
     cell2 = create_grade_cell("hello ", "markdown", "foo", 1)
     assert utils.compute_checksum(cell1) != utils.compute_checksum(cell2)
 
-    cell1 = create_solution_cell("hello", "code")
-    cell2 = create_solution_cell("hello ", "code")
+    cell1 = create_solution_cell("hello", "code", "foo")
+    cell2 = create_solution_cell("hello ", "code", "foo")
     assert utils.compute_checksum(cell1) != utils.compute_checksum(cell2)
 
-    cell1 = create_solution_cell("hello", "markdown")
-    cell2 = create_solution_cell("hello ", "markdown")
+    cell1 = create_solution_cell("hello", "markdown", "foo")
+    cell2 = create_solution_cell("hello ", "markdown", "foo")
     assert utils.compute_checksum(cell1) != utils.compute_checksum(cell2)
 
 
@@ -145,16 +146,16 @@ def test_compute_checksum_source():
     cell2 = create_grade_cell("print( 'hello' )", "markdown", "foo", 1)
     assert utils.compute_checksum(cell1) != utils.compute_checksum(cell2)
 
-    cell1 = create_solution_cell("print('hello')", "code")
-    cell2 = create_solution_cell("print( 'hello' )", "code")
+    cell1 = create_solution_cell("print('hello')", "code", "foo")
+    cell2 = create_solution_cell("print( 'hello' )", "code", "foo")
     assert utils.compute_checksum(cell1) != utils.compute_checksum(cell2)
 
-    cell1 = create_solution_cell("print('hello')", "code")
-    cell2 = create_solution_cell("print( 'hello!' )", "code")
+    cell1 = create_solution_cell("print('hello')", "code", "foo")
+    cell2 = create_solution_cell("print( 'hello!' )", "code", "foo")
     assert utils.compute_checksum(cell1) != utils.compute_checksum(cell2)
 
-    cell1 = create_solution_cell("print('hello')", "markdown")
-    cell2 = create_solution_cell("print( 'hello' )", "markdown")
+    cell1 = create_solution_cell("print('hello')", "markdown", "foo")
+    cell2 = create_solution_cell("print( 'hello' )", "markdown", "foo")
     assert utils.compute_checksum(cell1) != utils.compute_checksum(cell2)
 
 
@@ -181,7 +182,7 @@ def test_compute_checksum_grade_id():
     cell2 = create_grade_cell("hello", "code", "bar", 1)
     cell1.metadata.nbgrader["grade"] = False
     cell2.metadata.nbgrader["grade"] = False
-    assert utils.compute_checksum(cell1) == utils.compute_checksum(cell2)
+    assert utils.compute_checksum(cell1) != utils.compute_checksum(cell2)
 
 
 def test_compute_checksum_grade_cell():
@@ -194,8 +195,8 @@ def test_compute_checksum_grade_cell():
 
 def test_compute_checksum_solution_cell():
     # does it make a difference if solution=True?
-    cell1 = create_solution_cell("hello", "code")
-    cell2 = create_solution_cell("hello", "code")
+    cell1 = create_solution_cell("hello", "code", "foo")
+    cell2 = create_solution_cell("hello", "code", "foo")
     cell2.metadata.nbgrader["solution"] = False
     assert utils.compute_checksum(cell1) != utils.compute_checksum(cell2)
 
