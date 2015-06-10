@@ -50,18 +50,10 @@ help:
 clean:
 	rm -rf $(BUILDDIR)/*
 
-html: source/command_line_tools/%.rst source/config_options.rst
+html:
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html
 	@echo
 	@echo "Build finished. The HTML pages are in $(BUILDDIR)/html."
-
-source/command_line_tools/%.rst: autogen_command_line.py
-	python autogen_command_line.py
-	@echo "Generated command line options"
-
-source/config_options.rst: autogen_config.py
-	python autogen_config.py
-	@echo "Generated config options"
 
 dirhtml:
 	$(SPHINXBUILD) -b dirhtml $(ALLSPHINXOPTS) $(BUILDDIR)/dirhtml

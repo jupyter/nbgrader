@@ -130,34 +130,31 @@ def docs(root='docs'):
     os.chdir(root)
 
     # cleanup ignored files
-    run('git clean -fdX docs')
+    run('git clean -fdX')
 
     # make sure all the docs have been cleared
-    check_docs_input(root='.')
+    check_docs_input(root='source')
 
     # build the docs
     run(
         'ipython nbconvert '
-        '--to notebook '
+        '--to rst '
         '--execute '
-        '--FilesWriter.build_directory=command_line_tools '
+        '--FilesWriter.build_directory=source/user_guide '
         '--profile-dir=/tmp '
-        'command_line_tools/*.ipynb')
-    run(
-        'ipython nbconvert '
-        '--to notebook '
-        '--execute '
-        '--FilesWriter.build_directory=user_guide '
-        '--profile-dir=/tmp '
-        'user_guide/*.ipynb')
+        'source/user_guide/*.ipynb')
 
     # make sure the notebooks were executed successfully
-    check_docs_output(root='.')
+    check_docs_output(root='source')
+
+    # generate config options and stuff
+    run('python autogen_command_line.py')
+    run('python autogen_config.py')
 
     os.chdir(cwd)
 
 @task
-def clear_docs(root='docs'):
+def clear_docs(root='docs/source'):
     """Clear the outputs of documentation notebooks."""
 
     # cleanup ignored files
