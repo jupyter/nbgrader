@@ -84,15 +84,13 @@ def docs(root='docs'):
     check_docs_input(root='source')
 
     # execute the docs
-    os.chdir('source/user_guide')
-    cmd = 'ipython nbconvert --to notebook --execute --inplace --profile-dir=/tmp {}'
-    run(cmd.format('philosophy.ipynb'))
-    run(cmd.format('developing_assignments.ipynb'))
-    run(cmd.format('releasing_assignments.ipynb'))
-    run(cmd.format('autograding.ipynb'))
-    run(cmd.format('manual_grading.ipynb'))
-    run(cmd.format('returning_feedback.ipynb'))
-    os.chdir('../../')
+    run(
+        'ipython nbconvert '
+        '--to notebook '
+        '--execute '
+        '--FilesWriter.build_directory=source/user_guide '
+        '--profile-dir=/tmp '
+        'source/user_guide/*.ipynb')
 
     # convert to rst
     run(
