@@ -2,20 +2,16 @@
 Manually grading a student's solution
 =====================================
 
-.. raw:: html
+.. seealso::
 
-   <div class="alert alert-warning">
+    :doc:`/command_line_tools/nbgrader-formgrade`
+        Command line options for ``nbgrader formgrade``
 
-For the full documentation on ``nbgrader formgrade`` (including the list
-of all configurable options), run ``nbgrader formgrade --help-all``.
-
-.. raw:: html
-
-   </div>
+    :doc:`1_philosophy`
+        More details on how the nbgrader hierarchy is structured.
 
 After assignments have been autograded, they will saved into an
-``autograded`` directory (see `the philosophy and the
-approach <1%20-%20Philosophy.ipynb>`__ for details):
+``autograded`` directory (see :doc:`1_philosophy` for details):
 
 After running ``nbgrader autograde``, the autograded version of the
 notebooks will be:
@@ -33,7 +29,7 @@ To grade the assignments with an HTML form, all we have to do is run:
 This will launch a server at ``http://localhost:5000`` that will provide
 you with an interface for hand grading assignments that it finds in the
 directory listed above. Note that this applies to *all* assignments as
-well -- as long as `the autograder <4%20-%20Autograding.ipynb>`__ has
+well -- as long as :doc:`the autograder <4_autograding>` has
 been run on the assignment, it will be available for manual grading via
 the formgrader.
 

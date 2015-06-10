@@ -5,10 +5,12 @@ Developing assignments with the assignment toolbar
 **Note**: As you are developing your assignments, you should save them
 into the ``source/{assignment_id}/`` folder of the nbgrader hierarchy,
 where ``assignment_id`` is the name of the assignment you are creating
-(e.g. "Problem Set 1"). See `the philosophy and the
-approach <1%20-%20Philosophy.ipynb>`__ for more details.
+(e.g. "Problem Set 1").
 
---------------
+.. seealso::
+
+    :doc:`1_philosophy`
+        More details on how the nbgrader hierarchy is structured.
 
 Before you can begin developing assignments, you will need to actually
 install the nbgrader toolbar. If you do not have it installed, please
@@ -45,11 +47,10 @@ raised, and fail otherwise.
 ----------------
 
 If you select the "Solution?" checkbox for a cell, it will mark that
-cell as a "solution" cell. When creating the `release
-version <3%20-%20Releasing%20assignments.ipynb>`__ of the assignment,
-the bodies of solution cells will be replaced with a code or text stub
-indicating to the students that they should put their answer or solution
-there.
+cell as a "solution" cell. When creating the :doc:`release version <3_releasing_assignments>` of
+the assignment, the bodies of solution cells will be replaced with a code or
+text stub indicating to the students that they should put their answer or
+solution there.
 
 Cells can be both grader and solution cells. This case arises with
 written answers, for example, because the cell contains both the
@@ -66,8 +67,7 @@ example:
 .. figure:: images/solution_cell.png
    :alt: 
 
-When creating the `release
-version <3%20-%20Releasing%20assignments.ipynb>`__, the region between
+When creating the :doc:`release version <3_releasing_assignments>`, the region between
 the special syntax lines will be replaced with the code or text stub.
 
 Even if cells with the inline syntax are be marked as solution cells

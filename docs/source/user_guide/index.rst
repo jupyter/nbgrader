@@ -2,7 +2,7 @@ User Guide
 ==========
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
 
    1_philosophy
    2_developing_assignments
