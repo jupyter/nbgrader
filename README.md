@@ -8,7 +8,7 @@ A system for assigning and grading notebooks.
 
 **Warning: nbgrader is not yet stable and is under active development. The following instructions are currently incomplete and may change!**
 
-[Documentation can be found on nbviewer.](http://nbviewer.ipython.org/github/jupyter/nbgrader/tree/docs/Index.ipynb)
+[Documentation can be found on Read the Docs.](http://nbgrader.readthedocs.org)
 
 ## Dependencies
 
