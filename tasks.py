@@ -100,6 +100,28 @@ def docs(root='docs'):
         '--profile-dir=/tmp '
         'source/user_guide/*.ipynb')
 
+    # convert examples to html
+    for dirname, dirnames, filenames in os.walk('source/user_guide'):
+        if dirname == 'source/user_guide':
+            continue
+
+        build_directory = os.path.join('source', 'extra_files', os.path.relpath(dirname, 'source'))
+        if not os.path.exists(build_directory):
+            os.makedirs(build_directory)
+
+        for filename in filenames:
+            if filename.endswith('.ipynb'):
+                run(
+                    "ipython nbconvert "
+                    "--to html "
+                    "--FilesWriter.build_directory='{}' "
+                    "--profile-dir=/tmp "
+                    "'{}'".format(build_directory, os.path.join(dirname, filename)))
+            else:
+                os.copy(
+                    os.path.join(dirname, filename),
+                    os.path.join(build_directory, filename))
+
     os.chdir(cwd)
 
 @task
