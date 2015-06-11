@@ -26,7 +26,7 @@ def _check_if_directory_in_path(pth, target):
     return False
 
 @task
-def check_docs_input(root='.'):
+def check_docs_input(root='docs/source'):
     """Check that docs have output cleared."""
     echo("Checking that all docs have cleared outputs...")
     bad = []
@@ -184,10 +184,9 @@ def publish_docs(github_token, git_name, git_email):
     run('git checkout docs')
     run('rm -r *')
     run('ls -a')
-    run('git checkout {} -- docs'.format(commit))
-    run('mv docs/* . && rmdir docs')
+    run('git checkout {} -- .'.format(commit))
 
-    docs(root='.')
+    docs(root='docs')
 
     # commit the changes
     run('git add -A -f')
