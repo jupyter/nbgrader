@@ -27,16 +27,49 @@ def new_uuid():
 
 
 class Assignment(Base):
+    """Database representation of the master/source version of an assignment."""
+
     __tablename__ = "assignment"
 
+    #: Unique id of the assignment (automatically generated)
     id = Column(String(32), primary_key=True, default=new_uuid)
+
+    #: Unique human-readable name for the assignment, such as "Problem Set 1"
     name = Column(String(128), unique=True, nullable=False)
+
+    #: (Optional) Duedate for the assignment in datetime format, with UTC timezone
     duedate = Column(DateTime())
 
+    #: A collection of notebooks contained in this assignment, represented
+    #: by :class:`~nbgrader.api.Notebook` objects
     notebooks = relationship("Notebook", backref="assignment", order_by="Notebook.name")
+
+    #: A collection of submissions of this assignment, represented by
+    #: :class:`~nbgrader.api.SubmittedAssignment` objects.
     submissions = relationship("SubmittedAssignment", backref="assignment")
 
+    #: The number of submissions of this assignment
+    num_submissions = None
+
+    #: Maximum score achievable on this assignment, automatically calculated
+    #: from the :attr:`~nbgrader.api.Notebook.max_score` of each notebook
+    max_score = None
+
+    #: Maximum coding score achievable on this assignment, automatically
+    #: calculated from the :attr:`~nbgrader.api.Notebook.max_code_score` of
+    #: each notebook
+    max_code_score = None
+
+    #: Maximum written score achievable on this assignment, automatically
+    #: calculated from the :attr:`~nbgrader.api.Notebook.max_written_score` of
+    #: each notebook
+    max_written_score = None
+
     def to_dict(self):
+        """Convert the assignment object to a JSON-friendly dictionary
+        representation.
+
+        """
         return {
             "id": self.id,
             "name": self.name,
@@ -51,20 +84,67 @@ class Assignment(Base):
         return self.name
 
 class Notebook(Base):
+    """Database representation of the master/source version of a notebook."""
+
     __tablename__ = "notebook"
     __table_args__ = (UniqueConstraint('name', 'assignment_id'),)
 
+    #: Unique id of the notebook (automatically generated)
     id = Column(String(32), primary_key=True, default=new_uuid)
+
+    #: Unique human-readable name for the notebook, such as "Problem 1". Note
+    #: the uniqueness is only constrained within assignments (e.g. it is ok for
+    #: two different assignments to both have notebooks called "Problem 1", but
+    #: the same assignment cannot have two notebooks with the same name).
     name = Column(String(128), nullable=False)
 
+    #: The :class:`~nbgrader.api.Assignment` object that this notebook is a
+    #: part of
+    assignment = None
+
+    #: Unique id of :attr:`~nbgrader.api.Notebook.assignment`
     assignment_id = Column(String(32), ForeignKey('assignment.id'))
 
+    #: A collection of grade cells contained within this notebook, represented
+    #: by :class:`~nbgrader.api.GradeCell` objects
     grade_cells = relationship("GradeCell", backref="notebook")
+
+    #: A collection of solution cells contained within this notebook, represented
+    #: by :class:`~nbgrader.api.SolutionCell` objects
     solution_cells = relationship("SolutionCell", backref="notebook")
 
+    #: A collection of submitted versions of this notebook, represented by
+    #: :class:`~nbgrader.api.SubmittedNotebook` objects
     submissions = relationship("SubmittedNotebook", backref="notebook")
 
+    #: The number of submissions of this notebook
+    num_submissions = None
+
+    #: Maximum score achievable on this notebook, automatically calculated
+    #: from the :attr:`~nbgrader.api.GradeCell.max_score` of each grade cell
+    max_score = None
+
+    #: Maximum coding score achievable on this notebook, automatically
+    #: calculated from the :attr:`~nbgrader.api.GradeCell.max_score` and
+    #: :attr:`~nbgrader.api.GradeCell.cell_type` of each grade cell
+    max_code_score = None
+
+    #: Maximum written score achievable on this notebook, automatically
+    #: calculated from the :attr:`~nbgrader.api.GradeCell.max_score` and
+    #: :attr:`~nbgrader.api.GradeCell.cell_type` of each grade cell
+    max_written_score = None
+
+    #: Whether there are any submitted versions of this notebook that need to
+    #: be manually graded, automatically determined from the
+    #: :attr:`~nbgrader.api.SubmittedNotebook.needs_manual_grade` attribute of
+    #: each submitted notebook
+    needs_manual_grade = None
+
     def to_dict(self):
+        """Convert the notebook object to a JSON-friendly dictionary
+        representation.
+
+        """
         return {
             "id": self.id,
             "name": self.name,
@@ -80,23 +160,52 @@ class Notebook(Base):
 
 
 class GradeCell(Base):
+    """Database representation of the master/source version of a grade cell."""
+
     __tablename__ = "grade_cell"
     __table_args__ = (UniqueConstraint('name', 'notebook_id'),)
 
+    #: Unique id of the grade cell (automatically generated)
     id = Column(String(32), primary_key=True, default=new_uuid)
+
+    #: Unique human-readable name of the grade cell. This need only be unique
+    #: within the notebook, not across notebooks.
     name = Column(String(128), nullable=False)
+
+    #: Maximum score that can be assigned to this grade cell
     max_score = Column(Float(), nullable=False)
+
+    #: The cell type, either "code" or "markdown"
     cell_type = Column(Enum("code", "markdown"), nullable=False)
+
+    #: (Optional) The source code or text of the cell
     source = Column(Text())
+
+    #: (Optional) A checksum of the cell contents. This should usually be computed
+    #: using :func:`nbgrader.utils.compute_checksum`
     checksum = Column(String(128))
 
+    #: The :class:`~nbgrader.api.Notebook` that this grade cell is contained in
+    notebook = None
+
+    #: Unique id of the :attr:`~nbgrader.api.GradeCell.notebook`
     notebook_id = Column(String(32), ForeignKey('notebook.id'))
 
+    #: The assignment that this cell is contained within, represented by a
+    #: :class:`~nbgrader.api.Assignment` object
     assignment = association_proxy("notebook", "assignment")
 
+    #: A collection of grades assigned to submitted versions of this grade cell,
+    #: represented by :class:`~nbgrader.api.Grade` objects
     grades = relationship("Grade", backref="cell")
 
     def to_dict(self):
+        """Convert the grade cell object to a JSON-friendly dictionary
+        representation. Note that this includes keys for ``notebook`` and
+        ``assignment`` which correspond to the names of the notebook and
+        assignment, not the objects themselves.
+
+        """
         return {
             "id": self.id,
             "name": self.name,
@@ -116,27 +225,52 @@ class SolutionCell(Base):
     __tablename__ = "solution_cell"
     __table_args__ = (UniqueConstraint('name', 'notebook_id'),)
 
+    #: Unique id of the solution cell (automatically generated)
     id = Column(String(32), primary_key=True, default=new_uuid)
+
+    #: Unique human-readable name of the solution cell. This need only be unique
+    #: within the notebook, not across notebooks.
     name = Column(String(128), nullable=False)
 
-    notebook_id = Column(String(32), ForeignKey('notebook.id'))
-
-    assignment = association_proxy("notebook", "assignment")
-
-    comments = relationship("Comment", backref="cell")
+    #: The cell type, either "code" or "markdown"
     cell_type = Column(Enum("code", "markdown"), nullable=False)
+
+    #: (Optional) The source code or text of the cell
     source = Column(Text())
+
+    #: (Optional) A checksum of the cell contents. This should usually be computed
+    #: using :func:`nbgrader.utils.compute_checksum`
     checksum = Column(String(128))
 
+    #: The :class:`~nbgrader.api.Notebook` that this solution cell is contained in
+    notebook = None
+
+    #: Unique id of the :attr:`~nbgrader.api.SolutionCell.notebook`
+    notebook_id = Column(String(32), ForeignKey('notebook.id'))
+
+    #: The assignment that this cell is contained within, represented by a
+    #: :class:`~nbgrader.api.Assignment` object
+    assignment = association_proxy("notebook", "assignment")
+
+    #: A collection of comments assigned to submitted versions of this grade cell,
+    #: represented by :class:`~nbgrader.api.Comment` objects
+    comments = relationship("Comment", backref="cell")
+
     def to_dict(self):
+        """Convert the solution cell object to a JSON-friendly dictionary
+        representation. Note that this includes keys for ``notebook`` and
+        ``assignment`` which correspond to the names of the notebook and
+        assignment, not the objects themselves.
+
+        """
         return {
             "id": self.id,
             "name": self.name,
-            "notebook": self.notebook.name,
-            "assignment": self.assignment.name,
             "cell_type": self.cell_type,
             "source": self.source,
-            "checksum": self.checksum
+            "checksum": self.checksum,
+            "notebook": self.notebook.name,
+            "assignment": self.assignment.name
         }
 
     def __repr__(self):
@@ -144,16 +278,43 @@ class SolutionCell(Base):
 
 
 class Student(Base):
+    """Database representation of a student."""
+
     __tablename__ = "student"
 
+    #: Unique id of the student. This could be a student ID, a username, an
+    #: email address, etc., so long as it is unique.
     id = Column(String(128), primary_key=True, nullable=False)
+
+    #: (Optional) The first name of the student
     first_name = Column(String(128))
+
+    #: (Optional) The last name of the student
     last_name = Column(String(128))
+
+    #: (Optional) The student's email address, if the :attr:`~nbgrader.api.Student.id`
+    #: does not correspond to an email address
     email = Column(String(128))
 
+    #: A collection of assignments submitted by the student, represented as
+    #: :class:`~nbgrader.api.SubmittedAssignment` objects
     submissions = relationship("SubmittedAssignment", backref="student")
 
+    #: The overall score of the student across all assignments, computed
+    #: automatically from the :attr:`~nbgrader.api.SubmittedAssignment.score`
+    #: of each submitted assignment.
+    score = None
+
+    #: The maximum possible score the student could achieve across all assignments,
+    #: computed automatically from the :attr:`~nbgrader.api.Assignment.max_score`
+    #: of each assignment.
+    max_score = None
+
     def to_dict(self):
+        """Convert the student object to a JSON-friendly dictionary
+        representation.
+
+        """
         return {
             "id": self.id,
             "first_name": self.first_name,
@@ -168,20 +329,82 @@ class Student(Base):
 
 
 class SubmittedAssignment(Base):
+    """Database representation of an assignment submitted by a student."""
+
     __tablename__ = "submitted_assignment"
     __table_args__ = (UniqueConstraint('assignment_id', 'student_id'),)
 
+    #: Unique id of the submitted assignment (automatically generated)
     id = Column(String(32), primary_key=True, default=new_uuid)
+
+    #: Name of the assignment, inherited from :class:`~nbgrader.api.Assignment`
+    name = association_proxy("assignment", "name")
+
+    #: The master version of this assignment, represented by a
+    #: :class:`~nbgrader.api.Assignment` object
+    assignment = None
+
+    #: Unique id of :attr:`~nbgrader.api.SubmittedAssignment.assignment`
     assignment_id = Column(String(32), ForeignKey('assignment.id'))
+
+    #: The student who submitted this assignment, represented by a
+    #: :class:`~nbgrader.api.Student` object
+    student = None
+
+    #: Unique id of :attr:`~nbgrader.api.SubmittedAssignment.student`
     student_id = Column(String(128), ForeignKey('student.id'))
 
+    #: (Optional) The date and time that the assignment was submitted, in date
+    #: time format with a UTC timezone
     timestamp = Column(DateTime())
+
+    #: (Optional) An extension given to the student for this assignment, in
+    #: time delta format
     extension = Column(Interval())
 
+    #: A collection of notebooks contained within this submitted assignment,
+    #: represented by :class:`~nbgrader.api.SubmittedNotebook` objects
     notebooks = relationship("SubmittedNotebook", backref="assignment")
+
+    #: The score assigned to this assignment, automatically calculated from the
+    #: :attr:`~nbgrader.api.SubmittedNotebook.score` of each notebook within
+    #: this submitted assignment.
+    score = None
+
+    #: The maximum possible score of this assignment, inherited from
+    #: :class:`~nbgrader.api.Assignment`
+    max_score = None
+
+    #: The code score assigned to this assignment, automatically calculated from
+    #: the :attr:`~nbgrader.api.SubmittedNotebook.code_score` of each notebook
+    #: within this submitted assignment.
+    code_score = None
+
+    #: The maximum possible code score of this assignment, inherited from
+    #: :class:`~nbgrader.api.Assignment`
+    max_code_score = None
+
+    #: The written score assigned to this assignment, automatically calculated
+    #: from the :attr:`~nbgrader.api.SubmittedNotebook.written_score` of each
+    #: notebook within this submitted assignment.
+    written_score = None
+
+    #: The maximum possible written score of this assignment, inherited from
+    #: :class:`~nbgrader.api.Assignment`
+    max_written_score = None
+
+    #: Whether this assignment has parts that need to be manually graded,
+    #: automatically determined from the :attr:`~nbgrader.api.SubmittedNotebook.needs_manual_grade`
+    #: attribute of each notebook.
+    needs_manual_grade = None
 
     @property
     def duedate(self):
+        """The duedate of this student's assignment, which includes any extension
+        given, if applicable, and which is just the regular assignment duedate
+        otherwise.
+
+        """
         orig_duedate = self.assignment.duedate
         if self.extension is not None:
             return orig_duedate + self.extension
@@ -190,19 +413,29 @@ class SubmittedAssignment(Base):
 
     @property
     def total_seconds_late(self):
+        """The number of seconds that this assignment was turned in past the
+        duedate (including extensions, if any). If the assignment was turned in
+        before the deadline, this value will just be zero.
+
+        """
         if self.timestamp is None or self.duedate is None:
             return 0
         else:
             return max(0, (self.timestamp - self.duedate).total_seconds())
 
     def to_dict(self):
+        """Convert the submitted assignment object to a JSON-friendly dictionary
+        representation. Note that this includes a ``student`` key which is the
+        unique id of the student, not the object itself.
+
+        """
         return {
             "id": self.id,
-            "name": self.assignment.name,
+            "name": self.name,
             "student": self.student.id,
-            "duedate": self.duedate.isoformat() if self.duedate is not None else None,
             "timestamp": self.timestamp.isoformat() if self.timestamp is not None else None,
             "extension": self.extension.total_seconds() if self.extension is not None else None,
+            "duedate": self.duedate.isoformat() if self.duedate is not None else None,
             "total_seconds_late": self.total_seconds_late,
             "score": self.score,
             "max_score": self.max_score,
@@ -218,22 +451,89 @@ class SubmittedAssignment(Base):
 
 
 class SubmittedNotebook(Base):
+    """Database representation of a notebook submitted by a student."""
+
     __tablename__ = "submitted_notebook"
     __table_args__ = (UniqueConstraint('notebook_id', 'assignment_id'),)
 
+    #: Unique id of the submitted notebook (automatically generated)
     id = Column(String(32), primary_key=True, default=new_uuid)
-    notebook_id = Column(String(32), ForeignKey('notebook.id'))
+
+    #: Name of the notebook, inherited from :class:`~nbgrader.api.Notebook`
+    name = association_proxy("notebook", "name")
+
+    #: The submitted assignment this notebook is a part of, represented by a
+    #: :class:`~nbgrader.api.SubmittedAssignment` object
+    assignment = None
+
+    #: Unique id of :attr:`~nbgrader.api.SubmittedNotebook.assignment`
     assignment_id = Column(String(32), ForeignKey('submitted_assignment.id'))
 
+    #: The master version of this notebook, represesnted by a
+    #: :class:`~nbgrader.api.Notebook` object
+    notebook = None
+
+    #: Unique id of :attr:`~nbgrader.api.SubmittedNotebook.notebook`
+    notebook_id = Column(String(32), ForeignKey('notebook.id'))
+
+    #: Collection of grades associated with this submitted notebook, represented
+    #: by :class:`~nbgrader.api.Grade` objects
     grades = relationship("Grade", backref="notebook")
+
+    #: Collection of comments associated with this submitted notebook, represented
+    #: by :class:`~nbgrader.api.Comment` objects
     comments = relationship("Comment", backref="notebook")
 
+    #: The student who submitted this notebook, represented by a
+    #: :class:`~nbgrader.api.Student` object
     student = association_proxy('assignment', 'student')
 
+    #: The score assigned to this notebook, automatically calculated from the
+    #: :attr:`~nbgrader.api.Grade.score` of each grade cell within
+    #: this submitted notebook.
+    score = None
+
+    #: The maximum possible score of this notebook, inherited from
+    #: :class:`~nbgrader.api.Notebook`
+    max_score = None
+
+    #: The code score assigned to this notebook, automatically calculated from
+    #: the :attr:`~nbgrader.api.Grade.score` and :attr:`~nbgrader.api.GradeCell.cell_type`
+    #: of each grade within this submitted notebook.
+    code_score = None
+
+    #: The maximum possible code score of this notebook, inherited from
+    #: :class:`~nbgrader.api.Notebook`
+    max_code_score = None
+
+    #: The written score assigned to this notebook, automatically calculated from
+    #: the :attr:`~nbgrader.api.Grade.score` and :attr:`~nbgrader.api.GradeCell.cell_type`
+    #: of each grade within this submitted notebook.
+    written_score = None
+
+    #: The maximum possible written score of this notebook, inherited from
+    #: :class:`~nbgrader.api.Notebook`
+    max_written_score = None
+
+    #: Whether this notebook has parts that need to be manually graded,
+    #: automatically determined from the :attr:`~nbgrader.api.Grade.needs_manual_grade`
+    #: attribute of each grade.
+    needs_manual_grade = None
+
+    #: Whether this notebook contains autograder tests that failed to pass,
+    #: automatically determined from the :attr:`~nbgrader.api.Grade.failed_tests`
+    #: attribute of each grade.
+    failed_tests = None
+
     def to_dict(self):
+        """Convert the submitted notebook object to a JSON-friendly dictionary
+        representation. Note that this includes a key for ``student`` which is
+        the unique id of the student, not the actual student object.
+
+        """
         return {
             "id": self.id,
-            "name": self.notebook.name,
+            "name": self.name,
             "student": self.student.id,
             "score": self.score,
             "max_score": self.max_score,
@@ -250,19 +550,54 @@ class SubmittedNotebook(Base):
 
 
 class Grade(Base):
+    """Database representation of a grade assigned to the submitted version of
+    a grade cell.
+
+    """
+
     __tablename__ = "grade"
     __table_args__ = (UniqueConstraint('cell_id', 'notebook_id'),)
 
+    #: Unique id of the grade (automatically generated)
     id = Column(String(32), primary_key=True, default=new_uuid)
-    cell_id = Column(String(32), ForeignKey('grade_cell.id'))
+
+    #: The submitted assignment that this grade is contained in, represented by
+    #: a :class:`~nbgrader.api.SubmittedAssignment` object
+    assignment = association_proxy('notebook', 'assignment')
+
+    #: The submitted notebook that this grade is assigned to, represented by a
+    #: :class:`~nbgrader.api.SubmittedNotebook` object
+    notebook = None
+
+    #: Unique id of :attr:`~nbgrader.api.Grade.notebook`
     notebook_id = Column(String(32), ForeignKey('submitted_notebook.id'))
 
-    auto_score = Column(Float())
-    manual_score = Column(Float())
+    #: The master version of the cell this grade is assigned to, represented by
+    #: a :class:`~nbgrader.api.GradeCell` object.
+    cell = None
 
-    assignment = association_proxy('notebook', 'assignment')
+    #: Unique id of :attr:`~nbgrader.api.Grade.cell`
+    cell_id = Column(String(32), ForeignKey('grade_cell.id'))
+
+    #: The type of cell this grade corresponds to, inherited from
+    #: :class:`~nbgrader.api.GradeCell`
+    cell_type = None
+
+    #: The student who this grade is assigned to, represented by a
+    #: :class:`~nbgrader.api.Student` object
     student = association_proxy('notebook', 'student')
 
+    #: Score assigned by the autograder
+    auto_score = Column(Float())
+
+    #: Score assigned by a human grader
+    manual_score = Column(Float())
+
+    #: The overall score, computed automatically from the
+    #: :attr:`~nbgrader.api.Grade.auto_score` and :attr:`~nbgrader.api.Grade.manual_score`
+    #: values. If neither are set, the score is zero. If both are set, then the
+    #: manual score takes precedence. If only one is set, then that value is used
+    #: for the score.
     score = column_property(case(
         [
             (manual_score != None, manual_score),
@@ -271,15 +606,35 @@ class Grade(Base):
         else_=literal_column("0.0")
     ))
 
+    #: The maximum possible score that can be assigned, inherited from
+    #: :class:`~nbgrader.api.GradeCell`
+    max_score = None
+
+    #: Whether a score needs to be assigned manually. This is automatically computed
+    #: from the :attr:`~nbgrader.api.Grade.auto_score` and :attr:`~nbgrader.api.Grade.manual_score`
+    #: attributes: if neither is defined, then this value is True, otherwise it is
+    #: False.
     needs_manual_grade = column_property(
         (auto_score == None) & (manual_score == None))
 
+    #: Whether the autograded score is a result of failed autograder tests. This
+    #: is True if the autograder score is zero and the cell type is "code", and
+    #: otherwise False.
+    failed_tests = None
+
     def to_dict(self):
+        """Convert the grade object to a JSON-friendly dictionary representation.
+        Note that this includes keys for ``notebook`` and ``assignment`` which
+        correspond to the name of the notebook and assignment, not the actual
+        objects. It also includes a key for ``student`` which corresponds to the
+        unique id of the student, not the actual student object.
+
+        """
         return {
             "id": self.id,
             "name": self.cell.name,
-            "notebook": self.notebook.notebook.name,
-            "assignment": self.assignment.assignment.name,
+            "notebook": self.notebook.name,
+            "assignment": self.assignment.name,
             "student": self.student.id,
             "auto_score": self.auto_score,
             "manual_score": self.manual_score,
@@ -294,24 +649,52 @@ class Grade(Base):
 
 
 class Comment(Base):
+    """Database representation of a comment on a cell in a submitted notebook."""
+
     __tablename__ = "comment"
     __table_args__ = (UniqueConstraint('cell_id', 'notebook_id'),)
 
+    #: Unique id of the comment (automatically generated)
     id = Column(String(32), primary_key=True, default=new_uuid)
-    cell_id = Column(String(32), ForeignKey('solution_cell.id'))
+
+    #: The submitted assignment that this comment is contained in, represented by
+    #: a :class:`~nbgrader.api.SubmittedAssignment` object
+    assignment = association_proxy('notebook', 'assignment')
+
+    #: The submitted notebook that this comment is assigned to, represented by a
+    #: :class:`~nbgrader.api.SubmittedNotebook` object
+    notebook = None
+
+    #: Unique id of :attr:`~nbgrader.api.Comment.notebook`
     notebook_id = Column(String(32), ForeignKey('submitted_notebook.id'))
 
-    comment = Column(Text())
+    #: The master version of the cell this comment is assigned to, represented by
+    #: a :class:`~nbgrader.api.SolutionCell` object.
+    cell = None
 
-    assignment = association_proxy('notebook', 'assignment')
+    #: Unique id of :attr:`~nbgrader.api.Comment.cell`
+    cell_id = Column(String(32), ForeignKey('solution_cell.id'))
+
+    #: The student who this comment is assigned to, represented by a
+    #: :class:`~nbgrader.api.Student` object
     student = association_proxy('notebook', 'student')
 
+    #: The actual text of the comment
+    comment = Column(Text())
+
     def to_dict(self):
+        """Convert the comment object to a JSON-friendly dictionary representation.
+        Note that this includes keys for ``notebook`` and ``assignment`` which
+        correspond to the name of the notebook and assignment, not the actual
+        objects. It also includes a key for ``student`` which corresponds to the
+        unique id of the student, not the actual student object.
+
+        """
         return {
             "id": self.id,
             "name": self.cell.name,
-            "notebook": self.notebook.notebook.name,
-            "assignment": self.assignment.assignment.name,
+            "notebook": self.notebook.name,
+            "assignment": self.assignment.name,
             "student": self.student.id,
             "comment": self.comment,
         }
@@ -541,7 +924,7 @@ class Gradebook(object):
         Parameters
         ----------
         db_url : string
-            The URL to the database, e.g. sqlite:///grades.db
+            The URL to the database, e.g. ``sqlite:///grades.db``
 
         """
         # create the connection to the database
@@ -567,12 +950,12 @@ class Gradebook(object):
         ----------
         student_id : string
             The unique id of the student
-        **kwargs : dict
-            other keyword arguments to the nbgrader.api.Student object
+        `**kwargs` : dict
+            other keyword arguments to the :class:`~nbgrader.api.Student` object
 
         Returns
         -------
-        nbgrader.api.Student object
+        student : :class:`~nbgrader.api.Student`
 
         """
 
@@ -595,7 +978,7 @@ class Gradebook(object):
 
         Returns
         -------
-        nbgrader.api.Student object
+        student : :class:`~nbgrader.api.Student`
 
         """
 
@@ -615,12 +998,12 @@ class Gradebook(object):
         ----------
         name : string
             the name of the student
-        **kwargs : dict
-            additional keyword arguments for the nbgrader.api.Student object
+        `**kwargs`
+            additional keyword arguments for the :class:`~nbgrader.api.Student` object
 
         Returns
         -------
-        nbgrader.api.Student object
+        student : :class:`~nbgrader.api.Student`
 
         """
 
@@ -678,12 +1061,12 @@ class Gradebook(object):
         ----------
         name : string
             the unique name of the new assignment
-        **kwargs : dict
-            additional keyword arguments for the nbgrader.api.Assignment object
+        `**kwargs`
+            additional keyword arguments for the :class:`~nbgrader.api.Assignment` object
 
         Returns
         -------
-        nbgrader.api.Assignment object
+        assignment : :class:`~nbgrader.api.Assignment`
 
         """
         if 'duedate' in kwargs:
@@ -707,7 +1090,7 @@ class Gradebook(object):
 
         Returns
         -------
-        nbgrader.api.Assignment object
+        assignment : :class:`~nbgrader.api.Assignment`
 
         """
 
@@ -727,12 +1110,12 @@ class Gradebook(object):
         ----------
         name : string
             the name of the assignment
-        **kwargs : dict
-            additional keyword arguments for the nbgrader.api.Assignment object
+        `**kwargs`
+            additional keyword arguments for the :class:`~nbgrader.api.Assignment` object
 
         Returns
         -------
-        nbgrader.api.Assignment object
+        assignment : :class:`~nbgrader.api.Assignment`
 
         """
 
@@ -795,12 +1178,12 @@ class Gradebook(object):
             the name of the new notebook
         assignment : string
             the name of an existing assignment
-        **kwargs : dict
-            additional keyword arguments for the nbgrader.api.Notebook object
+        `**kwargs`
+            additional keyword arguments for the :class:`~nbgrader.api.Notebook` object
 
         Returns
         -------
-        nbgrader.api.Notebook object
+        notebook : :class:`~nbgrader.api.Notebook`
 
         """
 
@@ -826,7 +1209,7 @@ class Gradebook(object):
 
         Returns
         -------
-        nbgrader.api.Notebook object
+        notebook : :class:`~nbgrader.api.Notebook`
 
         """
 
@@ -849,12 +1232,12 @@ class Gradebook(object):
             the name of the notebook
         assignment : string
             the name of the assignment
-        **kwargs : dict
-            additional keyword arguments for the nbgrader.api.Notebook object
+        `**kwargs`
+            additional keyword arguments for the :class:`~nbgrader.api.Notebook` object
 
         Returns
         -------
-        nbgrader.api.Notebook object
+        notebook : :class:`~nbgrader.api.Notebook`
 
         """
 
@@ -887,12 +1270,12 @@ class Gradebook(object):
             the name of an existing notebook
         assignment : string
             the name of an existing assignment
-        **kwargs : dict
-            additional keyword arguments for nbgrader.api.GradeCell
+        `**kwargs`
+            additional keyword arguments for :class:`~nbgrader.api.GradeCell`
 
         Returns
         -------
-        nbgrader.api.GradeCell
+        grade_cell : :class:`~nbgrader.api.GradeCell`
 
         """
 
@@ -920,7 +1303,7 @@ class Gradebook(object):
 
         Returns
         -------
-        nbgrader.api.GradeCell
+        grade_cell : :class:`~nbgrader.api.GradeCell`
 
         """
 
@@ -950,12 +1333,12 @@ class Gradebook(object):
             the name of the notebook
         assignment : string
             the name of the assignment
-        **kwargs : dict
-            additional keyword arguments for nbgrader.api.GradeCell
+        `**kwargs`
+            additional keyword arguments for :class:`~nbgrader.api.GradeCell`
 
         Returns
         -------
-        nbgrader.api.GradeCell
+        grade_cell : :class:`~nbgrader.api.GradeCell`
 
         """
 
@@ -988,12 +1371,12 @@ class Gradebook(object):
             the name of an existing notebook
         assignment : string
             the name of an existing assignment
-        **kwargs : dict
-            additional keyword arguments for nbgrader.api.SolutionCell
+        `**kwargs`
+            additional keyword arguments for :class:`~nbgrader.api.SolutionCell`
 
         Returns
         -------
-        nbgrader.api.SolutionCell
+        solution_cell : :class:`~nbgrader.api.SolutionCell`
 
         """
 
@@ -1021,7 +1404,7 @@ class Gradebook(object):
 
         Returns
         -------
-        nbgrader.api.SolutionCell
+        solution_cell : :class:`~nbgrader.api.SolutionCell`
 
         """
 
@@ -1048,12 +1431,12 @@ class Gradebook(object):
             the name of the notebook
         assignment : string
             the name of the assignment
-        **kwargs : dict
-            additional keyword arguments for nbgrader.api.SolutionCell
+        `**kwargs`
+            additional keyword arguments for :class:`~nbgrader.api.SolutionCell`
 
         Returns
         -------
-        nbgrader.api.SolutionCell
+        solution_cell : :class:`~nbgrader.api.SolutionCell`
 
         """
 
@@ -1087,12 +1470,12 @@ class Gradebook(object):
             the name of an existing assignment
         student : string
             the name of an existing student
-        **kwargs : dict
-            additional keyword arguments for nbgrader.api.SubmittedAssignment
+        `**kwargs`
+            additional keyword arguments for :class:`~nbgrader.api.SubmittedAssignment`
 
         Returns
         -------
-        nbgrader.api.SubmittedAssignment
+        submission : :class:`~nbgrader.api.SubmittedAssignment`
 
         """
 
@@ -1135,7 +1518,7 @@ class Gradebook(object):
 
         Returns
         -------
-        nbgrader.api.SubmittedAssignment object
+        submission : :class:`~nbgrader.api.SubmittedAssignment`
 
         """
 
@@ -1155,7 +1538,8 @@ class Gradebook(object):
         """Update an existing submission of an assignment by a given student,
         or create a new submission if it doesn't exist.
 
-        See nbgrader.api.Gradebook.add_submission for additional details.
+        See :func:`~nbgrader.api.Gradebook.add_submission` for additional
+        details.
 
         Parameters
         ----------
@@ -1163,12 +1547,12 @@ class Gradebook(object):
             the name of an existing assignment
         student : string
             the name of an existing student
-        **kwargs : dict
-            additional keyword arguments for nbgrader.api.SubmittedAssignment
+        `**kwargs`
+            additional keyword arguments for :class:`~nbgrader.api.SubmittedAssignment`
 
         Returns
         -------
-        nbgrader.api.SubmittedAssignment
+        submission : :class:`~nbgrader.api.SubmittedAssignment`
 
         """
 
@@ -1228,7 +1612,8 @@ class Gradebook(object):
 
         Returns
         -------
-        list of nbgrader.api.SubmittedAssignment objects
+        submissions : list
+            A list of :class:`~nbgrader.api.SubmittedAssignment` objects
 
         """
 
@@ -1249,7 +1634,8 @@ class Gradebook(object):
 
         Returns
         -------
-        list of nbgrader.api.SubmittedNotebook objects
+        submissions : list
+            A list of :class:`~nbgrader.api.SubmittedNotebook` objects
 
         """
 
@@ -1270,7 +1656,8 @@ class Gradebook(object):
 
         Returns
         -------
-        list of nbgrader.api.SubmittedAssignment objects
+        submissions : list
+            A list of :class:`~nbgrader.api.SubmittedAssignment` objects
 
         """
 
@@ -1294,10 +1681,10 @@ class Gradebook(object):
 
         Returns
         -------
-        nbgrader.api.SubmittedNotebook object
+        notebook : :class:`~nbgrader.api.SubmittedNotebook`
 
         """
-        
+
         try:
             notebook = self.db.query(SubmittedNotebook)\
                 .join(Notebook, Notebook.id == SubmittedNotebook.notebook_id)\
@@ -1325,7 +1712,7 @@ class Gradebook(object):
 
         Returns
         -------
-        nbgrader.api.SubmittedNotebook object
+        notebook : :class:`~nbgrader.api.SubmittedNotebook`
 
         """
 
@@ -1355,7 +1742,7 @@ class Gradebook(object):
 
         Returns
         -------
-        nbgrader.api.Grade object
+        grade : :class:`~nbgrader.api.Grade`
 
         """
         try:
@@ -1388,7 +1775,7 @@ class Gradebook(object):
 
         Returns
         -------
-        nbgrader.api.Grade object
+        grade : :class:`~nbgrader.api.Grade`
 
         """
 
@@ -1416,7 +1803,7 @@ class Gradebook(object):
 
         Returns
         -------
-        nbgrader.api.Comment object
+        comment : :class:`~nbgrader.api.Comment`
 
         """
 
@@ -1450,10 +1837,10 @@ class Gradebook(object):
 
         Returns
         -------
-        nbgrader.api.Comment object
+        comment : :class:`~nbgrader.api.Comment`
 
         """
-        
+
         try:
             comment = self.db.query(Comment).filter(Comment.id == comment_id).one()
         except NoResultFound:
@@ -1471,7 +1858,8 @@ class Gradebook(object):
 
         Returns
         -------
-        float : the average score
+        score : float
+            The average score
 
         """
 
@@ -1494,7 +1882,8 @@ class Gradebook(object):
 
         Returns
         -------
-        float : the average code score
+        score : float
+            The average code score
 
         """
 
@@ -1522,7 +1911,8 @@ class Gradebook(object):
 
         Returns
         -------
-        float : the average writtenscore
+        score : float
+            The average written score
 
         """
 
@@ -1552,7 +1942,8 @@ class Gradebook(object):
 
         Returns
         -------
-        float : the average score
+        score : float
+            The average notebook score
 
         """
 
@@ -1580,7 +1971,8 @@ class Gradebook(object):
 
         Returns
         -------
-        float : the average code score
+        score : float
+            The average notebook code score
 
         """
 
@@ -1612,7 +2004,8 @@ class Gradebook(object):
 
         Returns
         -------
-        float : the average written score
+        score : float
+            The average notebook written score
 
         """
 
@@ -1633,8 +2026,14 @@ class Gradebook(object):
 
     def student_dicts(self):
         """Returns a list of dictionaries containing student data. Equivalent
-        to calling Student.to_dict() for each student, except that this method
-        is implemented using proper SQL joins and is much faster.
+        to calling :func:`~nbgrader.api.Student.to_dict` for each student,
+        except that this method is implemented using proper SQL joins and is
+        much faster.
+
+        Returns
+        -------
+        students : list
+            A list of dictionaries, one per student
 
         """
         # subquery the scores
@@ -1659,8 +2058,9 @@ class Gradebook(object):
 
     def notebook_submission_dicts(self, notebook_id, assignment_id):
         """Returns a list of dictionaries containing submission data. Equivalent
-        to calling SubmittedNotebook.to_dict() for each submission, except that 
-        this method is implemented using proper SQL joins and is much faster.
+        to calling :func:`~nbgrader.api.SubmittedNotebook.to_dict` for each
+        submission, except that this method is implemented using proper SQL
+        joins and is much faster.
 
         Parameters
         ----------
@@ -1668,6 +2068,11 @@ class Gradebook(object):
             the name of the notebook
         assignment_id : string
             the name of the assignment
+
+        Returns
+        -------
+        submissions : list
+            A list of dictionaries, one per submitted notebook
 
         """
         # subquery the code scores
