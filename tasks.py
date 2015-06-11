@@ -186,7 +186,7 @@ def publish_docs(github_token, git_name, git_email):
     run('ls -a')
     run('git checkout {} -- .'.format(commit))
     run('git checkout -- .travis.yml')
-    run('rm .gitignore')
+    run('git checkout -- .gitignore')
 
     docs(root='docs')
 
