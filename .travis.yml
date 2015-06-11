@@ -22,6 +22,7 @@ install:
   - if [[ $TRAVIS_PYTHON_VERSION == '3.4' ]]; then cd ~/jupyterhub && pip install -f ~/travis-wheels/wheelhouse -r dev-requirements.txt . && cd -; fi
   - pip install -r requirements.txt
   - pip install nose pytest pytest-cov coverage coveralls invoke selenium
+  - if [[ $GROUP == 'docs' ]]; then pip install pandoc; fi
   - if [[ $GROUP == 'docs' ]]; then python setup.py install; else pip install -e .; fi
 script:
   - invoke tests --group="${GROUP}" --python-version="${TRAVIS_PYTHON_VERSION}" --pull-request="${TRAVIS_PULL_REQUEST}" --github-token="${GH_TOKEN}" --git-name="${GIT_NAME}" --git-email="${GIT_EMAIL}"
