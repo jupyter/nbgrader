@@ -68,58 +68,6 @@ def check_docs_input(root='.'):
             """.format(bad)
         ))
 
-@task
-def check_docs_output(root='.'):
-    """Check that none of the cells in the documentation has errors."""
-
-    error_msg = dedent(
-        """
-
-        Notebook '{}' was not successfully executed. The cell that failed was:
-
-        ```
-        {}
-        ```
-
-        It generated the following output:
-
-        {}
-
-        The actual error was:
-
-        {}
-        """
-    )
-
-    echo("Checking that all docs were successfully executed...")
-    for dirpath, dirnames, filenames in os.walk(root):
-        # skip example directory -- those files are allowed to have errors
-        if _check_if_directory_in_path(dirpath, 'example'):
-            continue
-
-        for filename in sorted(filenames):
-            if os.path.splitext(filename)[1] == '.ipynb':
-                # read in the notebook
-                pth = os.path.join(dirpath, filename)
-                with open(pth, 'r') as fh:
-                    nb = read(fh, 4)
-
-                # check outputs of all the cells
-                for cell in nb.cells:
-                    if cell.cell_type != 'code':
-                        continue
-
-                    error = ""
-                    stdout = ""
-                    for output in cell.outputs:
-                        if output.output_type == 'error':
-                            error = "\n".join(output.traceback)
-                        elif output.output_type == 'stream':
-                            stdout += output.text
-
-                    if error != "":
-                        raise RuntimeError(error_msg.format(
-                            pth, cell.source, stdout, error))
 
 @task
 def docs(root='docs'):
@@ -130,34 +78,51 @@ def docs(root='docs'):
     os.chdir(root)
 
     # cleanup ignored files
-    run('git clean -fdX docs')
+    run('git clean -fdX')
 
     # make sure all the docs have been cleared
-    check_docs_input(root='.')
+    check_docs_input(root='source')
 
-    # build the docs
+    # execute the docs
     run(
         'ipython nbconvert '
         '--to notebook '
         '--execute '
-        '--FilesWriter.build_directory=command_line_tools '
+        '--FilesWriter.build_directory=source/user_guide '
         '--profile-dir=/tmp '
-        'command_line_tools/*.ipynb')
+        'source/user_guide/*.ipynb')
+
+    # convert to rst
     run(
         'ipython nbconvert '
-        '--to notebook '
-        '--execute '
-        '--FilesWriter.build_directory=user_guide '
+        '--to rst '
+        '--FilesWriter.build_directory=source/user_guide '
         '--profile-dir=/tmp '
-        'user_guide/*.ipynb')
+        'source/user_guide/*.ipynb')
 
-    # make sure the notebooks were executed successfully
-    check_docs_output(root='.')
+    # convert examples to html
+    for dirname, dirnames, filenames in os.walk('source/user_guide'):
+        if dirname == 'source/user_guide':
+            continue
+        for filename in filenames:
+            if not filename.endswith('.ipynb'):
+                continue
+
+            run(
+                "ipython nbconvert "
+                "--to html "
+                "--FilesWriter.build_directory='{}' "
+                "--profile-dir=/tmp "
+                "'{}'".format(dirname, os.path.join(dirname, filename)))
+
+    # generate config options and stuff
+    run('python autogen_command_line.py')
+    run('python autogen_config.py')
 
     os.chdir(cwd)
 
 @task
-def clear_docs(root='docs'):
+def clear_docs(root='docs/source'):
     """Clear the outputs of documentation notebooks."""
 
     # cleanup ignored files
