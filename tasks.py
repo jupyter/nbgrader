@@ -182,7 +182,7 @@ def publish_docs(github_token, git_name, git_email):
 
     # switch to the docs branch, and get the latest version from master
     run('git checkout docs')
-    run('rm -r *')
+    run('rm -rf *')
     run('ls -a')
     run('git checkout {} -- .'.format(commit))
     run('git reset HEAD -- .travis.yml .gitignore')
