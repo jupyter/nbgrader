@@ -1,8 +1,10 @@
 import datetime
 import pytest
+import json
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, scoped_session
+from sqlalchemy.sql import and_
 from nbgrader import api
 
 
@@ -29,6 +31,8 @@ def submissions(db):
         name='foo', max_score=10, notebook=n, cell_type="markdown")
     gc2 = api.GradeCell(
         name='bar', max_score=5, notebook=n, cell_type="code")
+    sc = api.SolutionCell(
+        name='foo', notebook=n, cell_type='markdown')
     db.add(a)
     db.commit()
 
@@ -37,6 +41,7 @@ def submissions(db):
     sn = api.SubmittedNotebook(assignment=sa, notebook=n)
     g1a = api.Grade(cell=gc1, notebook=sn)
     g2a = api.Grade(cell=gc2, notebook=sn)
+    ca = api.Comment(cell=sc, notebook=sn)
 
     db.add(s)
     db.commit()
@@ -46,11 +51,12 @@ def submissions(db):
     sn = api.SubmittedNotebook(assignment=sa, notebook=n)
     g1b = api.Grade(cell=gc1, notebook=sn)
     g2b = api.Grade(cell=gc2, notebook=sn)
+    cb = api.Comment(cell=sc, notebook=sn)
 
     db.add(s)
     db.commit()
 
-    return db, (g1a, g2a, g1b, g2b)
+    return db, (g1a, g2a, g1b, g2b), (ca, cb)
 
 
 def test_create_assignment(db):
@@ -485,7 +491,7 @@ def test_query_needs_manual_grade_ungraded(submissions):
     assert a == b
 
 def test_query_needs_manual_grade_autograded(submissions):
-    db, grades = submissions
+    db, grades, _ = submissions
 
     for grade in grades:
         grade.auto_score = grade.max_score
@@ -513,7 +519,7 @@ def test_query_needs_manual_grade_autograded(submissions):
         .all()
 
 def test_query_needs_manual_grade_manualgraded(submissions):
-    db, grades = submissions
+    db, grades, _ = submissions
 
     for grade in grades:
         grade.auto_score = None
@@ -561,7 +567,7 @@ def test_query_score_ungraded(submissions):
     assert [x[1] for x in db.query(api.Student.id, api.Student.score).all()] == [0.0, 0.0]
 
 def test_query_score_autograded(submissions):
-    db, grades = submissions
+    db, grades, _ = submissions
 
     grades[0].auto_score = 10
     grades[1].auto_score = 0
@@ -575,7 +581,7 @@ def test_query_score_autograded(submissions):
     assert sorted(x[1] for x in db.query(api.Student.id, api.Student.score).all()) == [7.5, 10]
 
 def test_query_score_manualgraded(submissions):
-    db, grades = submissions
+    db, grades, _ = submissions
 
     grades[0].auto_score = 10
     grades[1].auto_score = 0
@@ -607,7 +613,7 @@ def test_query_written_score_ungraded(submissions):
     assert [0.0, 0.0] == [x[1] for x in db.query(api.SubmittedAssignment.id, api.SubmittedAssignment.written_score).all()]
 
 def test_query_written_score_autograded(submissions):
-    db, grades = submissions
+    db, grades, _ = submissions
 
     grades[0].auto_score = 10
     grades[1].auto_score = 0
@@ -619,7 +625,7 @@ def test_query_written_score_autograded(submissions):
     assert [5, 10] == sorted(x[1] for x in db.query(api.SubmittedAssignment.id, api.SubmittedAssignment.written_score).all())
 
 def test_query_written_score_manualgraded(submissions):
-    db, grades = submissions
+    db, grades, _ = submissions
 
     grades[0].auto_score = 10
     grades[1].auto_score = 0
@@ -649,7 +655,7 @@ def test_query_code_score_ungraded(submissions):
     assert [0.0, 0.0] == [x[1] for x in db.query(api.SubmittedAssignment.id, api.SubmittedAssignment.code_score).all()]
 
 def test_query_code_score_autograded(submissions):
-    db, grades = submissions
+    db, grades, _ = submissions
 
     grades[0].auto_score = 10
     grades[1].auto_score = 0
@@ -661,7 +667,7 @@ def test_query_code_score_autograded(submissions):
     assert [0, 2.5] == sorted(x[1] for x in db.query(api.SubmittedAssignment.id, api.SubmittedAssignment.code_score).all())
 
 def test_query_code_score_manualgraded(submissions):
-    db, grades = submissions
+    db, grades, _ = submissions
 
     grades[0].auto_score = 10
     grades[1].auto_score = 0
@@ -725,7 +731,7 @@ def test_query_grade_cell_types(submissions):
     assert a == b
 
 def test_query_failed_tests_failed(submissions):
-    db, grades = submissions
+    db, grades, _ = submissions
 
     for grade in grades:
         if grade.cell.cell_type == "code":
@@ -753,7 +759,7 @@ def test_query_failed_tests_failed(submissions):
         .all()
 
 def test_query_failed_tests_ok(submissions):
-    db, all_grades = submissions
+    db, all_grades, _ = submissions
 
     for grade in all_grades:
         if grade.cell.cell_type == "code":
@@ -769,3 +775,251 @@ def test_query_failed_tests_ok(submissions):
     assert [] == db.query(api.SubmittedNotebook)\
         .filter(api.SubmittedNotebook.failed_tests)\
         .all()
+
+
+def test_assignment_to_dict(submissions):
+    db = submissions[0]
+
+    a = db.query(api.Assignment).one()
+    ad = a.to_dict()
+
+    assert set(ad.keys()) == {
+        'id', 'name', 'duedate', 'num_submissions', 'max_score',
+        'max_code_score', 'max_written_score'}
+
+    assert ad['id'] == a.id
+    assert ad['name'] == "foo"
+    assert ad['duedate'] == a.duedate.isoformat()
+    assert ad['num_submissions'] == 2
+    assert ad['max_score'] == 15
+    assert ad['max_code_score'] == 5
+    assert ad['max_written_score'] == 10
+
+    # make sure it can be JSONified
+    json.dumps(ad)
+
+
+def test_notebook_to_dict(submissions):
+    db = submissions[0]
+
+    a = db.query(api.Assignment).one()
+    n, = a.notebooks
+    nd = n.to_dict()
+
+    assert set(nd.keys()) == {
+        'id', 'name', 'num_submissions', 'max_score', 'max_code_score',
+        'max_written_score', 'needs_manual_grade'}
+
+    assert nd['id'] == n.id
+    assert nd['name'] == 'blah'
+    assert nd['num_submissions'] == 2
+    assert nd['max_score'] == 15
+    assert nd['max_code_score'] == 5
+    assert nd['max_written_score'] == 10
+    assert nd['needs_manual_grade']
+
+    # make sure it can be JSONified
+    json.dumps(nd)
+
+
+def test_gradecell_to_dict(submissions):
+    db = submissions[0]
+
+    gc1 = db.query(api.GradeCell).filter(api.GradeCell.name == 'foo').one()
+    gc2 = db.query(api.GradeCell).filter(api.GradeCell.name == 'bar').one()
+
+    gc1d = gc1.to_dict()
+    gc2d = gc2.to_dict()
+
+    assert set(gc1d.keys()) == set(gc2d.keys())
+    assert set(gc1d.keys()) == {
+        'id', 'name', 'max_score', 'cell_type', 'source',
+        'checksum', 'notebook', 'assignment'}
+
+    assert gc1d['id'] == gc1.id
+    assert gc1d['name'] == 'foo'
+    assert gc1d['max_score'] == 10
+    assert gc1d['cell_type'] == 'markdown'
+    assert gc1d['source'] is None
+    assert gc1d['checksum'] is None
+    assert gc1d['notebook'] == 'blah'
+    assert gc1d['assignment'] == 'foo'
+
+    assert gc2d['id'] == gc2.id
+    assert gc2d['name'] == 'bar'
+    assert gc2d['max_score'] == 5
+    assert gc2d['cell_type'] == 'code'
+    assert gc2d['source'] is None
+    assert gc2d['checksum'] is None
+    assert gc2d['notebook'] == 'blah'
+    assert gc2d['assignment'] == 'foo'
+
+    # make sure it can be JSONified
+    json.dumps(gc1d)
+    json.dumps(gc2d)
+
+
+def test_solutioncell_to_dict(submissions):
+    db = submissions[0]
+
+    sc = db.query(api.SolutionCell).one()
+    scd = sc.to_dict()
+
+    assert set(scd.keys()) == {
+        'id', 'name', 'cell_type', 'source', 'checksum',
+        'notebook', 'assignment'}
+
+    assert scd['id'] == sc.id
+    assert scd['name'] == 'foo'
+    assert scd['cell_type'] == 'markdown'
+    assert scd['source'] is None
+    assert scd['checksum'] is None
+    assert scd['notebook'] == 'blah'
+    assert scd['assignment'] == 'foo'
+
+    # make sure it can be JSONified
+    json.dumps(scd)
+
+
+def test_student_to_dict(submissions):
+    db = submissions[0]
+
+    s1 = db.query(api.Student).filter(api.Student.id == '12345').one()
+    s2 = db.query(api.Student).filter(api.Student.id == '6789').one()
+
+    s1d = s1.to_dict()
+    s2d = s2.to_dict()
+
+    assert set(s1d.keys()) == set(s2d.keys())
+    assert set(s1d.keys()) == {
+        'id', 'first_name', 'last_name', 'email', 'score', 'max_score'}
+
+    assert s1d['id'] == '12345'
+    assert s1d['first_name'] == 'Jane'
+    assert s1d['last_name'] == 'Doe'
+    assert s1d['email'] == 'janedoe@nowhere'
+    assert s1d['score'] == 0
+    assert s1d['max_score'] == 15
+
+    assert s2d['id'] == '6789'
+    assert s2d['first_name'] == 'John'
+    assert s2d['last_name'] == 'Doe'
+    assert s2d['email'] == 'johndoe@nowhere'
+    assert s2d['score'] == 0
+    assert s2d['max_score'] == 15
+
+    # make sure it can be JSONified
+    json.dumps(s1d)
+    json.dumps(s2d)
+
+
+def test_submittedassignment_to_dict(submissions):
+    db = submissions[0]
+
+    sa = db.query(api.SubmittedAssignment)\
+        .join(api.Student)\
+        .filter(api.Student.id == '12345')\
+        .one()
+
+    sad = sa.to_dict()
+
+    assert set(sad.keys()) == {
+        'id', 'name', 'student', 'timestamp', 'extension', 'duedate',
+        'total_seconds_late', 'score', 'max_score', 'code_score',
+        'max_code_score', 'written_score', 'max_written_score',
+        'needs_manual_grade'}
+
+    assert sad['id'] == sa.id
+    assert sad['name'] == 'foo'
+    assert sad['student'] == '12345'
+    assert sad['timestamp'] is None
+    assert sad['extension'] is None
+    assert sad['duedate'] == sa.assignment.duedate.isoformat()
+    assert sad['total_seconds_late'] == 0
+    assert sad['score'] == 0
+    assert sad['max_score'] == 15
+    assert sad['code_score'] == 0
+    assert sad['max_code_score'] == 5
+    assert sad['written_score'] == 0
+    assert sad['max_written_score'] == 10
+    assert sad['needs_manual_grade']
+
+    # make sure it can be JSONified
+    json.dumps(sad)
+
+
+def test_submittednotebook_to_dict(submissions):
+    db = submissions[0]
+
+    sn = db.query(api.SubmittedNotebook)\
+        .join(api.Notebook, api.SubmittedAssignment, api.Student)\
+        .filter(and_(
+            api.Student.id == '12345',
+            api.Notebook.name == 'blah'))\
+        .one()
+
+    snd = sn.to_dict()
+
+    assert set(snd.keys()) == {
+        'id', 'name', 'student', 'score', 'max_score', 'code_score',
+        'max_code_score', 'written_score', 'max_written_score',
+        'needs_manual_grade', 'failed_tests'}
+
+    assert snd['id'] == sn.id
+    assert snd['name'] == 'blah'
+    assert snd['student'] == '12345'
+    assert snd['score'] == 0
+    assert snd['max_score'] == 15
+    assert snd['code_score'] == 0
+    assert snd['max_code_score'] == 5
+    assert snd['written_score'] == 0
+    assert snd['max_written_score'] == 10
+    assert snd['needs_manual_grade']
+    assert not snd['failed_tests']
+
+    # make sure it can be JSONified
+    json.dumps(snd)
+
+
+def test_grade_to_dict(submissions):
+    _, grades, _ = submissions
+
+    for g in grades:
+        gd = g.to_dict()
+        assert set(gd.keys()) == {
+            'id', 'name', 'notebook', 'assignment', 'student', 'auto_score',
+            'manual_score', 'max_score', 'needs_manual_grade', 'failed_tests',
+            'cell_type'}
+
+        assert gd['id'] == g.id
+        assert gd['name'] == g.name
+        assert gd['notebook'] == 'blah'
+        assert gd['assignment'] == 'foo'
+        assert gd['student'] == g.student.id
+        assert gd['auto_score'] is None
+        assert gd['manual_score'] is None
+        assert gd['needs_manual_grade']
+        assert not gd['failed_tests']
+        assert gd['cell_type'] == g.cell_type
+
+        # make sure it can be JSONified
+        json.dumps(gd)
+
+
+def test_comment_to_dict(submissions):
+    _, _, comments = submissions
+
+    for c in comments:
+        cd = c.to_dict()
+        assert set(cd.keys()) == {
+            'id', 'name', 'notebook', 'assignment', 'student', 'comment'}
+
+        assert cd['id'] == c.id
+        assert cd['name'] == c.name
+        assert cd['notebook'] == 'blah'
+        assert cd['assignment'] == 'foo'
+        assert cd['student'] == c.student.id
+        assert cd['comment'] is None
+
+        # make sure it can be JSONified
+        json.dumps(cd)

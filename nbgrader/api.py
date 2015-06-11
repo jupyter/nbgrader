@@ -73,7 +73,7 @@ class Assignment(Base):
         return {
             "id": self.id,
             "name": self.name,
-            "duedate": self.duedate,
+            "duedate": self.duedate.isoformat() if self.duedate is not None else None,
             "num_submissions": self.num_submissions,
             "max_score": self.max_score,
             "max_code_score": self.max_code_score,
@@ -561,6 +561,9 @@ class Grade(Base):
     #: Unique id of the grade (automatically generated)
     id = Column(String(32), primary_key=True, default=new_uuid)
 
+    #: Unique name of the grade cell, inherited from :class:`~nbgrader.api.GradeCell`
+    name = association_proxy('cell', 'name')
+
     #: The submitted assignment that this grade is contained in, represented by
     #: a :class:`~nbgrader.api.SubmittedAssignment` object
     assignment = association_proxy('notebook', 'assignment')
@@ -632,7 +635,7 @@ class Grade(Base):
         """
         return {
             "id": self.id,
-            "name": self.cell.name,
+            "name": self.name,
             "notebook": self.notebook.name,
             "assignment": self.assignment.name,
             "student": self.student.id,
@@ -656,6 +659,9 @@ class Comment(Base):
 
     #: Unique id of the comment (automatically generated)
     id = Column(String(32), primary_key=True, default=new_uuid)
+
+    #: Unique name of the solution cell, inherited from :class:`~nbgrader.api.SolutionCell`
+    name = association_proxy('cell', 'name')
 
     #: The submitted assignment that this comment is contained in, represented by
     #: a :class:`~nbgrader.api.SubmittedAssignment` object
@@ -692,7 +698,7 @@ class Comment(Base):
         """
         return {
             "id": self.id,
-            "name": self.cell.name,
+            "name": self.name,
             "notebook": self.notebook.name,
             "assignment": self.assignment.name,
             "student": self.student.id,

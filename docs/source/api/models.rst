@@ -218,6 +218,8 @@ Submitted assignments
 
     .. autoattribute:: id
 
+    .. autoattribute:: name
+
     .. autoattribute:: assignment
 
     .. autoattribute:: notebook
@@ -251,6 +253,8 @@ Submitted assignments
 .. autoclass:: Comment
 
     .. autoattribute:: id
+
+    .. autoattribute:: name
 
     .. autoattribute:: assignment
 
