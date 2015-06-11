@@ -51,13 +51,9 @@ clean:
 	rm -rf $(BUILDDIR)/*
 
 html:
+	python autogen_command_line.py
+	python autogen_config.py
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html
-	cp -r source/user_guide/autograded $(BUILDDIR)/html/user_guide
-	cp -r source/user_guide/release $(BUILDDIR)/html/user_guide
-	cp -r source/user_guide/source $(BUILDDIR)/html/user_guide
-	cp -r source/user_guide/submitted $(BUILDDIR)/html/user_guide
-	cp -r source/user_guide/feedback $(BUILDDIR)/html/user_guide
-	find $(BUILDDIR)/html/user_guide -name "*.ipynb" -exec rm -f {} \;
 	@echo
 	@echo "Build finished. The HTML pages are in $(BUILDDIR)/html."
 

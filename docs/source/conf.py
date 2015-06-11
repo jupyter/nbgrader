@@ -21,6 +21,15 @@ import os
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #sys.path.insert(0, os.path.abspath('.'))
 
+if os.environ.get('READTHEDOCS', ''):
+    # RTD doesn't use the Makefile, so re-run autogen_config.py here.
+
+    with open('../autogen_config.py') as f:
+        exec(compile(f.read(), 'autogen_config.py', 'exec'), {})
+
+    with open('../autogen_command_line.py') as f:
+        exec(compile(f.read(), 'autogen_command_line.py', 'exec'), {})
+
 # -- General configuration ------------------------------------------------
 
 # If your documentation needs a minimal Sphinx version, state it here.

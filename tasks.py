@@ -100,25 +100,6 @@ def docs(root='docs'):
         '--profile-dir=/tmp '
         'source/user_guide/*.ipynb')
 
-    # convert examples to html
-    for dirname, dirnames, filenames in os.walk('source/user_guide'):
-        if dirname == 'source/user_guide':
-            continue
-        for filename in filenames:
-            if not filename.endswith('.ipynb'):
-                continue
-
-            run(
-                "ipython nbconvert "
-                "--to html "
-                "--FilesWriter.build_directory='{}' "
-                "--profile-dir=/tmp "
-                "'{}'".format(dirname, os.path.join(dirname, filename)))
-
-    # generate config options and stuff
-    run('python autogen_command_line.py')
-    run('python autogen_config.py')
-
     os.chdir(cwd)
 
 @task

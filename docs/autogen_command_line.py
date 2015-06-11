@@ -20,7 +20,7 @@ header = """\
 try:
     indir = os.path.dirname(__file__)
 except NameError:
-    indir = os.getcwd()
+    indir = os.path.dirname(os.getcwd())
 
 apps = [
     'AssignApp',
