@@ -1,6 +1,7 @@
 import os
 import re
 import shutil
+import glob
 
 from invoke import task
 from invoke import run as _run
@@ -101,6 +102,15 @@ def docs(root='docs'):
         '--FilesWriter.build_directory=source/user_guide '
         '--profile-dir=/tmp '
         'source/user_guide/*.ipynb')
+
+    # hack to convert links to ipynb files to html
+    for filename in glob.glob('source/user_guide/*.ipynb'):
+        filename = os.path.splitext(filename)[0] + '.rst'
+        with open(filename, 'r') as fh:
+            source = fh.read()
+        source = re.sub(r"<([^><]*)\.ipynb>", r"<\1.html>", source)
+        with open(filename, 'w') as fh:
+            fh.write(source)
 
     # convert examples to html
     for dirname, dirnames, filenames in os.walk('source/user_guide'):
