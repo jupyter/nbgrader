@@ -36,44 +36,55 @@ class OverwriteCells(NbGraderPreprocessor):
                 del cell['execution_count']
             validate(cell, 'markdown_cell')
 
+    def report_change(self, name, attr, old, new):
+        self.log.warning(
+            "Attribute '%s' for cell %s has changed! (should be: %s, got: %s)", attr, name, old, new)
+
     def preprocess_cell(self, cell, resources, cell_index):
+        grade_id = cell.metadata.get('nbgrader', {}).get('grade_id', None)
+        if grade_id is None:
+            return cell, resources
+
+        source_cell = self.gradebook.find_source_cell(
+            grade_id,
+            self.notebook_id,
+            self.assignment_id)
+
+        # check that the cell type hasn't changed
+        if cell.cell_type != source_cell.cell_type:
+            self.report_change(grade_id, "cell_type", source_cell.cell_type, cell.cell_type)
+            self.update_cell_type(cell, source_cell.cell_type)
+
+        # check that the locked status hasn't changed
+        if utils.is_locked(cell) != source_cell.locked:
+            self.report_change(grade_id, "locked", source_cell.locked, utils.is_locked(cell))
+            cell.metadata.nbgrader["locked"] = source_cell.locked
+
+        # if it's a grade cell, check that the max score hasn't changed
         if utils.is_grade(cell):
             grade_cell = self.gradebook.find_grade_cell(
-                cell.metadata.nbgrader["grade_id"],
+                grade_id,
                 self.notebook_id,
                 self.assignment_id)
 
-            cell.metadata.nbgrader['points'] = grade_cell.max_score
+            old_points = grade_cell.max_score
+            new_points = cell.metadata.nbgrader["points"]
+            if old_points != new_points:
+                self.report_change(grade_id, "points", old_points, new_points)
+                cell.metadata.nbgrader["points"] = old_points
 
-            # we only want the source and checksum for non-solution cells
-            if not utils.is_solution(cell):
-                old_checksum = grade_cell.checksum
-                new_checksum = utils.compute_checksum(cell)
+        # always update the checksum, just in case
+        cell.metadata.nbgrader["checksum"] = source_cell.checksum
 
-                if old_checksum != new_checksum:
-                    self.log.warning("Checksum for grade cell %s has changed!", grade_cell.name)
-
-                cell.source = grade_cell.source
-                cell.metadata.nbgrader['checksum'] = grade_cell.checksum
-                self.update_cell_type(cell, grade_cell.cell_type)
-
-            self.log.debug("Overwrote grade cell %s", grade_cell.name)
-
-        if utils.is_solution(cell):
-            solution_cell = self.gradebook.find_solution_cell(
-                cell.metadata.nbgrader["grade_id"],
-                self.notebook_id,
-                self.assignment_id)
-
-            old_checksum = solution_cell.checksum
+        # if it's locked, check that the checksum hasn't changed
+        if source_cell.locked:
+            old_checksum = source_cell.checksum
             new_checksum = utils.compute_checksum(cell)
-
-            if cell.cell_type != solution_cell.cell_type:
-                self.log.warning("Cell type for solution cell %s has changed!", solution_cell.name)
-
-            cell.metadata.nbgrader['checksum'] = solution_cell.checksum
-            self.update_cell_type(cell, solution_cell.cell_type)
-
-            self.log.debug("Overwrote solution cell #%s", solution_cell.name)
+            if old_checksum != new_checksum:
+                self.report_change(grade_id, "checksum", old_checksum, new_checksum)
+                cell.source = source_cell.source
+                # double check the the checksum is correct now
+                if utils.compute_checksum(cell) != source_cell.checksum:
+                    raise RuntimeError("Inconsistent checksums for cell {}".format(source_cell.name))
 
         return cell, resources

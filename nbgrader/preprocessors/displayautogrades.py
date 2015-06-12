@@ -30,9 +30,8 @@ class DisplayAutoGrades(NbGraderPreprocessor):
         False, config=True,
         help=dedent(
             """
-            Don't complain if cell checksums have changed (if they are code
-            grade cells) or haven't changed (if they are markdown solution
-            and grade cells)
+            Don't complain if cell checksums have changed (if they are locked
+            cells) or haven't changed (if they are solution cells)
             """
         )
     )
@@ -150,7 +149,7 @@ class DisplayAutoGrades(NbGraderPreprocessor):
         return nb, resources
 
     def preprocess_cell(self, cell, resources, cell_index):
-        if not utils.is_grade(cell):
+        if not (utils.is_grade(cell) or utils.is_locked(cell)):
             return cell, resources
 
         # if we're ignoring checksums, then remove the checksum from the
@@ -159,21 +158,22 @@ class DisplayAutoGrades(NbGraderPreprocessor):
             del cell.metadata.nbgrader['checksum']
 
         # verify checksums of cells
-        if not utils.is_solution(cell) and 'checksum' in cell.metadata.nbgrader:
+        if utils.is_locked(cell) and 'checksum' in cell.metadata.nbgrader:
             old_checksum = cell.metadata.nbgrader['checksum']
             new_checksum = utils.compute_checksum(cell)
             if old_checksum != new_checksum:
                 resources['nbgrader']['checksum_mismatch'].append(cell_index)
 
         # if it's a grade cell, the add a grade
-        score, max_score = utils.determine_grade(cell)
+        if utils.is_grade(cell):
+            score, max_score = utils.determine_grade(cell)
 
-        # it's a markdown cell, so we can't do anything
-        if score is None:
-            pass
-        elif score < max_score:
-            resources['nbgrader']['failed_cells'].append(cell_index)
-        else:
-            resources['nbgrader']['passed_cells'].append(cell_index)
+            # it's a markdown cell, so we can't do anything
+            if score is None:
+                pass
+            elif score < max_score:
+                resources['nbgrader']['failed_cells'].append(cell_index)
+            else:
+                resources['nbgrader']['passed_cells'].append(cell_index)
 
         return cell, resources

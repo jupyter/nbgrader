@@ -31,33 +31,39 @@ class SaveCells(NbGraderPreprocessor):
         if utils.is_grade(cell):
             max_score = float(cell.metadata.nbgrader['points'])
             cell_type = cell.cell_type
-            source = cell.source
-            checksum = cell.metadata.nbgrader.get('checksum', None)
 
             grade_cell = self.gradebook.update_or_create_grade_cell(
                 cell.metadata.nbgrader['grade_id'],
                 self.notebook_id,
                 self.assignment_id,
                 max_score=max_score,
-                source=source,
-                checksum=checksum,
                 cell_type=cell_type)
 
             self.log.debug("Recorded grade cell %s into database", grade_cell)
 
         if utils.is_solution(cell):
+            solution_cell = self.gradebook.update_or_create_solution_cell(
+                cell.metadata.nbgrader['grade_id'],
+                self.notebook_id,
+                self.assignment_id)
+
+            self.log.debug("Recorded solution cell %s into database", solution_cell)
+
+        if utils.is_grade(cell) or utils.is_solution(cell) or utils.is_locked(cell):
             cell_type = cell.cell_type
+            locked = utils.is_locked(cell)
             source = cell.source
             checksum = cell.metadata.nbgrader.get('checksum', None)
 
-            solution_cell = self.gradebook.update_or_create_solution_cell(
+            source_cell = self.gradebook.update_or_create_source_cell(
                 cell.metadata.nbgrader['grade_id'],
                 self.notebook_id,
                 self.assignment_id,
                 cell_type=cell_type,
+                locked=locked,
                 source=source,
                 checksum=checksum)
 
-            self.log.debug("Recorded solution cell %s into database", solution_cell)
+            self.log.debug("Recorded source cell %s into database", source_cell)
 
         return cell, resources

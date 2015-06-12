@@ -6,7 +6,7 @@ class ComputeChecksums(NbGraderPreprocessor):
 
     def preprocess_cell(self, cell, resources, cell_index):
         # compute checksums of grade cell and solution cells
-        if utils.is_grade(cell) or utils.is_solution(cell):
+        if utils.is_grade(cell) or utils.is_solution(cell) or utils.is_locked(cell):
             checksum = utils.compute_checksum(cell)
             cell.metadata.nbgrader['checksum'] = checksum
 
