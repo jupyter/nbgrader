@@ -4,6 +4,7 @@ from nbgrader.api import MissingEntry
 from nbgrader.tests.formgrader.base import BaseTestFormgrade
 
 
+@pytest.mark.js
 @pytest.mark.usefixtures("all_formgraders")
 class TestGradebook(BaseTestFormgrade):
 
