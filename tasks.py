@@ -122,10 +122,6 @@ def docs(root='docs'):
                     "--profile-dir=/tmp "
                     "'{}'".format(build_directory, os.path.join(dirname, filename)))
 
-                src = os.path.join(build_directory, os.path.splitext(filename)[0] + '.html')
-                dst = os.path.join(build_directory, filename)
-                os.rename(src, dst)
-
             else:
                 shutil.copy(
                     os.path.join(dirname, filename),
