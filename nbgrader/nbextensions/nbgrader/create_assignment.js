@@ -22,6 +22,7 @@ define([
     "use strict";
 
     var nbgrader_preset_name = "Create Assignment";
+    var nbgrader_highlight_cls = "nbgrader-highlight";
     var nbgrader_cls = "nbgrader-cell";
     var warning;
 
@@ -70,6 +71,9 @@ define([
     events.on("global_hide.CellToolbar toolbar_rebuild.CellToolbar", function (evt, cell) {
         if (cell.element && cell.element.hasClass(nbgrader_cls)) {
             cell.element.removeClass(nbgrader_cls);
+        }
+        if (cell.element && cell.element.hasClass(nbgrader_highlight_cls)) {
+            cell.element.removeClass(nbgrader_highlight_cls);
         }
     });
 
@@ -256,8 +260,15 @@ define([
      * nbgrader cell type.
      */
     var display_cell = function (cell) {
-        if (cell.element && (is_grade(cell) || is_solution(cell)) && !cell.element.hasClass(nbgrader_cls)) {
-            cell.element.addClass(nbgrader_cls);
+        if (is_grade(cell) || is_solution(cell)) {
+            if (cell.element && !cell.element.hasClass(nbgrader_highlight_cls)) {
+                cell.element.addClass(nbgrader_highlight_cls);
+            }
+        }
+        if (is_grade(cell) || is_solution(cell) || is_locked(cell)) {
+            if (cell.element && !cell.element.hasClass(nbgrader_cls)) {
+                cell.element.addClass(nbgrader_cls);
+            }
         }
     };
 

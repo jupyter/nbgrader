@@ -36,6 +36,7 @@ def _load_notebook(browser, retries=5):
     _wait(browser).until(
         EC.element_to_be_clickable((By.CSS_SELECTOR, '#ctb_select')))
 
+
 def _activate_toolbar(browser, name="Create Assignment"):
     # activate the Create Assignment toolbar
     element = browser.find_element_by_css_selector("#ctb_select")
@@ -61,6 +62,11 @@ def _select_solution(browser, index=0):
 def _select_tests(browser, index=0):
     select = Select(browser.find_elements_by_css_selector('.celltoolbar select')[index])
     select.select_by_value('tests')
+
+
+def _select_locked(browser, index=0):
+    select = Select(browser.find_elements_by_css_selector('.celltoolbar select')[index])
+    select.select_by_value('readonly')
 
 
 def _set_points(browser, points=2, index=0):
@@ -129,6 +135,7 @@ def test_manual_cell(browser):
     _select_manual(browser)
     assert _get_metadata(browser)['solution']
     assert _get_metadata(browser)['grade']
+    assert not _get_metadata(browser)['locked']
 
     # wait for the points and id fields to appear
     _wait(browser).until(
@@ -148,6 +155,7 @@ def test_manual_cell(browser):
     _select_none(browser)
     assert not _get_metadata(browser)['solution']
     assert not _get_metadata(browser)['grade']
+    assert not _get_metadata(browser)['locked']
 
 
 @pytest.mark.js
@@ -166,6 +174,7 @@ def test_solution_cell(browser):
     _select_solution(browser)
     assert _get_metadata(browser)['solution']
     assert not _get_metadata(browser)['grade']
+    assert not _get_metadata(browser)['locked']
 
     # wait for the id field to appear
     _wait(browser).until(
@@ -179,6 +188,7 @@ def test_solution_cell(browser):
     _select_none(browser)
     assert not _get_metadata(browser)['solution']
     assert not _get_metadata(browser)['grade']
+    assert not _get_metadata(browser)['locked']
 
 
 @pytest.mark.js
@@ -197,12 +207,15 @@ def test_tests_cell(browser):
     _select_tests(browser)
     assert not _get_metadata(browser)['solution']
     assert _get_metadata(browser)['grade']
+    assert _get_metadata(browser)['locked']
 
     # wait for the points and id fields to appear
     _wait(browser).until(
         EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".nbgrader-points")))
     _wait(browser).until(
         EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".nbgrader-id")))
+    WebDriverWait(browser, 30).until(
+        EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".lock-button")))
 
     # set the points
     _set_points(browser)
@@ -216,6 +229,41 @@ def test_tests_cell(browser):
     _select_none(browser)
     assert not _get_metadata(browser)['solution']
     assert not _get_metadata(browser)['grade']
+    assert not _get_metadata(browser)['locked']
+
+
+def test_locked_cell(browser):
+    _load_notebook(browser)
+    _activate_toolbar(browser)
+
+    # make sure the toolbar appeared
+    WebDriverWait(browser, 30).until(
+        EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".celltoolbar select")))
+
+    # does the nbgrader metadata exist?
+    assert {} == _get_metadata(browser)
+
+    # make it locked
+    _select_locked(browser)
+    assert not _get_metadata(browser)['solution']
+    assert not _get_metadata(browser)['grade']
+    assert _get_metadata(browser)['locked']
+
+    # wait for the id and lock button to appear
+    WebDriverWait(browser, 30).until(
+        EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".nbgrader-id")))
+    WebDriverWait(browser, 30).until(
+        EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".lock-button")))
+
+    # set the id
+    _set_id(browser)
+    assert "foo" == _get_metadata(browser)['grade_id']
+
+    # make it nothing
+    _select_none(browser)
+    assert not _get_metadata(browser)['solution']
+    assert not _get_metadata(browser)['grade']
+    assert not _get_metadata(browser)['locked']
 
 
 @pytest.mark.js

@@ -25,13 +25,13 @@ input.nbgrader-id-input {
     margin-right: 0.3em;
 }
 
-div.nbgrader-cell div.celltoolbar {
+div.nbgrader-highlight div.celltoolbar {
     color: white;
     background-color: #337ab7;
     border: 1px solid #337ab7;
 }
 
-div.nbgrader-cell div.text_cell_render, div.nbgrader-cell div.input_area {
+div.nbgrader-highlight div.text_cell_render, div.nbgrader-highlight div.input_area {
     border: 1px solid #337ab7 !important;
 }
 
@@ -49,7 +49,7 @@ div.lock-cell-container {
 a.lock-button {
     color: black
 }
-div.nbgrader-cell a.lock-button {
+div.nbgrader-highlight a.lock-button {
     color: white;
 }
 
