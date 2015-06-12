@@ -303,4 +303,3 @@ def before_install(group='', python_version=None):
     # install js dependencies
     if group == 'js':
         run('python -m IPython.external.mathjax')
-        run('pip install selenium')

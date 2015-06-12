@@ -20,7 +20,7 @@ before_install:
   - pip install invoke
   - invoke before_install --group="$GROUP" --python-version="$TRAVIS_PYTHON_VERSION"
 install:
-  - pip install nose pytest pytest-cov coverage coveralls
+  - pip install nose pytest pytest-cov coverage coveralls selenium
   - pip install -r requirements.txt
   - if [[ $GROUP == 'docs' ]]; then python setup.py install; else pip install -e .; fi
 script:
