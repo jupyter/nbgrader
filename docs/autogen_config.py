@@ -15,7 +15,7 @@ These options can be set in ``nbgrader_config.py``, or at the command line when 
 try:
     indir = os.path.dirname(__file__)
 except NameError:
-    indir = os.getcwd()
+    indir = os.path.dirname(os.getcwd())
 
 config = NbGraderApp().generate_config_file()
 config = "\n".join(["    " + x for x in config.split("\n")])

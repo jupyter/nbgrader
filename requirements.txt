@@ -1,4 +1,4 @@
-ipython>3.0
+ipython[all]>3.0
 sqlalchemy
 Flask
 python-dateutil

@@ -1,5 +1,8 @@
 import os
 import re
+import shutil
+import glob
+
 from invoke import task
 from invoke import run as _run
 from copy import deepcopy
@@ -26,7 +29,7 @@ def _check_if_directory_in_path(pth, target):
     return False
 
 @task
-def check_docs_input(root='.'):
+def check_docs_input(root='docs/source'):
     """Check that docs have output cleared."""
     echo("Checking that all docs have cleared outputs...")
     bad = []
@@ -100,24 +103,39 @@ def docs(root='docs'):
         '--profile-dir=/tmp '
         'source/user_guide/*.ipynb')
 
+    # hack to convert links to ipynb files to html
+    for filename in glob.glob('source/user_guide/*.ipynb'):
+        filename = os.path.splitext(filename)[0] + '.rst'
+        with open(filename, 'r') as fh:
+            source = fh.read()
+        source = re.sub(r"<([^><]*)\.ipynb>", r"<\1.html>", source)
+        with open(filename, 'w') as fh:
+            fh.write(source)
+
     # convert examples to html
     for dirname, dirnames, filenames in os.walk('source/user_guide'):
         if dirname == 'source/user_guide':
             continue
+        if dirname == 'source/user_guide/images':
+            continue
+
+        build_directory = os.path.join('source', 'extra_files', os.path.relpath(dirname, 'source'))
+        if not os.path.exists(build_directory):
+            os.makedirs(build_directory)
+
         for filename in filenames:
-            if not filename.endswith('.ipynb'):
-                continue
+            if filename.endswith('.ipynb'):
+                run(
+                    "ipython nbconvert "
+                    "--to html "
+                    "--FilesWriter.build_directory='{}' "
+                    "--profile-dir=/tmp "
+                    "'{}'".format(build_directory, os.path.join(dirname, filename)))
 
-            run(
-                "ipython nbconvert "
-                "--to html "
-                "--FilesWriter.build_directory='{}' "
-                "--profile-dir=/tmp "
-                "'{}'".format(dirname, os.path.join(dirname, filename)))
-
-    # generate config options and stuff
-    run('python autogen_command_line.py')
-    run('python autogen_config.py')
+            else:
+                shutil.copy(
+                    os.path.join(dirname, filename),
+                    os.path.join(build_directory, filename))
 
     os.chdir(cwd)
 
@@ -182,12 +200,13 @@ def publish_docs(github_token, git_name, git_email):
 
     # switch to the docs branch, and get the latest version from master
     run('git checkout docs')
-    run('rm -r *')
+    run('rm -rf *')
     run('ls -a')
-    run('git checkout {} -- docs'.format(commit))
-    run('mv docs/* . && rmdir docs')
+    run('git checkout {} -- .'.format(commit))
+    run('git reset HEAD -- .travis.yml .gitignore')
+    run('git checkout -- .travis.yml .gitignore')
 
-    docs(root='.')
+    docs(root='docs')
 
     # commit the changes
     run('git add -A -f')
