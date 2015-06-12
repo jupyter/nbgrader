@@ -68,3 +68,32 @@ class TestNbGraderValidate(BaseTestApp):
             'nbgrader validate submitted-unchanged.ipynb '
             '--DisplayAutoGrades.ignore_checksums=True')
         assert output.split("\n")[0] == "VALIDATION FAILED ON 1 CELL(S)! If you submit your assignment as it is, you WILL NOT"
+
+    def test_locked_cell_changed(self):
+        """Does the validate fail if a locked cell has changed?"""
+        self._copy_file("files/submitted-locked-cell-changed.ipynb", "submitted-locked-cell-changed.ipynb")
+        output = run_command('nbgrader validate submitted-locked-cell-changed.ipynb')
+        assert output.split("\n")[0] == "THE CONTENTS OF 2 TEST CELL(S) HAVE CHANGED! This might mean that even though the tests"
+
+    def test_locked_cell_changed_ignore_checksums(self):
+        """Does the validate pass if a locked cell has changed but we're ignoring checksums?"""
+        self._copy_file("files/submitted-locked-cell-changed.ipynb", "submitted-locked-cell-changed.ipynb")
+        output = run_command(
+            'nbgrader validate submitted-locked-cell-changed.ipynb '
+            '--DisplayAutoGrades.ignore_checksums=True')
+        assert output.split("\n")[0] == "VALIDATION FAILED ON 1 CELL(S)! If you submit your assignment as it is, you WILL NOT"
+
+    def test_invert_locked_cell_changed(self):
+        """Does the validate fail if a locked cell has changed, even with --invert?"""
+        self._copy_file("files/submitted-locked-cell-changed.ipynb", "submitted-locked-cell-changed.ipynb")
+        output = run_command('nbgrader validate submitted-locked-cell-changed.ipynb --invert')
+        assert output.split("\n")[0] == "THE CONTENTS OF 2 TEST CELL(S) HAVE CHANGED! This might mean that even though the tests"
+
+    def test_invert_locked_cell_changed_ignore_checksums(self):
+        """Does the validate fail if a locked cell has changed with --invert and ignoring checksums?"""
+        self._copy_file("files/submitted-locked-cell-changed.ipynb", "submitted-locked-cell-changed.ipynb")
+        output = run_command(
+            'nbgrader validate submitted-locked-cell-changed.ipynb '
+            '--invert '
+            '--DisplayAutoGrades.ignore_checksums=True')
+        assert output.split("\n")[0] == "NOTEBOOK PASSED ON 1 CELL(S)!"

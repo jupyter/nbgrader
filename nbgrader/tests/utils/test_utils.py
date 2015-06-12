@@ -48,6 +48,51 @@ def test_is_solution():
     assert utils.is_solution(cell)
 
 
+def test_is_locked():
+
+    cell = create_code_cell()
+    assert not utils.is_locked(cell)
+    cell.metadata['nbgrader'] = dict(solution=True, grade=False, locked=False)
+    assert not utils.is_locked(cell)
+
+    cell = create_code_cell()
+    assert not utils.is_locked(cell)
+    cell.metadata['nbgrader'] = dict(solution=True, grade=True, locked=False)
+    assert not utils.is_locked(cell)
+
+    cell = create_code_cell()
+    assert not utils.is_locked(cell)
+    cell.metadata['nbgrader'] = dict(solution=True, grade=False, locked=True)
+    assert not utils.is_locked(cell)
+
+    cell = create_code_cell()
+    assert not utils.is_locked(cell)
+    cell.metadata['nbgrader'] = dict(solution=True, grade=True, locked=True)
+    assert not utils.is_locked(cell)
+
+    cell = create_code_cell()
+    assert not utils.is_locked(cell)
+    cell.metadata['nbgrader'] = dict(solution=False, grade=True, locked=False)
+    assert utils.is_locked(cell)
+
+    cell = create_code_cell()
+    assert not utils.is_locked(cell)
+    cell.metadata['nbgrader'] = dict(solution=False, grade=True, locked=True)
+    assert utils.is_locked(cell)
+
+    cell = create_code_cell()
+    assert not utils.is_locked(cell)
+    cell.metadata['nbgrader'] = dict(solution=False, grade=False, locked=True)
+    assert utils.is_locked(cell)
+
+    assert utils.is_locked(cell)
+    cell = create_code_cell()
+    assert not utils.is_locked(cell)
+    cell.metadata['nbgrader'] = dict(solution=False, grade=False, locked=False)
+    assert not utils.is_locked(cell)
+
+
+
 def test_determine_grade_code_grade():
     cell = create_grade_cell('print("test")', "code", "foo", 10)
     cell.outputs = []
@@ -74,6 +119,7 @@ def test_determine_grade_solution():
 
 def test_determine_grade_code_grade_and_solution():
     cell = create_grade_and_solution_cell('test', "code", "foo", 10)
+    cell.metadata.nbgrader['checksum'] = utils.compute_checksum(cell)
     cell.outputs = []
     assert utils.determine_grade(cell) == (0, 10)
 
@@ -84,6 +130,7 @@ def test_determine_grade_code_grade_and_solution():
 
 def test_determine_grade_markdown_grade_and_solution():
     cell = create_grade_and_solution_cell('test', "markdown", "foo", 10)
+    cell.metadata.nbgrader['checksum'] = utils.compute_checksum(cell)
     assert utils.determine_grade(cell) == (0, 10)
 
     cell = create_grade_and_solution_cell('test', "markdown", "foo", 10)

@@ -20,8 +20,11 @@ def assignment(gradebook):
     gradebook.add_notebook('p1', 'foo')
     gradebook.add_grade_cell('test1', 'p1', 'foo', max_score=1, cell_type='code')
     gradebook.add_grade_cell('test2', 'p1', 'foo', max_score=2, cell_type='markdown')
-    gradebook.add_solution_cell('solution1', 'p1', 'foo', cell_type='code')
-    gradebook.add_solution_cell('test2', 'p1', 'foo', cell_type='markdown')
+    gradebook.add_solution_cell('solution1', 'p1', 'foo')
+    gradebook.add_solution_cell('test2', 'p1', 'foo')
+    gradebook.add_source_cell('test1', 'p1', 'foo', cell_type='code')
+    gradebook.add_source_cell('test2', 'p1', 'foo', cell_type='markdown')
+    gradebook.add_source_cell('solution1', 'p1', 'foo', cell_type='code')
     return gradebook
 
 
@@ -145,6 +148,7 @@ def test_remove_assignment(assignment):
     notebooks = assignment.find_assignment('foo').notebooks
     grade_cells = [x for nb in notebooks for x in nb.grade_cells]
     solution_cells = [x for nb in notebooks for x in nb.solution_cells]
+    source_cells = [x for nb in notebooks for x in nb.source_cells]
 
     assignment.remove_assignment('foo')
 
@@ -154,6 +158,8 @@ def test_remove_assignment(assignment):
         assert assignment.db.query(api.GradeCell).filter(api.GradeCell.id == grade_cell.id).all() == []
     for solution_cell in solution_cells:
         assert assignment.db.query(api.SolutionCell).filter(api.SolutionCell.id == solution_cell.id).all() == []
+    for source_cell in source_cells:
+        assert assignment.db.query(api.SourceCell).filter(api.SourceCell.id == source_cell.id).all() == []
 
     with pytest.raises(MissingEntry):
         assignment.find_assignment('foo')
@@ -251,13 +257,10 @@ def test_add_grade_cell_with_args(gradebook):
     gradebook.add_notebook('p1', 'foo')
     gc = gradebook.add_grade_cell(
         'test1', 'p1', 'foo',
-        max_score=3, source="blah blah blah",
-        cell_type="code", checksum="abcde")
+        max_score=3, cell_type="code")
     assert gc.name == 'test1'
     assert gc.max_score == 3
-    assert gc.source == "blah blah blah"
     assert gc.cell_type == "code"
-    assert gc.checksum == "abcde"
 
 
 def test_create_invalid_grade_cell(gradebook):
@@ -266,8 +269,7 @@ def test_create_invalid_grade_cell(gradebook):
     with pytest.raises(InvalidEntry):
         gradebook.add_grade_cell(
             'test1', 'p1', 'foo',
-            max_score=3, source="blah blah blah",
-            cell_type="something", checksum="abcde")
+            max_score=3, cell_type="something")
 
 
 def test_add_duplicate_grade_cell(gradebook):
@@ -312,12 +314,10 @@ def test_update_or_create_grade_cell(gradebook):
     assert gradebook.find_grade_cell('test1', 'p1', 'foo') == gc1
 
     # now test finding/updating it
-    assert gc1.checksum == None
-    gc2 = gradebook.update_or_create_grade_cell('test1', 'p1', 'foo', checksum="123456")
+    gc2 = gradebook.update_or_create_grade_cell('test1', 'p1', 'foo', max_score=3)
     assert gc1 == gc2
-    assert gc1.max_score == 2
+    assert gc1.max_score == 3
     assert gc1.cell_type == 'code'
-    assert gc1.checksum == "123456"
 
 
 #### Test solution cells
@@ -325,51 +325,27 @@ def test_update_or_create_grade_cell(gradebook):
 def test_add_solution_cell(gradebook):
     gradebook.add_assignment('foo')
     n = gradebook.add_notebook('p1', 'foo')
-    sc = gradebook.add_solution_cell('test1', 'p1', 'foo', cell_type="code")
+    sc = gradebook.add_solution_cell('test1', 'p1', 'foo')
     assert sc.name == 'test1'
-    assert sc.cell_type == 'code'
     assert n.solution_cells == [sc]
     assert sc.notebook == n
-
-
-def test_add_solution_cell_with_args(gradebook):
-    gradebook.add_assignment('foo')
-    gradebook.add_notebook('p1', 'foo')
-    sc = gradebook.add_solution_cell(
-        'test1', 'p1', 'foo',
-        source="blah blah blah",
-        cell_type="code", checksum="abcde")
-    assert sc.name == 'test1'
-    assert sc.source == "blah blah blah"
-    assert sc.cell_type == "code"
-    assert sc.checksum == "abcde"
-
-
-def test_create_invalid_solution_cell(gradebook):
-    gradebook.add_assignment('foo')
-    gradebook.add_notebook('p1', 'foo')
-    with pytest.raises(InvalidEntry):
-        gradebook.add_solution_cell(
-            'test1', 'p1', 'foo',
-            source="blah blah blah",
-            cell_type="something", checksum="abcde")
 
 
 def test_add_duplicate_solution_cell(gradebook):
     gradebook.add_assignment('foo')
     gradebook.add_notebook('p1', 'foo')
-    gradebook.add_solution_cell('test1', 'p1', 'foo', cell_type="code")
+    gradebook.add_solution_cell('test1', 'p1', 'foo')
     with pytest.raises(InvalidEntry):
-        gradebook.add_solution_cell('test1', 'p1', 'foo', cell_type="code")
+        gradebook.add_solution_cell('test1', 'p1', 'foo')
 
 
 def test_find_solution_cell(gradebook):
     gradebook.add_assignment('foo')
     gradebook.add_notebook('p1', 'foo')
-    sc1 = gradebook.add_solution_cell('test1', 'p1', 'foo', cell_type="code")
+    sc1 = gradebook.add_solution_cell('test1', 'p1', 'foo')
     assert gradebook.find_solution_cell('test1', 'p1', 'foo') == sc1
 
-    sc2 = gradebook.add_solution_cell('test2', 'p1', 'foo', cell_type="code")
+    sc2 = gradebook.add_solution_cell('test2', 'p1', 'foo')
     assert gradebook.find_solution_cell('test1', 'p1', 'foo') == sc1
     assert gradebook.find_solution_cell('test2', 'p1', 'foo') == sc2
 
@@ -391,13 +367,92 @@ def test_update_or_create_solution_cell(gradebook):
     # first test creating it
     gradebook.add_assignment('foo')
     gradebook.add_notebook('p1', 'foo')
-    sc1 = gradebook.update_or_create_solution_cell('test1', 'p1', 'foo', cell_type='code')
-    assert sc1.cell_type == 'code'
+    sc1 = gradebook.update_or_create_solution_cell('test1', 'p1', 'foo')
     assert gradebook.find_solution_cell('test1', 'p1', 'foo') == sc1
 
     # now test finding/updating it
+    sc2 = gradebook.update_or_create_solution_cell('test1', 'p1', 'foo')
+    assert sc1 == sc2
+
+
+#### Test source cells
+
+def test_add_source_cell(gradebook):
+    gradebook.add_assignment('foo')
+    n = gradebook.add_notebook('p1', 'foo')
+    sc = gradebook.add_source_cell('test1', 'p1', 'foo', cell_type="code")
+    assert sc.name == 'test1'
+    assert sc.cell_type == 'code'
+    assert n.source_cells == [sc]
+    assert sc.notebook == n
+
+
+def test_add_source_cell_with_args(gradebook):
+    gradebook.add_assignment('foo')
+    gradebook.add_notebook('p1', 'foo')
+    sc = gradebook.add_source_cell(
+        'test1', 'p1', 'foo',
+        source="blah blah blah",
+        cell_type="code", checksum="abcde")
+    assert sc.name == 'test1'
+    assert sc.source == "blah blah blah"
+    assert sc.cell_type == "code"
+    assert sc.checksum == "abcde"
+
+
+def test_create_invalid_source_cell(gradebook):
+    gradebook.add_assignment('foo')
+    gradebook.add_notebook('p1', 'foo')
+    with pytest.raises(InvalidEntry):
+        gradebook.add_source_cell(
+            'test1', 'p1', 'foo',
+            source="blah blah blah",
+            cell_type="something", checksum="abcde")
+
+
+def test_add_duplicate_source_cell(gradebook):
+    gradebook.add_assignment('foo')
+    gradebook.add_notebook('p1', 'foo')
+    gradebook.add_source_cell('test1', 'p1', 'foo', cell_type="code")
+    with pytest.raises(InvalidEntry):
+        gradebook.add_source_cell('test1', 'p1', 'foo', cell_type="code")
+
+
+def test_find_source_cell(gradebook):
+    gradebook.add_assignment('foo')
+    gradebook.add_notebook('p1', 'foo')
+    sc1 = gradebook.add_source_cell('test1', 'p1', 'foo', cell_type="code")
+    assert gradebook.find_source_cell('test1', 'p1', 'foo') == sc1
+
+    sc2 = gradebook.add_source_cell('test2', 'p1', 'foo', cell_type="code")
+    assert gradebook.find_source_cell('test1', 'p1', 'foo') == sc1
+    assert gradebook.find_source_cell('test2', 'p1', 'foo') == sc2
+
+
+def test_find_nonexistant_source_cell(gradebook):
+    with pytest.raises(MissingEntry):
+        gradebook.find_source_cell('test1', 'p1', 'foo')
+
+    gradebook.add_assignment('foo')
+    with pytest.raises(MissingEntry):
+        gradebook.find_source_cell('test1', 'p1', 'foo')
+
+    gradebook.add_notebook('p1', 'foo')
+    with pytest.raises(MissingEntry):
+        gradebook.find_source_cell('test1', 'p1', 'foo')
+
+
+def test_update_or_create_source_cell(gradebook):
+    # first test creating it
+    gradebook.add_assignment('foo')
+    gradebook.add_notebook('p1', 'foo')
+    sc1 = gradebook.update_or_create_source_cell('test1', 'p1', 'foo', cell_type='code')
+    assert sc1.cell_type == 'code'
+    assert gradebook.find_source_cell('test1', 'p1', 'foo') == sc1
+
+    # now test finding/updating it
     assert sc1.checksum == None
-    sc2 = gradebook.update_or_create_solution_cell('test1', 'p1', 'foo', checksum="123456")
+    sc2 = gradebook.update_or_create_source_cell('test1', 'p1', 'foo', checksum="123456")
     assert sc1 == sc2
     assert sc1.cell_type == 'code'
     assert sc1.checksum == "123456"
