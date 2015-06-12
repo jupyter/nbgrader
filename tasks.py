@@ -1,5 +1,7 @@
 import os
 import re
+import shutil
+
 from invoke import task
 from invoke import run as _run
 from copy import deepcopy
@@ -104,6 +106,8 @@ def docs(root='docs'):
     for dirname, dirnames, filenames in os.walk('source/user_guide'):
         if dirname == 'source/user_guide':
             continue
+        if dirname == 'source/user_guide/images':
+            continue
 
         build_directory = os.path.join('source', 'extra_files', os.path.relpath(dirname, 'source'))
         if not os.path.exists(build_directory):
@@ -117,8 +121,13 @@ def docs(root='docs'):
                     "--FilesWriter.build_directory='{}' "
                     "--profile-dir=/tmp "
                     "'{}'".format(build_directory, os.path.join(dirname, filename)))
+
+                src = os.path.join(build_directory, os.path.splitext(filename)[0] + '.html')
+                dst = os.path.join(build_directory, filename)
+                os.rename(src, dst)
+
             else:
-                os.copy(
+                shutil.copy(
                     os.path.join(dirname, filename),
                     os.path.join(build_directory, filename))
 
