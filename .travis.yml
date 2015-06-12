@@ -26,4 +26,4 @@ install:
 script:
   - invoke tests --group="$GROUP" --python-version="$TRAVIS_PYTHON_VERSION" --pull-request="$TRAVIS_PULL_REQUEST" --github-token="$GH_TOKEN" --git-name="$GIT_NAME" --git-email="$GIT_EMAIL"
 after_success:
-  - invoke after_success --group="$GROUP" --python-version="$TRAVIS_PYTHON_VERSION"
+  - invoke after_success --group="$GROUP"
