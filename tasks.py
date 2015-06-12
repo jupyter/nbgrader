@@ -8,8 +8,6 @@ from invoke import run as _run
 from copy import deepcopy
 from textwrap import dedent
 
-from IPython.nbformat import read, write
-from IPython.nbconvert.preprocessors import ClearOutputPreprocessor
 
 def run(*args, **kwargs):
     if 'pty' not in kwargs:
@@ -27,6 +25,14 @@ def _check_if_directory_in_path(pth, target):
         if dirname == target:
             return True
     return False
+
+
+try:
+    from IPython.nbformat import read, write
+    from IPython.nbconvert.preprocessors import ClearOutputPreprocessor
+except ImportError:
+    echo("Warning: IPython could not be imported, some tasks may not work")
+
 
 @task
 def check_docs_input(root='docs/source'):
