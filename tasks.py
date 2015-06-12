@@ -8,8 +8,6 @@ from invoke import run as _run
 from copy import deepcopy
 from textwrap import dedent
 
-from IPython.nbformat import read, write
-from IPython.nbconvert.preprocessors import ClearOutputPreprocessor
 
 def run(*args, **kwargs):
     if 'pty' not in kwargs:
@@ -27,6 +25,14 @@ def _check_if_directory_in_path(pth, target):
         if dirname == target:
             return True
     return False
+
+
+try:
+    from IPython.nbformat import read, write
+    from IPython.nbconvert.preprocessors import ClearOutputPreprocessor
+except ImportError:
+    echo("Warning: IPython could not be imported, some tasks may not work")
+
 
 @task
 def check_docs_input(root='docs/source'):
@@ -216,7 +222,7 @@ def publish_docs(github_token, git_name, git_email):
     run('git push -v origin docs')
 
 @task
-def python_tests():
+def python_tests(mark):
     import distutils.sysconfig
     site = distutils.sysconfig.get_python_lib()
     sitecustomize_path = os.path.join(site, "sitecustomize.py")
@@ -239,14 +245,19 @@ def python_tests():
             """
         ).lstrip())
 
-    run("COVERAGE_PROCESS_START={} py.test --cov nbgrader --no-cov-on-fail -v -x --capture=no".format(os.path.join(os.getcwd(), ".coveragerc")))
+    run('COVERAGE_PROCESS_START={} py.test -k "{}" --cov nbgrader --no-cov-on-fail -v -x --capture=no'.format(
+        os.path.join(os.getcwd(), ".coveragerc"), mark))
+
     run("ls -a .coverage*")
     run("coverage combine")
 
 @task
 def tests(group='', python_version=None, pull_request=None, github_token="", git_name="", git_email=""):
     if group == '':
-        python_tests()
+        python_tests("not js")
+
+    elif group == 'js':
+        python_tests("js")
 
     elif group == 'docs':
         print("Pull request is: {}".format(pull_request))
@@ -260,7 +271,7 @@ def tests(group='', python_version=None, pull_request=None, github_token="", git
 
 @task
 def after_success(group='', python_version=None):
-    if group == '' and python_version == '3.4':
+    if group in ('', 'js') and python_version == '3.4':
         run('coveralls')
     else:
         echo('Nothing to do.')
@@ -271,3 +282,24 @@ def js(clean=True):
     run('./node_modules/.bin/bower install --config.interactive=false')
     if clean:
         run('git clean -fdX nbgrader/html/static/components')
+
+@task
+def before_install(group='', python_version=None):
+    # install ipython
+    os.chdir(os.environ['HOME'])
+    run('git clone --quiet --depth 1 https://github.com/minrk/travis-wheels travis-wheels')
+    run('git clone --quiet --recursive -b 3.x https://github.com/ipython/ipython.git')
+    os.chdir('ipython')
+    run('pip install -f ~/travis-wheels/wheelhouse file://{}#egg=ipython[all]'.format(os.getcwd()))
+
+    # install jupyterhub
+    if python_version == '3.4' and group == 'js':
+        os.chdir(os.environ['HOME'])
+        run('npm install -g configurable-http-proxy')
+        run('git clone --quiet --recursive https://github.com/jupyter/jupyterhub.git')
+        os.chdir('jupyterhub')
+        run('pip install -f ~/travis-wheels/wheelhouse -r dev-requirements.txt .')
+
+    # install js dependencies
+    if group == 'js':
+        run('python -m IPython.external.mathjax')

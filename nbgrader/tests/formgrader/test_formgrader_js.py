@@ -8,6 +8,7 @@ from selenium.webdriver.common.by import By
 from nbgrader.tests.formgrader.base import BaseTestFormgrade
 
 
+@pytest.mark.js
 @pytest.mark.usefixtures("formgrader")
 class TestFormgraderJS(BaseTestFormgrade):
 

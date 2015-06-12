@@ -1,4 +1,4 @@
-import time
+import pytest
 
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
@@ -95,6 +95,7 @@ def _get_total_points(browser):
     return float(element.get_attribute("value"))
 
 
+@pytest.mark.js
 def test_create_assignment(browser):
     _load_notebook(browser)
     _activate_toolbar(browser)
@@ -138,6 +139,7 @@ def test_create_assignment(browser):
     assert not _get_metadata(browser)['grade']
 
 
+@pytest.mark.js
 def test_grade_cell_css(browser):
     _load_notebook(browser)
     _activate_toolbar(browser)
@@ -173,6 +175,7 @@ def test_grade_cell_css(browser):
     assert len(elements) == 0
 
 
+@pytest.mark.js
 def test_tabbing(browser):
     _load_notebook(browser)
     _activate_toolbar(browser)
@@ -194,6 +197,7 @@ def test_tabbing(browser):
     assert "nbgrader-points-input" == element.get_attribute("class")
 
 
+@pytest.mark.js
 def test_total_points(browser):
     _load_notebook(browser)
     _activate_toolbar(browser)
