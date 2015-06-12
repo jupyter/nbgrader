@@ -69,6 +69,8 @@ docs/source/user_guide/autograded
 docs/source/user_guide/feedback
 docs/source/user_guide/release
 docs/source/user_guide/gradebook.db
+docs/source/user_guide/submitted/
+docs/source/user_guide/nbgrader_config.py
 docs/source/command_line_tools/nbgrader*.rst
 docs/source/config_options.rst
 docs/source/user_guide/*.rst

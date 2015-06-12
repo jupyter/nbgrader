@@ -9,7 +9,7 @@ where ``assignment_id`` is the name of the assignment you are creating
 
 .. seealso::
 
-    :doc:`1_philosophy`
+    :doc:`01_philosophy`
         More details on how the nbgrader hierarchy is structured.
 
 Before you can begin developing assignments, you will need to actually
@@ -47,7 +47,7 @@ raised, and fail otherwise.
 ----------------
 
 If you select the "Solution?" checkbox for a cell, it will mark that
-cell as a "solution" cell. When creating the :doc:`release version <3_releasing_assignments>` of
+cell as a "solution" cell. When creating the :doc:`release version <03_generating_assignments>` of
 the assignment, the bodies of solution cells will be replaced with a code or
 text stub indicating to the students that they should put their answer or
 solution there.
@@ -67,7 +67,7 @@ example:
 .. figure:: images/solution_cell.png
    :alt: 
 
-When creating the :doc:`release version <3_releasing_assignments>`, the region between
+When creating the :doc:`release version <03_generating_assignments>`, the region between
 the special syntax lines will be replaced with the code or text stub.
 
 Even if cells with the inline syntax are be marked as solution cells
