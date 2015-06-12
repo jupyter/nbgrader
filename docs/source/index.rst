@@ -9,6 +9,7 @@ Contents:
    user_guide/index
    command_line_tools/index
    config_options
+   api/index
 
 
 
