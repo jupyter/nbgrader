@@ -81,7 +81,7 @@ class Assignment(Base):
         }
 
     def __repr__(self):
-        return self.name
+        return "Assignment<{}>".format(self.name)
 
 class Notebook(Base):
     """Database representation of the master/source version of a notebook."""
@@ -156,7 +156,7 @@ class Notebook(Base):
         }
 
     def __repr__(self):
-        return "{}/{}".format(self.assignment, self.name)
+        return "Notebook<{}/{}>".format(self.assignment.name, self.name)
 
 
 class GradeCell(Base):
@@ -218,7 +218,8 @@ class GradeCell(Base):
         }
 
     def __repr__(self):
-        return "{}/{}".format(self.notebook, self.name)
+        return "GradeCell<{}/{}/{}>".format(
+            self.assignment.name, self.notebook.name, self.name)
 
 
 class SolutionCell(Base):
@@ -274,7 +275,8 @@ class SolutionCell(Base):
         }
 
     def __repr__(self):
-        return "{}/{}".format(self.notebook, self.name)
+        return "SolutionCell<{}/{}/{}>".format(
+            self.assignment.name, self.notebook.name, self.name)
 
 
 class Student(Base):
@@ -325,7 +327,7 @@ class Student(Base):
         }
 
     def __repr__(self):
-        return self.id
+        return "Student<{}>".format(self.id)
 
 
 class SubmittedAssignment(Base):
@@ -447,7 +449,7 @@ class SubmittedAssignment(Base):
         }
 
     def __repr__(self):
-        return "{} for {}".format(self.assignment, self.student)
+        return "SubmittedAssignment<{} for {}>".format(self.name, self.student.id)
 
 
 class SubmittedNotebook(Base):
@@ -546,7 +548,8 @@ class SubmittedNotebook(Base):
         }
 
     def __repr__(self):
-        return "{} for {}".format(self.notebook, self.student)
+        return "SubmittedNotebook<{}/{} for {}>".format(
+            self.assignment.name, self.name, self.student.id)
 
 
 class Grade(Base):
@@ -648,7 +651,8 @@ class Grade(Base):
         }
 
     def __repr__(self):
-        return "{} for {}".format(self.cell, self.student)
+        return "Grade<{}/{}/{} for {}>".format(
+            self.assignment.name, self.notebook.name, self.name, self.student.id)
 
 
 class Comment(Base):
@@ -706,7 +710,8 @@ class Comment(Base):
         }
 
     def __repr__(self):
-        return "{} for {}".format(self.cell, self.student)
+        return "Comment<{}/{}/{} for {}>".format(
+            self.assignment.name, self.notebook.name, self.name, self.student.id)
 
 
 ## Needs manual grade

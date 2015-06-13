@@ -76,6 +76,8 @@ def test_create_assignment(db):
     assert a.max_written_score == 0
     assert a.num_submissions == 0
 
+    assert repr(a) == "Assignment<foo>"
+
 
 def test_create_notebook(db):
     now = datetime.datetime.now()
@@ -95,6 +97,8 @@ def test_create_notebook(db):
     assert n.max_score == 0
     assert n.max_code_score == 0
     assert n.max_written_score == 0
+
+    assert repr(n) == "Notebook<foo/blah>"
 
 
 def test_create_grade_cell(db):
@@ -122,6 +126,8 @@ def test_create_grade_cell(db):
     assert n.max_code_score == 10
     assert n.max_written_score == 0
 
+    assert repr(g) == "GradeCell<foo/blah/foo>"
+
 
 def test_create_solution_cell(db):
     now = datetime.datetime.now()
@@ -143,6 +149,8 @@ def test_create_solution_cell(db):
     assert s.comments == []
     assert n.solution_cells == [s]
 
+    assert repr(s) == "SolutionCell<foo/blah/foo>"
+
 
 def test_create_student(db):
     s = api.Student(id="12345", first_name='Jane', last_name='Doe', email='janedoe@nowhere')
@@ -157,6 +165,8 @@ def test_create_student(db):
 
     assert s.score == 0
     assert s.max_score == 0
+
+    assert repr(s) == "Student<12345>"
 
 
 def test_create_submitted_assignment(db):
@@ -201,6 +211,8 @@ def test_create_submitted_assignment(db):
     assert d['written_score'] == 0
     assert d['max_written_score'] == 0
     assert not d['needs_manual_grade']
+
+    assert repr(sa) == "SubmittedAssignment<foo for 12345>"
 
 
 def test_submission_timestamp_ontime(db):
@@ -320,6 +332,8 @@ def test_create_submitted_notebook(db):
     assert sn.max_written_score == 0
     assert not sn.needs_manual_grade
 
+    assert repr(sn) == "SubmittedNotebook<foo/blah for 12345>"
+
 
 def test_create_code_grade(db):
     now = datetime.datetime.now()
@@ -373,6 +387,8 @@ def test_create_code_grade(db):
     assert sa.written_score == 0
     assert s.score == 7.5
 
+    assert repr(g) == "Grade<foo/blah/foo for 12345>"
+
 
 def test_create_written_grade(db):
     now = datetime.datetime.now()
@@ -425,6 +441,8 @@ def test_create_written_grade(db):
     assert sa.written_score == 7.5
     assert s.score == 7.5
 
+    assert repr(g) == "Grade<foo/blah/foo for 12345>"
+
 
 def test_create_comment(db):
     now = datetime.datetime.now()
@@ -445,6 +463,7 @@ def test_create_comment(db):
     assert c.assignment == sa
     assert c.student == s
 
+    assert repr(c) == "Comment<foo/blah/foo for 12345>"
 
 def test_query_needs_manual_grade_ungraded(submissions):
     db = submissions[0]

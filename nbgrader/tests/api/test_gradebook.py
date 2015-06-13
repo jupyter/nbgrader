@@ -2,6 +2,7 @@ import pytest
 
 from datetime import datetime
 from nbgrader import api
+from nbgrader import utils
 from nbgrader.api import InvalidEntry, MissingEntry
 
 @pytest.fixture
@@ -82,6 +83,18 @@ def test_remove_student(assignment):
         assignment.find_student('hacker123')
 
 
+def test_update_or_create_student(gradebook):
+    # first test creating it
+    s1 = gradebook.update_or_create_student('hacker123')
+    assert gradebook.find_student('hacker123') == s1
+    assert s1.first_name is None
+
+    # now test finding/updating it
+    s2 = gradebook.update_or_create_student('hacker123', first_name='Alyssa')
+    assert s1 == s2
+    assert s2.first_name == 'Alyssa'
+
+
 #### Test assignments
 
 def test_add_assignment(gradebook):
@@ -146,6 +159,18 @@ def test_remove_assignment(assignment):
         assignment.find_assignment('foo')
 
     assert assignment.find_student('hacker123').submissions == []
+
+
+def test_update_or_create_assignment(gradebook):
+    # first test creating it
+    a1 = gradebook.update_or_create_assignment('foo')
+    assert gradebook.find_assignment('foo') == a1
+    assert a1.duedate is None
+
+    # now test finding/updating it
+    a2 = gradebook.update_or_create_assignment('foo', duedate="2015-02-02 14:58:23.948203 PST")
+    assert a1 == a2
+    assert a2.duedate == utils.parse_utc("2015-02-02 14:58:23.948203 PST")
 
 
 #### Test notebooks
@@ -422,9 +447,103 @@ def test_remove_submission(assignment):
         assignment.find_submission('foo', 'hacker123')
 
 
+def test_update_or_create_submission(assignment):
+    assignment.add_student('hacker123')
+    s1 = assignment.update_or_create_submission('foo', 'hacker123')
+    assert s1.timestamp is None
+
+    s2 = assignment.update_or_create_submission('foo', 'hacker123', timestamp="2015-02-02 14:58:23.948203 PST")
+    assert s1 == s2
+    assert s2.timestamp == utils.parse_utc("2015-02-02 14:58:23.948203 PST")
+
+
+def test_find_submission_notebook(assignment):
+    assignment.add_student('hacker123')
+    s = assignment.add_submission('foo', 'hacker123')
+    n1, = s.notebooks
+
+    with pytest.raises(MissingEntry):
+        assignment.find_submission_notebook('p2', 'foo', 'hacker123')
+
+    n2 = assignment.find_submission_notebook('p1', 'foo', 'hacker123')
+    assert n1 == n2
+
+
+def test_find_submission_notebook_by_id(assignment):
+    assignment.add_student('hacker123')
+    s = assignment.add_submission('foo', 'hacker123')
+    n1, = s.notebooks
+
+    with pytest.raises(MissingEntry):
+        assignment.find_submission_notebook_by_id('12345')
+
+    n2 = assignment.find_submission_notebook_by_id(n1.id)
+    assert n1 == n2
+
+
+def test_find_grade(assignment):
+    assignment.add_student('hacker123')
+    s = assignment.add_submission('foo', 'hacker123')
+    n1, = s.notebooks
+    grades = n1.grades
+
+    for g1 in grades:
+        g2 = assignment.find_grade(g1.name, 'p1', 'foo', 'hacker123')
+        assert g1 == g2
+
+    with pytest.raises(MissingEntry):
+        assignment.find_grade('asdf', 'p1', 'foo', 'hacker123')
+
+
+def test_find_grade_by_id(assignment):
+    assignment.add_student('hacker123')
+    s = assignment.add_submission('foo', 'hacker123')
+    n1, = s.notebooks
+    grades = n1.grades
+
+    for g1 in grades:
+        g2 = assignment.find_grade_by_id(g1.id)
+        assert g1 == g2
+
+    with pytest.raises(MissingEntry):
+        assignment.find_grade_by_id('12345')
+
+
+def test_find_comment(assignment):
+    assignment.add_student('hacker123')
+    s = assignment.add_submission('foo', 'hacker123')
+    n1, = s.notebooks
+    comments = n1.comments
+
+    for c1 in comments:
+        c2 = assignment.find_comment(c1.name, 'p1', 'foo', 'hacker123')
+        assert c1 == c2
+
+    with pytest.raises(MissingEntry):
+        assignment.find_comment('asdf', 'p1', 'foo', 'hacker123')
+
+
+def test_find_comment_by_id(assignment):
+    assignment.add_student('hacker123')
+    s = assignment.add_submission('foo', 'hacker123')
+    n1, = s.notebooks
+    comments = n1.comments
+
+    for c1 in comments:
+        c2 = assignment.find_comment_by_id(c1.id)
+        assert c1 == c2
+
+    with pytest.raises(MissingEntry):
+        assignment.find_comment_by_id('12345')
+
+
 ### Test average scores
 
 def test_average_assignment_score(assignment):
+    assert assignment.average_assignment_score('foo') == 0.0
+    assert assignment.average_assignment_code_score('foo') == 0.0
+    assert assignment.average_assignment_written_score('foo') == 0.0
+
     assignment.add_student('hacker123')
     assignment.add_student('bitdiddle')
     assignment.add_submission('foo', 'hacker123')
@@ -451,6 +570,10 @@ def test_average_assignment_score(assignment):
 
 
 def test_average_notebook_score(assignment):
+    assert assignment.average_notebook_score('p1', 'foo') == 0
+    assert assignment.average_notebook_code_score('p1', 'foo') == 0
+    assert assignment.average_notebook_written_score('p1', 'foo') == 0
+
     assignment.add_student('hacker123')
     assignment.add_student('bitdiddle')
     assignment.add_submission('foo', 'hacker123')

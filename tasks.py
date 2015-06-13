@@ -270,8 +270,8 @@ def tests(group='', python_version=None, pull_request=None, github_token="", git
         raise ValueError("Invalid test group: {}".format(group))
 
 @task
-def after_success(group='', python_version=None):
-    if group in ('', 'js') and python_version == '3.4':
+def after_success(group=''):
+    if group in ('', 'js'):
         run('coveralls')
     else:
         echo('Nothing to do.')
