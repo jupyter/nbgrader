@@ -470,7 +470,6 @@ class SubmittedNotebook(Base):
 
     #: Unique id of :attr:`~nbgrader.api.SubmittedNotebook.assignment`
     assignment_id = Column(String(32), ForeignKey('submitted_assignment.id'))
-    flagged = Column(Boolean, default=False)
 
     #: The master version of this notebook, represesnted by a
     #: :class:`~nbgrader.api.Notebook` object
@@ -490,6 +489,9 @@ class SubmittedNotebook(Base):
     #: The student who submitted this notebook, represented by a
     #: :class:`~nbgrader.api.Student` object
     student = association_proxy('assignment', 'student')
+
+    #: Whether this assignment has been flagged by a human grader
+    flagged = Column(Boolean, default=False)
 
     #: The score assigned to this notebook, automatically calculated from the
     #: :attr:`~nbgrader.api.Grade.score` of each grade cell within
