@@ -73,7 +73,7 @@ define([
     events.on("global_hide.CellToolbar toolbar_rebuild.CellToolbar", function (evt, cell) {
         if (cell.element && cell.element.hasClass(grade_cls)) {
             if (is_grade(cell)) {
-                total_points -= to_float(cell.metadata.nbgrader.points);
+                total_points -= get_points(cell);
                 update_total();
             }
             cell.element.removeClass(grade_cls);
@@ -84,7 +84,7 @@ define([
     events.on("delete.Cell", function (evt, info) {
         var cell = info.cell;
         if (is_grade(cell)) {
-            total_points -= to_float(cell.metadata.nbgrader.points);
+            total_points -= get_points(cell);
             update_total();
         }
     });
@@ -137,7 +137,6 @@ define([
      */
     var is_solution = function (cell) {
         if (cell.metadata.nbgrader === undefined) {
-            cell.metadata.nbgrader = {};
             return false;
         } else if (cell.metadata.nbgrader.solution === undefined) {
             return false;
@@ -146,17 +145,66 @@ define([
         }
     };
 
+    var set_solution = function (cell, val) {
+        if (cell.metadata.nbgrader === undefined) {
+            cell.metadata.nbgrader = {};
+        }
+        cell.metadata.nbgrader.solution = val;
+    };
+
     /**
      * Is the cell a grade cell?
      */
     var is_grade = function (cell) {
         if (cell.metadata.nbgrader === undefined) {
-            cell.metadata.nbgrader = {};
             return false;
         } else if (cell.metadata.nbgrader.grade === undefined) {
             return false;
         } else {
             return cell.metadata.nbgrader.grade;
+        }
+    };
+
+    var set_grade = function (cell, val) {
+        if (cell.metadata.nbgrader === undefined) {
+            cell.metadata.nbgrader = {};
+        }
+        cell.metadata.nbgrader.grade = val;
+    };
+
+    var get_points = function (cell) {
+        if (cell.metadata.nbgrader === undefined) {
+            return 0;
+        } else {
+            return to_float(cell.metadata.nbgrader.points);
+        }
+    };
+
+    var set_points = function (cell, val) {
+        if (cell.metadata.nbgrader === undefined) {
+            cell.metadata.nbgrader = {};
+        }
+        cell.metadata.nbgrader.points = to_float(val);
+    };
+
+    var get_grade_id = function (cell) {
+        if (cell.metadata.nbgrader === undefined) {
+            return '';
+        } else if (cell.metadata.nbgrader.grade_id === undefined) {
+            return '';
+        } else {
+            return cell.metadata.nbgrader.grade_id;
+        }
+    };
+
+    var set_grade_id = function (cell, val) {
+        if (cell.metadata.nbgrader === undefined) {
+            cell.metadata.nbgrader = {};
+        }
+        if (val === undefined) {
+            cell.metadata.nbgrader.grade_id = '';
+        } else {
+            cell.metadata.nbgrader.grade_id = val;
         }
     };
 
@@ -181,10 +229,10 @@ define([
         chkb.attr("checked", is_grade(cell));
         chkb.click(function () {
             if (is_grade(cell)) {
-                total_points -= to_float(cell.metadata.nbgrader.points);
+                total_points -= get_points(cell);
                 update_total();
             }
-            cell.metadata.nbgrader.grade = !is_grade(cell);
+            set_grade(cell, !is_grade(cell));
             celltoolbar.rebuild();
             display_cell(cell);
             validate_ids();
@@ -199,9 +247,7 @@ define([
      */
     var create_solution_checkbox = CellToolbar.utils.checkbox_ui_generator(
         "Solution? ",
-        function (cell, val) {
-            cell.metadata.nbgrader.solution = val;
-        },
+        set_solution,
         is_solution);
 
     /**
@@ -218,13 +264,13 @@ define([
         lbl.append(text);
 
         text.addClass('nbgrader-id-input');
-        text.attr("value", cell.metadata.nbgrader.grade_id);
+        text.attr("value", get_grade_id(cell));
         validate_ids();
         text.change(function () {
-            cell.metadata.nbgrader.grade_id = text.val();
+            set_grade_id(cell, text.val());
             validate_ids();
         });
-                
+
         local_div.addClass('nbgrader-id');
         $(div).append(local_div.append($('<span/>').append(lbl)));
 
@@ -246,15 +292,15 @@ define([
         lbl.append(text);
 
         text.addClass('nbgrader-points-input');
-        text.attr("value", cell.metadata.nbgrader.points);
-        total_points += to_float(cell.metadata.nbgrader.points);
+        text.attr("value", get_points(cell));
+        total_points += get_points(cell);
         update_total();
 
         text.change(function () {
-            total_points -= to_float(cell.metadata.nbgrader.points);
-            cell.metadata.nbgrader.points = to_float(text.val());
-            text.val(cell.metadata.nbgrader.points);
-            total_points += to_float(cell.metadata.nbgrader.points);
+            total_points -= get_points(cell);
+            set_points(cell, text.val());
+            text.val(get_points(cell));
+            total_points += get_points(cell);
             update_total();
         });
 

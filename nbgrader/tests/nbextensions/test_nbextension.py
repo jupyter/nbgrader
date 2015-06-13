@@ -106,7 +106,7 @@ def test_create_assignment(browser):
     assert element[0].get_attribute("type") == "checkbox"
 
     # does the nbgrader metadata exist?
-    assert {} == _get_metadata(browser)
+    assert _get_metadata(browser) is None
 
     # click the "solution?" checkbox
     _click_solution(browser)
