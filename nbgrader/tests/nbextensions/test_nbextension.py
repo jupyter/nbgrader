@@ -124,6 +124,7 @@ def test_manual_cell(browser):
     assert not _get_metadata(browser)['grade']
 
 
+@pytest.mark.js
 def test_solution_cell(browser):
     _load_notebook(browser)
     _activate_toolbar(browser)
@@ -154,6 +155,7 @@ def test_solution_cell(browser):
     assert not _get_metadata(browser)['grade']
 
 
+@pytest.mark.js
 def test_tests_cell(browser):
     _load_notebook(browser)
     _activate_toolbar(browser)

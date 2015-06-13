@@ -265,8 +265,6 @@ define([
                 } else if (is_grade(cell) && cell.cell_type === "code") {
                     return "tests";
                 } else {
-                    set_solution(cell, false);
-                    set_grade(cell, false);
                     return "";
                 }
             };
