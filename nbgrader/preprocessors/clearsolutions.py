@@ -106,8 +106,17 @@ class ClearSolutions(NbGraderPreprocessor):
         # replace solution regions with the relevant stubs
         replaced_solution = self._replace_solution_region(cell)
 
-        # determine whether the cell is a solution cell
+        # determine whether the cell is a solution/grade cell
         is_solution = utils.is_solution(cell)
+
+        # check that it is marked as a solution cell if we replaced a solution
+        # region -- if it's not, then this is a problem, because the cell needs
+        # to be given an id
+        if not is_solution and replaced_solution:
+            raise RuntimeError(
+                "Solution region detected in a non-solution cell; "
+                "please make sure all solution regions are within "
+                "solution cells")
 
         # replace solution cells with the code/text stub -- but not if
         # we already replaced a solution region, because that means
@@ -117,12 +126,5 @@ class ClearSolutions(NbGraderPreprocessor):
                 cell.source = self.code_stub
             else:
                 cell.source = self.text_stub
-
-        # if we replaced a solution region, then make sure the cell is marked
-        # as a solution cell
-        if replaced_solution:
-            if 'nbgrader' not in cell.metadata:
-                cell.metadata.nbgrader = {}
-            cell.metadata.nbgrader['solution'] = True
 
         return cell, resources
