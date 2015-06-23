@@ -151,3 +151,33 @@ class TestSaveAutoGrades(BaseTestPreprocessor):
 
         comment = gradebook.find_comment("foo", "test", "ps0", "bar")
         assert comment.comment == None
+
+    def test_grade_existing_manual_grade(self, preprocessors, gradebook, resources):
+        """Is a failing code cell correctly graded?"""
+        cell = create_grade_and_solution_cell("hello", "markdown", "foo", 1)
+        nb = new_notebook()
+        nb.cells.append(cell)
+        preprocessors[0].preprocess(nb, resources)
+        gradebook.add_submission("ps0", "bar")
+        cell.source = "hello!"
+        preprocessors[1].preprocess(nb, resources)
+
+        grade_cell = gradebook.find_grade("foo", "test", "ps0", "bar")
+        assert grade_cell.score == 0
+        assert grade_cell.max_score == 1
+        assert grade_cell.auto_score == None
+        assert grade_cell.manual_score == None
+        assert grade_cell.needs_manual_grade
+
+        grade_cell.manual_score = 1
+        grade_cell.needs_manual_grade = False
+        gradebook.db.commit()
+
+        preprocessors[1].preprocess(nb, resources)
+
+        grade_cell = gradebook.find_grade("foo", "test", "ps0", "bar")
+        assert grade_cell.score == 1
+        assert grade_cell.max_score == 1
+        assert grade_cell.auto_score == None
+        assert grade_cell.manual_score == 1
+        assert grade_cell.needs_manual_grade
