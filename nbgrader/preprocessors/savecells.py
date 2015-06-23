@@ -23,8 +23,6 @@ class SaveCells(NbGraderPreprocessor):
         self.gradebook.update_or_create_notebook(
             self.notebook_id, self.assignment_id)
 
-        self.comment_index = 0
-
         nb, resources = super(SaveCells, self).preprocess(nb, resources)
 
         return nb, resources
@@ -53,14 +51,13 @@ class SaveCells(NbGraderPreprocessor):
             checksum = cell.metadata.nbgrader.get('checksum', None)
 
             solution_cell = self.gradebook.update_or_create_solution_cell(
-                self.comment_index,
+                cell.metadata.nbgrader['grade_id'],
                 self.notebook_id,
                 self.assignment_id,
                 cell_type=cell_type,
                 source=source,
                 checksum=checksum)
 
-            self.comment_index += 1
             self.log.debug("Recorded solution cell %s into database", solution_cell)
 
         return cell, resources

@@ -22,8 +22,7 @@ define([
     "use strict";
 
     var nbgrader_preset_name = "Create Assignment";
-    var grade_cls = "nbgrader-grade-cell";
-    var total_points = 0;
+    var nbgrader_cls = "nbgrader-cell";
     var warning;
 
     var CellToolbar = celltoolbar.CellToolbar;
@@ -39,7 +38,6 @@ define([
     CellToolbar._global_hide = CellToolbar.global_hide;
     CellToolbar.global_hide = function () {
         $("#nbgrader-total-points-group").hide();
-        total_points = 0;
 
         CellToolbar._global_hide();
         for (var i=0; i < CellToolbar._instances.length; i++) {
@@ -65,28 +63,19 @@ define([
             update_total();
         } else {
             elem.hide();
-            total_points = 0;
         }
     });
 
     // remove nbgrader class when the cell is either hidden or rebuilt
     events.on("global_hide.CellToolbar toolbar_rebuild.CellToolbar", function (evt, cell) {
-        if (cell.element && cell.element.hasClass(grade_cls)) {
-            if (is_grade(cell)) {
-                total_points -= get_points(cell);
-                update_total();
-            }
-            cell.element.removeClass(grade_cls);
+        if (cell.element && cell.element.hasClass(nbgrader_cls)) {
+            cell.element.removeClass(nbgrader_cls);
         }
     });
 
     // update total points when a cell is deleted
     events.on("delete.Cell", function (evt, info) {
-        var cell = info.cell;
-        if (is_grade(cell)) {
-            total_points -= get_points(cell);
-            update_total();
-        }
+        update_total();
     });
 
     var to_float = function(val) {
@@ -97,6 +86,13 @@ define([
     };
 
     var update_total = function() {
+        var total_points = 0;
+        var cells = IPython.notebook.get_cells();
+        for (var i=0; i < cells.length; i++) {
+            if (is_grade(cells[i])) {
+                total_points += to_float(cells[i].metadata.nbgrader.points);
+            }
+        }
         $("#nbgrader-total-points").attr("value", total_points);
     };
 
@@ -145,6 +141,9 @@ define([
         }
     };
 
+    /**
+     * Set whether this cell is or is not a solution cell.
+     */
     var set_solution = function (cell, val) {
         if (cell.metadata.nbgrader === undefined) {
             cell.metadata.nbgrader = {};
@@ -165,6 +164,9 @@ define([
         }
     };
 
+    /**
+     * Set whether this cell is or is not a grade cell.
+     */
     var set_grade = function (cell, val) {
         if (cell.metadata.nbgrader === undefined) {
             cell.metadata.nbgrader = {};
@@ -213,48 +215,85 @@ define([
      * nbgrader cell type.
      */
     var display_cell = function (cell) {
-        if (cell.element && is_grade(cell) && !cell.element.hasClass(grade_cls)) {
-            cell.element.addClass(grade_cls);
+        if (cell.element && (is_grade(cell) || is_solution(cell)) && !cell.element.hasClass(nbgrader_cls)) {
+            cell.element.addClass(nbgrader_cls);
         }
     };
 
-    /**
-     * Create a checkbox to mark whether the cell is a grader cell or
-     * not.
-     */
-    var create_grader_checkbox = function (div, cell, celltoolbar) {
-        var chkb = $('<input/>').attr('type', 'checkbox');
-        var lbl = $('<label/>').append($('<span/>').text("Grade? "));
-        lbl.append(chkb);
-        chkb.attr("checked", is_grade(cell));
-        chkb.click(function () {
-            if (is_grade(cell)) {
-                total_points -= get_points(cell);
-                update_total();
-            }
-            set_grade(cell, !is_grade(cell));
-            celltoolbar.rebuild();
-            display_cell(cell);
-            validate_ids();
-        });
-        display_cell(cell);
-        $(div).append($('<span/>').append(lbl));
-    };
+    var create_celltype_select = function (div, cell, celltoolbar) {
+        // hack -- the DOM element for the celltoolbar is created before the
+        // cell type is actually set, so we need to wait until the cell type
+        // has been set before we can actually create the select menu
+        if (cell.cell_type === null) {
+            setTimeout(function () {
+                create_celltype_select(div, cell, celltoolbar);
+            }, 100);
 
-    /**
-     * Create a checkbox to mark whether the cell is a solution cell
-     * or not.
-     */
-    var create_solution_checkbox = CellToolbar.utils.checkbox_ui_generator(
-        "Solution? ",
-        set_solution,
-        is_solution);
+        } else {
+
+            var options_list = [];
+            options_list.push(["-", ""]);
+            options_list.push(["Manually graded answer", "manual"]);
+            if (cell.cell_type == "code") {
+                options_list.push(["Autograded answer", "solution"]);
+                options_list.push(["Autograder tests", "tests"]);
+            }
+
+            var setter = function (cell, val) {
+                if (val === "") {
+                    set_solution(cell, false);
+                    set_grade(cell, false);
+                } else if (val === "manual") {
+                    set_solution(cell, true);
+                    set_grade(cell, true);
+                } else if (val === "solution") {
+                    set_solution(cell, true);
+                    set_grade(cell, false);
+                } else if (val === "tests") {
+                    set_solution(cell, false);
+                    set_grade(cell, true);
+                } else {
+                    throw new Error("invalid nbgrader cell type: " + val);
+                }
+            };
+
+            var getter = function (cell) {
+                if (is_solution(cell) && is_grade(cell)) {
+                    return "manual";
+                } else if (is_solution(cell) && cell.cell_type === "code") {
+                    return "solution";
+                } else if (is_grade(cell) && cell.cell_type === "code") {
+                    return "tests";
+                } else {
+                    return "";
+                }
+            };
+
+            var select = $('<select/>');
+            for(var i=0; i < options_list.length; i++){
+                var opt = $('<option/>')
+                    .attr('value', options_list[i][1])
+                    .text(options_list[i][0]);
+                select.append(opt);
+            }
+            select.val(getter(cell));
+            select.change(function () {
+                setter(cell, select.val());
+                celltoolbar.rebuild();
+                update_total();
+                display_cell(cell);
+                validate_ids();
+            });
+            display_cell(cell);
+            $(div).append($('<span/>').append(select));
+        }
+    };
 
     /**
      * Create the input text box for the problem or test id.
      */
     var create_id_input = function (div, cell, celltoolbar) {
-        if (!is_grade(cell)) {
+        if (!is_grade(cell) && !is_solution(cell)) {
             return;
         }
 
@@ -293,14 +332,11 @@ define([
 
         text.addClass('nbgrader-points-input');
         text.attr("value", get_points(cell));
-        total_points += get_points(cell);
         update_total();
 
         text.change(function () {
-            total_points -= get_points(cell);
             set_points(cell, text.val());
             text.val(get_points(cell));
-            total_points += get_points(cell);
             update_total();
         });
 
@@ -326,16 +362,14 @@ define([
      */
     var load_extension = function () {
         load_css();
-        CellToolbar.register_callback('create_assignment.solution_checkbox', create_solution_checkbox); 
-        CellToolbar.register_callback('create_assignment.grader_checkbox', create_grader_checkbox);
+        CellToolbar.register_callback('create_assignment.grading_options', create_celltype_select);
         CellToolbar.register_callback('create_assignment.id_input', create_id_input);
         CellToolbar.register_callback('create_assignment.points_input', create_points_input);
-        
+
         var preset = [
-            'create_assignment.id_input',
             'create_assignment.points_input',
-            'create_assignment.grader_checkbox',
-            'create_assignment.solution_checkbox'
+            'create_assignment.id_input',
+            'create_assignment.grading_options',
         ];
         CellToolbar.register_preset(nbgrader_preset_name, preset, IPython.notebook);
         console.log('nbgrader extension for metadata editing loaded.');

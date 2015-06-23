@@ -237,12 +237,22 @@ class TestFormgraderJS(BaseTestFormgrade):
         assert self._get_active_element() == self._get_comment_box(2)
         assert self._get_index() == 8
 
+        # tab to the next and check that the sixth points is selected
+        self._send_keys_to_body(Keys.TAB)
+        assert self._get_active_element() == self._get_score_box(5)
+        assert self._get_index() == 9
+
+        # tab to the next and check that the fourth comment is selected
+        self._send_keys_to_body(Keys.TAB)
+        assert self._get_active_element() == self._get_comment_box(3)
+        assert self._get_index() == 10
+
         # tab to the next and check that the next arrow is selected
         self._send_keys_to_body(Keys.TAB)
         assert self._get_active_element() == self._get_next_arrow()
         assert self._get_index() == 0
 
-    @pytest.mark.parametrize("index", range(3))
+    @pytest.mark.parametrize("index", range(4))
     def test_save_comment(self, index):
         self._load_formgrade()
 
@@ -266,7 +276,7 @@ class TestFormgraderJS(BaseTestFormgrade):
         elem = self._get_comment_box(index)
         assert elem.get_attribute("value") == "this comment has index {}\nblah blah blah".format(index)
 
-    @pytest.mark.parametrize("index", range(5))
+    @pytest.mark.parametrize("index", range(6))
     def test_save_score(self, index):
         self._load_formgrade()
 

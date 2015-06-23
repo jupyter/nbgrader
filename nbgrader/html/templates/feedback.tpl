@@ -115,8 +115,12 @@ span.nbgrader-label {
         <div id="toc">
           <ol>
           {% for cell in nb.cells %}
-            {% if cell.metadata.nbgrader and cell.metadata.nbgrader.grade %}
+            {% if cell.metadata.nbgrader and cell.metadata.nbgrader.grade and not cell.metadata.nbgrader.solution %}
             <li><a href="#{{ cell.metadata.nbgrader.grade_id }}">Test cell</a> (Score: {{ cell.metadata.nbgrader.score | float | round(2) }} / {{ cell.metadata.nbgrader.points | float | round(2) }})</li>
+            {% elif cell.cell_type == "code" and cell.metadata.nbgrader and cell.metadata.nbgrader.grade %}
+            <li><a href="#{{ cell.metadata.nbgrader.grade_id }}">Coding free-response</a> (Score: {{ cell.metadata.nbgrader.score | float | round(2) }} / {{ cell.metadata.nbgrader.points | float | round(2) }})</li>
+            {% elif cell.cell_type == "markdown" and cell.metadata.nbgrader and cell.metadata.nbgrader.grade %}
+            <li><a href="#{{ cell.metadata.nbgrader.grade_id }}">Written response</a> (Score: {{ cell.metadata.nbgrader.score | float | round(2) }} / {{ cell.metadata.nbgrader.points | float | round(2) }})</li>
             {% endif %}
             {% if cell.metadata.nbgrader and cell.metadata.nbgrader.comment and cell.metadata.nbgrader.comment.comment %}
             <li><a href="#comment-{{ cell.metadata.nbgrader.comment.name }}">Comment</a></li>

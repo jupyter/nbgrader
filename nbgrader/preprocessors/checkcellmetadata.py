@@ -33,12 +33,6 @@ class CheckCellMetadata(NbGraderPreprocessor):
                     "Point value for grade cell {} is invalid: {}".format(
                         grade_id, points))
 
-        # check that code cells are grade OR solution (not both)
-        if cell.cell_type == "code" and utils.is_grade(cell) and utils.is_solution(cell):
-            raise RuntimeError(
-                "Code grade cell '{}' is also marked as a solution cell".format(
-                    grade_id))
-
         # check that markdown cells are grade AND solution (not either/or)
         if cell.cell_type == "markdown" and utils.is_grade(cell) and not utils.is_solution(cell):
             raise RuntimeError(

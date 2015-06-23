@@ -54,21 +54,24 @@ class TestNbGraderAutograde(BaseTestApp):
         gb = Gradebook(gradebook)
         notebook = gb.find_submission_notebook("p1", "ps1", "foo")
         assert notebook.score == 1
-        assert notebook.max_score == 4
+        assert notebook.max_score == 7
         assert notebook.needs_manual_grade == False
 
-        comment1 = gb.find_comment(0, "p1", "ps1", "foo")
-        comment2 = gb.find_comment(1, "p1", "ps1", "foo")
+        comment1 = gb.find_comment("set_a", "p1", "ps1", "foo")
+        comment2 = gb.find_comment("baz", "p1", "ps1", "foo")
+        comment3 = gb.find_comment("quux", "p1", "ps1", "foo")
         assert comment1.comment == "No response."
         assert comment2.comment == "No response."
+        assert comment3.comment == "No response."
 
         notebook = gb.find_submission_notebook("p1", "ps1", "bar")
         assert notebook.score == 2
-        assert notebook.max_score == 4
+        assert notebook.max_score == 7
         assert notebook.needs_manual_grade == True
 
-        comment1 = gb.find_comment(0, "p1", "ps1", "bar")
-        comment2 = gb.find_comment(1, "p1", "ps1", "bar")
+        comment1 = gb.find_comment("set_a", "p1", "ps1", "bar")
+        comment2 = gb.find_comment("baz", "p1", "ps1", "bar")
+        comment2 = gb.find_comment("quux", "p1", "ps1", "bar")
         assert comment1.comment == None
         assert comment2.comment == None
 

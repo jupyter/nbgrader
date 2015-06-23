@@ -7,11 +7,13 @@ input.nbgrader-points-input {
     height: 22px;
     text-align: right;
     line-height: 10px;
+    color: black;
 }
 
 input.nbgrader-id-input {
     height: 22px;
     text-align: left;
+    color: black;
 }
 
 #nbgrader-total-points {
@@ -23,6 +25,12 @@ input.nbgrader-id-input {
     margin-right: 0.3em;
 }
 
-div.nbgrader-grade-cell {
-    background-color: #FFA;
+div.nbgrader-cell div.celltoolbar {
+    color: white;
+    background-color: #337ab7;
+    border: 1px solid #337ab7;
+}
+
+div.nbgrader-cell div.text_cell_render, div.nbgrader-cell div.input_area {
+    border: 1px solid #337ab7 !important;
 }

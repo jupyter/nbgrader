@@ -45,7 +45,7 @@ base_flags = {
     ),
 }
 
-def format_excepthook(etype, evaule, tb):
+def format_excepthook(etype, evalue, tb):
     traceback.print_exception(etype, evalue, tb)
     print(dedent(
         """
@@ -115,7 +115,7 @@ class BaseApp(BaseIPythonApplication):
         return Config()
 
     def excepthook(self, etype, evalue, tb):
-        format_excepthook(etype, evaule, tb)
+        format_excepthook(etype, evalue, tb)
 
     @catch_config_error
     def initialize(self, argv=None):

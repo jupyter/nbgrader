@@ -104,19 +104,19 @@ class TestSaveAutoGrades(BaseTestPreprocessor):
 
     def test_comment_unchanged_code(self, preprocessors, gradebook, resources):
         """Is an unchanged code cell given the correct comment?"""
-        cell = create_solution_cell("hello", "code")
+        cell = create_solution_cell("hello", "code", "foo")
         nb = new_notebook()
         nb.cells.append(cell)
         preprocessors[0].preprocess(nb, resources)
         gradebook.add_submission("ps0", "bar")
         preprocessors[1].preprocess(nb, resources)
 
-        comment = gradebook.find_comment(0, "test", "ps0", "bar")
+        comment = gradebook.find_comment("foo", "test", "ps0", "bar")
         assert comment.comment == "No response."
 
     def test_comment_changed_code(self, preprocessors, gradebook, resources):
         """Is a changed code cell given the correct comment?"""
-        cell = create_solution_cell("hello", "code")
+        cell = create_solution_cell("hello", "code", "foo")
         nb = new_notebook()
         nb.cells.append(cell)
         preprocessors[0].preprocess(nb, resources)
@@ -124,7 +124,7 @@ class TestSaveAutoGrades(BaseTestPreprocessor):
         cell.source = "hello!"
         preprocessors[1].preprocess(nb, resources)
 
-        comment = gradebook.find_comment(0, "test", "ps0", "bar")
+        comment = gradebook.find_comment("foo", "test", "ps0", "bar")
         assert comment.comment == None
 
     def test_comment_unchanged_markdown(self, preprocessors, gradebook, resources):
@@ -136,7 +136,7 @@ class TestSaveAutoGrades(BaseTestPreprocessor):
         gradebook.add_submission("ps0", "bar")
         preprocessors[1].preprocess(nb, resources)
 
-        comment = gradebook.find_comment(0, "test", "ps0", "bar")
+        comment = gradebook.find_comment("foo", "test", "ps0", "bar")
         assert comment.comment == "No response."
 
     def test_comment_changed_markdown(self, preprocessors, gradebook, resources):
@@ -149,5 +149,5 @@ class TestSaveAutoGrades(BaseTestPreprocessor):
         cell.source = "hello!"
         preprocessors[1].preprocess(nb, resources)
 
-        comment = gradebook.find_comment(0, "test", "ps0", "bar")
+        comment = gradebook.find_comment("foo", "test", "ps0", "bar")
         assert comment.comment == None
