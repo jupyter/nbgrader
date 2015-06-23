@@ -38,8 +38,16 @@ class SaveAutoGrades(NbGraderPreprocessor):
             self.student_id)
 
         # determine what the grade is
-        auto_score, max_score = utils.determine_grade(cell)
+        auto_score, _ = utils.determine_grade(cell)
         grade.auto_score = auto_score
+
+        # if there was previously a manual grade, or if there is no autograder
+        # score, then we should mark this as needing review
+        if (grade.manual_score is not None) or (grade.auto_score is None):
+            grade.needs_manual_grade = True
+        else:
+            grade.needs_manual_grade = False
+
         self.gradebook.db.commit()
         self.log.debug(grade)
 
