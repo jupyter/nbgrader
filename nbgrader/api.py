@@ -3,7 +3,7 @@ from __future__ import division
 from nbgrader import utils
 
 from sqlalchemy import (create_engine, ForeignKey, Column, String, Text,
-    DateTime, Interval, Float, Enum, UniqueConstraint)
+    DateTime, Interval, Float, Enum, UniqueConstraint, Boolean)
 from sqlalchemy.orm import sessionmaker, scoped_session, relationship, column_property
 from sqlalchemy.orm.exc import NoResultFound, FlushError
 from sqlalchemy.ext.declarative import declarative_base
@@ -599,6 +599,9 @@ class Grade(Base):
     #: Score assigned by a human grader
     manual_score = Column(Float())
 
+    #: Whether a score needs to be assigned manually. This is True by default.
+    needs_manual_grade = Column(Boolean, default=True, nullable=False)
+
     #: The overall score, computed automatically from the
     #: :attr:`~nbgrader.api.Grade.auto_score` and :attr:`~nbgrader.api.Grade.manual_score`
     #: values. If neither are set, the score is zero. If both are set, then the
@@ -615,13 +618,6 @@ class Grade(Base):
     #: The maximum possible score that can be assigned, inherited from
     #: :class:`~nbgrader.api.GradeCell`
     max_score = None
-
-    #: Whether a score needs to be assigned manually. This is automatically computed
-    #: from the :attr:`~nbgrader.api.Grade.auto_score` and :attr:`~nbgrader.api.Grade.manual_score`
-    #: attributes: if neither is defined, then this value is True, otherwise it is
-    #: False.
-    needs_manual_grade = column_property(
-        (auto_score == None) & (manual_score == None))
 
     #: Whether the autograded score is a result of failed autograder tests. This
     #: is True if the autograder score is zero and the cell type is "code", and
