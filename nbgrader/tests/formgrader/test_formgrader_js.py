@@ -291,11 +291,13 @@ class TestFormgraderJS(BaseTestFormgrade):
             elem = self._get_score_box(index)
             assert elem.get_attribute("value") == ""
 
-            # check whether it needs manual grading
-            if elem.get_attribute("placeholder") != "":
-                assert not self._get_needs_manual_grade(index)
-            else:
-                assert self._get_needs_manual_grade(index)
+        # check whether it needs manual grading
+        if elem.get_attribute("placeholder") != "":
+            assert not self._get_needs_manual_grade(index)
+            assert "needs_manual_grade" not in elem.get_attribute("class").split(" ")
+        else:
+            assert self._get_needs_manual_grade(index)
+            assert "needs_manual_grade" in elem.get_attribute("class").split(" ")
 
         # set the grade
         elem.click()
@@ -307,6 +309,7 @@ class TestFormgraderJS(BaseTestFormgrade):
 
         # check whether it needs manual grading
         assert not self._get_needs_manual_grade(index)
+        assert "needs_manual_grade" not in elem.get_attribute("class").split(" ")
 
         # clear the grade
         elem.click()
@@ -319,8 +322,10 @@ class TestFormgraderJS(BaseTestFormgrade):
         # check whether it needs manual grading
         if elem.get_attribute("placeholder") != "":
             assert not self._get_needs_manual_grade(index)
+            assert "needs_manual_grade" not in elem.get_attribute("class").split(" ")
         else:
             assert self._get_needs_manual_grade(index)
+            assert "needs_manual_grade" in elem.get_attribute("class").split(" ")
 
     def test_same_part_navigation(self):
         problem = self.gradebook.find_notebook("Problem 1", "Problem Set 1")
