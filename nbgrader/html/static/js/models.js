@@ -3,12 +3,14 @@ var GradeUI = Backbone.View.extend({
     events: {
         "change .score": "save",
         "click .full-credit": "assignFullCredit",
-        "click .no-credit": "assignNoCredit"
+        "click .no-credit": "assignNoCredit",
+        "click .mark-graded": "save"
     },
 
     initialize: function () {
         this.$glyph = this.$el.find(".score-saved");
         this.$score = this.$el.find(".score");
+        this.$mark_graded = this.$el.find(".mark-graded");
 
         this.listenTo(this.model, "change", this.render);
         this.listenTo(this.model, "request", this.animateSaving);
@@ -20,6 +22,15 @@ var GradeUI = Backbone.View.extend({
 
     render: function () {
         this.$score.val(this.model.get("manual_score"));
+        if (this.model.get("needs_manual_grade")) {
+            this.$score.addClass("needs_manual_grade");
+            if (this.model.get("manual_score") !== null) {
+                this.$mark_graded.show();
+            }
+        } else {
+            this.$score.removeClass("needs_manual_grade");
+            this.$mark_graded.hide();
+        }
     },
 
     save: function () {
@@ -38,6 +49,8 @@ var GradeUI = Backbone.View.extend({
                 this.model.save({"manual_score": val});
             }
         }
+
+        this.render();
     },
 
     animateSaving: function () {

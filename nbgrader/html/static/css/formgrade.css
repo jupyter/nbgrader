@@ -83,11 +83,6 @@ div.nbgrader_cell {
     width: 100%;
 }
 
-/*div.nbgrader_cell .panel-heading {
-    padding: 0.4em 0.6em;
-    height: 37px;
-}*/
-
 div.nbgrader_cell .panel-footer {
     padding: 0.4em 0.6em;
 }
@@ -112,6 +107,15 @@ div.nbgrader_cell .input_area {
     margin-left: 1em;
     border-width: 1px;
     border-color: white;
+}
+
+.needs_manual_grade {
+  background-color: #f2dede;
+  border-color: #d43f3a;
+}
+
+.mark-graded {
+  display: none;
 }
 
 .nbgrader-label {
@@ -150,6 +154,16 @@ div.nbgrader_cell .input_area {
 .scoring-buttons button.btn-danger:hover {
   background-color: #d9534f;
   border-color: #d43f3a;
+}
+
+.scoring-buttons button.btn-warning {
+  background-color: rgba(240, 173, 78, 0.2);
+  border-color: #7C4F0E;
+}
+
+.scoring-buttons button.btn-warning:hover {
+  background-color: #f0ad4e;
+  border-color: #eea236;
 }
 
 .help {

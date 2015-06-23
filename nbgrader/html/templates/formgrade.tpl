@@ -70,9 +70,8 @@ window.MathJax = {
   <span class="glyphicon glyphicon-ok save-icon score-saved"></span>
   <div class="pull-right">
     <span class="btn-group btn-group-sm scoring-buttons" role="group">
+      <button type="button" class="btn btn-warning mark-graded">Resolve</button>
       <button type="button" class="btn btn-success full-credit">Full credit</button>
-    </span>
-    <span class="btn-group btn-group-sm scoring-buttons" role="group">
       <button type="button" class="btn btn-danger no-credit">No credit</button>
     </span>
     <span>
