@@ -345,7 +345,6 @@ define([
                 celltoolbar.rebuild();
                 update_total();
                 display_cell(cell);
-                validate_ids();
             });
             display_cell(cell);
             $(div).append($('<span/>').append(select));
@@ -369,7 +368,6 @@ define([
         text.attr("value", get_grade_id(cell));
         text.change(function () {
             set_grade_id(cell, text.val());
-            validate_ids();
         });
 
         local_div.addClass('nbgrader-id');
