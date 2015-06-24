@@ -35,7 +35,6 @@ def create_grade_cell(source, cell_type, grade_id, points):
     cell.metadata.nbgrader["grade"] = True
     cell.metadata.nbgrader["grade_id"] = grade_id
     cell.metadata.nbgrader["points"] = points
-    cell.metadata.nbgrader["checksum"] = compute_checksum(cell)
 
     return cell
 
@@ -51,7 +50,21 @@ def create_solution_cell(source, cell_type, grade_id):
     cell.metadata.nbgrader = {}
     cell.metadata.nbgrader["solution"] = True
     cell.metadata.nbgrader["grade_id"] = grade_id
-    cell.metadata.nbgrader["checksum"] = compute_checksum(cell)
+
+    return cell
+
+
+def create_locked_cell(source, cell_type, grade_id):
+    if cell_type == "markdown":
+        cell = new_markdown_cell(source=source)
+    elif cell_type == "code":
+        cell = new_code_cell(source=source)
+    else:
+        raise ValueError("invalid cell type: {}".format(cell_type))
+
+    cell.metadata.nbgrader = {}
+    cell.metadata.nbgrader["locked"] = True
+    cell.metadata.nbgrader["grade_id"] = grade_id
 
     return cell
 
@@ -69,7 +82,6 @@ def create_grade_and_solution_cell(source, cell_type, grade_id, points):
     cell.metadata.nbgrader["grade"] = True
     cell.metadata.nbgrader["grade_id"] = grade_id
     cell.metadata.nbgrader["points"] = points
-    cell.metadata.nbgrader["checksum"] = compute_checksum(cell)
 
     return cell
 

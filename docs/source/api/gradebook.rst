@@ -45,6 +45,12 @@ Gradebook
 
     .. automethod:: update_or_create_solution_cell
 
+    .. automethod:: add_source_cell
+
+    .. automethod:: find_source_cell
+
+    .. automethod:: update_or_create_source_cell
+
     .. automethod:: add_submission
 
     .. automethod:: find_submission

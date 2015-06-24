@@ -68,6 +68,8 @@ Master version of an assignment
 
     .. autoattribute:: solution_cells
 
+    .. autoattribute:: source_cells
+
     .. autoattribute:: submissions
 
     .. autoattribute:: num_submissions
@@ -92,10 +94,6 @@ Master version of an assignment
 
     .. autoattribute:: cell_type
 
-    .. autoattribute:: source
-
-    .. autoattribute:: checksum
-
     .. autoattribute:: notebook
         :annotation:
 
@@ -113,6 +111,23 @@ Master version of an assignment
 
     .. autoattribute:: name
 
+    .. autoattribute:: notebook
+        :annotation:
+
+    .. autoattribute:: notebook_id
+
+    .. autoattribute:: assignment
+
+    .. autoattribute:: comments
+
+    .. automethod:: to_dict
+
+.. autoclass:: SourceCell
+
+    .. autoattribute:: id
+
+    .. autoattribute:: name
+
     .. autoattribute:: cell_type
 
     .. autoattribute:: source
@@ -125,8 +140,6 @@ Master version of an assignment
     .. autoattribute:: notebook_id
 
     .. autoattribute:: assignment
-
-    .. autoattribute:: comments
 
     .. automethod:: to_dict
 

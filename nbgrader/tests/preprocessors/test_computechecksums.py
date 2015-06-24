@@ -5,7 +5,7 @@ from nbgrader.utils import compute_checksum
 from nbgrader.tests.preprocessors.base import BaseTestPreprocessor
 from nbgrader.tests import (
     create_code_cell, create_text_cell,
-    create_grade_cell, create_solution_cell)
+    create_grade_cell, create_solution_cell, create_locked_cell)
 
 
 @pytest.fixture
@@ -45,6 +45,17 @@ class TestComputeChecksums(BaseTestPreprocessor):
         cell1 = create_solution_cell("", "code", "foo")
         cell1 = preprocessor.preprocess_cell(cell1, {}, 0)[0]
         cell2 = create_solution_cell("", "markdown", "foo")
+        cell2 = preprocessor.preprocess_cell(cell2, {}, 0)[0]
+
+        assert cell1.metadata.nbgrader["checksum"] == compute_checksum(cell1)
+        assert cell2.metadata.nbgrader["checksum"] == compute_checksum(cell2)
+        assert cell1.metadata.nbgrader["checksum"] != cell2.metadata.nbgrader["checksum"]
+
+    def test_checksum_locked_cell_type(self, preprocessor):
+        """Test that the checksum is computed for locked cells"""
+        cell1 = create_locked_cell("", "code", "foo")
+        cell1 = preprocessor.preprocess_cell(cell1, {}, 0)[0]
+        cell2 = create_locked_cell("", "markdown", "foo")
         cell2 = preprocessor.preprocess_cell(cell2, {}, 0)[0]
 
         assert cell1.metadata.nbgrader["checksum"] == compute_checksum(cell1)

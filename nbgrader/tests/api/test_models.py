@@ -27,12 +27,15 @@ def submissions(db):
     now = datetime.datetime.now()
     a = api.Assignment(name='foo', duedate=now)
     n = api.Notebook(name='blah', assignment=a)
-    gc1 = api.GradeCell(
-        name='foo', max_score=10, notebook=n, cell_type="markdown")
-    gc2 = api.GradeCell(
-        name='bar', max_score=5, notebook=n, cell_type="code")
-    sc = api.SolutionCell(
-        name='foo', notebook=n, cell_type='markdown')
+    gc1 = api.GradeCell(name='foo', max_score=10, notebook=n, cell_type="markdown")
+    gc2 = api.GradeCell(name='bar', max_score=5, notebook=n, cell_type="code")
+    sc = api.SolutionCell(name='foo', notebook=n)
+    api.SourceCell(
+        name='foo', cell_type='markdown', notebook=n,
+        source='waoiefjwoweifjw', checksum='12345', locked=True)
+    api.SourceCell(
+        name='bar', cell_type='code', notebook=n,
+        source='afejfwejfwe', checksum='567890', locked=False)
     db.add(a)
     db.commit()
 
@@ -91,6 +94,7 @@ def test_create_notebook(db):
     assert n.assignment == a
     assert n.grade_cells == []
     assert n.solution_cells == []
+    assert n.source_cells == []
     assert n.submissions == []
     assert a.notebooks == [n]
 
@@ -105,18 +109,14 @@ def test_create_grade_cell(db):
     now = datetime.datetime.now()
     a = api.Assignment(name='foo', duedate=now)
     n = api.Notebook(name='blah', assignment=a)
-    g = api.GradeCell(
-        name='foo', max_score=10, notebook=n, source="print('hello')",
-        cell_type="code", checksum="12345")
+    g = api.GradeCell(name='foo', max_score=10, notebook=n, cell_type="code")
     db.add(a)
     db.commit()
 
     assert g.id
     assert g.name == 'foo'
     assert g.max_score == 10
-    assert g.source == "print('hello')"
     assert g.cell_type == "code"
-    assert g.checksum == "12345"
     assert g.assignment == a
     assert g.notebook == n
     assert g.grades == []
@@ -133,7 +133,23 @@ def test_create_solution_cell(db):
     now = datetime.datetime.now()
     a = api.Assignment(name='foo', duedate=now)
     n = api.Notebook(name='blah', assignment=a)
-    s = api.SolutionCell(
+    s = api.SolutionCell(name='foo', notebook=n)
+    db.add(a)
+    db.commit()
+
+    assert s.id
+    assert s.name == 'foo'
+    assert s.assignment == a
+    assert s.notebook == n
+    assert s.comments == []
+    assert n.solution_cells == [s]
+
+
+def test_create_source_cell(db):
+    now = datetime.datetime.now()
+    a = api.Assignment(name='foo', duedate=now)
+    n = api.Notebook(name='blah', assignment=a)
+    s = api.SourceCell(
         name='foo', notebook=n, source="hello",
         cell_type="code", checksum="12345")
     db.add(a)
@@ -141,13 +157,13 @@ def test_create_solution_cell(db):
 
     assert s.id
     assert s.name == 'foo'
+    assert not s.locked
     assert s.cell_type == "code"
     assert s.source == "hello"
     assert s.checksum == "12345"
     assert s.assignment == a
     assert s.notebook == n
-    assert s.comments == []
-    assert n.solution_cells == [s]
+    assert n.source_cells == [s]
 
     assert repr(s) == "SolutionCell<foo/blah/foo>"
 
@@ -339,9 +355,7 @@ def test_create_code_grade(db):
     now = datetime.datetime.now()
     a = api.Assignment(name='foo', duedate=now)
     n = api.Notebook(name='blah', assignment=a)
-    gc = api.GradeCell(
-        name='foo', max_score=10, notebook=n, source="print('hello')",
-        cell_type="code", checksum="12345")
+    gc = api.GradeCell(name='foo', max_score=10, notebook=n, cell_type="code")
     s = api.Student(id="12345", first_name='Jane', last_name='Doe', email='janedoe@nowhere')
     sa = api.SubmittedAssignment(assignment=a, student=s)
     sn = api.SubmittedNotebook(assignment=sa, notebook=n)
@@ -401,8 +415,7 @@ def test_create_written_grade(db):
     now = datetime.datetime.now()
     a = api.Assignment(name='foo', duedate=now)
     n = api.Notebook(name='blah', assignment=a)
-    gc = api.GradeCell(
-        name='foo', max_score=10, notebook=n, cell_type="markdown")
+    gc = api.GradeCell(name='foo', max_score=10, notebook=n, cell_type="markdown")
     s = api.Student(id="12345", first_name='Jane', last_name='Doe', email='janedoe@nowhere')
     sa = api.SubmittedAssignment(assignment=a, student=s)
     sn = api.SubmittedNotebook(assignment=sa, notebook=n)
@@ -462,7 +475,7 @@ def test_create_comment(db):
     now = datetime.datetime.now()
     a = api.Assignment(name='foo', duedate=now)
     n = api.Notebook(name='blah', assignment=a)
-    sc = api.SolutionCell(name='foo', notebook=n, cell_type="code")
+    sc = api.SolutionCell(name='foo', notebook=n)
     s = api.Student(id="12345", first_name='Jane', last_name='Doe', email='janedoe@nowhere')
     sa = api.SubmittedAssignment(assignment=a, student=s)
     sn = api.SubmittedNotebook(assignment=sa, notebook=n)
@@ -815,10 +828,8 @@ def test_student_max_score(db):
     now = datetime.datetime.now()
     a = api.Assignment(name='foo', duedate=now)
     n = api.Notebook(name='blah', assignment=a)
-    api.GradeCell(
-        name='foo', max_score=10, notebook=n, cell_type="markdown")
-    api.GradeCell(
-        name='bar', max_score=5, notebook=n, cell_type="code")
+    api.GradeCell(name='foo', max_score=10, notebook=n, cell_type="markdown")
+    api.GradeCell(name='bar', max_score=5, notebook=n, cell_type="code")
     db.add(a)
     db.commit()
 
@@ -956,15 +967,12 @@ def test_gradecell_to_dict(submissions):
 
     assert set(gc1d.keys()) == set(gc2d.keys())
     assert set(gc1d.keys()) == {
-        'id', 'name', 'max_score', 'cell_type', 'source',
-        'checksum', 'notebook', 'assignment'}
+        'id', 'name', 'max_score', 'cell_type', 'notebook', 'assignment'}
 
     assert gc1d['id'] == gc1.id
     assert gc1d['name'] == 'foo'
     assert gc1d['max_score'] == 10
     assert gc1d['cell_type'] == 'markdown'
-    assert gc1d['source'] is None
-    assert gc1d['checksum'] is None
     assert gc1d['notebook'] == 'blah'
     assert gc1d['assignment'] == 'foo'
 
@@ -972,8 +980,6 @@ def test_gradecell_to_dict(submissions):
     assert gc2d['name'] == 'bar'
     assert gc2d['max_score'] == 5
     assert gc2d['cell_type'] == 'code'
-    assert gc2d['source'] is None
-    assert gc2d['checksum'] is None
     assert gc2d['notebook'] == 'blah'
     assert gc2d['assignment'] == 'foo'
 
@@ -988,20 +994,52 @@ def test_solutioncell_to_dict(submissions):
     sc = db.query(api.SolutionCell).one()
     scd = sc.to_dict()
 
-    assert set(scd.keys()) == {
-        'id', 'name', 'cell_type', 'source', 'checksum',
-        'notebook', 'assignment'}
+    assert set(scd.keys()) == {'id', 'name', 'notebook', 'assignment'}
 
     assert scd['id'] == sc.id
     assert scd['name'] == 'foo'
-    assert scd['cell_type'] == 'markdown'
-    assert scd['source'] is None
-    assert scd['checksum'] is None
     assert scd['notebook'] == 'blah'
     assert scd['assignment'] == 'foo'
 
     # make sure it can be JSONified
     json.dumps(scd)
+
+
+def test_sourcecell_to_dict(submissions):
+    db = submissions[0]
+
+    sc1 = db.query(api.SourceCell).filter(api.SourceCell.name == 'foo').one()
+    sc2 = db.query(api.SourceCell).filter(api.SourceCell.name == 'bar').one()
+
+    sc1d = sc1.to_dict()
+    sc2d = sc2.to_dict()
+
+    assert set(sc1d.keys()) == set(sc2d.keys())
+    assert set(sc1d.keys()) == {
+        'id', 'name', 'cell_type', 'source', 'checksum', 'locked',
+        'notebook', 'assignment'}
+
+    assert sc1d['id'] == sc1.id
+    assert sc1d['name'] == 'foo'
+    assert sc1d['cell_type'] == 'markdown'
+    assert sc1d['source'] == 'waoiefjwoweifjw'
+    assert sc1d['checksum'] == '12345'
+    assert sc1d['notebook'] == 'blah'
+    assert sc1d['assignment'] == 'foo'
+    assert sc1d['locked']
+
+    assert sc2d['id'] == sc2.id
+    assert sc2d['name'] == 'bar'
+    assert sc2d['cell_type'] == 'code'
+    assert sc2d['source'] == 'afejfwejfwe'
+    assert sc2d['checksum'] == '567890'
+    assert sc2d['notebook'] == 'blah'
+    assert sc2d['assignment'] == 'foo'
+    assert not sc2d['locked']
+
+    # make sure it can be JSONified
+    json.dumps(sc1d)
+    json.dumps(sc2d)
 
 
 def test_student_to_dict(submissions):

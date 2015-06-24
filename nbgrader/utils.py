@@ -19,6 +19,17 @@ def is_solution(cell):
         return False
     return cell.metadata['nbgrader'].get('solution', False)
 
+def is_locked(cell):
+    """Returns True if the cell source is locked (will be overwritten)."""
+    if 'nbgrader' not in cell.metadata:
+        return False
+    elif is_solution(cell):
+        return False
+    elif is_grade(cell):
+        return True
+    else:
+        return cell.metadata['nbgrader'].get('locked', False)
+
 def determine_grade(cell):
     if not is_grade(cell):
         raise ValueError("cell is not a grade cell")
@@ -51,6 +62,7 @@ def compute_checksum(cell):
     # add whether it's a grade cell and/or solution cell
     m.update(str_to_bytes(str(is_grade(cell))))
     m.update(str_to_bytes(str(is_solution(cell))))
+    m.update(str_to_bytes(str(is_locked(cell))))
 
     # include the cell id
     m.update(str_to_bytes(cell.metadata.nbgrader['grade_id']))

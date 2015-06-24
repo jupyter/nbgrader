@@ -113,6 +113,10 @@ class Notebook(Base):
     #: by :class:`~nbgrader.api.SolutionCell` objects
     solution_cells = relationship("SolutionCell", backref="notebook")
 
+    #: A collection of source cells contained within this notebook, represented
+    #: by :class:`~nbgrader.api.SourceCell` objects
+    source_cells = relationship("SourceCell", backref="notebook")
+
     #: A collection of submitted versions of this notebook, represented by
     #: :class:`~nbgrader.api.SubmittedNotebook` objects
     submissions = relationship("SubmittedNotebook", backref="notebook")
@@ -178,13 +182,6 @@ class GradeCell(Base):
     #: The cell type, either "code" or "markdown"
     cell_type = Column(Enum("code", "markdown"), nullable=False)
 
-    #: (Optional) The source code or text of the cell
-    source = Column(Text())
-
-    #: (Optional) A checksum of the cell contents. This should usually be computed
-    #: using :func:`nbgrader.utils.compute_checksum`
-    checksum = Column(String(128))
-
     #: The :class:`~nbgrader.api.Notebook` that this grade cell is contained in
     notebook = None
 
@@ -211,8 +208,6 @@ class GradeCell(Base):
             "name": self.name,
             "max_score": self.max_score,
             "cell_type": self.cell_type,
-            "source": self.source,
-            "checksum": self.checksum,
             "notebook": self.notebook.name,
             "assignment": self.assignment.name
         }
@@ -232,16 +227,6 @@ class SolutionCell(Base):
     #: Unique human-readable name of the solution cell. This need only be unique
     #: within the notebook, not across notebooks.
     name = Column(String(128), nullable=False)
-
-    #: The cell type, either "code" or "markdown"
-    cell_type = Column(Enum("code", "markdown"), nullable=False)
-
-    #: (Optional) The source code or text of the cell
-    source = Column(Text())
-
-    #: (Optional) A checksum of the cell contents. This should usually be computed
-    #: using :func:`nbgrader.utils.compute_checksum`
-    checksum = Column(String(128))
 
     #: The :class:`~nbgrader.api.Notebook` that this solution cell is contained in
     notebook = None
@@ -267,7 +252,61 @@ class SolutionCell(Base):
         return {
             "id": self.id,
             "name": self.name,
+            "notebook": self.notebook.name,
+            "assignment": self.assignment.name
+        }
+
+    def __repr__(self):
+        return "{}/{}".format(self.notebook, self.name)
+
+
+class SourceCell(Base):
+    __tablename__ = "source_cell"
+    __table_args__ = (UniqueConstraint('name', 'notebook_id'),)
+
+    #: Unique id of the source cell (automatically generated)
+    id = Column(String(32), primary_key=True, default=new_uuid)
+
+    #: Unique human-readable name of the source cell. This need only be unique
+    #: within the notebook, not across notebooks.
+    name = Column(String(128), nullable=False)
+
+    #: The cell type, either "code" or "markdown"
+    cell_type = Column(Enum("code", "markdown"), nullable=False)
+
+    #: Whether the cell is locked (e.g. the source saved in the database should
+    #: be used to overwrite the source of students' cells)
+    locked = Column(Boolean, default=False, nullable=False)
+
+    #: The source code or text of the cell
+    source = Column(Text())
+
+    #: A checksum of the cell contents. This should usually be computed
+    #: using :func:`nbgrader.utils.compute_checksum`
+    checksum = Column(String(128))
+
+    #: The :class:`~nbgrader.api.Notebook` that this source cell is contained in
+    notebook = None
+
+    #: Unique id of the :attr:`~nbgrader.api.SourceCell.notebook`
+    notebook_id = Column(String(32), ForeignKey('notebook.id'))
+
+    #: The assignment that this cell is contained within, represented by a
+    #: :class:`~nbgrader.api.Assignment` object
+    assignment = association_proxy("notebook", "assignment")
+
+    def to_dict(self):
+        """Convert the source cell object to a JSON-friendly dictionary
+        representation. Note that this includes keys for ``notebook`` and
+        ``assignment`` which correspond to the names of the notebook and
+        assignment, not the objects themselves.
+
+        """
+        return {
+            "id": self.id,
+            "name": self.name,
             "cell_type": self.cell_type,
+            "locked": self.locked,
             "source": self.source,
             "checksum": self.checksum,
             "notebook": self.notebook.name,
@@ -1168,6 +1207,8 @@ class Gradebook(object):
                 self.db.delete(grade_cell)
             for solution_cell in notebook.solution_cells:
                 self.db.delete(solution_cell)
+            for source_cell in notebook.source_cells:
+                self.db.delete(source_cell)
             self.db.delete(notebook)
 
         self.db.delete(assignment)
@@ -1464,6 +1505,103 @@ class Gradebook(object):
                 raise InvalidEntry(*e.args)
 
         return solution_cell
+
+    #### Source cells
+
+    def add_source_cell(self, name, notebook, assignment, **kwargs):
+        """Add a new source cell to an existing notebook of an existing
+        assignment.
+
+        Parameters
+        ----------
+        name : string
+            the name of the new source cell
+        notebook : string
+            the name of an existing notebook
+        assignment : string
+            the name of an existing assignment
+        `**kwargs`
+            additional keyword arguments for :class:`~nbgrader.api.SourceCell`
+
+        Returns
+        -------
+        source_cell : :class:`~nbgrader.api.SourceCell`
+
+        """
+
+        notebook = self.find_notebook(notebook, assignment)
+        source_cell = SourceCell(name=name, notebook=notebook, **kwargs)
+        self.db.add(source_cell)
+        try:
+            self.db.commit()
+        except (IntegrityError, FlushError) as e:
+            self.db.rollback()
+            raise InvalidEntry(*e.args)
+        return source_cell
+
+    def find_source_cell(self, name, notebook, assignment):
+        """Find a source cell in a particular notebook of an assignment.
+
+        Parameters
+        ----------
+        name : string
+            the name of the source cell
+        notebook : string
+            the name of the notebook
+        assignment : string
+            the name of the assignment
+
+        Returns
+        -------
+        source_cell : :class:`~nbgrader.api.SourceCell`
+
+        """
+
+        try:
+            source_cell = self.db.query(SourceCell)\
+                .join(Notebook, Notebook.id == SourceCell.notebook_id)\
+                .join(Assignment, Assignment.id == Notebook.assignment_id)\
+                .filter(SourceCell.name == name, Notebook.name == notebook, Assignment.name == assignment)\
+                .one()
+        except NoResultFound:
+            raise MissingEntry("No such source cell: {}/{}/{}".format(assignment, notebook, name))
+
+        return source_cell
+
+    def update_or_create_source_cell(self, name, notebook, assignment, **kwargs):
+        """Update an existing source cell in a notebook of an assignment, or
+        create the source cell if it does not exist.
+
+        Parameters
+        ----------
+        name : string
+            the name of the source cell
+        notebook : string
+            the name of the notebook
+        assignment : string
+            the name of the assignment
+        `**kwargs`
+            additional keyword arguments for :class:`~nbgrader.api.SourceCell`
+
+        Returns
+        -------
+        source_cell : :class:`~nbgrader.api.SourceCell`
+
+        """
+
+        try:
+            source_cell = self.find_source_cell(name, notebook, assignment)
+        except MissingEntry:
+            source_cell = self.add_source_cell(name, notebook, assignment, **kwargs)
+        else:
+            for attr in kwargs:
+                setattr(source_cell, attr, kwargs[attr])
+            try:
+                self.db.commit()
+            except (IntegrityError, FlushError) as e:
+                raise InvalidEntry(*e.args)
+
+        return source_cell
 
     #### Submissions
 

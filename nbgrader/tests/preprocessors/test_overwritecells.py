@@ -7,7 +7,8 @@ from nbgrader.api import Gradebook
 from nbgrader.utils import compute_checksum
 from nbgrader.tests.preprocessors.base import BaseTestPreprocessor
 from nbgrader.tests import (
-    create_grade_cell, create_solution_cell, create_grade_and_solution_cell)
+    create_grade_cell, create_solution_cell, create_grade_and_solution_cell,
+    create_locked_cell)
 
 
 @pytest.fixture
@@ -38,6 +39,7 @@ class TestOverwriteCells(BaseTestPreprocessor):
     def test_overwrite_points(self, preprocessors, resources):
         """Are points overwritten for grade cells?"""
         cell = create_grade_cell("hello", "code", "foo", 1)
+        cell.metadata.nbgrader['checksum'] = compute_checksum(cell)
         nb = new_notebook()
         nb.cells.append(cell)
         nb, resources = preprocessors[0].preprocess(nb, resources)
@@ -50,6 +52,33 @@ class TestOverwriteCells(BaseTestPreprocessor):
     def test_overwrite_grade_source(self, preprocessors, resources):
         """Is the source overwritten for grade cells?"""
         cell = create_grade_cell("hello", "code", "foo", 1)
+        cell.metadata.nbgrader['checksum'] = compute_checksum(cell)
+        nb = new_notebook()
+        nb.cells.append(cell)
+        nb, resources = preprocessors[0].preprocess(nb, resources)
+
+        cell.source = "hello!"
+        nb, resources = preprocessors[1].preprocess(nb, resources)
+
+        assert cell.source == "hello"
+
+    def test_overwrite_locked_source_code(self, preprocessors, resources):
+        """Is the source overwritten for locked code cells?"""
+        cell = create_locked_cell("hello", "code", "foo")
+        cell.metadata.nbgrader['checksum'] = compute_checksum(cell)
+        nb = new_notebook()
+        nb.cells.append(cell)
+        nb, resources = preprocessors[0].preprocess(nb, resources)
+
+        cell.source = "hello!"
+        nb, resources = preprocessors[1].preprocess(nb, resources)
+
+        assert cell.source == "hello"
+
+    def test_overwrite_locked_source_markdown(self, preprocessors, resources):
+        """Is the source overwritten for locked markdown cells?"""
+        cell = create_locked_cell("hello", "markdown", "foo")
+        cell.metadata.nbgrader['checksum'] = compute_checksum(cell)
         nb = new_notebook()
         nb.cells.append(cell)
         nb, resources = preprocessors[0].preprocess(nb, resources)
@@ -62,6 +91,7 @@ class TestOverwriteCells(BaseTestPreprocessor):
     def test_dont_overwrite_grade_and_solution_source(self, preprocessors, resources):
         """Is the source not overwritten for grade+solution cells?"""
         cell = create_grade_and_solution_cell("hello", "code", "foo", 1)
+        cell.metadata.nbgrader['checksum'] = compute_checksum(cell)
         nb = new_notebook()
         nb.cells.append(cell)
         nb, resources = preprocessors[0].preprocess(nb, resources)
@@ -74,6 +104,7 @@ class TestOverwriteCells(BaseTestPreprocessor):
     def test_dont_overwrite_solution_source(self, preprocessors, resources):
         """Is the source not overwritten for solution cells?"""
         cell = create_solution_cell("hello", "code", "foo")
+        cell.metadata.nbgrader['checksum'] = compute_checksum(cell)
         nb = new_notebook()
         nb.cells.append(cell)
         nb, resources = preprocessors[0].preprocess(nb, resources)
@@ -86,6 +117,7 @@ class TestOverwriteCells(BaseTestPreprocessor):
     def test_overwrite_grade_cell_type(self, preprocessors, resources):
         """Is the cell type overwritten for grade cells?"""
         cell = create_grade_cell("hello", "code", "foo", 1)
+        cell.metadata.nbgrader['checksum'] = compute_checksum(cell)
         nb = new_notebook()
         nb.cells.append(cell)
         nb, resources = preprocessors[0].preprocess(nb, resources)
@@ -98,6 +130,20 @@ class TestOverwriteCells(BaseTestPreprocessor):
     def test_overwrite_solution_cell_type(self, preprocessors, resources):
         """Is the cell type overwritten for solution cells?"""
         cell = create_solution_cell("hello", "code", "foo")
+        cell.metadata.nbgrader['checksum'] = compute_checksum(cell)
+        nb = new_notebook()
+        nb.cells.append(cell)
+        nb, resources = preprocessors[0].preprocess(nb, resources)
+
+        cell.cell_type = "markdown"
+        nb, resources = preprocessors[1].preprocess(nb, resources)
+
+        assert cell.cell_type == "code"
+
+    def test_overwrite_locked_cell_type(self, preprocessors, resources):
+        """Is the cell type overwritten for locked cells?"""
+        cell = create_locked_cell("hello", "code", "foo")
+        cell.metadata.nbgrader['checksum'] = compute_checksum(cell)
         nb = new_notebook()
         nb.cells.append(cell)
         nb, resources = preprocessors[0].preprocess(nb, resources)
@@ -110,6 +156,7 @@ class TestOverwriteCells(BaseTestPreprocessor):
     def test_overwrite_grade_checksum(self, preprocessors, resources):
         """Is the checksum overwritten for grade cells?"""
         cell = create_grade_cell("hello", "code", "foo", 1)
+        cell.metadata.nbgrader['checksum'] = compute_checksum(cell)
         nb = new_notebook()
         nb.cells.append(cell)
         nb, resources = preprocessors[0].preprocess(nb, resources)
@@ -122,6 +169,20 @@ class TestOverwriteCells(BaseTestPreprocessor):
     def test_overwrite_solution_checksum(self, preprocessors, resources):
         """Is the checksum overwritten for solution cells?"""
         cell = create_solution_cell("hello", "code", "foo")
+        cell.metadata.nbgrader['checksum'] = compute_checksum(cell)
+        nb = new_notebook()
+        nb.cells.append(cell)
+        nb, resources = preprocessors[0].preprocess(nb, resources)
+
+        cell.metadata.nbgrader["checksum"] = "1234"
+        nb, resources = preprocessors[1].preprocess(nb, resources)
+
+        assert cell.metadata.nbgrader["checksum"] == compute_checksum(cell)
+
+    def test_overwrite_locked_checksum(self, preprocessors, resources):
+        """Is the checksum overwritten for locked cells?"""
+        cell = create_locked_cell("hello", "code", "foo")
+        cell.metadata.nbgrader['checksum'] = compute_checksum(cell)
         nb = new_notebook()
         nb.cells.append(cell)
         nb, resources = preprocessors[0].preprocess(nb, resources)
