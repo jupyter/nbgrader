@@ -289,13 +289,13 @@ def before_install(group='', python_version=None):
     run('pip install nose pytest pytest-cov coverage coveralls selenium')
 
     # install requirements
-    run('pip install -r requirements.txt')
+    run('git clone --quiet --depth 1 https://github.com/minrk/travis-wheels ~/travis-wheels')
+    run('pip install -f ~/travis-wheels/wheelhouse -r requirements.txt')
 
     # install jupyterhub
     if python_version == '3.4' and group == 'js':
         os.chdir(os.environ['HOME'])
         run('npm install -g configurable-http-proxy')
-        run('git clone --quiet --depth 1 https://github.com/minrk/travis-wheels travis-wheels')
         run('git clone --quiet --recursive https://github.com/jupyter/jupyterhub.git')
         os.chdir('jupyterhub')
         run('pip install -f ~/travis-wheels/wheelhouse -r dev-requirements.txt .')
