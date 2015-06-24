@@ -22,7 +22,7 @@
     <th class="center">Overall Score</th>
     <th class="center">Code Score</th>
     <th class="center">Written Score</th>
-    <th class="center">Manual grade?</th>
+    <th class="center">Needs manual grade?</th>
     <th class="center">Tests failed?</th>
   </tr>
 </thead>

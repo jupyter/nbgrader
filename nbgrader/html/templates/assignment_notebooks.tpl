@@ -20,7 +20,7 @@
     <th class="center">Avg. Score</th>
     <th class="center">Avg. Code Score</th>
     <th class="center">Avg. Written Score</th>
-    <th class="center">Manual grade?</th>
+    <th class="center">Needs manual grade?</th>
   </tr>
 </thead>
 <tbody>

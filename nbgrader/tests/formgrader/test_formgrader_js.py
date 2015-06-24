@@ -40,6 +40,9 @@ class TestFormgraderJS(BaseTestFormgrade):
         WebDriverWait(self.browser, 30).until(lambda browser: glyph.is_displayed())
         WebDriverWait(self.browser, 30).until(lambda browser: not glyph.is_displayed())
 
+    def _get_needs_manual_grade(self, index):
+        return self.browser.execute_script('return formgrader.grades.at({:d}).get("needs_manual_grade");'.format(index))
+
     def _get_active_element(self):
         return self.browser.execute_script("return document.activeElement;")
 
@@ -255,13 +258,12 @@ class TestFormgraderJS(BaseTestFormgrade):
     @pytest.mark.parametrize("index", range(4))
     def test_save_comment(self, index):
         self._load_formgrade()
-
         elem = self._get_comment_box(index)
+
         if elem.get_attribute("value") != "":
             elem.click()
             elem.clear()
             self._save_comment(index)
-
             self._load_formgrade()
             elem = self._get_comment_box(index)
             assert elem.get_attribute("value") == ""
@@ -279,24 +281,51 @@ class TestFormgraderJS(BaseTestFormgrade):
     @pytest.mark.parametrize("index", range(6))
     def test_save_score(self, index):
         self._load_formgrade()
-
         elem = self._get_score_box(index)
+
         if elem.get_attribute("value") != "":
             elem.click()
             elem.clear()
             self._save_score(index)
-
             self._load_formgrade()
             elem = self._get_score_box(index)
             assert elem.get_attribute("value") == ""
 
+        # check whether it needs manual grading
+        if elem.get_attribute("placeholder") != "":
+            assert not self._get_needs_manual_grade(index)
+            assert "needs_manual_grade" not in elem.get_attribute("class").split(" ")
+        else:
+            assert self._get_needs_manual_grade(index)
+            assert "needs_manual_grade" in elem.get_attribute("class").split(" ")
+
+        # set the grade
         elem.click()
         elem.send_keys("{}".format((index + 1) / 10.0))
         self._save_score(index)
-
         self._load_formgrade()
         elem = self._get_score_box(index)
         assert elem.get_attribute("value") == "{}".format((index + 1) / 10.0)
+
+        # check whether it needs manual grading
+        assert not self._get_needs_manual_grade(index)
+        assert "needs_manual_grade" not in elem.get_attribute("class").split(" ")
+
+        # clear the grade
+        elem.click()
+        elem.clear()
+        self._save_score(index)
+        self._load_formgrade()
+        elem = self._get_score_box(index)
+        assert elem.get_attribute("value") == ""
+
+        # check whether it needs manual grading
+        if elem.get_attribute("placeholder") != "":
+            assert not self._get_needs_manual_grade(index)
+            assert "needs_manual_grade" not in elem.get_attribute("class").split(" ")
+        else:
+            assert self._get_needs_manual_grade(index)
+            assert "needs_manual_grade" in elem.get_attribute("class").split(" ")
 
     def test_same_part_navigation(self):
         problem = self.gradebook.find_notebook("Problem 1", "Problem Set 1")

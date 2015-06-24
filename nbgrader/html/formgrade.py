@@ -404,6 +404,10 @@ def get_grade(_id):
 
     if request.method == "PUT":
         grade.manual_score = request.json.get("manual_score", None)
+        if grade.manual_score is None and grade.auto_score is None:
+            grade.needs_manual_grade = True
+        else:
+            grade.needs_manual_grade = False
         app.gradebook.db.commit()
 
     return json.dumps(grade.to_dict())

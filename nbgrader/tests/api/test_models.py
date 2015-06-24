@@ -358,9 +358,9 @@ def test_create_code_grade(db):
     assert g.student == s
     assert g.max_score == 10
 
-    assert not g.needs_manual_grade
-    assert not sn.needs_manual_grade
-    assert not sa.needs_manual_grade
+    assert g.needs_manual_grade
+    assert sn.needs_manual_grade
+    assert sa.needs_manual_grade
 
     assert g.score == 5
     assert sn.score == 5
@@ -374,9 +374,9 @@ def test_create_code_grade(db):
     g.manual_score = 7.5
     db.commit()
 
-    assert not g.needs_manual_grade
-    assert not sn.needs_manual_grade
-    assert not sa.needs_manual_grade
+    assert g.needs_manual_grade
+    assert sn.needs_manual_grade
+    assert sa.needs_manual_grade
 
     assert g.score == 7.5
     assert sn.score == 7.5
@@ -386,6 +386,13 @@ def test_create_code_grade(db):
     assert sa.code_score == 7.5
     assert sa.written_score == 0
     assert s.score == 7.5
+
+    g.needs_manual_grade = False
+    db.commit()
+
+    assert not g.needs_manual_grade
+    assert not sn.needs_manual_grade
+    assert not sa.needs_manual_grade
 
     assert repr(g) == "Grade<foo/blah/foo for 12345>"
 
@@ -428,9 +435,9 @@ def test_create_written_grade(db):
     g.manual_score = 7.5
     db.commit()
 
-    assert not g.needs_manual_grade
-    assert not sn.needs_manual_grade
-    assert not sa.needs_manual_grade
+    assert g.needs_manual_grade
+    assert sn.needs_manual_grade
+    assert sa.needs_manual_grade
 
     assert g.score == 7.5
     assert sn.score == 7.5
@@ -440,6 +447,13 @@ def test_create_written_grade(db):
     assert sa.code_score == 0
     assert sa.written_score == 7.5
     assert s.score == 7.5
+
+    g.needs_manual_grade = False
+    db.commit()
+
+    assert not g.needs_manual_grade
+    assert not sn.needs_manual_grade
+    assert not sa.needs_manual_grade
 
     assert repr(g) == "Grade<foo/blah/foo for 12345>"
 
@@ -516,6 +530,51 @@ def test_query_needs_manual_grade_autograded(submissions):
         grade.auto_score = grade.max_score
     db.commit()
 
+    # do all the cells need grading?
+    a = db.query(api.Grade)\
+        .filter(api.Grade.needs_manual_grade)\
+        .order_by(api.Grade.id)\
+        .all()
+    b = db.query(api.Grade)\
+        .order_by(api.Grade.id)\
+        .all()
+    assert a == b
+
+    # do all the submitted notebooks need grading?
+    a = db.query(api.SubmittedNotebook)\
+        .filter(api.SubmittedNotebook.needs_manual_grade)\
+        .order_by(api.SubmittedNotebook.id)\
+        .all()
+    b = db.query(api.SubmittedNotebook)\
+        .order_by(api.SubmittedNotebook.id)\
+        .all()
+    assert a == b
+
+    # do all the notebooks need grading?
+    a = db.query(api.Notebook)\
+        .filter(api.Notebook.needs_manual_grade)\
+        .order_by(api.Notebook.id)\
+        .all()
+    b = db.query(api.Notebook)\
+        .order_by(api.Notebook.id)\
+        .all()
+    assert a == b
+
+    # do all the assignments need grading?
+    a = db.query(api.SubmittedAssignment)\
+        .join(api.SubmittedNotebook, api.Grade)\
+        .filter(api.SubmittedNotebook.needs_manual_grade)\
+        .order_by(api.SubmittedAssignment.id)\
+        .all()
+    b = db.query(api.SubmittedAssignment)\
+        .order_by(api.SubmittedAssignment.id)\
+        .all()
+    assert a == b
+
+    for grade in grades:
+        grade.needs_manual_grade = False
+    db.commit()
+
     # do none of the cells need grading?
     assert [] == db.query(api.Grade)\
         .filter(api.Grade.needs_manual_grade)\
@@ -543,6 +602,51 @@ def test_query_needs_manual_grade_manualgraded(submissions):
     for grade in grades:
         grade.auto_score = None
         grade.manual_score = grade.max_score / 2.0
+    db.commit()
+
+    # do all the cells need grading?
+    a = db.query(api.Grade)\
+        .filter(api.Grade.needs_manual_grade)\
+        .order_by(api.Grade.id)\
+        .all()
+    b = db.query(api.Grade)\
+        .order_by(api.Grade.id)\
+        .all()
+    assert a == b
+
+    # do all the submitted notebooks need grading?
+    a = db.query(api.SubmittedNotebook)\
+        .filter(api.SubmittedNotebook.needs_manual_grade)\
+        .order_by(api.SubmittedNotebook.id)\
+        .all()
+    b = db.query(api.SubmittedNotebook)\
+        .order_by(api.SubmittedNotebook.id)\
+        .all()
+    assert a == b
+
+    # do all the notebooks need grading?
+    a = db.query(api.Notebook)\
+        .filter(api.Notebook.needs_manual_grade)\
+        .order_by(api.Notebook.id)\
+        .all()
+    b = db.query(api.Notebook)\
+        .order_by(api.Notebook.id)\
+        .all()
+    assert a == b
+
+    # do all the assignments need grading?
+    a = db.query(api.SubmittedAssignment)\
+        .join(api.SubmittedNotebook, api.Grade)\
+        .filter(api.SubmittedNotebook.needs_manual_grade)\
+        .order_by(api.SubmittedAssignment.id)\
+        .all()
+    b = db.query(api.SubmittedAssignment)\
+        .order_by(api.SubmittedAssignment.id)\
+        .all()
+    assert a == b
+
+    for grade in grades:
+        grade.needs_manual_grade = False
     db.commit()
 
     # do none of the cells need grading?
