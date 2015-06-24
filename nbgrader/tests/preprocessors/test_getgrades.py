@@ -79,9 +79,7 @@ class TestGetGrades(BaseTestPreprocessor):
         preprocessors[1].preprocess(nb, resources)
         preprocessors[2].preprocess(nb, resources)
 
-        comment = gradebook.find_comment("foo", "test", "ps0", "bar")
-        assert cell.metadata.nbgrader['comment'] == comment.to_dict()
-        assert cell.metadata.nbgrader['comment']['comment'] == "No response."
+        assert cell.metadata.nbgrader['comment'] == "No response."
 
     def test_save_changed_code(self, preprocessors, gradebook, resources):
         """Is an unchanged code cell given the correct comment?"""
@@ -95,9 +93,7 @@ class TestGetGrades(BaseTestPreprocessor):
         preprocessors[1].preprocess(nb, resources)
         preprocessors[2].preprocess(nb, resources)
 
-        comment = gradebook.find_comment("foo", "test", "ps0", "bar")
-        assert cell.metadata.nbgrader['comment'] == comment.to_dict()
-        assert cell.metadata.nbgrader['comment']['comment'] == None
+        assert cell.metadata.nbgrader['comment'] is None
 
     def test_save_unchanged_markdown(self, preprocessors, gradebook, resources):
         """Is an unchanged markdown cell correctly graded?"""
@@ -110,12 +106,9 @@ class TestGetGrades(BaseTestPreprocessor):
         preprocessors[1].preprocess(nb, resources)
         preprocessors[2].preprocess(nb, resources)
 
-        comment = gradebook.find_comment("foo", "test", "ps0", "bar")
-
         assert cell.metadata.nbgrader['score'] == 0
         assert cell.metadata.nbgrader['points'] == 1
-        assert cell.metadata.nbgrader['comment'] == comment.to_dict()
-        assert cell.metadata.nbgrader['comment']['comment'] == "No response."
+        assert cell.metadata.nbgrader['comment'] == "No response."
 
     def test_save_changed_markdown(self, preprocessors, gradebook, resources):
         """Is a changed markdown cell correctly graded?"""
@@ -132,6 +125,4 @@ class TestGetGrades(BaseTestPreprocessor):
         assert cell.metadata.nbgrader['score'] == 0
         assert cell.metadata.nbgrader['points'] == 1
 
-        comment = gradebook.find_comment("foo", "test", "ps0", "bar")
-        assert cell.metadata.nbgrader['comment'] == comment.to_dict()
-        assert cell.metadata.nbgrader['comment']['comment'] == None
+        assert cell.metadata.nbgrader['comment'] is None

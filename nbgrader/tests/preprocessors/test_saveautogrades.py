@@ -118,7 +118,7 @@ class TestSaveAutoGrades(BaseTestPreprocessor):
         preprocessors[1].preprocess(nb, resources)
 
         comment = gradebook.find_comment("foo", "test", "ps0", "bar")
-        assert comment.comment == "No response."
+        assert comment.auto_comment == "No response."
 
     def test_comment_changed_code(self, preprocessors, gradebook, resources):
         """Is a changed code cell given the correct comment?"""
@@ -132,7 +132,7 @@ class TestSaveAutoGrades(BaseTestPreprocessor):
         preprocessors[1].preprocess(nb, resources)
 
         comment = gradebook.find_comment("foo", "test", "ps0", "bar")
-        assert comment.comment == None
+        assert comment.auto_comment is None
 
     def test_comment_unchanged_markdown(self, preprocessors, gradebook, resources):
         """Is an unchanged markdown cell given the correct comment?"""
@@ -145,7 +145,7 @@ class TestSaveAutoGrades(BaseTestPreprocessor):
         preprocessors[1].preprocess(nb, resources)
 
         comment = gradebook.find_comment("foo", "test", "ps0", "bar")
-        assert comment.comment == "No response."
+        assert comment.auto_comment == "No response."
 
     def test_comment_changed_markdown(self, preprocessors, gradebook, resources):
         """Is a changed markdown cell given the correct comment?"""
@@ -159,7 +159,7 @@ class TestSaveAutoGrades(BaseTestPreprocessor):
         preprocessors[1].preprocess(nb, resources)
 
         comment = gradebook.find_comment("foo", "test", "ps0", "bar")
-        assert comment.comment == None
+        assert comment.auto_comment is None
 
     def test_grade_existing_manual_grade(self, preprocessors, gradebook, resources):
         """Is a failing code cell correctly graded?"""
@@ -190,3 +190,22 @@ class TestSaveAutoGrades(BaseTestPreprocessor):
         assert grade_cell.auto_score == None
         assert grade_cell.manual_score == 1
         assert grade_cell.needs_manual_grade
+
+    def test_grade_existing_auto_comment(self, preprocessors, gradebook, resources):
+        """Is a failing code cell correctly graded?"""
+        cell = create_grade_and_solution_cell("hello", "markdown", "foo", 1)
+        cell.metadata.nbgrader['checksum'] = compute_checksum(cell)
+        nb = new_notebook()
+        nb.cells.append(cell)
+        preprocessors[0].preprocess(nb, resources)
+        gradebook.add_submission("ps0", "bar")
+        preprocessors[1].preprocess(nb, resources)
+
+        comment = gradebook.find_comment("foo", "test", "ps0", "bar")
+        assert comment.auto_comment == "No response."
+
+        nb.cells[-1].source = 'goodbye'
+        preprocessors[1].preprocess(nb, resources)
+
+        gradebook.db.refresh(comment)
+        assert comment.auto_comment is None
