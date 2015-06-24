@@ -232,6 +232,7 @@ def test_tests_cell(browser):
     assert not _get_metadata(browser)['locked']
 
 
+@pytest.mark.js
 def test_locked_cell(browser):
     _load_notebook(browser)
     _activate_toolbar(browser)
@@ -241,7 +242,7 @@ def test_locked_cell(browser):
         EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".celltoolbar select")))
 
     # does the nbgrader metadata exist?
-    assert {} == _get_metadata(browser)
+    assert _get_metadata(browser) is None
 
     # make it locked
     _select_locked(browser)
