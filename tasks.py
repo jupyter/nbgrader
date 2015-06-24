@@ -285,12 +285,11 @@ def js(clean=True):
 
 @task
 def before_install(group='', python_version=None):
-    # install ipython
-    os.chdir(os.environ['HOME'])
-    run('git clone --quiet --depth 1 https://github.com/minrk/travis-wheels travis-wheels')
-    run('git clone --quiet --recursive -b 3.x https://github.com/ipython/ipython.git')
-    os.chdir('ipython')
-    run('pip install -f ~/travis-wheels/wheelhouse file://{}#egg=ipython[all]'.format(os.getcwd()))
+    # install testing requirements
+    run('pip install nose pytest pytest-cov coverage coveralls selenium')
+
+    # install requirements
+    run('pip install -r requirements.txt')
 
     # install jupyterhub
     if python_version == '3.4' and group == 'js':
