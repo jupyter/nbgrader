@@ -346,7 +346,6 @@ define([
                 update_total();
                 display_cell(cell);
                 validate_ids();
-                IPython.notebook.save_checkpoint();
             });
             display_cell(cell);
             $(div).append($('<span/>').append(select));
@@ -371,7 +370,6 @@ define([
         text.change(function () {
             set_grade_id(cell, text.val());
             validate_ids();
-            IPython.notebook.save_checkpoint();
         });
 
         local_div.addClass('nbgrader-id');
@@ -402,7 +400,6 @@ define([
             set_points(cell, text.val());
             text.val(get_points(cell));
             update_total();
-            IPython.notebook.save_checkpoint();
         });
 
         local_div.addClass('nbgrader-points');
