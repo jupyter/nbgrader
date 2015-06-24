@@ -479,7 +479,7 @@ def test_create_comment(db):
     s = api.Student(id="12345", first_name='Jane', last_name='Doe', email='janedoe@nowhere')
     sa = api.SubmittedAssignment(assignment=a, student=s)
     sn = api.SubmittedNotebook(assignment=sa, notebook=n)
-    c = api.Comment(cell=sc, notebook=sn, comment="something")
+    c = api.Comment(cell=sc, notebook=sn, auto_comment="something")
     db.add(c)
     db.commit()
 
@@ -702,6 +702,11 @@ def test_query_score_ungraded(submissions):
     assert [x[1] for x in db.query(api.SubmittedAssignment.id, api.SubmittedAssignment.score).all()] == [0.0, 0.0]
     assert [x[1] for x in db.query(api.Student.id, api.Student.score).all()] == [0.0, 0.0]
 
+def test_query_comment_unchanged(submissions):
+    db = submissions[0]
+
+    assert [x[0] for x in db.query(api.Comment.comment).all()] == [None, None]
+
 def test_query_score_autograded(submissions):
     db, grades, _ = submissions
 
@@ -715,6 +720,15 @@ def test_query_score_autograded(submissions):
     assert sorted(x[1] for x in db.query(api.SubmittedNotebook.id, api.SubmittedNotebook.score).all()) == [7.5, 10]
     assert sorted(x[1] for x in db.query(api.SubmittedAssignment.id, api.SubmittedAssignment.score).all()) == [7.5, 10]
     assert sorted(x[1] for x in db.query(api.Student.id, api.Student.score).all()) == [7.5, 10]
+
+def test_query_auto_comment(submissions):
+    db, _, comments = submissions
+
+    comments[0].auto_comment = "foo"
+    comments[1].auto_comment = "bar"
+    db.commit()
+
+    assert sorted(x[0] for x in db.query(api.Comment.comment).all()) == ["bar", "foo"]
 
 def test_query_score_manualgraded(submissions):
     db, grades, _ = submissions
@@ -733,6 +747,17 @@ def test_query_score_manualgraded(submissions):
     assert sorted(x[1] for x in db.query(api.SubmittedNotebook.id, api.SubmittedNotebook.score).all()) == [5.5, 12]
     assert sorted(x[1] for x in db.query(api.SubmittedAssignment.id, api.SubmittedAssignment.score).all()) == [5.5, 12]
     assert sorted(x[1] for x in db.query(api.Student.id, api.Student.score).all()) == [5.5, 12]
+
+def test_query_manual_comment(submissions):
+    db, _, comments = submissions
+
+    comments[0].auto_comment = "foo"
+    comments[1].auto_comment = "bar"
+    comments[0].manual_comment = "baz"
+    comments[1].manual_comment = "quux"
+    db.commit()
+
+    assert sorted(x[0] for x in db.query(api.Comment.comment).all()) == ["baz", "quux"]
 
 def test_query_max_written_score(submissions):
     db = submissions[0]
@@ -1174,14 +1199,16 @@ def test_comment_to_dict(submissions):
     for c in comments:
         cd = c.to_dict()
         assert set(cd.keys()) == {
-            'id', 'name', 'notebook', 'assignment', 'student', 'comment'}
+            'id', 'name', 'notebook', 'assignment', 'student', 'auto_comment',
+            'manual_comment'}
 
         assert cd['id'] == c.id
         assert cd['name'] == c.name
         assert cd['notebook'] == 'blah'
         assert cd['assignment'] == 'foo'
         assert cd['student'] == c.student.id
-        assert cd['comment'] is None
+        assert cd['auto_comment'] is None
+        assert cd['manual_comment'] is None
 
         # make sure it can be JSONified
         json.dumps(cd)
