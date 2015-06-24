@@ -174,6 +174,18 @@ class TestGradebook(BaseTestFormgrade):
                 self.browser.back()
                 self._wait_for_formgrader("submissions/{}/?index=0".format(submission.id))
 
+    def test_load_live_notebook(self):
+        if type(self.manager).__name__.startswith('Hub'):
+            pytest.xfail("issue jupter/jupyterhub#262")
+
+        for problem in self.gradebook.find_assignment("Problem Set 1").notebooks:
+            submissions = problem.submissions
+            submissions.sort(key=lambda x: x.id)
+
+            for i, submission in enumerate(submissions):
+                self.browser.get(self.formgrade_url("submissions/{}".format(submission.id)))
+                self._wait_for_formgrader("submissions/{}/?index=0".format(submission.id))
+
                 # check the live notebook link
                 self._click_link("Submission #{}".format(i + 1))
                 self.browser.switch_to_window(self.browser.window_handles[1])
