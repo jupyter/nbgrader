@@ -59,6 +59,7 @@ window.MathJax = {
     </div>
   </div>
   <div class="help"><span class="glyphicon glyphicon-question-sign"></span></div>
+  <div id="statusmessage"></div>
 </body>
 {%- endblock body %}
 

@@ -1086,7 +1086,7 @@ def test_submittednotebook_to_dict(submissions):
     assert set(snd.keys()) == {
         'id', 'name', 'student', 'score', 'max_score', 'code_score',
         'max_code_score', 'written_score', 'max_written_score',
-        'needs_manual_grade', 'failed_tests'}
+        'needs_manual_grade', 'failed_tests', 'flagged'}
 
     assert snd['id'] == sn.id
     assert snd['name'] == 'blah'
@@ -1099,6 +1099,7 @@ def test_submittednotebook_to_dict(submissions):
     assert snd['max_written_score'] == 10
     assert snd['needs_manual_grade']
     assert not snd['failed_tests']
+    assert not snd['flagged']
 
     # make sure it can be JSONified
     json.dumps(snd)

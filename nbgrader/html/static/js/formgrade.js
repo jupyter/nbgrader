@@ -66,6 +66,11 @@ FormGrader.prototype.init = function () {
         "keybinding": "control-shift-,",
         "help": "Move to the same score or comment input of the previous submission with failed tests"
     });
+    this.keyboard_manager.register({
+        "handler": _.bind(this.flag, this),
+        "keybinding": "control-shift-f",
+        "help": "Flag the submission"
+    });
 };
 
 FormGrader.prototype.loadGrades = function () {
@@ -286,6 +291,32 @@ FormGrader.prototype.configureScrolling = function () {
             that.last_selected.focus();
             MathJax.loaded = true;
             that.scrollToLastSelected();
+        }
+    });
+};
+
+FormGrader.prototype.flag = function () {
+    $.ajax({
+        'url': base_url + '/api/submission/' + submission_id + '/flag',
+        'success': function (data, status, xhr) {
+            var elem = $("#statusmessage");
+            data = JSON.parse(data);
+            if (data.flagged) {
+                elem.text("Submission flagged");
+                elem.css({
+                    'color': 'rgba(255, 0, 0, 0.6)'
+                });
+                elem.show();
+            } else {
+                elem.text("Submission unflagged");
+                elem.css({
+                    'color': 'rgba(0, 100, 0, 0.6)'
+                });
+                elem.show();
+            }
+            setTimeout(function () {
+                elem.fadeOut(500);
+            }, 500);
         }
     });
 };

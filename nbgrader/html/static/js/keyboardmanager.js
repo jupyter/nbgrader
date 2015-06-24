@@ -4,7 +4,8 @@ function KeyboardManager () {
         27: 'escape',
         13: 'enter',
         190: '.',
-        188: ','
+        188: ',',
+        70: 'f'
     };
 
     this.handlers = new Object();

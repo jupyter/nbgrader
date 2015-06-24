@@ -628,8 +628,10 @@ def test_student_dicts(assignment):
 def test_notebook_submission_dicts(assignment):
     assignment.add_student('hacker123')
     assignment.add_student('bitdiddle')
-    assignment.add_submission('foo', 'hacker123')
-    assignment.add_submission('foo', 'bitdiddle')
+    s1 = assignment.add_submission('foo', 'hacker123')
+    s2 = assignment.add_submission('foo', 'bitdiddle')
+    s1.flagged = True
+    s2.flagged = False
 
     g1 = assignment.find_grade("test1", "p1", "foo", "hacker123")
     g2 = assignment.find_grade("test2", "p1", "foo", "hacker123")

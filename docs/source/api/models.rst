@@ -198,6 +198,8 @@ Submitted assignments
 
     .. autoattribute:: student
 
+    .. autoattribute:: flagged
+
     .. autoattribute:: score
 
     .. autoattribute:: max_score

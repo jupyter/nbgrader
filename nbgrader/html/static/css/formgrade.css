@@ -132,6 +132,7 @@ div.nbgrader_cell .input_area {
     overflow: hidden;
 }
 
+<<<<<<< HEAD
 .scoring-buttons button {
   background-color: #337ab7;
 }
@@ -203,4 +204,14 @@ div.nbgrader_cell .input_area {
   bottom: 0;
   position: fixed;
   z-index: 1040;
+}
+
+#statusmessage {
+    position: fixed;
+    top: 40%;
+    width: 100%;
+    z-index: 9999;
+    font-size: 3em;
+    text-align: center;
+    font-weight: bold;
 }
