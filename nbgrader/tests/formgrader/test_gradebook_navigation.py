@@ -175,9 +175,6 @@ class TestGradebook(BaseTestFormgrade):
                 self._wait_for_formgrader("submissions/{}/?index=0".format(submission.id))
 
     def test_load_live_notebook(self):
-        if type(self.manager).__name__.startswith('Hub'):
-            pytest.xfail("issue jupter/jupyterhub#262")
-
         for problem in self.gradebook.find_assignment("Problem Set 1").notebooks:
             submissions = problem.submissions
             submissions.sort(key=lambda x: x.id)
