@@ -42,7 +42,7 @@ class GetGrades(NbGraderPreprocessor):
             self.student_id)
 
         # save it in the notebook
-        cell.metadata.nbgrader['comment'] = comment.to_dict()
+        cell.metadata.nbgrader['comment'] = comment.comment
 
     def _get_score(self, cell, resources):
         grade = self.gradebook.find_grade(

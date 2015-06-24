@@ -122,8 +122,8 @@ span.nbgrader-label {
             {% elif cell.cell_type == "markdown" and cell.metadata.nbgrader and cell.metadata.nbgrader.grade %}
             <li><a href="#{{ cell.metadata.nbgrader.grade_id }}">Written response</a> (Score: {{ cell.metadata.nbgrader.score | float | round(2) }} / {{ cell.metadata.nbgrader.points | float | round(2) }})</li>
             {% endif %}
-            {% if cell.metadata.nbgrader and cell.metadata.nbgrader.comment and cell.metadata.nbgrader.comment.comment %}
-            <li><a href="#comment-{{ cell.metadata.nbgrader.comment.name }}">Comment</a></li>
+            {% if cell.metadata.nbgrader and cell.metadata.nbgrader.comment and cell.metadata.nbgrader.comment %}
+            <li><a href="#comment-{{ cell.metadata.nbgrader.grade_id }}">Comment</a></li>
             {% endif %}
           {% endfor %}
           </ol>
@@ -154,7 +154,7 @@ span.nbgrader-label {
 
 {% macro nbgrader_heading(cell) -%}
 {%- if cell.metadata.nbgrader.solution -%}
-<a name="comment-{{ cell.metadata.nbgrader.comment.name }}"></a>
+<a name="comment-{{ cell.metadata.nbgrader.grade_id }}"></a>
 {%- endif -%}
 {%- if cell.metadata.nbgrader.grade -%}
 <a name="{{ cell.metadata.nbgrader.grade_id }}"></a>
@@ -175,10 +175,10 @@ span.nbgrader-label {
 {%- endmacro %}
 
 {% macro nbgrader_footer(cell) -%}
-{%- if cell.metadata.nbgrader.solution and cell.metadata.nbgrader.comment.comment -%}
+{%- if cell.metadata.nbgrader.solution and cell.metadata.nbgrader.comment -%}
 <div class="panel-footer">
   <div>
-    <b>Comments:</b> {{ cell.metadata.nbgrader.comment.comment }}
+    <b>Comments:</b> {{ cell.metadata.nbgrader.comment }}
   </div>
 </div>
 {%- endif -%}

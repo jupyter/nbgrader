@@ -422,7 +422,7 @@ def get_comment(_id):
         abort(404)
 
     if request.method == "PUT":
-        comment.comment = request.json.get("comment", None)
+        comment.manual_comment = request.json.get("manual_comment", None)
         app.gradebook.db.commit()
 
     return json.dumps(comment.to_dict())

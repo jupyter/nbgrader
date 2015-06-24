@@ -728,8 +728,25 @@ class Comment(Base):
     #: :class:`~nbgrader.api.Student` object
     student = association_proxy('notebook', 'student')
 
-    #: The actual text of the comment
-    comment = Column(Text())
+    #: A comment which is automatically assigned by the autograder
+    auto_comment = Column(Text())
+
+    #: A commment which is assigned manually
+    manual_comment = Column(Text())
+
+    #: The overall comment, computed automatically from the
+    #: :attr:`~nbgrader.api.Comment.auto_comment` and
+    #: :attr:`~nbgrader.api.Comment.manual_comment` values. If neither are set,
+    #: the comment is None. If both are set, then the manual comment
+    #: takes precedence. If only one is set, then that value is used for the
+    #: comment.
+    comment = column_property(case(
+        [
+            (manual_comment != None, manual_comment),
+            (auto_comment != None, auto_comment)
+        ],
+        else_=None
+    ))
 
     def to_dict(self):
         """Convert the comment object to a JSON-friendly dictionary representation.
@@ -745,7 +762,8 @@ class Comment(Base):
             "notebook": self.notebook.name,
             "assignment": self.assignment.name,
             "student": self.student.id,
-            "comment": self.comment,
+            "auto_comment": self.auto_comment,
+            "manual_comment": self.manual_comment
         }
 
     def __repr__(self):

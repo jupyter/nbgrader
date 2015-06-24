@@ -120,15 +120,16 @@ var CommentUI = Backbone.View.extend({
         this.listenTo(this.model, "request", this.animateSaving);
         this.listenTo(this.model, "sync", this.animateSaved);
 
+        this.$comment.attr("placeholder", this.model.get("auto_comment") || "Comments");
         this.render();
     },
 
     render: function () {
-        this.$comment.val(this.model.get("comment"));
+        this.$comment.val(this.model.get("manual_comment"));
     },
 
     save: function () {
-        this.model.save({"comment": this.$comment.val()});
+        this.model.save({"manual_comment": this.$comment.val()});
     },
 
     animateSaving: function () {

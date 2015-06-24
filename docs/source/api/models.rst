@@ -285,6 +285,10 @@ Submitted assignments
 
     .. autoattribute:: student
 
+    .. autoattribute:: auto_comment
+
+    .. autoattribute:: manual_comment
+
     .. autoattribute:: comment
 
     .. automethod:: to_dict
