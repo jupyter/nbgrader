@@ -1,6 +1,6 @@
 # nbgrader
 
-[![Gitter chat](https://badges.gitter.im/jupyter/nbgrader.png)](https://gitter.im/jupyter/nbgrader)
+[![Google Group](https://img.shields.io/badge/-Google%20Group-lightgrey.svg)](https://groups.google.com/forum/#!forum/jupyter)
 [![Build Status](https://travis-ci.org/jupyter/nbgrader.svg)](https://travis-ci.org/jupyter/nbgrader)
 [![Coverage Status](https://coveralls.io/repos/jupyter/nbgrader/badge.svg)](https://coveralls.io/r/jupyter/nbgrader)
 
@@ -9,14 +9,6 @@ A system for assigning and grading notebooks.
 **Warning: nbgrader is not yet stable and is under active development. The following instructions are currently incomplete and may change!**
 
 [Documentation can be found on Read the Docs.](http://nbgrader.readthedocs.org)
-
-## Dependencies
-
-To install nbgrader, you will need version 3.x of IPython. However, note that version 3.0 will **NOT** work -- you will need at least version 3.1. If you do not have version 3.1 of IPython installed (you can check with `ipython --version`), you can install it by:
-
-```bash
-git clone --recursive -b 3.x https://github.com/ipython/ipython.git && pip install -e "ipython[all]"
-```
 
 ## Installation
 
@@ -33,7 +25,7 @@ nbgrader extension install
 nbgrader extension activate
 ```
 
-To get help and see all the options you can pass while installing/activating the nbgrader notebook extension, use:
+If you want to install the extension for only yourself (and not systemwide), use `nbgrader extension install --user`. If you don't want to have to reinstall the extension when nbgrader is updated, use `nbgrader extension install --symlink`. To get help and see all the options you can pass while installing/activating the nbgrader notebook extension, use:
 
 ```bash
 nbgrader extension install --help-all
