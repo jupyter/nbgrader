@@ -1,3 +1,5 @@
+import re
+
 from nbgrader import utils
 from nbgrader.preprocessors import NbGraderPreprocessor
 
@@ -17,13 +19,14 @@ class CheckCellMetadata(NbGraderPreprocessor):
         return nb, resources
 
     def preprocess_cell(self, cell, resources, cell_index):
-        if utils.is_grade(cell):
-            # check for blank grade ids
+        if utils.is_grade(cell) or utils.is_solution(cell):
+            # check for invalid grade ids
             grade_id = cell.metadata.nbgrader.get("grade_id", "")
-            if grade_id == "":
-                raise RuntimeError("Blank grade id!")
+            if not re.match(r"^[a-zA-Z0-9_\-]+$", grade_id):
+                raise RuntimeError("Invalid grade id: {}".format(grade_id))
             resources['grade_ids'].append(grade_id)
 
+        if utils.is_grade(cell):
             # check for valid points
             points = cell.metadata.nbgrader.get("points", "")
             try:

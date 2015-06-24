@@ -78,6 +78,11 @@ define([
         update_total();
     });
 
+    // validate cell ids on save
+    events.on("before_save.Notebook", function (evt) {
+        validate_ids();
+    });
+
     var to_float = function(val) {
         if (val === undefined || val === "") {
             return 0;
@@ -103,25 +108,34 @@ define([
             return;
         }
 
+        var valid = /^[a-zA-Z0-9_\-]+$/;
+        var modal_opts = {
+            notebook: IPython.notebook,
+            keyboard_manager: IPython.keyboard_manager,
+            buttons: {
+                OK: {
+                    class: "btn-primary",
+                    click: function () {
+                        warning = undefined;
+                    }
+                }
+            }
+        };
+
         elems = $(".nbgrader-id-input");
         set = new Object();
         for (i = 0; i < elems.length; i++) {
             label = $(elems[i]).val();
-            if (label in set) {
-                warning = dialog.modal({
-                    notebook: IPython.notebook,
-                    keyboard_manager: IPython.keyboard_manager,
-                    title: "Duplicate grade cell ID",
-                    body: "The ID \"" + label + "\" has been used for more than one grade cell. This will cause nbgrader to break! Please make sure all grade cells have unique ids.",
-                    buttons: {
-                        OK: {
-                            class: "btn-primary",
-                            click: function () {
-                                warning = undefined;
-                            }
-                        }
-                    }
-                });
+            if (!valid.test(label)) {
+                modal_opts.title = "Invalid nbgrader cell ID";
+                modal_opts.body = "At least one cell has an invalid nbgrader ID. Cell IDs must contain at least one character, and may only container letters, numbers, hyphens, and/or underscores.";
+                warning = dialog.modal(modal_opts);
+                break;
+            } else if (label in set) {
+                modal_opts.title = "Duplicate nbgrader cell ID";
+                modal_opts.body = "The nbgrader ID \"" + label + "\" has been used for more than one cell. Please make sure all grade cells have unique ids.";
+                warning = dialog.modal(modal_opts);
+                break;
             } else {
                 set[label] = true;
             }
@@ -282,7 +296,6 @@ define([
                 celltoolbar.rebuild();
                 update_total();
                 display_cell(cell);
-                validate_ids();
             });
             display_cell(cell);
             $(div).append($('<span/>').append(select));
@@ -304,10 +317,8 @@ define([
 
         text.addClass('nbgrader-id-input');
         text.attr("value", get_grade_id(cell));
-        validate_ids();
         text.change(function () {
             set_grade_id(cell, text.val());
-            validate_ids();
         });
 
         local_div.addClass('nbgrader-id');

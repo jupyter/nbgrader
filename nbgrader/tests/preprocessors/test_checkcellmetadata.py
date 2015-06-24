@@ -1,6 +1,7 @@
 import pytest
 from nbgrader.preprocessors import CheckCellMetadata
 from nbgrader.tests.preprocessors.base import BaseTestPreprocessor
+from nbgrader.tests import create_grade_cell, create_solution_cell
 
 @pytest.fixture
 def preprocessor():
@@ -20,6 +21,44 @@ class TestCheckCellMetadata(BaseTestPreprocessor):
         nb = self._read_nb("files/blank-grade-id.ipynb")
         with pytest.raises(RuntimeError):
             preprocessor.preprocess(nb, {})
+
+    def test_invalid_grade_cell_id(self, preprocessor):
+        """Check that an error is raised when the grade cell id is invalid"""
+        resources = dict(grade_ids=[])
+
+        cell = create_grade_cell("", "code", "", 1)
+        with pytest.raises(RuntimeError):
+            preprocessor.preprocess_cell(cell, resources, 0)
+
+        cell = create_grade_cell("", "code", "a b", 1)
+        with pytest.raises(RuntimeError):
+            preprocessor.preprocess_cell(cell, resources, 0)
+
+        cell = create_grade_cell("", "code", "a\"b", 1)
+        with pytest.raises(RuntimeError):
+            preprocessor.preprocess_cell(cell, resources, 0)
+
+        cell = create_solution_cell("", "code", "abc-ABC_0")
+        preprocessor.preprocess_cell(cell, resources, 0)
+
+    def test_invalid_solution_cell_id(self, preprocessor):
+        """Check that an error is raised when the solution id is invalid"""
+        resources = dict(grade_ids=[])
+
+        cell = create_solution_cell("", "code", "")
+        with pytest.raises(RuntimeError):
+            preprocessor.preprocess_cell(cell, resources, 0)
+
+        cell = create_solution_cell("", "code", "a b")
+        with pytest.raises(RuntimeError):
+            preprocessor.preprocess_cell(cell, resources, 0)
+
+        cell = create_solution_cell("", "code", "a\"b")
+        with pytest.raises(RuntimeError):
+            preprocessor.preprocess_cell(cell, resources, 0)
+
+        cell = create_solution_cell("", "code", "abc-ABC_0")
+        preprocessor.preprocess_cell(cell, resources, 0)
 
     def test_blank_points(self, preprocessor):
         """Check that an error is raised if the points are blank"""

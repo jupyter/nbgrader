@@ -5,7 +5,11 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support.ui import Select
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.keys import Keys
-from selenium.common.exceptions import TimeoutException
+from selenium.common.exceptions import TimeoutException, NoSuchElementException
+
+
+def _wait(browser):
+    return WebDriverWait(browser, 30)
 
 
 def _load_notebook(browser, retries=5):
@@ -18,7 +22,7 @@ def _load_notebook(browser, retries=5):
 
     # wait for the page to load
     try:
-        WebDriverWait(browser, 30).until(page_loaded)
+        _wait(browser).until(page_loaded)
     except TimeoutException:
         if retries > 0:
             print("Retrying page load...")
@@ -29,7 +33,7 @@ def _load_notebook(browser, retries=5):
             raise
 
     # wait for the celltoolbar menu to appear
-    WebDriverWait(browser, 30).until(
+    _wait(browser).until(
         EC.element_to_be_clickable((By.CSS_SELECTOR, '#ctb_select')))
 
 def _activate_toolbar(browser, name="Create Assignment"):
@@ -87,13 +91,35 @@ def _get_total_points(browser):
     return float(element.get_attribute("value"))
 
 
+def _save(browser):
+    browser.execute_script("IPython.notebook.save_notebook();")
+
+
+def _wait_for_modal(browser):
+    _wait(browser).until(
+        EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".modal-dialog")))
+
+
+def _dismiss_modal(browser):
+    button = browser.find_element_by_css_selector(".modal-footer .btn-primary")
+    button.click()
+
+    def modal_gone(browser):
+        try:
+            browser.find_element_by_css_selector(".modal-dialog")
+        except NoSuchElementException:
+            return True
+        return False
+    _wait(browser).until(modal_gone)
+
+
 @pytest.mark.js
 def test_manual_cell(browser):
     _load_notebook(browser)
     _activate_toolbar(browser)
 
     # make sure the toolbar appeared
-    WebDriverWait(browser, 30).until(
+    _wait(browser).until(
         EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".celltoolbar select")))
 
     # does the nbgrader metadata exist?
@@ -105,9 +131,9 @@ def test_manual_cell(browser):
     assert _get_metadata(browser)['grade']
 
     # wait for the points and id fields to appear
-    WebDriverWait(browser, 30).until(
+    _wait(browser).until(
         EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".nbgrader-points")))
-    WebDriverWait(browser, 30).until(
+    _wait(browser).until(
         EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".nbgrader-id")))
 
     # set the points
@@ -130,7 +156,7 @@ def test_solution_cell(browser):
     _activate_toolbar(browser)
 
     # make sure the toolbar appeared
-    WebDriverWait(browser, 30).until(
+    _wait(browser).until(
         EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".celltoolbar select")))
 
     # does the nbgrader metadata exist?
@@ -142,7 +168,7 @@ def test_solution_cell(browser):
     assert not _get_metadata(browser)['grade']
 
     # wait for the id field to appear
-    WebDriverWait(browser, 30).until(
+    _wait(browser).until(
         EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".nbgrader-id")))
 
     # set the id
@@ -161,7 +187,7 @@ def test_tests_cell(browser):
     _activate_toolbar(browser)
 
     # make sure the toolbar appeared
-    WebDriverWait(browser, 30).until(
+    _wait(browser).until(
         EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".celltoolbar select")))
 
     # does the nbgrader metadata exist?
@@ -173,9 +199,9 @@ def test_tests_cell(browser):
     assert _get_metadata(browser)['grade']
 
     # wait for the points and id fields to appear
-    WebDriverWait(browser, 30).until(
+    _wait(browser).until(
         EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".nbgrader-points")))
-    WebDriverWait(browser, 30).until(
+    _wait(browser).until(
         EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".nbgrader-id")))
 
     # set the points
@@ -324,7 +350,7 @@ def test_total_points(browser):
         except IndexError:
             return False
         return True
-    WebDriverWait(browser, 30).until(find_toolbar)
+    _wait(browser).until(find_toolbar)
 
     # make it a test cell
     _select_tests(browser, index=1)
@@ -345,3 +371,43 @@ def test_total_points(browser):
     element.send_keys("d")
     element.send_keys("d")
     assert _get_total_points(browser) == 0
+
+
+@pytest.mark.js
+def test_cell_ids(browser):
+    _load_notebook(browser)
+    _activate_toolbar(browser)
+
+    # turn it into a cell with an id
+    _select_solution(browser)
+
+    # save and check for an error (blank id)
+    _save(browser)
+    _wait_for_modal(browser)
+    _dismiss_modal(browser)
+
+    # set the label
+    _set_id(browser)
+
+    # create a new cell
+    element = browser.find_element_by_tag_name("body")
+    element.send_keys(Keys.ESCAPE)
+    element.send_keys("b")
+
+    # make sure the toolbar appeared
+    def find_toolbar(browser):
+        try:
+            browser.find_elements_by_css_selector(".celltoolbar select")[1]
+        except IndexError:
+            return False
+        return True
+    _wait(browser).until(find_toolbar)
+
+    # make it a test cell and set the label
+    _select_tests(browser, index=1)
+    _set_id(browser, index=1)
+
+    # save and check for an error (duplicate id)
+    _save(browser)
+    _wait_for_modal(browser)
+    _dismiss_modal(browser)
