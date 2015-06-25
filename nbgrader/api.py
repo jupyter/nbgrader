@@ -1780,11 +1780,7 @@ class Gradebook(object):
         submission = self.find_submission(assignment, student)
 
         for notebook in submission.notebooks:
-            for grade in notebook.grades:
-                self.db.delete(grade)
-            for comment in notebook.comments:
-                self.db.delete(comment)
-            self.db.delete(notebook)
+            self.remove_submission_notebook(notebook.name, assignment, student)
 
         self.db.delete(submission)
 
