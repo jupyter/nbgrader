@@ -1,3 +1,5 @@
+import os
+import re
 from textwrap import dedent
 
 from IPython.utils.traitlets import List, Bool
@@ -130,6 +132,43 @@ class AssignApp(BaseNbConvertApp):
         extra_config.NbGraderConfig.notebook_id = '*'
         return extra_config
 
+    def _clean_old_notebooks(self, assignment_id, student_id):
+        gb = Gradebook(self.db_url)
+        assignment = gb.find_assignment(assignment_id)
+        regexp = os.path.join(
+            self._format_source("(?P<assignment_id>.*)", "(?P<student_id>.*)"),
+            "(?P<notebook_id>.*).ipynb")
+
+        # find a set of notebook ids for new notebooks
+        new_notebook_ids = set([])
+        for notebook in self.notebooks:
+            m = re.match(regexp, notebook)
+            if m is None:
+                raise RuntimeError("Could not match '%s' with regexp '%s'", notebook, regexp)
+            gd = m.groupdict()
+            if gd['assignment_id'] == assignment_id and gd['student_id'] == student_id:
+                new_notebook_ids.add(gd['notebook_id'])
+
+        # pull out the existing notebook ids
+        old_notebook_ids = set(x.name for x in assignment.notebooks)
+
+        # no added or removed notebooks, so nothing to do
+        if old_notebook_ids == new_notebook_ids:
+            return
+
+        # some notebooks have been removed, but there are submissions associated
+        # with the assignment, so we don't want to overwrite stuff
+        if len(assignment.submissions) > 0:
+            self.fail("Cannot modify existing assignment '%s' because there are submissions associated with it", assignment)
+
+        # remove the assignment and re-add it
+        else:
+            self.log.debug("Removing existing assignment '%s' from the gradebook", assignment)
+            assignment_info = assignment.to_dict()
+            del assignment_info['name']
+            gb.remove_assignment(assignment_id)
+            gb.add_assignment(assignment_id, **assignment_info)
+
     def init_assignment(self, assignment_id, student_id):
         super(AssignApp, self).init_assignment(assignment_id, student_id)
 
@@ -144,3 +183,8 @@ class AssignApp(BaseNbConvertApp):
                 gb.add_assignment(assignment_id)
             else:
                 self.fail("No assignment called '%s' exists in the database", assignment_id)
+
+        # check if there are any extra notebooks in the db that are no longer
+        # part of the assignment, and if so, remove them
+        if self.notebook_id == "*":
+            self._clean_old_notebooks(assignment_id, student_id)
