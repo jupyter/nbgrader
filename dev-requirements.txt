@@ -1,0 +1,8 @@
+-r requirements.txt
+nose
+pytest
+pytest-cov
+coverage
+coveralls
+selenium
+invoke

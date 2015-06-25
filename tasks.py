@@ -145,6 +145,7 @@ def docs(root='docs'):
 
     os.chdir(cwd)
 
+
 @task
 def clear_docs(root='docs/source'):
     """Clear the outputs of documentation notebooks."""
@@ -181,6 +182,7 @@ def clear_docs(root='docs/source'):
 
                 if orig_nb != new_nb:
                     print("Cleared '{}'".format(pth))
+
 
 @task
 def publish_docs(github_token, git_name, git_email):
@@ -227,8 +229,7 @@ def sphinx():
     run('make -C docs html')
 
 
-@task
-def python_tests(mark):
+def _run_tests(mark=None, skip=None):
     import distutils.sysconfig
     site = distutils.sysconfig.get_python_lib()
     sitecustomize_path = os.path.join(site, "sitecustomize.py")
@@ -251,36 +252,58 @@ def python_tests(mark):
             """
         ).lstrip())
 
-    run('COVERAGE_PROCESS_START={} py.test -k "{}" --cov nbgrader --no-cov-on-fail -v -x --capture=no'.format(
-        os.path.join(os.getcwd(), ".coveragerc"), mark))
+    cmd = [
+        'COVERAGE_PROCESS_START={}'.format(os.path.join(os.getcwd(), ".coveragerc")),
+        'py.test',
+        '--cov nbgrader',
+        '--no-cov-on-fail',
+        '-v',
+        '-x',
+        '--capture=no',
+        '--collect-only'
+    ]
 
+    marks = []
+    if mark is not None:
+        marks.append(mark)
+    if skip is not None:
+        marks.append("not {}".format(skip))
+    if len(marks) > 0:
+        cmd.append('-m "{}"'.format(" and ".join(marks)))
+
+    run(" ".join(cmd))
     run("ls -a .coverage*")
     run("coverage combine")
 
+
 @task
-def tests(group='', python_version=None, pull_request=None, github_token="", git_name="", git_email=""):
-    if group == '':
-        python_tests("not js")
+def tests(group='all', python_version=None, pull_request=None, github_token="", git_name="", git_email="", skip=None):
+    if group == 'python':
+        _run_tests(mark="not js", skip=skip)
 
     elif group == 'js':
-        python_tests("js")
+        _run_tests(mark="js", skip=skip)
 
     elif group == 'docs':
-        print("Pull request is: {}".format(pull_request))
         if python_version == '3.4' and pull_request == 'false':
             publish_docs(github_token, git_name, git_email)
         else:
             docs(root='docs')
 
+    elif group == 'all':
+        _run_tests(skip=skip)
+
     else:
         raise ValueError("Invalid test group: {}".format(group))
 
+
 @task
-def after_success(group=''):
-    if group in ('', 'js'):
+def after_success(group):
+    if group in ('python', 'js'):
         run('coveralls')
     else:
         echo('Nothing to do.')
+
 
 @task
 def js(clean=True):
@@ -289,14 +312,12 @@ def js(clean=True):
     if clean:
         run('git clean -fdX nbgrader/html/static/components')
 
-@task
-def before_install(group='', python_version=None):
-    # install testing requirements
-    run('pip install nose pytest pytest-cov coverage coveralls selenium')
 
+@task
+def before_install(group, python_version):
     # install requirements
     run('git clone --quiet --depth 1 https://github.com/minrk/travis-wheels ~/travis-wheels')
-    run('pip install -f ~/travis-wheels/wheelhouse -r requirements.txt')
+    run('pip install -f ~/travis-wheels/wheelhouse -r dev-requirements.txt')
 
     # install jupyterhub
     if python_version == '3.4' and group == 'js':

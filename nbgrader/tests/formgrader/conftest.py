@@ -61,11 +61,6 @@ def gradebook(request, tempdir):
     return gb
 
 
-# skip if less than Python 3
-minversion = pytest.mark.skipif(
-    sys.version_info[0] < 3,
-    reason="JupyterHub tests require Python 3")
-
 def _formgrader(request, gradebook, tempdir):
     if not hasattr(request, 'param'):
         man = manager.DefaultManager(tempdir)
@@ -96,10 +91,16 @@ def _formgrader(request, gradebook, tempdir):
         man.stop()
     request.addfinalizer(fin)
 
+# skip if less than Python 3
+minversion = pytest.mark.skipif(
+    sys.version_info[0] < 3,
+    reason="JupyterHub tests require Python 3")
+jupyterhub = pytest.mark.jupyterhub
+
 # parameterize the formgrader to run under all managers
 @pytest.fixture(
     scope="class",
-    params=[minversion(x) if x.startswith("Hub") else x for x in manager.__all__]
+    params=[jupyterhub(minversion(x)) if x.startswith("Hub") else x for x in manager.__all__]
 )
 def all_formgraders(request, gradebook, tempdir):
     _formgrader(request, gradebook, tempdir)
