@@ -73,7 +73,13 @@ docs/source/user_guide/submitted/
 docs/source/user_guide/nbgrader_config.py
 docs/source/command_line_tools/nbgrader*.rst
 docs/source/config_options.rst
-docs/source/user_guide/*.rst
+docs/source/user_guide/03_generating_assignments.rst
+docs/source/user_guide/04_autograding.rst
+docs/source/user_guide/06_returning_feedback.rst
+docs/source/user_guide/07_releasing_assignments.rst
+docs/source/user_guide/08_fetching_assignments.rst
+docs/source/user_guide/09_submitting_assignments.rst
+docs/source/user_guide/10_collecting_assignments.rst
 
 # components stuff
 node_modules
