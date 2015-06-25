@@ -6,6 +6,8 @@ class SaveCells(NbGraderPreprocessor):
     """A preprocessor to save information about grade and solution cells."""
 
     def _create_notebook(self):
+        notebook_info = None
+
         try:
             notebook = self.gradebook.find_notebook(self.notebook_id, self.assignment_id)
         except MissingEntry:
@@ -27,29 +29,31 @@ class SaveCells(NbGraderPreprocessor):
                         "Cannot add or remove cells for notebook '%s' because there "
                         "are submissions associated with it" % self.notebook_id)
 
-            # clear data about the existing notebook
-            self.log.debug("Removing existing notebook '%s' from the database", self.notebook_id)
-            notebook_info = notebook.to_dict()
-            del notebook_info['name']
-            self.gradebook.remove_notebook(self.notebook_id, self.assignment_id)
+            else:
+                # clear data about the existing notebook
+                self.log.debug("Removing existing notebook '%s' from the database", self.notebook_id)
+                notebook_info = notebook.to_dict()
+                del notebook_info['name']
+                self.gradebook.remove_notebook(self.notebook_id, self.assignment_id)
 
         # create the notebook
-        self.log.debug("Creating notebook '%s' in the database", self.notebook_id)
-        self.gradebook.add_notebook(self.notebook_id, self.assignment_id, **notebook_info)
+        if notebook_info is not None:
+            self.log.debug("Creating notebook '%s' in the database", self.notebook_id)
+            self.gradebook.add_notebook(self.notebook_id, self.assignment_id, **notebook_info)
 
         # save grade cells
         for name, info in self.new_grade_cells.items():
-            grade_cell = self.gradebook.add_grade_cell(name, self.notebook_id, self.assignment_id, **info)
+            grade_cell = self.gradebook.update_or_create_grade_cell(name, self.notebook_id, self.assignment_id, **info)
             self.log.debug("Recorded grade cell %s into the gradebook", grade_cell)
 
         # save solution cells
         for name, info in self.new_solution_cells.items():
-            solution_cell = self.gradebook.add_solution_cell(name, self.notebook_id, self.assignment_id, **info)
+            solution_cell = self.gradebook.update_or_create_solution_cell(name, self.notebook_id, self.assignment_id, **info)
             self.log.debug("Recorded solution cell %s into the gradebook", solution_cell)
 
         # save source cells
         for name, info in self.new_source_cells.items():
-            source_cell = self.gradebook.add_source_cell(name, self.notebook_id, self.assignment_id, **info)
+            source_cell = self.gradebook.update_or_create_source_cell(name, self.notebook_id, self.assignment_id, **info)
             self.log.debug("Recorded source cell %s into the gradebook", source_cell)
 
     def preprocess(self, nb, resources):

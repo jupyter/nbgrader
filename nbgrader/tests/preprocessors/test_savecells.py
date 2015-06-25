@@ -255,6 +255,7 @@ class TestSaveCells(BaseTestPreprocessor):
         nb, resources = preprocessor.preprocess(nb, resources)
 
         gb = preprocessor.gradebook
+        notebook = gb.find_notebook("test", "ps0")
         grade_cell = gb.find_grade_cell("foo", "test", "ps0")
         solution_cell = gb.find_solution_cell("foo", "test", "ps0")
         source_cell = gb.find_source_cell("foo", "test", "ps0")
@@ -264,6 +265,7 @@ class TestSaveCells(BaseTestPreprocessor):
         nb.cells[-1] = create_grade_and_solution_cell("goodbye", "markdown", "foo", 1)
         nb, resources = preprocessor.preprocess(nb, resources)
 
+        gb.db.refresh(notebook)
         gb.db.refresh(grade_cell)
         gb.db.refresh(solution_cell)
         gb.db.refresh(source_cell)
@@ -276,6 +278,7 @@ class TestSaveCells(BaseTestPreprocessor):
         nb, resources = preprocessor.preprocess(nb, resources)
 
         gb = preprocessor.gradebook
+        notebook = gb.find_notebook("test", "ps0")
         grade_cell = gb.find_grade_cell("foo", "test", "ps0")
         solution_cell = gb.find_solution_cell("foo", "test", "ps0")
         source_cell = gb.find_source_cell("foo", "test", "ps0")
@@ -283,12 +286,17 @@ class TestSaveCells(BaseTestPreprocessor):
         assert source_cell.source == "hello"
 
         gb.add_student("hacker123")
-        gb.add_submission("ps0", "hacker123")
+        submission = gb.add_submission("ps0", "hacker123").notebooks[0]
+        assert len(notebook.submissions) == 1
+
         nb.cells[-1] = create_grade_and_solution_cell("goodbye", "markdown", "foo", 1)
         nb, resources = preprocessor.preprocess(nb, resources)
 
+        gb.db.refresh(notebook)
+        gb.db.refresh(submission)
         gb.db.refresh(grade_cell)
         gb.db.refresh(solution_cell)
         gb.db.refresh(source_cell)
+        assert len(notebook.submissions) == 1
         assert grade_cell.max_score == 1
         assert source_cell.source == "goodbye"

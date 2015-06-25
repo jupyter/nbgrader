@@ -1,4 +1,7 @@
 import os
+import pytest
+
+from sqlalchemy.exc import InvalidRequestError
 
 from nbgrader.api import Gradebook
 from nbgrader.tests import run_command
@@ -124,8 +127,8 @@ class TestNbGraderAssign(BaseTestApp):
         assert self._get_permissions("release/ps1/foo.ipynb") == "666"
         assert self._get_permissions("release/ps1/foo.txt") == "666"
 
-    def test_remove_extra_notebooks(self, db):
-        """Are extra notebooks removed?"""
+    def test_add_remove_extra_notebooks(self, db):
+        """Are extra notebooks added and removed?"""
         gb = Gradebook(db)
         assignment = gb.add_assignment("ps1")
 
@@ -134,18 +137,24 @@ class TestNbGraderAssign(BaseTestApp):
 
         gb.db.refresh(assignment)
         assert len(assignment.notebooks) == 1
+        notebook1 = gb.find_notebook("test", "ps1")
 
         self._copy_file("files/test.ipynb", "source/ps1/test2.ipynb")
         run_command('nbgrader assign ps1 --db="{}" --force'.format(db))
 
         gb.db.refresh(assignment)
         assert len(assignment.notebooks) == 2
+        gb.db.refresh(notebook1)
+        notebook2 = gb.find_notebook("test2", "ps1")
 
         os.remove("source/ps1/test2.ipynb")
         run_command('nbgrader assign ps1 --db="{}" --force'.format(db))
 
         gb.db.refresh(assignment)
         assert len(assignment.notebooks) == 1
+        gb.db.refresh(notebook1)
+        with pytest.raises(InvalidRequestError):
+            gb.db.refresh(notebook2)
 
     def test_add_extra_notebooks_with_submissions(self, db):
         """Is an error thrown when new notebooks are added and there are existing submissions?"""
@@ -183,7 +192,7 @@ class TestNbGraderAssign(BaseTestApp):
         run_command('nbgrader assign ps1 --db="{}" --force'.format(db), retcode=1)
 
     def test_same_notebooks_with_submissions(self, db):
-        """Is an error thrown when new notebooks are added and there are existing submissions?"""
+        """Is it ok to run nbgrader assign with the same notebooks and existing submissions?"""
         gb = Gradebook(db)
         assignment = gb.add_assignment("ps1")
 
@@ -192,11 +201,16 @@ class TestNbGraderAssign(BaseTestApp):
 
         gb.db.refresh(assignment)
         assert len(assignment.notebooks) == 1
+        notebook = assignment.notebooks[0]
 
         gb.add_student("hacker123")
-        gb.add_submission("ps1", "hacker123")
+        submission = gb.add_submission("ps1", "hacker123")
+        submission_notebook = submission.notebooks[0]
 
         run_command('nbgrader assign ps1 --db="{}" --force'.format(db))
 
         gb.db.refresh(assignment)
         assert len(assignment.notebooks) == 1
+        gb.db.refresh(notebook)
+        gb.db.refresh(submission)
+        gb.db.refresh(submission_notebook)

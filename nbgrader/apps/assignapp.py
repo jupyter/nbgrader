@@ -161,13 +161,10 @@ class AssignApp(BaseNbConvertApp):
         if len(assignment.submissions) > 0:
             self.fail("Cannot modify existing assignment '%s' because there are submissions associated with it", assignment)
 
-        # remove the assignment and re-add it
-        else:
-            self.log.debug("Removing existing assignment '%s' from the gradebook", assignment)
-            assignment_info = assignment.to_dict()
-            del assignment_info['name']
-            gb.remove_assignment(assignment_id)
-            gb.add_assignment(assignment_id, **assignment_info)
+        # remove the old notebooks
+        for notebook_id in (old_notebook_ids - new_notebook_ids):
+            self.log.warning("Removing notebook '%s' from the gradebook", notebook_id)
+            gb.remove_notebook(notebook_id, assignment_id)
 
     def init_assignment(self, assignment_id, student_id):
         super(AssignApp, self).init_assignment(assignment_id, student_id)
@@ -183,8 +180,8 @@ class AssignApp(BaseNbConvertApp):
                 gb.add_assignment(assignment_id)
             else:
                 self.fail("No assignment called '%s' exists in the database", assignment_id)
-
-        # check if there are any extra notebooks in the db that are no longer
-        # part of the assignment, and if so, remove them
-        if self.notebook_id == "*":
-            self._clean_old_notebooks(assignment_id, student_id)
+        else:
+            # check if there are any extra notebooks in the db that are no longer
+            # part of the assignment, and if so, remove them
+            if self.notebook_id == "*":
+                self._clean_old_notebooks(assignment_id, student_id)
