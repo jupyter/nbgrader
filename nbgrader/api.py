@@ -1221,13 +1221,7 @@ class Gradebook(object):
             self.remove_submission(name, submission.student.id)
 
         for notebook in assignment.notebooks:
-            for grade_cell in notebook.grade_cells:
-                self.db.delete(grade_cell)
-            for solution_cell in notebook.solution_cells:
-                self.db.delete(solution_cell)
-            for source_cell in notebook.source_cells:
-                self.db.delete(source_cell)
-            self.db.delete(notebook)
+            self.remove_notebook(notebook.name, name)
 
         self.db.delete(assignment)
 
@@ -1325,6 +1319,37 @@ class Gradebook(object):
                 raise InvalidEntry(*e.args)
 
         return notebook
+
+    def remove_notebook(self, name, assignment):
+        """Deletes an existing notebook from the gradebook, including any
+        submissions the might be associated with that notebook.
+
+        Parameters
+        ----------
+        name : string
+            the name of the notebook to delete
+        assignment : string
+            the name of an existing assignment
+
+        """
+        notebook = self.find_notebook(name, assignment)
+
+        for submission in notebook.submissions:
+            self.remove_submission_notebook(name, assignment, submission.student.id)
+
+        for grade_cell in notebook.grade_cells:
+            self.db.delete(grade_cell)
+        for solution_cell in notebook.solution_cells:
+            self.db.delete(solution_cell)
+        for source_cell in notebook.source_cells:
+            self.db.delete(source_cell)
+        self.db.delete(notebook)
+
+        try:
+            self.db.commit()
+        except (IntegrityError, FlushError) as e:
+            self.db.rollback()
+            raise InvalidEntry(*e.args)
 
     #### Grade cells
 
@@ -1761,6 +1786,33 @@ class Gradebook(object):
                 self.db.delete(comment)
             self.db.delete(notebook)
 
+        self.db.delete(submission)
+
+        try:
+            self.db.commit()
+        except (IntegrityError, FlushError) as e:
+            self.db.rollback()
+            raise InvalidEntry(*e.args)
+
+    def remove_submission_notebook(self, notebook, assignment, student):
+        """Removes a submitted notebook from the database.
+
+        Parameters
+        ----------
+        notebook : string
+            the name of a notebook
+        assignment : string
+            the name of an assignment
+        student : string
+            the name of a student
+
+        """
+        submission = self.find_submission_notebook(notebook, assignment, student)
+
+        for grade in submission.grades:
+            self.db.delete(grade)
+        for comment in submission.comments:
+            self.db.delete(comment)
         self.db.delete(submission)
 
         try:

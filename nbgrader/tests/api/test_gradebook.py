@@ -239,6 +239,31 @@ def test_update_or_create_notebook(gradebook):
     assert n1 == n2
 
 
+def test_remove_notebook(assignment):
+    assignment.add_student('hacker123')
+    assignment.add_submission('foo', 'hacker123')
+
+    notebooks = assignment.find_assignment('foo').notebooks
+
+    for nb in notebooks:
+        grade_cells = [x for x in nb.grade_cells]
+        solution_cells = [x for x in nb.solution_cells]
+        source_cells = [x for x in nb.source_cells]
+
+        assignment.remove_notebook(nb.name, 'foo')
+        assert assignment.db.query(api.SubmittedNotebook).filter(api.SubmittedNotebook.id == nb.id).all() == []
+
+        for grade_cell in grade_cells:
+            assert assignment.db.query(api.GradeCell).filter(api.GradeCell.id == grade_cell.id).all() == []
+        for solution_cell in solution_cells:
+            assert assignment.db.query(api.SolutionCell).filter(api.SolutionCell.id == solution_cell.id).all() == []
+        for source_cell in source_cells:
+            assert assignment.db.query(api.SourceCell).filter(api.SourceCell.id == source_cell.id).all() == []
+
+        with pytest.raises(MissingEntry):
+            assignment.find_notebook(nb.name, 'foo')
+
+
 #### Test grade cells
 
 def test_add_grade_cell(gradebook):
@@ -534,6 +559,29 @@ def test_find_submission_notebook_by_id(assignment):
 
     n2 = assignment.find_submission_notebook_by_id(n1.id)
     assert n1 == n2
+
+
+def test_remove_submission_notebook(assignment):
+    assignment.add_student('hacker123')
+    assignment.add_submission('foo', 'hacker123')
+
+    submission = assignment.find_submission('foo', 'hacker123')
+    notebooks = submission.notebooks
+
+    for nb in notebooks:
+        grades = [x for x in nb.grades]
+        comments = [x for x in nb.comments]
+
+        assignment.remove_submission_notebook(nb.name, 'foo', 'hacker123')
+        assert assignment.db.query(api.SubmittedNotebook).filter(api.SubmittedNotebook.id == nb.id).all() == []
+
+        for grade in grades:
+            assert assignment.db.query(api.Grade).filter(api.Grade.id == grade.id).all() == []
+        for comment in comments:
+            assert assignment.db.query(api.Comment).filter(api.Comment.id == comment.id).all() == []
+
+        with pytest.raises(MissingEntry):
+            assignment.find_submission_notebook(nb.name, 'foo', 'hacker123')
 
 
 def test_find_grade(assignment):
