@@ -221,6 +221,12 @@ def publish_docs(github_token, git_name, git_email):
     # push to origin
     run('git push -v origin docs')
 
+
+@task
+def sphinx():
+    run('make -C docs html')
+
+
 @task
 def python_tests(mark):
     import distutils.sysconfig
