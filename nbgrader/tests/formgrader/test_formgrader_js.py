@@ -40,8 +40,9 @@ class TestFormgraderJS(BaseTestFormgrade):
         WebDriverWait(self.browser, 30).until(lambda browser: glyph.is_displayed())
         WebDriverWait(self.browser, 30).until(lambda browser: not glyph.is_displayed())
 
-    def _get_needs_manual_grade(self, index):
-        return self.browser.execute_script('return formgrader.grades.at({:d}).get("needs_manual_grade");'.format(index))
+    def _get_needs_manual_grade(self, name):
+        return self.browser.execute_script(
+            'return formgrader.grades.findWhere({name: "%s"}).get("needs_manual_grade");' % name)
 
     def _flag(self):
         self._send_keys_to_body(Keys.SHIFT, Keys.CONTROL, "f")
@@ -300,10 +301,10 @@ class TestFormgraderJS(BaseTestFormgrade):
 
         # check whether it needs manual grading
         if elem.get_attribute("placeholder") != "":
-            assert not self._get_needs_manual_grade(index)
+            assert not self._get_needs_manual_grade(elem.get_attribute("id"))
             assert "needs_manual_grade" not in elem.get_attribute("class").split(" ")
         else:
-            assert self._get_needs_manual_grade(index)
+            assert self._get_needs_manual_grade(elem.get_attribute("id"))
             assert "needs_manual_grade" in elem.get_attribute("class").split(" ")
 
         # set the grade
@@ -315,7 +316,7 @@ class TestFormgraderJS(BaseTestFormgrade):
         assert elem.get_attribute("value") == "{}".format((index + 1) / 10.0)
 
         # check whether it needs manual grading
-        assert not self._get_needs_manual_grade(index)
+        assert not self._get_needs_manual_grade(elem.get_attribute("id"))
         assert "needs_manual_grade" not in elem.get_attribute("class").split(" ")
 
         # clear the grade
@@ -328,10 +329,10 @@ class TestFormgraderJS(BaseTestFormgrade):
 
         # check whether it needs manual grading
         if elem.get_attribute("placeholder") != "":
-            assert not self._get_needs_manual_grade(index)
+            assert not self._get_needs_manual_grade(elem.get_attribute("id"))
             assert "needs_manual_grade" not in elem.get_attribute("class").split(" ")
         else:
-            assert self._get_needs_manual_grade(index)
+            assert self._get_needs_manual_grade(elem.get_attribute("id"))
             assert "needs_manual_grade" in elem.get_attribute("class").split(" ")
 
     def test_same_part_navigation(self):
