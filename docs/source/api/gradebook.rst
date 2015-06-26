@@ -33,6 +33,8 @@ Gradebook
 
     .. automethod:: update_or_create_notebook
 
+    .. automethod:: remove_notebook
+
     .. automethod:: add_grade_cell
 
     .. automethod:: find_grade_cell
@@ -58,6 +60,8 @@ Gradebook
     .. automethod:: update_or_create_submission
 
     .. automethod:: remove_submission
+
+    .. automethod:: remove_submission_notebook
 
     .. automethod:: assignment_submissions
 
