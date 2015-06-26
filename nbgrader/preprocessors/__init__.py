@@ -12,6 +12,7 @@ from .execute import Execute
 from .getgrades import GetGrades
 from .clearoutput import ClearOutput
 from .limitoutput import LimitOutput
+from .deduplicateids import DeduplicateIds
 
 __all__ = [
     "IncludeHeaderFooter",
@@ -26,5 +27,6 @@ __all__ = [
     "Execute",
     "GetGrades",
     "ClearOutput",
-    "LimitOutput"
+    "LimitOutput",
+    "DeduplicateIds"
 ]
