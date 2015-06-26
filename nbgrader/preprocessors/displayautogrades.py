@@ -1,4 +1,5 @@
 import re
+import sys
 
 from IPython.utils.traitlets import Unicode, Integer, Bool
 
@@ -43,7 +44,7 @@ class DisplayAutoGrades(NbGraderPreprocessor):
             This might mean that even though the tests are passing
             now, they won't pass when your assignment is graded.
             """
-        ).strip(),
+        ).strip() + "\n",
         config=True,
         help="Warning to display when a cell has changed.")
 
@@ -54,7 +55,7 @@ class DisplayAutoGrades(NbGraderPreprocessor):
             your assignment as it is, you WILL NOT receive full
             credit.
             """
-        ).strip(),
+        ).strip() + "\n",
         config=True,
         help="Warning to display when a cell fails.")
 
@@ -63,11 +64,12 @@ class DisplayAutoGrades(NbGraderPreprocessor):
             """
             NOTEBOOK PASSED ON {num_passed} CELL(S)!
             """
-        ).strip(),
+        ).strip() + "\n",
         config=True,
         help="Warning to display when a cell passes (when invert=True)")
 
     ansi_escape = re.compile(r'\x1b[^m]*m')
+    stream = sys.stdout
 
     def _indent(self, val):
         lines = val.split("\n")
@@ -79,72 +81,100 @@ class DisplayAutoGrades(NbGraderPreprocessor):
             new_lines.append(new_line)
         return "\n".join(new_lines)
 
+    def _print_changed(self, cell):
+        self.stream.write("\n" + "=" * self.width + "\n")
+        self.stream.write("The following cell has changed:\n\n")
+        self.stream.write(self._indent(cell.source.strip()) + "\n\n")
+
     def _print_error(self, cell):
-        print("\n" + "=" * self.width)
-        print("The following cell failed:\n")
-        print(self._indent(cell.source))
-        print("\nThe error was:\n")
+        self.stream.write("\n" + "=" * self.width + "\n")
+        self.stream.write("The following cell failed:\n\n")
+        self.stream.write(self._indent(cell.source.strip()) + "\n\n")
+        self.stream.write("The error was:\n\n")
+
         if cell.cell_type == "code":
+            errors = []
             for output in cell.outputs:
                 if output.output_type == "error":
-                    print(self._indent("\n".join(output.traceback)))
+                    errors.append(self._indent("\n".join(output.traceback)))
+
+            if len(errors) == 0:
+                self.stream.write(self._indent("You did not provide a response.") + "\n")
+            else:
+                for error in errors:
+                    self.stream.write(error + "\n")
+
         else:
-            print(self._indent("You did not provide a response."))
-        print
+            self.stream.write(self._indent("You did not provide a response.") + "\n")
+
+        self.stream.write("\n")
 
     def _print_pass(self, cell):
-        print("\n" + "=" * self.width)
-        print("The following cell passed:\n")
-        print(self._indent(cell.source))
-        print
+        self.stream.write("\n" + "=" * self.width + "\n")
+        self.stream.write("The following cell passed:\n\n")
+        self.stream.write(self._indent(cell.source.strip()) + "\n\n")
 
-    def _print_changed(self, cell):
-        print("\n" + "=" * self.width)
-        print("The following cell has changed:\n")
-        print(self._indent(cell.source))
-        print
+    def _print_num_changed(self, num_changed):
+        if num_changed == 0:
+            return
+
+        else:
+            self.stream.write(
+                fill(
+                    self.changed_warning.format(num_changed=num_changed),
+                    width=self.width
+                )
+            )
+
+    def _print_num_failed(self, num_failed):
+        if num_failed == 0:
+            self.stream.write("Success! Your notebook passes all the tests.\n")
+
+        else:
+            self.stream.write(
+                fill(
+                    self.failed_warning.format(num_failed=num_failed),
+                    width=self.width
+                )
+            )
+
+    def _print_num_passed(self, num_passed):
+        if num_passed == 0:
+            self.stream.write("Success! The notebook does not pass any tests.\n")
+
+        else:
+            self.stream.write(
+                fill(
+                    self.passed_warning.format(num_passed=num_passed),
+                    width=self.width
+                )
+            )
 
     def preprocess(self, nb, resources):
         resources['nbgrader']['failed_cells'] = []
         resources['nbgrader']['passed_cells'] = []
         resources['nbgrader']['checksum_mismatch'] = []
+
         nb, resources = super(DisplayAutoGrades, self).preprocess(nb, resources)
 
-        num_changed = len(resources['nbgrader']['checksum_mismatch'])
-        num_failed = len(resources['nbgrader']['failed_cells'])
-        num_passed = len(resources['nbgrader']['passed_cells'])
+        changed = resources['nbgrader']['checksum_mismatch']
+        failed = resources['nbgrader']['failed_cells']
+        passed = resources['nbgrader']['passed_cells']
 
-        if not self.ignore_checksums and num_changed > 0:
-            print(fill(
-                self.changed_warning.format(num_changed=num_changed),
-                width=self.width))
-
-            for cell_index in resources['nbgrader']['checksum_mismatch']:
+        if not self.ignore_checksums and len(changed) > 0:
+            self._print_num_changed(len(changed))
+            for cell_index in changed:
                 self._print_changed(nb.cells[cell_index])
 
-        elif not self.invert:
-            if num_failed == 0:
-                print("Success! Your notebook passes all the tests.")
-
-            else:
-                print(fill(
-                    self.failed_warning.format(num_failed=num_failed),
-                    width=self.width))
-
-                for cell_index in resources["nbgrader"]["failed_cells"]:
-                    self._print_error(nb.cells[cell_index])
+        elif self.invert:
+            self._print_num_passed(len(passed))
+            for cell_index in passed:
+                self._print_pass(nb.cells[cell_index])
 
         else:
-            if num_passed == 0:
-                print("Success! The notebook does not pass any tests.")
-
-            else:
-                print(fill(
-                    self.passed_warning.format(num_passed=num_passed),
-                    width=self.width))
-
-                for cell_index in resources["nbgrader"]["passed_cells"]:
-                    self._print_pass(nb.cells[cell_index])
+            self._print_num_failed(len(failed))
+            for cell_index in failed:
+                self._print_error(nb.cells[cell_index])
 
         return nb, resources
 
@@ -164,7 +194,7 @@ class DisplayAutoGrades(NbGraderPreprocessor):
             if old_checksum != new_checksum:
                 resources['nbgrader']['checksum_mismatch'].append(cell_index)
 
-        # if it's a grade cell, the add a grade
+        # if it's a grade cell, the check the grade
         if utils.is_grade(cell):
             score, max_score = utils.determine_grade(cell)
 
