@@ -259,8 +259,7 @@ def _run_tests(mark=None, skip=None):
         '--no-cov-on-fail',
         '-v',
         '-x',
-        '--capture=no',
-        '--collect-only'
+        '--capture=no'
     ]
 
     marks = []
