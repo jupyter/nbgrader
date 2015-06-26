@@ -31,3 +31,7 @@ If you want to install the extension for only yourself (and not systemwide), use
 nbgrader extension install --help-all
 nbgrader extension activate --help-all
 ```
+
+## Contributing
+
+Please see the [contributing guidelines and documentation](CONTRIBUTING.md).

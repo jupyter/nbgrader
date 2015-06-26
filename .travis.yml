@@ -9,7 +9,7 @@ env:
   matrix:
     - GROUP=docs
     - GROUP=js
-    - GROUP=
+    - GROUP=python
   global:
     - secure: Ry2LhsYWOtVppoorTkOXyL6C6cEMw1bfqsHDka76kNSQzkn1HOpFOnVzjQk3kW3QxP9N60vcPlMtMln1jW1tsQRkh2mPT3EI0ugX18R5btR9R69CZSVo0At666HuQeZ6WN/a+pKWpaHYSFlXvSvlkLXkfW++AXbkShWvkD6Z0Hg=
 addons:
