@@ -35,8 +35,11 @@ def gradebook(request, tempdir):
     os.chdir("class_files")
 
     # copy files from the user guide
-    shutil.copytree(os.path.join(os.path.dirname(__file__), "files", "source"), "source")
-    shutil.copytree(os.path.join(os.path.dirname(__file__), "files", "submitted"), "submitted")
+    source_path = os.path.join(os.path.dirname(__file__), "..", "..", "..", "docs", "source", "user_guide", "source")
+    submitted_path = os.path.join(os.path.dirname(__file__), "..", "..", "..", "docs", "source", "user_guide", "submitted")
+
+    shutil.copytree(os.path.join(os.path.dirname(__file__), source_path), "source")
+    shutil.copytree(os.path.join(os.path.dirname(__file__), submitted_path), "submitted")
 
     # create the gradebook
     gb = Gradebook("sqlite:///gradebook.db")
