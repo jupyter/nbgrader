@@ -282,14 +282,14 @@ class TransferApp(BaseNbGraderApp):
         # set assignemnt and course
         if len(self.extra_args) == 1:
             self.assignment_id = self.extra_args[0]
+        elif len(self.extra_args) > 2:
+            self.fail("Too many arguments")
         else:
             self.fail("Must provide assignment name:\nnbgrader <command> ASSIGNMENT [ --course COURSE ]")
 
         if self.course:
             self.course_id = self.course
 
-        self.log.info("Assignment ID: " + self.assignment_id)
-        self.log.info("Course ID: " + self.course_id)
         self.init_src()
         self.init_dest()
         self.copy_files()
