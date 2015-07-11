@@ -66,11 +66,8 @@ class OverwriteCells(NbGraderPreprocessor):
                 grade_id,
                 self.notebook_id,
                 self.assignment_id)
-            old_points = grade_cell.max_score
-            new_points = cell.metadata.nbgrader["points"]
-	    if type(old_points)!=type(new_points):
-		new_points=float(new_points)
-		old_points=float(old_points)
+            old_points = float(grade_cell.max_score)
+            new_points = float(cell.metadata.nbgrader["points"])
 
             if old_points != new_points:
                 self.report_change(grade_id, "points", old_points, new_points)
