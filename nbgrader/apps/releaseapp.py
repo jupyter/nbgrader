@@ -37,44 +37,41 @@ class ReleaseApp(TransferApp):
 
     examples = """
         Release an assignment to students. For the usage of instructors.
-        
+
         This command is run from the top-level nbgrader folder. Before running
         this command, there are two things you must do.
-        
+
         First, you have to set the unique `course_id` for the course. It must be
         unique for each instructor/course combination. To set it in the config
         file add a line to the `nbgrader_config.py` file:
-        
+
             c.NbGraderConfig.course_id = 'phys101'
-        
+
         To pass the `course_id` at the command line, add `--course=phys101` to any
         of the below commands.
-        
+
         Second, the assignment to be released but already be in the `release` folder.
         The usual way of getting an assignment into this folder is by running
         `nbgrader assign`.
-        
+
         To release an assignment named `assignment1` run:
-        
+
             nbgrader release assignment1
-           
+
         If the assignment has already been released, you will have to add the
         `--force` flag to overwrite the released assignment:
-        
+
             nbgrader release --force assignment1
-        
+
         To query the exchange to see a list of your released assignments:
-        
+
             nbgrader list
         """
 
     force = Bool(False, config=True, help="Force overwrite existing files in the exchange.")
 
     def init_args(self):
-        if len(self.extra_args) == 1:
-            self.assignment_id = self.extra_args[0]
-        else:
-            self.fail("Invalid number of argument, call as `nbgrader release ASSIGNMENT`.")
+        pass
 
     def init_src(self):
         self.src_path = os.path.abspath(os.path.join(self.release_directory, self.assignment_id))
@@ -86,13 +83,13 @@ class ReleaseApp(TransferApp):
                 # Looks like the instructor forgot to assign
                 self.fail("Assignment found in ./{} but not ./{}, run `nbgrader assign` first.".format(
                     self.source_directory, self.release_directory
-                )) 
+                ))
             else:
                 self.fail(
                     "You have to run `nbgrader release {}` from your main nbgrader directory.".format(
                     self.assignment_id
                 ))
-    
+
     def init_dest(self):
         self.course_path = os.path.join(self.exchange_directory, self.course_id)
         self.outbound_path = os.path.join(self.course_path, 'outbound')

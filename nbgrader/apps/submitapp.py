@@ -30,38 +30,34 @@ class SubmitApp(TransferApp):
 
     examples = """
         Submit an assignment for grading. For the usage of students.
-        
+
         You must run this command from the directory containing the assignments
         sub-directory. For example, if you want to submit an assignment named
         `assignment1`, that must be a sub-directory of your current working directory.
         If you are inside the `assignment1` directory, it won't work.
-        
+
         To fetch an assignment you must first know the `course_id` for your course.
         If you don't know it, ask your instructor.
 
         To submit `assignment1` to the course `phys101`:
-        
+
             nbgrader submit assignment1 phys101
-        
+
         You can submit an assignment multiple times and the instructor will always
         get the most recent version. Your assignment submission are timestamped
         so instructors can tell when you turned it in. No other students will
         be able to see your submissions.
         """
-    
+
     def init_args(self):
-        if len(self.extra_args) == 2:
-            # The first argument (assignment_id) is processed in init_src
-            self.course_id = self.extra_args[1]
-        else:
-            self.fail("Invalid number of args, call as `nbgrader submit assignment_id course_id`")
+        pass
 
     def init_src(self):
         self.src_path = os.path.abspath(self.extra_args[0])
         self.assignment_id = os.path.split(self.src_path)[-1]
         if not os.path.isdir(self.src_path):
             self.fail("Assignment not found: {}".format(self.src_path))
-    
+
     def init_dest(self):
         self.course_path = os.path.join(self.exchange_directory, self.course_id)
         self.inbound_path = os.path.join(self.course_path, 'inbound')

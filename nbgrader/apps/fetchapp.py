@@ -24,33 +24,29 @@ class FetchApp(TransferApp):
 
     examples = """
         Fetch an assignment that an instructor has released. For the usage of students.
-        
+
         You can run this command from any directory, but usually, you will have a
         directory where you are keeping your course assignments.
-        
+
         To fetch an assignment you must first know the `course_id` for your course.
         If you don't know it, ask your instructor.
-        
+
         To show the list of assignments available for fetching (assume the `course_id`
         is `phys101`):
-        
+
             nbgrader list phys101
-        
+
         To fetch an assignment by name into the current directory:
-        
+
             nbgrader fetch phys101 assignment1
-        
+
         This will create an new directory named `assignment1` where you can work
         on the assignment. When you are done, use the `nbgrader submit` command
         to turn in the assignment.
         """
-    
+
     def init_args(self):
-        if len(self.extra_args) == 2:
-            self.course_id = self.extra_args[0]
-            self.assignment_id = self.extra_args[1]
-        else:
-            self.fail("Invalid number of args, call as `nbgrader fetch COURSE ASSIGNMENT`")
+        pass
 
     def init_src(self):
         self.course_path = os.path.join(self.exchange_directory, self.course_id)
@@ -60,7 +56,7 @@ class FetchApp(TransferApp):
             self.fail("Assignment not found: {}".format(self.src_path))
         if not check_mode(self.src_path, read=True, execute=True):
             self.fail("You don't have read permissions for the directory: {}".format(self.src_path))
-    
+
     def init_dest(self):
         self.dest_path = os.path.abspath(os.path.join('.', self.assignment_id))
         if os.path.isdir(self.dest_path):
