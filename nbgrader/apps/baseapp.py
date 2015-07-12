@@ -250,13 +250,9 @@ class TransferApp(BaseNbGraderApp):
         if not check_directory(self.exchange_directory, write=True, execute=True):
             self.fail("Unwritable directory, please contact your instructor: {}".format(self.exchange_directory))
 
-    def init_args(self):
-        pass
-
     @catch_config_error
     def initialize(self, argv=None):
         super(TransferApp, self).initialize(argv)
-        self.init_args()
         self.ensure_exchange_directory()
         self.set_timestamp()
 

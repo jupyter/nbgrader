@@ -70,9 +70,6 @@ class ReleaseApp(TransferApp):
 
     force = Bool(False, config=True, help="Force overwrite existing files in the exchange.")
 
-    def init_args(self):
-        pass
-
     def init_src(self):
         self.src_path = os.path.abspath(os.path.join(self.release_directory, self.assignment_id))
         if not os.path.isdir(self.src_path):

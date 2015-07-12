@@ -83,9 +83,6 @@ class ListApp(TransferApp):
 
     remove = Bool(False, config=True, help="Remove, rather than list files.")
 
-    def init_args(self):
-        pass
-
     def init_src(self):
         pass
 

@@ -49,9 +49,6 @@ class SubmitApp(TransferApp):
         be able to see your submissions.
         """
 
-    def init_args(self):
-        pass
-
     def init_src(self):
         self.src_path = os.path.abspath(self.extra_args[0])
         self.assignment_id = os.path.split(self.src_path)[-1]

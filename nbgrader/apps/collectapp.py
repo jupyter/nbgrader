@@ -74,9 +74,6 @@ class CollectApp(TransferApp):
         help="Update existing submissions with ones that have newer timestamps."
     )
 
-    def init_args(self):
-        pass
-
     def _path_to_record(self, path):
         filename = os.path.split(path)[1]
         # Only split twice on +, giving three components. This allows usernames with +.

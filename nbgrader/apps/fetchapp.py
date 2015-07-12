@@ -45,9 +45,6 @@ class FetchApp(TransferApp):
         to turn in the assignment.
         """
 
-    def init_args(self):
-        pass
-
     def init_src(self):
         self.course_path = os.path.join(self.exchange_directory, self.course_id)
         self.outbound_path = os.path.join(self.course_path, 'outbound')
