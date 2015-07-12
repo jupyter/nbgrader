@@ -1,7 +1,13 @@
 import os
 import hashlib
 import dateutil.parser
-import pwd
+import warnings
+try:
+    import pwd
+except ImportError:
+    pwd = None
+    warnings.warn("Using Windows")
+    print "Warning: Using Windows, pwd does not exist"
 import glob
 
 from IPython.utils.py3compat import str_to_bytes, string_types
@@ -103,10 +109,14 @@ def check_directory(path, read=False, write=False, execute=False):
 
 def get_username():
     """Get the username of the current process."""
+    if pwd == None:
+        return "username"
     return pwd.getpwuid(os.getuid())[0]
 
 def find_owner(path):
     """Get the username of the owner of path."""
+    if pwd == None:
+        return "username"
     return pwd.getpwuid(os.stat(os.path.abspath(path)).st_uid).pw_name
 
 def self_owned(path):

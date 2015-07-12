@@ -20,6 +20,10 @@ def temp_cwd(request):
 
     def fin():
         os.chdir(orig_dir)
+        for r,d,f in os.walk(path):
+            os.chmod(r, 0o666)
+            for filename in f:
+                os.chmod(os.path.join(r, filename), 0o666)
         shutil.rmtree(path)
     request.addfinalizer(fin)
 

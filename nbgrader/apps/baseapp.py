@@ -186,7 +186,7 @@ class BaseNbGraderApp(BaseApp):
 
     def _get_existing_timestamp(self, dest_path):
         """Get the timestamp, as a datetime object, of an existing submission."""
-        timestamp_path = os.path.join(dest_path, 'timestamp.txt')
+        timestamp_path = os.path.join(dest_path, 'timestamp.txt').replace("\\", "\\\\")
         if os.path.exists(timestamp_path):
             with open(timestamp_path, 'r') as fh:
                 timestamp = fh.read().strip()
@@ -391,11 +391,11 @@ class BaseNbConvertApp(BaseNbGraderApp, NbConvertApp):
     def init_single_notebook_resources(self, notebook_filename):
         regexp = os.path.join(
             self._format_source("(?P<assignment_id>.*)", "(?P<student_id>.*)"),
-            "(?P<notebook_id>.*).ipynb")
+            "(?P<notebook_id>.*).ipynb").replace("\\", "/")
 
-        m = re.match(regexp, notebook_filename)
+        m = re.match(regexp, notebook_filename.replace("\\", "/"))
         if m is None:
-            raise RuntimeError("Could not match '%s' with regexp '%s'", notebook_filename, regexp)
+                raise RuntimeError("Could not match '" + notebook_filename.replace("\\", "/") + "' with regexp '" + regexp + "'")
         gd = m.groupdict()
 
         self.log.debug("Student: %s", gd['student_id'])
@@ -445,6 +445,10 @@ class BaseNbConvertApp(BaseNbGraderApp, NbConvertApp):
         if self.force:
             if self.notebook_id == "*":
                 self.log.warning("Removing existing assignment: {}".format(dest))
+                for r,d,f in os.walk(dest):
+                    os.chmod(r, 0o666)
+                    for filename in f:
+                        os.chmod(os.path.join(r, filename), 0o666)
                 shutil.rmtree(dest)
             else:
                 for notebook in self.notebooks:
@@ -468,7 +472,7 @@ class BaseNbConvertApp(BaseNbGraderApp, NbConvertApp):
             else:
                 for notebook in self.notebooks:
                     filename = os.path.splitext(os.path.basename(notebook))[0] + self.exporter.file_extension
-                    path = os.path.join(dest, filename)
+                    path = os.path.join(dest, filename).replace("\\", "\\\\")
                     if os.path.exists(path):
                         self.log.warning("Updating existing notebook: {}".format(path))
                         os.remove(path)
@@ -489,12 +493,15 @@ class BaseNbConvertApp(BaseNbGraderApp, NbConvertApp):
         # detect other files in the source directory
         for filename in find_all_files(source, self.ignore + ["*.ipynb"]):
             # Make sure folder exists.
-            path = os.path.join(dest, os.path.relpath(filename, source))
+            path = os.path.join(dest, os.path.relpath(filename, source)).replace("\\", "/")
             ensure_dir_exists(os.path.dirname(path))
 
             # Copy if destination is different.
             if not os.path.normpath(path) == os.path.normpath(filename):
                 self.log.info("Linking %s -> %s", filename, path)
+                os.chmod(filename, 0o666)
+                if (os.path.exists(path)):
+                    os.chmod(path, 0o666)
                 link_or_copy(filename, path)
 
     def set_permissions(self, assignment_id, student_id):
@@ -513,9 +520,9 @@ class BaseNbConvertApp(BaseNbGraderApp, NbConvertApp):
 
             # parse out the assignment and student ids
             regexp = self._format_source("(?P<assignment_id>.*)", "(?P<student_id>.*)")
-            m = re.match(regexp, assignment)
+            m = re.match(regexp, assignment.replace("\\", "/"))
             if m is None:
-                raise RuntimeError("Could not match '%s' with regexp '%s'", assignment, regexp)
+                raise RuntimeError("Could not match '" + assignment.replace("\\", "/") + "' with regexp '" + regexp + "'")
             gd = m.groupdict()
 
             try:
@@ -536,6 +543,10 @@ class BaseNbConvertApp(BaseNbGraderApp, NbConvertApp):
                 if self.notebook_id == "*":
                     if os.path.exists(dest):
                         self.log.warning("Removing failed assignment: {}".format(dest))
+                        for r,d,f in os.walk(dest):
+                            os.chmod(r, 0o666)
+                            for filename in f:
+                                os.chmod(os.path.join(r, filename), 0o666)
                         shutil.rmtree(dest)
                 else:
                     for notebook in self.notebooks:

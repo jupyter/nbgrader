@@ -12,21 +12,21 @@ class TestNbGraderCollect(BaseTestApp):
         run_command(
             'nbgrader release {} '
             '--NbGraderConfig.course_id=abc101 '
-            '--TransferApp.exchange_directory={} '.format(assignment, exchange))
+            '--TransferApp.exchange_directory="{}" '.format(assignment, exchange))
         run_command(
             'nbgrader fetch abc101 {} '
-            '--TransferApp.exchange_directory={} '.format(assignment, exchange))
+            '--TransferApp.exchange_directory="{}" '.format(assignment, exchange))
 
     def _submit(self, assignment, exchange):
         run_command(
             'nbgrader submit {} abc101 '
-            '--TransferApp.exchange_directory={} '.format(assignment, exchange))
+            '--TransferApp.exchange_directory="{}" '.format(assignment, exchange))
 
     def _collect(self, assignment, exchange, flags="", retcode=0):
         run_command(
             'nbgrader collect {} '
             '--NbGraderConfig.course_id=abc101 '
-            '--TransferApp.exchange_directory={} '
+            '--TransferApp.exchange_directory="{}" '
             '{}'.format(assignment, exchange, flags),
             retcode=retcode)
 
@@ -44,7 +44,7 @@ class TestNbGraderCollect(BaseTestApp):
 
         # try to collect when there's nothing to collect
         self._collect("ps1", exchange)
-        root = os.path.join("submitted/{}/ps1".format(os.environ['USER']))
+        root = os.path.join("submitted/{}/ps1".format(os.environ['USERNAME']))
         assert os.path.isdir("submitted")
         assert not os.path.isdir(root)
 

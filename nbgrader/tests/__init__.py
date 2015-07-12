@@ -1,6 +1,7 @@
 import os
 import glob
 import shutil
+#import pyd
 import subprocess as sp
 
 from IPython.nbformat.v4 import new_code_cell, new_markdown_cell
@@ -88,7 +89,10 @@ def create_grade_and_solution_cell(source, cell_type, grade_id, points):
 
 def start_subprocess(command, **kwargs):
     kwargs['env'] = kwargs.get('env', os.environ.copy())
-    proc = sp.Popen(command, **kwargs)
+    shell_command = ['bash', '-c', command]
+    proc = sp.Popen(shell_command, **kwargs)
+    #proc = sp.Popen([shell_command, '-c ', command], **kwargs)
+    #proc = sp.Popen(command, **kwargs)
     return proc
 
 
@@ -103,12 +107,13 @@ def copy_coverage_files():
 
 
 def run_command(command, retcode=0):
-    proc = start_subprocess(command, shell=True, stdout=sp.PIPE, stderr=sp.STDOUT)
-    true_retcode = proc.wait()
+    print(command)
+    proc = start_subprocess(command, stdout=sp.PIPE, stderr=sp.STDOUT)
     output = proc.communicate()[0].decode()
+    true_retcode = proc.wait()
     output = output.replace("Coverage.py warning: No data was collected.\n", "")
+    print(output)
     if true_retcode != retcode:
-        print(output)
         raise AssertionError(
             "process returned an unexpected return code: {}".format(true_retcode))
     copy_coverage_files()

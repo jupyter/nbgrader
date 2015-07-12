@@ -1,5 +1,4 @@
 import os
-
 from nbgrader.api import Gradebook
 from nbgrader.tests import run_command
 from nbgrader.tests.apps.base import BaseTestApp
@@ -121,6 +120,7 @@ class TestNbGraderAutograde(BaseTestApp):
         assert not os.path.isfile("autograded/foo/ps1/blah.pyc")
 
         # check that it skips the existing directory
+        os.chmod("autograded/foo/ps1/foo.txt", 0o666)
         os.remove("autograded/foo/ps1/foo.txt")
         run_command('nbgrader autograde ps1 --db="{}"'.format(gradebook))
         assert not os.path.isfile("autograded/foo/ps1/foo.txt")
@@ -130,7 +130,9 @@ class TestNbGraderAutograde(BaseTestApp):
         assert os.path.isfile("autograded/foo/ps1/foo.txt")
 
         # force overwrite
+        os.chmod("source/ps1/foo.txt", 0o666)
         os.remove("source/ps1/foo.txt")
+        os.chmod("submitted/foo/ps1/foo.txt", 0o666)
         os.remove("submitted/foo/ps1/foo.txt")
         run_command('nbgrader autograde ps1 --db="{}" --force'.format(gradebook))
         assert os.path.isfile("autograded/foo/ps1/p1.ipynb")
@@ -157,7 +159,9 @@ class TestNbGraderAutograde(BaseTestApp):
         assert not os.path.isfile("autograded/foo/ps1/blah.pyc")
 
         # check that removing the notebook still causes the autograder to run
+        os.chmod("autograded/foo/ps1/p1.ipynb", 0o666)
         os.remove("autograded/foo/ps1/p1.ipynb")
+        os.chmod("autograded/foo/ps1/foo.txt", 0o666)
         os.remove("autograded/foo/ps1/foo.txt")
         run_command('nbgrader autograde ps1 --db="{}" --notebook "p1"'.format(gradebook))
 
@@ -167,6 +171,7 @@ class TestNbGraderAutograde(BaseTestApp):
         assert not os.path.isfile("autograded/foo/ps1/blah.pyc")
 
         # check that running it again doesn't do anything
+        os.chmod("autograded/foo/ps1/foo.txt", 0o666)
         os.remove("autograded/foo/ps1/foo.txt")
         run_command('nbgrader autograde ps1 --db="{}" --notebook "p1"'.format(gradebook))
 
@@ -176,6 +181,7 @@ class TestNbGraderAutograde(BaseTestApp):
         assert not os.path.isfile("autograded/foo/ps1/blah.pyc")
 
         # check that removing the notebook doesn't caus the autograder to run
+        os.chmod("autograded/foo/ps1/p1.ipynb", 0o666)
         os.remove("autograded/foo/ps1/p1.ipynb")
         run_command('nbgrader autograde ps1 --db="{}"'.format(gradebook))
 
@@ -251,9 +257,9 @@ class TestNbGraderAutograde(BaseTestApp):
 
         self._empty_notebook('submitted/foo/ps1/foo.ipynb')
         self._make_file("source/foo/ps1/foo.txt", "foo")
-        run_command("nbgrader autograde ps1 --create --AutogradeApp.permissions=644")
+        run_command("nbgrader autograde ps1 --create --AutogradeApp.permissions=666")
 
         assert os.path.isfile("autograded/foo/ps1/foo.ipynb")
         assert os.path.isfile("autograded/foo/ps1/foo.txt")
-        assert self._get_permissions("autograded/foo/ps1/foo.ipynb") == "644"
-        assert self._get_permissions("autograded/foo/ps1/foo.txt") == "644"
+        assert self._get_permissions("autograded/foo/ps1/foo.ipynb") == "666"
+        assert self._get_permissions("autograded/foo/ps1/foo.txt") == "666"

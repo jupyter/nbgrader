@@ -29,10 +29,20 @@ class TestNbGraderExtension(BaseTestApp):
         run_command("nbgrader extension deactivate --help-all")
 
     def test_install_system(self, temp_dir):
-        run_command("nbgrader extension install --prefix={}".format(temp_dir))
+        run_command("nbgrader extension install --prefix={} --debug".format(temp_dir))
+        nbextension_dir = os.path.join(temp_dir, "share", "jupyter", "nbextensions", "nbgrader").replace("\\", "/")
 
+        print temp_dir
         # check the extension file were copied
-        nbextension_dir = os.path.join(temp_dir, "share", "jupyter", "nbextensions", "nbgrader")
+        print nbextension_dir
+        print "starting walk"
+        for r, s, f in os.walk(nbextension_dir):
+            print r
+            for filename in f:
+                print filename
+        print "ended walk"
+        print os.path.join(nbextension_dir, "create_assignment.js")
+
         assert os.path.isfile(os.path.join(nbextension_dir, "create_assignment.js"))
         assert os.path.isfile(os.path.join(nbextension_dir, "nbgrader.css"))
 

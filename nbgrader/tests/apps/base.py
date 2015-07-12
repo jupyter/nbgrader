@@ -3,6 +3,7 @@ import shutil
 import pytest
 import stat
 
+
 from IPython.nbformat import write as write_nb
 from IPython.nbformat.v4 import new_notebook
 
@@ -23,6 +24,7 @@ class BaseTestApp(object):
         full_dest = os.path.join(os.getcwd(), dest)
         if not os.path.exists(os.path.dirname(full_dest)):
             os.makedirs(os.path.dirname(full_dest))
+        os.chmod(full_src, 0o666)
         shutil.copy(full_src, full_dest)
 
     def _make_file(self, path, contents=""):

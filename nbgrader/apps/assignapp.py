@@ -137,11 +137,12 @@ class AssignApp(BaseNbConvertApp):
         assignment = gb.find_assignment(assignment_id)
         regexp = os.path.join(
             self._format_source("(?P<assignment_id>.*)", "(?P<student_id>.*)"),
-            "(?P<notebook_id>.*).ipynb")
+            "(?P<notebook_id>.*).ipynb").replace("\\", "\\\\")
 
         # find a set of notebook ids for new notebooks
         new_notebook_ids = set([])
         for notebook in self.notebooks:
+            print regexp 
             m = re.match(regexp, notebook)
             if m is None:
                 raise RuntimeError("Could not match '%s' with regexp '%s'", notebook, regexp)
