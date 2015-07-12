@@ -5,6 +5,18 @@ This document gives an overview of how various parts of the project work and wha
 
 In general, the guidelines for opening issues, submitting PRs, code style, etc. are the same as the [IPython contribution guidelines](https://github.com/ipython/ipython/blob/master/CONTRIBUTING.md).
 
+## Preliminary IPython installation
+
+Before installing the other dependencies of nbgrader, please ensure that IPython Notebooks are properly installed.
+
+If using conda, run
+
+    conda install ipython-notebook
+
+Otherwise, run
+
+    pip install ipython[notebook]
+
 ## Development installation
 
 To develop and test nbgrader, you will want to install nbgrader using the development requirements:
