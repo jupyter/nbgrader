@@ -122,7 +122,7 @@ var CommentUI = Backbone.View.extend({
 
         this.$comment.attr("placeholder", this.model.get("auto_comment") || "Comments");
 
-        autosize(document.querySelectorAll('textarea'));        
+        autosize(this.$comment);        
 
         this.render();
     },
