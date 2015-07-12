@@ -16,6 +16,20 @@ You will probably also want to install the notebook extension only for yourself,
     nbgrader extension install --user --symlink
     nbgrader extension activate
 
+Phantomjs must be installed in order to run tests. If you have npm installed, you can install phantomjs using:
+    
+    npm install phantomjs
+
+If you do not have npm installed, you can still install phantomjs. On OS X:
+
+    brew update
+    brew install phantomjs
+
+On Linux:
+
+    apt-get update
+    apt-get install phantomjs
+
 ## Pull request checklist
 
 Before making a pull request, please ensure you have:
@@ -94,10 +108,8 @@ When a commit is made on the `master` branch, documentation is automatically bui
 
 ## JavaScript dependencies
 
-For the time being, we are committing JavaScript dependencies to the repository as that makes installation much easier. However there is an unbundled dependency on PhantomJS that must be installed separately. If you have `npm` installed, you can install PhantomJS by running:
-    
-    npm install phantomjs
-
+For the time being, we are committing JavaScript dependencies to the repository as that makes installation much easier.
+If you need to add a new library, or update the version of a library, you will need to have `npm` installed.
 To install npm on OS X, use Homebrew to install node (npm will be installed along with node):
 
     brew update
@@ -109,7 +121,6 @@ To install npm on Linux with apt-get, use:
     apt-get install node
     apt-get install npm
 
-If you need to add a new library, or update the version of a library, you will need to have `npm` installed.
 Modify the [bower.json](bower.json) file in the root of the repository and then run:
 
     invoke js
