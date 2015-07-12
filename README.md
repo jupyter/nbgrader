@@ -12,6 +12,8 @@ A system for assigning and grading notebooks.
 
 ## Installation
 
+Developers can install a development version following the instructions in the [contributing guidelines and documentation](CONTRIBUTING.md). All other users can install using the instructions below:
+
 To install the most recent (development, and possibly unstable!) version of nbgrader, run:
 
 ```bash
