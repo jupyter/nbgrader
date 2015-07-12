@@ -323,11 +323,8 @@ def before_install(group, python_version):
 
     # install jupyterhub
     if python_version == '3.4' and group == 'js':
-        os.chdir(os.environ['HOME'])
         run('npm install -g configurable-http-proxy')
-        run('git clone --quiet --recursive https://github.com/jupyter/jupyterhub.git')
-        os.chdir('jupyterhub')
-        run('pip install -f ~/travis-wheels/wheelhouse -r dev-requirements.txt .')
+        run('pip install jupyterhub==0.2.0')
 
     # install js dependencies
     if group == 'js':
