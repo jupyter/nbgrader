@@ -318,6 +318,9 @@ def before_install(group, python_version):
     run('git clone --quiet --depth 1 https://github.com/minrk/travis-wheels ~/travis-wheels')
     run('pip install -f ~/travis-wheels/wheelhouse -r dev-requirements.txt')
 
+    # install ipython
+    run('pip install ipython[all]')
+
     # install jupyterhub
     if python_version == '3.4' and group == 'js':
         os.chdir(os.environ['HOME'])
