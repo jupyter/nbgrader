@@ -65,9 +65,6 @@ window.MathJax = {
 {%- endblock body %}
 
 {% block footer %}
-<script>
-    autosize(document.querySelectorAll('textarea'));
-</script>
 </html>
 {% endblock footer %}
 
