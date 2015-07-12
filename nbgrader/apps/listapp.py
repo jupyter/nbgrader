@@ -59,7 +59,7 @@ class ListApp(TransferApp):
 
         or
 
-            nbgrader list phys101  # course_id provided
+            nbgrader list --course phys101  # course_id provided
 
         To see the inbound (submitted) assignments:
 
@@ -134,6 +134,7 @@ class ListApp(TransferApp):
                 shutil.rmtree(path)
 
     def start(self):
+        self.extra_args = ["*"] # allow user to not put in assignment
         super(ListApp, self).start()
         if self.remove:
             self.remove_files()

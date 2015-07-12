@@ -41,9 +41,9 @@ class CollectApp(TransferApp):
         Collect assignments students have submitted. For the usage of instructors.
 
         This command is run from the top-level nbgrader folder. Before running
-        this command, you must set the unique `course_id` for the course. It must be
-        unique for each instructor/course combination. To set it in the config
-        file add a line to the `nbgrader_config.py` file:
+        this command, you may want toset the unique `course_id` for the course.
+        It must be unique for each instructor/course combination. To set it in
+        the config file add a line to the `nbgrader_config.py` file:
 
             c.NbGraderConfig.course_id = 'phys101'
 

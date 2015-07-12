@@ -41,7 +41,7 @@ class SubmitApp(TransferApp):
 
         To submit `assignment1` to the course `phys101`:
 
-            nbgrader submit assignment1 phys101
+            nbgrader submit assignment1 --course phys101
 
         You can submit an assignment multiple times and the instructor will always
         get the most recent version. Your assignment submission are timestamped
