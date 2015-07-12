@@ -100,7 +100,7 @@ class HubAuth(BaseAuth):
         # If auth cookie doesn't exist, redirect to the login page with
         # next set to redirect back to the this page.
         if 'jupyter-hub-token' not in request.cookies:
-            return redirect(self.hub_base_url + '/hub/login?next=' + self.hub_base_url + self.remap_url)
+            return redirect(self.hub_base_url + '/hub/login?next=' + self.remap_url)
         cookie = request.cookies[self.hubapi_cookie]
 
         # Check with the Hub to see if the auth cookie is valid.
@@ -132,7 +132,7 @@ class HubAuth(BaseAuth):
             abort(500, "Failed to check authorization")
         else:
             # Auth invalid, reauthenticate.
-            return redirect(self.hub_base_url + '/hub/login?next=' + self.hub_base_url + self.remap_url)
+            return redirect(self.hub_base_url + '/hub/login?next=' + self.remap_url)
         return False
 
     def notebook_server_exists(self):
