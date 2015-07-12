@@ -32,6 +32,7 @@ window.MathJax = {
 };
 </script>
 <script type="text/javascript" src="{{ resources.mathjax_url }}?config=TeX-AMS_HTML-full"></script>
+<script type="text/javascript" src="{{base_url}}/static/components/autosize/dist/autosize.js"></script>
 
 <link rel="stylesheet" href="{{resources.base_url}}/static/css/formgrade.css" />
 
@@ -64,6 +65,9 @@ window.MathJax = {
 {%- endblock body %}
 
 {% block footer %}
+<script>
+    autosize(document.querySelectorAll('textarea'));
+</script>
 </html>
 {% endblock footer %}
 
