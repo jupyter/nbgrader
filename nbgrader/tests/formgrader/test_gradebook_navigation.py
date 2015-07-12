@@ -20,7 +20,8 @@ class TestGradebook(BaseTestFormgrade):
 
         self.browser.get(self.manager.base_formgrade_url)
         self._wait_for_element("username_input")
-        self._check_url("http://localhost:8000/hub/login?next={}".format(self.formgrade_url()))
+        next_url = self.formgrade_url().replace("http://localhost:8000", "")
+        self._check_url("http://localhost:8000/hub/login?next={}".format(next_url))
 
         # fill out the form
         self.browser.find_element_by_id("username_input").send_keys("foobar")
