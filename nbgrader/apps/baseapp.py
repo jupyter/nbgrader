@@ -138,7 +138,7 @@ nbgrader_flags = {}
 nbgrader_flags.update(base_flags)
 nbgrader_flags.update({
 })
-        
+
 class BaseNbGraderApp(BaseApp):
     """A base class for all the nbgrader apps that depend on the nbgrader
     directory structure.
@@ -161,7 +161,7 @@ class BaseNbGraderApp(BaseApp):
     autograded_directory = Unicode()
     feedback_directory = Unicode()
     course_id = Unicode()
-    
+
     # nbgrader configuration instance
     _nbgrader_config = Instance(NbGraderConfig)
 
@@ -178,7 +178,7 @@ class BaseNbGraderApp(BaseApp):
             """
         )
     )
-    
+
     def _classes_default(self):
         classes = super(BaseNbGraderApp, self)._classes_default()
         classes.append(NbGraderConfig)
@@ -198,26 +198,27 @@ class BaseNbGraderApp(BaseApp):
         super(BaseNbGraderApp, self).__init__(*args, **kwargs)
         self._nbgrader_config = NbGraderConfig(parent=self)
 
-        
+
 # These are the aliases and flags for nbgrader apps that inherit only from
 # TransferApp
 transfer_aliases = {}
 transfer_aliases.update(nbgrader_aliases)
 transfer_aliases.update({
-    "timezone": "TransferApp.timezone"
+    "timezone": "TransferApp.timezone",
+    "course": "TransferApp.course"
 })
 transfer_flags = {}
 transfer_flags.update(nbgrader_flags)
 transfer_flags.update({
 })
-        
+
 class TransferApp(BaseNbGraderApp):
     """A base class for the list, release, collect, fetch, and submit apps.
-    
+
     All of these apps involve transfering files between an instructor or students
     files and the nbgrader exchange.
     """
-    
+
     timezone = Unicode(
         "UTC", config=True,
         help="Timezone for recording timestamps"
@@ -227,6 +228,8 @@ class TransferApp(BaseNbGraderApp):
         "%Y-%m-%d %H:%M:%S %Z", config=True,
         help="Format string for timestamps"
     )
+
+    course = Unicode(None, config=True, allow_none=True, help="Optional course name.")
 
     def set_timestamp(self):
         """Set the timestap using the configured timezone."""
@@ -242,30 +245,27 @@ class TransferApp(BaseNbGraderApp):
     )
 
     def ensure_exchange_directory(self):
+        return
         """See if the exchange directory exists and is writable, fail if not."""
         if not check_directory(self.exchange_directory, write=True, execute=True):
             self.fail("Unwritable directory, please contact your instructor: {}".format(self.exchange_directory))
 
-    def init_args(self):
-        pass
-
     @catch_config_error
     def initialize(self, argv=None):
         super(TransferApp, self).initialize(argv)
-        self.init_args()
         self.ensure_exchange_directory()
         self.set_timestamp()
 
     def init_src(self):
         """Compute and check the source paths for the transfer."""
         raise NotImplemented
-    
+
     def init_dest(self):
         """Compute and check the destination paths for the transfer."""
         raise NotImplemented
-    
+
     def copy_files(self):
-        """Actually to the file transfer."""
+        """Actually do the file transfer."""
         raise NotImplemented
 
     def do_copy(self, src, dest):
@@ -273,7 +273,19 @@ class TransferApp(BaseNbGraderApp):
         shutil.copytree(src, dest, ignore=shutil.ignore_patterns(*self.ignore))
 
     def start(self):
-        super(TransferApp, self).start() 
+        super(TransferApp, self).start()
+
+        # set assignemnt and course
+        if len(self.extra_args) == 1:
+            self.assignment_id = self.extra_args[0]
+        elif len(self.extra_args) > 2:
+            self.fail("Too many arguments")
+        else:
+            self.fail("Must provide assignment name:\nnbgrader <command> ASSIGNMENT [ --course COURSE ]")
+
+        if self.course:
+            self.course_id = self.course
+
         self.init_src()
         self.init_dest()
         self.copy_files()

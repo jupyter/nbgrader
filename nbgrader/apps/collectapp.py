@@ -39,32 +39,32 @@ class CollectApp(TransferApp):
 
     examples = """
         Collect assignments students have submitted. For the usage of instructors.
-        
+
         This command is run from the top-level nbgrader folder. Before running
-        this command, you must set the unique `course_id` for the course. It must be
-        unique for each instructor/course combination. To set it in the config
-        file add a line to the `nbgrader_config.py` file:
-        
+        this command, you may want toset the unique `course_id` for the course.
+        It must be unique for each instructor/course combination. To set it in
+        the config file add a line to the `nbgrader_config.py` file:
+
             c.NbGraderConfig.course_id = 'phys101'
-        
+
         To pass the `course_id` at the command line, add `--course=phys101` to any
         of the below commands.
-        
+
         To collect `assignment1` for all students:
-        
+
             nbgrader collect assignment1
-        
+
         To collect `assignment1` for only `student1`:
-        
+
             nbgrader collect --student=student1 assignment1
-            
+
         Collected assignments will go into the `submitted` folder with the proper
         directory structure to start grading. All submissions are timestamped and
         students can turn an assignment in multiple times. The `collect` command
         will always get the most recent submission from each student, but it will
         never overwrite an existing submission unless you provide the `--update`
         flag:
-        
+
             nbgrader collect --update assignment1
         """
 
@@ -73,12 +73,6 @@ class CollectApp(TransferApp):
         config=True,
         help="Update existing submissions with ones that have newer timestamps."
     )
-    
-    def init_args(self):
-        if len(self.extra_args) == 1:
-            self.assignment_id = self.extra_args[0]
-        else:
-            self.fail("Invalid number of argument, call as `nbgrader release ASSIGNMENT`.")
 
     def _path_to_record(self, path):
         filename = os.path.split(path)[1]
@@ -89,10 +83,10 @@ class CollectApp(TransferApp):
         username = filename_list[0]
         timestamp = parse_utc(filename_list[2])
         return {'username': username, 'filename': filename, 'timestamp': timestamp}
-    
+
     def _sort_by_timestamp(self, records):
         return sorted(records, key=lambda item: item['timestamp'], reverse=True)
-    
+
     def init_src(self):
         self.course_path = os.path.join(self.exchange_directory, self.course_id)
         self.inbound_path = os.path.join(self.course_path, 'inbound')
@@ -135,7 +129,7 @@ class CollectApp(TransferApp):
                     self.log.info("Updating submission: {} {}".format(student_id, self.assignment_id))
                     shutil.rmtree(dest_path)
                 else:
-                    self.log.info("Collecting submission: {} {}".format(student_id, self.assignment_id))  
+                    self.log.info("Collecting submission: {} {}".format(student_id, self.assignment_id))
                 self.do_copy(src_path, dest_path)
             else:
                 if self.update:

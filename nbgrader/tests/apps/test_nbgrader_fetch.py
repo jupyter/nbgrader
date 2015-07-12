@@ -15,7 +15,7 @@ class TestNbGraderFetch(BaseTestApp):
 
     def _fetch(self, assignment, exchange, flags="", retcode=0):
         run_command(
-            'nbgrader fetch abc101 {} '
+            'nbgrader fetch {} --course abc101  '
             '--TransferApp.exchange_directory={} '
             '{}'.format(assignment, exchange, flags),
             retcode=retcode)

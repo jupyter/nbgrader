@@ -14,15 +14,16 @@ class TestNbGraderCollect(BaseTestApp):
             '--NbGraderConfig.course_id=abc101 '
             '--TransferApp.exchange_directory={} '.format(assignment, exchange))
         run_command(
-            'nbgrader fetch abc101 {} '
+            'nbgrader fetch {} --course abc101 '
             '--TransferApp.exchange_directory={} '.format(assignment, exchange))
 
     def _submit(self, assignment, exchange):
         run_command(
-            'nbgrader submit {} abc101 '
+            'nbgrader submit {} --course abc101 '
             '--TransferApp.exchange_directory={} '.format(assignment, exchange))
 
     def _collect(self, assignment, exchange, flags="", retcode=0):
+        print("Calling collect with assignment: " + assignment)
         run_command(
             'nbgrader collect {} '
             '--NbGraderConfig.course_id=abc101 '

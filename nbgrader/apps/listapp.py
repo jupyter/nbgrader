@@ -36,64 +36,56 @@ class ListApp(TransferApp):
     examples = """
         List assignments in the nbgrader exchange. For the usage of instructors
         and students.
-        
+
         Students
         ========
-        
+
         To list assignments for a course, you must first know the `course_id` for
         your course. If you don't know it, ask your instructor.
-        
+
         To list the released assignments for the course `phys101`:
-        
+
             nbgrader list phys101
-        
+
         Instructors
         ===========
-        
+
         To list outbound (released) or inbound (submitted) assignments for a course,
         you must configure the `course_id` in your config file or the command line.
-        
+
         To see all of the released assignments, run
-        
+
             nbgrader list  # course_id in the config file
-        
+
         or
-        
-            nbgrader list phys101  # course_id provided
-            
+
+            nbgrader list --course phys101  # course_id provided
+
         To see the inbound (submitted) assignments:
-        
+
             nbgrader list --inbound phys101
-        
+
         You can use the `--student` and `--assignment` options to filter the list
         by student or assignment:
-        
+
             nbgrader list --inbound --student=student1 --assignment=assignment1 phys101
-        
+
         If a student has submitted an assignment multiple times, the `list` command
         will show all submissions with their timestamps.
-        
+
         The `list` command can optionally remove listed assignments by providing the
         `--remove` flag:
-        
+
             nbgrader list --inbound --remove --student=student1 phys101
         """
 
     inbound = Bool(False, config=True, help="List inbound files rather than outbound.")
-    
+
     remove = Bool(False, config=True, help="Remove, rather than list files.")
-    
-    def init_args(self):
-        if len(self.extra_args) == 0:
-            pass
-        elif len(self.extra_args) == 1:
-            self.course_id = self.extra_args[0]
-        else:
-            self.fail("Invalid number of argument, call as `nbgrader list COURSE`.")
 
     def init_src(self):
         pass
-    
+
     def init_dest(self):
         self.course_path = os.path.join(self.exchange_directory, self.course_id)
         self.outbound_path = os.path.join(self.course_path, 'outbound')
@@ -110,7 +102,7 @@ class ListApp(TransferApp):
 
     def copy_files(self):
         pass
-    
+
     def list_files(self):
         """List files."""
         if self.inbound:
@@ -124,7 +116,7 @@ class ListApp(TransferApp):
             self.log.info("Released assignments:")
             for path in self.assignments:
                 self.log.info("{} {}".format(self.course_id, os.path.split(path)[1]))
-    
+
     def remove_files(self):
         """List and remove files."""
         if self.inbound:
@@ -142,10 +134,10 @@ class ListApp(TransferApp):
                 shutil.rmtree(path)
 
     def start(self):
-        super(ListApp, self).start() 
+        if len(self.extra_args) == 0:
+            self.extra_args = ["*"] # allow user to not put in assignment
+        super(ListApp, self).start()
         if self.remove:
             self.remove_files()
         else:
             self.list_files()
-
-

@@ -16,12 +16,12 @@ class TestNbGraderSubmit(BaseTestApp):
             '--NbGraderConfig.course_id=abc101 '
             '--TransferApp.exchange_directory={} '.format(assignment, exchange))
         run_command(
-            'nbgrader fetch abc101 {} '
+            'nbgrader fetch {} --course abc101 '
             '--TransferApp.exchange_directory={} '.format(assignment, exchange))
 
     def _submit(self, assignment, exchange, flags="", retcode=0):
         run_command(
-            'nbgrader submit {} abc101 '
+            'nbgrader submit {} --course abc101 '
             '--TransferApp.exchange_directory={} '
             '{}'.format(assignment, exchange, flags),
             retcode=retcode)
