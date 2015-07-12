@@ -134,7 +134,8 @@ class ListApp(TransferApp):
                 shutil.rmtree(path)
 
     def start(self):
-        self.extra_args = ["*"] # allow user to not put in assignment
+        if len(self.extra_args) == 0:
+            self.extra_args = ["*"] # allow user to not put in assignment
         super(ListApp, self).start()
         if self.remove:
             self.remove_files()
