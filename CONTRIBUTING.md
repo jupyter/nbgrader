@@ -98,7 +98,18 @@ For the time being, we are committing JavaScript dependencies to the repository 
     
     npm install phantomjs
 
-If you need to add a new library, or update the version of a library, you will need to have `npm` installed (on OS X, you can install it with Homebrew, and on Linux, you can install it with the relevant package manager).
+To install npm on OS X, use Homebrew to install node (npm will be installed along with node):
+
+    brew update
+    brew install node
+
+To install npm on Linux with apt-get, use:
+
+    apt-get update
+    apt-get install node
+    apt-get install npm
+
+If you need to add a new library, or update the version of a library, you will need to have `npm` installed.
 Modify the [bower.json](bower.json) file in the root of the repository and then run:
 
     invoke js
