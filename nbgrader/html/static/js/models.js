@@ -17,9 +17,6 @@ var GradeUI = Backbone.View.extend({
         this.listenTo(this.model, "sync", this.animateSaved);
 
         this.$score.attr("placeholder", this.model.get("auto_score"));
-
-        autosize(document.querySelectorAll('textarea'));        
-
         this.render();
     },
 
@@ -124,6 +121,9 @@ var CommentUI = Backbone.View.extend({
         this.listenTo(this.model, "sync", this.animateSaved);
 
         this.$comment.attr("placeholder", this.model.get("auto_comment") || "Comments");
+
+        autosize(document.querySelectorAll('textarea'));        
+
         this.render();
     },
 
