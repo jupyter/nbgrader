@@ -178,7 +178,7 @@ span.nbgrader-label {
 {%- if cell.metadata.nbgrader.solution and cell.metadata.nbgrader.comment -%}
 <div class="panel-footer">
   <div>
-    <b>Comments:</b> {{ cell.metadata.nbgrader.comment }}
+    <b>Comments:</b> {{ cell.metadata.nbgrader.comment | markdown2html | strip_files_prefix }}
   </div>
 </div>
 {%- endif -%}
