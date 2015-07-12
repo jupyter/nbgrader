@@ -94,6 +94,7 @@ div.nbgrader_cell .panel-body {
 .comment {
     width: 100%;
     margin-top: 0.5em;
+    max-height: 150px;
 }
 
 div.nbgrader_cell .input_area {
