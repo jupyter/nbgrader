@@ -1,4 +1,0 @@
-ipython==3.2
-sqlalchemy
-Flask
-python-dateutil
