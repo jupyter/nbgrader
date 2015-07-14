@@ -6,33 +6,42 @@
 
 A system for assigning and grading notebooks.
 
-**Warning: nbgrader is not yet stable and is under active development. The following instructions are currently incomplete and may change!**
-
 [Documentation can be found on Read the Docs.](http://nbgrader.readthedocs.org)
 
 ## Installation
 
-Developers can install a development version following the instructions in the [contributing guidelines and documentation](CONTRIBUTING.md). All other users can install using the instructions below:
+If you want to develop on nbgrader, please follow the [development installation instructions](CONTRIBUTING.md#development-installation).
 
-To install the most recent (development, and possibly unstable!) version of nbgrader, run:
+### Dependencies
 
-```bash
-pip install git+git://github.com/jupyter/nbgrader.git@master
-```
+Before installing nbgrader, please ensure that the IPython notebook is properly installed.
+Note that it is not sufficient to just install IPython; you must specifically install the notebook components as well.
+
+If using conda, run
+
+    conda install ipython-notebook=3.2
+
+Otherwise, run
+
+    pip install ipython[notebook]==3.2
+
+### Installing nbgrader
+
+Otherwise, to install the current version of nbgrader:
+
+    pip install nbgrader
 
 You can then install and activate the nbgrader assignment toolbar extension with:
 
-```bash
-nbgrader extension install
-nbgrader extension activate
-```
+    nbgrader extension install
+    nbgrader extension activate
 
-If you want to install the extension for only yourself (and not systemwide), use `nbgrader extension install --user`. If you don't want to have to reinstall the extension when nbgrader is updated, use `nbgrader extension install --symlink`. To get help and see all the options you can pass while installing/activating the nbgrader notebook extension, use:
+If you want to install the extension for only yourself (and not systemwide), use `nbgrader extension install --user`.
+If you don't want to have to reinstall the extension when nbgrader is updated, use `nbgrader extension install --symlink`.
+To get help and see all the options you can pass while installing/activating the nbgrader notebook extension, use:
 
-```bash
-nbgrader extension install --help-all
-nbgrader extension activate --help-all
-```
+    nbgrader extension install --help-all
+    nbgrader extension activate --help-all
 
 ## Contributing
 
