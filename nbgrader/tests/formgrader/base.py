@@ -78,7 +78,9 @@ class BaseTestFormgrade(object):
             if (!(formgrader.comments !== undefined && formgrader.comments.loaded)) {
                 return false;
             }
-
+            if(autosize == undefined) {
+                return false;
+            }
             return true;
             """)
         WebDriverWait(self.browser, 30).until(page_loaded)
