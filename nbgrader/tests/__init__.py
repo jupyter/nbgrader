@@ -102,14 +102,18 @@ def copy_coverage_files():
             shutil.copyfile(filename, os.path.join(root, filename))
 
 
-def run_command(command, retcode=0):
-    proc = start_subprocess(command, shell=True, stdout=sp.PIPE, stderr=sp.STDOUT)
-    true_retcode = proc.wait()
+def run_command(command, retcode=0, coverage=True):
+    proc = start_subprocess(command, stdout=sp.PIPE, stderr=sp.STDOUT)
     output = proc.communicate()[0].decode()
     output = output.replace("Coverage.py warning: No data was collected.\n", "")
+    print(output)
+
+    true_retcode = proc.poll()
     if true_retcode != retcode:
-        print(output)
         raise AssertionError(
             "process returned an unexpected return code: {}".format(true_retcode))
-    copy_coverage_files()
+
+    if coverage:
+        copy_coverage_files()
+
     return output

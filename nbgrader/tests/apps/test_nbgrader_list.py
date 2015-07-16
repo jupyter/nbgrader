@@ -10,30 +10,41 @@ class TestNbGraderList(BaseTestApp):
 
     def _release(self, assignment, exchange):
         self._copy_file("files/test.ipynb", "release/{}/p1.ipynb".format(assignment))
-        run_command(
-            'nbgrader release {} '
-            '--NbGraderConfig.course_id=abc101 '
-            '--TransferApp.exchange_directory={}'.format(assignment, exchange))
+        run_command([
+            "nbgrader", "release", assignment,
+            "--NbGraderConfig.course_id=abc101",
+            "--TransferApp.exchange_directory={}".format(exchange)
+        ])
 
     def _fetch(self, assignment, exchange):
-        run_command(
-            'nbgrader fetch {} --course abc101 '
-            '--TransferApp.exchange_directory={}'.format(assignment, exchange))
+        run_command([
+            "nbgrader", "fetch", assignment,
+            "--course", "abc101",
+            "--TransferApp.exchange_directory={}".format(exchange)
+        ])
 
     def _submit(self, assignment, exchange):
-        run_command(
-            'nbgrader submit {} --course abc101 '
-            '--TransferApp.exchange_directory={}'.format(assignment, exchange))
+        run_command([
+            "nbgrader", "submit", assignment,
+            "--course", "abc101",
+            "--TransferApp.exchange_directory={}".format(exchange)
+        ])
 
-    def _list(self, assignment, exchange, flags='', retcode=0):
-        return run_command(
-            'nbgrader list {} --course abc101 '
-            '--TransferApp.exchange_directory={} '
-            '{}'.format(assignment, exchange, flags), retcode=retcode)
+    def _list(self, assignment, exchange, flags=None, retcode=0):
+        cmd = [
+            "nbgrader", "list", assignment,
+            "--course", "abc101",
+            "--TransferApp.exchange_directory={}".format(exchange)
+        ]
+
+        if flags is not None:
+            cmd.extend(flags)
+
+        return run_command(cmd, retcode=retcode)
 
     def test_help(self):
         """Does the help display without error?"""
-        run_command("nbgrader list --help-all")
+        run_command(["nbgrader", "list", "--help-all"])
 
     def test_list_released(self, exchange):
         self._release("ps1", exchange)
@@ -54,7 +65,7 @@ class TestNbGraderList(BaseTestApp):
 
     def test_list_remove_outbound(self, exchange):
         self._release("ps1", exchange)
-        self._list("ps1", exchange, flags="--remove")
+        self._list("ps1", exchange, flags=["--remove"])
         assert self._list("ps1", exchange) == dedent(
             """
             [ListApp | INFO] Released assignments:
@@ -62,7 +73,7 @@ class TestNbGraderList(BaseTestApp):
         ).lstrip()
 
         self._release("ps2", exchange)
-        self._list("ps2", exchange, flags="--remove")
+        self._list("ps2", exchange, flags=["--remove"])
         assert self._list("ps2", exchange) == dedent(
             """
             [ListApp | INFO] Released assignments:
@@ -72,7 +83,7 @@ class TestNbGraderList(BaseTestApp):
     def test_list_submitted(self, exchange):
         self._release("ps1", exchange)
 
-        assert self._list("ps1", exchange, flags='--inbound') == dedent(
+        assert self._list("ps1", exchange, flags=['--inbound']) == dedent(
             """
             [ListApp | INFO] Submitted assignments:
             """
@@ -82,7 +93,7 @@ class TestNbGraderList(BaseTestApp):
         self._submit("ps1", exchange)
         filename, = os.listdir(os.path.join(exchange, "abc101/inbound"))
         timestamp = filename.split("+")[2]
-        assert self._list("ps1", exchange, flags='--inbound') == dedent(
+        assert self._list("ps1", exchange, flags=['--inbound']) == dedent(
             """
             [ListApp | INFO] Submitted assignments:
             [ListApp | INFO] abc101 {} ps1 {}
@@ -92,7 +103,7 @@ class TestNbGraderList(BaseTestApp):
         self._submit("ps1", exchange)
         filenames = sorted(os.listdir(os.path.join(exchange, "abc101/inbound")))
         timestamps = [x.split("+")[2] for x in filenames]
-        assert self._list("ps1", exchange, flags='--inbound') == dedent(
+        assert self._list("ps1", exchange, flags=['--inbound']) == dedent(
             """
             [ListApp | INFO] Submitted assignments:
             [ListApp | INFO] abc101 {} ps1 {}
@@ -109,8 +120,8 @@ class TestNbGraderList(BaseTestApp):
         self._submit("ps1", exchange)
         self._submit("ps2", exchange)
 
-        self._list("ps1", exchange, flags="--inbound --remove")
-        assert self._list("ps1", exchange, flags='--inbound') == dedent(
+        self._list("ps1", exchange, flags=["--inbound", "--remove"])
+        assert self._list("ps1", exchange, flags=['--inbound']) == dedent(
             """
             [ListApp | INFO] Submitted assignments:
             """
@@ -119,10 +130,10 @@ class TestNbGraderList(BaseTestApp):
         self._submit("ps1", exchange)
         self._submit("ps2", exchange)
 
-        self._list("ps2", exchange, flags="--inbound --remove")
+        self._list("ps2", exchange, flags=["--inbound", "--remove"])
         filename = sorted(os.listdir(os.path.join(exchange, "abc101/inbound")))[0]
         timestamp = filename.split("+")[2]
-        assert self._list("ps2", exchange, flags='--inbound') == dedent(
+        assert self._list("ps2", exchange, flags=['--inbound']) == dedent(
             """
             [ListApp | INFO] Submitted assignments:
             """.format(os.environ['USER'], timestamp)

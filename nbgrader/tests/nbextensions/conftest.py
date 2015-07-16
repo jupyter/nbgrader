@@ -31,7 +31,7 @@ def ipythondir(request):
     ipythondir = tempfile.mkdtemp()
 
     # ensure IPython dir exists.
-    sp.call(['ipython', 'profile', 'create', '--ipython-dir', ipythondir])
+    run_command(['ipython', 'profile', 'create', '--ipython-dir', ipythondir])
 
     def fin():
         shutil.rmtree(ipythondir)
@@ -42,8 +42,8 @@ def ipythondir(request):
 
 @pytest.fixture(scope="module")
 def nbserver(request, tempdir, ipythondir):
-    run_command("nbgrader extension install --nbextensions={}".format(os.path.join(ipythondir, "nbextensions")))
-    run_command("nbgrader extension activate --ipython-dir={}".format(ipythondir))
+    run_command(["nbgrader", "extension", "install", "--nbextensions", os.path.join(ipythondir, "nbextensions")])
+    run_command(["nbgrader", "extension", "activate", "--ipython-dir", ipythondir])
 
     # bug in IPython cannot use --profile-dir
     # that does not set it for everything.
