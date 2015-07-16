@@ -27,7 +27,7 @@ Otherwise, run
 
 ### Installing nbgrader
 
-Otherwise, to install the current version of nbgrader:
+After installing the above dependencies, you can install the current version of nbgrader with:
 
     pip install nbgrader
 
