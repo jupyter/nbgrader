@@ -6,7 +6,7 @@ import sys
 import nbgrader.apps
 
 from textwrap import dedent
-from clear_docs import echo, run, clear_notebooks
+from clear_docs import run, clear_notebooks
 
 try:
     from StringIO import StringIO # Python 2
@@ -42,7 +42,7 @@ def autogen_command_line(root):
         'ValidateApp'
     ]
 
-    echo('Generating command line documentation')
+    print('Generating command line documentation')
     orig_stdout = sys.stdout
 
     for app in apps:
@@ -76,7 +76,7 @@ def autogen_config(root):
         """
     )
 
-    echo('Generating example configuration file')
+    print('Generating example configuration file')
     config = nbgrader.apps.NbGraderApp().generate_config_file()
     config = "\n".join(["    " + x for x in config.split("\n")])
     destination = os.path.join(root, 'config_options.rst')
@@ -88,7 +88,7 @@ def autogen_config(root):
 
 def build_notebooks(root):
     """Execute notebooks and convert them to rst"""
-    echo("Executing and converting notebooks in '{}'...".format(os.path.abspath(root)))
+    print("Executing and converting notebooks in '{}'...".format(os.path.abspath(root)))
 
     cwd = os.getcwd()
     os.chdir(root)

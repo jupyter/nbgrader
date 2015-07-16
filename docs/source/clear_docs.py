@@ -10,12 +10,8 @@ except ImportError:
     print("Warning: IPython could not be imported, some tasks may not work")
 
 
-def echo(msg):
-    print("\033[1;37m{0}\033[0m".format(msg))
-
-
 def run(cmd):
-    echo(cmd)
+    print(cmd)
     proc = sp.Popen(cmd, shell=True, stdout=sp.PIPE, stderr=sp.STDOUT)
     stdout, _ = proc.communicate()
     if proc.poll() != 0:
@@ -38,7 +34,7 @@ def clear_notebooks(root):
     # cleanup ignored files
     run('git clean -fdX {}'.format(root))
 
-    echo("Clearing outputs of notebooks in '{}'...".format(os.path.abspath(root)))
+    print("Clearing outputs of notebooks in '{}'...".format(os.path.abspath(root)))
     preprocessor = ClearOutputPreprocessor()
 
     for dirpath, dirnames, filenames in os.walk(root):
@@ -66,7 +62,7 @@ def clear_notebooks(root):
                     write(new_nb, fh, 4)
 
                 if orig_nb != new_nb:
-                    echo("Cleared '{}'".format(pth))
+                    print("Cleared '{}'".format(pth))
 
 if __name__ == "__main__":
     root = os.path.abspath(os.path.dirname(__file__))
