@@ -23,6 +23,11 @@ import os
 
 if os.environ.get('READTHEDOCS', ''):
     # RTD doesn't use the Makefile, so re-run autogen_config.py here.
+    with open('../clear_docs.py') as f:
+        exec(compile(f.read(), 'clear_docs.py', 'exec'), {})
+
+    with open('../build_docs.py') as f:
+        exec(compile(f.read(), 'build_docs.py', 'exec'), {})
 
     with open('../autogen_config.py') as f:
         exec(compile(f.read(), 'autogen_config.py', 'exec'), {})

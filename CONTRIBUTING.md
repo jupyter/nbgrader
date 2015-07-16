@@ -95,28 +95,22 @@ You will, however, still need to run `invoke clear_docs` or the Travis CI build 
 ### Building locally
 
 Our docs are built with [nbconvert](http://nbconvert.readthedocs.org/en/latest/), [Pandoc](http://pandoc.org/), and [Sphinx](http://sphinx-doc.org/).
-There are two steps to building the docs locally.
-
-First, the notebooks must be executed and converted to rst or html (the actual documentation notebooks will be converted to rst, and example notebooks will be converted to html).
-To do this, run the following command from the root of the repository (make sure you have cleared the docs first, too):
+To build the docs locally, run the following command:
 
     invoke docs
 
-Second, the rst files must be converted to html using Sphinx.
-This is different from the html produced by `nbconvert` in the previous step, as it includes more complicated operations such as automatically generating API docs from docstring, creating links between docs, etc.
-To generate the Sphinx docs, run the following command from the root of the repository:
+This will perform a few different steps:
 
-    invoke sphinx
+1. The notebooks are executed and converted to rst or html (the actual documentation notebooks will be converted to rst, and example notebooks will be converted to html) using the `build_docs.py` script.
+2. The command line documentation is automatically generated using the `autogen_command_line.py` and `autogen_config.py` scripts.
+3. The rst files are converted to html using Sphinx.
 
-This will produce HTML files in `docs/build/html`.
+After running `invoke docs`, the resultant HTML files will be in `docs/build/html`.
 You can open these files in your browser to preview what the documentation will look like (note, however, that the theme used by Read The Docs is different from the default Sphinx theme, so the styling will look different).
 
 ### Automatic builds
 
-When a commit is made on the `master` branch, documentation is automatically built in two steps:
-
-1. Travis CI will perform the step of `invoke docs` and automatically commit the results to the `docs` branch of this repository.
-2. Read The Docs will perform the step of building the Sphinx documentation, and render it at [nbgrader.readthedocs.org](http://nbgrader.readthedocs.org)
+When a commit is made on the `master` branch, documentation is automatically built by Read The Docs and rendered at [nbgrader.readthedocs.org](http://nbgrader.readthedocs.org).
 
 ## JavaScript dependencies
 

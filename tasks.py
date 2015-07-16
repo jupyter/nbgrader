@@ -1,11 +1,8 @@
 import os
 import re
-import shutil
-import glob
 
 from invoke import task
 from invoke import run as _run
-from copy import deepcopy
 from textwrap import dedent
 
 
@@ -28,8 +25,7 @@ def _check_if_directory_in_path(pth, target):
 
 
 try:
-    from IPython.nbformat import read, write
-    from IPython.nbconvert.preprocessors import ClearOutputPreprocessor
+    from IPython.nbformat import read
 except ImportError:
     echo("Warning: IPython could not be imported, some tasks may not work")
 
@@ -79,154 +75,14 @@ def check_docs_input(root='docs/source'):
 
 
 @task
-def docs(root='docs'):
-    """Build documentation."""
-    echo("Building documentation from '{}'...".format(os.path.abspath(root)))
-
-    cwd = os.getcwd()
-    os.chdir(root)
-
-    # cleanup ignored files
-    run('git clean -fdX')
-
-    # make sure all the docs have been cleared
-    check_docs_input(root='source')
-
-    # execute the docs
-    run(
-        'ipython nbconvert '
-        '--to notebook '
-        '--execute '
-        '--FilesWriter.build_directory=source/user_guide '
-        '--profile-dir=/tmp '
-        'source/user_guide/*.ipynb')
-
-    # convert to rst
-    run(
-        'ipython nbconvert '
-        '--to rst '
-        '--FilesWriter.build_directory=source/user_guide '
-        '--profile-dir=/tmp '
-        'source/user_guide/*.ipynb')
-
-    # hack to convert links to ipynb files to html
-    for filename in glob.glob('source/user_guide/*.ipynb'):
-        filename = os.path.splitext(filename)[0] + '.rst'
-        with open(filename, 'r') as fh:
-            source = fh.read()
-        source = re.sub(r"<([^><]*)\.ipynb>", r"<\1.html>", source)
-        with open(filename, 'w') as fh:
-            fh.write(source)
-
-    # convert examples to html
-    for dirname, dirnames, filenames in os.walk('source/user_guide'):
-        if dirname == 'source/user_guide':
-            continue
-        if dirname == 'source/user_guide/images':
-            continue
-
-        build_directory = os.path.join('source', 'extra_files', os.path.relpath(dirname, 'source'))
-        if not os.path.exists(build_directory):
-            os.makedirs(build_directory)
-
-        for filename in filenames:
-            if filename.endswith('.ipynb'):
-                run(
-                    "ipython nbconvert "
-                    "--to html "
-                    "--FilesWriter.build_directory='{}' "
-                    "--profile-dir=/tmp "
-                    "'{}'".format(build_directory, os.path.join(dirname, filename)))
-
-            else:
-                shutil.copy(
-                    os.path.join(dirname, filename),
-                    os.path.join(build_directory, filename))
-
-    os.chdir(cwd)
-
-
-@task
-def clear_docs(root='docs/source'):
-    """Clear the outputs of documentation notebooks."""
-
-    # cleanup ignored files
-    run('git clean -fdX {}'.format(root))
-
-    echo("Clearing outputs of notebooks in '{}'...".format(os.path.abspath(root)))
-    preprocessor = ClearOutputPreprocessor()
-
-    for dirpath, dirnames, filenames in os.walk(root):
-        is_submitted = _check_if_directory_in_path(dirpath, 'submitted')
-
-        for filename in sorted(filenames):
-            if os.path.splitext(filename)[1] == '.ipynb':
-                # read in the notebook
-                pth = os.path.join(dirpath, filename)
-                with open(pth, 'r') as fh:
-                    orig_nb = read(fh, 4)
-
-                # copy the original notebook
-                new_nb = deepcopy(orig_nb)
-
-                # check outputs of all the cells
-                if not is_submitted:
-                    new_nb = preprocessor.preprocess(new_nb, {})[0]
-
-                # clear metadata
-                new_nb.metadata = {}
-
-                # write the notebook back to disk
-                with open(pth, 'w') as fh:
-                    write(new_nb, fh, 4)
-
-                if orig_nb != new_nb:
-                    print("Cleared '{}'".format(pth))
-
-
-@task
-def publish_docs(github_token, git_name, git_email):
-    echo("Publishing documentation to 'docs' branch...")
-
-    # configure git credentials
-    run("git config user.name '{}'".format(git_name.strip()))
-    run("git config user.email '{}'".format(git_email.strip()))
-    run("git config credential.helper 'store --file=.git/credentials'")
-    with open(".git/credentials", "w") as fh:
-        fh.write("https://{}:@github.com".format(github_token.strip()))
-    run('shasum .git/credentials')
-
-    # setup the remote
-    run('git remote set-url --push origin https://github.com/jupyter/nbgrader.git')
-    run('git remote set-branches --add origin docs')
-    run('git fetch origin')
-    run('git branch docs origin/docs')
-
-    # get the current commit
-    ref = run('git rev-parse HEAD', pty=False, hide=True).stdout.strip()
-    commit = run('git rev-parse --short {}'.format(ref), pty=False, hide=True).stdout.strip()
-
-    # switch to the docs branch, and get the latest version from master
-    run('git checkout docs')
-    run('rm -rf *')
-    run('ls -a')
-    run('git checkout {} -- .'.format(commit))
-    run('git reset HEAD -- .travis.yml .gitignore')
-    run('git checkout -- .travis.yml .gitignore')
-
-    docs(root='docs')
-
-    # commit the changes
-    run('git add -A -f')
-    run("git commit -m 'Update docs ({})'".format(commit))
-
-    # push to origin
-    run('git push -v origin docs')
-
-
-@task
-def sphinx():
+def docs():
+    check_docs_input()
     run('make -C docs html')
+
+
+@task
+def clear_docs():
+    run('python docs/clear_docs.py')
 
 
 def _run_tests(mark=None, skip=None):
@@ -276,7 +132,7 @@ def _run_tests(mark=None, skip=None):
 
 
 @task
-def tests(group='all', python_version=None, pull_request=None, github_token="", git_name="", git_email="", skip=None):
+def tests(group='all', skip=None):
     if group == 'python':
         _run_tests(mark="not js", skip=skip)
 
@@ -284,10 +140,7 @@ def tests(group='all', python_version=None, pull_request=None, github_token="", 
         _run_tests(mark="js", skip=skip)
 
     elif group == 'docs':
-        if python_version == '3.4' and pull_request == 'false':
-            publish_docs(github_token, git_name, git_email)
-        else:
-            docs(root='docs')
+        docs()
 
     elif group == 'all':
         _run_tests(skip=skip)
