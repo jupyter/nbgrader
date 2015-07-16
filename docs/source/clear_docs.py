@@ -18,8 +18,8 @@ def run(cmd):
     echo(cmd)
     proc = sp.Popen(cmd, shell=True, stdout=sp.PIPE, stderr=sp.STDOUT)
     stdout, _ = proc.communicate()
-    print(stdout.decode())
     if proc.poll() != 0:
+        print(stdout.decode())
         print("Command exited with code: {}".format(proc.poll()))
         sys.exit(1)
 
