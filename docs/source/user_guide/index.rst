@@ -27,3 +27,4 @@ the student side.
     08_fetching_assignments
     09_submitting_assignments
     10_collecting_assignments
+    11_jupyterhub_config
