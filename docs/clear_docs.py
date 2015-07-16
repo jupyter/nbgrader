@@ -21,6 +21,7 @@ def run(cmd):
     print(stdout.decode())
     if proc.poll() != 0:
         print("Command exited with code: {}".format(proc.poll()))
+        sys.exit(1)
 
 
 def _check_if_directory_in_path(pth, target):

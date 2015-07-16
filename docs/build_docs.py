@@ -17,6 +17,7 @@ def run(cmd):
     print(stdout.decode())
     if proc.poll() != 0:
         print("Command exited with code: {}".format(proc.poll()))
+        sys.exit(1)
 
 
 def build_docs(root='.'):
