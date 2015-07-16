@@ -3,3 +3,4 @@ sqlalchemy
 Flask
 python-dateutil
 invoke
+pygments
