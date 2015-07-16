@@ -8,21 +8,27 @@ class TestNbGraderFetch(BaseTestApp):
 
     def _release(self, assignment, exchange):
         self._copy_file("files/test.ipynb", "release/ps1/p1.ipynb")
-        run_command(
-            'nbgrader release {} '
-            '--NbGraderConfig.course_id=abc101 '
-            '--TransferApp.exchange_directory={} '.format(assignment, exchange))
+        run_command([
+            "nbgrader", "release", assignment,
+            "--NbGraderConfig.course_id=abc101",
+            "--TransferApp.exchange_directory={}".format(exchange)
+        ])
 
-    def _fetch(self, assignment, exchange, flags="", retcode=0):
-        run_command(
-            'nbgrader fetch {} --course abc101  '
-            '--TransferApp.exchange_directory={} '
-            '{}'.format(assignment, exchange, flags),
-            retcode=retcode)
+    def _fetch(self, assignment, exchange, flags=None, retcode=0):
+        cmd = [
+            "nbgrader", "fetch", assignment,
+            "--course", "abc101",
+            "--TransferApp.exchange_directory={}".format(exchange)
+        ]
+
+        if flags is not None:
+            cmd.extend(flags)
+
+        run_command(cmd, retcode=retcode)
 
     def test_help(self):
         """Does the help display without error?"""
-        run_command("nbgrader fetch --help-all")
+        run_command(["nbgrader", "fetch", "--help-all"])
 
     def test_fetch(self, exchange):
         self._release("ps1", exchange)

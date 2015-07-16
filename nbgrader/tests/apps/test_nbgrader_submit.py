@@ -11,24 +11,32 @@ class TestNbGraderSubmit(BaseTestApp):
 
     def _release_and_fetch(self, assignment, exchange):
         self._copy_file("files/test.ipynb", "release/ps1/p1.ipynb")
-        run_command(
-            'nbgrader release {} '
-            '--NbGraderConfig.course_id=abc101 '
-            '--TransferApp.exchange_directory={} '.format(assignment, exchange))
-        run_command(
-            'nbgrader fetch {} --course abc101 '
-            '--TransferApp.exchange_directory={} '.format(assignment, exchange))
+        run_command([
+            "nbgrader", "release", assignment,
+            "--NbGraderConfig.course_id=abc101",
+            "--TransferApp.exchange_directory={}".format(exchange)
+        ])
+        run_command([
+            "nbgrader", "fetch", assignment,
+            "--course", "abc101",
+            "--TransferApp.exchange_directory={}".format(exchange)
+        ])
 
-    def _submit(self, assignment, exchange, flags="", retcode=0):
-        run_command(
-            'nbgrader submit {} --course abc101 '
-            '--TransferApp.exchange_directory={} '
-            '{}'.format(assignment, exchange, flags),
-            retcode=retcode)
+    def _submit(self, assignment, exchange, flags=None, retcode=0):
+        cmd = [
+            "nbgrader", "submit", assignment,
+            "--course", "abc101",
+            "--TransferApp.exchange_directory={}".format(exchange)
+        ]
+
+        if flags is not None:
+            cmd.extend(flags)
+
+        run_command(cmd, retcode=retcode)
 
     def test_help(self):
         """Does the help display without error?"""
-        run_command("nbgrader submit --help-all")
+        run_command(["nbgrader", "submit", "--help-all"])
 
     def test_submit(self, exchange):
         self._release_and_fetch("ps1", exchange)

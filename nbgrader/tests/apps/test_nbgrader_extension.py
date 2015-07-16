@@ -23,13 +23,13 @@ class TestNbGraderExtension(BaseTestApp):
 
     def test_help(self):
         """Does the help display without error?"""
-        run_command("nbgrader extension --help-all")
-        run_command("nbgrader extension install --help-all")
-        run_command("nbgrader extension activate --help-all")
-        run_command("nbgrader extension deactivate --help-all")
+        run_command(["nbgrader", "extension", "--help-all"])
+        run_command(["nbgrader", "extension", "install", "--help-all"])
+        run_command(["nbgrader", "extension", "activate", "--help-all"])
+        run_command(["nbgrader", "extension", "deactivate", "--help-all"])
 
     def test_install_system(self, temp_dir):
-        run_command("nbgrader extension install --prefix={}".format(temp_dir))
+        run_command(["nbgrader", "extension", "install", "--prefix", temp_dir])
 
         # check the extension file were copied
         nbextension_dir = os.path.join(temp_dir, "share", "jupyter", "nbextensions", "nbgrader")
@@ -38,7 +38,7 @@ class TestNbGraderExtension(BaseTestApp):
 
     def test_install_user(self, temp_dir):
         nbextension_dir = os.path.join(temp_dir, "nbextensions")
-        run_command("nbgrader extension install --nbextensions={}".format(nbextension_dir))
+        run_command(["nbgrader", "extension", "install", "--nbextensions", nbextension_dir])
 
         # check the extension file were copied
         assert os.path.isfile(os.path.join(nbextension_dir, "nbgrader", "create_assignment.js"))
@@ -46,8 +46,8 @@ class TestNbGraderExtension(BaseTestApp):
 
     def test_activate(self, temp_dir):
         nbextension_dir = os.path.join(temp_dir, "nbextensions")
-        run_command("nbgrader extension install --nbextensions={}".format(nbextension_dir))
-        run_command("nbgrader extension activate --ipython-dir={}".format(temp_dir))
+        run_command(["nbgrader", "extension", "install", "--nbextensions", nbextension_dir])
+        run_command(["nbgrader", "extension", "activate", "--ipython-dir", temp_dir])
 
         # check the extension file were copied
         assert os.path.isfile(os.path.join(nbextension_dir, "nbgrader", "create_assignment.js"))
@@ -59,8 +59,8 @@ class TestNbGraderExtension(BaseTestApp):
 
     def test_activate_custom_profile(self, temp_dir):
         nbextension_dir = os.path.join(temp_dir, "nbextensions")
-        run_command("nbgrader extension install --nbextensions={}".format(nbextension_dir))
-        run_command("nbgrader extension activate --ipython-dir={} --profile=foo".format(temp_dir))
+        run_command(["nbgrader", "extension", "install", "--nbextensions", nbextension_dir])
+        run_command(["nbgrader", "extension", "activate", "--ipython-dir", temp_dir, "--profile", "foo"])
 
         # check the extension file were copied
         assert os.path.isfile(os.path.join(nbextension_dir, "nbgrader", "create_assignment.js"))
@@ -72,8 +72,8 @@ class TestNbGraderExtension(BaseTestApp):
 
     def test_deactivate(self, temp_dir):
         nbextension_dir = os.path.join(temp_dir, "nbextensions")
-        run_command("nbgrader extension install --nbextensions={}".format(nbextension_dir))
-        run_command("nbgrader extension activate --ipython-dir={}".format(temp_dir))
+        run_command(["nbgrader", "extension", "install", "--nbextensions", nbextension_dir])
+        run_command(["nbgrader", "extension", "activate", "--ipython-dir", temp_dir])
 
         # check the extension file were copied
         assert os.path.isfile(os.path.join(nbextension_dir, "nbgrader", "create_assignment.js"))
@@ -95,7 +95,7 @@ class TestNbGraderExtension(BaseTestApp):
 
         self._assert_is_activated(config_file, key=okey)
 
-        run_command("nbgrader extension deactivate --ipython-dir={}".format(temp_dir))
+        run_command(["nbgrader", "extension", "deactivate", "--ipython-dir", temp_dir])
 
         # check that it is deactivated
         self._assert_is_deactivated(config_file)

@@ -9,27 +9,35 @@ class TestNbGraderCollect(BaseTestApp):
 
     def _release_and_fetch(self, assignment, exchange):
         self._copy_file("files/test.ipynb", "release/ps1/p1.ipynb")
-        run_command(
-            'nbgrader release {} '
-            '--NbGraderConfig.course_id=abc101 '
-            '--TransferApp.exchange_directory={} '.format(assignment, exchange))
-        run_command(
-            'nbgrader fetch {} --course abc101 '
-            '--TransferApp.exchange_directory={} '.format(assignment, exchange))
+        run_command([
+            'nbgrader', 'release', assignment,
+            '--NbGraderConfig.course_id=abc101',
+            '--TransferApp.exchange_directory={}'.format(exchange)
+        ])
+        run_command([
+            'nbgrader', 'fetch', assignment,
+            '--course', 'abc101',
+            '--TransferApp.exchange_directory={}'.format(exchange)
+        ])
 
     def _submit(self, assignment, exchange):
-        run_command(
-            'nbgrader submit {} --course abc101 '
-            '--TransferApp.exchange_directory={} '.format(assignment, exchange))
+        run_command([
+            'nbgrader', 'submit', assignment,
+            '--course', 'abc101',
+            '--TransferApp.exchange_directory={}'.format(exchange)
+        ])
 
-    def _collect(self, assignment, exchange, flags="", retcode=0):
-        print("Calling collect with assignment: " + assignment)
-        run_command(
-            'nbgrader collect {} '
-            '--NbGraderConfig.course_id=abc101 '
-            '--TransferApp.exchange_directory={} '
-            '{}'.format(assignment, exchange, flags),
-            retcode=retcode)
+    def _collect(self, assignment, exchange, flags=None, retcode=0):
+        cmd = [
+            'nbgrader', 'collect', assignment,
+            '--NbGraderConfig.course_id=abc101',
+            '--TransferApp.exchange_directory={}'.format(exchange)
+        ]
+
+        if flags is not None:
+            cmd.extend(flags)
+
+        run_command(cmd, retcode=retcode)
 
     def _read_timestamp(self, root):
         with open(os.path.join(root, "timestamp.txt"), "r") as fh:
@@ -38,7 +46,7 @@ class TestNbGraderCollect(BaseTestApp):
 
     def test_help(self):
         """Does the help display without error?"""
-        run_command("nbgrader collect --help-all")
+        run_command(["nbgrader", "collect", "--help-all"])
 
     def test_collect(self, exchange):
         self._release_and_fetch("ps1", exchange)
@@ -70,6 +78,6 @@ class TestNbGraderCollect(BaseTestApp):
         assert self._read_timestamp(root) == timestamp
 
         # collect again with --update
-        self._collect("ps1", exchange, "--update")
+        self._collect("ps1", exchange, ["--update"])
         assert self._read_timestamp(root) != timestamp
 

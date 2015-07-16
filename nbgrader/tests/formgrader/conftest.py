@@ -49,12 +49,13 @@ def gradebook(request, tempdir):
     gb.add_student("Reasoner", first_name="Louis", last_name="R")
 
     # run nbgrader assign
-    run_command(
-        'nbgrader assign "Problem Set 1" '
-        '--IncludeHeaderFooter.header=source/header.ipynb')
+    run_command([
+        "nbgrader", "assign", "Problem Set 1",
+        "--IncludeHeaderFooter.header=source/header.ipynb"
+    ])
 
     # run the autograder
-    run_command('nbgrader autograde "Problem Set 1"')
+    run_command(["nbgrader", "autograde", "Problem Set 1"])
 
     def fin():
         os.chdir(origdir)
