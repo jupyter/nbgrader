@@ -23,7 +23,7 @@ If using conda, run
 
 Otherwise, run
 
-    pip install ipython[notebook]==3.2
+    pip install ipython[all]==3.2
 
 ### Installing nbgrader
 
