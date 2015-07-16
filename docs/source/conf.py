@@ -290,5 +290,11 @@ import sys
 import os
 import subprocess as sp
 
+try:
+    ipython = os.path.join(os.path.dirname(sys.executable), 'ipython')
+    sp.check_call([ipython, 'kernelspec', 'install-self', '--user'])
+except sp.CalledProcessError:
+    pass
+
 here = os.path.dirname(os.path.abspath(__file__))
 sp.check_call([sys.executable, "build_docs.py"], cwd=here)
