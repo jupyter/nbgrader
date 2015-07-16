@@ -291,4 +291,7 @@ import os
 import subprocess as sp
 
 here = os.path.dirname(os.path.abspath(__file__))
-sp.check_call([sys.executable, "build_docs.py"], cwd=here)
+bin_path = os.path.dirname(sys.executable)
+env = os.environ.copy()
+env['PATH'] = "{}:{}".format(bin_path, env['PATH'])
+sp.check_call([sys.executable, "build_docs.py"], cwd=here, env=env)
