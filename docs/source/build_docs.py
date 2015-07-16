@@ -14,6 +14,11 @@ except ImportError:
     from io import StringIO # Python 3
 
 
+# get absolute path to IPython to make sure it's the same one as what is installed
+# in the virtualenv
+IPYTHON = os.path.join(os.path.dirname(sys.executable), 'ipython')
+
+
 def autogen_command_line(root):
     """Generate command line documentation."""
 
@@ -95,12 +100,14 @@ def build_notebooks(root):
 
     # hack to convert links to ipynb files to html
     for filename in glob.glob('user_guide/*.ipynb'):
-        run("ipython nbconvert "
-            "--to rst "
-            "--execute "
-            "--FilesWriter.build_directory=user_guide "
-            "--profile-dir=/tmp "
-            "'{}'".format(filename))
+        run([
+            IPYTHON, 'nbconvert',
+            '--to', 'rst',
+            '--execute',
+            '--FilesWriter.build_directory=user_guide',
+            '--profile-dir', '/tmp',
+            filename
+        ])
 
         filename = os.path.splitext(filename)[0] + '.rst'
         with open(filename, 'r') as fh:
@@ -122,12 +129,13 @@ def build_notebooks(root):
 
         for filename in filenames:
             if filename.endswith('.ipynb'):
-                run(
-                    "ipython nbconvert "
-                    "--to html "
-                    "--FilesWriter.build_directory='{}' "
-                    "--profile-dir=/tmp "
-                    "'{}'".format(build_directory, os.path.join(dirname, filename)))
+                run([
+                    IPYTHON, 'nbconvert',
+                    '--to', 'html',
+                    "--FilesWriter.build_directory='{}'".format(build_directory),
+                    '--profile-dir', '/tmp',
+                    os.path.join(dirname, filename)
+                ])
 
             else:
                 shutil.copy(

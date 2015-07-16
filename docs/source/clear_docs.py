@@ -11,8 +11,8 @@ except ImportError:
 
 
 def run(cmd):
-    print(cmd)
-    proc = sp.Popen(cmd, shell=True, stdout=sp.PIPE, stderr=sp.STDOUT)
+    print(" ".join(cmd))
+    proc = sp.Popen(cmd, stdout=sp.PIPE, stderr=sp.STDOUT)
     stdout, _ = proc.communicate()
     if proc.poll() != 0:
         print(stdout.decode())
@@ -32,7 +32,7 @@ def clear_notebooks(root):
     """Clear the outputs of documentation notebooks."""
 
     # cleanup ignored files
-    run('git clean -fdX {}'.format(root))
+    run(['git', 'clean', '-fdX', root])
 
     print("Clearing outputs of notebooks in '{}'...".format(os.path.abspath(root)))
     preprocessor = ClearOutputPreprocessor()
