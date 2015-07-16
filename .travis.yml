@@ -18,7 +18,7 @@ before_install:
   - pip install invoke
   - invoke before_install --group="$GROUP" --python-version="$TRAVIS_PYTHON_VERSION"
 install:
-  - if [[ $GROUP == 'docs' ]]; then python setup.py install; else pip install -e .; fi
+  - invoke install --group="$GROUP" --python-version="$TRAVIS_PYTHON_VERSION"
 script:
   - invoke tests --group="$GROUP"
 after_success:

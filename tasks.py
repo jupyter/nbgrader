@@ -167,12 +167,17 @@ def js(clean=True):
 
 @task
 def before_install(group, python_version):
-    # install requirements
-    run('git clone --quiet --depth 1 https://github.com/minrk/travis-wheels ~/travis-wheels')
-    run('pip install -f ~/travis-wheels/wheelhouse -r dev-requirements.txt')
-
     # install ipython
-    run('pip install ipython[all]')
+    run('pip install ipython[all]==3.2')
+
+    # clone travis wheels repo to make installing requirements easier
+    run('git clone --quiet --depth 1 https://github.com/minrk/travis-wheels ~/travis-wheels')
+
+    # if we're on python 2, install flit-install-py2, otherwise install flit
+    if python_version == '3.4':
+        run('pip install flit')
+    else:
+        run('pip install flit-install-py2')
 
     # install jupyterhub
     if python_version == '3.4' and group == 'js':
@@ -182,3 +187,19 @@ def before_install(group, python_version):
     # install js dependencies
     if group == 'js':
         run('python -m IPython.external.mathjax')
+
+
+@task
+def install(group, python_version):
+    # build the command depending on python version
+    if python_version == '3.4':
+        cmd = 'flit install'
+    else:
+        cmd = 'flit-install-py2'
+
+    # add --symlink flag, depending on whether it's docs or not
+    if group != 'docs':
+        cmd += ' --symlink'
+
+    # install
+    run('PIP_FIND_LINKS=~/travis-wheels/wheelhouse {}'.format(cmd))
