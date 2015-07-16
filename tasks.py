@@ -82,7 +82,7 @@ def docs():
 
 @task
 def clear_docs():
-    run('python docs/clear_docs.py')
+    run('python docs/source/clear_docs.py')
 
 
 def _run_tests(mark=None, skip=None):

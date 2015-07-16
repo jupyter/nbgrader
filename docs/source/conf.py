@@ -21,20 +21,6 @@ import os
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #sys.path.insert(0, os.path.abspath('.'))
 
-if os.environ.get('READTHEDOCS', ''):
-    # RTD doesn't use the Makefile, so re-run autogen_config.py here.
-    with open('../clear_docs.py') as f:
-        exec(compile(f.read(), 'clear_docs.py', 'exec'), {})
-
-    with open('../build_docs.py') as f:
-        exec(compile(f.read(), 'build_docs.py', 'exec'), {})
-
-    with open('../autogen_config.py') as f:
-        exec(compile(f.read(), 'autogen_config.py', 'exec'), {})
-
-    with open('../autogen_command_line.py') as f:
-        exec(compile(f.read(), 'autogen_command_line.py', 'exec'), {})
-
 # -- General configuration ------------------------------------------------
 
 # If your documentation needs a minimal Sphinx version, state it here.
@@ -300,3 +286,9 @@ texinfo_documents = [
 
 # Example configuration for intersphinx: refer to the Python standard library.
 intersphinx_mapping = {'http://docs.python.org/': None}
+
+# -- Run nbconvert on documentation --------------------------------------
+
+import subprocess as sp
+here = os.path.dirname(os.path.abspath(__file__))
+sp.check_call(["python", "build_docs.py"], cwd=here)

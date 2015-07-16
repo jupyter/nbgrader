@@ -51,10 +51,6 @@ clean:
 	rm -rf $(BUILDDIR)/*
 
 html:
-	python clear_docs.py
-	python build_docs.py
-	python autogen_command_line.py
-	python autogen_config.py
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html
 	@echo
 	@echo "Build finished. The HTML pages are in $(BUILDDIR)/html."

@@ -1,6 +1,6 @@
-import subprocess as sp
 import os
 import sys
+import subprocess as sp
 from copy import deepcopy
 
 try:
@@ -32,7 +32,7 @@ def _check_if_directory_in_path(pth, target):
     return False
 
 
-def clear_docs(root='.'):
+def clear_notebooks(root):
     """Clear the outputs of documentation notebooks."""
 
     # cleanup ignored files
@@ -69,8 +69,5 @@ def clear_docs(root='.'):
                     echo("Cleared '{}'".format(pth))
 
 if __name__ == "__main__":
-    try:
-        root = os.path.dirname(__file__)
-    except NameError:
-        root = os.path.dirname(os.getcwd())
-    clear_docs(os.path.join(os.path.abspath(root), 'source'))
+    root = os.path.abspath(os.path.dirname(__file__))
+    clear_notebooks(root)
