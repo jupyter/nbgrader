@@ -49,7 +49,7 @@ class NbGraderApp(BaseNbGraderApp):
 
     name = 'nbgrader'
     description = u'A system for assigning and grading notebooks'
-    version = u'0.1.0'
+    version = u'0.2.0'
 
     aliases = aliases
     flags = flags
