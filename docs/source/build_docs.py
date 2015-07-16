@@ -53,7 +53,7 @@ def autogen_command_line(root):
     for app in apps:
         cls = getattr(nbgrader.apps, app)
         buf = sys.stdout = StringIO()
-        cls().print_help()
+        cls().print_help(True)
         buf.flush()
         helpstr = buf.getvalue()
         helpstr = "\n".join(["    " + x for x in helpstr.split("\n")])
