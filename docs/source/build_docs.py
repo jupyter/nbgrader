@@ -99,7 +99,7 @@ def build_notebooks(root):
     os.chdir(root)
 
     # hack to convert links to ipynb files to html
-    for filename in glob.glob('user_guide/*.ipynb'):
+    for filename in sorted(glob.glob('user_guide/*.ipynb')):
         run([
             IPYTHON, 'nbconvert',
             '--to', 'rst',
@@ -127,7 +127,7 @@ def build_notebooks(root):
         if not os.path.exists(build_directory):
             os.makedirs(build_directory)
 
-        for filename in filenames:
+        for filename in sorted(filenames):
             if filename.endswith('.ipynb'):
                 run([
                     IPYTHON, 'nbconvert',
