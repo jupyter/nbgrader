@@ -151,8 +151,7 @@ def tests(group='all', skip=None):
 @task
 def after_success(group):
     if group in ('python', 'js'):
-        run('coveralls')
-        run("codecov")
+        run('codecov')
     else:
         echo('Nothing to do.')
 

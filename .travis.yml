@@ -16,7 +16,6 @@ addons:
     - pandoc
 before_install:
   - pip install invoke
-  - pip install codecov
   - invoke before_install --group="$GROUP" --python-version="$TRAVIS_PYTHON_VERSION"
 install:
   - invoke install --group="$GROUP" --python-version="$TRAVIS_PYTHON_VERSION"

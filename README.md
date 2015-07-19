@@ -2,7 +2,7 @@
 
 [![Google Group](https://img.shields.io/badge/-Google%20Group-lightgrey.svg)](https://groups.google.com/forum/#!forum/jupyter)
 [![Build Status](https://travis-ci.org/jupyter/nbgrader.svg)](https://travis-ci.org/jupyter/nbgrader)
-[![Coverage Status](https://coveralls.io/repos/jupyter/nbgrader/badge.svg)](https://coveralls.io/r/jupyter/nbgrader)
+[![codecov.io](http://codecov.io/github/jupyter/nbgrader/coverage.svg?branch=master)](http://codecov.io/github/jupyter/nbgrader?branch=master)
 
 A system for assigning and grading notebooks.
 
