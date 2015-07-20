@@ -257,3 +257,27 @@ class TestNbGraderAutograde(BaseTestApp):
         assert os.path.isfile("autograded/foo/ps1/foo.txt")
         assert self._get_permissions("autograded/foo/ps1/foo.ipynb") == "644"
         assert self._get_permissions("autograded/foo/ps1/foo.txt") == "644"
+
+    def test_force_single_notebook(self):
+        self._copy_file("files/test.ipynb", "source/ps1/p1.ipynb")
+        self._copy_file("files/test.ipynb", "source/ps1/p2.ipynb")
+        run_command(["nbgrader", "assign", "ps1", "--create"])
+
+        self._copy_file("files/test.ipynb", "submitted/foo/ps1/p1.ipynb")
+        self._copy_file("files/test.ipynb", "submitted/foo/ps1/p2.ipynb")
+        run_command(["nbgrader", "autograde", "ps1", "--create"])
+
+        assert os.path.exists("autograded/foo/ps1/p1.ipynb")
+        assert os.path.exists("autograded/foo/ps1/p2.ipynb")
+        p1 = self._file_contents("autograded/foo/ps1/p1.ipynb")
+        p2 = self._file_contents("autograded/foo/ps1/p2.ipynb")
+        assert p1 == p2
+
+        self._empty_notebook("submitted/foo/ps1/p1.ipynb")
+        self._empty_notebook("submitted/foo/ps1/p2.ipynb")
+        run_command(["nbgrader", "autograde", "ps1", "--NbGraderConfig.notebook_id=p1", "--force"])
+
+        assert os.path.exists("autograded/foo/ps1/p1.ipynb")
+        assert os.path.exists("autograded/foo/ps1/p2.ipynb")
+        assert p1 != self._file_contents("autograded/foo/ps1/p1.ipynb")
+        assert p2 == self._file_contents("autograded/foo/ps1/p2.ipynb")

@@ -128,3 +128,27 @@ class TestNbGraderFeedback(BaseTestApp):
 
         assert os.path.isfile("feedback/foo/ps1/foo.html")
         assert self._get_permissions("feedback/foo/ps1/foo.html") == "644"
+
+    def test_force_single_notebook(self):
+        self._copy_file("files/test.ipynb", "source/ps1/p1.ipynb")
+        self._copy_file("files/test.ipynb", "source/ps1/p2.ipynb")
+        run_command(["nbgrader", "assign", "ps1", "--create"])
+
+        self._copy_file("files/test.ipynb", "submitted/foo/ps1/p1.ipynb")
+        self._copy_file("files/test.ipynb", "submitted/foo/ps1/p2.ipynb")
+        run_command(["nbgrader", "autograde", "ps1", "--create"])
+        run_command(["nbgrader", "feedback", "ps1"])
+
+        assert os.path.exists("feedback/foo/ps1/p1.html")
+        assert os.path.exists("feedback/foo/ps1/p2.html")
+        p1 = self._file_contents("feedback/foo/ps1/p1.html")
+        p2 = self._file_contents("feedback/foo/ps1/p2.html")
+
+        self._empty_notebook("autograded/foo/ps1/p1.ipynb")
+        self._empty_notebook("autograded/foo/ps1/p2.ipynb")
+        run_command(["nbgrader", "feedback", "ps1", "--NbGraderConfig.notebook_id=p1", "--force"])
+
+        assert os.path.exists("feedback/foo/ps1/p1.html")
+        assert os.path.exists("feedback/foo/ps1/p2.html")
+        assert p1 != self._file_contents("feedback/foo/ps1/p1.html")
+        assert p2 == self._file_contents("feedback/foo/ps1/p2.html")

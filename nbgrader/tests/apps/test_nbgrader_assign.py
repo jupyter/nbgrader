@@ -214,3 +214,23 @@ class TestNbGraderAssign(BaseTestApp):
         gb.db.refresh(notebook)
         gb.db.refresh(submission)
         gb.db.refresh(submission_notebook)
+
+    def test_force_single_notebook(self):
+        self._copy_file("files/test.ipynb", "source/ps1/p1.ipynb")
+        self._copy_file("files/test.ipynb", "source/ps1/p2.ipynb")
+        run_command(["nbgrader", "assign", "ps1", "--create"])
+
+        assert os.path.exists("release/ps1/p1.ipynb")
+        assert os.path.exists("release/ps1/p2.ipynb")
+        p1 = self._file_contents("release/ps1/p1.ipynb")
+        p2 = self._file_contents("release/ps1/p2.ipynb")
+        assert p1 == p2
+
+        self._copy_file("files/submitted-changed.ipynb", "source/ps1/p1.ipynb")
+        self._copy_file("files/submitted-changed.ipynb", "source/ps1/p2.ipynb")
+        run_command(["nbgrader", "assign", "ps1", "--NbGraderConfig.notebook_id=p1", "--force"])
+
+        assert os.path.exists("release/ps1/p1.ipynb")
+        assert os.path.exists("release/ps1/p2.ipynb")
+        assert p1 != self._file_contents("release/ps1/p1.ipynb")
+        assert p2 == self._file_contents("release/ps1/p2.ipynb")
