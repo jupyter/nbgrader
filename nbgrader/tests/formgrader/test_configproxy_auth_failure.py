@@ -1,6 +1,9 @@
 from nbgrader.tests.formgrader.manager import HubAuthManager
+from nbgrader.tests.formgrader.conftest import jupyterhub, minversion
 
 
+@jupyterhub
+@minversion
 def test_configproxy_auth_success(gradebook, tempdir):
     """Can the formgrader be started with the correct auth token?"""
 
@@ -20,6 +23,8 @@ def test_configproxy_auth_success(gradebook, tempdir):
     assert man.jupyterhub.poll() == 0
 
 
+@jupyterhub
+@minversion
 def test_configproxy_auth_failure(gradebook, tempdir):
     """Can the formgrader not be started when the auth token is incorrect?"""
 
