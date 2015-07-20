@@ -520,7 +520,7 @@ class BaseNbConvertApp(BaseNbGraderApp, NbConvertApp):
     def convert_notebooks(self):
         for assignment in sorted(self.assignments.keys()):
             # initialize the list of notebooks and the exporter
-            self.notebooks = self.assignments[assignment]
+            self.notebooks = sorted(self.assignments[assignment])
             self.exporter = exporter_map[self.export_format](config=self.config)
 
             # parse out the assignment and student ids
