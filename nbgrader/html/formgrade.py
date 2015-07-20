@@ -32,6 +32,30 @@ def set_index(url, request):
         return url
 
 
+@app.errorhandler(500)
+def internal_server_error(e):
+    return render_template(
+        'gradebook_500.tpl',
+        base_url=app.auth.base_url,
+        error_code=500), 500
+
+
+@app.errorhandler(502)
+def upstream_server_error(e):
+    return render_template(
+        'gradebook_500.tpl',
+        base_url=app.auth.base_url,
+        error_code=502), 502
+
+
+@blueprint.errorhandler(403)
+def unauthorized(e):
+    return render_template(
+        'gradebook_403.tpl',
+        base_url=app.auth.base_url,
+        error_code=403), 403
+
+
 @blueprint.url_defaults
 def bp_url_defaults(endpoint, values):
     name = getattr(g, 'name', None)
@@ -45,13 +69,11 @@ def bp_url_value_preprocessor(endpoint, values):
 
 
 @blueprint.route("/static/<path:filename>")
-@auth
 def static_proxy(filename):
     return send_from_directory(os.path.join(app.root_path, 'static'), filename)
 
 
 @blueprint.route("/fonts/<filename>")
-@auth
 def fonts(filename):
     return redirect(url_for('.static_proxy', filename=os.path.join("components", "bootstrap", "fonts", filename)))
 

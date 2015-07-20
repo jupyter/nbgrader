@@ -10,7 +10,7 @@ from selenium import webdriver
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 
 from nbgrader.tests import run_command
-from nbgrader.tests.formgrader import manager
+from nbgrader.tests.formgrader import manager, bad_manager
 
 
 @pytest.fixture(scope="session")
@@ -65,11 +65,8 @@ def gradebook(request, tempdir):
     return gb
 
 
-def _formgrader(request, gradebook, tempdir):
-    if not hasattr(request, 'param'):
-        man = manager.DefaultManager(tempdir)
-    else:
-        man = getattr(manager, request.param)(tempdir)
+def _formgrader(request, manager_class, gradebook, tempdir):
+    man = manager_class(tempdir)
     man.start()
 
     selenium_logger = logging.getLogger('selenium.webdriver.remote.remote_connection')
@@ -107,9 +104,13 @@ jupyterhub = pytest.mark.jupyterhub
     params=[jupyterhub(minversion(x)) if x.startswith("Hub") else x for x in manager.__all__]
 )
 def all_formgraders(request, gradebook, tempdir):
-    _formgrader(request, gradebook, tempdir)
+    _formgrader(request, getattr(manager, request.param), gradebook, tempdir)
 
 # parameterize the formgrader to run under all managers
 @pytest.fixture(scope="class")
 def formgrader(request, gradebook, tempdir):
-    _formgrader(request, gradebook, tempdir)
+    _formgrader(request, manager.DefaultManager, gradebook, tempdir)
+
+@pytest.fixture(scope="class", params=[jupyterhub(minversion("BadHubAuthManager"))])
+def bad_formgrader(request, gradebook, tempdir):
+    _formgrader(request, getattr(bad_manager, request.param), gradebook, tempdir)
