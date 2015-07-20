@@ -104,8 +104,8 @@ class HubAuthManager(DefaultManager):
         with open(pth, "w") as fh:
             fh.write(self.jupyterhub_config.format(tempdir=self.tempdir))
 
-    def _start_jupyterhub(self):
-        self.env['CONFIGPROXY_AUTH_TOKEN'] = 'foo'
+    def _start_jupyterhub(self, configproxy_auth_token='foo'):
+        self.env['CONFIGPROXY_AUTH_TOKEN'] = configproxy_auth_token
         self.jupyterhub = start_subprocess(
             ["jupyterhub"],
             cwd=self.tempdir,
@@ -113,11 +113,11 @@ class HubAuthManager(DefaultManager):
 
         time.sleep(self.startup_wait)
 
-    def _start_formgrader(self):
+    def _start_formgrader(self, configproxy_auth_token='foo'):
         print("Getting token from jupyterhub")
         token = sp.check_output(['jupyterhub', 'token'], cwd=self.tempdir).decode().strip()
         self.env['JPY_API_TOKEN'] = token
-        self.env['CONFIGPROXY_AUTH_TOKEN'] = 'foo'
+        self.env['CONFIGPROXY_AUTH_TOKEN'] = configproxy_auth_token
         super(HubAuthManager, self)._start_formgrader()
 
     def _stop_jupyterhub(self):
@@ -174,4 +174,3 @@ class HubAuthCustomUrlManager(HubAuthManager):
     )
 
     base_formgrade_url = "http://localhost:8000/hub/grader/"
-

@@ -102,7 +102,7 @@ class FormgradeApp(BaseNbGraderApp):
     def _signal_stop(self, sig, frame):
         self.log.critical("received signal %s, stopping", sig)
         self.authenticator_instance.stop(sig)
-        sys.exit(-sig)
+        sys.exit(0)
 
     def build_extra_config(self):
         extra_config = super(FormgradeApp, self).build_extra_config()
