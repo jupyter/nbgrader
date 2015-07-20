@@ -234,3 +234,6 @@ class TestNbGraderAssign(BaseTestApp):
         assert os.path.exists("release/ps1/p2.ipynb")
         assert p1 != self._file_contents("release/ps1/p1.ipynb")
         assert p2 == self._file_contents("release/ps1/p2.ipynb")
+
+    def test_fail_no_notebooks(self):
+        run_command(["nbgrader", "assign", "ps1", "--create"], retcode=1)
