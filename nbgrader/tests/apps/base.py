@@ -15,6 +15,8 @@ class BaseTestApp(object):
         full_dest = os.path.join(os.getcwd(), path)
         if not os.path.exists(os.path.dirname(full_dest)):
             os.makedirs(os.path.dirname(full_dest))
+        if os.path.exists(full_dest):
+            os.remove(full_dest)
         with open(full_dest, 'w') as f:
             write_nb(nb, f, 4)
 
@@ -29,8 +31,15 @@ class BaseTestApp(object):
         full_dest = os.path.join(os.getcwd(), path)
         if not os.path.exists(os.path.dirname(full_dest)):
             os.makedirs(os.path.dirname(full_dest))
+        if os.path.exists(full_dest):
+            os.remove(full_dest)
         with open(full_dest, "w") as fh:
             fh.write(contents)
 
     def _get_permissions(self, filename):
         return oct(os.stat(filename).st_mode)[-3:]
+
+    def _file_contents(self, path):
+        with open(path, "r") as fh:
+            contents = fh.read()
+        return contents

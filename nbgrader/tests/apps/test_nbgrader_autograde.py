@@ -257,3 +257,103 @@ class TestNbGraderAutograde(BaseTestApp):
         assert os.path.isfile("autograded/foo/ps1/foo.txt")
         assert self._get_permissions("autograded/foo/ps1/foo.ipynb") == "644"
         assert self._get_permissions("autograded/foo/ps1/foo.txt") == "644"
+
+    def test_force_single_notebook(self):
+        self._copy_file("files/test.ipynb", "source/ps1/p1.ipynb")
+        self._copy_file("files/test.ipynb", "source/ps1/p2.ipynb")
+        run_command(["nbgrader", "assign", "ps1", "--create"])
+
+        self._copy_file("files/test.ipynb", "submitted/foo/ps1/p1.ipynb")
+        self._copy_file("files/test.ipynb", "submitted/foo/ps1/p2.ipynb")
+        run_command(["nbgrader", "autograde", "ps1", "--create"])
+
+        assert os.path.exists("autograded/foo/ps1/p1.ipynb")
+        assert os.path.exists("autograded/foo/ps1/p2.ipynb")
+        p1 = self._file_contents("autograded/foo/ps1/p1.ipynb")
+        p2 = self._file_contents("autograded/foo/ps1/p2.ipynb")
+        assert p1 == p2
+
+        self._empty_notebook("submitted/foo/ps1/p1.ipynb")
+        self._empty_notebook("submitted/foo/ps1/p2.ipynb")
+        run_command(["nbgrader", "autograde", "ps1", "--NbGraderConfig.notebook_id=p1", "--force"])
+
+        assert os.path.exists("autograded/foo/ps1/p1.ipynb")
+        assert os.path.exists("autograded/foo/ps1/p2.ipynb")
+        assert p1 != self._file_contents("autograded/foo/ps1/p1.ipynb")
+        assert p2 == self._file_contents("autograded/foo/ps1/p2.ipynb")
+
+    def test_update_newer(self):
+        self._copy_file("files/test.ipynb", "source/ps1/p1.ipynb")
+        run_command(["nbgrader", "assign", "ps1", "--create"])
+
+        self._copy_file("files/test.ipynb", "submitted/foo/ps1/p1.ipynb")
+        self._make_file('submitted/foo/ps1/timestamp.txt', "2015-02-02 15:58:23.948203 PST")
+        run_command(["nbgrader", "autograde", "ps1", "--create"])
+
+        assert os.path.isfile("autograded/foo/ps1/p1.ipynb")
+        assert os.path.isfile("autograded/foo/ps1/timestamp.txt")
+        assert self._file_contents("autograded/foo/ps1/timestamp.txt") == "2015-02-02 15:58:23.948203 PST"
+        p = self._file_contents("autograded/foo/ps1/p1.ipynb")
+
+        self._empty_notebook("submitted/foo/ps1/p1.ipynb")
+        self._make_file('submitted/foo/ps1/timestamp.txt', "2015-02-02 16:58:23.948203 PST")
+        run_command(["nbgrader", "autograde", "ps1", "--create"])
+
+        assert os.path.isfile("autograded/foo/ps1/p1.ipynb")
+        assert os.path.isfile("autograded/foo/ps1/timestamp.txt")
+        assert self._file_contents("autograded/foo/ps1/timestamp.txt") == "2015-02-02 16:58:23.948203 PST"
+        assert p != self._file_contents("autograded/foo/ps1/p1.ipynb")
+
+    def test_update_newer_single_notebook(self):
+        self._copy_file("files/test.ipynb", "source/ps1/p1.ipynb")
+        self._copy_file("files/test.ipynb", "source/ps1/p2.ipynb")
+        run_command(["nbgrader", "assign", "ps1", "--create"])
+
+        self._copy_file("files/test.ipynb", "submitted/foo/ps1/p1.ipynb")
+        self._copy_file("files/test.ipynb", "submitted/foo/ps1/p2.ipynb")
+        self._make_file('submitted/foo/ps1/timestamp.txt', "2015-02-02 15:58:23.948203 PST")
+        run_command(["nbgrader", "autograde", "ps1", "--create"])
+
+        assert os.path.exists("autograded/foo/ps1/p1.ipynb")
+        assert os.path.exists("autograded/foo/ps1/p2.ipynb")
+        assert os.path.isfile("autograded/foo/ps1/timestamp.txt")
+        assert self._file_contents("autograded/foo/ps1/timestamp.txt") == "2015-02-02 15:58:23.948203 PST"
+        p1 = self._file_contents("autograded/foo/ps1/p1.ipynb")
+        p2 = self._file_contents("autograded/foo/ps1/p2.ipynb")
+        assert p1 == p2
+
+        self._empty_notebook("submitted/foo/ps1/p1.ipynb")
+        self._empty_notebook("submitted/foo/ps1/p2.ipynb")
+        self._make_file('submitted/foo/ps1/timestamp.txt', "2015-02-02 16:58:23.948203 PST")
+        run_command(["nbgrader", "autograde", "ps1", "--NbGraderConfig.notebook_id=p1"])
+
+        assert os.path.exists("autograded/foo/ps1/p1.ipynb")
+        assert os.path.exists("autograded/foo/ps1/p2.ipynb")
+        assert os.path.isfile("autograded/foo/ps1/timestamp.txt")
+        assert self._file_contents("autograded/foo/ps1/timestamp.txt") == "2015-02-02 16:58:23.948203 PST"
+        assert p1 != self._file_contents("autograded/foo/ps1/p1.ipynb")
+        assert p2 == self._file_contents("autograded/foo/ps1/p2.ipynb")
+
+    def test_handle_failure(self):
+        self._empty_notebook("source/ps1/p1.ipynb")
+        self._empty_notebook("source/ps1/p2.ipynb")
+        run_command(["nbgrader", "assign", "ps1", "--create"])
+
+        self._empty_notebook("submitted/foo/ps1/p1.ipynb")
+        self._copy_file("files/test.ipynb", "submitted/foo/ps1/p2.ipynb")
+        run_command(["nbgrader", "autograde", "ps1", "--create"], retcode=1)
+
+        assert not os.path.exists("autograded/foo/ps1")
+
+    def test_handle_failure_single_notebook(self):
+        self._empty_notebook("source/ps1/p1.ipynb")
+        self._empty_notebook("source/ps1/p2.ipynb")
+        run_command(["nbgrader", "assign", "ps1", "--create"])
+
+        self._empty_notebook("submitted/foo/ps1/p1.ipynb")
+        self._copy_file("files/test.ipynb", "submitted/foo/ps1/p2.ipynb")
+        run_command(["nbgrader", "autograde", "ps1", "--create", "--NbGraderConfig.notebook_id=p*"], retcode=1)
+
+        assert os.path.exists("autograded/foo/ps1")
+        assert not os.path.isfile("autograded/foo/ps1/p1.ipynb")
+        assert not os.path.isfile("autograded/foo/ps1/p2.ipynb")
