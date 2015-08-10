@@ -74,6 +74,10 @@ class HubAuth(BaseAuth):
     def _remap_url_changed(self, name, old, new):
         self.remap_url = new.rstrip('/')
 
+    connect_ip = Unicode('', config=True, help="""The formgrader ip address that
+        JupyterHub should actually connect to. Useful for when the formgrader is
+        running behind a proxy or inside a container.""")
+
     def __init__(self, *args, **kwargs):
         super(HubAuth, self).__init__(*args, **kwargs)
 
@@ -83,8 +87,14 @@ class HubAuth(BaseAuth):
 
         # Register self as a route of the configurable-http-proxy and then
         # update the base_url to point to the new path.
+        if self.connect_ip:
+            ip = self.connect_ip
+        else:
+            ip = self._ip
+        target = 'http://{}:{}'.format(ip, self._port)
+        self.log.info("Proxying {} --> {}".format(self.remap_url, target))
         response = self._proxy_request('/api/routes' + self.remap_url, method='POST', body={
-            'target': 'http://{}:{}'.format(self._ip, self._port)
+            'target': target
         })
         # This error will occur, for example, if the CONFIGPROXY_AUTH_TOKEN is
         # incorrect.
