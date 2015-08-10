@@ -14,8 +14,8 @@ User Guide
 Integration with JupyterHub
 ---------------------------
 
-If you are running a class with JupyterHub, nbgrader offers serveral tools that
-exploit that fact that students and instructors are all sharing the same system.
+If you are running a class with JupyterHub, nbgrader offers several tools that 
+exploit the fact that students and instructors are all sharing the same system.
 In particular, nbgrader streamlines the process of releasing and collecting
 assignments on the instructor side, and fetching and submitting assignments on
 the student side.
