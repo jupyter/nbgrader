@@ -59,27 +59,40 @@ class SubmitApp(TransferApp):
         if self.course_id == '':
             self.fail("No course id specified. Re-run with --course flag.")
 
-        self.course_path = os.path.join(self.exchange_directory, self.course_id)
-        self.inbound_path = os.path.join(self.course_path, 'inbound')
-        self.assignment_filename = get_username() + '+' + self.assignment_id + '+' + self.timestamp
-        self.dest_path = os.path.join(self.inbound_path, self.assignment_filename)
+        self.inbound_path = os.path.join(self.exchange_directory, self.course_id, 'inbound')
         if not os.path.isdir(self.inbound_path):
             self.fail("Inbound directory doesn't exist: {}".format(self.inbound_path))
         if not check_mode(self.inbound_path, write=True, execute=True):
             self.fail("You don't have write permissions to the directory: {}".format(self.inbound_path))
 
+        self.cache_path = os.path.join(self.cache_directory, self.course_id)
+        self.assignment_filename = '{}+{}+{}'.format(get_username(), self.assignment_id, self.timestamp)
+
     def copy_files(self):
+        dest_path = os.path.join(self.inbound_path, self.assignment_filename)
+        cache_path = os.path.join(self.cache_path, self.assignment_filename)
+
         self.log.info("Source: {}".format(self.src_path))
-        self.log.info("Destination: {}".format(self.dest_path))
-        self.do_copy(self.src_path, self.dest_path)
-        with open(os.path.join(self.dest_path, "timestamp.txt"), "w") as fh:
+        self.log.info("Destination: {}".format(dest_path))
+
+        # copy to the real location
+        self.do_copy(self.src_path, dest_path)
+        with open(os.path.join(dest_path, "timestamp.txt"), "w") as fh:
             fh.write(self.timestamp)
+
         # Make this 0777=ugo=rwx so the instructor can delete later. Hidden from other users by the timestamp.
         os.chmod(
-            self.dest_path,
+            dest_path,
             S_IRUSR|S_IWUSR|S_IXUSR|S_IRGRP|S_IWGRP|S_IXGRP|S_IROTH|S_IWOTH|S_IXOTH
         )
+
+        # also copy to the cache
+        if not os.path.isdir(self.cache_path):
+            os.makedirs(self.cache_path)
+        self.do_copy(self.src_path, cache_path)
+        with open(os.path.join(cache_path, "timestamp.txt"), "w") as fh:
+            fh.write(self.timestamp)
+
         self.log.info("Submitted as: {} {} {}".format(
             self.course_id, self.assignment_id, str(self.timestamp)
         ))
-

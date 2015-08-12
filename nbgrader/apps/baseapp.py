@@ -229,7 +229,21 @@ class TransferApp(BaseNbGraderApp):
         help="Format string for timestamps"
     )
 
-    course = Unicode(None, config=True, allow_none=True, help="Optional course name.")
+    course = Unicode('', config=True, allow_none=True, help="Required course name.")
+
+    exchange_directory = Unicode(
+        "/srv/nbgrader/exchange",
+        config=True,
+        help="The nbgrader exchange directory writable to everyone. MUST be preexisting."
+    )
+
+    cache_directory = Unicode(
+        "",
+        config=True,
+        help="Local cache directory for nbgrader submit and nbgrader list. Defaults to ~/.nbgrader/cache")
+
+    def _cache_directory_default(self):
+        return os.path.join(os.environ['HOME'], '.nbgrader', 'cache')
 
     def set_timestamp(self):
         """Set the timestap using the configured timezone."""
@@ -238,14 +252,7 @@ class TransferApp(BaseNbGraderApp):
             self.fail("Invalid timezone: {}".format(self.timezone))
         self.timestamp = datetime.datetime.now(tz).strftime(self.timestamp_format)
 
-    exchange_directory = Unicode(
-        "/srv/nbgrader/exchange",
-        config=True,
-        help="The nbgrader exchange directory writable to everyone. MUST be preexisting."
-    )
-
     def ensure_exchange_directory(self):
-        return
         """See if the exchange directory exists and is writable, fail if not."""
         if not check_directory(self.exchange_directory, write=True, execute=True):
             self.fail("Unwritable directory, please contact your instructor: {}".format(self.exchange_directory))
