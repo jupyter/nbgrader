@@ -30,7 +30,7 @@ class FetchApp(TransferApp):
 
         To fetch an assignment by name into the current directory:
 
-            nbgrader list assignment1
+            nbgrader fetch assignment1
 
         To fetch an assignment for a specific course, you must first know the
         `course_id` for your course.  If you don't know it, ask your instructor.
@@ -44,6 +44,9 @@ class FetchApp(TransferApp):
         """
 
     def init_src(self):
+        if self.course_id == '':
+            self.fail("No course id specified. Re-run with --course flag.")
+
         self.course_path = os.path.join(self.exchange_directory, self.course_id)
         self.outbound_path = os.path.join(self.course_path, 'outbound')
         self.src_path = os.path.join(self.outbound_path, self.assignment_id)

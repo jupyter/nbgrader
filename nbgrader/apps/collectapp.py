@@ -88,6 +88,9 @@ class CollectApp(TransferApp):
         return sorted(records, key=lambda item: item['timestamp'], reverse=True)
 
     def init_src(self):
+        if self.course_id == '':
+            self.fail("No course id specified. Re-run with --course flag.")
+
         self.course_path = os.path.join(self.exchange_directory, self.course_id)
         self.inbound_path = os.path.join(self.course_path, 'inbound')
         if not os.path.isdir(self.inbound_path):

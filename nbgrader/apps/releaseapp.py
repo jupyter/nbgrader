@@ -88,6 +88,9 @@ class ReleaseApp(TransferApp):
                 ))
 
     def init_dest(self):
+        if self.course_id == '':
+            self.fail("No course id specified. Re-run with --course flag.")
+
         self.course_path = os.path.join(self.exchange_directory, self.course_id)
         self.outbound_path = os.path.join(self.course_path, 'outbound')
         self.inbound_path = os.path.join(self.course_path, 'inbound')
