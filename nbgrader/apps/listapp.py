@@ -2,6 +2,7 @@ import os
 import glob
 import shutil
 import re
+import json
 
 from IPython.utils.traitlets import Bool
 
@@ -27,6 +28,10 @@ flags.update({
     'remove': (
         {'ListApp' : {'remove': True}},
         "Remove an assignment from the exchange."
+    ),
+    'json': (
+        {'ListApp' : {'as_json': True}},
+        "Print out assignments as json."
     ),
 })
 
@@ -87,6 +92,7 @@ class ListApp(TransferApp):
     inbound = Bool(False, config=True, help="List inbound files rather than outbound.")
     cached = Bool(False, config=True, help="List assignments in submission cache.")
     remove = Bool(False, config=True, help="Remove, rather than list files.")
+    as_json = Bool(False, config=True, help="Print out assignments as json")
 
     def init_src(self):
         pass
@@ -127,30 +133,62 @@ class ListApp(TransferApp):
     def copy_files(self):
         pass
 
+    def parse_assignments(self):
+        assignments = []
+        for path in self.assignments:
+            info = self.parse_assignment(path)
+            if self.inbound or self.cached:
+                info['status'] = 'submitted'
+                info['path'] = path
+            elif os.path.exists(info['assignment_id']):
+                info['status'] = 'fetched'
+                info['path'] = os.path.abspath(info['assignment_id'])
+                info['notebooks'] = []
+                for notebook in glob.glob(os.path.join(info['assignment_id'], '*.ipynb')):
+                    info['notebooks'].append({
+                        'notebook_id': os.path.splitext(os.path.split(notebook)[1])[0],
+                        'path': os.path.abspath(notebook)
+                    })
+            else:
+                info['status'] = 'released'
+                info['path'] = path
+            assignments.append(info)
+        return assignments
+
     def list_files(self):
         """List files."""
-        if self.inbound or self.cached:
-            self.log.info("Submitted assignments:")
-            for path in self.assignments:
-                self.log.info(self.format_inbound_assignment(path))
+        if self.as_json:
+            print(json.dumps(self.parse_assignments()))
 
         else:
-            self.log.info("Released assignments:")
-            for path in self.assignments:
-                self.log.info(self.format_outbound_assignment(path))
+            if self.inbound or self.cached:
+                self.log.info("Submitted assignments:")
+                for assignment in self.assignments:
+                    self.log.info(self.format_inbound_assignment(assignment))
+            else:
+                self.log.info("Released assignments:")
+                for assignment in self.assignments:
+                    self.log.info(self.format_outbound_assignment(assignment))
 
     def remove_files(self):
         """List and remove files."""
-        if self.inbound or self.cached:
-            self.log.info("Removing submitted assignments:")
-            for path in self.assignments:
-                self.log.info(self.format_inbound_assignment(path))
-                shutil.rmtree(path)
+        if self.as_json:
+            assignments = self.parse_assignments()
+            print(json.dumps(assignments))
+            for assignment in assignments:
+                shutil.rmtree(assignment['path'])
+
         else:
-            self.log.info("Removing released assignments:")
-            for path in self.assignments:
-                self.log.info(self.format_outbound_assignment(path))
-                shutil.rmtree(path)
+            if self.inbound or self.cached:
+                self.log.info("Removing submitted assignments:")
+                for assignment in self.assignments:
+                    self.log.info(self.format_inbound_assignment(assignment))
+                    shutil.rmtree(assignment)
+            else:
+                self.log.info("Removing released assignments:")
+                for assignment in self.assignments:
+                    self.log.info(self.format_outbound_assignment(assignment))
+                    shutil.rmtree(assignment)
 
     def start(self):
         if self.inbound and self.cached:

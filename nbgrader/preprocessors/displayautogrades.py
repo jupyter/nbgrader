@@ -1,7 +1,8 @@
-import re
 import sys
+import json
 
 from IPython.utils.traitlets import Unicode, Integer, Bool
+from IPython.nbconvert.filters import ansi2html, strip_ansi
 
 from nbgrader import utils
 from nbgrader.preprocessors import NbGraderPreprocessor
@@ -68,18 +69,34 @@ class DisplayAutoGrades(NbGraderPreprocessor):
         config=True,
         help="Warning to display when a cell passes (when invert=True)")
 
-    ansi_escape = re.compile(r'\x1b[^m]*m')
+    as_json = Bool(False, config=True, help="Print out validation results as json")
+
     stream = sys.stdout
 
     def _indent(self, val):
         lines = val.split("\n")
         new_lines = []
         for line in lines:
-            new_line = self.ansi_escape.sub('', self.indent + line)
+            new_line = self.indent + strip_ansi(line)
             if len(new_line) > (self.width - 3):
                 new_line = new_line[:(self.width - 3)] + "..."
             new_lines.append(new_line)
         return "\n".join(new_lines)
+
+    def _extract_error(self, cell):
+        errors = []
+        if cell.cell_type == "code":
+            for output in cell.outputs:
+                if output.output_type == "error":
+                    errors.append("\n".join(output.traceback))
+
+            if len(errors) == 0:
+                errors.append("You did not provide a response.")
+
+        else:
+            errors.append("You did not provide a response.")
+
+        return "\n".join(errors)
 
     def _print_changed(self, cell):
         self.stream.write("\n" + "=" * self.width + "\n")
@@ -91,23 +108,7 @@ class DisplayAutoGrades(NbGraderPreprocessor):
         self.stream.write("The following cell failed:\n\n")
         self.stream.write(self._indent(cell.source.strip()) + "\n\n")
         self.stream.write("The error was:\n\n")
-
-        if cell.cell_type == "code":
-            errors = []
-            for output in cell.outputs:
-                if output.output_type == "error":
-                    errors.append(self._indent("\n".join(output.traceback)))
-
-            if len(errors) == 0:
-                self.stream.write(self._indent("You did not provide a response.") + "\n")
-            else:
-                for error in errors:
-                    self.stream.write(error + "\n")
-
-        else:
-            self.stream.write(self._indent("You did not provide a response.") + "\n")
-
-        self.stream.write("\n")
+        self.stream.write(self._indent(self._extract_error(cell)) + "\n\n")
 
     def _print_pass(self, cell):
         self.stream.write("\n" + "=" * self.width + "\n")
@@ -161,20 +162,41 @@ class DisplayAutoGrades(NbGraderPreprocessor):
         failed = resources['nbgrader']['failed_cells']
         passed = resources['nbgrader']['passed_cells']
 
+        json_dict = {}
+
         if not self.ignore_checksums and len(changed) > 0:
-            self._print_num_changed(len(changed))
-            for cell_index in changed:
-                self._print_changed(nb.cells[cell_index])
+            if self.as_json:
+                json_dict['changed'] = [{
+                    "source": cell.source.strip()
+                } for cell in changed]
+            else:
+                self._print_num_changed(len(changed))
+                for cell in changed:
+                    self._print_changed(cell)
 
         elif self.invert:
-            self._print_num_passed(len(passed))
-            for cell_index in passed:
-                self._print_pass(nb.cells[cell_index])
+            if self.as_json:
+                json_dict['passed'] = [{
+                    "source": cell.source.strip()
+                } for cell in passed]
+            else:
+                self._print_num_passed(len(passed))
+                for cell in passed:
+                    self._print_pass(cell)
 
         else:
-            self._print_num_failed(len(failed))
-            for cell_index in failed:
-                self._print_error(nb.cells[cell_index])
+            if self.as_json:
+                json_dict['failed'] = [{
+                    "source": cell.source.strip(),
+                    "error": ansi2html(self._extract_error(cell))
+                } for cell in failed]
+            else:
+                self._print_num_failed(len(failed))
+                for cell in failed:
+                    self._print_error(cell)
+
+        if self.as_json:
+            self.stream.write(json.dumps(json_dict))
 
         return nb, resources
 
@@ -192,7 +214,7 @@ class DisplayAutoGrades(NbGraderPreprocessor):
             old_checksum = cell.metadata.nbgrader['checksum']
             new_checksum = utils.compute_checksum(cell)
             if old_checksum != new_checksum:
-                resources['nbgrader']['checksum_mismatch'].append(cell_index)
+                resources['nbgrader']['checksum_mismatch'].append(cell)
 
         # if it's a grade cell, the check the grade
         if utils.is_grade(cell):
@@ -202,8 +224,8 @@ class DisplayAutoGrades(NbGraderPreprocessor):
             if score is None:
                 pass
             elif score < max_score:
-                resources['nbgrader']['failed_cells'].append(cell_index)
+                resources['nbgrader']['failed_cells'].append(cell)
             else:
-                resources['nbgrader']['passed_cells'].append(cell_index)
+                resources['nbgrader']['passed_cells'].append(cell)
 
         return cell, resources

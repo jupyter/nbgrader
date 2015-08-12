@@ -14,6 +14,10 @@ flags.update({
     'invert': (
         {'DisplayAutoGrades': {'invert': True}},
         "Complain when cells pass, rather than vice versa."
+    ),
+    'json': (
+        {'DisplayAutoGrades' : {'as_json': True}},
+        "Print out validation results as json."
     )
 })
 
