@@ -56,6 +56,9 @@ class SubmitApp(TransferApp):
             self.fail("Assignment not found: {}".format(self.src_path))
 
     def init_dest(self):
+        if self.course_id == '':
+            self.fail("No course id specified. Re-run with --course flag.")
+
         self.course_path = os.path.join(self.exchange_directory, self.course_id)
         self.inbound_path = os.path.join(self.course_path, 'inbound')
         self.assignment_filename = get_username() + '+' + self.assignment_id + '+' + self.timestamp

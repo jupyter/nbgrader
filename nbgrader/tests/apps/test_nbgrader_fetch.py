@@ -10,7 +10,7 @@ class TestNbGraderFetch(BaseTestApp):
         self._copy_file("files/test.ipynb", "release/ps1/p1.ipynb")
         run_command([
             "nbgrader", "release", assignment,
-            "--NbGraderConfig.course_id=abc101",
+            "--course", "abc101",
             "--TransferApp.exchange_directory={}".format(exchange)
         ])
 
@@ -29,6 +29,15 @@ class TestNbGraderFetch(BaseTestApp):
     def test_help(self):
         """Does the help display without error?"""
         run_command(["nbgrader", "fetch", "--help-all"])
+
+    def test_no_course_id(self, exchange):
+        """Does releasing without a course id thrown an error?"""
+        self._release("ps1", exchange)
+        cmd = [
+            "nbgrader", "fetch", "ps1",
+            "--TransferApp.exchange_directory={}".format(exchange)
+        ]
+        run_command(cmd, retcode=1)
 
     def test_fetch(self, exchange):
         self._release("ps1", exchange)
