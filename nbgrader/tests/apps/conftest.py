@@ -61,3 +61,13 @@ def exchange(request):
     request.addfinalizer(fin)
 
     return path
+
+@pytest.fixture
+def cache(request):
+    path = tempfile.mkdtemp()
+
+    def fin():
+        shutil.rmtree(path)
+    request.addfinalizer(fin)
+
+    return path

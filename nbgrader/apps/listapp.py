@@ -20,6 +20,10 @@ flags.update({
         {'ListApp' : {'inbound': True}},
         "List inbound files rather than outbound."
     ),
+    'cached': (
+        {'ListApp' : {'cached': True}},
+        "List cached files rather than inbound/outbound."
+    ),
     'remove': (
         {'ListApp' : {'remove': True}},
         "Remove an assignment from the exchange."
@@ -81,6 +85,7 @@ class ListApp(TransferApp):
         """
 
     inbound = Bool(False, config=True, help="List inbound files rather than outbound.")
+    cached = Bool(False, config=True, help="List assignments in submission cache.")
     remove = Bool(False, config=True, help="Remove, rather than list files.")
 
     def init_src(self):
@@ -93,39 +98,38 @@ class ListApp(TransferApp):
 
         if self.inbound:
             pattern = os.path.join(self.exchange_directory, course_id, 'inbound', '{}+{}+*'.format(student_id, assignment_id))
+        elif self.cached:
+            pattern = os.path.join(self.cache_directory, course_id, '{}+{}+*'.format(student_id, assignment_id))
         else:
             pattern = os.path.join(self.exchange_directory, course_id, 'outbound', '{}'.format(assignment_id))
 
         self.assignments = sorted(glob.glob(pattern))
 
-    def parse_inbound_assignment(self, assignment):
-        regexp = r".*/(?P<course_id>.*)/inbound/(?P<student_id>.*)\+(?P<assignment_id>.*)\+(?P<timestamp>.*)"
-        m = re.match(regexp, assignment)
-        if m is None:
-            raise RuntimeError("Could not match '%s' with regexp '%s'", assignment, regexp)
-        return m.groupdict()
+    def parse_assignment(self, assignment):
+        if self.inbound:
+            regexp = r".*/(?P<course_id>.*)/inbound/(?P<student_id>.*)\+(?P<assignment_id>.*)\+(?P<timestamp>.*)"
+        elif self.cached:
+            regexp = r".*/(?P<course_id>.*)/(?P<student_id>.*)\+(?P<assignment_id>.*)\+(?P<timestamp>.*)"
+        else:
+            regexp = r".*/(?P<course_id>.*)/outbound/(?P<assignment_id>.*)"
 
-    def parse_outbound_assignment(self, assignment):
-        regexp = r".*/(?P<course_id>.*)/outbound/(?P<assignment_id>.*)"
         m = re.match(regexp, assignment)
         if m is None:
             raise RuntimeError("Could not match '%s' with regexp '%s'", assignment, regexp)
         return m.groupdict()
 
     def format_inbound_assignment(self, assignment):
-        info = self.parse_inbound_assignment(assignment)
-        return "{course_id} {student_id} {assignment_id} {timestamp}".format(**info)
+        return "{course_id} {student_id} {assignment_id} {timestamp}".format(**self.parse_assignment(assignment))
 
     def format_outbound_assignment(self, assignment):
-        info = self.parse_outbound_assignment(assignment)
-        return "{course_id} {assignment_id}".format(**info)
+        return "{course_id} {assignment_id}".format(**self.parse_assignment(assignment))
 
     def copy_files(self):
         pass
 
     def list_files(self):
         """List files."""
-        if self.inbound:
+        if self.inbound or self.cached:
             self.log.info("Submitted assignments:")
             for path in self.assignments:
                 self.log.info(self.format_inbound_assignment(path))
@@ -137,7 +141,7 @@ class ListApp(TransferApp):
 
     def remove_files(self):
         """List and remove files."""
-        if self.inbound:
+        if self.inbound or self.cached:
             self.log.info("Removing submitted assignments:")
             for path in self.assignments:
                 self.log.info(self.format_inbound_assignment(path))
@@ -149,9 +153,14 @@ class ListApp(TransferApp):
                 shutil.rmtree(path)
 
     def start(self):
+        if self.inbound and self.cached:
+            self.fail("Options --inbound and --cached are incompatible.")
+
         if len(self.extra_args) == 0:
             self.extra_args = ["*"] # allow user to not put in assignment
+
         super(ListApp, self).start()
+
         if self.remove:
             self.remove_files()
         else:
