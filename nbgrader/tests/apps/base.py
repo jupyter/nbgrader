@@ -1,7 +1,6 @@
 import os
 import shutil
 import pytest
-import stat
 
 from IPython.nbformat import write as write_nb
 from IPython.nbformat.v4 import new_notebook

@@ -124,11 +124,14 @@ class ListApp(TransferApp):
             raise RuntimeError("Could not match '%s' with regexp '%s'", assignment, regexp)
         return m.groupdict()
 
-    def format_inbound_assignment(self, assignment):
-        return "{course_id} {student_id} {assignment_id} {timestamp}".format(**self.parse_assignment(assignment))
+    def format_inbound_assignment(self, info):
+        return "{course_id} {student_id} {assignment_id} {timestamp}".format(**info)
 
-    def format_outbound_assignment(self, assignment):
-        return "{course_id} {assignment_id}".format(**self.parse_assignment(assignment))
+    def format_outbound_assignment(self, info):
+        msg = "{course_id} {assignment_id}".format(**info)
+        if os.path.exists(info['assignment_id']):
+            msg += " (already downloaded)"
+        return msg
 
     def copy_files(self):
         pass
@@ -137,58 +140,67 @@ class ListApp(TransferApp):
         assignments = []
         for path in self.assignments:
             info = self.parse_assignment(path)
+
             if self.inbound or self.cached:
                 info['status'] = 'submitted'
                 info['path'] = path
             elif os.path.exists(info['assignment_id']):
                 info['status'] = 'fetched'
                 info['path'] = os.path.abspath(info['assignment_id'])
-                info['notebooks'] = []
-                for notebook in glob.glob(os.path.join(info['assignment_id'], '*.ipynb')):
-                    info['notebooks'].append({
-                        'notebook_id': os.path.splitext(os.path.split(notebook)[1])[0],
-                        'path': os.path.abspath(notebook)
-                    })
             else:
                 info['status'] = 'released'
                 info['path'] = path
+
+            if self.remove:
+                info['status'] = 'removed'
+
+            info['notebooks'] = []
+            for notebook in glob.glob(os.path.join(info['path'], '*.ipynb')):
+                info['notebooks'].append({
+                    'notebook_id': os.path.splitext(os.path.split(notebook)[1])[0],
+                    'path': os.path.abspath(notebook)
+                })
+
             assignments.append(info)
+
         return assignments
 
     def list_files(self):
         """List files."""
+        assignments = self.parse_assignments()
+
         if self.as_json:
-            print(json.dumps(self.parse_assignments()))
+            print(json.dumps(assignments))
 
         else:
             if self.inbound or self.cached:
                 self.log.info("Submitted assignments:")
-                for assignment in self.assignments:
-                    self.log.info(self.format_inbound_assignment(assignment))
+                for info in assignments:
+                    self.log.info(self.format_inbound_assignment(info))
             else:
                 self.log.info("Released assignments:")
-                for assignment in self.assignments:
-                    self.log.info(self.format_outbound_assignment(assignment))
+                for info in assignments:
+                    self.log.info(self.format_outbound_assignment(info))
 
     def remove_files(self):
         """List and remove files."""
+        assignments = self.parse_assignments()
+
         if self.as_json:
-            assignments = self.parse_assignments()
             print(json.dumps(assignments))
-            for assignment in assignments:
-                shutil.rmtree(assignment['path'])
 
         else:
             if self.inbound or self.cached:
                 self.log.info("Removing submitted assignments:")
-                for assignment in self.assignments:
-                    self.log.info(self.format_inbound_assignment(assignment))
-                    shutil.rmtree(assignment)
+                for info in assignments:
+                    self.log.info(self.format_inbound_assignment(info))
             else:
                 self.log.info("Removing released assignments:")
-                for assignment in self.assignments:
-                    self.log.info(self.format_outbound_assignment(assignment))
-                    shutil.rmtree(assignment)
+                for info in assignments:
+                    self.log.info(self.format_outbound_assignment(info))
+
+        for assignment in self.assignments:
+            shutil.rmtree(assignment)
 
     def start(self):
         if self.inbound and self.cached:

@@ -1,4 +1,5 @@
 import os
+import json
 
 from textwrap import dedent
 
@@ -54,7 +55,7 @@ class TestNbGraderList(BaseTestApp):
     def test_list_released(self, exchange, cache):
         self._release("ps1", exchange, cache)
         self._release("ps1", exchange, cache, course="xyz200")
-        assert self._list(exchange, "ps1", flags=["--course", "abc101"]) == dedent(
+        assert self._list(exchange, cache, "ps1", flags=["--course", "abc101"]) == dedent(
             """
             [ListApp | INFO] Released assignments:
             [ListApp | INFO] abc101 ps1
@@ -91,6 +92,20 @@ class TestNbGraderList(BaseTestApp):
             [ListApp | INFO] abc101 ps2
             [ListApp | INFO] xyz200 ps1
             [ListApp | INFO] xyz200 ps2
+            """
+        ).lstrip()
+
+    def test_list_fetched(self, exchange, cache):
+        self._release("ps1", exchange, cache)
+        self._release("ps2", exchange, cache)
+        print(os.listdir('.'))
+        self._fetch("ps1", exchange, cache)
+        print(os.listdir('.'))
+        assert self._list(exchange, cache) == dedent(
+            """
+            [ListApp | INFO] Released assignments:
+            [ListApp | INFO] abc101 ps1 (already downloaded)
+            [ListApp | INFO] abc101 ps2
             """
         ).lstrip()
 
@@ -233,3 +248,134 @@ class TestNbGraderList(BaseTestApp):
 
     def test_list_cached_and_inbound(self, exchange, cache):
         self._list(exchange, cache, flags=["--inbound", "--cached"], retcode=1)
+
+    def test_list_json(self, exchange, cache):
+        self._release("ps1", exchange, cache)
+        assert self._list(exchange, cache) == dedent(
+            """
+            [ListApp | INFO] Released assignments:
+            [ListApp | INFO] abc101 ps1
+            """
+        ).lstrip()
+        assert json.loads(self._list(exchange, cache, flags=['--json'])) == [
+            {
+                "assignment_id": "ps1",
+                "status": "released",
+                "course_id": "abc101",
+                "path": os.path.join(exchange, "abc101", "outbound", "ps1"),
+                "notebooks": [
+                    {
+                        "path": os.path.join(exchange, "abc101", "outbound", "ps1", "p1.ipynb"),
+                        "notebook_id": "p1"
+                    }
+                ]
+            }
+        ]
+
+        self._fetch("ps1", exchange, cache)
+        assert self._list(exchange, cache) == dedent(
+            """
+            [ListApp | INFO] Released assignments:
+            [ListApp | INFO] abc101 ps1 (already downloaded)
+            """
+        ).lstrip()
+        assert json.loads(self._list(exchange, cache, flags=['--json'])) == [
+            {
+                "assignment_id": "ps1",
+                "status": "fetched",
+                "course_id": "abc101",
+                "path": os.path.abspath("ps1"),
+                "notebooks": [
+                    {
+                        "path": os.path.abspath(os.path.join("ps1", "p1.ipynb")),
+                        "notebook_id": "p1"
+                    }
+                ]
+            }
+        ]
+
+        self._submit("ps1", exchange, cache)
+        filenames = sorted(os.listdir(os.path.join(exchange, "abc101", "inbound")))
+        timestamps = [x.split("+")[2] for x in filenames]
+
+        assert self._list(exchange, "ps1", flags=['--inbound']) == dedent(
+            """
+            [ListApp | INFO] Submitted assignments:
+            [ListApp | INFO] abc101 {} ps1 {}
+            """.format(os.environ['USER'], timestamps[0])
+        ).lstrip()
+
+        submission = "{}+ps1+{}".format(os.environ['USER'], timestamps[0])
+        assert json.loads(self._list(exchange, "ps1", flags=['--inbound', '--json'])) == [
+            {
+                "assignment_id": "ps1",
+                "status": "submitted",
+                "course_id": "abc101",
+                "student_id": os.environ['USER'],
+                "timestamp": timestamps[0],
+                "path": os.path.join(exchange, "abc101", "inbound", submission),
+                "notebooks": [
+                    {
+                        "path": os.path.join(exchange, "abc101", "inbound", submission, "p1.ipynb"),
+                        "notebook_id": "p1"
+                    }
+                ]
+            }
+        ]
+        assert json.loads(self._list(exchange, "ps1", flags=['--remove', '--inbound', '--json'])) == [
+            {
+                "assignment_id": "ps1",
+                "status": "removed",
+                "course_id": "abc101",
+                "student_id": os.environ['USER'],
+                "timestamp": timestamps[0],
+                "path": os.path.join(exchange, "abc101", "inbound", submission),
+                "notebooks": [
+                    {
+                        "path": os.path.join(exchange, "abc101", "inbound", submission, "p1.ipynb"),
+                        "notebook_id": "p1"
+                    }
+                ]
+            }
+        ]
+
+        assert self._list(exchange, cache, flags=['--cached']) == dedent(
+            """
+            [ListApp | INFO] Submitted assignments:
+            [ListApp | INFO] abc101 {} ps1 {}
+            """.format(os.environ['USER'], timestamps[0])
+        ).lstrip()
+
+        submission = "{}+ps1+{}".format(os.environ['USER'], timestamps[0])
+        assert json.loads(self._list(exchange, cache, flags=['--cached', '--json'])) == [
+            {
+                "assignment_id": "ps1",
+                "status": "submitted",
+                "course_id": "abc101",
+                "student_id": os.environ['USER'],
+                "timestamp": timestamps[0],
+                "path": os.path.join(cache, "abc101", submission),
+                "notebooks": [
+                    {
+                        "path": os.path.join(cache, "abc101", submission, "p1.ipynb"),
+                        "notebook_id": "p1"
+                    }
+                ]
+            }
+        ]
+        assert json.loads(self._list(exchange, cache, flags=['--remove', '--cached', '--json'])) == [
+            {
+                "assignment_id": "ps1",
+                "status": "removed",
+                "course_id": "abc101",
+                "student_id": os.environ['USER'],
+                "timestamp": timestamps[0],
+                "path": os.path.join(cache, "abc101", submission),
+                "notebooks": [
+                    {
+                        "path": os.path.join(cache, "abc101", submission, "p1.ipynb"),
+                        "notebook_id": "p1"
+                    }
+                ]
+            }
+        ]
