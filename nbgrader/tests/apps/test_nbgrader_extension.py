@@ -10,13 +10,13 @@ from nbgrader.tests.apps.base import BaseTestApp
 
 class TestNbGraderExtension(BaseTestApp):
 
-    def _assert_is_deactivated(self, config_file, key='nbgrader/create_assignment'):
+    def _assert_is_deactivated(self, config_file, key='create_assignment/main'):
         with open(config_file, 'r') as fh:
             config = json.load(fh)
         with pytest.raises(KeyError):
             config['load_extensions'][key]
 
-    def _assert_is_activated(self, config_file, key='nbgrader/create_assignment'):
+    def _assert_is_activated(self, config_file, key='create_assignment/main'):
         with open(config_file, 'r') as fh:
             config = json.load(fh)
         assert config['load_extensions'][key]
@@ -32,17 +32,17 @@ class TestNbGraderExtension(BaseTestApp):
         run_command(["nbgrader", "extension", "install", "--prefix", temp_dir])
 
         # check the extension file were copied
-        nbextension_dir = os.path.join(temp_dir, "share", "jupyter", "nbextensions", "nbgrader")
-        assert os.path.isfile(os.path.join(nbextension_dir, "create_assignment.js"))
-        assert os.path.isfile(os.path.join(nbextension_dir, "nbgrader.css"))
+        nbextension_dir = os.path.join(temp_dir, "share", "jupyter", "nbextensions", "create_assignment")
+        assert os.path.isfile(os.path.join(nbextension_dir, "main.js"))
+        assert os.path.isfile(os.path.join(nbextension_dir, "create_assignment.css"))
 
     def test_install_user(self, temp_dir):
         nbextension_dir = os.path.join(temp_dir, "nbextensions")
         run_command(["nbgrader", "extension", "install", "--nbextensions", nbextension_dir])
 
         # check the extension file were copied
-        assert os.path.isfile(os.path.join(nbextension_dir, "nbgrader", "create_assignment.js"))
-        assert os.path.isfile(os.path.join(nbextension_dir, "nbgrader", "nbgrader.css"))
+        assert os.path.isfile(os.path.join(nbextension_dir, "create_assignment", "main.js"))
+        assert os.path.isfile(os.path.join(nbextension_dir, "create_assignment", "create_assignment.css"))
 
     def test_activate(self, temp_dir):
         nbextension_dir = os.path.join(temp_dir, "nbextensions")
@@ -50,8 +50,8 @@ class TestNbGraderExtension(BaseTestApp):
         run_command(["nbgrader", "extension", "activate", "--ipython-dir", temp_dir])
 
         # check the extension file were copied
-        assert os.path.isfile(os.path.join(nbextension_dir, "nbgrader", "create_assignment.js"))
-        assert os.path.isfile(os.path.join(nbextension_dir, "nbgrader", "nbgrader.css"))
+        assert os.path.isfile(os.path.join(nbextension_dir, "create_assignment", "main.js"))
+        assert os.path.isfile(os.path.join(nbextension_dir, "create_assignment", "create_assignment.css"))
 
         # check that it is activated
         config_file = os.path.join(temp_dir, 'profile_default', 'nbconfig', 'notebook.json')
@@ -63,8 +63,8 @@ class TestNbGraderExtension(BaseTestApp):
         run_command(["nbgrader", "extension", "activate", "--ipython-dir", temp_dir, "--profile", "foo"])
 
         # check the extension file were copied
-        assert os.path.isfile(os.path.join(nbextension_dir, "nbgrader", "create_assignment.js"))
-        assert os.path.isfile(os.path.join(nbextension_dir, "nbgrader", "nbgrader.css"))
+        assert os.path.isfile(os.path.join(nbextension_dir, "create_assignment", "main.js"))
+        assert os.path.isfile(os.path.join(nbextension_dir, "create_assignment", "create_assignment.css"))
 
         # check that it is activated
         config_file = os.path.join(temp_dir, 'profile_foo', 'nbconfig', 'notebook.json')
@@ -76,8 +76,8 @@ class TestNbGraderExtension(BaseTestApp):
         run_command(["nbgrader", "extension", "activate", "--ipython-dir", temp_dir])
 
         # check the extension file were copied
-        assert os.path.isfile(os.path.join(nbextension_dir, "nbgrader", "create_assignment.js"))
-        assert os.path.isfile(os.path.join(nbextension_dir, "nbgrader", "nbgrader.css"))
+        assert os.path.isfile(os.path.join(nbextension_dir, "create_assignment", "main.js"))
+        assert os.path.isfile(os.path.join(nbextension_dir, "create_assignment", "create_assignment.css"))
 
         # check that it is activated
         config_file = os.path.join(temp_dir, 'profile_default', 'nbconfig', 'notebook.json')

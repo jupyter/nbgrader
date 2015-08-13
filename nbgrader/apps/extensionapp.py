@@ -11,14 +11,13 @@ from IPython.config.application import Application
 
 from nbgrader.apps.baseapp import BaseApp, format_excepthook, base_aliases, base_flags
 
-
 install_flags = {}
 install_flags.update(extension_flags)
 install_aliases = {}
 install_aliases.update(extension_aliases)
 del install_aliases['destination']
 del install_aliases['ipython-dir']
-class ExtensionInstallApp(NBExtensionApp):
+class ExtensionInstallApp(NBExtensionApp, BaseApp):
 
     name = u'nbgrader-extension-install'
     description = u'Install the nbgrader extension'
@@ -42,8 +41,15 @@ class ExtensionInstallApp(NBExtensionApp):
         format_excepthook(etype, evalue, tb)
 
     def start(self):
-        self.extra_args = [os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'nbextensions', 'nbgrader'))]
-        self.install_extensions()
+        nbextensions_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'nbextensions'))
+        extra_args = self.extra_args.copy()
+
+        # install the create_assignment extension
+        if len(extra_args) == 0 or "create_assignment" in extra_args:
+            self.log.info("Installing create_assignment extension")
+            self.extra_args = [os.path.join(nbextensions_dir, 'create_assignment')]
+            self.destination = 'create_assignment'
+            self.install_extensions()
 
 
 activate_flags = {}
@@ -72,30 +78,46 @@ class ExtensionActivateApp(BaseApp):
             config.BasicConfig.profile = 'default'
         return config
 
+    def _update_config(self, config_file, key_list, value):
+        if os.path.exists(config_file):
+            with io.open(config_file, 'r') as f:
+                config = json.loads(f.read())
+        else:
+            config = {}
+
+        # ensure the hierarchy of dictionaries exists
+        last_config = config
+        for key in key_list[:-1]:
+            if key not in last_config:
+                last_config[key] = {}
+            last_config = last_config[key]
+
+        # add the actual key/value pair
+        if isinstance(value, (list, tuple, set)):
+            old_set = set(last_config.get(key_list[-1], set([])))
+            old_set.update(set(value))
+            last_config[key_list[-1]] = list(old_set)
+        else:
+            last_config[key_list[-1]] = value
+
+        # make sure the directory exists
+        if not os.path.exists(os.path.dirname(config_file)):
+            os.mkdir(os.path.dirname(config_file))
+
+        # save it out
+        with io.open(config_file, 'w+') as f:
+            f.write(cast_unicode_py2(json.dumps(config, indent=2), 'utf-8'))
+
     def start(self):
         super(ExtensionActivateApp, self).start()
 
-        self.log.info("Activating nbextension for '%s' profile" % self.profile)
-
-        json_dir = os.path.join(self.profile_dir.location, 'nbconfig')
-        json_file = os.path.expanduser(os.path.join(json_dir, 'notebook.json'))
-
-        try:
-            with io.open(json_file, 'r') as f:
-                config = json.loads(f.read())
-        except IOError:
-            # file doesn't exist yet. IPython might have never been launched.
-            config = {}
-
-        if not config.get('load_extensions', None):
-            config['load_extensions'] = {}
-        config['load_extensions']['nbgrader/create_assignment'] = True
-
-        if not os.path.exists(json_dir):
-            os.mkdir(json_dir)
-
-        with io.open(json_file, 'w+') as f:
-            f.write(cast_unicode_py2(json.dumps(config, indent=2), 'utf-8'))
+        if len(self.extra_args) == 0 or "create_assignment" in self.extra_args:
+            self.log.info("Activating create_assignment nbextension for '%s' profile" % self.profile)
+            self._update_config(
+                os.path.expanduser(os.path.join(self.profile_dir.location, 'nbconfig', 'notebook.json')),
+                ["load_extensions", "create_assignment/main"],
+                True
+            )
 
 
 deactivate_flags = {}
@@ -124,35 +146,53 @@ class ExtensionDeactivateApp(BaseApp):
             config.BasicConfig.profile = 'default'
         return config
 
+    def _recursive_get(self, obj, key_list):
+        if obj is None or len(key_list) == 0:
+            return obj
+        return self._recursive_get(obj.get(key_list[0], None), key_list[1:])
+
+    def _update_config(self, config_file, key_list, value=None):
+        if os.path.exists(config_file):
+            with io.open(config_file, 'r') as f:
+                config = json.loads(f.read())
+        else:
+            config = {}
+
+        # search for the key through the hierarchy, return if it's not present
+        last_config = self._recursive_get(config, key_list)
+        if last_config is None:
+            return
+
+        # remove the key
+        if value is None:
+            self._recursive_get(config, key_list[:-1])[key_list[-1]] = False
+        else:
+            last_config = self._recursive_get(config, key_list[:-1])[key_list[-1]]
+            if value not in last_config:
+                return
+            last_config.remove(value)
+
+        # remove empty structures
+        while len(key_list) > 0:
+            key = key_list.pop()
+            last_config = self._recursive_get(config, key_list)
+            if not last_config[key]:
+                del last_config[key]
+
+        # save the updated config
+        with io.open(config_file, 'w+') as f:
+            f.write(cast_unicode_py2(json.dumps(config, indent=2), 'utf-8'))
+
     def start(self):
+        print(self.extra_args)
         super(ExtensionDeactivateApp, self).start()
 
-        self.log.info("Dectivating nbextension for '%s' profile" % self.profile)
-
-        json_dir = os.path.join(self.profile_dir.location, 'nbconfig')
-        json_file = os.path.expanduser(os.path.join(json_dir, 'notebook.json'))
-
-        try:
-            with io.open(json_file, 'r') as f:
-                config = json.loads(f.read())
-        except IOError:
-            # file doesn't exist yet. IPython might have never been launched.
-            return
-
-        if 'load_extensions' not in config:
-            return
-        if 'nbgrader/create_assignment' not in config['load_extensions']:
-            return
-
-        # deactivation require the delete the key.
-        del config['load_extensions']['nbgrader/create_assignment']
-
-        # prune if last extension.
-        if not config['load_extensions']:
-            del config['load_extensions']
-
-        with io.open(json_file, 'w+') as f:
-            f.write(cast_unicode_py2(json.dumps(config, indent=2), 'utf-8'))
+        if len(self.extra_args) == 0 or "create_assignment" in self.extra_args:
+            self.log.info("Deactivating create_assignment nbextension for '%s' profile" % self.profile)
+            self._update_config(
+                os.path.expanduser(os.path.join(self.profile_dir.location, 'nbconfig', 'notebook.json')),
+                ["load_extensions", "create_assignment/main"]
+            )
 
 
 class ExtensionApp(Application):
