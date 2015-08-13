@@ -152,6 +152,9 @@ class DisplayAutoGrades(NbGraderPreprocessor):
             )
 
     def preprocess(self, nb, resources):
+        if 'nbgrader' not in resources:
+            resources['nbgrader'] = {}
+
         resources['nbgrader']['failed_cells'] = []
         resources['nbgrader']['passed_cells'] = []
         resources['nbgrader']['checksum_mismatch'] = []
@@ -176,9 +179,10 @@ class DisplayAutoGrades(NbGraderPreprocessor):
 
         elif self.invert:
             if self.as_json:
-                json_dict['passed'] = [{
-                    "source": cell.source.strip()
-                } for cell in passed]
+                if len(passed) > 0:
+                    json_dict['passed'] = [{
+                        "source": cell.source.strip()
+                    } for cell in passed]
             else:
                 self._print_num_passed(len(passed))
                 for cell in passed:
@@ -186,10 +190,11 @@ class DisplayAutoGrades(NbGraderPreprocessor):
 
         else:
             if self.as_json:
-                json_dict['failed'] = [{
-                    "source": cell.source.strip(),
-                    "error": ansi2html(self._extract_error(cell))
-                } for cell in failed]
+                if len(failed) > 0:
+                    json_dict['failed'] = [{
+                        "source": cell.source.strip(),
+                        "error": ansi2html(self._extract_error(cell))
+                    } for cell in failed]
             else:
                 self._print_num_failed(len(failed))
                 for cell in failed:
