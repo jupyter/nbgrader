@@ -1,3 +1,5 @@
+import json
+
 from nbgrader.tests import run_command
 from nbgrader.tests.apps.base import BaseTestApp
 
@@ -102,3 +104,20 @@ class TestNbGraderValidate(BaseTestApp):
             "--DisplayAutoGrades.ignore_checksums=True"
         ])
         assert output.split("\n")[0] == "NOTEBOOK PASSED ON 1 CELL(S)!"
+
+    def test_invert_locked_cell_changed_ignore_checksums_json(self):
+        """Does the validate fail if a locked cell has changed with --invert and ignoring checksums?"""
+        self._copy_file("files/submitted-locked-cell-changed.ipynb", "submitted-locked-cell-changed.ipynb")
+        output = run_command([
+            "nbgrader", "validate", "submitted-locked-cell-changed.ipynb",
+            "--invert",
+            "--json",
+            "--DisplayAutoGrades.ignore_checksums=True"
+        ])
+        assert json.loads(output) == {
+            "passed": [
+                {
+                    "source": 'print("Success!")'
+                }
+            ]
+        }

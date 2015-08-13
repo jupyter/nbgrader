@@ -2,6 +2,7 @@ import os
 import glob
 import shutil
 import re
+import json
 
 from IPython.utils.traitlets import Bool
 
@@ -27,6 +28,10 @@ flags.update({
     'remove': (
         {'ListApp' : {'remove': True}},
         "Remove an assignment from the exchange."
+    ),
+    'json': (
+        {'ListApp' : {'as_json': True}},
+        "Print out assignments as json."
     ),
 })
 
@@ -87,6 +92,7 @@ class ListApp(TransferApp):
     inbound = Bool(False, config=True, help="List inbound files rather than outbound.")
     cached = Bool(False, config=True, help="List assignments in submission cache.")
     remove = Bool(False, config=True, help="Remove, rather than list files.")
+    as_json = Bool(False, config=True, help="Print out assignments as json")
 
     def init_src(self):
         pass
@@ -118,39 +124,83 @@ class ListApp(TransferApp):
             raise RuntimeError("Could not match '%s' with regexp '%s'", assignment, regexp)
         return m.groupdict()
 
-    def format_inbound_assignment(self, assignment):
-        return "{course_id} {student_id} {assignment_id} {timestamp}".format(**self.parse_assignment(assignment))
+    def format_inbound_assignment(self, info):
+        return "{course_id} {student_id} {assignment_id} {timestamp}".format(**info)
 
-    def format_outbound_assignment(self, assignment):
-        return "{course_id} {assignment_id}".format(**self.parse_assignment(assignment))
+    def format_outbound_assignment(self, info):
+        msg = "{course_id} {assignment_id}".format(**info)
+        if os.path.exists(info['assignment_id']):
+            msg += " (already downloaded)"
+        return msg
 
     def copy_files(self):
         pass
 
+    def parse_assignments(self):
+        assignments = []
+        for path in self.assignments:
+            info = self.parse_assignment(path)
+
+            if self.inbound or self.cached:
+                info['status'] = 'submitted'
+                info['path'] = path
+            elif os.path.exists(info['assignment_id']):
+                info['status'] = 'fetched'
+                info['path'] = os.path.abspath(info['assignment_id'])
+            else:
+                info['status'] = 'released'
+                info['path'] = path
+
+            if self.remove:
+                info['status'] = 'removed'
+
+            info['notebooks'] = []
+            for notebook in glob.glob(os.path.join(info['path'], '*.ipynb')):
+                info['notebooks'].append({
+                    'notebook_id': os.path.splitext(os.path.split(notebook)[1])[0],
+                    'path': os.path.abspath(notebook)
+                })
+
+            assignments.append(info)
+
+        return assignments
+
     def list_files(self):
         """List files."""
-        if self.inbound or self.cached:
-            self.log.info("Submitted assignments:")
-            for path in self.assignments:
-                self.log.info(self.format_inbound_assignment(path))
+        assignments = self.parse_assignments()
+
+        if self.as_json:
+            print(json.dumps(assignments))
 
         else:
-            self.log.info("Released assignments:")
-            for path in self.assignments:
-                self.log.info(self.format_outbound_assignment(path))
+            if self.inbound or self.cached:
+                self.log.info("Submitted assignments:")
+                for info in assignments:
+                    self.log.info(self.format_inbound_assignment(info))
+            else:
+                self.log.info("Released assignments:")
+                for info in assignments:
+                    self.log.info(self.format_outbound_assignment(info))
 
     def remove_files(self):
         """List and remove files."""
-        if self.inbound or self.cached:
-            self.log.info("Removing submitted assignments:")
-            for path in self.assignments:
-                self.log.info(self.format_inbound_assignment(path))
-                shutil.rmtree(path)
+        assignments = self.parse_assignments()
+
+        if self.as_json:
+            print(json.dumps(assignments))
+
         else:
-            self.log.info("Removing released assignments:")
-            for path in self.assignments:
-                self.log.info(self.format_outbound_assignment(path))
-                shutil.rmtree(path)
+            if self.inbound or self.cached:
+                self.log.info("Removing submitted assignments:")
+                for info in assignments:
+                    self.log.info(self.format_inbound_assignment(info))
+            else:
+                self.log.info("Removing released assignments:")
+                for info in assignments:
+                    self.log.info(self.format_outbound_assignment(info))
+
+        for assignment in self.assignments:
+            shutil.rmtree(assignment)
 
     def start(self):
         if self.inbound and self.cached:

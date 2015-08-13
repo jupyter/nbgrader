@@ -1,4 +1,5 @@
 import pytest
+import json
 
 try:
     from StringIO import StringIO # python 2
@@ -191,3 +192,262 @@ class TestDisplayAutoGrades(BaseTestPreprocessor):
         preprocessor.stream = stream
         preprocessor._print_num_passed(1)
         assert stream.getvalue().startswith("NOTEBOOK PASSED ON 1 CELL(S)!")
+
+    def test_submitted_unchanged(self, preprocessor, stream):
+        """Does the validation fail on an unchanged notebook?"""
+        nb = self._read_nb("files/submitted-unchanged.ipynb")
+        preprocessor.stream = stream
+        preprocessor.preprocess(nb, {})
+        assert stream.getvalue().split("\n")[0] == "VALIDATION FAILED ON 3 CELL(S)! If you submit your assignment as it is, you WILL NOT"
+
+    def test_submitted_changed(self, preprocessor, stream):
+        """Does the validation pass on an changed notebook?"""
+        nb = self._read_nb("files/submitted-changed.ipynb")
+        preprocessor.stream = stream
+        preprocessor.preprocess(nb, {})
+        assert stream.getvalue() == "Success! Your notebook passes all the tests.\n"
+
+    def test_invert_submitted_unchanged(self, preprocessor, stream):
+        """Does the inverted validation pass on an unchanged notebook?"""
+        nb = self._read_nb("files/submitted-unchanged.ipynb")
+        preprocessor.stream = stream
+        preprocessor.invert = True
+        preprocessor.preprocess(nb, {})
+        assert stream.getvalue().split("\n")[0] == "NOTEBOOK PASSED ON 1 CELL(S)!"
+
+    def test_invert_submitted_changed(self, preprocessor, stream):
+        """Does the inverted validation fail on a changed notebook?"""
+        nb = self._read_nb("files/submitted-changed.ipynb")
+        preprocessor.stream = stream
+        preprocessor.invert = True
+        preprocessor.preprocess(nb, {})
+        assert stream.getvalue().split("\n")[0] == "NOTEBOOK PASSED ON 2 CELL(S)!"
+
+    def test_grade_cell_changed(self, preprocessor, stream):
+        """Does the validate fail if a grade cell has changed?"""
+        nb = self._read_nb("files/submitted-grade-cell-changed.ipynb")
+        preprocessor.stream = stream
+        preprocessor.preprocess(nb, {})
+        assert stream.getvalue().split("\n")[0] == "THE CONTENTS OF 1 TEST CELL(S) HAVE CHANGED! This might mean that even though the tests"
+
+    def test_grade_cell_changed_ignore_checksums(self, preprocessor, stream):
+        """Does the validate pass if a grade cell has changed but we're ignoring checksums?"""
+        nb = self._read_nb("files/submitted-grade-cell-changed.ipynb")
+        preprocessor.stream = stream
+        preprocessor.ignore_checksums = True
+        preprocessor.preprocess(nb, {})
+        assert stream.getvalue().split("\n")[0] == "Success! Your notebook passes all the tests."
+
+    def test_invert_grade_cell_changed(self, preprocessor, stream):
+        """Does the validate fail if a grade cell has changed, even with --invert?"""
+        nb = self._read_nb("files/submitted-grade-cell-changed.ipynb")
+        preprocessor.stream = stream
+        preprocessor.invert = True
+        preprocessor.preprocess(nb, {})
+        assert stream.getvalue().split("\n")[0] == "THE CONTENTS OF 1 TEST CELL(S) HAVE CHANGED! This might mean that even though the tests"
+
+    def test_invert_grade_cell_changed_ignore_checksums(self, preprocessor, stream):
+        """Does the validate fail if a grade cell has changed with --invert and ignoring checksums?"""
+        nb = self._read_nb("files/submitted-grade-cell-changed.ipynb")
+        preprocessor.stream = stream
+        preprocessor.invert = True
+        preprocessor.ignore_checksums = True
+        preprocessor.preprocess(nb, {})
+        assert stream.getvalue().split("\n")[0] == "NOTEBOOK PASSED ON 2 CELL(S)!"
+
+    def test_submitted_unchanged_ignore_checksums(self, preprocessor, stream):
+        """Does the validation fail on an unchanged notebook with ignoring checksums?"""
+        nb = self._read_nb("files/submitted-unchanged.ipynb")
+        preprocessor.stream = stream
+        preprocessor.ignore_checksums = True
+        preprocessor.preprocess(nb, {})
+        assert stream.getvalue().split("\n")[0] == "VALIDATION FAILED ON 1 CELL(S)! If you submit your assignment as it is, you WILL NOT"
+
+    def test_locked_cell_changed(self, preprocessor, stream):
+        """Does the validate fail if a locked cell has changed?"""
+        nb = self._read_nb("files/submitted-locked-cell-changed.ipynb")
+        preprocessor.stream = stream
+        preprocessor.preprocess(nb, {})
+        assert stream.getvalue().split("\n")[0] == "THE CONTENTS OF 2 TEST CELL(S) HAVE CHANGED! This might mean that even though the tests"
+
+    def test_locked_cell_changed_ignore_checksums(self, preprocessor, stream):
+        """Does the validate pass if a locked cell has changed but we're ignoring checksums?"""
+        nb = self._read_nb("files/submitted-locked-cell-changed.ipynb")
+        preprocessor.stream = stream
+        preprocessor.ignore_checksums = True
+        preprocessor.preprocess(nb, {})
+        assert stream.getvalue().split("\n")[0] == "VALIDATION FAILED ON 1 CELL(S)! If you submit your assignment as it is, you WILL NOT"
+
+    def test_invert_locked_cell_changed(self, preprocessor, stream):
+        """Does the validate fail if a locked cell has changed, even with --invert?"""
+        nb = self._read_nb("files/submitted-locked-cell-changed.ipynb")
+        preprocessor.stream = stream
+        preprocessor.invert = True
+        preprocessor.preprocess(nb, {})
+        assert stream.getvalue().split("\n")[0] == "THE CONTENTS OF 2 TEST CELL(S) HAVE CHANGED! This might mean that even though the tests"
+
+    def test_invert_locked_cell_changed_ignore_checksums(self, preprocessor, stream):
+        """Does the validate fail if a locked cell has changed with --invert and ignoring checksums?"""
+        nb = self._read_nb("files/submitted-locked-cell-changed.ipynb")
+        preprocessor.stream = stream
+        preprocessor.invert = True
+        preprocessor.ignore_checksums = True
+        preprocessor.preprocess(nb, {})
+        assert stream.getvalue().split("\n")[0] == "NOTEBOOK PASSED ON 1 CELL(S)!"
+
+    def test_submitted_unchanged_json(self, preprocessor, stream):
+        """Does the validation fail on an unchanged notebook?"""
+        nb = self._read_nb("files/submitted-unchanged.ipynb")
+        preprocessor.stream = stream
+        preprocessor.as_json = True
+        preprocessor.preprocess(nb, {})
+        output = json.loads(stream.getvalue())
+        assert list(output.keys()) == ["failed"]
+        assert len(output["failed"]) == 3
+        assert output["failed"][0]["source"] == "assert a == 1"
+        assert output["failed"][1]["source"] == "YOUR ANSWER HERE"
+        assert output["failed"][1]["error"] == "You did not provide a response."
+        assert output["failed"][2]["source"] == "# YOUR CODE HERE\nraise NotImplementedError()"
+
+    def test_submitted_changed_json(self, preprocessor, stream):
+        """Does the validation pass on an changed notebook?"""
+        nb = self._read_nb("files/submitted-changed.ipynb")
+        preprocessor.stream = stream
+        preprocessor.as_json = True
+        preprocessor.preprocess(nb, {})
+        output = json.loads(stream.getvalue())
+        assert list(output.keys()) == []
+
+    def test_invert_submitted_unchanged_json(self, preprocessor, stream):
+        """Does the inverted validation pass on an unchanged notebook?"""
+        nb = self._read_nb("files/submitted-unchanged.ipynb")
+        preprocessor.stream = stream
+        preprocessor.as_json = True
+        preprocessor.invert = True
+        preprocessor.preprocess(nb, {})
+        output = json.loads(stream.getvalue())
+        assert list(output.keys()) == ["passed"]
+        assert len(output["passed"]) == 1
+        assert output["passed"][0]["source"] == 'print("Success!")'
+
+    def test_invert_submitted_changed_json(self, preprocessor, stream):
+        """Does the inverted validation fail on a changed notebook?"""
+        nb = self._read_nb("files/submitted-changed.ipynb")
+        preprocessor.stream = stream
+        preprocessor.as_json = True
+        preprocessor.invert = True
+        preprocessor.preprocess(nb, {})
+        output = json.loads(stream.getvalue())
+        assert list(output.keys()) == ["passed"]
+        assert len(output["passed"]) == 2
+        assert output["passed"][0]["source"] == 'print("Success!")'
+        assert output["passed"][1]["source"] == 'assert a == 1'
+
+    def test_grade_cell_changed_json(self, preprocessor, stream):
+        """Does the validate fail if a grade cell has changed?"""
+        nb = self._read_nb("files/submitted-grade-cell-changed.ipynb")
+        preprocessor.stream = stream
+        preprocessor.as_json = True
+        preprocessor.preprocess(nb, {})
+        output = json.loads(stream.getvalue())
+        assert list(output.keys()) == ["changed"]
+        assert len(output["changed"]) == 1
+        assert output["changed"][0]["source"] == '#assert a == 1'
+
+    def test_grade_cell_changed_ignore_checksums_json(self, preprocessor, stream):
+        """Does the validate pass if a grade cell has changed but we're ignoring checksums?"""
+        nb = self._read_nb("files/submitted-grade-cell-changed.ipynb")
+        preprocessor.stream = stream
+        preprocessor.as_json = True
+        preprocessor.ignore_checksums = True
+        preprocessor.preprocess(nb, {})
+        output = json.loads(stream.getvalue())
+        assert list(output.keys()) == []
+
+    def test_invert_grade_cell_changed_json(self, preprocessor, stream):
+        """Does the validate fail if a grade cell has changed, even with --invert?"""
+        nb = self._read_nb("files/submitted-grade-cell-changed.ipynb")
+        preprocessor.stream = stream
+        preprocessor.as_json = True
+        preprocessor.invert = True
+        preprocessor.preprocess(nb, {})
+        output = json.loads(stream.getvalue())
+        assert list(output.keys()) == ["changed"]
+        assert len(output["changed"]) == 1
+        assert output["changed"][0]["source"] == '#assert a == 1'
+
+    def test_invert_grade_cell_changed_ignore_checksums_json(self, preprocessor, stream):
+        """Does the validate fail if a grade cell has changed with --invert and ignoring checksums?"""
+        nb = self._read_nb("files/submitted-grade-cell-changed.ipynb")
+        preprocessor.stream = stream
+        preprocessor.as_json = True
+        preprocessor.invert = True
+        preprocessor.ignore_checksums = True
+        preprocessor.preprocess(nb, {})
+        output = json.loads(stream.getvalue())
+        assert list(output.keys()) == ["passed"]
+        assert len(output["passed"]) == 2
+        assert output["passed"][0]["source"] == 'print("Success!")'
+        assert output["passed"][1]["source"] == '#assert a == 1'
+
+    def test_submitted_unchanged_ignore_checksums_json(self, preprocessor, stream):
+        """Does the validation fail on an unchanged notebook with ignoring checksums?"""
+        nb = self._read_nb("files/submitted-unchanged.ipynb")
+        preprocessor.stream = stream
+        preprocessor.as_json = True
+        preprocessor.ignore_checksums = True
+        preprocessor.preprocess(nb, {})
+        output = json.loads(stream.getvalue())
+        assert list(output.keys()) == ["failed"]
+        assert len(output["failed"]) == 1
+        assert output["failed"][0]["source"] == 'assert a == 1'
+
+    def test_locked_cell_changed_json(self, preprocessor, stream):
+        """Does the validate fail if a locked cell has changed?"""
+        nb = self._read_nb("files/submitted-locked-cell-changed.ipynb")
+        preprocessor.stream = stream
+        preprocessor.as_json = True
+        preprocessor.preprocess(nb, {})
+        output = json.loads(stream.getvalue())
+        assert list(output.keys()) == ["changed"]
+        assert len(output["changed"]) == 2
+        assert output["changed"][0]["source"] == '#print("Don\'t change this cell!")'
+        assert output["changed"][1]["source"] == "This cell shouldn't \nbe changed."
+
+    def test_locked_cell_changed_ignore_checksums_json(self, preprocessor, stream):
+        """Does the validate pass if a locked cell has changed but we're ignoring checksums?"""
+        nb = self._read_nb("files/submitted-locked-cell-changed.ipynb")
+        preprocessor.stream = stream
+        preprocessor.as_json = True
+        preprocessor.ignore_checksums = True
+        preprocessor.preprocess(nb, {})
+        output = json.loads(stream.getvalue())
+        assert list(output.keys()) == ["failed"]
+        assert len(output["failed"]) == 1
+        assert output["failed"][0]["source"] == 'assert a == 1'
+
+    def test_invert_locked_cell_changed_json(self, preprocessor, stream):
+        """Does the validate fail if a locked cell has changed, even with --invert?"""
+        nb = self._read_nb("files/submitted-locked-cell-changed.ipynb")
+        preprocessor.stream = stream
+        preprocessor.as_json = True
+        preprocessor.invert = True
+        preprocessor.preprocess(nb, {})
+        output = json.loads(stream.getvalue())
+        assert list(output.keys()) == ["changed"]
+        assert len(output["changed"]) == 2
+        assert output["changed"][0]["source"] == '#print("Don\'t change this cell!")'
+        assert output["changed"][1]["source"] == "This cell shouldn't \nbe changed."
+
+    def test_invert_locked_cell_changed_ignore_checksums_json(self, preprocessor, stream):
+        """Does the validate fail if a locked cell has changed with --invert and ignoring checksums?"""
+        nb = self._read_nb("files/submitted-locked-cell-changed.ipynb")
+        preprocessor.stream = stream
+        preprocessor.as_json = True
+        preprocessor.invert = True
+        preprocessor.ignore_checksums = True
+        preprocessor.preprocess(nb, {})
+        output = json.loads(stream.getvalue())
+        assert list(output.keys()) == ["passed"]
+        assert len(output["passed"]) == 1
+        assert output["passed"][0]["source"] == 'print("Success!")'
