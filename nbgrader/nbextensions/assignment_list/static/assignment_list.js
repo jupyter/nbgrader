@@ -6,7 +6,7 @@ define([
     'jquery',
     'base/js/utils',
     'base/js/dialog',
-], function(IPython, $, utils, dialog) {
+], function(Jupyter, $, utils, dialog) {
     "use strict";
 
     var AssignmentList = function (released_selector, fetched_selector, submitted_selector, options) {

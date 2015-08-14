@@ -1,4 +1,4 @@
-from IPython.nbformat.v4.nbbase import validate
+from nbformat.v4.nbbase import validate
 
 from nbgrader import utils
 from nbgrader.api import Gradebook

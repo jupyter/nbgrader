@@ -1,6 +1,6 @@
 define(function(require) {
     var $ = require('jquery');
-    var IPython = require('base/js/namespace');
+    var Jupyter = require('base/js/namespace');
     var AssignmentList = require('./assignment_list');
 
     var assignment_html = $([
@@ -57,8 +57,8 @@ define(function(require) {
     ].join('\n'));
 
    function load() {
-        if (!IPython.notebook_list) return;
-        var base_url = IPython.notebook_list.base_url;
+        if (!Jupyter.notebook_list) return;
+        var base_url = Jupyter.notebook_list.base_url;
         $('head').append(
             $('<link>')
             .attr('rel', 'stylesheet')
@@ -83,8 +83,8 @@ define(function(require) {
             '#fetched_assignments_list',
             '#submitted_assignments_list',
             {
-                base_url: IPython.notebook_list.base_url,
-                notebook_path: IPython.notebook_list.notebook_path,
+                base_url: Jupyter.notebook_list.base_url,
+                notebook_path: Jupyter.notebook_list.notebook_path,
             }
         );
         assignment_list.load_list();

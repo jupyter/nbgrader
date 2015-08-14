@@ -16,16 +16,9 @@ class TestNbGrader(BaseTestApp):
 
     def test_generate_config(self):
         """Is the config file properly generated?"""
+
         run_command(["nbgrader", "--generate-config"])
         assert os.path.isfile("nbgrader_config.py")
 
-        with open("nbgrader_config.py", "w") as fh:
-            fh.write("foo")
-
+        # does it fail if it already exists?
         run_command(["nbgrader", "--generate-config"], retcode=1)
-        run_command(["nbgrader", "--generate-config", "--overwrite"])
-
-        with open("nbgrader_config.py", "r") as fh:
-            contents = fh.read()
-
-        assert contents != "foo"

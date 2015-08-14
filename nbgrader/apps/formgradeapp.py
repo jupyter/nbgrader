@@ -1,13 +1,12 @@
 import os
 import signal
 import sys
+import notebook
 
+from nbconvert.exporters import HTMLExporter
 from textwrap import dedent
-
-from IPython.utils.traitlets import Unicode, Integer, Type, Instance
-
-from IPython.nbconvert.exporters import HTMLExporter
-from IPython.config.application import catch_config_error
+from traitlets import Unicode, Integer, Type, Instance
+from traitlets.config.application import catch_config_error
 
 from nbgrader.apps.baseapp import BaseNbGraderApp, nbgrader_aliases, nbgrader_flags
 from nbgrader.html.formgrade import app
@@ -42,7 +41,7 @@ class FormgradeApp(BaseNbGraderApp):
         graded, as long as it has already been run through the autograder.
 
         By default, the formgrader runs at http://localhost:5000. It also starts
-        an IPython notebook server, to allow students' notebooks to be open up
+        a Jupyter notebook server, to allow students' notebooks to be open up
         and run manually if so desired. The notebook server also runs on
         localhost on a random port, though this port can be specified by setting
         `FormgradeApp.nbserver_port`. The notebook server can be disabled entirely
@@ -76,15 +75,14 @@ class FormgradeApp(BaseNbGraderApp):
         config=True,
         help=dedent(
             """
-            URL or local path to mathjax installation. To install it locally,
-            install mathjax with IPython and then configure this variable to
-            use the local version.
+            URL or local path to mathjax installation. Defaults to the version
+            of MathJax included with the Jupyter Notebook.
             """
         )
     )
 
     def _mathjax_url_default(self):
-        url = os.path.join(self.ipython_dir, 'nbextensions', 'mathjax', 'MathJax.js')
+        url = os.path.join(notebook.DEFAULT_STATIC_FILES_PATH, 'components', 'MathJax', 'MathJax.js')
         if not os.path.exists(url):
             url = 'https://cdn.mathjax.org/mathjax/latest/MathJax.js'
         self.log.info("Serving MathJax from %s", url)

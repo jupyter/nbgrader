@@ -3,7 +3,7 @@ import pytest
 import tempfile
 import shutil
 
-from IPython.nbformat.v4 import new_output
+from nbformat.v4 import new_output
 
 from nbgrader import utils
 from nbgrader.tests import (

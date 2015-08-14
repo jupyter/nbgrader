@@ -11,23 +11,7 @@ A system for assigning and grading notebooks.
 ## Installation
 
 If you want to develop on nbgrader, please follow the [development installation instructions](CONTRIBUTING.md#development-installation).
-
-### Dependencies
-
-Before installing nbgrader, please ensure that the IPython notebook is properly installed.
-Note that it is not sufficient to just install IPython; you must specifically install the notebook components as well.
-
-If using conda, run
-
-    conda install ipython-notebook=3.2
-
-Otherwise, run
-
-    pip install ipython[all]==3.2
-
-### Installing nbgrader
-
-After installing the above dependencies, you can install the current version of nbgrader with:
+Otherwise, you can install the current version of nbgrader with:
 
     pip install nbgrader
 

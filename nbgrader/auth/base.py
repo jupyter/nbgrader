@@ -1,5 +1,5 @@
 """Base formgrade authenticator."""
-from IPython.config.configurable import LoggingConfigurable
+from traitlets.config.configurable import LoggingConfigurable
 
 
 class BaseAuth(LoggingConfigurable):

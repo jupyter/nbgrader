@@ -2,8 +2,8 @@ import os
 import shutil
 import pytest
 
-from IPython.nbformat import write as write_nb
-from IPython.nbformat.v4 import new_notebook
+from nbformat import write as write_nb
+from nbformat.v4 import new_notebook
 
 
 @pytest.mark.usefixtures("temp_cwd")

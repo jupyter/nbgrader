@@ -4,10 +4,10 @@ import subprocess as sp
 from copy import deepcopy
 
 try:
-    from IPython.nbformat import read, write
-    from IPython.nbconvert.preprocessors import ClearOutputPreprocessor
+    from nbformat import read, write
+    from nbconvert.preprocessors import ClearOutputPreprocessor
 except ImportError:
-    print("Warning: IPython could not be imported, some tasks may not work")
+    print("Warning: nbformat and/or nbconvert could not be imported, some tasks may not work")
 
 
 def run(cmd):

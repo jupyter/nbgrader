@@ -4,7 +4,7 @@ import os
 import json
 from subprocess import check_output
 from flask import request, redirect, abort
-from IPython.utils.traitlets import Unicode, Int, List, Bool 
+from traitlets import Unicode, Int, List, Bool 
 
 from nbgrader.html.formgrade import blueprint
 from .base import BaseAuth

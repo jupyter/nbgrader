@@ -1,4 +1,4 @@
-from IPython.utils.traitlets import Bool
+from traitlets import Bool
 
 from nbgrader import utils
 from nbgrader.preprocessors import NbGraderPreprocessor

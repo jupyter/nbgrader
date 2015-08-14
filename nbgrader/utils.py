@@ -3,8 +3,7 @@ import hashlib
 import dateutil.parser
 import pwd
 import glob
-
-from IPython.utils.py3compat import str_to_bytes, string_types
+import six
 
 
 def is_grade(cell):
@@ -56,20 +55,20 @@ def determine_grade(cell):
 def compute_checksum(cell):
     m = hashlib.md5()
     # add the cell source and type
-    m.update(str_to_bytes(cell.source))
-    m.update(str_to_bytes(cell.cell_type))
+    m.update(six.b(cell.source))
+    m.update(six.b(cell.cell_type))
 
     # add whether it's a grade cell and/or solution cell
-    m.update(str_to_bytes(str(is_grade(cell))))
-    m.update(str_to_bytes(str(is_solution(cell))))
-    m.update(str_to_bytes(str(is_locked(cell))))
+    m.update(six.b(str(is_grade(cell))))
+    m.update(six.b(str(is_solution(cell))))
+    m.update(six.b(str(is_locked(cell))))
 
     # include the cell id
-    m.update(str_to_bytes(cell.metadata.nbgrader['grade_id']))
+    m.update(six.b(cell.metadata.nbgrader['grade_id']))
 
     # include the number of points that the cell is worth, if it is a grade cell
     if is_grade(cell):
-        m.update(str_to_bytes(str(float(cell.metadata.nbgrader['points']))))
+        m.update(six.b(str(float(cell.metadata.nbgrader['points']))))
 
     return m.hexdigest()
 
@@ -77,7 +76,7 @@ def parse_utc(ts):
     """Parses a timestamp into datetime format, converting it to UTC if necessary."""
     if ts is None:
         return None
-    if isinstance(ts, string_types):
+    if isinstance(ts, six.string_types):
         ts = dateutil.parser.parse(ts)
     if ts.tzinfo is not None:
         ts = (ts - ts.utcoffset()).replace(tzinfo=None)

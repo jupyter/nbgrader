@@ -1,5 +1,5 @@
-from IPython.nbconvert.preprocessors import Preprocessor
-from IPython.utils.traitlets import List, Unicode, Bool
+from nbconvert.preprocessors import Preprocessor
+from traitlets import List, Unicode, Bool
 
 class NbGraderPreprocessor(Preprocessor):
 

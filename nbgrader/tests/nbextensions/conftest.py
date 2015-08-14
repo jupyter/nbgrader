@@ -6,13 +6,12 @@ import subprocess as sp
 import logging
 import time
 
-from copy import copy
 from selenium import webdriver
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from textwrap import dedent
 
-from IPython.nbformat import write as write_nb
-from IPython.nbformat.v4 import new_notebook
+from nbformat import write as write_nb
+from nbformat.v4 import new_notebook
 
 from nbgrader.tests import run_command, copy_coverage_files
 from nbgrader.api import Gradebook
@@ -32,17 +31,24 @@ def tempdir(request):
 
 
 @pytest.fixture(scope="module")
-def ipythondir(request):
-    ipythondir = tempfile.mkdtemp()
-
-    # ensure IPython dir exists.
-    run_command(['ipython', 'profile', 'create', '--ipython-dir', ipythondir])
+def jupyter_config_dir(request):
+    jupyter_config_dir = tempfile.mkdtemp()
 
     def fin():
-        shutil.rmtree(ipythondir)
+        shutil.rmtree(jupyter_config_dir)
     request.addfinalizer(fin)
 
-    return ipythondir
+    return jupyter_config_dir
+
+@pytest.fixture(scope="module")
+def jupyter_data_dir(request):
+    jupyter_data_dir = tempfile.mkdtemp()
+
+    def fin():
+        shutil.rmtree(jupyter_data_dir)
+    request.addfinalizer(fin)
+
+    return jupyter_data_dir
 
 
 @pytest.fixture(scope="module")
@@ -90,9 +96,14 @@ def class_files(request, tempdir):
 
 
 @pytest.fixture(scope="module")
-def nbserver(request, tempdir, ipythondir, exchange, cache):
-    run_command(["nbgrader", "extension", "install", "--nbextensions", os.path.join(ipythondir, "nbextensions")])
-    run_command(["nbgrader", "extension", "activate", "--ipython-dir", ipythondir])
+def nbserver(request, tempdir, jupyter_config_dir, jupyter_data_dir, exchange, cache):
+    env = os.environ.copy()
+    env['JUPYTER_CONFIG_DIR'] = jupyter_config_dir
+    env['JUPYTER_DATA_DIR'] = jupyter_data_dir
+
+    nbextension_dir = os.path.join(jupyter_data_dir, "nbextensions")
+    run_command(["nbgrader", "extension", "install", "--nbextensions", nbextension_dir], env=env)
+    run_command(["nbgrader", "extension", "activate"], env=env)
 
     # create nbgrader_config.py file
     with open('nbgrader_config.py', 'w') as fh:
@@ -104,14 +115,8 @@ def nbserver(request, tempdir, ipythondir, exchange, cache):
             """.format(exchange, cache)
         ))
 
-    # bug in IPython cannot use --profile-dir
-    # that does not set it for everything.
-    # still this does not allow to have things that work.
-    env = copy(os.environ)
-    env['IPYTHONDIR'] = ipythondir
-
     nbserver = sp.Popen([
-        "ipython", "notebook",
+        "jupyter", "notebook",
         "--no-browser",
         "--port", "9000"], env=env)
 

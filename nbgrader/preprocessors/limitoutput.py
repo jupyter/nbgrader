@@ -1,6 +1,6 @@
 from nbgrader.preprocessors import NbGraderPreprocessor
 
-from IPython.utils.traitlets import Integer
+from traitlets import Integer
 
 class LimitOutput(NbGraderPreprocessor):
     """Preprocessor for limiting cell output"""

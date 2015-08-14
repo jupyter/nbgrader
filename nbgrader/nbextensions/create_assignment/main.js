@@ -1,15 +1,3 @@
-/*global define*/
-/**
- * To load this extension, add the following to your custom.js:
- *
- * require(['base/js/events'], function (events) {
- *     events.on('app_initialized.NotebookApp', function() {
- *         IPython.load_extensions('nbgrader');
- *     });
- * });
- *
-**/
-
 define([
     'require',
     'jquery',
@@ -18,7 +6,7 @@ define([
     'notebook/js/celltoolbar',
     'base/js/events'
 
-], function (require, $, IPython, dialog, celltoolbar, events) {
+], function (require, $, Jupyter, dialog, celltoolbar, events) {
     "use strict";
 
     var nbgrader_preset_name = "Create Assignment";
@@ -96,7 +84,7 @@ define([
 
     var update_total = function() {
         var total_points = 0;
-        var cells = IPython.notebook.get_cells();
+        var cells = Jupyter.notebook.get_cells();
         for (var i=0; i < cells.length; i++) {
             if (is_grade(cells[i])) {
                 total_points += to_float(cells[i].metadata.nbgrader.points);
@@ -114,8 +102,8 @@ define([
 
         var valid = /^[a-zA-Z0-9_\-]+$/;
         var modal_opts = {
-            notebook: IPython.notebook,
-            keyboard_manager: IPython.keyboard_manager,
+            notebook: Jupyter.notebook,
+            keyboard_manager: Jupyter.keyboard_manager,
             buttons: {
                 OK: {
                     class: "btn-primary",
@@ -373,7 +361,7 @@ define([
         local_div.addClass('nbgrader-id');
         $(div).append(local_div.append($('<span/>').append(lbl)));
 
-        IPython.keyboard_manager.register_events(text);
+        Jupyter.keyboard_manager.register_events(text);
     };
 
     /**
@@ -403,7 +391,7 @@ define([
         local_div.addClass('nbgrader-points');
         $(div).append(local_div.append($('<span/>').append(lbl)));
 
-        IPython.keyboard_manager.register_events(text);
+        Jupyter.keyboard_manager.register_events(text);
     };
 
     var create_lock_cell_button = function (div, cell, celltoolbar) {
@@ -446,7 +434,7 @@ define([
             'create_assignment.id_input',
             'create_assignment.grading_options',
         ];
-        CellToolbar.register_preset(nbgrader_preset_name, preset, IPython.notebook);
+        CellToolbar.register_preset(nbgrader_preset_name, preset, Jupyter.notebook);
         console.log('nbgrader extension for metadata editing loaded.');
     };
 

@@ -3,20 +3,15 @@ import glob
 import re
 import shutil
 import sys
+import six
 import nbgrader.apps
 
 from textwrap import dedent
 from clear_docs import run, clear_notebooks
 
-try:
-    from StringIO import StringIO # Python 2
-except ImportError:
-    from io import StringIO # Python 3
-
-
-# get absolute path to IPython to make sure it's the same one as what is installed
+# get absolute path to Jupyter to make sure it's the same one as what is installed
 # in the virtualenv
-IPYTHON = os.path.join(os.path.dirname(sys.executable), 'ipython')
+JUPYTER = os.path.join(os.path.dirname(sys.executable), 'jupyter')
 
 
 def autogen_command_line(root):
@@ -52,7 +47,7 @@ def autogen_command_line(root):
 
     for app in apps:
         cls = getattr(nbgrader.apps, app)
-        buf = sys.stdout = StringIO()
+        buf = sys.stdout = six.StringIO()
         cls().print_help(True)
         buf.flush()
         helpstr = buf.getvalue()
@@ -101,11 +96,10 @@ def build_notebooks(root):
     # hack to convert links to ipynb files to html
     for filename in sorted(glob.glob('user_guide/*.ipynb')):
         run([
-            IPYTHON, 'nbconvert',
+            JUPYTER, 'nbconvert',
             '--to', 'rst',
             '--execute',
             '--FilesWriter.build_directory=user_guide',
-            '--profile-dir', '/tmp',
             filename
         ])
 
@@ -130,10 +124,9 @@ def build_notebooks(root):
         for filename in sorted(filenames):
             if filename.endswith('.ipynb'):
                 run([
-                    IPYTHON, 'nbconvert',
+                    JUPYTER, 'nbconvert',
                     '--to', 'html',
                     "--FilesWriter.build_directory='{}'".format(build_directory),
-                    '--profile-dir', '/tmp',
                     os.path.join(dirname, filename)
                 ])
 

@@ -25,9 +25,9 @@ def _check_if_directory_in_path(pth, target):
 
 
 try:
-    from IPython.nbformat import read
+    from nbformat import read
 except ImportError:
-    echo("Warning: IPython could not be imported, some tasks may not work")
+    echo("Warning: nbformat could not be imported, some tasks may not work")
 
 
 @task
@@ -167,9 +167,6 @@ def js(clean=True):
 
 @task
 def before_install(group, python_version):
-    # install ipython
-    run('pip install ipython[all]==3.2')
-
     # clone travis wheels repo to make installing requirements easier
     run('git clone --quiet --depth 1 https://github.com/minrk/travis-wheels ~/travis-wheels')
 
@@ -182,11 +179,7 @@ def before_install(group, python_version):
     # install jupyterhub
     if python_version == '3.4' and group == 'js':
         run('npm install -g configurable-http-proxy')
-        run('pip install jupyterhub==0.2.0')
-
-    # install js dependencies
-    if group == 'js':
-        run('python -m IPython.external.mathjax')
+        run('pip install jupyterhub')
 
 
 @task
