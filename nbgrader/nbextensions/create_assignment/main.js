@@ -426,7 +426,7 @@ define([
         var link = document.createElement('link');
         link.type = 'text/css';
         link.rel = 'stylesheet';
-        link.href = require.toUrl('./nbgrader.css');
+        link.href = require.toUrl('./create_assignment.css');
         document.getElementsByTagName('head')[0].appendChild(link);
     };
 
