@@ -42,7 +42,7 @@ class ExtensionInstallApp(NBExtensionApp, BaseApp):
 
     def start(self):
         nbextensions_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'nbextensions'))
-        extra_args = self.extra_args.copy()
+        extra_args = self.extra_args[:]
 
         # install the create_assignment extension
         if len(extra_args) == 0 or "create_assignment" in extra_args:
