@@ -138,7 +138,7 @@ define([
         this.element.empty().append(row);
 
         if (this.data.status === 'fetched') {
-            var id = this.data.course_id + "-" + this.data.assignment_id;
+            var id = (this.data.course_id + "-" + this.data.assignment_id).replace(/ /g, "_");
             var children = $('<div/>')
                 .attr("id", id)
                 .addClass("panel-collapse collapse list_container assignment-notebooks")
@@ -163,7 +163,7 @@ define([
         var link;
 
         if (this.data.status === 'fetched') {
-            var id = this.data.course_id + "-" + this.data.assignment_id;
+            var id = (this.data.course_id + "-" + this.data.assignment_id).replace(/ /g, "_");
             link = $('<a/>')
                 .addClass("collapsed assignment-notebooks-link")
                 .attr("role", "button")
@@ -336,6 +336,7 @@ define([
                 body.append($('<div/>').append($('<p/>').text('The source of the following cell has changed, but it should not have!')));
                 body.append($('<pre/>').text(data.changed[i].source));
             }
+            body.addClass("validation-changed");
             this.validate_failure(button);
 
         } else if (data.passed !== undefined) {
@@ -343,6 +344,7 @@ define([
                 body.append($('<div/>').append($('<p/>').text('The following cell passed:')));
                 body.append($('<pre/>').text(data.passed[i].source));
             }
+            body.addClass("validation-passed");
             this.validate_failure(button);
 
         } else if (data.failed !== undefined) {
@@ -351,10 +353,12 @@ define([
                 body.append($('<pre/>').text(data.failed[i].source));
                 body.append($('<pre/>').html(data.failed[i].error));
             }
+            body.addClass("validation-failed");
             this.validate_failure(button);
 
         } else {
             body.append($('<div/>').append($('<p/>').text('Success! Your notebook passes all the tests.')));
+            body.addClass("validation-success");
             this.validate_success(button);
         }
 

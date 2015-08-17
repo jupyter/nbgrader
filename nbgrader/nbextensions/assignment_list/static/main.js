@@ -22,7 +22,7 @@ define(function(require) {
         '      </div>',
         '      <div class="panel-body">',
         '        <div id="released_assignments_list" class="list_container">',
-        '          <div id="released_assignments_list_header" class="row list_placeholder">',
+        '          <div id="released_assignments_list_placeholder" class="row list_placeholder">',
         '            <div> There are no assignments to fetch. </div>',
         '          </div>',
         '        </div>',
