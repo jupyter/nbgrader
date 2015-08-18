@@ -155,7 +155,7 @@ class ListApp(TransferApp):
                 info['status'] = 'removed'
 
             info['notebooks'] = []
-            for notebook in glob.glob(os.path.join(info['path'], '*.ipynb')):
+            for notebook in sorted(glob.glob(os.path.join(info['path'], '*.ipynb'))):
                 info['notebooks'].append({
                     'notebook_id': os.path.splitext(os.path.split(notebook)[1])[0],
                     'path': os.path.abspath(notebook)

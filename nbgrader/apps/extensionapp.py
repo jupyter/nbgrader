@@ -51,6 +51,13 @@ class ExtensionInstallApp(NBExtensionApp, BaseApp):
             self.destination = 'create_assignment'
             self.install_extensions()
 
+        # install the assignment_list extension
+        if len(extra_args) == 0 or "assignment_list" in extra_args:
+            self.log.info("Installing assignment_list extension")
+            self.extra_args = [os.path.join(nbextensions_dir, 'assignment_list', 'static')]
+            self.destination = 'assignment_list'
+            self.install_extensions()
+
 
 activate_flags = {}
 activate_flags.update(base_flags)
@@ -118,6 +125,23 @@ class ExtensionActivateApp(BaseApp):
                 ["load_extensions", "create_assignment/main"],
                 True
             )
+
+        if len(self.extra_args) == 0 or "assignment_list" in self.extra_args:
+            self.log.info("Activating assignment_list server extension for '%s' profile" % self.profile)
+            self._update_config(
+                os.path.expanduser(os.path.join(self.profile_dir.location, 'ipython_notebook_config.json')),
+                ["NotebookApp", "server_extensions"],
+                ["nbgrader.nbextensions.assignment_list"]
+            )
+
+            self.log.info("Activating assignment_list nbextension for '%s' profile" % self.profile)
+            self._update_config(
+                os.path.expanduser(os.path.join(self.profile_dir.location, 'nbconfig', 'tree.json')),
+                ["load_extensions", "assignment_list/main"],
+                True
+            )
+
+        self.log.info("Done. You may need to restart the IPython notebook server for changes to take effect.")
 
 
 deactivate_flags = {}
@@ -193,6 +217,22 @@ class ExtensionDeactivateApp(BaseApp):
                 os.path.expanduser(os.path.join(self.profile_dir.location, 'nbconfig', 'notebook.json')),
                 ["load_extensions", "create_assignment/main"]
             )
+
+        if len(self.extra_args) == 0 or "assignment_list" in self.extra_args:
+            self.log.info("Deactivating assignment_list server extension for '%s' profile" % self.profile)
+            self._update_config(
+                os.path.expanduser(os.path.join(self.profile_dir.location, 'ipython_notebook_config.json')),
+                ["NotebookApp", "server_extensions"],
+                "nbgrader.nbextensions.assignment_list"
+            )
+
+            self.log.info("Deactivating assignment_list nbextension for '%s' profile" % self.profile)
+            self._update_config(
+                os.path.expanduser(os.path.join(self.profile_dir.location, 'nbconfig', 'tree.json')),
+                ["load_extensions", "assignment_list/main"]
+            )
+
+        self.log.info("Done. You may need to restart the IPython notebook server for changes to take effect.")
 
 
 class ExtensionApp(Application):
