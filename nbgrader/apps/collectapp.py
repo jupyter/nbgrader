@@ -3,7 +3,7 @@ import glob
 import shutil
 from collections import defaultdict
 
-from IPython.utils.traitlets import Bool
+from traitlets import Bool
 
 from nbgrader.apps.baseapp import TransferApp, transfer_aliases, transfer_flags
 from nbgrader.utils import check_mode, parse_utc

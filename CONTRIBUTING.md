@@ -7,9 +7,6 @@ In general, the guidelines for opening issues, submitting PRs, code style, etc. 
 
 ## Development installation
 
-In addition to the dependencies listed below, you must have the IPython notebook installed.
-Please refer to the [README](README.md#dependencies) for instructions on how to install the notebook.
-
 ### Dependencies
 
 Phantomjs must be installed in order to run tests.

@@ -1,8 +1,7 @@
 import pytest
 import os
 import json
-
-from IPython.utils.py3compat import cast_unicode_py2
+import six
 
 from nbgrader.tests import run_command
 from nbgrader.tests.apps.base import BaseTestApp
@@ -38,7 +37,7 @@ class TestNbGraderExtension(BaseTestApp):
         config['load_extensions'][key] = True
 
         with open(config_file, 'w+') as f:
-            f.write(cast_unicode_py2(json.dumps(config, indent=2), 'utf-8'))
+            f.write(six.u(json.dumps(config, indent=2)))
 
         self._assert_is_activated(config_file, key=key)
 
@@ -49,66 +48,54 @@ class TestNbGraderExtension(BaseTestApp):
         run_command(["nbgrader", "extension", "activate", "--help-all"])
         run_command(["nbgrader", "extension", "deactivate", "--help-all"])
 
-    def test_install_system(self, temp_dir):
-        run_command(["nbgrader", "extension", "install", "--prefix", temp_dir])
-        self._assert_is_installed(os.path.join(temp_dir, "share", "jupyter", "nbextensions"))
+    def test_install_system(self, jupyter_data_dir, env):
+        run_command(["nbgrader", "extension", "install", "--prefix", jupyter_data_dir], env=env)
+        self._assert_is_installed(os.path.join(jupyter_data_dir, "share", "jupyter", "nbextensions"))
 
-    def test_install_user(self, temp_dir):
-        nbextension_dir = os.path.join(temp_dir, "nbextensions")
-        run_command(["nbgrader", "extension", "install", "--nbextensions", nbextension_dir])
+    def test_install_user(self, jupyter_data_dir, env):
+        nbextension_dir = os.path.join(jupyter_data_dir, "nbextensions")
+        run_command(["nbgrader", "extension", "install", "--nbextensions", nbextension_dir], env=env)
         self._assert_is_installed(nbextension_dir)
 
-    def test_activate(self, temp_dir):
-        nbextension_dir = os.path.join(temp_dir, "nbextensions")
-        run_command(["nbgrader", "extension", "install", "--nbextensions", nbextension_dir])
-        run_command(["nbgrader", "extension", "activate", "--ipython-dir", temp_dir])
+    def test_activate(self, jupyter_data_dir, jupyter_config_dir, env):
+        nbextension_dir = os.path.join(jupyter_data_dir, "nbextensions")
+        run_command(["nbgrader", "extension", "install", "--nbextensions", nbextension_dir], env=env)
+        run_command(["nbgrader", "extension", "activate"], env=env)
 
         # check the extension file were copied
         self._assert_is_installed(nbextension_dir)
 
         # check that it is activated
-        self._assert_is_activated(os.path.join(temp_dir, 'profile_default', 'nbconfig', 'notebook.json'), key='create_assignment/main')
-        self._assert_is_activated(os.path.join(temp_dir, 'profile_default', 'nbconfig', 'tree.json'), key='assignment_list/main')
+        self._assert_is_activated(os.path.join(jupyter_config_dir, 'nbconfig', 'notebook.json'), key='create_assignment/main')
+        self._assert_is_activated(os.path.join(jupyter_config_dir, 'nbconfig', 'tree.json'), key='assignment_list/main')
 
-    def test_activate_custom_profile(self, temp_dir):
-        nbextension_dir = os.path.join(temp_dir, "nbextensions")
-        run_command(["nbgrader", "extension", "install", "--nbextensions", nbextension_dir])
-        run_command(["nbgrader", "extension", "activate", "--ipython-dir", temp_dir, "--profile", "foo"])
-
-        # check the extension file were copied
-        self._assert_is_installed(nbextension_dir)
-
-        # check that it is activated
-        self._assert_is_activated(os.path.join(temp_dir, 'profile_foo', 'nbconfig', 'notebook.json'), key='create_assignment/main')
-        self._assert_is_activated(os.path.join(temp_dir, 'profile_foo', 'nbconfig', 'tree.json'), key='assignment_list/main')
-
-    def test_deactivate(self, temp_dir):
-        nbextension_dir = os.path.join(temp_dir, "nbextensions")
-        run_command(["nbgrader", "extension", "install", "--nbextensions", nbextension_dir])
-        run_command(["nbgrader", "extension", "activate", "--ipython-dir", temp_dir])
+    def test_deactivate(self, jupyter_data_dir, jupyter_config_dir, env):
+        nbextension_dir = os.path.join(jupyter_data_dir, "nbextensions")
+        run_command(["nbgrader", "extension", "install", "--nbextensions", nbextension_dir], env=env)
+        run_command(["nbgrader", "extension", "activate"], env=env)
 
         # check the extension file were copied
         self._assert_is_installed(nbextension_dir)
 
         # check that it is activated
-        self._assert_is_activated(os.path.join(temp_dir, 'profile_default', 'nbconfig', 'notebook.json'), key='create_assignment/main')
-        self._assert_is_activated(os.path.join(temp_dir, 'profile_default', 'nbconfig', 'tree.json'), key='assignment_list/main')
+        self._assert_is_activated(os.path.join(jupyter_config_dir, 'nbconfig', 'notebook.json'), key='create_assignment/main')
+        self._assert_is_activated(os.path.join(jupyter_config_dir, 'nbconfig', 'tree.json'), key='assignment_list/main')
 
         # activate a fake extension
-        self._activate_fake_extension(os.path.join(temp_dir, 'profile_default', 'nbconfig', 'notebook.json'), key='other_extension')
-        self._activate_fake_extension(os.path.join(temp_dir, 'profile_default', 'nbconfig', 'tree.json'), key='other_extension')
+        self._activate_fake_extension(os.path.join(jupyter_config_dir, 'nbconfig', 'notebook.json'), key='other_extension')
+        self._activate_fake_extension(os.path.join(jupyter_config_dir, 'nbconfig', 'tree.json'), key='other_extension')
 
-        run_command(["nbgrader", "extension", "deactivate", "--ipython-dir", temp_dir])
+        run_command(["nbgrader", "extension", "deactivate"], env=env)
 
         # check that it is deactivated
-        self._assert_is_deactivated(os.path.join(temp_dir, 'profile_default', 'nbconfig', 'notebook.json'), key='create_assignment/main')
-        self._assert_is_deactivated(os.path.join(temp_dir, 'profile_default', 'nbconfig', 'tree.json'), key='assignment_list/main')
-        self._assert_is_activated(os.path.join(temp_dir, 'profile_default', 'nbconfig', 'notebook.json'), key='other_extension')
-        self._assert_is_activated(os.path.join(temp_dir, 'profile_default', 'nbconfig', 'tree.json'), key='other_extension')
+        self._assert_is_deactivated(os.path.join(jupyter_config_dir, 'nbconfig', 'notebook.json'), key='create_assignment/main')
+        self._assert_is_deactivated(os.path.join(jupyter_config_dir, 'nbconfig', 'tree.json'), key='assignment_list/main')
+        self._assert_is_activated(os.path.join(jupyter_config_dir, 'nbconfig', 'notebook.json'), key='other_extension')
+        self._assert_is_activated(os.path.join(jupyter_config_dir, 'nbconfig', 'tree.json'), key='other_extension')
 
-        run_command(["nbgrader", "extension", "activate", "--ipython-dir", temp_dir])
+        run_command(["nbgrader", "extension", "activate"], env=env)
 
-        self._assert_is_activated(os.path.join(temp_dir, 'profile_default', 'nbconfig', 'notebook.json'), key='create_assignment/main')
-        self._assert_is_activated(os.path.join(temp_dir, 'profile_default', 'nbconfig', 'tree.json'), key='assignment_list/main')
-        self._assert_is_activated(os.path.join(temp_dir, 'profile_default', 'nbconfig', 'notebook.json'), key='other_extension')
-        self._assert_is_activated(os.path.join(temp_dir, 'profile_default', 'nbconfig', 'tree.json'), key='other_extension')
+        self._assert_is_activated(os.path.join(jupyter_config_dir, 'nbconfig', 'notebook.json'), key='create_assignment/main')
+        self._assert_is_activated(os.path.join(jupyter_config_dir, 'nbconfig', 'tree.json'), key='assignment_list/main')
+        self._assert_is_activated(os.path.join(jupyter_config_dir, 'nbconfig', 'notebook.json'), key='other_extension')
+        self._assert_is_activated(os.path.join(jupyter_config_dir, 'nbconfig', 'tree.json'), key='other_extension')

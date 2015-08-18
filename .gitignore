@@ -53,7 +53,7 @@ docs/_build/
 # PyBuilder
 target/
 
-# IPython checkpoints
+# Jupyter notebook checkpoints
 .ipynb_checkpoints/
 
 # Coverage files

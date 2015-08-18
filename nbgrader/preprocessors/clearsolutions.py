@@ -1,4 +1,4 @@
-from IPython.utils.traitlets import Unicode
+from traitlets import Unicode
 
 from nbgrader import utils
 from nbgrader.preprocessors import NbGraderPreprocessor

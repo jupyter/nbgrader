@@ -3,7 +3,7 @@ import glob
 import shutil
 import subprocess as sp
 
-from IPython.nbformat.v4 import new_code_cell, new_markdown_cell
+from nbformat.v4 import new_code_cell, new_markdown_cell
 
 from nbgrader.utils import compute_checksum
 
@@ -102,8 +102,8 @@ def copy_coverage_files():
             shutil.copyfile(filename, os.path.join(root, filename))
 
 
-def run_command(command, retcode=0, coverage=True):
-    proc = start_subprocess(command, stdout=sp.PIPE, stderr=sp.STDOUT)
+def run_command(command, retcode=0, coverage=True, **kwargs):
+    proc = start_subprocess(command, stdout=sp.PIPE, stderr=sp.STDOUT, **kwargs)
     output = proc.communicate()[0].decode()
     output = output.replace("Coverage.py warning: No data was collected.\n", "")
     print(output)

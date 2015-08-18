@@ -1,5 +1,5 @@
-from IPython.utils.traitlets import Unicode, List, Bool
-from IPython.nbconvert.nbconvertapp import NbConvertApp, DottedOrNone
+from traitlets import Unicode, List, Bool
+from nbconvert.nbconvertapp import NbConvertApp, DottedOrNone
 from nbgrader.preprocessors import DisplayAutoGrades, Execute, ClearOutput
 from nbgrader.apps.baseapp import BaseApp, base_flags, base_aliases
 

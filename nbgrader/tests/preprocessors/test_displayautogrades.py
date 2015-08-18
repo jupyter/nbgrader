@@ -1,13 +1,9 @@
 import pytest
 import json
-
-try:
-    from StringIO import StringIO # python 2
-except ImportError:
-    from io import StringIO # python 3
+import six
 
 from textwrap import dedent
-from IPython.nbformat.v4 import new_output
+from nbformat.v4 import new_output
 
 from nbgrader.preprocessors import DisplayAutoGrades
 from nbgrader.tests.preprocessors.base import BaseTestPreprocessor
@@ -20,7 +16,7 @@ def preprocessor():
 
 @pytest.fixture
 def stream():
-    return StringIO()
+    return six.StringIO()
 
 
 class TestDisplayAutoGrades(BaseTestPreprocessor):

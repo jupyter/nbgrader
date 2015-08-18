@@ -7,7 +7,7 @@ from stat import (
     S_ISVTX, S_ISGID
 )
 
-from IPython.utils.traitlets import Bool
+from traitlets import Bool
 
 from nbgrader.apps.baseapp import TransferApp, transfer_aliases, transfer_flags
 from nbgrader.utils import self_owned

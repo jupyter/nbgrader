@@ -1,6 +1,6 @@
 import pytest
 
-from IPython.nbformat.v4 import new_notebook, new_output
+from nbformat.v4 import new_notebook, new_output
 
 from nbgrader.preprocessors import SaveCells, SaveAutoGrades, GetGrades
 from nbgrader.api import Gradebook

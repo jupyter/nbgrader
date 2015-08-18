@@ -1,6 +1,5 @@
-from IPython.config import Configurable
-from IPython.utils.traitlets import Unicode, Bool, link
-from IPython.utils.path import get_ipython_dir
+from traitlets.config import Configurable
+from traitlets import Unicode, Bool, link
 
 from textwrap import dedent
 
@@ -20,58 +19,7 @@ class LinkedConfig(Configurable):
 
 
 class BasicConfig(LinkedConfig):
-    """Config options that inherited from IPython."""
-
-    profile = Unicode(
-        'nbgrader',
-        config=True,
-        help="Default IPython profile to use")
-
-    overwrite = Bool(
-        False,
-        config=True,
-        help="Whether to overwrite existing config files when copying")
-
-    auto_create = Bool(
-        True,
-        config=True,
-        help="Whether to automatically generate the profile")
-
-    extra_config_file = Unicode(
-        config=True,
-        help=dedent(
-            """
-            Path to an extra config file to load. If specified, load this config
-            file in addition to any other IPython config.
-            """
-        )
-    )
-
-    copy_config_files = Bool(
-        False,
-        config=True,
-        help=dedent(
-            """
-            Whether to install the default config files into the profile dir.
-            If a new profile is being created, and IPython contains config files
-            for that profile, then they will be staged into the new directory.
-            Otherwise, default config files will be automatically generated.
-            """
-        )
-    )
-
-    ipython_dir = Unicode(
-        get_ipython_dir(),
-        config=True,
-        help=dedent(
-            """
-            The name of the IPython directory. This directory is used for logging
-            configuration (through profiles), history storage, etc. The default
-            is usually $HOME/.ipython. This option can also be specified through
-            the environment variable IPYTHONDIR.
-            """
-        )
-    )
+    """Config options that inherited from Jupyter."""
 
     log_datefmt = Unicode(
         "%Y-%m-%d %H:%M:%S",

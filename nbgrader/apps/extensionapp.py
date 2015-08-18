@@ -2,12 +2,13 @@ import io
 import os.path
 import json
 import sys
+import six
 
-from IPython.html.nbextensions import NBExtensionApp, flags as extension_flags, aliases as extension_aliases
-from IPython.utils.traitlets import Unicode
-from IPython.utils.py3compat import cast_unicode_py2
-from IPython.config.application import catch_config_error
-from IPython.config.application import Application
+from jupyter_core.paths import jupyter_config_dir
+from notebook.nbextensions import InstallNBExtensionApp, flags as extension_flags, aliases as extension_aliases
+from traitlets import Unicode
+from traitlets.config.application import catch_config_error
+from traitlets.config.application import Application
 
 from nbgrader.apps.baseapp import BaseApp, format_excepthook, base_aliases, base_flags
 
@@ -16,8 +17,7 @@ install_flags.update(extension_flags)
 install_aliases = {}
 install_aliases.update(extension_aliases)
 del install_aliases['destination']
-del install_aliases['ipython-dir']
-class ExtensionInstallApp(NBExtensionApp, BaseApp):
+class ExtensionInstallApp(InstallNBExtensionApp, BaseApp):
 
     name = u'nbgrader-extension-install'
     description = u'Install the nbgrader extension'
@@ -63,10 +63,6 @@ activate_flags = {}
 activate_flags.update(base_flags)
 activate_aliases = {}
 activate_aliases.update(base_aliases)
-activate_aliases.update({
-    "ipython-dir": "BasicConfig.ipython_dir",
-    "profile": "BasicConfig.profile"
-})
 class ExtensionActivateApp(BaseApp):
 
     name = u'nbgrader-extension-activate'
@@ -78,12 +74,6 @@ class ExtensionActivateApp(BaseApp):
     examples = """
         nbgrader extension activate
     """
-
-    def build_extra_config(self):
-        config = super(ExtensionActivateApp, self).build_extra_config()
-        if 'profile' not in config.BasicConfig:
-            config.BasicConfig.profile = 'default'
-        return config
 
     def _update_config(self, config_file, key_list, value):
         if os.path.exists(config_file):
@@ -113,45 +103,41 @@ class ExtensionActivateApp(BaseApp):
 
         # save it out
         with io.open(config_file, 'w+') as f:
-            f.write(cast_unicode_py2(json.dumps(config, indent=2), 'utf-8'))
+            f.write(six.u(json.dumps(config, indent=2)))
 
     def start(self):
         super(ExtensionActivateApp, self).start()
 
         if len(self.extra_args) == 0 or "create_assignment" in self.extra_args:
-            self.log.info("Activating create_assignment nbextension for '%s' profile" % self.profile)
+            self.log.info("Activating create_assignment nbextension")
             self._update_config(
-                os.path.expanduser(os.path.join(self.profile_dir.location, 'nbconfig', 'notebook.json')),
+                os.path.expanduser(os.path.join(jupyter_config_dir(), 'nbconfig', 'notebook.json')),
                 ["load_extensions", "create_assignment/main"],
                 True
             )
 
         if len(self.extra_args) == 0 or "assignment_list" in self.extra_args:
-            self.log.info("Activating assignment_list server extension for '%s' profile" % self.profile)
+            self.log.info("Activating assignment_list server extension")
             self._update_config(
-                os.path.expanduser(os.path.join(self.profile_dir.location, 'ipython_notebook_config.json')),
+                os.path.expanduser(os.path.join(jupyter_config_dir(), 'jupyter_notebook_config.json')),
                 ["NotebookApp", "server_extensions"],
                 ["nbgrader.nbextensions.assignment_list"]
             )
 
-            self.log.info("Activating assignment_list nbextension for '%s' profile" % self.profile)
+            self.log.info("Activating assignment_list nbextension")
             self._update_config(
-                os.path.expanduser(os.path.join(self.profile_dir.location, 'nbconfig', 'tree.json')),
+                os.path.expanduser(os.path.join(jupyter_config_dir(), 'nbconfig', 'tree.json')),
                 ["load_extensions", "assignment_list/main"],
                 True
             )
 
-        self.log.info("Done. You may need to restart the IPython notebook server for changes to take effect.")
+        self.log.info("Done. You may need to restart the Jupyter notebook server for changes to take effect.")
 
 
 deactivate_flags = {}
 deactivate_flags.update(base_flags)
 deactivate_aliases = {}
 deactivate_aliases.update(base_aliases)
-deactivate_aliases.update({
-    "ipython-dir": "BasicConfig.ipython_dir",
-    "profile": "BasicConfig.profile"
-})
 class ExtensionDeactivateApp(BaseApp):
 
     name = u'nbgrader-extension-deactivate'
@@ -163,12 +149,6 @@ class ExtensionDeactivateApp(BaseApp):
     examples = """
         nbgrader extension deactivate
     """
-
-    def build_extra_config(self):
-        config = super(ExtensionDeactivateApp, self).build_extra_config()
-        if 'profile' not in config.BasicConfig:
-            config.BasicConfig.profile = 'default'
-        return config
 
     def _recursive_get(self, obj, key_list):
         if obj is None or len(key_list) == 0:
@@ -205,34 +185,34 @@ class ExtensionDeactivateApp(BaseApp):
 
         # save the updated config
         with io.open(config_file, 'w+') as f:
-            f.write(cast_unicode_py2(json.dumps(config, indent=2), 'utf-8'))
+            f.write(six.u(json.dumps(config, indent=2)))
 
     def start(self):
         print(self.extra_args)
         super(ExtensionDeactivateApp, self).start()
 
         if len(self.extra_args) == 0 or "create_assignment" in self.extra_args:
-            self.log.info("Deactivating create_assignment nbextension for '%s' profile" % self.profile)
+            self.log.info("Deactivating create_assignment nbextension")
             self._update_config(
-                os.path.expanduser(os.path.join(self.profile_dir.location, 'nbconfig', 'notebook.json')),
+                os.path.expanduser(os.path.join(jupyter_config_dir(), 'nbconfig', 'notebook.json')),
                 ["load_extensions", "create_assignment/main"]
             )
 
         if len(self.extra_args) == 0 or "assignment_list" in self.extra_args:
-            self.log.info("Deactivating assignment_list server extension for '%s' profile" % self.profile)
+            self.log.info("Deactivating assignment_list server extension")
             self._update_config(
-                os.path.expanduser(os.path.join(self.profile_dir.location, 'ipython_notebook_config.json')),
+                os.path.expanduser(os.path.join(jupyter_config_dir(), 'jupyter_notebook_config.json')),
                 ["NotebookApp", "server_extensions"],
                 "nbgrader.nbextensions.assignment_list"
             )
 
-            self.log.info("Deactivating assignment_list nbextension for '%s' profile" % self.profile)
+            self.log.info("Deactivating assignment_list nbextension")
             self._update_config(
-                os.path.expanduser(os.path.join(self.profile_dir.location, 'nbconfig', 'tree.json')),
+                os.path.expanduser(os.path.join(jupyter_config_dir(), 'nbconfig', 'tree.json')),
                 ["load_extensions", "assignment_list/main"]
             )
 
-        self.log.info("Done. You may need to restart the IPython notebook server for changes to take effect.")
+        self.log.info("Done. You may need to restart the Jupyter notebook server for changes to take effect.")
 
 
 class ExtensionApp(Application):

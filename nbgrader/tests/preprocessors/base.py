@@ -1,7 +1,7 @@
 import os
 
-from IPython.nbformat import current_nbformat
-from IPython.nbformat import read as read_nb
+from nbformat import current_nbformat
+from nbformat import read as read_nb
 
 
 class BaseTestPreprocessor(object):

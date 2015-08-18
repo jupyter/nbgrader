@@ -18,7 +18,7 @@ def _load_notebook(browser, retries=5):
 
     def page_loaded(browser):
         return browser.execute_script(
-            'return typeof IPython !== "undefined" && IPython.page !== undefined;')
+            'return typeof Jupyter !== "undefined" && Jupyter.page !== undefined;')
 
     # wait for the page to load
     try:
@@ -86,7 +86,7 @@ def _set_id(browser, cell_id="foo", index=0):
 def _get_metadata(browser):
     return browser.execute_script(
         """
-        var cell = IPython.notebook.get_cell(0);
+        var cell = Jupyter.notebook.get_cell(0);
         return cell.metadata.nbgrader;
         """
     )
@@ -98,7 +98,7 @@ def _get_total_points(browser):
 
 
 def _save(browser):
-    browser.execute_script("IPython.notebook.save_notebook();")
+    browser.execute_script("Jupyter.notebook.save_notebook();")
 
 
 def _wait_for_modal(browser):

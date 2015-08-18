@@ -1,8 +1,8 @@
 import os
 
-from IPython.utils.traitlets import List
-from IPython.nbconvert.exporters import HTMLExporter
-from IPython.nbconvert.preprocessors import CSSHTMLHeaderPreprocessor
+from traitlets import List
+from nbconvert.exporters import HTMLExporter
+from nbconvert.preprocessors import CSSHTMLHeaderPreprocessor
 
 from nbgrader.apps.baseapp import BaseNbConvertApp, nbconvert_aliases, nbconvert_flags
 from nbgrader.preprocessors import GetGrades

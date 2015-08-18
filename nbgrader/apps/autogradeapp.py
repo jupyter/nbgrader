@@ -1,9 +1,8 @@
 import os
+import shutil
 
 from textwrap import dedent
-
-from IPython.utils.traitlets import List, Bool
-from IPython.utils.path import link_or_copy, ensure_dir_exists
+from traitlets import List, Bool
 
 from nbgrader.apps.baseapp import BaseNbConvertApp, nbconvert_aliases, nbconvert_flags
 from nbgrader.preprocessors import (
@@ -147,10 +146,12 @@ class AutogradeApp(BaseNbConvertApp):
         # copy them to the build directory
         for filename in source_files:
             dest = os.path.join(dest_path, os.path.relpath(filename, source_path))
-            ensure_dir_exists(os.path.dirname(dest))
-            if not os.path.normpath(dest) == os.path.normpath(filename):
-                self.log.info("Linking %s -> %s", filename, dest)
-                link_or_copy(filename, dest)
+            if not os.path.exists(os.path.dirname(dest)):
+                os.makedirs(os.path.dirname(dest))
+            if os.path.exists(dest):
+                os.remove(dest)
+            self.log.info("Copying %s -> %s", filename, dest)
+            shutil.copy(filename, dest)
 
         # ignore notebooks that aren't in the database
         notebooks = []

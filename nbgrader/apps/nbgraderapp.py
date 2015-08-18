@@ -6,8 +6,8 @@ import os
 
 from textwrap import dedent
 
-from IPython.config.application import catch_config_error
-from IPython.utils.traitlets import Bool
+from traitlets.config.application import catch_config_error
+from traitlets import Bool
 
 from nbgrader import preprocessors
 from nbgrader.apps.baseapp import nbgrader_aliases, nbgrader_flags
@@ -37,11 +37,7 @@ flags.update({
     'generate-config': (
         {'NbGraderApp' : {'generate_config': True}},
         "Generate a config file."
-    ),
-    'overwrite': (
-        {'BasicConfig' : {'overwrite': True}},
-        "Overwrite existing config files."
-    ),
+    )
 })
 
 
@@ -214,8 +210,8 @@ class NbGraderApp(BaseNbGraderApp):
             s = self.generate_config_file()
             filename = "nbgrader_config.py"
 
-            if os.path.exists(filename) and not self.overwrite:
-                self.fail("Config file '{}' already exists (run with --overwrite to overwrite it)".format(filename))
+            if os.path.exists(filename):
+                self.fail("Config file '{}' already exists".format(filename))
 
             with open(filename, 'w') as fh:
                 fh.write(s)

@@ -6,10 +6,10 @@ import subprocess as sp
 
 from tornado import web
 
-from IPython.html.utils import url_path_join as ujoin
-from IPython.html.base.handlers import IPythonHandler
-from IPython.utils.traitlets import Unicode
-from IPython.config import LoggingConfigurable
+from notebook.utils import url_path_join as ujoin
+from notebook.base.handlers import IPythonHandler
+from traitlets import Unicode
+from traitlets.config import LoggingConfigurable
 
 static = os.path.join(os.path.dirname(__file__), 'static')
 

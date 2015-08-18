@@ -53,6 +53,36 @@ def temp_dir(request):
 
 
 @pytest.fixture
+def jupyter_config_dir(request):
+    path = tempfile.mkdtemp()
+
+    def fin():
+        shutil.rmtree(path)
+    request.addfinalizer(fin)
+
+    return path
+
+
+@pytest.fixture
+def jupyter_data_dir(request):
+    path = tempfile.mkdtemp()
+
+    def fin():
+        shutil.rmtree(path)
+    request.addfinalizer(fin)
+
+    return path
+
+
+@pytest.fixture
+def env(request, jupyter_config_dir, jupyter_data_dir):
+    env = os.environ.copy()
+    env['JUPYTER_DATA_DIR'] = jupyter_data_dir
+    env['JUPYTER_CONFIG_DIR'] = jupyter_config_dir
+    return env
+
+
+@pytest.fixture
 def exchange(request):
     path = tempfile.mkdtemp()
 

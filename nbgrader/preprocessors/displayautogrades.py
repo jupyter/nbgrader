@@ -1,8 +1,8 @@
 import sys
 import json
 
-from IPython.utils.traitlets import Unicode, Integer, Bool
-from IPython.nbconvert.filters import ansi2html, strip_ansi
+from traitlets import Unicode, Integer, Bool
+from nbconvert.filters import ansi2html, strip_ansi
 
 from nbgrader import utils
 from nbgrader.preprocessors import NbGraderPreprocessor

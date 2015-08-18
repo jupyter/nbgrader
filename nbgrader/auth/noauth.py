@@ -5,7 +5,7 @@ import subprocess as sp
 import time
 import sys
 from textwrap import dedent
-from IPython.utils.traitlets import Bool, Integer, Unicode
+from traitlets import Bool, Integer, Unicode
 
 from .base import BaseAuth
 

@@ -12,27 +12,24 @@ import logging
 import datetime
 import shutil
 
+from dateutil.tz import gettz
+from jupyter_core.application import JupyterApp
+from nbconvert.exporters.export import exporter_map
+from nbconvert.nbconvertapp import NbConvertApp, DottedOrNone
+from textwrap import dedent
 from tornado.log import LogFormatter
-
-from IPython.utils.traitlets import Unicode, List, Bool, Instance, Dict, Integer
-from IPython.core.application import BaseIPythonApplication
-from IPython.config.application import catch_config_error
-from IPython.nbconvert.nbconvertapp import NbConvertApp, DottedOrNone
-from IPython.config.loader import Config
-from IPython.utils.path import link_or_copy, ensure_dir_exists
-from IPython.nbconvert.exporters.export import exporter_map
+from traitlets import Unicode, List, Bool, Instance, Dict, Integer
+from traitlets.config.application import catch_config_error
+from traitlets.config.loader import Config
 
 from nbgrader.config import BasicConfig, NbGraderConfig
 from nbgrader.utils import check_directory, parse_utc, find_all_files
 
-from textwrap import dedent
-from dateutil.tz import gettz
 
 # These are the aliases and flags for nbgrader apps that inherit only from
 # BaseApp (and not BaseNbGraderApp)
 base_aliases = {
     'log-level' : 'Application.log_level',
-    'config' : 'BasicConfig.extra_config_file',
 }
 base_flags = {
     'debug': (
@@ -54,15 +51,8 @@ def format_excepthook(etype, evalue, tb):
         """
     ), file=sys.stderr)
 
-class BaseApp(BaseIPythonApplication):
-    """A base class for all the nbgrader apps. This sets a few important defaults,
-    like the IPython profile (nbgrader) and that this profile should be created
-    automatically if it doesn't exist.
-
-    Additionally, it defines a `build_extra_config` method that subclasses can
-    override in order to specify extra config options.
-
-    """
+class BaseApp(JupyterApp):
+    """A base class for all the nbgrader apps."""
 
     aliases = base_aliases
     flags = base_flags
@@ -80,18 +70,12 @@ class BaseApp(BaseIPythonApplication):
     verbose_crash = Bool(False)
 
     # This is a hack in order to centralize the config options inherited from
-    # IPython. Rather than allowing them to be configured for each app separately,
+    # Jupyter. Rather than allowing them to be configured for each app separately,
     # this makes them non-configurable for the apps themselves. Then, in the init,
     # an instance of `BasicConfig` is created, which contains these options, and
     # their values are set on the application instance. So, to configure these
     # options, the `BasicConfig` class can be configured, rather than the
     # application itself.
-    profile = Unicode()
-    overwrite = Bool()
-    auto_create = Bool()
-    extra_config_file = Unicode()
-    copy_config_files = Bool()
-    ipython_dir = Unicode()
     log_datefmt = Unicode()
     log_format = Unicode()
 
@@ -116,6 +100,11 @@ class BaseApp(BaseIPythonApplication):
 
     def excepthook(self, etype, evalue, tb):
         format_excepthook(etype, evalue, tb)
+
+    def _config_changed(self, name, old, new):
+        super(BaseApp, self)._config_changed(name, old, new)
+        if 'BasicConfig' in new:
+            self._basic_config.update_config(new)
 
     @catch_config_error
     def initialize(self, argv=None):
@@ -197,6 +186,11 @@ class BaseNbGraderApp(BaseApp):
     def __init__(self, *args, **kwargs):
         super(BaseNbGraderApp, self).__init__(*args, **kwargs)
         self._nbgrader_config = NbGraderConfig(parent=self)
+
+    def _config_changed(self, name, old, new):
+        super(BaseNbGraderApp, self)._config_changed(name, old, new)
+        if 'NbGraderConfig' in new:
+            self._nbgrader_config.update_config(new)
 
 
 # These are the aliases and flags for nbgrader apps that inherit only from
@@ -422,7 +416,6 @@ class BaseNbConvertApp(BaseNbGraderApp, NbConvertApp):
         self.log.debug("Notebook: %s", gd['notebook_id'])
 
         resources = {}
-        resources['profile_dir'] = self.profile_dir.location
         resources['unique_key'] = gd['notebook_id']
         resources['output_files_dir'] = '%s_files' % gd['notebook_id']
 
@@ -509,12 +502,12 @@ class BaseNbConvertApp(BaseNbGraderApp, NbConvertApp):
         for filename in find_all_files(source, self.ignore + ["*.ipynb"]):
             # Make sure folder exists.
             path = os.path.join(dest, os.path.relpath(filename, source))
-            ensure_dir_exists(os.path.dirname(path))
-
-            # Copy if destination is different.
-            if not os.path.normpath(path) == os.path.normpath(filename):
-                self.log.info("Linking %s -> %s", filename, path)
-                link_or_copy(filename, path)
+            if not os.path.exists(os.path.dirname(path)):
+                os.makedirs(os.path.dirname(path))
+            if os.path.exists(path):
+                os.remove(path)
+            self.log.info("Copying %s -> %s", filename, path)
+            shutil.copy(filename, path)
 
     def set_permissions(self, assignment_id, student_id):
         self.log.info("Setting destination file permissions to %s", self.permissions)

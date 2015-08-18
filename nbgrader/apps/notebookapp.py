@@ -1,5 +1,5 @@
 from tornado import ioloop
-from IPython.html.notebookapp import NotebookApp
+from notebook.notebookapp import NotebookApp
 
 class FormgradeNotebookApp(NotebookApp):
     """A Subclass of the regular NotebookApp that can be spawned by the form grader."""

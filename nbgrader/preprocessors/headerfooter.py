@@ -1,6 +1,6 @@
-from IPython.nbformat import read as read_nb
-from IPython.nbformat import current_nbformat
-from IPython.utils.traitlets import Unicode
+from nbformat import read as read_nb
+from nbformat import current_nbformat
+from traitlets import Unicode
 
 from nbgrader.preprocessors import NbGraderPreprocessor
 
