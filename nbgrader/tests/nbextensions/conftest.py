@@ -14,7 +14,7 @@ from textwrap import dedent
 from IPython.nbformat import write as write_nb
 from IPython.nbformat.v4 import new_notebook
 
-from nbgrader.tests import run_command
+from nbgrader.tests import run_command, copy_coverage_files
 from nbgrader.api import Gradebook
 
 @pytest.fixture(scope="module")
@@ -125,6 +125,7 @@ def nbserver(request, tempdir, ipythondir, exchange, cache):
         if retcode is None:
             print("couldn't shutdown notebook server, force killing it")
             nbserver.kill()
+        copy_coverage_files()
     request.addfinalizer(fin)
 
     return nbserver
