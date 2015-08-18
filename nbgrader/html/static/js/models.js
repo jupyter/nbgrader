@@ -121,7 +121,10 @@ var CommentUI = Backbone.View.extend({
         this.listenTo(this.model, "sync", this.animateSaved);
 
         this.$comment.attr("placeholder", this.model.get("auto_comment") || "Comments");
+
+
         this.render();
+        autosize(this.$comment);        
     },
 
     render: function () {
