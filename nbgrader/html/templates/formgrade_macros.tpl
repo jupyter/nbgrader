@@ -7,6 +7,7 @@
 <script src="{{resources.base_url}}/static/components/underscore/underscore-min.js"></script>
 <script src="{{resources.base_url}}/static/components/backbone/backbone-min.js"></script>
 <script src="{{resources.base_url}}/static/components/bootstrap/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="{{resources.base_url}}/static/components/autosize/dist/autosize.min.js"></script>
 
 <script type="text/javascript">
 var submission_id = "{{ resources.submission_id }}";
