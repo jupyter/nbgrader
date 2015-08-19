@@ -54,16 +54,14 @@ class BaseTestFormgrade(object):
         self._check_url(url)
 
     def _get(self, url, retries=5):
-        for _ in range(retries):
-            try:
-                self.browser.get(url)
-            except TimeoutException:
-                print("Failed to load '{}', trying again...".format(url))
-                continue
+        try:
+            self.browser.get(url)
+        except TimeoutException:
+            if retries == 0:
+                raise
             else:
-                return
-
-        raise TimeoutException
+                print("Failed to load '{}', trying again...".format(url))
+                self._get(url, retries=retries - 1)
 
     def _load_gradebook_page(self, url):
         self._get(self.formgrade_url(url))
@@ -73,7 +71,7 @@ class BaseTestFormgrade(object):
         self._wait_for_element("notebook-container")
         self._check_url(url)
 
-    def _wait_for_formgrader(self, url):
+    def _wait_for_formgrader(self, url, retries=5):
         self._wait_for_element("notebook-container")
         page_loaded = lambda browser: browser.execute_script(
             """
@@ -99,5 +97,14 @@ class BaseTestFormgrade(object):
 
             return true;
             """)
-        WebDriverWait(self.browser, 30).until(page_loaded)
+        try:
+            WebDriverWait(self.browser, 30).until(page_loaded)
+        except TimeoutException:
+            if retries == 0:
+                raise
+            else:
+                print("Failed to load formgrader (url '{}'), trying again...".format(url))
+                self._get(self.browser.current_url)
+                self._wait_for_formgrader(url, retries=retries - 1)
+
         self._check_url(url)
