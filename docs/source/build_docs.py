@@ -71,14 +71,12 @@ def autogen_config(root):
         =====================
 
         These options can be set in ``nbgrader_config.py``, or at the command line when you start it.
-        ::
 
         """
     )
 
     print('Generating example configuration file')
-    config = nbgrader.apps.NbGraderApp().generate_config_file()
-    config = "\n".join(["    " + x for x in config.split("\n")])
+    config = nbgrader.apps.NbGraderApp().document_config_options()
     destination = os.path.join(root, 'config_options.rst')
     with open(destination, 'w') as f:
         f.write(header)
