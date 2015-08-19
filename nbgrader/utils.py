@@ -4,6 +4,7 @@ import dateutil.parser
 import pwd
 import glob
 import six
+import sys
 
 
 def is_grade(cell):
@@ -52,23 +53,34 @@ def determine_grade(cell):
     else:
         return None, max_points
 
+def to_bytes(string):
+    """A python 2/3 compatible function for converting a string to bytes.
+    In Python 2, this just returns the 8-bit string. In Python 3, this first
+    encodes the string to utf-8.
+
+    """
+    if sys.version_info[0] == 2:
+        return bytes(string)
+    else:
+        return bytes(string.encode('utf-8'))
+
 def compute_checksum(cell):
     m = hashlib.md5()
     # add the cell source and type
-    m.update(six.b(cell.source))
-    m.update(six.b(cell.cell_type))
+    m.update(to_bytes(cell.source))
+    m.update(to_bytes(cell.cell_type))
 
     # add whether it's a grade cell and/or solution cell
-    m.update(six.b(str(is_grade(cell))))
-    m.update(six.b(str(is_solution(cell))))
-    m.update(six.b(str(is_locked(cell))))
+    m.update(to_bytes(str(is_grade(cell))))
+    m.update(to_bytes(str(is_solution(cell))))
+    m.update(to_bytes(str(is_locked(cell))))
 
     # include the cell id
-    m.update(six.b(cell.metadata.nbgrader['grade_id']))
+    m.update(to_bytes(cell.metadata.nbgrader['grade_id']))
 
     # include the number of points that the cell is worth, if it is a grade cell
     if is_grade(cell):
-        m.update(six.b(str(float(cell.metadata.nbgrader['points']))))
+        m.update(to_bytes(str(float(cell.metadata.nbgrader['points']))))
 
     return m.hexdigest()
 
