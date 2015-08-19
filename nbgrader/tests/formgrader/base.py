@@ -7,6 +7,7 @@ except ImportError:
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
+from selenium.common.exceptions import TimeoutException
 
 
 class BaseTestFormgrade(object):
@@ -52,15 +53,25 @@ class BaseTestFormgrade(object):
         self._wait_for_element("gradebook")
         self._check_url(url)
 
+    def _get(self, url, retries=5):
+        try:
+            self.browser.get(url)
+        except TimeoutException:
+            if retries == 0:
+                raise
+            else:
+                print("Failed to load '{}', trying again...".format(url))
+                self._get(url, retries=retries - 1)
+
     def _load_gradebook_page(self, url):
-        self.browser.get(self.formgrade_url(url))
+        self._get(self.formgrade_url(url))
         self._wait_for_gradebook_page(url)
 
     def _wait_for_notebook_page(self, url):
         self._wait_for_element("notebook-container")
         self._check_url(url)
 
-    def _wait_for_formgrader(self, url):
+    def _wait_for_formgrader(self, url, retries=5):
         self._wait_for_element("notebook-container")
         page_loaded = lambda browser: browser.execute_script(
             """
@@ -86,5 +97,14 @@ class BaseTestFormgrade(object):
 
             return true;
             """)
-        WebDriverWait(self.browser, 30).until(page_loaded)
+        try:
+            WebDriverWait(self.browser, 30).until(page_loaded)
+        except TimeoutException:
+            if retries == 0:
+                raise
+            else:
+                print("Failed to load formgrader (url '{}'), trying again...".format(url))
+                self._get(self.browser.current_url)
+                self._wait_for_formgrader(url, retries=retries - 1)
+
         self._check_url(url)

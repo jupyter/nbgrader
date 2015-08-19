@@ -13,7 +13,7 @@ class TestAuthFailures(BaseTestFormgrade):
         pass
 
     def test_login(self):
-        self.browser.get(self.manager.base_formgrade_url)
+        self._get(self.manager.base_formgrade_url)
         self._wait_for_element("username_input")
         next_url = self.formgrade_url().replace("http://localhost:8000", "")
         self._check_url("http://localhost:8000/hub/login?next={}".format(next_url))
@@ -41,7 +41,7 @@ class TestInvalidGrader(BaseTestFormgrade):
         if self.manager.jupyterhub is None:
             return
 
-        self.browser.get(self.manager.base_formgrade_url)
+        self._get(self.manager.base_formgrade_url)
         self._wait_for_element("username_input")
         next_url = self.formgrade_url().replace("http://localhost:8000", "")
         self._check_url("http://localhost:8000/hub/login?next={}".format(next_url))
@@ -55,14 +55,14 @@ class TestInvalidGrader(BaseTestFormgrade):
         self._wait_for_element("error-403")
 
         # logout
-        self.browser.get("http://localhost:8000/hub/logout")
+        self._get("http://localhost:8000/hub/logout")
         self._wait_for_element("username_input")
 
     def test_expired_cookie(self):
         if self.manager.jupyterhub is None:
             return
 
-        self.browser.get(self.manager.base_formgrade_url)
+        self._get(self.manager.base_formgrade_url)
         self._wait_for_element("username_input")
         next_url = self.formgrade_url().replace("http://localhost:8000", "")
         self._check_url("http://localhost:8000/hub/login?next={}".format(next_url))
@@ -79,7 +79,7 @@ class TestInvalidGrader(BaseTestFormgrade):
         self.browser.delete_cookie("jupyter-hub-token")
 
         # check that we are redirected to the login page
-        self.browser.get(self.manager.base_formgrade_url)
+        self._get(self.manager.base_formgrade_url)
         self._wait_for_element("username_input")
 
         # add a bad cookie
@@ -87,5 +87,5 @@ class TestInvalidGrader(BaseTestFormgrade):
         self.browser.add_cookie(cookie)
 
         # check that we are still redirected to the login page
-        self.browser.get(self.manager.base_formgrade_url)
+        self._get(self.manager.base_formgrade_url)
         self._wait_for_element("username_input")
