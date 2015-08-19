@@ -5,17 +5,19 @@ import sys
 import six
 
 from jupyter_core.paths import jupyter_config_dir
-from notebook.nbextensions import InstallNBExtensionApp, flags as extension_flags, aliases as extension_aliases
+from notebook.nbextensions import InstallNBExtensionApp, EnableNBExtensionApp, DisableNBExtensionApp, flags, aliases
 from traitlets import Unicode
+from traitlets.config import Config
 from traitlets.config.application import catch_config_error
 from traitlets.config.application import Application
+from traitlets.config.loader import JSONFileConfigLoader, ConfigFileNotFound
 
 from nbgrader.apps.baseapp import NbGrader, format_excepthook
 
 install_flags = {}
-install_flags.update(extension_flags)
+install_flags.update(flags)
 install_aliases = {}
-install_aliases.update(extension_aliases)
+install_aliases.update(aliases)
 del install_aliases['destination']
 class ExtensionInstallApp(InstallNBExtensionApp, NbGrader):
 
@@ -35,7 +37,7 @@ class ExtensionInstallApp(InstallNBExtensionApp, NbGrader):
     destination = Unicode('')
 
     def _classes_default(self):
-        return []
+        return [ExtensionInstallApp, InstallNBExtensionApp]
 
     def excepthook(self, etype, evalue, tb):
         format_excepthook(etype, evalue, tb)
@@ -59,144 +61,105 @@ class ExtensionInstallApp(InstallNBExtensionApp, NbGrader):
             self.install_extensions()
 
 
-class ExtensionActivateApp(NbGrader):
+class ExtensionActivateApp(EnableNBExtensionApp, NbGrader):
 
     name = u'nbgrader-extension-activate'
     description = u'Activate the nbgrader extension'
+
+    flags = {}
+    aliases = {}
 
     examples = """
         nbgrader extension activate
     """
 
-    def _update_config(self, config_file, key_list, value):
-        if os.path.exists(config_file):
-            with io.open(config_file, 'r') as f:
-                config = json.loads(f.read())
-        else:
-            config = {}
+    def _classes_default(self):
+        return [ExtensionActivateApp, EnableNBExtensionApp]
 
-        # ensure the hierarchy of dictionaries exists
-        last_config = config
-        for key in key_list[:-1]:
-            if key not in last_config:
-                last_config[key] = {}
-            last_config = last_config[key]
+    def enable_server_extension(self, extension):
+        loader = JSONFileConfigLoader('jupyter_notebook_config.json', jupyter_config_dir())
+        try:
+            config = loader.load_config()
+        except ConfigFileNotFound:
+            config = Config()
 
-        # add the actual key/value pair
-        if isinstance(value, (list, tuple, set)):
-            old_set = set(last_config.get(key_list[-1], set([])))
-            old_set.update(set(value))
-            last_config[key_list[-1]] = list(old_set)
-        else:
-            last_config[key_list[-1]] = value
+        if 'server_extensions' not in config.NotebookApp:
+            config.NotebookApp.server_extensions = []
+        if extension not in config.NotebookApp.server_extensions:
+            config.NotebookApp.server_extensions.append(extension)
 
-        # make sure the directory exists
-        if not os.path.exists(os.path.dirname(config_file)):
-            os.mkdir(os.path.dirname(config_file))
-
-        # save it out
-        with io.open(config_file, 'w+') as f:
+        # save the updated config
+        with io.open(os.path.join(jupyter_config_dir(), 'jupyter_notebook_config.json'), 'w+') as f:
             f.write(six.u(json.dumps(config, indent=2)))
 
     def start(self):
-        super(ExtensionActivateApp, self).start()
-
         if len(self.extra_args) == 0 or "create_assignment" in self.extra_args:
             self.log.info("Activating create_assignment nbextension")
-            self._update_config(
-                os.path.expanduser(os.path.join(jupyter_config_dir(), 'nbconfig', 'notebook.json')),
-                ["load_extensions", "create_assignment/main"],
-                True
-            )
+            self.section = "notebook"
+            self.enable_nbextension("create_assignment/main")
 
         if len(self.extra_args) == 0 or "assignment_list" in self.extra_args:
             self.log.info("Activating assignment_list server extension")
-            self._update_config(
-                os.path.expanduser(os.path.join(jupyter_config_dir(), 'jupyter_notebook_config.json')),
-                ["NotebookApp", "server_extensions"],
-                ["nbgrader.nbextensions.assignment_list"]
-            )
+            self.enable_server_extension('nbgrader.nbextensions.assignment_list')
 
             self.log.info("Activating assignment_list nbextension")
-            self._update_config(
-                os.path.expanduser(os.path.join(jupyter_config_dir(), 'nbconfig', 'tree.json')),
-                ["load_extensions", "assignment_list/main"],
-                True
-            )
+            self.section = "tree"
+            self.enable_nbextension("assignment_list/main")
 
         self.log.info("Done. You may need to restart the Jupyter notebook server for changes to take effect.")
 
 
-class ExtensionDeactivateApp(NbGrader):
+class ExtensionDeactivateApp(DisableNBExtensionApp, NbGrader):
 
     name = u'nbgrader-extension-deactivate'
     description = u'Deactivate the nbgrader extension'
 
+    flags = {}
+    aliases = {}
+
     examples = """
         nbgrader extension deactivate
     """
+
+    def _classes_default(self):
+        return [ExtensionDeactivateApp, DisableNBExtensionApp]
 
     def _recursive_get(self, obj, key_list):
         if obj is None or len(key_list) == 0:
             return obj
         return self._recursive_get(obj.get(key_list[0], None), key_list[1:])
 
-    def _update_config(self, config_file, key_list, value=None):
-        if os.path.exists(config_file):
-            with io.open(config_file, 'r') as f:
-                config = json.loads(f.read())
-        else:
-            config = {}
+    def disable_server_extension(self, extension):
+        loader = JSONFileConfigLoader('jupyter_notebook_config.json', jupyter_config_dir())
+        try:
+            config = loader.load_config()
+        except ConfigFileNotFound:
+            config = Config()
 
-        # search for the key through the hierarchy, return if it's not present
-        last_config = self._recursive_get(config, key_list)
-        if last_config is None:
+        if 'server_extensions' not in config.NotebookApp:
+            return
+        if extension not in config.NotebookApp.server_extensions:
             return
 
-        # remove the key
-        if value is None:
-            self._recursive_get(config, key_list[:-1])[key_list[-1]] = False
-        else:
-            last_config = self._recursive_get(config, key_list[:-1])[key_list[-1]]
-            if value not in last_config:
-                return
-            last_config.remove(value)
-
-        # remove empty structures
-        while len(key_list) > 0:
-            key = key_list.pop()
-            last_config = self._recursive_get(config, key_list)
-            if not last_config[key]:
-                del last_config[key]
+        config.NotebookApp.server_extensions.remove(extension)
 
         # save the updated config
-        with io.open(config_file, 'w+') as f:
+        with io.open(os.path.join(jupyter_config_dir(), 'jupyter_notebook_config.json'), 'w+') as f:
             f.write(six.u(json.dumps(config, indent=2)))
 
     def start(self):
-        print(self.extra_args)
-        super(ExtensionDeactivateApp, self).start()
-
         if len(self.extra_args) == 0 or "create_assignment" in self.extra_args:
             self.log.info("Deactivating create_assignment nbextension")
-            self._update_config(
-                os.path.expanduser(os.path.join(jupyter_config_dir(), 'nbconfig', 'notebook.json')),
-                ["load_extensions", "create_assignment/main"]
-            )
+            self.section = "notebook"
+            self.disable_nbextension("create_assignment/main")
 
         if len(self.extra_args) == 0 or "assignment_list" in self.extra_args:
             self.log.info("Deactivating assignment_list server extension")
-            self._update_config(
-                os.path.expanduser(os.path.join(jupyter_config_dir(), 'jupyter_notebook_config.json')),
-                ["NotebookApp", "server_extensions"],
-                "nbgrader.nbextensions.assignment_list"
-            )
+            self.disable_server_extension('nbgrader.nbextensions.assignment_list')
 
             self.log.info("Deactivating assignment_list nbextension")
-            self._update_config(
-                os.path.expanduser(os.path.join(jupyter_config_dir(), 'nbconfig', 'tree.json')),
-                ["load_extensions", "assignment_list/main"]
-            )
+            self.section = "tree"
+            self.disable_nbextension("assignment_list/main")
 
         self.log.info("Done. You may need to restart the Jupyter notebook server for changes to take effect.")
 
