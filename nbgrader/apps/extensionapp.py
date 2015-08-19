@@ -10,14 +10,14 @@ from traitlets import Unicode
 from traitlets.config.application import catch_config_error
 from traitlets.config.application import Application
 
-from nbgrader.apps.baseapp import BaseApp, format_excepthook, base_aliases, base_flags
+from nbgrader.apps.baseapp import NbGrader, format_excepthook
 
 install_flags = {}
 install_flags.update(extension_flags)
 install_aliases = {}
 install_aliases.update(extension_aliases)
 del install_aliases['destination']
-class ExtensionInstallApp(InstallNBExtensionApp, BaseApp):
+class ExtensionInstallApp(InstallNBExtensionApp, NbGrader):
 
     name = u'nbgrader-extension-install'
     description = u'Install the nbgrader extension'
@@ -59,17 +59,10 @@ class ExtensionInstallApp(InstallNBExtensionApp, BaseApp):
             self.install_extensions()
 
 
-activate_flags = {}
-activate_flags.update(base_flags)
-activate_aliases = {}
-activate_aliases.update(base_aliases)
-class ExtensionActivateApp(BaseApp):
+class ExtensionActivateApp(NbGrader):
 
     name = u'nbgrader-extension-activate'
     description = u'Activate the nbgrader extension'
-
-    flags = activate_flags
-    aliases = activate_aliases
 
     examples = """
         nbgrader extension activate
@@ -134,17 +127,10 @@ class ExtensionActivateApp(BaseApp):
         self.log.info("Done. You may need to restart the Jupyter notebook server for changes to take effect.")
 
 
-deactivate_flags = {}
-deactivate_flags.update(base_flags)
-deactivate_aliases = {}
-deactivate_aliases.update(base_aliases)
-class ExtensionDeactivateApp(BaseApp):
+class ExtensionDeactivateApp(NbGrader):
 
     name = u'nbgrader-extension-deactivate'
     description = u'Deactivate the nbgrader extension'
-
-    flags = deactivate_flags
-    aliases = deactivate_aliases
 
     examples = """
         nbgrader extension deactivate

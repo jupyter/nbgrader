@@ -114,8 +114,7 @@ def _run_tests(mark=None, skip=None):
         '--cov nbgrader',
         '--no-cov-on-fail',
         '-v',
-        '-x',
-        '--capture', 'no'
+        '-x'
     ]
 
     marks = []

@@ -1,6 +1,6 @@
 c = get_config()
 
-c.BaseNbGraderApp.course_id = "example_course"
+c.NbGrader.course_id = "example_course"
 
 c.FormgradeApp.ip = "127.0.0.1"
 c.FormgradeApp.port = 9000

@@ -25,12 +25,15 @@ from traitlets.config.loader import Config
 from nbgrader.utils import check_directory, parse_utc, find_all_files
 
 
-# These are the aliases and flags for nbgrader apps that inherit only from
-# BaseApp (and not BaseNbGraderApp)
-base_aliases = {
+nbgrader_aliases = {
     'log-level' : 'Application.log_level',
+    'student': 'NbGrader.student_id',
+    'assignment': 'NbGrader.assignment_id',
+    'notebook': 'NbGrader.notebook_id',
+    'db': 'NbGrader.db_url',
+    'course': 'NbGrader.course_id'
 }
-base_flags = {
+nbgrader_flags = {
     'debug': (
         {'Application' : {'log_level' : 'DEBUG'}},
         "set log level to DEBUG (maximize logging output)"
@@ -50,11 +53,12 @@ def format_excepthook(etype, evalue, tb):
         """
     ), file=sys.stderr)
 
-class BaseApp(JupyterApp):
+
+class NbGrader(JupyterApp):
     """A base class for all the nbgrader apps."""
 
-    aliases = base_aliases
-    flags = base_flags
+    aliases = nbgrader_aliases
+    flags = nbgrader_flags
 
     _log_formatter_cls = LogFormatter
 
@@ -72,72 +76,6 @@ class BaseApp(JupyterApp):
         config=True,
         help="The logging format template"
     )
-
-    def fail(self, msg, *args):
-        """Log the error msg using self.log.error and exit using sys.exit(1)."""
-        self.log.error(msg, *args)
-        sys.exit(1)
-
-    verbose_crash = Bool(False)
-
-    # The classes added here determine how configuration will be documented
-    classes = List()
-
-    def _classes_default(self):
-        return [BaseApp]
-
-    def _config_file_name_default(self):
-        return u'nbgrader_config'
-
-    def build_extra_config(self):
-        return Config()
-
-    def excepthook(self, etype, evalue, tb):
-        format_excepthook(etype, evalue, tb)
-
-    def _config_changed(self, name, old, new):
-        if 'BasicConfig' in new:
-            self.log.warn(
-                "Use BaseApp in config, not BasicConfig. Outdated config:\n%s",
-                '\n'.join(
-                    'BasicConfig.{key} = {value!r}'.format(key=key, value=value)
-                    for key, value in new.BasicConfig.items()
-                )
-            )
-            new.BaseApp.merge(new.BasicConfig)
-            del new.BasicConfig
-        super(BaseApp, self)._config_changed(name, old, new)
-
-    @catch_config_error
-    def initialize(self, argv=None):
-        self.update_config(self.build_extra_config())
-        super(BaseApp, self).initialize(argv)
-
-
-# These are the aliases and flags for nbgrader apps that inherit only from
-# BaseNbGraderApp (and not BaseNbConvertApp)
-nbgrader_aliases = {}
-nbgrader_aliases.update(base_aliases)
-nbgrader_aliases.update({
-    'student': 'BaseNbGraderApp.student_id',
-    'assignment': 'BaseNbGraderApp.assignment_id',
-    'notebook': 'BaseNbGraderApp.notebook_id',
-    'db': 'BaseNbGraderApp.db_url',
-    'course': 'BaseNbGraderApp.course_id'
-})
-nbgrader_flags = {}
-nbgrader_flags.update(base_flags)
-nbgrader_flags.update({
-})
-
-class BaseNbGraderApp(BaseApp):
-    """A base class for all the nbgrader apps that depend on the nbgrader
-    directory structure.
-
-    """
-
-    aliases = nbgrader_aliases
-    flags = nbgrader_flags
 
     db_url = Unicode("sqlite:///gradebook.db", config=True, help="URL to the database")
 
@@ -278,6 +216,17 @@ class BaseNbGraderApp(BaseApp):
         )
     )
 
+    verbose_crash = Bool(False)
+
+    # The classes added here determine how configuration will be documented
+    classes = List()
+
+    def _classes_default(self):
+        return [NbGrader]
+
+    def _config_file_name_default(self):
+        return u'nbgrader_config'
+
     def _get_existing_timestamp(self, dest_path):
         """Get the timestamp, as a datetime object, of an existing submission."""
         timestamp_path = os.path.join(dest_path, 'timestamp.txt')
@@ -291,15 +240,65 @@ class BaseNbGraderApp(BaseApp):
     def _config_changed(self, name, old, new):
         if 'NbGraderConfig' in new:
             self.log.warn(
-                "Use BaseNbGraderApp in config, not NbGraderConfig. Outdated config:\n%s",
+                "Use NbGrader in config, not NbGraderConfig. Outdated config:\n%s",
                 '\n'.join(
                     'NbGraderConfig.{key} = {value!r}'.format(key=key, value=value)
                     for key, value in new.NbGraderConfig.items()
                 )
             )
-            new.BaseNbGraderApp.merge(new.NbGraderConfig)
+            new.NbGrader.merge(new.NbGraderConfig)
             del new.NbGraderConfig
-        super(BaseNbGraderApp, self)._config_changed(name, old, new)
+
+        if 'BasicConfig' in new:
+            self.log.warn(
+                "Use NbGrader in config, not BasicConfig. Outdated config:\n%s",
+                '\n'.join(
+                    'BasicConfig.{key} = {value!r}'.format(key=key, value=value)
+                    for key, value in new.BasicConfig.items()
+                )
+            )
+            new.NbGrader.merge(new.BasicConfig)
+            del new.BasicConfig
+
+        if 'BaseNbGraderApp' in new:
+            self.log.warn(
+                "Use NbGrader in config, not BaseNbGraderApp. Outdated config:\n%s",
+                '\n'.join(
+                    'BaseNbGraderApp.{key} = {value!r}'.format(key=key, value=value)
+                    for key, value in new.BaseNbGraderApp.items()
+                )
+            )
+            new.NbGrader.merge(new.BaseNbGraderApp)
+            del new.BaseNbGraderApp
+
+        if 'BaseApp' in new:
+            self.log.warn(
+                "Use NbGrader in config, not BaseApp. Outdated config:\n%s",
+                '\n'.join(
+                    'BaseApp.{key} = {value!r}'.format(key=key, value=value)
+                    for key, value in new.BaseApp.items()
+                )
+            )
+            new.NbGrader.merge(new.BaseApp)
+            del new.BaseApp
+
+        super(NbGrader, self)._config_changed(name, old, new)
+
+    def fail(self, msg, *args):
+        """Log the error msg using self.log.error and exit using sys.exit(1)."""
+        self.log.error(msg, *args)
+        sys.exit(1)
+
+    def build_extra_config(self):
+        return Config()
+
+    def excepthook(self, etype, evalue, tb):
+        format_excepthook(etype, evalue, tb)
+
+    @catch_config_error
+    def initialize(self, argv=None):
+        self.update_config(self.build_extra_config())
+        super(NbGrader, self).initialize(argv)
 
 
 # These are the aliases and flags for nbgrader apps that inherit only from
@@ -308,14 +307,13 @@ transfer_aliases = {}
 transfer_aliases.update(nbgrader_aliases)
 transfer_aliases.update({
     "timezone": "TransferApp.timezone",
-    "course": "TransferApp.course"
 })
 transfer_flags = {}
 transfer_flags.update(nbgrader_flags)
 transfer_flags.update({
 })
 
-class TransferApp(BaseNbGraderApp):
+class TransferApp(NbGrader):
     """A base class for the list, release, collect, fetch, and submit apps.
 
     All of these apps involve transfering files between an instructor or students
@@ -331,8 +329,6 @@ class TransferApp(BaseNbGraderApp):
         "%Y-%m-%d %H:%M:%S %Z", config=True,
         help="Format string for timestamps"
     )
-
-    course = Unicode('', config=True, allow_none=True, help="Required course name.")
 
     exchange_directory = Unicode(
         "/srv/nbgrader/exchange",
@@ -368,15 +364,15 @@ class TransferApp(BaseNbGraderApp):
 
     def init_src(self):
         """Compute and check the source paths for the transfer."""
-        raise NotImplemented
+        raise NotImplementedError
 
     def init_dest(self):
         """Compute and check the destination paths for the transfer."""
-        raise NotImplemented
+        raise NotImplementedError
 
     def copy_files(self):
         """Actually do the file transfer."""
-        raise NotImplemented
+        raise NotImplementedError
 
     def do_copy(self, src, dest):
         """Copy the src dir to the dest dir omitting the self.ignore globs."""
@@ -392,9 +388,6 @@ class TransferApp(BaseNbGraderApp):
             self.fail("Too many arguments")
         else:
             self.fail("Must provide assignment name:\nnbgrader <command> ASSIGNMENT [ --course COURSE ]")
-
-        if self.course:
-            self.course_id = self.course
 
         self.init_src()
         self.init_dest()
@@ -415,9 +408,9 @@ nbconvert_flags.update({
     ),
 })
 
-class BaseNbConvertApp(BaseNbGraderApp, NbConvertApp):
+class BaseNbConvertApp(NbGrader, NbConvertApp):
     """A base class for all the nbgrader apps that utilize nbconvert. This
-    inherits defaults from BaseNbGraderApp, while exposing nbconvert's
+    inherits defaults from NbGrader, while exposing nbconvert's
     functionality of running preprocessors and writing a new file.
 
     The default export format is 'assignment', which is a special export format

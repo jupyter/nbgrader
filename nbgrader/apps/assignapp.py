@@ -76,7 +76,7 @@ class AssignApp(BaseNbConvertApp):
 
         `nbgrader assign` takes one argument (the name of the assignment), and
         looks for notebooks in the 'source' directory by default, according to
-        the directory structure specified in `BaseNbGraderApp.directory_structure`.
+        the directory structure specified in `NbGrader.directory_structure`.
         The student version is then saved into the 'release' directory.
 
         Note that the directory structure requires the `student_id` to be given;
@@ -127,8 +127,8 @@ class AssignApp(BaseNbConvertApp):
 
     def build_extra_config(self):
         extra_config = super(AssignApp, self).build_extra_config()
-        extra_config.BaseNbGraderApp.student_id = '.'
-        extra_config.BaseNbGraderApp.notebook_id = '*'
+        extra_config.NbGrader.student_id = '.'
+        extra_config.NbGrader.notebook_id = '*'
         return extra_config
 
     def _clean_old_notebooks(self, assignment_id, student_id):

@@ -1,4 +1,4 @@
-from .baseapp import BaseApp, BaseNbGraderApp, BaseNbConvertApp
+from .baseapp import NbGrader, BaseNbConvertApp
 from .assignapp import AssignApp
 from .autogradeapp import AutogradeApp
 from .feedbackapp import FeedbackApp
@@ -15,7 +15,6 @@ from .nbgraderapp import NbGraderApp
 
 
 __all__ = [
-    'BaseNbGraderApp',
     'BaseNbConvertApp',
     'NbGraderApp',
     'AssignApp',

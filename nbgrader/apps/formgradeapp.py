@@ -8,7 +8,7 @@ from textwrap import dedent
 from traitlets import Unicode, Integer, Type, Instance
 from traitlets.config.application import catch_config_error
 
-from nbgrader.apps.baseapp import BaseNbGraderApp, nbgrader_aliases, nbgrader_flags
+from nbgrader.apps.baseapp import NbGrader, nbgrader_aliases, nbgrader_flags
 from nbgrader.html.formgrade import app
 from nbgrader.api import Gradebook
 from nbgrader.auth import BaseAuth, NoAuth
@@ -26,7 +26,7 @@ flags.update({
 })
 
 
-class FormgradeApp(BaseNbGraderApp):
+class FormgradeApp(NbGrader):
 
     name = u'nbgrader-formgrade'
     description = u'Grade a notebook using an HTML form'
