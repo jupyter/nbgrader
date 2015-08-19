@@ -95,7 +95,7 @@ class TestFormgraderJS(BaseTestFormgrade):
             prev_function = lambda: p[0](*p[1:])
 
             # Load the first submission
-            self.browser.get(self.formgrade_url("submissions/{}".format(submissions[0].id)))
+            self._get(self.formgrade_url("submissions/{}".format(submissions[0].id)))
             self._wait_for_formgrader("submissions/{}/?index=0".format(submissions[0].id))
 
             # Move to the next submission
@@ -132,7 +132,7 @@ class TestFormgraderJS(BaseTestFormgrade):
             assert submissions[1].failed_tests
 
         # Load the first submission
-        self.browser.get(self.formgrade_url("submissions/{}".format(submissions[0].id)))
+        self._get(self.formgrade_url("submissions/{}".format(submissions[0].id)))
         self._wait_for_formgrader("submissions/{}/?index=0".format(submissions[0].id))
 
         if submissions[0].failed_tests:
@@ -341,7 +341,7 @@ class TestFormgraderJS(BaseTestFormgrade):
         submissions.sort(key=lambda x: x.id)
 
         # Load the first submission
-        self.browser.get(self.formgrade_url("submissions/{}".format(submissions[0].id)))
+        self._get(self.formgrade_url("submissions/{}".format(submissions[0].id)))
         self._wait_for_formgrader("submissions/{}/?index=0".format(submissions[0].id))
 
         # Click the second comment box and navigate to the next submission

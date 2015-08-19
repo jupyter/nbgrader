@@ -18,7 +18,7 @@ class TestGradebook(BaseTestFormgrade):
         if self.manager.jupyterhub is None:
             return
 
-        self.browser.get(self.manager.base_formgrade_url)
+        self._get(self.manager.base_formgrade_url)
         self._wait_for_element("username_input")
         next_url = self.formgrade_url().replace("http://localhost:8000", "")
         self._check_url("http://localhost:8000/hub/login?next={}".format(next_url))
@@ -32,7 +32,7 @@ class TestGradebook(BaseTestFormgrade):
 
     def test_load_assignment_list(self):
         # load the main page and make sure it redirects
-        self.browser.get(self.formgrade_url())
+        self._get(self.formgrade_url())
         self._wait_for_gradebook_page("assignments")
         self._check_breadcrumbs("Assignments")
 
@@ -148,7 +148,7 @@ class TestGradebook(BaseTestFormgrade):
             submissions.sort(key=lambda x: x.id)
 
             for i, submission in enumerate(submissions):
-                self.browser.get(self.formgrade_url("submissions/{}".format(submission.id)))
+                self._get(self.formgrade_url("submissions/{}".format(submission.id)))
                 self._wait_for_formgrader("submissions/{}/?index=0".format(submission.id))
 
                 # click on the "Assignments" link
@@ -181,7 +181,7 @@ class TestGradebook(BaseTestFormgrade):
             submissions.sort(key=lambda x: x.id)
 
             for i, submission in enumerate(submissions):
-                self.browser.get(self.formgrade_url("submissions/{}".format(submission.id)))
+                self._get(self.formgrade_url("submissions/{}".format(submission.id)))
                 self._wait_for_formgrader("submissions/{}/?index=0".format(submission.id))
 
                 # check the live notebook link
@@ -196,7 +196,7 @@ class TestGradebook(BaseTestFormgrade):
         submissions.sort(key=lambda x: x.id)
 
         for submission in submissions:
-            self.browser.get(self.formgrade_url("submissions/{}".format(submission.id)))
+            self._get(self.formgrade_url("submissions/{}".format(submission.id)))
             self._wait_for_formgrader("submissions/{}/?index=0".format(submission.id))
 
             images = self.browser.find_elements_by_tag_name("img")

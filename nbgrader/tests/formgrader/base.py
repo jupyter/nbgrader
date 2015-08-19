@@ -7,6 +7,7 @@ except ImportError:
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
+from selenium.common.exceptions import TimeoutException
 
 
 class BaseTestFormgrade(object):
@@ -52,8 +53,20 @@ class BaseTestFormgrade(object):
         self._wait_for_element("gradebook")
         self._check_url(url)
 
+    def _get(self, url, retries=5):
+        for _ in range(retries):
+            try:
+                self.browser.get(url)
+            except TimeoutException:
+                print("Failed to load '{}', trying again...".format(url))
+                continue
+            else:
+                return
+
+        raise TimeoutException
+
     def _load_gradebook_page(self, url):
-        self.browser.get(self.formgrade_url(url))
+        self._get(self.formgrade_url(url))
         self._wait_for_gradebook_page(url)
 
     def _wait_for_notebook_page(self, url):
