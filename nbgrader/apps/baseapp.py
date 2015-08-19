@@ -14,6 +14,7 @@ import shutil
 
 from dateutil.tz import gettz
 from jupyter_core.application import JupyterApp
+from jupyter_core.paths import jupyter_data_dir
 from nbconvert.exporters.export import exporter_map
 from nbconvert.nbconvertapp import NbConvertApp, DottedOrNone
 from textwrap import dedent
@@ -339,10 +340,10 @@ class TransferApp(NbGrader):
     cache_directory = Unicode(
         "",
         config=True,
-        help="Local cache directory for nbgrader submit and nbgrader list. Defaults to ~/.nbgrader/cache")
+        help="Local cache directory for nbgrader submit and nbgrader list. Defaults to $JUPYTER_DATA_DIR/nbgrader_cache")
 
     def _cache_directory_default(self):
-        return os.path.join(os.environ['HOME'], '.nbgrader', 'cache')
+        return os.path.join(jupyter_data_dir(), 'nbgrader_cache')
 
     def set_timestamp(self):
         """Set the timestap using the configured timezone."""
