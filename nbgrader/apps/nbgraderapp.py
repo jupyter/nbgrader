@@ -183,8 +183,6 @@ class NbGraderApp(NbGrader):
         )
     )
 
-    generate_config = Bool(False, config=True, help="Generate a new config file")
-
     def _classes_default(self):
         classes = super(NbGraderApp, self)._classes_default()
 

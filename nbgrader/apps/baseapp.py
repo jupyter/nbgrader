@@ -66,17 +66,11 @@ class NbGrader(JupyterApp):
     def _log_level_default(self):
         return logging.INFO
 
-    log_datefmt = Unicode(
-        "%Y-%m-%d %H:%M:%S",
-        config=True,
-        help="The date format used by logging formatters for %(asctime)s"
-    )
+    def _log_datefmt_default(self):
+        return "%Y-%m-%d %H:%M:%S"
 
-    log_format = Unicode(
-        "%(color)s[%(name)s | %(levelname)s]%(end_color)s %(message)s",
-        config=True,
-        help="The logging format template"
-    )
+    def _log_format_default(self):
+        return "%(color)s[%(name)s | %(levelname)s]%(end_color)s %(message)s"
 
     db_url = Unicode("sqlite:///gradebook.db", config=True, help="URL to the database")
 
