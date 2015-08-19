@@ -74,7 +74,7 @@ class NbGraderApp(BaseNbGraderApp):
             autograded/{student_id}/Problem Set 1/{notebook_id}.ipynb
 
         These variables, as well as the overall directory structure, can be
-        configured through the `NbGraderConfig` class (run `nbgrader --help-all`
+        configured through the `BaseNbGraderApp` class (run `nbgrader --help-all`
         to see these options).
 
         For more details on how each of the subcommands work, please see the help

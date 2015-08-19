@@ -78,7 +78,7 @@ class HubAuthManager(DefaultManager):
     nbgrader_config = dedent(
         """
         c = get_config()
-        c.NbGraderConfig.course_id = 'course123ABC'
+        c.BaseNbGraderApp.course_id = 'course123ABC'
         c.FormgradeApp.port = 9000
         c.FormgradeApp.authenticator_class = "nbgrader.auth.hubauth.HubAuth"
         c.HubAuth.graders = ["foobar"]
@@ -144,7 +144,7 @@ class HubAuthTokenManager(HubAuthManager):
     nbgrader_config = dedent(
         """
         c = get_config()
-        c.NbGraderConfig.course_id = 'course123ABC'
+        c.BaseNbGraderApp.course_id = 'course123ABC'
         c.FormgradeApp.port = 9000
         c.FormgradeApp.authenticator_class = "nbgrader.auth.hubauth.HubAuth"
         c.HubAuth.graders = ["foobar"]
@@ -164,7 +164,7 @@ class HubAuthCustomUrlManager(HubAuthManager):
     nbgrader_config = dedent(
         """
         c = get_config()
-        c.NbGraderConfig.course_id = 'course123ABC'
+        c.BaseNbGraderApp.course_id = 'course123ABC'
         c.FormgradeApp.port = 9000
         c.FormgradeApp.authenticator_class = "nbgrader.auth.hubauth.HubAuth"
         c.HubAuth.graders = ["foobar"]

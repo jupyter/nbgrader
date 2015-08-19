@@ -146,7 +146,7 @@ class TestNbGraderFeedback(BaseTestApp):
 
         self._empty_notebook("autograded/foo/ps1/p1.ipynb")
         self._empty_notebook("autograded/foo/ps1/p2.ipynb")
-        run_command(["nbgrader", "feedback", "ps1", "--NbGraderConfig.notebook_id=p1", "--force"])
+        run_command(["nbgrader", "feedback", "ps1", "--notebook", "p1", "--force"])
 
         assert os.path.exists("feedback/foo/ps1/p1.html")
         assert os.path.exists("feedback/foo/ps1/p2.html")
@@ -197,7 +197,7 @@ class TestNbGraderFeedback(BaseTestApp):
         self._empty_notebook("autograded/foo/ps1/p1.ipynb")
         self._empty_notebook("autograded/foo/ps1/p2.ipynb")
         self._make_file('autograded/foo/ps1/timestamp.txt', "2015-02-02 16:58:23.948203 PST")
-        run_command(["nbgrader", "feedback", "ps1", "--NbGraderConfig.notebook_id=p1"])
+        run_command(["nbgrader", "feedback", "ps1", "--notebook", "p1"])
 
         assert os.path.exists("feedback/foo/ps1/p1.html")
         assert os.path.exists("feedback/foo/ps1/p2.html")

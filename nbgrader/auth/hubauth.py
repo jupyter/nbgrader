@@ -66,7 +66,7 @@ class HubAuth(BaseAuth):
 
     remap_url = Unicode(config=True, help="""Suffix appened to 
         `HubAuth.hub_base_url` to form the full URL to the formgrade server.  By
-        default this is '/hub/{{NbGraderConfig.course_id}}'.  Change this if you
+        default this is '/hub/{BaseNbGraderApp.course_id}'.  Change this if you
         plan on running more than one formgrade server behind one JupyterHub
         instance.""")
     def _remap_url_default(self):
