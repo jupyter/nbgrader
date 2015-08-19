@@ -9,6 +9,7 @@ from textwrap import dedent
 from traitlets.config.application import catch_config_error
 from traitlets import Bool
 
+import nbgrader
 from nbgrader import preprocessors
 from nbgrader.apps.baseapp import nbgrader_aliases, nbgrader_flags
 from nbgrader.apps import (
@@ -45,7 +46,7 @@ class NbGraderApp(BaseNbGraderApp):
 
     name = 'nbgrader'
     description = u'A system for assigning and grading notebooks'
-    version = u'0.2.0'
+    version = nbgrader.__version__
 
     aliases = aliases
     flags = flags
@@ -224,6 +225,10 @@ class NbGraderApp(BaseNbGraderApp):
 
         # This starts subapps
         super(NbGraderApp, self).start()
+
+    def print_version(self):
+        print("Python version {}".format(sys.version))
+        print("nbgrader version {}".format(nbgrader.__version__))
 
 def main():
     NbGraderApp.launch_instance()
