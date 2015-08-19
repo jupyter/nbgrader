@@ -45,7 +45,7 @@ class CollectApp(TransferApp):
         It must be unique for each instructor/course combination. To set it in
         the config file add a line to the `nbgrader_config.py` file:
 
-            c.NbGraderConfig.course_id = 'phys101'
+            c.NbGrader.course_id = 'phys101'
 
         To pass the `course_id` at the command line, add `--course=phys101` to any
         of the below commands.

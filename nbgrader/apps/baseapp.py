@@ -22,16 +22,18 @@ from traitlets import Unicode, List, Bool, Instance, Dict, Integer
 from traitlets.config.application import catch_config_error
 from traitlets.config.loader import Config
 
-from nbgrader.config import BasicConfig, NbGraderConfig
 from nbgrader.utils import check_directory, parse_utc, find_all_files
 
 
-# These are the aliases and flags for nbgrader apps that inherit only from
-# BaseApp (and not BaseNbGraderApp)
-base_aliases = {
+nbgrader_aliases = {
     'log-level' : 'Application.log_level',
+    'student': 'NbGrader.student_id',
+    'assignment': 'NbGrader.assignment_id',
+    'notebook': 'NbGrader.notebook_id',
+    'db': 'NbGrader.db_url',
+    'course': 'NbGrader.course_id'
 }
-base_flags = {
+nbgrader_flags = {
     'debug': (
         {'Application' : {'log_level' : 'DEBUG'}},
         "set log level to DEBUG (maximize logging output)"
@@ -51,108 +53,154 @@ def format_excepthook(etype, evalue, tb):
         """
     ), file=sys.stderr)
 
-class BaseApp(JupyterApp):
+
+class NbGrader(JupyterApp):
     """A base class for all the nbgrader apps."""
 
-    aliases = base_aliases
-    flags = base_flags
+    aliases = nbgrader_aliases
+    flags = nbgrader_flags
 
     _log_formatter_cls = LogFormatter
 
     def _log_level_default(self):
         return logging.INFO
 
-    def fail(self, msg, *args):
-        """Log the error msg using self.log.error and exit using sys.exit(1)."""
-        self.log.error(msg, *args)
-        sys.exit(1)
+    log_datefmt = Unicode(
+        "%Y-%m-%d %H:%M:%S",
+        config=True,
+        help="The date format used by logging formatters for %(asctime)s"
+    )
 
-    verbose_crash = Bool(False)
+    log_format = Unicode(
+        "%(color)s[%(name)s | %(levelname)s]%(end_color)s %(message)s",
+        config=True,
+        help="The logging format template"
+    )
 
-    # This is a hack in order to centralize the config options inherited from
-    # Jupyter. Rather than allowing them to be configured for each app separately,
-    # this makes them non-configurable for the apps themselves. Then, in the init,
-    # an instance of `BasicConfig` is created, which contains these options, and
-    # their values are set on the application instance. So, to configure these
-    # options, the `BasicConfig` class can be configured, rather than the
-    # application itself.
-    log_datefmt = Unicode()
-    log_format = Unicode()
+    db_url = Unicode("sqlite:///gradebook.db", config=True, help="URL to the database")
 
-    # The classes added here determine how configuration will be documented
-    classes = List()
+    student_id = Unicode(
+        "*",
+        config=True,
+        help=dedent(
+            """
+            File glob to match student IDs. This can be changed to filter by
+            student. Note: this is always changed to '.' when running `nbgrader
+            assign`, as the assign step doesn't have any student ID associated
+            with it.
+            """
+        )
+    )
 
-    # Basic configuration instance
-    _basic_config = Instance(BasicConfig)
+    assignment_id = Unicode(
+        "",
+        config=True,
+        help=dedent(
+            """
+            The assignment name. This MUST be specified, either by setting the
+            config option, passing an argument on the command line, or using the
+            --assignment option on the command line.
+            """
+        )
+    )
 
-    def _classes_default(self):
-        return [BasicConfig]
+    notebook_id = Unicode(
+        "*",
+        config=True,
+        help=dedent(
+            """
+            File glob to match notebook names, excluding the '.ipynb' extension.
+            This can be changed to filter by notebook.
+            """
+        )
+    )
 
-    def _config_file_name_default(self):
-        return u'nbgrader_config'
+    directory_structure = Unicode(
+        "{nbgrader_step}/{student_id}/{assignment_id}",
+        config=True,
+        help=dedent(
+            """
+            Format string for the directory structure that nbgrader works
+            over during the grading process. This MUST contain named keys for
+            'nbgrader_step', 'student_id', and 'assignment_id'. It SHOULD NOT
+            contain a key for 'notebook_id', as this will be automatically joined
+            with the rest of the path.
+            """
+        )
+    )
 
-    def __init__(self, *args, **kwargs):
-        super(BaseApp, self).__init__(*args, **kwargs)
-        self._basic_config = BasicConfig(parent=self)
+    source_directory = Unicode(
+        'source',
+        config=True,
+        help=dedent(
+            """
+            The name of the directory that contains the master/instructor
+            version of assignments. This corresponds to the `nbgrader_step`
+            variable in the `directory_structure` config option.
+            """
+        )
+    )
 
-    def build_extra_config(self):
-        return Config()
+    release_directory = Unicode(
+        'release',
+        config=True,
+        help=dedent(
+            """
+            The name of the directory that contains the version of the
+            assignment that will be released to students. This corresponds to
+            the `nbgrader_step` variable in the `directory_structure` config
+            option.
+            """
+        )
+    )
 
-    def excepthook(self, etype, evalue, tb):
-        format_excepthook(etype, evalue, tb)
+    submitted_directory = Unicode(
+        'submitted',
+        config=True,
+        help=dedent(
+            """
+            The name of the directory that contains assignments that have been
+            submitted by students for grading. This corresponds to the
+            `nbgrader_step` variable in the `directory_structure` config option.
+            """
+        )
+    )
 
-    def _config_changed(self, name, old, new):
-        super(BaseApp, self)._config_changed(name, old, new)
-        if 'BasicConfig' in new:
-            self._basic_config.update_config(new)
+    autograded_directory = Unicode(
+        'autograded',
+        config=True,
+        help=dedent(
+            """
+            The name of the directory that contains assignment submissions after
+            they have been autograded. This corresponds to the `nbgrader_step`
+            variable in the `directory_structure` config option.
+            """
+        )
+    )
 
-    @catch_config_error
-    def initialize(self, argv=None):
-        self.update_config(self.build_extra_config())
-        super(BaseApp, self).initialize(argv)
+    feedback_directory = Unicode(
+        'feedback',
+        config=True,
+        help=dedent(
+            """
+            The name of the directory that contains assignment feedback after
+            grading has been completed. This corresponds to the `nbgrader_step`
+            variable in the `directory_structure` config option.
+            """
+        )
+    )
 
-
-# These are the aliases and flags for nbgrader apps that inherit only from
-# BaseNbGraderApp (and not BaseNbConvertApp)
-nbgrader_aliases = {}
-nbgrader_aliases.update(base_aliases)
-nbgrader_aliases.update({
-    'student': 'NbGraderConfig.student_id',
-    'assignment': 'NbGraderConfig.assignment_id',
-    'notebook': 'NbGraderConfig.notebook_id',
-    'db': 'NbGraderConfig.db_url',
-    'course': 'NbGraderConfig.course_id'
-})
-nbgrader_flags = {}
-nbgrader_flags.update(base_flags)
-nbgrader_flags.update({
-})
-
-class BaseNbGraderApp(BaseApp):
-    """A base class for all the nbgrader apps that depend on the nbgrader
-    directory structure.
-
-    """
-
-    aliases = nbgrader_aliases
-    flags = nbgrader_flags
-
-    # these must be defined, but then will actually be populated with values from
-    # the NbGraderConfig instance
-    db_url = Unicode()
-    student_id = Unicode()
-    assignment_id = Unicode()
-    notebook_id = Unicode()
-    directory_structure = Unicode()
-    source_directory = Unicode()
-    release_directory = Unicode()
-    submitted_directory = Unicode()
-    autograded_directory = Unicode()
-    feedback_directory = Unicode()
-    course_id = Unicode()
-
-    # nbgrader configuration instance
-    _nbgrader_config = Instance(NbGraderConfig)
+    course_id = Unicode(
+        '',
+        config=True,
+        help=dedent(
+            """
+            A key that is unique per instructor and course. This MUST be
+            specified, either by setting the config option, or using the
+            --course option on the command line.
+            """
+        )
+    )
 
     ignore = List(
         [
@@ -168,10 +216,16 @@ class BaseNbGraderApp(BaseApp):
         )
     )
 
+    verbose_crash = Bool(False)
+
+    # The classes added here determine how configuration will be documented
+    classes = List()
+
     def _classes_default(self):
-        classes = super(BaseNbGraderApp, self)._classes_default()
-        classes.append(NbGraderConfig)
-        return classes
+        return [NbGrader]
+
+    def _config_file_name_default(self):
+        return u'nbgrader_config'
 
     def _get_existing_timestamp(self, dest_path):
         """Get the timestamp, as a datetime object, of an existing submission."""
@@ -183,14 +237,68 @@ class BaseNbGraderApp(BaseApp):
         else:
             return None
 
-    def __init__(self, *args, **kwargs):
-        super(BaseNbGraderApp, self).__init__(*args, **kwargs)
-        self._nbgrader_config = NbGraderConfig(parent=self)
-
     def _config_changed(self, name, old, new):
-        super(BaseNbGraderApp, self)._config_changed(name, old, new)
         if 'NbGraderConfig' in new:
-            self._nbgrader_config.update_config(new)
+            self.log.warn(
+                "Use NbGrader in config, not NbGraderConfig. Outdated config:\n%s",
+                '\n'.join(
+                    'NbGraderConfig.{key} = {value!r}'.format(key=key, value=value)
+                    for key, value in new.NbGraderConfig.items()
+                )
+            )
+            new.NbGrader.merge(new.NbGraderConfig)
+            del new.NbGraderConfig
+
+        if 'BasicConfig' in new:
+            self.log.warn(
+                "Use NbGrader in config, not BasicConfig. Outdated config:\n%s",
+                '\n'.join(
+                    'BasicConfig.{key} = {value!r}'.format(key=key, value=value)
+                    for key, value in new.BasicConfig.items()
+                )
+            )
+            new.NbGrader.merge(new.BasicConfig)
+            del new.BasicConfig
+
+        if 'BaseNbGraderApp' in new:
+            self.log.warn(
+                "Use NbGrader in config, not BaseNbGraderApp. Outdated config:\n%s",
+                '\n'.join(
+                    'BaseNbGraderApp.{key} = {value!r}'.format(key=key, value=value)
+                    for key, value in new.BaseNbGraderApp.items()
+                )
+            )
+            new.NbGrader.merge(new.BaseNbGraderApp)
+            del new.BaseNbGraderApp
+
+        if 'BaseApp' in new:
+            self.log.warn(
+                "Use NbGrader in config, not BaseApp. Outdated config:\n%s",
+                '\n'.join(
+                    'BaseApp.{key} = {value!r}'.format(key=key, value=value)
+                    for key, value in new.BaseApp.items()
+                )
+            )
+            new.NbGrader.merge(new.BaseApp)
+            del new.BaseApp
+
+        super(NbGrader, self)._config_changed(name, old, new)
+
+    def fail(self, msg, *args):
+        """Log the error msg using self.log.error and exit using sys.exit(1)."""
+        self.log.error(msg, *args)
+        sys.exit(1)
+
+    def build_extra_config(self):
+        return Config()
+
+    def excepthook(self, etype, evalue, tb):
+        format_excepthook(etype, evalue, tb)
+
+    @catch_config_error
+    def initialize(self, argv=None):
+        self.update_config(self.build_extra_config())
+        super(NbGrader, self).initialize(argv)
 
 
 # These are the aliases and flags for nbgrader apps that inherit only from
@@ -199,14 +307,13 @@ transfer_aliases = {}
 transfer_aliases.update(nbgrader_aliases)
 transfer_aliases.update({
     "timezone": "TransferApp.timezone",
-    "course": "TransferApp.course"
 })
 transfer_flags = {}
 transfer_flags.update(nbgrader_flags)
 transfer_flags.update({
 })
 
-class TransferApp(BaseNbGraderApp):
+class TransferApp(NbGrader):
     """A base class for the list, release, collect, fetch, and submit apps.
 
     All of these apps involve transfering files between an instructor or students
@@ -222,8 +329,6 @@ class TransferApp(BaseNbGraderApp):
         "%Y-%m-%d %H:%M:%S %Z", config=True,
         help="Format string for timestamps"
     )
-
-    course = Unicode('', config=True, allow_none=True, help="Required course name.")
 
     exchange_directory = Unicode(
         "/srv/nbgrader/exchange",
@@ -259,15 +364,15 @@ class TransferApp(BaseNbGraderApp):
 
     def init_src(self):
         """Compute and check the source paths for the transfer."""
-        raise NotImplemented
+        raise NotImplementedError
 
     def init_dest(self):
         """Compute and check the destination paths for the transfer."""
-        raise NotImplemented
+        raise NotImplementedError
 
     def copy_files(self):
         """Actually do the file transfer."""
-        raise NotImplemented
+        raise NotImplementedError
 
     def do_copy(self, src, dest):
         """Copy the src dir to the dest dir omitting the self.ignore globs."""
@@ -283,9 +388,6 @@ class TransferApp(BaseNbGraderApp):
             self.fail("Too many arguments")
         else:
             self.fail("Must provide assignment name:\nnbgrader <command> ASSIGNMENT [ --course COURSE ]")
-
-        if self.course:
-            self.course_id = self.course
 
         self.init_src()
         self.init_dest()
@@ -306,9 +408,9 @@ nbconvert_flags.update({
     ),
 })
 
-class BaseNbConvertApp(BaseNbGraderApp, NbConvertApp):
+class BaseNbConvertApp(NbGrader, NbConvertApp):
     """A base class for all the nbgrader apps that utilize nbconvert. This
-    inherits defaults from BaseNbGraderApp, while exposing nbconvert's
+    inherits defaults from NbGrader, while exposing nbconvert's
     functionality of running preprocessors and writing a new file.
 
     The default export format is 'assignment', which is a special export format

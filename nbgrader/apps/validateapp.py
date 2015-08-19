@@ -1,16 +1,10 @@
 from traitlets import Unicode, List, Bool
 from nbconvert.nbconvertapp import NbConvertApp, DottedOrNone
 from nbgrader.preprocessors import DisplayAutoGrades, Execute, ClearOutput
-from nbgrader.apps.baseapp import BaseApp, base_flags, base_aliases
+from nbgrader.apps.baseapp import NbGrader
 
 aliases = {}
-aliases.update(base_aliases)
-aliases.update({
-})
-
-flags = {}
-flags.update(base_flags)
-flags.update({
+flags = {
     'invert': (
         {'DisplayAutoGrades': {'invert': True}},
         "Complain when cells pass, rather than vice versa."
@@ -19,9 +13,9 @@ flags.update({
         {'DisplayAutoGrades' : {'as_json': True}},
         "Print out validation results as json."
     )
-})
+}
 
-class ValidateApp(BaseApp, NbConvertApp):
+class ValidateApp(NbGrader, NbConvertApp):
 
     name = u'nbgrader-validate'
     description = u'Validate a notebook by running it'

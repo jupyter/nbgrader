@@ -228,7 +228,7 @@ class TestNbGraderAssign(BaseTestApp):
 
         self._copy_file("files/submitted-changed.ipynb", "source/ps1/p1.ipynb")
         self._copy_file("files/submitted-changed.ipynb", "source/ps1/p2.ipynb")
-        run_command(["nbgrader", "assign", "ps1", "--NbGraderConfig.notebook_id=p1", "--force"])
+        run_command(["nbgrader", "assign", "ps1", "--notebook", "p1", "--force"])
 
         assert os.path.exists("release/ps1/p1.ipynb")
         assert os.path.exists("release/ps1/p2.ipynb")
