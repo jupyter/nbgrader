@@ -248,6 +248,10 @@ def test_compute_checksum_solution_cell():
     assert utils.compute_checksum(cell1) != utils.compute_checksum(cell2)
 
 
+def test_compute_checksum_utf8():
+    utils.compute_checksum(create_solution_cell("\u03b8", "markdown", "foo"))
+
+
 def test_is_ignored(temp_cwd):
     os.mkdir("foo")
     with open("foo/bar.txt", "w") as fh:
