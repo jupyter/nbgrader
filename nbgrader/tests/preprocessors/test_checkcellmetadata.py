@@ -87,3 +87,16 @@ class TestCheckCellMetadata(BaseTestPreprocessor):
         nb = self._read_nb("files/bad-markdown-cell-2.ipynb")
         with pytest.raises(RuntimeError):
             preprocessor.preprocess(nb, {})
+
+    def test_non_nbgrader_cell_blank_grade_id(self, preprocessor):
+        resources = dict(grade_ids=[])
+        cell = create_grade_cell("", "code", "", 1)
+        cell.metadata.nbgrader['grade'] = False
+        new_cell, _ = preprocessor.preprocess_cell(cell, resources, 0)
+        assert 'grade_id' not in new_cell.metadata.nbgrader
+
+        resources = dict(grade_ids=[])
+        cell = create_solution_cell("", "code", "")
+        cell.metadata.nbgrader['solution'] = False
+        new_cell, _ = preprocessor.preprocess_cell(cell, resources, 0)
+        assert 'grade_id' not in new_cell.metadata.nbgrader

@@ -1,7 +1,7 @@
 from nbformat.v4.nbbase import validate
 
 from nbgrader import utils
-from nbgrader.api import Gradebook
+from nbgrader.api import Gradebook, MissingEntry
 from nbgrader.preprocessors import NbGraderPreprocessor
 
 class OverwriteCells(NbGraderPreprocessor):
@@ -45,10 +45,15 @@ class OverwriteCells(NbGraderPreprocessor):
         if grade_id is None:
             return cell, resources
 
-        source_cell = self.gradebook.find_source_cell(
-            grade_id,
-            self.notebook_id,
-            self.assignment_id)
+        try:
+            source_cell = self.gradebook.find_source_cell(
+                grade_id,
+                self.notebook_id,
+                self.assignment_id)
+        except MissingEntry:
+            self.log.warning("Cell '{}' does not exist in the database".format(grade_id))
+            del cell.metadata.nbgrader['grade_id']
+            return cell, resources
 
         # check that the cell type hasn't changed
         if cell.cell_type != source_cell.cell_type:
