@@ -192,3 +192,21 @@ class TestOverwriteCells(BaseTestPreprocessor):
 
         assert cell.metadata.nbgrader["checksum"] == compute_checksum(cell)
 
+    def test_nonexistant_grade_id(self, preprocessors, resources):
+        """Are cells not in the database ignored?"""
+        cell = create_grade_cell("", "code", "", 1)
+        cell.metadata.nbgrader['grade'] = False
+        nb = new_notebook()
+        nb.cells.append(cell)
+        nb, resources = preprocessors[0].preprocess(nb, resources)
+        nb, resources = preprocessors[1].preprocess(nb, resources)
+        assert 'grade_id' not in cell.metadata.nbgrader
+
+        cell = create_grade_cell("", "code", "foo", 1)
+        cell.metadata.nbgrader['grade'] = False
+        nb = new_notebook()
+        nb.cells.append(cell)
+        nb, resources = preprocessors[0].preprocess(nb, resources)
+        nb, resources = preprocessors[1].preprocess(nb, resources)
+        assert 'grade_id' not in cell.metadata.nbgrader
+
