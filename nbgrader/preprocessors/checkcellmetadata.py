@@ -46,4 +46,9 @@ class CheckCellMetadata(NbGraderPreprocessor):
                 "Markdown solution cell (index {}) is not marked as a grade cell".format(
                     cell_index))
 
+        if 'nbgrader' in cell.metadata and 'grade_id' in cell.metadata.nbgrader:
+            if (not utils.is_grade(cell) and not utils.is_solution(cell) and not utils.is_locked(cell)):
+                self.log.warn("Removing unused grade_id from cell {}".format(cell_index))
+                del cell.metadata.nbgrader['grade_id']
+
         return cell, resources
