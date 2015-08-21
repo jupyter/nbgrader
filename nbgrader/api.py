@@ -2260,12 +2260,15 @@ class Gradebook(object):
          .subquery()
 
         # full query
+        _scores = func.coalesce(scores.c.score, 0.0)
         students = self.db.query(
             Student.id, Student.first_name, Student.last_name,
-            Student.email, func.coalesce(scores.c.score, 0.0),
+            Student.email, _scores,
             func.sum(GradeCell.max_score)
         ).outerjoin(scores, Student.id == scores.c.id)\
-         .group_by(Student.id)\
+         .group_by(
+             Student.id, Student.first_name, Student.last_name,
+             Student.email, _scores)\
          .all()
 
         keys = ["id", "first_name", "last_name", "email", "score", "max_score"]
@@ -2333,14 +2336,14 @@ class Gradebook(object):
          .subquery()
 
         # full query
+        _manual_grade = func.coalesce(manual_grade.c.needs_manual_grade, False)
+        _failed_tests = func.coalesce(failed_tests.c.failed_tests, False)
         submissions = self.db.query(
             SubmittedNotebook.id, Notebook.name, Student.id,
             func.sum(Grade.score), func.sum(GradeCell.max_score),
             code_scores.c.code_score, code_scores.c.max_code_score,
             written_scores.c.written_score, written_scores.c.max_written_score,
-            func.coalesce(manual_grade.c.needs_manual_grade, False),
-            func.coalesce(failed_tests.c.failed_tests, False),
-            SubmittedNotebook.flagged
+            _manual_grade, _failed_tests, SubmittedNotebook.flagged
         ).join(SubmittedAssignment, Notebook, Assignment, Student, Grade, GradeCell)\
          .outerjoin(code_scores, SubmittedNotebook.id == code_scores.c.id)\
          .outerjoin(written_scores, SubmittedNotebook.id == written_scores.c.id)\
@@ -2353,7 +2356,11 @@ class Gradebook(object):
              SubmittedAssignment.id == SubmittedNotebook.assignment_id,
              SubmittedNotebook.id == Grade.notebook_id,
              GradeCell.id == Grade.cell_id))\
-         .group_by(Student.id)\
+         .group_by(
+             SubmittedNotebook.id, Notebook.name, Student.id,
+             code_scores.c.code_score, code_scores.c.max_code_score,
+             written_scores.c.written_score, written_scores.c.max_written_score,
+             _manual_grade, _failed_tests, SubmittedNotebook.flagged)\
          .all()
 
         keys = [
