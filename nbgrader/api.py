@@ -180,7 +180,7 @@ class GradeCell(Base):
     max_score = Column(Float(), nullable=False)
 
     #: The cell type, either "code" or "markdown"
-    cell_type = Column(Enum("code", "markdown"), nullable=False)
+    cell_type = Column(Enum("code", "markdown", name="grade_cell_type"), nullable=False)
 
     #: The :class:`~nbgrader.api.Notebook` that this grade cell is contained in
     notebook = None
@@ -272,7 +272,7 @@ class SourceCell(Base):
     name = Column(String(128), nullable=False)
 
     #: The cell type, either "code" or "markdown"
-    cell_type = Column(Enum("code", "markdown"), nullable=False)
+    cell_type = Column(Enum("code", "markdown", name="source_cell_type"), nullable=False)
 
     #: Whether the cell is locked (e.g. the source saved in the database should
     #: be used to overwrite the source of students' cells)
