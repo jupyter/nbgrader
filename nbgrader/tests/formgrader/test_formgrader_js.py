@@ -31,14 +31,14 @@ class TestFormgraderJS(BaseTestFormgrade):
     def _save_comment(self, index):
         self._send_keys_to_body(Keys.ESCAPE)
         glyph = self.browser.find_elements_by_css_selector(".comment-saved")[index]
-        WebDriverWait(self.browser, 30).until(lambda browser: glyph.is_displayed())
-        WebDriverWait(self.browser, 30).until(lambda browser: not glyph.is_displayed())
+        WebDriverWait(self.browser, 10).until(lambda browser: glyph.is_displayed())
+        WebDriverWait(self.browser, 10).until(lambda browser: not glyph.is_displayed())
 
     def _save_score(self, index):
         self._send_keys_to_body(Keys.ESCAPE)
         glyph = self.browser.find_elements_by_css_selector(".score-saved")[index]
-        WebDriverWait(self.browser, 30).until(lambda browser: glyph.is_displayed())
-        WebDriverWait(self.browser, 30).until(lambda browser: not glyph.is_displayed())
+        WebDriverWait(self.browser, 10).until(lambda browser: glyph.is_displayed())
+        WebDriverWait(self.browser, 10).until(lambda browser: not glyph.is_displayed())
 
     def _get_needs_manual_grade(self, name):
         return self.browser.execute_script(
@@ -373,12 +373,12 @@ class TestFormgraderJS(BaseTestFormgrade):
         # show the help dialog
         self._click_element(".help")
         self._wait_for_element("help-dialog")
-        WebDriverWait(self.browser, 30).until(EC.visibility_of_element_located((By.CSS_SELECTOR, "#help-dialog button.btn-primary")))
+        WebDriverWait(self.browser, 10).until(EC.visibility_of_element_located((By.CSS_SELECTOR, "#help-dialog button.btn-primary")))
 
         # close it
         self._click_element("#help-dialog button.btn-primary")
         modal_not_present = lambda browser: browser.execute_script("""return $("#help-dialog").length === 0;""")
-        WebDriverWait(self.browser, 30).until(modal_not_present)
+        WebDriverWait(self.browser, 10).until(modal_not_present)
 
     def test_flag(self):
         self._load_formgrade()

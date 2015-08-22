@@ -44,7 +44,7 @@ class BaseTestFormgrade(object):
             element = self.browser.find_element_by_link_text(link_text)
         element.click()
 
-    def _wait_for_element(self, element_id, time=30):
+    def _wait_for_element(self, element_id, time=10):
         return WebDriverWait(self.browser, time).until(
             EC.presence_of_element_located((By.ID, element_id))
         )
@@ -98,7 +98,7 @@ class BaseTestFormgrade(object):
             return true;
             """)
         try:
-            WebDriverWait(self.browser, 30).until(page_loaded)
+            WebDriverWait(self.browser, 10).until(page_loaded)
         except TimeoutException:
             if retries == 0:
                 raise

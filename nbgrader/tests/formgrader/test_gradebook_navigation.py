@@ -2,6 +2,7 @@ import pytest
 
 from nbgrader.api import MissingEntry
 from nbgrader.tests.formgrader.base import BaseTestFormgrade
+from nbgrader.tests.formgrader.manager import HubAuthNotebookServerUserManager
 
 
 @pytest.mark.js
@@ -16,7 +17,7 @@ class TestGradebook(BaseTestFormgrade):
 
     def test_login(self):
         if self.manager.jupyterhub is None:
-            return
+            pytest.skip("JupyterHub is not running")
 
         self._get(self.manager.base_formgrade_url)
         self._wait_for_element("username_input")
@@ -204,3 +205,34 @@ class TestGradebook(BaseTestFormgrade):
                 # check that the image is loaded, and that it has a width
                 assert self.browser.execute_script("return arguments[0].complete", image)
                 assert self.browser.execute_script("return arguments[0].naturalWidth", image) > 0
+
+    def test_logout(self):
+        """Make sure after we've logged out we can't access any of the formgrader pages."""
+        if self.manager.jupyterhub is None:
+            pytest.skip("JupyterHub is not running")
+
+        # logout and wait for the login page to appear
+        self._get("http://localhost:8000/hub")
+        self._wait_for_element("logout")
+        element = self.browser.find_element_by_id("logout")
+        element.click()
+        self._wait_for_element("username_input")
+
+        # try going to a formgrader page
+        self._get(self.manager.base_formgrade_url)
+        self._wait_for_element("username_input")
+        next_url = self.formgrade_url().replace("http://localhost:8000", "")
+        self._check_url("http://localhost:8000/hub/login?next={}".format(next_url))
+
+        # this will fail if we have a cookie for another user and try to access
+        # a live notebook for that user
+        if isinstance(self.manager, HubAuthNotebookServerUserManager):
+            pytest.xfail("https://github.com/jupyter/jupyterhub/pull/290")
+
+        # try going to a live notebook page
+        problem = self.gradebook.find_assignment("Problem Set 1").notebooks[0]
+        submission = sorted(problem.submissions, key=lambda x: x.id)[0]
+        self._get(self.notebook_url("autograded/{}/Problem Set 1/{}.ipynb".format(submission.student.id, problem.name)))
+        self._wait_for_element("username_input")
+        self._check_url("http://localhost:8000/hub/login")
+
