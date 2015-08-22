@@ -18,6 +18,10 @@ class FakeUserAuth(LocalAuthenticator):
             return
         return username
 
+    @staticmethod
+    def system_user_exists(user):
+        return True
+
 
 class FakeUserSpawner(LocalProcessSpawner):
 
