@@ -88,9 +88,6 @@ class HubAuth(BaseAuth):
         users' servers, then this variable can be set, allowing them to access
         the notebook server with the autograded notebooks.""")
 
-    notebook_server_cookie = Unicode('', help="""The value of the cookie used to access the
-        notebook server user's notebook server.""")
-
     def __init__(self, *args, **kwargs):
         super(HubAuth, self).__init__(*args, **kwargs)
 
@@ -209,22 +206,19 @@ class HubAuth(BaseAuth):
         if not self.notebook_server_user:
             return None
 
-        # we've already requested access
+        # request admin access to the user's server
+        response = self._hubapi_request('/hub/api/users/{}/admin-access'.format(self.notebook_server_user), method='POST')
+        if response.status_code != 200:
+            self.log.warn("Failed to gain admin access to user {}'s server (response: {} {})".format(
+                self.notebook_server_user, response.status_code, response.reason))
+            return None
+
+        # access granted!
         cookie_name = '{}-{}'.format(self.hubapi_cookie, self.notebook_server_user)
-        if not self.notebook_server_cookie:
-            # request admin access to the user's server
-            response = self._hubapi_request('/hub/api/users/{}/admin-access'.format(self.notebook_server_user), method='POST')
-            if response.status_code != 200:
-                self.log.warn("Failed to gain admin access to user {}'s server (response: {} {})".format(
-                    self.notebook_server_user, response.status_code, response.reason))
-                return None
-
-            self.log.info("Access to user {}'s server granted".format(self.notebook_server_user))
-            self.notebook_server_cookie = unquote(response.cookies[cookie_name][1:-1])
-
+        notebook_server_cookie = unquote(response.cookies[cookie_name][1:-1])
         cookie = {
             'key': cookie_name,
-            'value': self.notebook_server_cookie,
+            'value': notebook_server_cookie,
             'path': '/user/{}'.format(self.notebook_server_user)
         }
 
