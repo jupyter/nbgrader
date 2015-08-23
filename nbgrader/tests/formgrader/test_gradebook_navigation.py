@@ -1,5 +1,7 @@
 import pytest
 
+from six.moves.urllib.parse import quote
+
 from nbgrader.api import MissingEntry
 from nbgrader.tests.formgrader.base import BaseTestFormgrade
 from nbgrader.tests.formgrader.manager import HubAuthNotebookServerUserManager
@@ -233,7 +235,9 @@ class TestGradebook(BaseTestFormgrade):
         # try going to a live notebook page
         problem = self.gradebook.find_assignment("Problem Set 1").notebooks[0]
         submission = sorted(problem.submissions, key=lambda x: x.id)[0]
-        self._get(self.notebook_url("autograded/{}/Problem Set 1/{}.ipynb".format(submission.student.id, problem.name)))
+        url = self.notebook_url("autograded/{}/Problem Set 1/{}.ipynb".format(submission.student.id, problem.name))
+        self._get(url)
         self._wait_for_element("username_input")
-        self._check_url("http://localhost:8000/hub/login")
+        next_url = quote(url.replace("http://localhost:8000", ""))
+        self._check_url("http://localhost:8000/hub/?next={}".format(next_url))
 

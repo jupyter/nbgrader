@@ -1,9 +1,4 @@
-try:
-    from urllib import unquote # Python 2
-    from urlparse import urljoin
-except ImportError:
-    from urllib.parse import urljoin, unquote # Python 3
-
+from six.moves.urllib.parse import urljoin, unquote
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
