@@ -5,7 +5,7 @@ import json
 from subprocess import check_output
 from flask import request, redirect, abort
 from traitlets import Unicode, Int, List, Bool
-from urllib.parse import unquote
+from six.moves.urllib.parse import unquote
 
 from nbgrader.html.formgrade import blueprint
 from .base import BaseAuth

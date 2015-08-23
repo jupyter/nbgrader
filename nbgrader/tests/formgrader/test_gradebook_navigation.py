@@ -214,6 +214,7 @@ class TestGradebook(BaseTestFormgrade):
         # logout and wait for the login page to appear
         self._get("http://localhost:8000/hub")
         self._wait_for_element("logout")
+        self._wait_for_visibility_of_element("logout")
         element = self.browser.find_element_by_id("logout")
         element.click()
         self._wait_for_element("username_input")

@@ -49,6 +49,11 @@ class BaseTestFormgrade(object):
             EC.presence_of_element_located((By.ID, element_id))
         )
 
+    def _wait_for_visibility_of_element(self, element_id, time=10):
+        return WebDriverWait(self.browser, time).until(
+            EC.visibility_of_element_located((By.ID, element_id))
+        )
+
     def _wait_for_gradebook_page(self, url):
         self._wait_for_element("gradebook")
         self._check_url(url)
