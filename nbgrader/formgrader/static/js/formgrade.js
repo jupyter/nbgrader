@@ -297,6 +297,7 @@ FormGrader.prototype.configureScrolling = function () {
 
 FormGrader.prototype.flag = function () {
     $.ajax({
+        'method': 'POST',
         'url': base_url + '/api/submission/' + submission_id + '/flag',
         'success': function (data, status, xhr) {
             var elem = $("#statusmessage");

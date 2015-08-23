@@ -39,7 +39,7 @@ class TestInvalidGrader(BaseTestFormgrade):
 
     def test_invalid_login(self):
         if self.manager.jupyterhub is None:
-            return
+            pytest.skip("JupyterHub is not running")
 
         self._get(self.manager.base_formgrade_url)
         self._wait_for_element("username_input")
@@ -60,7 +60,7 @@ class TestInvalidGrader(BaseTestFormgrade):
 
     def test_expired_cookie(self):
         if self.manager.jupyterhub is None:
-            return
+            pytest.skip("JupyterHub is not running")
 
         self._get(self.manager.base_formgrade_url)
         self._wait_for_element("username_input")
@@ -72,7 +72,7 @@ class TestInvalidGrader(BaseTestFormgrade):
         self.browser.find_element_by_id("login_submit").click()
 
         # check the url
-        self._wait_for_gradebook_page("assignments")
+        self._wait_for_gradebook_page("")
 
         # get and delete the cookie
         cookie = self.browser.get_cookie("jupyter-hub-token")

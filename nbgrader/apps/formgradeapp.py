@@ -1,15 +1,19 @@
 import os
 import signal
-import sys
 import notebook
+import logging
 
 from nbconvert.exporters import HTMLExporter
 from textwrap import dedent
 from traitlets import Unicode, Integer, Type, Instance
 from traitlets.config.application import catch_config_error
+from tornado import web
+from tornado.ioloop import IOLoop
+from tornado.log import app_log, access_log, gen_log
+from jinja2 import Environment, FileSystemLoader
 
 from .baseapp import NbGrader, nbgrader_aliases, nbgrader_flags
-from ..formgrader import app
+from ..formgrader import handlers, apihandlers
 from ..api import Gradebook
 from ..auth import BaseAuth, NoAuth
 
@@ -64,6 +68,7 @@ class FormgradeApp(NbGrader):
 
     ip = Unicode("localhost", config=True, help="IP address for the server")
     port = Integer(5000, config=True, help="Port for the server")
+
     authenticator_class = Type(NoAuth, klass=BaseAuth, config=True, help="""
         Authenticator used in all formgrade requests.""")
     authenticator_instance = Instance(BaseAuth, config=False)
@@ -100,12 +105,12 @@ class FormgradeApp(NbGrader):
     def _signal_stop(self, sig, frame):
         self.log.critical("received signal %s, stopping", sig)
         self.authenticator_instance.stop(sig)
-        sys.exit(0)
+        self.io_loop.stop()
 
     def build_extra_config(self):
         extra_config = super(FormgradeApp, self).build_extra_config()
         extra_config.Exporter.template_file = 'formgrade'
-        extra_config.Exporter.template_path = [os.path.join(app.root_path, app.template_folder)]
+        extra_config.Exporter.template_path = [handlers.template_path]
         return extra_config
 
     @catch_config_error
@@ -113,28 +118,74 @@ class FormgradeApp(NbGrader):
         super(FormgradeApp, self).initialize(argv)
         self.init_signal()
 
-    def start(self):
-        super(FormgradeApp, self).start()
+    def init_logging(self):
+        # hook up tornado 3's loggers to our app handlers
+        self.log.propagate = False
+        for log in (app_log, access_log, gen_log):
+            # ensure all log statements identify the application they come from
+            log.name = self.log.name
+        logger = logging.getLogger('tornado')
+        logger.propagate = True
+        logger.parent = self.log
+        logger.setLevel(self.log.level)
 
+    def init_tornado_settings(self):
         # Init authenticator.
         self.authenticator_instance = self.authenticator_class(
-            app,
             self.ip,
             self.port,
             self.base_directory,
             parent=self)
-        app.auth = self.authenticator_instance
 
-        # now launch the formgrader
-        app.notebook_dir = self.base_directory
-        app.notebook_dir_format = self.directory_structure
-        app.nbgrader_step = self.autograded_directory
-        app.exporter = HTMLExporter(config=self.config)
-        app.mathjax_url = self.mathjax_url
+        # Init jinja environment
+        jinja_env = Environment(loader=FileSystemLoader([handlers.template_path]))
+
+        # Configure the formgrader settings
+        self.tornado_settings = dict(
+            auth=self.authenticator_instance,
+            notebook_dir=self.base_directory,
+            notebook_dir_format=self.directory_structure,
+            nbgrader_step=self.autograded_directory,
+            exporter=HTMLExporter(config=self.config),
+            mathjax_url=self.mathjax_url,
+            gradebook=Gradebook(self.db_url),
+            jinja2_env=jinja_env,
+            log=self.log
+        )
+
+    def init_handlers(self):
+        h = []
+        h.extend(handlers.default_handlers)
+        h.extend(apihandlers.default_handlers)
+        h.extend([
+            (r"/mathjax/(.*)", web.StaticFileHandler, {'path': os.path.dirname(self.mathjax_url)}),
+            (r"/static/(.*)", web.StaticFileHandler, {'path': handlers.static_path}),
+            (r".*", handlers.Template404)
+        ])
+
+        self.handlers = [self.authenticator_instance.transform_handler(handler) for handler in h]
+
+    def init_tornado_application(self):
+        self.tornado_application = web.Application(self.handlers, **self.tornado_settings)
+
+    def start(self):
+        super(FormgradeApp, self).start()
+
+        self.init_logging()
+        self.init_tornado_settings()
+        self.init_handlers()
+        self.init_tornado_application()
+
+        # Create the application
+        self.io_loop = IOLoop.current()
+        self.tornado_application.listen(self.port, address=self.ip)
 
         url = "http://{:s}:{:d}/".format(self.ip, self.port)
         self.log.info("Form grader running at {}".format(url))
         self.log.info("Use Control-C to stop this server")
 
-        app.gradebook = Gradebook(self.db_url)
-        app.run(host=self.ip, port=self.port, debug=True, use_reloader=False)
+        # register cleanup on both TERM and INT
+        self.init_signal()
+
+        # Start the loop
+        self.io_loop.start()

@@ -5,11 +5,10 @@ import json
 import sys
 
 from subprocess import check_output
-from flask import request, redirect, abort
 from traitlets import Unicode, Int, List, Bool
 from six.moves.urllib.parse import unquote
+from tornado import web
 
-from ..formgrader.formgrade import blueprint
 from .base import BaseAuth
 
 
@@ -114,18 +113,37 @@ class HubAuth(BaseAuth):
             raise Exception('Error while trying to add JupyterHub route. {}: {}'.format(response.status_code, response.text))
         self._base_url = self.hub_base_url + self.remap_url
 
-        # Redirect all formgrade request to the correct API method.
-        self._app.register_blueprint(blueprint, static_url_path=self.remap_url + '/static', url_prefix=self.remap_url, url_defaults={'name': 'hub'})
+    def add_remap_url_prefix(self, url):
+        if url == '/':
+            return self.remap_url + '/?'
+        else:
+            return self.remap_url + url
 
-    def authenticate(self):
+    def transform_handler(self, handler):
+        new_handler = list(handler)
+
+        # transform the handler url
+        url = self.add_remap_url_prefix(handler[0])
+        new_handler[0] = url
+
+        # transform any urls in the arguments
+        if len(handler) > 2:
+            new_args = handler[2].copy()
+            if 'url' in new_args:
+                new_args['url'] = self.add_remap_url_prefix(new_args['url'])
+            new_handler[2] = new_args
+
+        return tuple(new_handler)
+
+    def authenticate(self, request):
         """Authenticate a request.
-        Returns a boolean or flask redirect."""
+        Returns a boolean or redirect."""
 
         # If auth cookie doesn't exist, redirect to the login page with
         # next set to redirect back to the this page.
         if 'jupyter-hub-token' not in request.cookies:
-            return redirect(self.hub_base_url + '/hub/login?next=' + self.remap_url)
-        cookie = request.cookies[self.hubapi_cookie]
+            return self.hub_base_url + '/hub/login?next=' + self.remap_url
+        cookie = request.cookies[self.hubapi_cookie].value
 
         # Check with the Hub to see if the auth cookie is valid.
         response = self._hubapi_request('/hub/api/authorizations/cookie/' + self.hubapi_cookie + '/' + cookie)
@@ -147,32 +165,32 @@ class HubAuth(BaseAuth):
             # ever changes
             else:
                 self.log.warn('Malformed response from the JupyterHub auth API.')
-                abort(500, "Failed to check authorization, malformed response from Hub auth.")
+                raise web.HTTPError(500, "Failed to check authorization, malformed response from Hub auth.")
 
         # this will happen if the JPY_API_TOKEN is incorrect
         elif response.status_code == 403:
             self.log.error("I don't have permission to verify cookies, my auth token may have expired: [%i] %s", response.status_code, response.reason)
-            abort(500, "Permission failure checking authorization, I may need to be restarted")
+            raise web.HTTPError(500, "Permission failure checking authorization, I may need to be restarted")
 
         # this will happen if jupyterhub has been restarted but the user cookie
         # is still the old one, in which case we should reauthenticate
         elif response.status_code == 404:
             self.log.warn("Failed to check authorization, this probably means the user's cookie token is invalid or expired: [%i] %s", response.status_code, response.reason)
-            return redirect(self.hub_base_url + '/hub/login?next=' + self.remap_url)
+            return self.hub_base_url + '/hub/login?next=' + self.remap_url
 
         # generic catch-all for upstream errors
         elif response.status_code >= 500:
             self.log.error("Upstream failure verifying auth token: [%i] %s", response.status_code, response.reason)
-            abort(502, "Failed to check authorization (upstream problem)")
+            raise web.HTTPError(502, "Failed to check authorization (upstream problem)")
 
         # generic catch-all for internal server errors
         elif response.status_code >= 400:
             self.log.warn("Failed to check authorization: [%i] %s", response.status_code, response.reason)
-            abort(500, "Failed to check authorization")
+            raise web.HTTPError(500, "Failed to check authorization")
 
         else:
             # Auth invalid, reauthenticate.
-            return redirect(self.hub_base_url + '/hub/login?next=' + self.remap_url)
+            return self.hub_base_url + '/hub/login?next=' + self.remap_url
 
         return False
 
@@ -219,7 +237,7 @@ class HubAuth(BaseAuth):
         cookie_name = '{}-{}'.format(self.hubapi_cookie, self.notebook_server_user)
         notebook_server_cookie = unquote(response.cookies[cookie_name][1:-1])
         cookie = {
-            'key': cookie_name,
+            'name': cookie_name,
             'value': notebook_server_cookie,
             'path': '/user/{}'.format(self.notebook_server_user)
         }
