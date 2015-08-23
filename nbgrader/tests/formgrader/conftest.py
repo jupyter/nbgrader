@@ -75,8 +75,8 @@ def _formgrader(request, manager_class, gradebook, tempdir):
     capabilities = DesiredCapabilities.PHANTOMJS
     capabilities['loggingPrefs'] = {'browser': 'ALL'}
     browser = webdriver.PhantomJS(desired_capabilities=capabilities)
-    browser.set_page_load_timeout(30)
-    browser.set_script_timeout(30)
+    browser.set_page_load_timeout(10)
+    browser.set_script_timeout(10)
 
     request.cls.manager = man
     request.cls.gradebook = gradebook

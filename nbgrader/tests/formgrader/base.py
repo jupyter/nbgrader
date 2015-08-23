@@ -1,9 +1,4 @@
-try:
-    from urllib import unquote # Python 2
-    from urlparse import urljoin
-except ImportError:
-    from urllib.parse import urljoin, unquote # Python 3
-
+from six.moves.urllib.parse import urljoin, unquote
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
@@ -44,9 +39,14 @@ class BaseTestFormgrade(object):
             element = self.browser.find_element_by_link_text(link_text)
         element.click()
 
-    def _wait_for_element(self, element_id, time=30):
+    def _wait_for_element(self, element_id, time=10):
         return WebDriverWait(self.browser, time).until(
             EC.presence_of_element_located((By.ID, element_id))
+        )
+
+    def _wait_for_visibility_of_element(self, element_id, time=10):
+        return WebDriverWait(self.browser, time).until(
+            EC.visibility_of_element_located((By.ID, element_id))
         )
 
     def _wait_for_gradebook_page(self, url):
@@ -98,7 +98,7 @@ class BaseTestFormgrade(object):
             return true;
             """)
         try:
-            WebDriverWait(self.browser, 30).until(page_loaded)
+            WebDriverWait(self.browser, 10).until(page_loaded)
         except TimeoutException:
             if retries == 0:
                 raise

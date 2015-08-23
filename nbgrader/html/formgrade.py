@@ -3,7 +3,7 @@ import os
 from functools import wraps
 from nbgrader.api import MissingEntry
 from flask import Flask, request, abort, redirect, url_for, render_template, \
-    send_from_directory, Blueprint, g
+    send_from_directory, Blueprint, g, make_response
 
 app = Flask(__name__, static_url_path='')
 blueprint = Blueprint('formgrade', __name__)
@@ -362,6 +362,7 @@ def view_submission(submission_id):
     submission_ids = sorted([x.id for x in submissions])
     ix = submission_ids.index(submission.id)
     server_exists = app.auth.notebook_server_exists()
+    server_cookie = app.auth.get_notebook_server_cookie()
 
     if app.mathjax_url.startswith("http"):
         mathjax_url = app.mathjax_url
@@ -387,7 +388,11 @@ def view_submission(submission_id):
         return render_template('formgrade_404.tpl', resources=resources), 404
 
     output, resources = app.exporter.from_filename(filename, resources=resources)
-    return output
+    response = make_response(output)
+    if server_cookie:
+        response.set_cookie(**server_cookie)
+
+    return response
 
 
 @blueprint.route("/api/grades")

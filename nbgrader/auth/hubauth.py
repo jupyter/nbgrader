@@ -4,7 +4,8 @@ import os
 import json
 from subprocess import check_output
 from flask import request, redirect, abort
-from traitlets import Unicode, Int, List, Bool 
+from traitlets import Unicode, Int, List, Bool
+from six.moves.urllib.parse import unquote
 
 from nbgrader.html.formgrade import blueprint
 from .base import BaseAuth
@@ -43,6 +44,8 @@ class HubAuth(BaseAuth):
     
     generate_hubapi_token = Bool(False, config=True, help="""Use `jupyterhub token` as a default
         for HubAuth.hubapi_token instead of $JPY_API_TOKEN.""")
+    hubapi_token_user = Unicode('', config=True, help="""The user for which to obtain
+        a jupyterhub token. Only used if `generate_hubapi_token` is True.""")
 
     hub_db = Unicode(config=True, help="""Path to JupyterHub's database.  Only
         manditory if `generate_hubapi_token` is True.""")
@@ -52,9 +55,10 @@ class HubAuth(BaseAuth):
         nbgrader will use $JPY_API_TOKEN as the API token.""")
     def _hubapi_token_default(self):
         if self.generate_hubapi_token:
-            return check_output([
-                'jupyterhub', 'token', '--db={}'.format(self.hub_db)
-                ]).decode('utf-8').strip()
+            cmd = ['jupyterhub', 'token', '--db={}'.format(self.hub_db)]
+            if self.hubapi_token_user:
+                cmd.append(self.hubapi_token_user)
+            return check_output(cmd).decode('utf-8').strip()
         else:
             return os.environ.get('JPY_API_TOKEN', '')
 
@@ -77,6 +81,12 @@ class HubAuth(BaseAuth):
     connect_ip = Unicode('', config=True, help="""The formgrader ip address that
         JupyterHub should actually connect to. Useful for when the formgrader is
         running behind a proxy or inside a container.""")
+
+    notebook_server_user = Unicode('', config=True, help="""The user that hosts
+        the autograded notebooks. By default, this is just the user that is logged
+        in, but if that user is an admin user and has the ability to access other
+        users' servers, then this variable can be set, allowing them to access
+        the notebook server with the autograded notebooks.""")
 
     def __init__(self, *args, **kwargs):
         super(HubAuth, self).__init__(*args, **kwargs)
@@ -166,15 +176,63 @@ class HubAuth(BaseAuth):
 
     def notebook_server_exists(self):
         """Does the notebook server exist?"""
+        if self.notebook_server_user:
+            user = self.notebook_server_user
+        else:
+            user = self._user
+
+        # first check if the server is running
+        response = self._hubapi_request('/hub/api/users/{}'.format(user))
+        if response.status_code == 200:
+            user_data = response.json()
+        else:
+            self.log.warn("Could not access information about user {} (response: {} {})".format(
+                user, response.status_code, response.reason))
+            return False
+
+        # start it if it's not running
+        if user_data['server'] is None and user_data['pending'] != 'spawn':
+            # start the server
+            response = self._hubapi_request('/hub/api/users/{}/server'.format(user), method='POST')
+            if response.status_code not in (201, 202):
+                self.log.warn("Could not start server for user {} (response: {} {})".format(
+                    user, response.status_code, response.reason))
+                return False
+
         return True
+
+    def get_notebook_server_cookie(self):
+        # same user, so no need to request admin access
+        if not self.notebook_server_user:
+            return None
+
+        # request admin access to the user's server
+        response = self._hubapi_request('/hub/api/users/{}/admin-access'.format(self.notebook_server_user), method='POST')
+        if response.status_code != 200:
+            self.log.warn("Failed to gain admin access to user {}'s server (response: {} {})".format(
+                self.notebook_server_user, response.status_code, response.reason))
+            return None
+
+        # access granted!
+        cookie_name = '{}-{}'.format(self.hubapi_cookie, self.notebook_server_user)
+        notebook_server_cookie = unquote(response.cookies[cookie_name][1:-1])
+        cookie = {
+            'key': cookie_name,
+            'value': notebook_server_cookie,
+            'path': '/user/{}'.format(self.notebook_server_user)
+        }
+
+        return cookie
 
     def get_notebook_url(self, relative_path):
         """Gets the notebook's url."""
         if self.notebook_url_prefix is not None:
             relative_path = self.notebook_url_prefix + '/' + relative_path
-        return self.hub_base_url + "/user/{}/notebooks/{}".format(
-            self._user,
-            relative_path)
+        if self.notebook_server_user:
+            user = self.notebook_server_user
+        else:
+            user = self._user
+        return "{}/user/{}/notebooks/{}".format(self.hub_base_url, user, relative_path)
 
     def _hubapi_request(self, *args, **kwargs):
         return self._request('hubapi', *args, **kwargs)

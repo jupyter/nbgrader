@@ -26,6 +26,10 @@ class BaseAuth(LoggingConfigurable):
         """Checks for a notebook server."""
         return False
 
+    def get_notebook_server_cookie(self):
+        """Gets a cookie that is needed to access the notebook server."""
+        return None
+
     def get_notebook_url(self, relative_path):
         """Gets the notebook's url."""
         raise NotImplemented

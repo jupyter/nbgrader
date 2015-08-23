@@ -10,7 +10,8 @@ __all__ = [
     "DefaultManager",
     "HubAuthManager",
     "HubAuthTokenManager",
-    "HubAuthCustomUrlManager"
+    "HubAuthCustomUrlManager",
+    "HubAuthNotebookServerUserManager"
 ]
 
 class DefaultManager(object):
@@ -91,6 +92,8 @@ class HubAuthManager(DefaultManager):
         c = get_config()
         c.JupyterHub.authenticator_class = 'nbgrader.tests.formgrader.fakeuser.FakeUserAuth'
         c.JupyterHub.spawner_class = 'nbgrader.tests.formgrader.fakeuser.FakeUserSpawner'
+        c.Authenticator.admin_users = set(['admin'])
+        c.Authenticator.whitelist = set(['foobar', 'baz'])
         c.JupyterHub.log_level = "WARN"
         """
     )
@@ -115,7 +118,7 @@ class HubAuthManager(DefaultManager):
 
     def _start_formgrader(self, configproxy_auth_token='foo'):
         print("Getting token from jupyterhub")
-        token = sp.check_output(['jupyterhub', 'token'], cwd=self.tempdir).decode().strip()
+        token = sp.check_output(['jupyterhub', 'token', 'admin'], cwd=self.tempdir).decode().strip()
         self.env['JPY_API_TOKEN'] = token
         self.env['CONFIGPROXY_AUTH_TOKEN'] = configproxy_auth_token
         super(HubAuthManager, self)._start_formgrader()
@@ -150,6 +153,7 @@ class HubAuthTokenManager(HubAuthManager):
         c.HubAuth.graders = ["foobar"]
         c.HubAuth.notebook_url_prefix = "class_files"
         c.HubAuth.proxy_token = 'foo'
+        c.HubAuth.hubapi_token_user = 'admin'
         c.HubAuth.generate_hubapi_token = True
         c.HubAuth.hub_db = '{tempdir}/jupyterhub.sqlite'
         """
@@ -174,3 +178,33 @@ class HubAuthCustomUrlManager(HubAuthManager):
     )
 
     base_formgrade_url = "http://localhost:8000/hub/grader/"
+
+
+class HubAuthNotebookServerUserManager(HubAuthManager):
+
+    nbgrader_config = dedent(
+        """
+        c = get_config()
+        c.NbGrader.course_id = 'course123ABC'
+        c.FormgradeApp.port = 9000
+        c.FormgradeApp.authenticator_class = "nbgrader.auth.hubauth.HubAuth"
+        c.HubAuth.graders = ["foobar", "quux"]
+        c.HubAuth.notebook_url_prefix = "class_files"
+        c.HubAuth.notebook_server_user = 'quux'
+        """
+    )
+
+    jupyterhub_config = dedent(
+        """
+        c = get_config()
+        c.JupyterHub.authenticator_class = 'nbgrader.tests.formgrader.fakeuser.FakeUserAuth'
+        c.JupyterHub.spawner_class = 'nbgrader.tests.formgrader.fakeuser.FakeUserSpawner'
+        c.JupyterHub.admin_access = True
+        c.JupyterHub.log_level = "WARN"
+        c.Authenticator.admin_users = set(['admin'])
+        c.Authenticator.whitelist = set(['foobar', 'baz', 'quux'])
+        """
+    )
+
+    base_notebook_url = "http://localhost:8000/user/quux/notebooks/class_files/"
+
