@@ -83,12 +83,12 @@ docs/source/user_guide/10_collecting_assignments.rst
 
 # components stuff
 node_modules
-nbgrader/html/static/components/bootstrap/less
-nbgrader/html/static/components/bootstrap/js/*
-!nbgrader/html/static/components/bootstrap/js/bootstrap.js
-!nbgrader/html/static/components/bootstrap/js/bootstrap.min.js
-nbgrader/html/static/components/jquery/jquery-migrate.min.js
-nbgrader/html/static/components/jquery/jquery-migrate.js
-nbgrader/html/static/components/jquery-color/test
-nbgrader/html/static/components/autosize/example
-!nbgrader/html/static/components/autosize/dist
+nbgrader/formgrader/static/components/bootstrap/less
+nbgrader/formgrader/static/components/bootstrap/js/*
+!nbgrader/formgrader/static/components/bootstrap/js/bootstrap.js
+!nbgrader/formgrader/static/components/bootstrap/js/bootstrap.min.js
+nbgrader/formgrader/static/components/jquery/jquery-migrate.min.js
+nbgrader/formgrader/static/components/jquery/jquery-migrate.js
+nbgrader/formgrader/static/components/jquery-color/test
+nbgrader/formgrader/static/components/autosize/example
+!nbgrader/formgrader/static/components/autosize/dist

@@ -7,7 +7,7 @@ from flask import request, redirect, abort
 from traitlets import Unicode, Int, List, Bool
 from six.moves.urllib.parse import unquote
 
-from nbgrader.html.formgrade import blueprint
+from nbgrader.formgrader.formgrade import blueprint
 from .base import BaseAuth
 
 
