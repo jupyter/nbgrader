@@ -1,5 +1,5 @@
 from nbconvert.preprocessors import ClearOutputPreprocessor
-from nbgrader.preprocessors import NbGraderPreprocessor
+from . import NbGraderPreprocessor
 
 class ClearOutput(NbGraderPreprocessor, ClearOutputPreprocessor):
     pass

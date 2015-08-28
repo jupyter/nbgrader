@@ -6,8 +6,8 @@ from stat import (
     S_ISVTX, S_ISGID
 )
 
-from nbgrader.apps.baseapp import TransferApp, transfer_aliases, transfer_flags
-from nbgrader.utils import get_username, check_mode
+from .baseapp import TransferApp, transfer_aliases, transfer_flags
+from ..utils import get_username, check_mode
 
 
 aliases = {}

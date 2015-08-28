@@ -5,7 +5,7 @@ import subprocess as sp
 
 from nbformat.v4 import new_code_cell, new_markdown_cell
 
-from nbgrader.utils import compute_checksum
+from ..utils import compute_checksum
 
 
 def create_code_cell():

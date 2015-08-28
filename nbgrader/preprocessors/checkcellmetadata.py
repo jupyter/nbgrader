@@ -1,7 +1,7 @@
 import re
 
-from nbgrader import utils
-from nbgrader.preprocessors import NbGraderPreprocessor
+from .. import utils
+from . import NbGraderPreprocessor
 
 class CheckCellMetadata(NbGraderPreprocessor):
     """A preprocessor for checking that grade ids are unique."""

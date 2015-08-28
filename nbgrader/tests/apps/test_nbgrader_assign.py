@@ -3,9 +3,9 @@ import pytest
 
 from sqlalchemy.exc import InvalidRequestError
 
-from nbgrader.api import Gradebook
-from nbgrader.tests import run_command
-from nbgrader.tests.apps.base import BaseTestApp
+from ...api import Gradebook
+from .. import run_command
+from .base import BaseTestApp
 
 
 class TestNbGraderAssign(BaseTestApp):

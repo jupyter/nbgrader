@@ -3,7 +3,7 @@ import os
 import subprocess as sp
 
 from textwrap import dedent
-from nbgrader.tests import start_subprocess, copy_coverage_files
+from .. import start_subprocess, copy_coverage_files
 
 # to add a new manager for the tests, you MUST add it to this list of classes
 __all__ = [

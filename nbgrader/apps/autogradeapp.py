@@ -4,11 +4,11 @@ import shutil
 from textwrap import dedent
 from traitlets import List, Bool
 
-from nbgrader.apps.baseapp import BaseNbConvertApp, nbconvert_aliases, nbconvert_flags
-from nbgrader.preprocessors import (
+from .baseapp import BaseNbConvertApp, nbconvert_aliases, nbconvert_flags
+from ..preprocessors import (
     ClearOutput, DeduplicateIds, OverwriteCells, SaveAutoGrades, Execute, LimitOutput)
-from nbgrader.api import Gradebook, MissingEntry
-from nbgrader import utils
+from ..api import Gradebook, MissingEntry
+from .. import utils
 
 aliases = {}
 aliases.update(nbconvert_aliases)

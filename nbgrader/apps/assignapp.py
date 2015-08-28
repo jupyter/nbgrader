@@ -4,10 +4,10 @@ from textwrap import dedent
 
 from traitlets import List, Bool
 
-from nbgrader.api import Gradebook, MissingEntry
-from nbgrader.apps.baseapp import (
+from ..api import Gradebook, MissingEntry
+from .baseapp import (
     BaseNbConvertApp, nbconvert_aliases, nbconvert_flags)
-from nbgrader.preprocessors import (
+from ..preprocessors import (
     IncludeHeaderFooter,
     ClearSolutions,
     LockCells,

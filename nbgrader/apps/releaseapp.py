@@ -9,8 +9,8 @@ from stat import (
 
 from traitlets import Bool
 
-from nbgrader.apps.baseapp import TransferApp, transfer_aliases, transfer_flags
-from nbgrader.utils import self_owned
+from .baseapp import TransferApp, transfer_aliases, transfer_flags
+from ..utils import self_owned
 
 
 aliases = {}

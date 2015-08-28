@@ -1,8 +1,8 @@
 import os
 
-from nbgrader.tests import run_command
-from nbgrader.tests.apps.base import BaseTestApp
-from nbgrader.utils import parse_utc
+from .. import run_command
+from .base import BaseTestApp
+from ...utils import parse_utc
 
 
 class TestNbGraderCollect(BaseTestApp):

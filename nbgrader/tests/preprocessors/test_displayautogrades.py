@@ -5,9 +5,9 @@ import six
 from textwrap import dedent
 from nbformat.v4 import new_output
 
-from nbgrader.preprocessors import DisplayAutoGrades
-from nbgrader.tests.preprocessors.base import BaseTestPreprocessor
-from nbgrader.tests import (
+from ...preprocessors import DisplayAutoGrades
+from .base import BaseTestPreprocessor
+from .. import (
     create_code_cell, create_text_cell)
 
 @pytest.fixture

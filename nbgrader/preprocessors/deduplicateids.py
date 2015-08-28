@@ -1,5 +1,5 @@
-from nbgrader import utils
-from nbgrader.preprocessors import NbGraderPreprocessor
+from .. import utils
+from . import NbGraderPreprocessor
 
 class DeduplicateIds(NbGraderPreprocessor):
     """A preprocessor to overwrite information about grade and solution cells."""

@@ -5,7 +5,8 @@ import json
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, scoped_session
 from sqlalchemy.sql import and_
-from nbgrader import api
+
+from ... import api
 
 
 @pytest.fixture

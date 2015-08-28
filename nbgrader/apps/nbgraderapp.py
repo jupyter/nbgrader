@@ -10,9 +10,9 @@ from traitlets.config.application import catch_config_error
 from traitlets import Bool
 
 import nbgrader
-from nbgrader import preprocessors
-from nbgrader.apps.baseapp import nbgrader_aliases, nbgrader_flags
-from nbgrader.apps import (
+from .. import preprocessors
+from .baseapp import nbgrader_aliases, nbgrader_flags
+from . import (
     NbGrader,
     AssignApp,
     AutogradeApp,

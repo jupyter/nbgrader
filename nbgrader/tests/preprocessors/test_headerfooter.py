@@ -1,8 +1,8 @@
 import pytest
 import os
 
-from nbgrader.preprocessors import IncludeHeaderFooter
-from nbgrader.tests.preprocessors.base import BaseTestPreprocessor
+from ...preprocessors import IncludeHeaderFooter
+from .base import BaseTestPreprocessor
 
 
 @pytest.fixture

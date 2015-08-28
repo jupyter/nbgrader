@@ -6,7 +6,7 @@ import json
 
 from traitlets import Bool
 
-from nbgrader.apps.baseapp import TransferApp, transfer_aliases, transfer_flags
+from .baseapp import TransferApp, transfer_aliases, transfer_flags
 
 
 aliases = {}

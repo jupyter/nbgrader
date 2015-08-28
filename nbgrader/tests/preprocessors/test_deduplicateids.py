@@ -2,9 +2,9 @@ import pytest
 
 from nbformat.v4 import new_notebook
 
-from nbgrader.preprocessors import DeduplicateIds
-from nbgrader.tests.preprocessors.base import BaseTestPreprocessor
-from nbgrader.tests import (
+from ...preprocessors import DeduplicateIds
+from .base import BaseTestPreprocessor
+from .. import (
     create_grade_cell, create_solution_cell, create_locked_cell)
 
 

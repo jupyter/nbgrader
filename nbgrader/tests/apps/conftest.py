@@ -3,7 +3,7 @@ import tempfile
 import shutil
 import pytest
 
-from nbgrader.api import Gradebook
+from ...api import Gradebook
 
 
 @pytest.fixture

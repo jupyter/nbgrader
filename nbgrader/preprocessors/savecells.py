@@ -1,6 +1,6 @@
-from nbgrader import utils
-from nbgrader.api import Gradebook, MissingEntry
-from nbgrader.preprocessors import NbGraderPreprocessor
+from .. import utils
+from ..api import Gradebook, MissingEntry
+from . import NbGraderPreprocessor
 
 class SaveCells(NbGraderPreprocessor):
     """A preprocessor to save information about grade and solution cells."""

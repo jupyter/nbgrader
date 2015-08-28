@@ -1,8 +1,8 @@
 from nbformat.v4.nbbase import validate
 
-from nbgrader import utils
-from nbgrader.api import Gradebook, MissingEntry
-from nbgrader.preprocessors import NbGraderPreprocessor
+from .. import utils
+from ..api import Gradebook, MissingEntry
+from . import NbGraderPreprocessor
 
 class OverwriteCells(NbGraderPreprocessor):
     """A preprocessor to overwrite information about grade and solution cells."""

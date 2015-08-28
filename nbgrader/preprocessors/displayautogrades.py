@@ -4,8 +4,8 @@ import json
 from traitlets import Unicode, Integer, Bool
 from nbconvert.filters import ansi2html, strip_ansi
 
-from nbgrader import utils
-from nbgrader.preprocessors import NbGraderPreprocessor
+from .. import utils
+from . import NbGraderPreprocessor
 
 from textwrap import fill, dedent
 

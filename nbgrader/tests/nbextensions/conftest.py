@@ -13,8 +13,8 @@ from textwrap import dedent
 from nbformat import write as write_nb
 from nbformat.v4 import new_notebook
 
-from nbgrader.tests import run_command, copy_coverage_files
-from nbgrader.api import Gradebook
+from .. import run_command, copy_coverage_files
+from ...api import Gradebook
 
 @pytest.fixture(scope="module")
 def tempdir(request):

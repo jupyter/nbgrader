@@ -5,8 +5,8 @@ import shutil
 
 from nbformat.v4 import new_output
 
-from nbgrader import utils
-from nbgrader.tests import (
+from ... import utils
+from .. import (
     create_code_cell,
     create_grade_cell, create_solution_cell,
     create_grade_and_solution_cell)
