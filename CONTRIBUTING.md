@@ -132,6 +132,6 @@ Modify the [bower.json](bower.json) file in the root of the repository and then 
 
     invoke js
 
-This will download and install the correct versions of the dependencies to [nbgrader/html/static/components](nbgrader/html/static/components).
+This will download and install the correct versions of the dependencies to [nbgrader/formgrader/static/components](nbgrader/formgrader/static/components).
 Usually, JavaScript libraries installed in this way include a lot of extra files that we don't want to commit to the nbgrader repository (e.g. tests, documentation).
 If this is the case, please add these files to the [.gitignore](.gitignore) file so they don't get committed.

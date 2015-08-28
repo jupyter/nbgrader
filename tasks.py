@@ -161,7 +161,7 @@ def js(clean=True):
     run('npm install')
     run('./node_modules/.bin/bower install --config.interactive=false')
     if clean:
-        run('git clean -fdX nbgrader/html/static/components')
+        run('git clean -fdX nbgrader/formgrader/static/components')
 
 
 @task
