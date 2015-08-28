@@ -78,7 +78,7 @@ class FeedbackApp(BaseNbConvertApp):
         if 'template_file' not in self.config.HTMLExporter:
             extra_config.HTMLExporter.template_file = 'feedback'
         if 'template_path' not in self.config.HTMLExporter:
-            template_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../html/templates'))
+            template_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'formgrader', 'templates'))
             extra_config.HTMLExporter.template_path = ['.', template_path]
 
         return extra_config
