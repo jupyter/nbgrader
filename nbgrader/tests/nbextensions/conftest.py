@@ -13,7 +13,7 @@ from textwrap import dedent
 from nbformat import write as write_nb
 from nbformat.v4 import new_notebook
 
-from .. import run_command, copy_coverage_files
+from .. import run_python_module, copy_coverage_files
 from ...api import Gradebook
 
 @pytest.fixture(scope="module")
@@ -102,8 +102,8 @@ def nbserver(request, tempdir, jupyter_config_dir, jupyter_data_dir, exchange, c
     env['JUPYTER_DATA_DIR'] = jupyter_data_dir
 
     nbextension_dir = os.path.join(jupyter_data_dir, "nbextensions")
-    run_command(["nbgrader", "extension", "install", "--nbextensions", nbextension_dir], env=env)
-    run_command(["nbgrader", "extension", "activate"], env=env)
+    run_python_module(["nbgrader", "extension", "install", "--nbextensions", nbextension_dir], env=env)
+    run_python_module(["nbgrader", "extension", "activate"], env=env)
 
     # create nbgrader_config.py file
     with open('nbgrader_config.py', 'w') as fh:
@@ -116,7 +116,7 @@ def nbserver(request, tempdir, jupyter_config_dir, jupyter_data_dir, exchange, c
         ))
 
     nbserver = sp.Popen([
-        "jupyter", "notebook",
+        sys.executable, "-m", "jupyter", "notebook",
         "--no-browser",
         "--port", "9000"], env=env)
 

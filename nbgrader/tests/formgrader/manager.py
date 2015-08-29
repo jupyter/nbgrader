@@ -43,7 +43,9 @@ class DefaultManager(object):
         pass
 
     def _start_formgrader(self):
-        self.formgrader = start_subprocess(["nbgrader", "formgrade"], env=self.env)
+        self.formgrader = start_subprocess(
+            [sys.executable, "-m", "nbgrader", "formgrade"],
+            env=self.env)
         time.sleep(self.startup_wait)
 
     def start(self):
@@ -110,7 +112,7 @@ class HubAuthManager(DefaultManager):
     def _start_jupyterhub(self, configproxy_auth_token='foo'):
         self.env['CONFIGPROXY_AUTH_TOKEN'] = configproxy_auth_token
         self.jupyterhub = start_subprocess(
-            ["jupyterhub"],
+            [sys.executable, "-m", "jupyterhub"],
             cwd=self.tempdir,
             env=self.env)
 
@@ -118,7 +120,9 @@ class HubAuthManager(DefaultManager):
 
     def _start_formgrader(self, configproxy_auth_token='foo'):
         print("Getting token from jupyterhub")
-        token = sp.check_output(['jupyterhub', 'token', 'admin'], cwd=self.tempdir).decode().strip()
+        token = sp.check_output(
+            [sys.executable, '-m', 'jupyterhub', 'token', 'admin'],
+            cwd=self.tempdir).decode().strip()
         self.env['JPY_API_TOKEN'] = token
         self.env['CONFIGPROXY_AUTH_TOKEN'] = configproxy_auth_token
         super(HubAuthManager, self)._start_formgrader()

@@ -9,10 +9,6 @@ import nbgrader.apps
 from textwrap import dedent
 from clear_docs import run, clear_notebooks
 
-# get absolute path to Jupyter to make sure it's the same one as what is installed
-# in the virtualenv
-JUPYTER = os.path.join(os.path.dirname(sys.executable), 'jupyter')
-
 
 def autogen_command_line(root):
     """Generate command line documentation."""
@@ -94,7 +90,7 @@ def build_notebooks(root):
     # hack to convert links to ipynb files to html
     for filename in sorted(glob.glob('user_guide/*.ipynb')):
         run([
-            JUPYTER, 'nbconvert',
+            sys.executable, '-m', 'jupyter', 'nbconvert',
             '--to', 'rst',
             '--execute',
             '--FilesWriter.build_directory=user_guide',
@@ -122,7 +118,7 @@ def build_notebooks(root):
         for filename in sorted(filenames):
             if filename.endswith('.ipynb'):
                 run([
-                    JUPYTER, 'nbconvert',
+                    sys.executable, '-m', 'jupyter', 'nbconvert',
                     '--to', 'html',
                     "--FilesWriter.build_directory='{}'".format(build_directory),
                     os.path.join(dirname, filename)

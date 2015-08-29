@@ -3,7 +3,7 @@ import json
 
 from textwrap import dedent
 
-from .. import run_command
+from .. import run_python_module
 from .base import BaseTestApp
 
 
@@ -11,7 +11,7 @@ class TestNbGraderList(BaseTestApp):
 
     def _release(self, assignment, exchange, cache, course="abc101"):
         self._copy_file("files/test.ipynb", "release/{}/p1.ipynb".format(assignment))
-        run_command([
+        run_python_module([
             "nbgrader", "release", assignment,
             "--course", course,
             "--TransferApp.cache_directory={}".format(cache),
@@ -19,7 +19,7 @@ class TestNbGraderList(BaseTestApp):
         ])
 
     def _fetch(self, assignment, exchange, cache, course="abc101"):
-        run_command([
+        run_python_module([
             "nbgrader", "fetch", assignment,
             "--course", course,
             "--TransferApp.cache_directory={}".format(cache),
@@ -27,7 +27,7 @@ class TestNbGraderList(BaseTestApp):
         ])
 
     def _submit(self, assignment, exchange, cache, course="abc101"):
-        run_command([
+        run_python_module([
             "nbgrader", "submit", assignment,
             "--course", course,
             "--TransferApp.cache_directory={}".format(cache),
@@ -46,11 +46,11 @@ class TestNbGraderList(BaseTestApp):
         if assignment is not None:
             cmd.append(assignment)
 
-        return run_command(cmd, retcode=retcode)
+        return run_python_module(cmd, retcode=retcode)
 
     def test_help(self):
         """Does the help display without error?"""
-        run_command(["nbgrader", "list", "--help-all"])
+        run_python_module(["nbgrader", "list", "--help-all"])
 
     def test_list_released(self, exchange, cache):
         self._release("ps1", exchange, cache)

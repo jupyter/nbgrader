@@ -2,6 +2,7 @@ import os
 import glob
 import shutil
 import subprocess as sp
+import sys
 
 from nbformat.v4 import new_code_cell, new_markdown_cell
 
@@ -117,3 +118,9 @@ def run_command(command, retcode=0, coverage=True, **kwargs):
         copy_coverage_files()
 
     return output
+
+
+def run_python_module(command, **kwargs):
+    full_command = [sys.executable, "-m"]
+    full_command.extend(command)
+    return run_command(full_command, **kwargs)

@@ -1,6 +1,6 @@
 import os
 
-from .. import run_command
+from .. import run_python_module
 from .base import BaseTestApp
 
 
@@ -8,7 +8,7 @@ class TestNbGraderFetch(BaseTestApp):
 
     def _release(self, assignment, exchange):
         self._copy_file("files/test.ipynb", "release/ps1/p1.ipynb")
-        run_command([
+        run_python_module([
             "nbgrader", "release", assignment,
             "--course", "abc101",
             "--TransferApp.exchange_directory={}".format(exchange)
@@ -24,11 +24,11 @@ class TestNbGraderFetch(BaseTestApp):
         if flags is not None:
             cmd.extend(flags)
 
-        run_command(cmd, retcode=retcode)
+        run_python_module(cmd, retcode=retcode)
 
     def test_help(self):
         """Does the help display without error?"""
-        run_command(["nbgrader", "fetch", "--help-all"])
+        run_python_module(["nbgrader", "fetch", "--help-all"])
 
     def test_no_course_id(self, exchange):
         """Does releasing without a course id thrown an error?"""
@@ -37,7 +37,7 @@ class TestNbGraderFetch(BaseTestApp):
             "nbgrader", "fetch", "ps1",
             "--TransferApp.exchange_directory={}".format(exchange)
         ]
-        run_command(cmd, retcode=1)
+        run_python_module(cmd, retcode=1)
 
     def test_fetch(self, exchange):
         self._release("ps1", exchange)

@@ -3,7 +3,7 @@ import datetime
 import time
 
 from ...utils import parse_utc
-from .. import run_command
+from .. import run_python_module
 from .base import BaseTestApp
 
 
@@ -11,13 +11,13 @@ class TestNbGraderSubmit(BaseTestApp):
 
     def _release_and_fetch(self, assignment, exchange, cache):
         self._copy_file("files/test.ipynb", "release/ps1/p1.ipynb")
-        run_command([
+        run_python_module([
             "nbgrader", "release", assignment,
             "--course", "abc101",
             "--TransferApp.cache_directory={}".format(cache),
             "--TransferApp.exchange_directory={}".format(exchange)
         ])
-        run_command([
+        run_python_module([
             "nbgrader", "fetch", assignment,
             "--course", "abc101",
             "--TransferApp.cache_directory={}".format(cache),
@@ -35,11 +35,11 @@ class TestNbGraderSubmit(BaseTestApp):
         if flags is not None:
             cmd.extend(flags)
 
-        run_command(cmd, retcode=retcode)
+        run_python_module(cmd, retcode=retcode)
 
     def test_help(self):
         """Does the help display without error?"""
-        run_command(["nbgrader", "submit", "--help-all"])
+        run_python_module(["nbgrader", "submit", "--help-all"])
 
     def test_no_course_id(self, exchange, cache):
         """Does releasing without a course id thrown an error?"""
@@ -49,7 +49,7 @@ class TestNbGraderSubmit(BaseTestApp):
             "--TransferApp.cache_directory={}".format(cache),
             "--TransferApp.exchange_directory={}".format(exchange)
         ]
-        run_command(cmd, retcode=1)
+        run_python_module(cmd, retcode=1)
 
     def test_submit(self, exchange, cache):
         self._release_and_fetch("ps1", exchange, cache)

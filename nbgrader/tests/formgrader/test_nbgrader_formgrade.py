@@ -1,5 +1,5 @@
-from .. import run_command
+from .. import run_python_module
 
 
 def test_help():
-    run_command(["nbgrader", "formgrade", "--help-all"])
+    run_python_module(["nbgrader", "formgrade", "--help-all"])
