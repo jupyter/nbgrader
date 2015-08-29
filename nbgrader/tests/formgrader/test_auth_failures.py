@@ -1,6 +1,6 @@
 import pytest
 
-from nbgrader.tests.formgrader.base import BaseTestFormgrade
+from .base import BaseTestFormgrade
 
 @pytest.mark.js
 @pytest.mark.usefixtures("bad_formgrader")

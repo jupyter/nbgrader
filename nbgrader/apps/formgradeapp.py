@@ -8,10 +8,10 @@ from textwrap import dedent
 from traitlets import Unicode, Integer, Type, Instance
 from traitlets.config.application import catch_config_error
 
-from nbgrader.apps.baseapp import NbGrader, nbgrader_aliases, nbgrader_flags
-from nbgrader.formgrader import app
-from nbgrader.api import Gradebook
-from nbgrader.auth import BaseAuth, NoAuth
+from .baseapp import NbGrader, nbgrader_aliases, nbgrader_flags
+from ..formgrader import app
+from ..api import Gradebook
+from ..auth import BaseAuth, NoAuth
 
 aliases = {}
 aliases.update(nbgrader_aliases)

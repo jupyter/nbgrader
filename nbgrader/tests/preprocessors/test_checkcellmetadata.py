@@ -1,7 +1,7 @@
 import pytest
-from nbgrader.preprocessors import CheckCellMetadata
-from nbgrader.tests.preprocessors.base import BaseTestPreprocessor
-from nbgrader.tests import create_grade_cell, create_solution_cell
+from ...preprocessors import CheckCellMetadata
+from .base import BaseTestPreprocessor
+from .. import create_grade_cell, create_solution_cell
 
 @pytest.fixture
 def preprocessor():

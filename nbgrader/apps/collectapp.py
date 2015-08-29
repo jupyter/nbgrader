@@ -5,8 +5,8 @@ from collections import defaultdict
 
 from traitlets import Bool
 
-from nbgrader.apps.baseapp import TransferApp, transfer_aliases, transfer_flags
-from nbgrader.utils import check_mode, parse_utc
+from .baseapp import TransferApp, transfer_aliases, transfer_flags
+from ..utils import check_mode, parse_utc
 
 
 aliases = {}

@@ -1,7 +1,7 @@
 from nbconvert.preprocessors import ExecutePreprocessor
 from traitlets import Bool, List
 
-from nbgrader.preprocessors import NbGraderPreprocessor
+from . import NbGraderPreprocessor
 
 class Execute(NbGraderPreprocessor, ExecutePreprocessor):
 

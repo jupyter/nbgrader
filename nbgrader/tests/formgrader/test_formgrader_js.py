@@ -5,7 +5,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 
-from nbgrader.tests.formgrader.base import BaseTestFormgrade
+from .base import BaseTestFormgrade
 
 
 @pytest.mark.js

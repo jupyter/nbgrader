@@ -1,9 +1,10 @@
 import json
 import os
 from functools import wraps
-from nbgrader.api import MissingEntry
 from flask import Flask, request, abort, redirect, url_for, render_template, \
     send_from_directory, Blueprint, g, make_response
+
+from ..api import MissingEntry
 
 app = Flask(__name__, static_url_path='')
 blueprint = Blueprint('formgrade', __name__)

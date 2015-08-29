@@ -1,5 +1,5 @@
-from nbgrader import utils
-from nbgrader.preprocessors import NbGraderPreprocessor
+from .. import utils
+from . import NbGraderPreprocessor
 
 class ComputeChecksums(NbGraderPreprocessor):
     """A preprocessor to compute checksums of grade cells."""

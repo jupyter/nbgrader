@@ -1,7 +1,7 @@
 from traitlets import Bool
 
-from nbgrader import utils
-from nbgrader.preprocessors import NbGraderPreprocessor
+from .. import utils
+from . import NbGraderPreprocessor
 
 class LockCells(NbGraderPreprocessor):
     """A preprocessor for making cells undeletable."""

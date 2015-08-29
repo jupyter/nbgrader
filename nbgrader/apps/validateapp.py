@@ -1,7 +1,7 @@
 from traitlets import Unicode, List, Bool
 from nbconvert.nbconvertapp import NbConvertApp, DottedOrNone
-from nbgrader.preprocessors import DisplayAutoGrades, Execute, ClearOutput
-from nbgrader.apps.baseapp import NbGrader
+from ..preprocessors import DisplayAutoGrades, Execute, ClearOutput
+from .baseapp import NbGrader
 
 aliases = {}
 flags = {

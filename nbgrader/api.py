@@ -1,6 +1,6 @@
 from __future__ import division
 
-from nbgrader import utils
+from . import utils
 
 from sqlalchemy import (create_engine, ForeignKey, Column, String, Text,
     DateTime, Interval, Float, Enum, UniqueConstraint, Boolean)

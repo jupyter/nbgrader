@@ -2,11 +2,11 @@ import pytest
 
 from nbformat.v4 import new_notebook
 
-from nbgrader.preprocessors import SaveCells, OverwriteCells
-from nbgrader.api import Gradebook
-from nbgrader.utils import compute_checksum
-from nbgrader.tests.preprocessors.base import BaseTestPreprocessor
-from nbgrader.tests import (
+from ...preprocessors import SaveCells, OverwriteCells
+from ...api import Gradebook
+from ...utils import compute_checksum
+from .base import BaseTestPreprocessor
+from .. import (
     create_grade_cell, create_solution_cell, create_grade_and_solution_cell,
     create_locked_cell)
 

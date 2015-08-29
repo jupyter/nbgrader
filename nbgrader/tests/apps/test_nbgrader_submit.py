@@ -2,9 +2,9 @@ import os
 import datetime
 import time
 
-from nbgrader.utils import parse_utc
-from nbgrader.tests import run_command
-from nbgrader.tests.apps.base import BaseTestApp
+from ...utils import parse_utc
+from .. import run_command
+from .base import BaseTestApp
 
 
 class TestNbGraderSubmit(BaseTestApp):

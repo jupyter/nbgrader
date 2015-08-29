@@ -1,9 +1,9 @@
 import pytest
 
 from textwrap import dedent
-from nbgrader.preprocessors import ClearSolutions
-from nbgrader.tests.preprocessors.base import BaseTestPreprocessor
-from nbgrader.tests import create_code_cell, create_text_cell
+from ...preprocessors import ClearSolutions
+from .base import BaseTestPreprocessor
+from .. import create_code_cell, create_text_cell
 
 
 @pytest.fixture

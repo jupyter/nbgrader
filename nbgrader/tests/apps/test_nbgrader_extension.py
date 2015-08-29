@@ -3,8 +3,8 @@ import os
 import json
 import six
 
-from nbgrader.tests import run_command
-from nbgrader.tests.apps.base import BaseTestApp
+from .. import run_command
+from .base import BaseTestApp
 
 
 class TestNbGraderExtension(BaseTestApp):

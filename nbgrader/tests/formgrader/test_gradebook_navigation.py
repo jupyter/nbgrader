@@ -2,9 +2,9 @@ import pytest
 
 from six.moves.urllib.parse import quote
 
-from nbgrader.api import MissingEntry
-from nbgrader.tests.formgrader.base import BaseTestFormgrade
-from nbgrader.tests.formgrader.manager import HubAuthNotebookServerUserManager
+from ...api import MissingEntry
+from .base import BaseTestFormgrade
+from .manager import HubAuthNotebookServerUserManager
 
 
 @pytest.mark.js

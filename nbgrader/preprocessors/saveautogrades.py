@@ -1,6 +1,6 @@
-from nbgrader import utils
-from nbgrader.api import Gradebook
-from nbgrader.preprocessors import NbGraderPreprocessor
+from .. import utils
+from ..api import Gradebook
+from . import NbGraderPreprocessor
 
 
 class SaveAutoGrades(NbGraderPreprocessor):

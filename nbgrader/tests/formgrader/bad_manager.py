@@ -1,4 +1,4 @@
-from nbgrader.tests.formgrader.manager import HubAuthManager
+from .manager import HubAuthManager
 
 __all__ = [
     'BadHubAuthManager'

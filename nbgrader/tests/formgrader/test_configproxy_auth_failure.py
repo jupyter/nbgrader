@@ -1,7 +1,7 @@
 import pytest
 
-from nbgrader.tests.formgrader.manager import HubAuthManager
-from nbgrader.tests.formgrader.conftest import jupyterhub, minversion
+from .manager import HubAuthManager
+from .conftest import jupyterhub, minversion
 
 
 @jupyterhub

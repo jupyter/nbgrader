@@ -1,4 +1,4 @@
-from nbgrader.tests import run_command
+from .. import run_command
 
 
 def test_help():

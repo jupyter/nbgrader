@@ -12,7 +12,7 @@ from traitlets.config.application import catch_config_error
 from traitlets.config.application import Application
 from traitlets.config.loader import JSONFileConfigLoader, ConfigFileNotFound
 
-from nbgrader.apps.baseapp import NbGrader, format_excepthook
+from .baseapp import NbGrader, format_excepthook
 
 install_flags = {}
 install_flags.update(flags)

@@ -23,7 +23,7 @@ from traitlets import Unicode, List, Bool, Instance, Dict, Integer
 from traitlets.config.application import catch_config_error
 from traitlets.config.loader import Config
 
-from nbgrader.utils import check_directory, parse_utc, find_all_files
+from ..utils import check_directory, parse_utc, find_all_files
 
 
 nbgrader_aliases = {

@@ -1,9 +1,9 @@
 import pytest
 
 from datetime import datetime
-from nbgrader import api
-from nbgrader import utils
-from nbgrader.api import InvalidEntry, MissingEntry
+from ... import api
+from ... import utils
+from ...api import InvalidEntry, MissingEntry
 
 @pytest.fixture
 def gradebook(request):

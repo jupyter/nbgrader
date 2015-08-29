@@ -2,7 +2,7 @@ from nbformat import read as read_nb
 from nbformat import current_nbformat
 from traitlets import Unicode
 
-from nbgrader.preprocessors import NbGraderPreprocessor
+from . import NbGraderPreprocessor
 
 
 class IncludeHeaderFooter(NbGraderPreprocessor):

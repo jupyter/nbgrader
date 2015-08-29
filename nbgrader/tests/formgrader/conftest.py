@@ -5,12 +5,12 @@ import tempfile
 import sys
 import logging
 
-from nbgrader.api import Gradebook
 from selenium import webdriver
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 
-from nbgrader.tests import run_command
-from nbgrader.tests.formgrader import manager, bad_manager
+from ...api import Gradebook
+from .. import run_command
+from . import manager, bad_manager
 
 
 @pytest.fixture(scope="session")

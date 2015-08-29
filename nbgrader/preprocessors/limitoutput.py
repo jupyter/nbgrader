@@ -1,4 +1,4 @@
-from nbgrader.preprocessors import NbGraderPreprocessor
+from . import NbGraderPreprocessor
 
 from traitlets import Integer
 

@@ -4,8 +4,8 @@ from traitlets import List
 from nbconvert.exporters import HTMLExporter
 from nbconvert.preprocessors import CSSHTMLHeaderPreprocessor
 
-from nbgrader.apps.baseapp import BaseNbConvertApp, nbconvert_aliases, nbconvert_flags
-from nbgrader.preprocessors import GetGrades
+from .baseapp import BaseNbConvertApp, nbconvert_aliases, nbconvert_flags
+from ..preprocessors import GetGrades
 
 aliases = {}
 aliases.update(nbconvert_aliases)

@@ -1,7 +1,7 @@
 from traitlets import Unicode
 
-from nbgrader import utils
-from nbgrader.preprocessors import NbGraderPreprocessor
+from .. import utils
+from . import NbGraderPreprocessor
 
 
 class ClearSolutions(NbGraderPreprocessor):

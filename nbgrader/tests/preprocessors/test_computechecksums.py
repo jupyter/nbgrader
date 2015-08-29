@@ -1,9 +1,9 @@
 import pytest
 
-from nbgrader.preprocessors import ComputeChecksums
-from nbgrader.utils import compute_checksum
-from nbgrader.tests.preprocessors.base import BaseTestPreprocessor
-from nbgrader.tests import (
+from ...preprocessors import ComputeChecksums
+from ...utils import compute_checksum
+from .base import BaseTestPreprocessor
+from .. import (
     create_code_cell, create_text_cell,
     create_grade_cell, create_solution_cell, create_locked_cell)
 

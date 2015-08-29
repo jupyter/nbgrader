@@ -1,7 +1,7 @@
 import os
 
-from nbgrader.apps.baseapp import TransferApp, transfer_aliases, transfer_flags
-from nbgrader.utils import check_mode
+from .baseapp import TransferApp, transfer_aliases, transfer_flags
+from ..utils import check_mode
 
 
 aliases = {}
