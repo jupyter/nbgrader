@@ -32,7 +32,8 @@ nbgrader_aliases = {
     'assignment': 'NbGrader.assignment_id',
     'notebook': 'NbGrader.notebook_id',
     'db': 'NbGrader.db_url',
-    'course': 'NbGrader.course_id'
+    'course': 'NbGrader.course_id',
+    'course-dir': 'NbGrader.course_directory'
 }
 nbgrader_flags = {
     'debug': (
@@ -197,6 +198,21 @@ class NbGrader(JupyterApp):
         )
     )
 
+    course_directory = Unicode(
+        '',
+        config=True,
+        help=dedent(
+            """
+            The root directory for the course files (that includes the `source`,
+            `release`, `submitted`, `autograded`, etc. directories). Defaults to
+            the current working directory.
+            """
+        )
+    )
+
+    def _course_directory_default(self):
+        return os.getcwd()
+
     ignore = List(
         [
             ".ipynb_checkpoints",
@@ -296,10 +312,14 @@ class NbGrader(JupyterApp):
         super(NbGrader, self).initialize(argv)
 
     def _format_path(self, nbgrader_step, student_id, assignment_id):
-        return self.directory_structure.format(
-            nbgrader_step=nbgrader_step,
-            student_id=student_id,
-            assignment_id=assignment_id)
+        return os.path.join(
+            self.course_directory,
+            self.directory_structure.format(
+                nbgrader_step=nbgrader_step,
+                student_id=student_id,
+                assignment_id=assignment_id
+            )
+        )
 
 
 # These are the aliases and flags for nbgrader apps that inherit only from
@@ -503,7 +523,7 @@ class BaseNbConvertApp(NbGrader, NbConvertApp):
 
         m = re.match(regexp, notebook_filename)
         if m is None:
-            raise RuntimeError("Could not match '%s' with regexp '%s'", notebook_filename, regexp)
+            self.fail("Could not match '%s' with regexp '%s'", notebook_filename, regexp)
         gd = m.groupdict()
 
         self.log.debug("Student: %s", gd['student_id'])
@@ -622,7 +642,7 @@ class BaseNbConvertApp(NbGrader, NbConvertApp):
             regexp = self._format_source("(?P<assignment_id>.*)", "(?P<student_id>.*)")
             m = re.match(regexp, assignment)
             if m is None:
-                raise RuntimeError("Could not match '%s' with regexp '%s'", assignment, regexp)
+                self.fail("Could not match '%s' with regexp '%s'", assignment, regexp)
             gd = m.groupdict()
 
             try:
