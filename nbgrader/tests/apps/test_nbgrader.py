@@ -1,6 +1,6 @@
 import os
 
-from .. import run_command
+from .. import run_python_module, run_command
 from .base import BaseTestApp
 
 
@@ -8,17 +8,23 @@ class TestNbGrader(BaseTestApp):
 
     def test_help(self):
         """Does the help display without error?"""
-        run_command(["nbgrader", "--help-all"])
+        run_python_module(["nbgrader", "--help-all"])
 
     def test_no_subapp(self):
         """Is the help displayed when no subapp is given?"""
-        run_command(["nbgrader"], retcode=1)
+        run_python_module(["nbgrader"], retcode=1)
 
     def test_generate_config(self):
         """Is the config file properly generated?"""
 
-        run_command(["nbgrader", "--generate-config"])
+        run_python_module(["nbgrader", "--generate-config"])
         assert os.path.isfile("nbgrader_config.py")
 
         # does it fail if it already exists?
-        run_command(["nbgrader", "--generate-config"], retcode=1)
+        run_python_module(["nbgrader", "--generate-config"], retcode=1)
+
+    def test_check_version(self):
+        """Is the version the same regardless of how we run nbgrader?"""
+        out1 = run_command(["nbgrader", "--version"])
+        out2 = run_python_module(["nbgrader", "--version"])
+        assert out1 == out2

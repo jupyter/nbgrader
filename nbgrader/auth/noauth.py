@@ -34,11 +34,6 @@ class NoAuth(BaseAuth):
 
         # first launch a notebook server
         if self.start_nbserver:
-            if sys.version_info[0] == 2:
-                program = "python2"
-            elif sys.version_info[0] == 3:
-                program = "python3"
-
             notebookapp = os.path.normpath(os.path.join(
                 os.path.dirname(__file__), "..", "apps", "notebookapp.py"))
 
@@ -53,7 +48,7 @@ class NoAuth(BaseAuth):
             self._notebook_server_port = str(self.nbserver_port)
             self._notebook_server = sp.Popen(
                 [
-                    program, notebookapp,
+                    sys.executable, notebookapp,
                     "--ip", self._notebook_server_ip,
                     "--port", self._notebook_server_port
                 ],

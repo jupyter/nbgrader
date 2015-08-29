@@ -6,7 +6,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException, NoSuchElementException
 
-from .. import run_command
+from .. import run_python_module
 
 
 def _wait(browser):
@@ -96,8 +96,8 @@ def test_show_assignments_list(browser, class_files):
     _wait(browser).until(EC.visibility_of_element_located((By.CSS_SELECTOR, "#submitted_assignments_list_placeholder")))
 
     # release an assignment
-    run_command(["nbgrader", "assign", "Problem Set 1"])
-    run_command(["nbgrader", "release", "Problem Set 1", "--course", "abc101"])
+    run_python_module(["nbgrader", "assign", "Problem Set 1"])
+    run_python_module(["nbgrader", "release", "Problem Set 1", "--course", "abc101"])
 
     # click the refresh button
     browser.find_element_by_css_selector("#refresh_assignments_list").click()
@@ -115,8 +115,8 @@ def test_multiple_released_assignments(browser, class_files):
     _load_assignments_list(browser)
 
     # release another assignment
-    run_command(["nbgrader", "assign", "ps1"])
-    run_command(["nbgrader", "release", "ps1", "--course", "xyz 200"])
+    run_python_module(["nbgrader", "assign", "ps1"])
+    run_python_module(["nbgrader", "release", "ps1", "--course", "xyz 200"])
 
     # click the refresh button
     browser.find_element_by_css_selector("#refresh_assignments_list").click()

@@ -3,6 +3,7 @@
 import os
 import json
 import subprocess as sp
+import sys
 
 from tornado import web
 
@@ -20,7 +21,7 @@ class AssignmentList(LoggingConfigurable):
         return self.parent.notebook_dir
 
     def list_released_assignments(self):
-        p = sp.Popen(["nbgrader", "list", "--json"], stdout=sp.PIPE, stderr=sp.PIPE, cwd=self.assignment_dir)
+        p = sp.Popen([sys.executable, "-m", "nbgrader", "list", "--json"], stdout=sp.PIPE, stderr=sp.PIPE, cwd=self.assignment_dir)
         output, _ = p.communicate()
         retcode = p.poll()
         if retcode != 0:
@@ -34,7 +35,7 @@ class AssignmentList(LoggingConfigurable):
         return sorted(assignments, key=lambda x: (x['course_id'], x['assignment_id']))
 
     def list_submitted_assignments(self):
-        p = sp.Popen(["nbgrader", "list", "--json", "--cached"], stdout=sp.PIPE, stderr=sp.PIPE, cwd=self.assignment_dir)
+        p = sp.Popen([sys.executable, "-m", "nbgrader", "list", "--json", "--cached"], stdout=sp.PIPE, stderr=sp.PIPE, cwd=self.assignment_dir)
         output, _ = p.communicate()
         retcode = p.poll()
         if retcode != 0:
@@ -62,7 +63,7 @@ class AssignmentList(LoggingConfigurable):
 
     def submit_assignment(self, course_id, assignment_id):
         p = sp.Popen([
-            "nbgrader", "submit",
+            sys.executable, "-m", "nbgrader", "submit",
             "--course", course_id,
             assignment_id
         ], stdout=sp.PIPE, stderr=sp.STDOUT, cwd=self.assignment_dir)
@@ -74,7 +75,7 @@ class AssignmentList(LoggingConfigurable):
 
     def validate_notebook(self, assignment_id, notebook_id):
         p = sp.Popen([
-            "nbgrader", "validate", "--json",
+            sys.executable, "-m", "nbgrader", "validate", "--json",
             os.path.join(assignment_id, "{}.ipynb".format(notebook_id))
         ], stdout=sp.PIPE, stderr=sp.PIPE, cwd=self.assignment_dir)
         output, _ = p.communicate()

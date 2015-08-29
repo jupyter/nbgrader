@@ -2,6 +2,8 @@
 import requests
 import os
 import json
+import sys
+
 from subprocess import check_output
 from flask import request, redirect, abort
 from traitlets import Unicode, Int, List, Bool
@@ -55,7 +57,7 @@ class HubAuth(BaseAuth):
         nbgrader will use $JPY_API_TOKEN as the API token.""")
     def _hubapi_token_default(self):
         if self.generate_hubapi_token:
-            cmd = ['jupyterhub', 'token', '--db={}'.format(self.hub_db)]
+            cmd = [sys.executable, '-m', 'jupyterhub', 'token', '--db={}'.format(self.hub_db)]
             if self.hubapi_token_user:
                 cmd.append(self.hubapi_token_user)
             return check_output(cmd).decode('utf-8').strip()
