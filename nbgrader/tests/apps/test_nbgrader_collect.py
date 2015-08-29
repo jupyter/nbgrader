@@ -64,8 +64,7 @@ class TestNbGraderCollect(BaseTestApp):
         # try to collect when there's nothing to collect
         self._collect("ps1", exchange)
         root = os.path.join("submitted/{}/ps1".format(os.environ['USER']))
-        assert os.path.isdir("submitted")
-        assert not os.path.isdir(root)
+        assert not os.path.isdir("submitted")
 
         # submit something
         self._submit("ps1", exchange)

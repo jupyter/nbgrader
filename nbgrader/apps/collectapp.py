@@ -104,19 +104,16 @@ class CollectApp(TransferApp):
         self.src_records = [self._sort_by_timestamp(v)[0] for v in usergroups.values()]
 
     def init_dest(self):
-        submit_dir = os.path.abspath(self.submitted_directory)
-        if not os.path.isdir(submit_dir):
-            os.mkdir(submit_dir)
+        pass
 
     def copy_files(self):
         for rec in self.src_records:
             student_id = rec['username']
             src_path = os.path.join(self.inbound_path, rec['filename'])
-            dest_path = os.path.abspath(self.directory_structure.format(
-                nbgrader_step=self.submitted_directory,
-                student_id=student_id,
-                assignment_id=self.assignment_id
-            ))
+            dest_path = self._format_path(self.submitted_directory, student_id, self.assignment_id)
+            if not os.path.exists(os.path.dirname(dest_path)):
+                os.makedirs(os.path.dirname(dest_path))
+
             copy = False
             updating = False
             if os.path.isdir(dest_path):
@@ -127,6 +124,7 @@ class CollectApp(TransferApp):
                     updating = True
             else:
                 copy = True
+
             if copy:
                 if updating:
                     self.log.info("Updating submission: {} {}".format(student_id, self.assignment_id))

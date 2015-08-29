@@ -295,6 +295,12 @@ class NbGrader(JupyterApp):
         self.update_config(self.build_extra_config())
         super(NbGrader, self).initialize(argv)
 
+    def _format_path(self, nbgrader_step, student_id, assignment_id):
+        return self.directory_structure.format(
+            nbgrader_step=nbgrader_step,
+            student_id=student_id,
+            assignment_id=assignment_id)
+
 
 # These are the aliases and flags for nbgrader apps that inherit only from
 # TransferApp
@@ -458,18 +464,10 @@ class BaseNbConvertApp(NbGrader, NbConvertApp):
         raise NotImplementedError
 
     def _format_source(self, assignment_id, student_id):
-        return self.directory_structure.format(
-            nbgrader_step=self._input_directory,
-            student_id=student_id,
-            assignment_id=assignment_id
-        )
+        return self._format_path(self._input_directory, student_id, assignment_id)
 
     def _format_dest(self, assignment_id, student_id):
-        return self.directory_structure.format(
-            nbgrader_step=self._output_directory,
-            student_id=student_id,
-            assignment_id=assignment_id
-        )
+        return self._format_path(self._output_directory, student_id, assignment_id)
 
     def build_extra_config(self):
         extra_config = super(BaseNbConvertApp, self).build_extra_config()

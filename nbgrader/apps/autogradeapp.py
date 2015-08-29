@@ -137,10 +137,7 @@ class AutogradeApp(BaseNbConvertApp):
         # copy files over from the source directory
         self.log.info("Overwriting files with master versions from the source directory")
         dest_path = self._format_dest(assignment_id, student_id)
-        source_path = self.directory_structure.format(
-            nbgrader_step=self.source_directory,
-            student_id='.',
-            assignment_id=assignment_id)
+        source_path = self._format_path(self.source_directory, '.', assignment_id)
         source_files = utils.find_all_files(source_path, self.ignore + ["*.ipynb"])
 
         # copy them to the build directory
