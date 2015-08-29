@@ -1,6 +1,7 @@
 import time
 import os
 import subprocess as sp
+import sys
 
 from textwrap import dedent
 from .. import start_subprocess, copy_coverage_files

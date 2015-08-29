@@ -5,6 +5,7 @@ import shutil
 import subprocess as sp
 import logging
 import time
+import sys
 
 from selenium import webdriver
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
