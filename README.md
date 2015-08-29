@@ -49,8 +49,8 @@ system and command line tools:
 
 ### The nbgrader toolbar extension for Jupyter notebook
 You may then install the nbgrader toolbar extension for
-Jupyter notebook. This will install both the "create assignment" and
-"assignment list" extensions for the notebook:
+Jupyter notebook. This will install both the "create assignment" toolbar extension and
+"assignment list" notebook server extension:
 
     nbgrader extension install
 
