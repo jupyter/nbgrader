@@ -17,6 +17,8 @@ assignment and grading tasks using the familiar Jupyter notebook interface.
 
 ![nbgrader toolbar extension for Jupyter notebooks](docs/source/user_guide/images/assignment_toolbar.png "nbgrader toolbar extension for Jupyter notebooks")
 
+![Creating assignment](docs/source/user_guide/images/creating_assignment.gif "Creating assignment")
+
 ### Student toolbar extension for Jupyter notebooks
 Using the toolbar extension, students may conveniently view, fetch, submit, and validate their assignments.
 
@@ -26,8 +28,9 @@ Using the toolbar extension, students may conveniently view, fetch, submit, and 
 TODO Example demonstrating formgrader is coming soon.
 
 ### The command line tools of nbgrader
-Command lines tools offer an efficient way for the instructor to generate, assign,
-release, collect, and grade notebooks.
+[Command line tools](https://nbgrader.readthedocs.org/en/stable/command_line_tools/index.html)
+offer an efficient way for the instructor to generate, assign, release, collect,
+and grade notebooks.
 
 * `nbgrader assign`: create a student version of a notebook
 * `nbgrader release`: release a notebook to students
