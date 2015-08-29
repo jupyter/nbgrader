@@ -2,6 +2,7 @@ import os
 import json
 
 from textwrap import dedent
+from os.path import join
 
 from .. import run_python_module
 from .base import BaseTestApp
@@ -9,8 +10,8 @@ from .base import BaseTestApp
 
 class TestNbGraderList(BaseTestApp):
 
-    def _release(self, assignment, exchange, cache, course="abc101"):
-        self._copy_file("files/test.ipynb", "release/{}/p1.ipynb".format(assignment))
+    def _release(self, assignment, exchange, cache, course_dir, course="abc101"):
+        self._copy_file(join("files", "test.ipynb"), join(course_dir, "release", assignment, "p1.ipynb"))
         run_python_module([
             "nbgrader", "release", assignment,
             "--course", course,
@@ -52,9 +53,9 @@ class TestNbGraderList(BaseTestApp):
         """Does the help display without error?"""
         run_python_module(["nbgrader", "list", "--help-all"])
 
-    def test_list_released(self, exchange, cache):
-        self._release("ps1", exchange, cache)
-        self._release("ps1", exchange, cache, course="xyz200")
+    def test_list_released(self, exchange, cache, course_dir):
+        self._release("ps1", exchange, cache, course_dir)
+        self._release("ps1", exchange, cache, course_dir, course="xyz200")
         assert self._list(exchange, cache, "ps1", flags=["--course", "abc101"]) == dedent(
             """
             [ListApp | INFO] Released assignments:
@@ -75,8 +76,8 @@ class TestNbGraderList(BaseTestApp):
             """
         ).lstrip()
 
-        self._release("ps2", exchange, cache)
-        self._release("ps2", exchange, cache, course="xyz200")
+        self._release("ps2", exchange, cache, course_dir)
+        self._release("ps2", exchange, cache, course_dir, course="xyz200")
         assert self._list(exchange, cache, "ps2") == dedent(
             """
             [ListApp | INFO] Released assignments:
@@ -95,12 +96,10 @@ class TestNbGraderList(BaseTestApp):
             """
         ).lstrip()
 
-    def test_list_fetched(self, exchange, cache):
-        self._release("ps1", exchange, cache)
-        self._release("ps2", exchange, cache)
-        print(os.listdir('.'))
+    def test_list_fetched(self, exchange, cache, course_dir):
+        self._release("ps1", exchange, cache, course_dir)
+        self._release("ps2", exchange, cache, course_dir)
         self._fetch("ps1", exchange, cache)
-        print(os.listdir('.'))
         assert self._list(exchange, cache) == dedent(
             """
             [ListApp | INFO] Released assignments:
@@ -109,9 +108,9 @@ class TestNbGraderList(BaseTestApp):
             """
         ).lstrip()
 
-    def test_list_remove_outbound(self, exchange, cache):
-        self._release("ps1", exchange, cache)
-        self._release("ps2", exchange, cache)
+    def test_list_remove_outbound(self, exchange, cache, course_dir):
+        self._release("ps1", exchange, cache, course_dir)
+        self._release("ps2", exchange, cache, course_dir)
         self._list(exchange, cache, "ps1", flags=["--remove"])
         assert self._list(exchange, cache) == dedent(
             """
@@ -127,10 +126,10 @@ class TestNbGraderList(BaseTestApp):
             """
         ).lstrip()
 
-    def test_list_inbound(self, exchange, cache):
-        self._release("ps1", exchange, cache)
+    def test_list_inbound(self, exchange, cache, course_dir):
+        self._release("ps1", exchange, cache, course_dir)
 
-        assert self._list(exchange, cache, "ps1", flags=['--inbound']) == dedent(
+        assert self._list(exchange, cache, "ps1", flags=["--inbound"]) == dedent(
             """
             [ListApp | INFO] Submitted assignments:
             """
@@ -140,28 +139,28 @@ class TestNbGraderList(BaseTestApp):
         self._submit("ps1", exchange, cache)
         filename, = os.listdir(os.path.join(exchange, "abc101", "inbound"))
         timestamp = filename.split("+")[2]
-        assert self._list(exchange, cache, "ps1", flags=['--inbound']) == dedent(
+        assert self._list(exchange, cache, "ps1", flags=["--inbound"]) == dedent(
             """
             [ListApp | INFO] Submitted assignments:
             [ListApp | INFO] abc101 {} ps1 {}
-            """.format(os.environ['USER'], timestamp)
+            """.format(os.environ["USER"], timestamp)
         ).lstrip()
 
         self._submit("ps1", exchange, cache)
         filenames = sorted(os.listdir(os.path.join(exchange, "abc101", "inbound")))
         timestamps = [x.split("+")[2] for x in filenames]
-        assert self._list(exchange, cache, "ps1", flags=['--inbound']) == dedent(
+        assert self._list(exchange, cache, "ps1", flags=["--inbound"]) == dedent(
             """
             [ListApp | INFO] Submitted assignments:
             [ListApp | INFO] abc101 {} ps1 {}
             [ListApp | INFO] abc101 {} ps1 {}
-            """.format(os.environ['USER'], timestamps[0], os.environ['USER'], timestamps[1])
+            """.format(os.environ["USER"], timestamps[0], os.environ["USER"], timestamps[1])
         ).lstrip()
 
-    def test_list_cached(self, exchange, cache):
-        self._release("ps1", exchange, cache)
+    def test_list_cached(self, exchange, cache, course_dir):
+        self._release("ps1", exchange, cache, course_dir)
 
-        assert self._list(exchange, cache, "ps1", flags=['--cached']) == dedent(
+        assert self._list(exchange, cache, "ps1", flags=["--cached"]) == dedent(
             """
             [ListApp | INFO] Submitted assignments:
             """
@@ -171,29 +170,29 @@ class TestNbGraderList(BaseTestApp):
         self._submit("ps1", exchange, cache)
         filename, = os.listdir(os.path.join(cache, "abc101"))
         timestamp = filename.split("+")[2]
-        assert self._list(exchange, cache, "ps1", flags=['--cached']) == dedent(
+        assert self._list(exchange, cache, "ps1", flags=["--cached"]) == dedent(
             """
             [ListApp | INFO] Submitted assignments:
             [ListApp | INFO] abc101 {} ps1 {}
-            """.format(os.environ['USER'], timestamp)
+            """.format(os.environ["USER"], timestamp)
         ).lstrip()
 
         self._submit("ps1", exchange, cache)
         self._list(exchange, cache, "ps1", flags=["--inbound", "--remove"])
         filenames = sorted(os.listdir(os.path.join(cache, "abc101")))
         timestamps = [x.split("+")[2] for x in filenames]
-        assert self._list(exchange, cache, "ps1", flags=['--cached']) == dedent(
+        assert self._list(exchange, cache, "ps1", flags=["--cached"]) == dedent(
             """
             [ListApp | INFO] Submitted assignments:
             [ListApp | INFO] abc101 {} ps1 {}
             [ListApp | INFO] abc101 {} ps1 {}
-            """.format(os.environ['USER'], timestamps[0], os.environ['USER'], timestamps[1])
+            """.format(os.environ["USER"], timestamps[0], os.environ["USER"], timestamps[1])
         ).lstrip()
 
-    def test_list_remove_inbound(self, exchange, cache):
-        self._release("ps1", exchange, cache)
+    def test_list_remove_inbound(self, exchange, cache, course_dir):
+        self._release("ps1", exchange, cache, course_dir)
         self._fetch("ps1", exchange, cache)
-        self._release("ps2", exchange, cache)
+        self._release("ps2", exchange, cache, course_dir)
         self._fetch("ps2", exchange, cache)
 
         self._submit("ps1", exchange, cache)
@@ -202,26 +201,26 @@ class TestNbGraderList(BaseTestApp):
         timestamps = [x.split("+")[2] for x in filenames]
 
         self._list(exchange, cache, "ps1", flags=["--inbound", "--remove"])
-        assert self._list(exchange, cache, flags=['--inbound']) == dedent(
+        assert self._list(exchange, cache, flags=["--inbound"]) == dedent(
             """
             [ListApp | INFO] Submitted assignments:
             [ListApp | INFO] abc101 {} ps2 {}
-            """.format(os.environ['USER'], timestamps[1])
+            """.format(os.environ["USER"], timestamps[1])
         ).lstrip()
         assert len(os.listdir(os.path.join(exchange, "abc101", "inbound"))) == 1
 
         self._list(exchange, cache, "ps2", flags=["--inbound", "--remove"])
-        assert self._list(exchange, cache, flags=['--inbound']) == dedent(
+        assert self._list(exchange, cache, flags=["--inbound"]) == dedent(
             """
             [ListApp | INFO] Submitted assignments:
             """
         ).lstrip()
         assert len(os.listdir(os.path.join(exchange, "abc101", "inbound"))) == 0
 
-    def test_list_remove_cached(self, exchange, cache):
-        self._release("ps1", exchange, cache)
+    def test_list_remove_cached(self, exchange, cache, course_dir):
+        self._release("ps1", exchange, cache, course_dir)
         self._fetch("ps1", exchange, cache)
-        self._release("ps2", exchange, cache)
+        self._release("ps2", exchange, cache, course_dir)
         self._fetch("ps2", exchange, cache)
 
         self._submit("ps1", exchange, cache)
@@ -230,16 +229,16 @@ class TestNbGraderList(BaseTestApp):
         timestamps = [x.split("+")[2] for x in filenames]
 
         self._list(exchange, cache, "ps1", flags=["--cached", "--remove"])
-        assert self._list(exchange, cache, flags=['--cached']) == dedent(
+        assert self._list(exchange, cache, flags=["--cached"]) == dedent(
             """
             [ListApp | INFO] Submitted assignments:
             [ListApp | INFO] abc101 {} ps2 {}
-            """.format(os.environ['USER'], timestamps[1])
+            """.format(os.environ["USER"], timestamps[1])
         ).lstrip()
         assert len(os.listdir(os.path.join(cache, "abc101"))) == 1
 
         self._list(exchange, cache, "ps2", flags=["--cached", "--remove"])
-        assert self._list(exchange, cache, flags=['--cached']) == dedent(
+        assert self._list(exchange, cache, flags=["--cached"]) == dedent(
             """
             [ListApp | INFO] Submitted assignments:
             """
@@ -249,15 +248,15 @@ class TestNbGraderList(BaseTestApp):
     def test_list_cached_and_inbound(self, exchange, cache):
         self._list(exchange, cache, flags=["--inbound", "--cached"], retcode=1)
 
-    def test_list_json(self, exchange, cache):
-        self._release("ps1", exchange, cache)
+    def test_list_json(self, exchange, cache, course_dir):
+        self._release("ps1", exchange, cache, course_dir)
         assert self._list(exchange, cache) == dedent(
             """
             [ListApp | INFO] Released assignments:
             [ListApp | INFO] abc101 ps1
             """
         ).lstrip()
-        assert json.loads(self._list(exchange, cache, flags=['--json'])) == [
+        assert json.loads(self._list(exchange, cache, flags=["--json"])) == [
             {
                 "assignment_id": "ps1",
                 "status": "released",
@@ -279,7 +278,7 @@ class TestNbGraderList(BaseTestApp):
             [ListApp | INFO] abc101 ps1 (already downloaded)
             """
         ).lstrip()
-        assert json.loads(self._list(exchange, cache, flags=['--json'])) == [
+        assert json.loads(self._list(exchange, cache, flags=["--json"])) == [
             {
                 "assignment_id": "ps1",
                 "status": "fetched",
@@ -298,20 +297,20 @@ class TestNbGraderList(BaseTestApp):
         filenames = sorted(os.listdir(os.path.join(exchange, "abc101", "inbound")))
         timestamps = [x.split("+")[2] for x in filenames]
 
-        assert self._list(exchange, "ps1", flags=['--inbound']) == dedent(
+        assert self._list(exchange, "ps1", flags=["--inbound"]) == dedent(
             """
             [ListApp | INFO] Submitted assignments:
             [ListApp | INFO] abc101 {} ps1 {}
-            """.format(os.environ['USER'], timestamps[0])
+            """.format(os.environ["USER"], timestamps[0])
         ).lstrip()
 
-        submission = "{}+ps1+{}".format(os.environ['USER'], timestamps[0])
-        assert json.loads(self._list(exchange, "ps1", flags=['--inbound', '--json'])) == [
+        submission = "{}+ps1+{}".format(os.environ["USER"], timestamps[0])
+        assert json.loads(self._list(exchange, "ps1", flags=["--inbound", "--json"])) == [
             {
                 "assignment_id": "ps1",
                 "status": "submitted",
                 "course_id": "abc101",
-                "student_id": os.environ['USER'],
+                "student_id": os.environ["USER"],
                 "timestamp": timestamps[0],
                 "path": os.path.join(exchange, "abc101", "inbound", submission),
                 "notebooks": [
@@ -322,12 +321,12 @@ class TestNbGraderList(BaseTestApp):
                 ]
             }
         ]
-        assert json.loads(self._list(exchange, "ps1", flags=['--remove', '--inbound', '--json'])) == [
+        assert json.loads(self._list(exchange, "ps1", flags=["--remove", "--inbound", "--json"])) == [
             {
                 "assignment_id": "ps1",
                 "status": "removed",
                 "course_id": "abc101",
-                "student_id": os.environ['USER'],
+                "student_id": os.environ["USER"],
                 "timestamp": timestamps[0],
                 "path": os.path.join(exchange, "abc101", "inbound", submission),
                 "notebooks": [
@@ -339,20 +338,20 @@ class TestNbGraderList(BaseTestApp):
             }
         ]
 
-        assert self._list(exchange, cache, flags=['--cached']) == dedent(
+        assert self._list(exchange, cache, flags=["--cached"]) == dedent(
             """
             [ListApp | INFO] Submitted assignments:
             [ListApp | INFO] abc101 {} ps1 {}
-            """.format(os.environ['USER'], timestamps[0])
+            """.format(os.environ["USER"], timestamps[0])
         ).lstrip()
 
-        submission = "{}+ps1+{}".format(os.environ['USER'], timestamps[0])
-        assert json.loads(self._list(exchange, cache, flags=['--cached', '--json'])) == [
+        submission = "{}+ps1+{}".format(os.environ["USER"], timestamps[0])
+        assert json.loads(self._list(exchange, cache, flags=["--cached", "--json"])) == [
             {
                 "assignment_id": "ps1",
                 "status": "submitted",
                 "course_id": "abc101",
-                "student_id": os.environ['USER'],
+                "student_id": os.environ["USER"],
                 "timestamp": timestamps[0],
                 "path": os.path.join(cache, "abc101", submission),
                 "notebooks": [
@@ -363,12 +362,12 @@ class TestNbGraderList(BaseTestApp):
                 ]
             }
         ]
-        assert json.loads(self._list(exchange, cache, flags=['--remove', '--cached', '--json'])) == [
+        assert json.loads(self._list(exchange, cache, flags=["--remove", "--cached", "--json"])) == [
             {
                 "assignment_id": "ps1",
                 "status": "removed",
                 "course_id": "abc101",
-                "student_id": os.environ['USER'],
+                "student_id": os.environ["USER"],
                 "timestamp": timestamps[0],
                 "path": os.path.join(cache, "abc101", submission),
                 "notebooks": [
