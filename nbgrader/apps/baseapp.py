@@ -73,7 +73,20 @@ class NbGrader(JupyterApp):
     def _log_format_default(self):
         return "%(color)s[%(name)s | %(levelname)s]%(end_color)s %(message)s"
 
-    db_url = Unicode("sqlite:///gradebook.db", config=True, help="URL to the database")
+    db_url = Unicode(
+        "",
+        config=True,
+        help=dedent(
+            """
+            URL to the database. Defaults to sqlite:///<course_directory>/gradebook.db,
+            where <course_directory> is another configurable variable.
+            """
+        )
+    )
+
+    def _db_url_default(self):
+        return "sqlite:///{}".format(
+            os.path.abspath(os.path.join(self.course_directory, "gradebook.db")))
 
     student_id = Unicode(
         "*",
