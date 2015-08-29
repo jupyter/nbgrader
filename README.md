@@ -47,7 +47,7 @@ system and command line tools:
 
     pip install nbgrader
 
-### The nbgrader toolbar extension for Jupyter notebook
+### nbgrader extensions
 You may then install the nbgrader toolbar extension for
 Jupyter notebook. This will install both the *create assignment* toolbar
 extension and *assignment list* notebook server extension:
