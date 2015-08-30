@@ -8,7 +8,11 @@ assignments will be organized with the following directory structure:
 
 ::
 
-    {nbgrader_step}/{student_id}/{assignment_id}/{notebook_id}.ipynb
+    {course_directory}/{nbgrader_step}/{student_id}/{assignment_id}/{notebook_id}.ipynb
+
+By default, the ``course_directory`` variable is wherever you run the nbgrader commands.
+This means that you can place your class files directory wherever you want.
+However, this location can also be customized (see the :doc:`configuration options </config_options>`) so that you can run the nbgrader commands from anywhere on your system, but still have them operate on the same directory.
 
 Each subcommand of nbgrader (e.g. ``assign``, ``autograde``, etc.) has
 different input and output folders associated with it. These correspond
@@ -21,6 +25,11 @@ corresponds to the unique ID of a student, ``assignment_id`` corresponds
 to the unique name of an assignment, and ``notebook_id`` corresponds to
 the name of a notebook within an assignment (excluding the .ipynb
 extension).
+
+Additionally, nbgrader needs access to a database to store information about the assignments.
+This database is, by default, a sqlite database that lives at ``{course_directory}/gradebook.db``, but you can also configure this to be any location of your choosing.
+You do not need to manually create this database yourself, as nbgrader will create it for you, but you probably want to prepopulate it with some information about assignment due dates and students (see :doc:`03_generating_assignments` and :doc:`04_autograding`).
+Additionally, nbgrader uses SQLAlchemy, so you should be able to also use MySQL or PostgreSQL backends as well (though in these cases, you *will* need to create the database ahead of time, as this is just how MySQL and PostgreSQL work).
 
 Example
 -------
