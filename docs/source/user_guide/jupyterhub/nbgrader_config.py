@@ -1,6 +1,13 @@
 c = get_config()
 
+## Generic nbgrader options (technically, the exchange directory is not used
+## by the formgrader, but it is left in here for consistency with the rest of
+## the user guide):
+
 c.NbGrader.course_id = "example_course"
+c.TransferApp.exchange_directory = "/tmp/exchange"
+
+## Options that are specific to the formgrader and integrating it with JuptyerHub:
 
 c.FormgradeApp.ip = "127.0.0.1"
 c.FormgradeApp.port = 9000

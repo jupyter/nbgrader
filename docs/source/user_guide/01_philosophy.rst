@@ -12,7 +12,7 @@ assignments will be organized with the following directory structure:
 
 By default, the ``course_directory`` variable is wherever you run the nbgrader commands.
 This means that you can place your class files directory wherever you want.
-However, this location can also be customized (see the :doc:`configuration options <../config_options>`) so that you can run the nbgrader commands from anywhere on your system, but still have them operate on the same directory.
+However, this location can also be customized (see the :doc:`configuration options </config_options>`) so that you can run the nbgrader commands from anywhere on your system, but still have them operate on the same directory.
 
 Each subcommand of nbgrader (e.g. ``assign``, ``autograde``, etc.) has
 different input and output folders associated with it. These correspond

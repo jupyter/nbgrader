@@ -10,6 +10,9 @@ Manually grading a student's solution
     :doc:`01_philosophy`
         More details on how the nbgrader hierarchy is structured.
 
+    :doc:`/config_options`
+        Details on ``nbgrader_config.py``
+
 After assignments have been autograded, they will saved into an
 ``autograded`` directory (see :doc:`01_philosophy` for details):
 
