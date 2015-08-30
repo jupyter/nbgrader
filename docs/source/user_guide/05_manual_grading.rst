@@ -42,4 +42,4 @@ modifies information about them in the database. So, there is no
 
 Important note: if you run the formgrader on a public IP address and port (for example, by running ``nbgrader formgrade --ip=<public_ip>``), then *anyone* will be able to access the formgrader at its URL!
 So, you probably want to only run the formgrader on a private network that only the instructors have access to (e.g., behind a VPN).
-Alternately, if students are accessing their notebooks via JupyterHub, then you can configure the formgrader to authenticate users through JupyterHub so that only specified graders may access the formgrader. See :doc:`<11_jupyerhub_config>` for more details.
+Alternately, if students are accessing their notebooks via JupyterHub, then you can configure the formgrader to authenticate users through JupyterHub so that only specified graders may access the formgrader. See :doc:`11_jupyterhub_config` for more details.

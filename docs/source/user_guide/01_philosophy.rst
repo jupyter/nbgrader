@@ -28,7 +28,7 @@ extension).
 
 Additionally, nbgrader needs access to a database to store information about the assignments.
 This database is, by default, a sqlite database that lives at ``{course_directory}/gradebook.db``, but you can also configure this to be any location of your choosing.
-You do not need to manually create this database yourself, as nbgrader will create it for you, but you probably want to prepopulate it with some information about assignment due dates and students (see :doc:`<03_generating_assignments>` and :doc:`<04_autograding>`).
+You do not need to manually create this database yourself, as nbgrader will create it for you, but you probably want to prepopulate it with some information about assignment due dates and students (see :doc:`03_generating_assignments` and :doc:`04_autograding`).
 Additionally, nbgrader uses SQLAlchemy, so you should be able to also use MySQL or PostgreSQL backends as well (though in these cases, you *will* need to create the database ahead of time, as this is just how MySQL and PostgreSQL work).
 
 Example

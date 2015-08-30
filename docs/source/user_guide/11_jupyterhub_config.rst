@@ -29,7 +29,7 @@ configured to integrate with JupyterHub so that all grading can occur on the
 same server.
 
 To set up the formgrader to work with JupyterHub, you will need to specify a
-few custom config options (see :doc:`</config_options>` for details on all possible config options, and where configuration files live).
+few custom config options (see :doc:`/config_options` for details on all possible config options, and where configuration files live).
 In this documentation, we'll go through an example
 setup of JupyterHub with nbgrader, though note that each deployment of JupyterHub is slightly different, which might also require a slightly different nbgrader configuration.
 If you run into problems getting nbgrader to work with JupyterHub, please do email the Jupyter mailing list!
