@@ -23,7 +23,7 @@ assignment and grading tasks using the familiar Jupyter notebook interface.
 Using the assignment list extension, students may conveniently view, fetch,
 submit, and validate their assignments.
 
-![nbgrader assignment list](docs/source/user_guide/images/student_assignments.gif "nbgrader assignment list")
+![nbgrader assignment list](docs/source/user_guide/images/student_assignment.gif "nbgrader assignment list")
 
 ### Using formgrader
 ![nbgrader formgrader](docs/source/user_guide/images/manually_graded_answer.png "nbgrader formgrader")
