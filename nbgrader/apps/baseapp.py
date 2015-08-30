@@ -32,7 +32,8 @@ nbgrader_aliases = {
     'assignment': 'NbGrader.assignment_id',
     'notebook': 'NbGrader.notebook_id',
     'db': 'NbGrader.db_url',
-    'course': 'NbGrader.course_id'
+    'course': 'NbGrader.course_id',
+    'course-dir': 'NbGrader.course_directory'
 }
 nbgrader_flags = {
     'debug': (
@@ -72,7 +73,20 @@ class NbGrader(JupyterApp):
     def _log_format_default(self):
         return "%(color)s[%(name)s | %(levelname)s]%(end_color)s %(message)s"
 
-    db_url = Unicode("sqlite:///gradebook.db", config=True, help="URL to the database")
+    db_url = Unicode(
+        "",
+        config=True,
+        help=dedent(
+            """
+            URL to the database. Defaults to sqlite:///<course_directory>/gradebook.db,
+            where <course_directory> is another configurable variable.
+            """
+        )
+    )
+
+    def _db_url_default(self):
+        return "sqlite:///{}".format(
+            os.path.abspath(os.path.join(self.course_directory, "gradebook.db")))
 
     student_id = Unicode(
         "*",
@@ -197,6 +211,21 @@ class NbGrader(JupyterApp):
         )
     )
 
+    course_directory = Unicode(
+        '',
+        config=True,
+        help=dedent(
+            """
+            The root directory for the course files (that includes the `source`,
+            `release`, `submitted`, `autograded`, etc. directories). Defaults to
+            the current working directory.
+            """
+        )
+    )
+
+    def _course_directory_default(self):
+        return os.getcwd()
+
     ignore = List(
         [
             ".ipynb_checkpoints",
@@ -294,6 +323,16 @@ class NbGrader(JupyterApp):
     def initialize(self, argv=None):
         self.update_config(self.build_extra_config())
         super(NbGrader, self).initialize(argv)
+
+    def _format_path(self, nbgrader_step, student_id, assignment_id):
+        return os.path.join(
+            self.course_directory,
+            self.directory_structure.format(
+                nbgrader_step=nbgrader_step,
+                student_id=student_id,
+                assignment_id=assignment_id
+            )
+        )
 
 
 # These are the aliases and flags for nbgrader apps that inherit only from
@@ -458,18 +497,10 @@ class BaseNbConvertApp(NbGrader, NbConvertApp):
         raise NotImplementedError
 
     def _format_source(self, assignment_id, student_id):
-        return self.directory_structure.format(
-            nbgrader_step=self._input_directory,
-            student_id=student_id,
-            assignment_id=assignment_id
-        )
+        return self._format_path(self._input_directory, student_id, assignment_id)
 
     def _format_dest(self, assignment_id, student_id):
-        return self.directory_structure.format(
-            nbgrader_step=self._output_directory,
-            student_id=student_id,
-            assignment_id=assignment_id
-        )
+        return self._format_path(self._output_directory, student_id, assignment_id)
 
     def build_extra_config(self):
         extra_config = super(BaseNbConvertApp, self).build_extra_config()
@@ -505,7 +536,7 @@ class BaseNbConvertApp(NbGrader, NbConvertApp):
 
         m = re.match(regexp, notebook_filename)
         if m is None:
-            raise RuntimeError("Could not match '%s' with regexp '%s'", notebook_filename, regexp)
+            self.fail("Could not match '%s' with regexp '%s'", notebook_filename, regexp)
         gd = m.groupdict()
 
         self.log.debug("Student: %s", gd['student_id'])
@@ -624,7 +655,7 @@ class BaseNbConvertApp(NbGrader, NbConvertApp):
             regexp = self._format_source("(?P<assignment_id>.*)", "(?P<student_id>.*)")
             m = re.match(regexp, assignment)
             if m is None:
-                raise RuntimeError("Could not match '%s' with regexp '%s'", assignment, regexp)
+                self.fail("Could not match '%s' with regexp '%s'", assignment, regexp)
             gd = m.groupdict()
 
             try:

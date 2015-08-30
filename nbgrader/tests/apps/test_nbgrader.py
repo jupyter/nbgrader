@@ -17,6 +17,10 @@ class TestNbGrader(BaseTestApp):
     def test_generate_config(self):
         """Is the config file properly generated?"""
 
+        # it already exists, because we create it in conftest.py
+        os.remove("nbgrader_config.py")
+
+        # try recreating it
         run_python_module(["nbgrader", "--generate-config"])
         assert os.path.isfile("nbgrader_config.py")
 

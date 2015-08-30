@@ -3,6 +3,8 @@ import tempfile
 import shutil
 import pytest
 
+from textwrap import dedent
+
 from ...api import Gradebook
 
 
@@ -28,13 +30,10 @@ def gradebook(db):
 
 
 @pytest.fixture
-def temp_cwd(request):
-    orig_dir = os.getcwd()
+def course_dir(request):
     path = tempfile.mkdtemp()
-    os.chdir(path)
 
     def fin():
-        os.chdir(orig_dir)
         shutil.rmtree(path)
     request.addfinalizer(fin)
 
@@ -42,10 +41,21 @@ def temp_cwd(request):
 
 
 @pytest.fixture
-def temp_dir(request):
+def temp_cwd(request, course_dir):
+    orig_dir = os.getcwd()
     path = tempfile.mkdtemp()
+    os.chdir(path)
+
+    with open("nbgrader_config.py", "w") as fh:
+        fh.write(dedent(
+            """
+            c = get_config()
+            c.NbGrader.course_directory = "{}"
+            """.format(course_dir)
+        ))
 
     def fin():
+        os.chdir(orig_dir)
         shutil.rmtree(path)
     request.addfinalizer(fin)
 

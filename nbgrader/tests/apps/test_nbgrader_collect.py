@@ -1,5 +1,7 @@
 import os
 
+from os.path import join
+
 from .. import run_python_module
 from .base import BaseTestApp
 from ...utils import parse_utc
@@ -7,31 +9,31 @@ from ...utils import parse_utc
 
 class TestNbGraderCollect(BaseTestApp):
 
-    def _release_and_fetch(self, assignment, exchange):
-        self._copy_file("files/test.ipynb", "release/ps1/p1.ipynb")
+    def _release_and_fetch(self, assignment, exchange, course_dir):
+        self._copy_file(join("files", "test.ipynb"), join(course_dir, "release", "ps1", "p1.ipynb"))
         run_python_module([
-            'nbgrader', 'release', assignment,
-            '--course', 'abc101',
-            '--TransferApp.exchange_directory={}'.format(exchange)
+            "nbgrader", "release", assignment,
+            "--course", "abc101",
+            "--TransferApp.exchange_directory={}".format(exchange)
         ])
         run_python_module([
-            'nbgrader', 'fetch', assignment,
-            '--course', 'abc101',
-            '--TransferApp.exchange_directory={}'.format(exchange)
+            "nbgrader", "fetch", assignment,
+            "--course", "abc101",
+            "--TransferApp.exchange_directory={}".format(exchange)
         ])
 
     def _submit(self, assignment, exchange):
         run_python_module([
-            'nbgrader', 'submit', assignment,
-            '--course', 'abc101',
-            '--TransferApp.exchange_directory={}'.format(exchange)
+            "nbgrader", "submit", assignment,
+            "--course", "abc101",
+            "--TransferApp.exchange_directory={}".format(exchange)
         ])
 
     def _collect(self, assignment, exchange, flags=None, retcode=0):
         cmd = [
-            'nbgrader', 'collect', assignment,
-            '--course', 'abc101',
-            '--TransferApp.exchange_directory={}'.format(exchange)
+            "nbgrader", "collect", assignment,
+            "--course", "abc101",
+            "--TransferApp.exchange_directory={}".format(exchange)
         ]
 
         if flags is not None:
@@ -48,9 +50,9 @@ class TestNbGraderCollect(BaseTestApp):
         """Does the help display without error?"""
         run_python_module(["nbgrader", "collect", "--help-all"])
 
-    def test_no_course_id(self, exchange):
+    def test_no_course_id(self, exchange, course_dir):
         """Does releasing without a course id thrown an error?"""
-        self._release_and_fetch("ps1", exchange)
+        self._release_and_fetch("ps1", exchange, course_dir)
         self._submit("ps1", exchange)
         cmd = [
             "nbgrader", "collect", "ps1",
@@ -58,14 +60,13 @@ class TestNbGraderCollect(BaseTestApp):
         ]
         run_python_module(cmd, retcode=1)
 
-    def test_collect(self, exchange):
-        self._release_and_fetch("ps1", exchange)
+    def test_collect(self, exchange, course_dir):
+        self._release_and_fetch("ps1", exchange, course_dir)
 
-        # try to collect when there's nothing to collect
+        # try to collect when there"s nothing to collect
         self._collect("ps1", exchange)
-        root = os.path.join("submitted/{}/ps1".format(os.environ['USER']))
-        assert os.path.isdir("submitted")
-        assert not os.path.isdir(root)
+        root = os.path.join(join(course_dir, "submitted", os.environ["USER"], "ps1"))
+        assert not os.path.isdir(join(course_dir, "submitted"))
 
         # submit something
         self._submit("ps1", exchange)

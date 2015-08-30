@@ -70,22 +70,22 @@ class ReleaseApp(TransferApp):
 
     force = Bool(False, config=True, help="Force overwrite existing files in the exchange.")
 
+    def build_extra_config(self):
+        extra_config = super(ReleaseApp, self).build_extra_config()
+        extra_config.NbGrader.student_id = '.'
+        extra_config.NbGrader.notebook_id = '*'
+        return extra_config
+
     def init_src(self):
-        self.src_path = os.path.abspath(os.path.join(self.release_directory, self.assignment_id))
+        self.src_path = self._format_path(self.release_directory, self.student_id, self.assignment_id)
         if not os.path.isdir(self.src_path):
-            self.log.error("Assignment not found: {}/{}".format(
-                self.release_directory, self.assignment_id
-            ))
-            if os.path.isdir(os.path.join(self.source_directory, self.assignment_id)):
+            source = self._format_path(self.source_directory, self.student_id, self.assignment_id)
+            if os.path.isdir(source):
                 # Looks like the instructor forgot to assign
-                self.fail("Assignment found in ./{} but not ./{}, run `nbgrader assign` first.".format(
-                    self.source_directory, self.release_directory
-                ))
+                self.fail("Assignment found in '{}' but not '{}', run `nbgrader assign` first.".format(
+                    source, self.src_path))
             else:
-                self.fail(
-                    "You have to run `nbgrader release {}` from your main nbgrader directory.".format(
-                    self.assignment_id
-                ))
+                self.fail("Assignment not found: {}".format(self.src_path))
 
     def init_dest(self):
         if self.course_id == '':
