@@ -19,13 +19,15 @@ assignment and grading tasks using the familiar Jupyter notebook interface.
 
 ![Creating assignment](docs/source/user_guide/images/creating_assignment.gif "Creating assignment")
 
-### Student toolbar extension for Jupyter notebooks
-Using the toolbar extension, students may conveniently view, fetch, submit, and validate their assignments.
+### Student assignment list extension for Jupyter notebooks
+Using the assignment list extension, students may conveniently view, fetch,
+submit, and validate their assignments.
 
-![nbgrader assignment list](docs/source/user_guide/images/assignment_list_downloaded_expanded.png "nbgrader assignment list")
+![nbgrader assignment list](docs/source/user_guide/images/student_assignments.gif "nbgrader assignment list")
 
 ### Using formgrader
-TODO Example demonstrating formgrader is coming soon.
+![nbgrader formgrader](docs/source/user_guide/images/manually_graded_answer.png "nbgrader formgrader")
+
 
 ### The command line tools of nbgrader
 [Command line tools](https://nbgrader.readthedocs.org/en/stable/command_line_tools/index.html)
