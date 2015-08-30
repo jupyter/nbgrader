@@ -9,12 +9,15 @@ c.FormgradeApp.authenticator_class = "nbgrader.auth.hubauth.HubAuth"
 # Change this to be the path to the user guide folder in your clone of
 # nbgrader, or just wherever you have your class files. This is relative
 # to the root of the notebook server launched by JupyterHub, which is
-# probably your home directory.
+# probably your home directory. This is used for accessing the *live*
+# version of notebooks via JupyterHub. If you don't want to access the
+# live notebooks and are fine with just the static interface provided by
+# the formgrader, then you can ignore this option.
 c.HubAuth.notebook_url_prefix = "path/to/class_files"
 
 # Change this to be the list of unix usernames that are allowed to access
 # the formgrader.
-c.HubAuth.graders = ["jhamrick"]
+c.HubAuth.graders = ["instructor1", "instructor2"]
 
 # This specifies that the formgrader should automatically generate an api
 # token to authenticate itself with JupyterHub.
