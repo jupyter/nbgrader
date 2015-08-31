@@ -23,7 +23,7 @@ from traitlets import Unicode, List, Bool, Instance, Dict, Integer
 from traitlets.config.application import catch_config_error
 from traitlets.config.loader import Config
 
-from ..utils import check_directory, parse_utc, find_all_files, full_split
+from ..utils import check_directory, parse_utc, find_all_files, full_split, rmtree, remove
 
 
 nbgrader_aliases = {
@@ -596,14 +596,14 @@ class BaseNbConvertApp(NbGrader, NbConvertApp):
         if self.force:
             if self.notebook_id == "*":
                 self.log.warning("Removing existing assignment: {}".format(dest))
-                shutil.rmtree(dest)
+                rmtree(dest)
             else:
                 for notebook in self.notebooks:
                     filename = os.path.splitext(os.path.basename(notebook))[0] + self.exporter.file_extension
                     path = os.path.join(dest, filename)
                     if os.path.exists(path):
                         self.log.warning("Removing existing notebook: {}".format(path))
-                        os.remove(path)
+                        remove(path)
             return True
 
         src = self._format_source(assignment_id, student_id)
@@ -615,14 +615,14 @@ class BaseNbConvertApp(NbGrader, NbConvertApp):
         if new_timestamp is not None and old_timestamp is not None and new_timestamp > old_timestamp:
             if self.notebook_id == "*":
                 self.log.warning("Updating existing assignment: {}".format(dest))
-                shutil.rmtree(dest)
+                rmtree(dest)
             else:
                 for notebook in self.notebooks:
                     filename = os.path.splitext(os.path.basename(notebook))[0] + self.exporter.file_extension
                     path = os.path.join(dest, filename)
                     if os.path.exists(path):
                         self.log.warning("Updating existing notebook: {}".format(path))
-                        os.remove(path)
+                        remove(path)
             return True
 
         # otherwise, we should skip the assignment
@@ -644,7 +644,7 @@ class BaseNbConvertApp(NbGrader, NbConvertApp):
             if not os.path.exists(os.path.dirname(path)):
                 os.makedirs(os.path.dirname(path))
             if os.path.exists(path):
-                os.remove(path)
+                remove(path)
             self.log.info("Copying %s -> %s", filename, path)
             shutil.copy(filename, path)
 
@@ -687,13 +687,13 @@ class BaseNbConvertApp(NbGrader, NbConvertApp):
                 if self.notebook_id == "*":
                     if os.path.exists(dest):
                         self.log.warning("Removing failed assignment: {}".format(dest))
-                        shutil.rmtree(dest)
+                        rmtree(dest)
                 else:
                     for notebook in self.notebooks:
                         filename = os.path.splitext(os.path.basename(notebook))[0] + self.exporter.file_extension
                         path = os.path.join(dest, filename)
                         if os.path.exists(path):
                             self.log.warning("Removing failed notebook: {}".format(path))
-                            os.remove(path)
+                            remove(path)
 
                 raise

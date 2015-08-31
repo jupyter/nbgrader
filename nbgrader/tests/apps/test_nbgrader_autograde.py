@@ -1,8 +1,10 @@
 import os
+import sys
 
 from os.path import join
 
 from ...api import Gradebook
+from ...utils import remove
 from .. import run_python_module
 from .base import BaseTestApp
 
@@ -77,6 +79,8 @@ class TestNbGraderAutograde(BaseTestApp):
         assert comment1.comment == None
         assert comment2.comment == None
 
+        gb.db.close()
+
     def test_grade_timestamp(self, gradebook, course_dir):
         """Is a timestamp correctly read in?"""
         self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
@@ -104,6 +108,8 @@ class TestNbGraderAutograde(BaseTestApp):
         # make sure it still works to run it a second time
         run_python_module(["nbgrader", "autograde", "ps1", "--db", gradebook])
 
+        gb.db.close()
+
     def test_force(self, gradebook, course_dir):
         """Ensure the force option works properly"""
         self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
@@ -123,7 +129,7 @@ class TestNbGraderAutograde(BaseTestApp):
         assert not os.path.isfile(join(course_dir, "autograded", "foo", "ps1", "blah.pyc"))
 
         # check that it skips the existing directory
-        os.remove(join(course_dir, "autograded", "foo", "ps1", "foo.txt"))
+        remove(join(course_dir, "autograded", "foo", "ps1", "foo.txt"))
         run_python_module(["nbgrader", "autograde", "ps1", "--db", gradebook])
         assert not os.path.isfile(join(course_dir, "autograded", "foo", "ps1", "foo.txt"))
 
@@ -132,8 +138,8 @@ class TestNbGraderAutograde(BaseTestApp):
         assert os.path.isfile(join(course_dir, "autograded", "foo", "ps1", "foo.txt"))
 
         # force overwrite
-        os.remove(join(course_dir, "source", "ps1", "foo.txt"))
-        os.remove(join(course_dir, "submitted", "foo", "ps1", "foo.txt"))
+        remove(join(course_dir, "source", "ps1", "foo.txt"))
+        remove(join(course_dir, "submitted", "foo", "ps1", "foo.txt"))
         run_python_module(["nbgrader", "autograde", "ps1", "--db", gradebook, "--force"])
         assert os.path.isfile(join(course_dir, "autograded", "foo", "ps1", "p1.ipynb"))
         assert not os.path.isfile(join(course_dir, "autograded", "foo", "ps1", "foo.txt"))
@@ -159,8 +165,8 @@ class TestNbGraderAutograde(BaseTestApp):
         assert not os.path.isfile(join(course_dir, "autograded", "foo", "ps1", "blah.pyc"))
 
         # check that removing the notebook still causes the autograder to run
-        os.remove(join(course_dir, "autograded", "foo", "ps1", "p1.ipynb"))
-        os.remove(join(course_dir, "autograded", "foo", "ps1", "foo.txt"))
+        remove(join(course_dir, "autograded", "foo", "ps1", "p1.ipynb"))
+        remove(join(course_dir, "autograded", "foo", "ps1", "foo.txt"))
         run_python_module(["nbgrader", "autograde", "ps1", "--db", gradebook, "--notebook", "p1"])
 
         assert os.path.isfile(join(course_dir, "autograded", "foo", "ps1", "p1.ipynb"))
@@ -169,7 +175,7 @@ class TestNbGraderAutograde(BaseTestApp):
         assert not os.path.isfile(join(course_dir, "autograded", "foo", "ps1", "blah.pyc"))
 
         # check that running it again doesn"t do anything
-        os.remove(join(course_dir, "autograded", "foo", "ps1", "foo.txt"))
+        remove(join(course_dir, "autograded", "foo", "ps1", "foo.txt"))
         run_python_module(["nbgrader", "autograde", "ps1", "--db", gradebook, "--notebook", "p1"])
 
         assert os.path.isfile(join(course_dir, "autograded", "foo", "ps1", "p1.ipynb"))
@@ -178,7 +184,7 @@ class TestNbGraderAutograde(BaseTestApp):
         assert not os.path.isfile(join(course_dir, "autograded", "foo", "ps1", "blah.pyc"))
 
         # check that removing the notebook doesn"t caus the autograder to run
-        os.remove(join(course_dir, "autograded", "foo", "ps1", "p1.ipynb"))
+        remove(join(course_dir, "autograded", "foo", "ps1", "p1.ipynb"))
         run_python_module(["nbgrader", "autograde", "ps1", "--db", gradebook])
 
         assert not os.path.isfile(join(course_dir, "autograded", "foo", "ps1", "p1.ipynb"))
@@ -255,10 +261,15 @@ class TestNbGraderAutograde(BaseTestApp):
         self._make_file(join(course_dir, "source", "foo", "ps1", "foo.txt"), "foo")
         run_python_module(["nbgrader", "autograde", "ps1", "--create", "--AutogradeApp.permissions=644"])
 
+        if sys.platform == 'win32':
+            perms = '666'
+        else:
+            perms = '644'
+
         assert os.path.isfile(join(course_dir, "autograded", "foo", "ps1", "foo.ipynb"))
         assert os.path.isfile(join(course_dir, "autograded", "foo", "ps1", "foo.txt"))
-        assert self._get_permissions(join(course_dir, "autograded", "foo", "ps1", "foo.ipynb")) == "644"
-        assert self._get_permissions(join(course_dir, "autograded", "foo", "ps1", "foo.txt")) == "644"
+        assert self._get_permissions(join(course_dir, "autograded", "foo", "ps1", "foo.ipynb")) == perms
+        assert self._get_permissions(join(course_dir, "autograded", "foo", "ps1", "foo.txt")) == perms
 
     def test_force_single_notebook(self, course_dir):
         self._copy_file(join("files", "test.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))

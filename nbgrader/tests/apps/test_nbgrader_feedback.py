@@ -127,8 +127,13 @@ class TestNbGraderFeedback(BaseTestApp):
         run_python_module(["nbgrader", "autograde", "ps1", "--create"])
         run_python_module(["nbgrader", "feedback", "ps1", "--FeedbackApp.permissions=644"])
 
+        if sys.platform == 'win32':
+            perms = '666'
+        else:
+            perms = '644'
+
         assert isfile(join(course_dir, "feedback", "foo", "ps1", "foo.html"))
-        assert self._get_permissions(join(course_dir, "feedback", "foo", "ps1", "foo.html")) == "644"
+        assert self._get_permissions(join(course_dir, "feedback", "foo", "ps1", "foo.html")) == perms
 
     def test_force_single_notebook(self, course_dir):
         self._copy_file(join("files", "test.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))

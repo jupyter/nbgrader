@@ -184,3 +184,12 @@ def rmtree(path):
 
     # now we can remove the path
     shutil.rmtree(path)
+
+def remove(path):
+    # for windows, we need to make sure that the file is writeable,
+    # otherwise remove will fail
+    if sys.platform == 'win32':
+        os.chmod(path, stat.S_IWRITE)
+
+    # now we can remove the path
+    os.remove(path)
