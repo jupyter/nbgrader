@@ -7,6 +7,7 @@ import sys
 from textwrap import dedent
 
 from ...api import Gradebook
+from ...utils import rmtree
 
 
 @pytest.fixture
@@ -15,18 +16,23 @@ def db(request):
     dbpath = os.path.join(path, "nbgrader_test.db")
 
     def fin():
-        shutil.rmtree(path)
+        rmtree(path)
     request.addfinalizer(fin)
 
     return "sqlite:///" + dbpath
 
 
 @pytest.fixture
-def gradebook(db):
+def gradebook(request, db):
     gb = Gradebook(db)
     gb.add_assignment("ps1", duedate="2015-02-02 14:58:23.948203 PST")
     gb.add_student("foo")
     gb.add_student("bar")
+
+    def fin():
+        gb.db.close()
+    request.addfinalizer(fin)
+
     return db
 
 
@@ -35,7 +41,7 @@ def course_dir(request):
     path = tempfile.mkdtemp()
 
     def fin():
-        shutil.rmtree(path)
+        rmtree(path)
     request.addfinalizer(fin)
 
     return path
@@ -51,13 +57,13 @@ def temp_cwd(request, course_dir):
         fh.write(dedent(
             """
             c = get_config()
-            c.NbGrader.course_directory = "{}"
+            c.NbGrader.course_directory = r"{}"
             """.format(course_dir)
         ))
 
     def fin():
         os.chdir(orig_dir)
-        shutil.rmtree(path)
+        rmtree(path)
     request.addfinalizer(fin)
 
     return path
@@ -68,7 +74,7 @@ def jupyter_config_dir(request):
     path = tempfile.mkdtemp()
 
     def fin():
-        shutil.rmtree(path)
+        rmtree(path)
     request.addfinalizer(fin)
 
     return path
@@ -79,7 +85,7 @@ def jupyter_data_dir(request):
     path = tempfile.mkdtemp()
 
     def fin():
-        shutil.rmtree(path)
+        rmtree(path)
     request.addfinalizer(fin)
 
     return path
@@ -98,7 +104,7 @@ def exchange(request):
     path = tempfile.mkdtemp()
 
     def fin():
-        shutil.rmtree(path)
+        rmtree(path)
     request.addfinalizer(fin)
 
     return path
@@ -108,7 +114,7 @@ def cache(request):
     path = tempfile.mkdtemp()
 
     def fin():
-        shutil.rmtree(path)
+        rmtree(path)
     request.addfinalizer(fin)
 
     return path

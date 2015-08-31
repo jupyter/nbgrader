@@ -4,6 +4,8 @@ import dateutil.parser
 import glob
 import six
 import sys
+import shutil
+import stat
 
 # pwd is for unix passwords only, so we shouldn't import it on
 # windows machines
@@ -161,3 +163,24 @@ def find_all_files(path, exclude=None):
             else:
                 files.append(fullpath)
     return files
+
+def full_split(path):
+    rest, last = os.path.split(path)
+    if last == path:
+        return (path,)
+    elif rest == path:
+        return (rest,)
+    else:
+        return full_split(rest) + (last,)
+
+def rmtree(path):
+    # for windows, we need to go through and make sure everything
+    # is writeable, otherwise rmtree will fail
+    if sys.platform == 'win32':
+        for dirname, _, filenames in os.walk(path):
+            os.chmod(dirname, stat.S_IWRITE)
+            for filename in filenames:
+                os.chmod(os.path.join(dirname, filename), stat.S_IWRITE)
+
+    # now we can remove the path
+    shutil.rmtree(path)

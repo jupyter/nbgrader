@@ -23,7 +23,7 @@ from traitlets import Unicode, List, Bool, Instance, Dict, Integer
 from traitlets.config.application import catch_config_error
 from traitlets.config.loader import Config
 
-from ..utils import check_directory, parse_utc, find_all_files
+from ..utils import check_directory, parse_utc, find_all_files, full_split
 
 
 nbgrader_aliases = {
@@ -324,15 +324,22 @@ class NbGrader(JupyterApp):
         self.update_config(self.build_extra_config())
         super(NbGrader, self).initialize(argv)
 
-    def _format_path(self, nbgrader_step, student_id, assignment_id):
-        return os.path.join(
-            self.course_directory,
-            self.directory_structure.format(
-                nbgrader_step=nbgrader_step,
-                student_id=student_id,
-                assignment_id=assignment_id
-            )
+    def _format_path(self, nbgrader_step, student_id, assignment_id, escape=False):
+
+        kwargs = dict(
+            nbgrader_step=nbgrader_step,
+            student_id=student_id,
+            assignment_id=assignment_id
         )
+
+        if escape:
+            base = re.escape(self.course_directory)
+            structure = [x.format(**kwargs) for x in full_split(self.directory_structure)]
+            path = re.escape(os.path.sep).join([base] + structure)
+        else:
+            path = os.path.join(self.course_directory, self.directory_structure).format(**kwargs)
+
+        return path
 
 
 # These are the aliases and flags for nbgrader apps that inherit only from
@@ -499,11 +506,11 @@ class BaseNbConvertApp(NbGrader, NbConvertApp):
     def _output_directory(self):
         raise NotImplementedError
 
-    def _format_source(self, assignment_id, student_id):
-        return self._format_path(self._input_directory, student_id, assignment_id)
+    def _format_source(self, assignment_id, student_id, escape=False):
+        return self._format_path(self._input_directory, student_id, assignment_id, escape=escape)
 
-    def _format_dest(self, assignment_id, student_id):
-        return self._format_path(self._output_directory, student_id, assignment_id)
+    def _format_dest(self, assignment_id, student_id, escape=False):
+        return self._format_path(self._output_directory, student_id, assignment_id, escape=escape)
 
     def build_extra_config(self):
         extra_config = super(BaseNbConvertApp, self).build_extra_config()
@@ -533,9 +540,10 @@ class BaseNbConvertApp(NbGrader, NbConvertApp):
             self.fail("No notebooks were matched by '%s'", fullglob)
 
     def init_single_notebook_resources(self, notebook_filename):
-        regexp = os.path.join(
-            self._format_source("(?P<assignment_id>.*)", "(?P<student_id>.*)"),
-            "(?P<notebook_id>.*).ipynb")
+        regexp = re.escape(os.path.sep).join([
+            self._format_source("(?P<assignment_id>.*)", "(?P<student_id>.*)", escape=True),
+            "(?P<notebook_id>.*).ipynb"
+        ])
 
         m = re.match(regexp, notebook_filename)
         if m is None:
@@ -655,7 +663,7 @@ class BaseNbConvertApp(NbGrader, NbConvertApp):
             self.exporter = exporter_map[self.export_format](config=self.config)
 
             # parse out the assignment and student ids
-            regexp = self._format_source("(?P<assignment_id>.*)", "(?P<student_id>.*)")
+            regexp = self._format_source("(?P<assignment_id>.*)", "(?P<student_id>.*)", escape=True)
             m = re.match(regexp, assignment)
             if m is None:
                 self.fail("Could not match '%s' with regexp '%s'", assignment, regexp)
