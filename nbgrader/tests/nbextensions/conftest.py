@@ -80,14 +80,14 @@ def class_files(request, tempdir):
     shutil.copytree(os.path.join(os.path.dirname(__file__), source_path), "source")
 
     # create a fake ps1
-    os.mkdir(os.path.join("source", "ps1"))
-    with open(os.path.join("source", "ps1", "problem 1.ipynb"), "w") as fh:
+    os.mkdir(os.path.join("source", "ps.01"))
+    with open(os.path.join("source", "ps.01", "problem 1.ipynb"), "w") as fh:
         write_nb(new_notebook(), fh, 4)
 
     # create the gradebook
     gb = Gradebook("sqlite:///gradebook.db")
     gb.add_assignment("Problem Set 1")
-    gb.add_assignment("ps1")
+    gb.add_assignment("ps.01")
     gb.add_student("Bitdiddle", first_name="Ben", last_name="B")
     gb.add_student("Hacker", first_name="Alyssa", last_name="H")
     gb.add_student("Reasoner", first_name="Louis", last_name="R")
