@@ -125,7 +125,7 @@ class NbGrader(JupyterApp):
     )
 
     directory_structure = Unicode(
-        "{nbgrader_step}/{student_id}/{assignment_id}",
+        os.path.join("{nbgrader_step}", "{student_id}", "{assignment_id}"),
         config=True,
         help=dedent(
             """

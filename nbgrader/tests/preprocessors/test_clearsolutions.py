@@ -1,4 +1,5 @@
 import pytest
+import os
 
 from textwrap import dedent
 from ...preprocessors import ClearSolutions
@@ -190,12 +191,12 @@ class TestClearSolutions(BaseTestPreprocessor):
 
     def test_preprocess_notebook(self, preprocessor):
         """Is the test notebook processed without error?"""
-        nb = self._read_nb("files/test.ipynb")
+        nb = self._read_nb(os.path.join("files", "test.ipynb"))
         preprocessor.preprocess(nb, {})
 
     def test_remove_celltoolbar(self, preprocessor):
         """Is the celltoolbar removed?"""
-        nb = self._read_nb("files/test.ipynb")
+        nb = self._read_nb(os.path.join("files", "test.ipynb"))
         nb.metadata['celltoolbar'] = 'Create Assignment'
         nb = preprocessor.preprocess(nb, {})[0]
         assert 'celltoolbar' not in nb.metadata

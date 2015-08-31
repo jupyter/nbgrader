@@ -1,4 +1,5 @@
 import pytest
+import os
 
 from textwrap import dedent
 from ...preprocessors import LimitOutput
@@ -14,7 +15,7 @@ def preprocessor():
 class TestLimitOutput(BaseTestPreprocessor):
 
     def test_long_output(self):
-        nb = self._read_nb("files/long-output.ipynb")
+        nb = self._read_nb(os.path.join("files", "long-output.ipynb"))
         cell, = nb.cells
         output, = cell.outputs
         assert len(output.text.split("\n")) > 1000
@@ -27,7 +28,7 @@ class TestLimitOutput(BaseTestPreprocessor):
         assert len(output.text.split("\n")) == 1000
 
     def test_infinite_recursion(self):
-        nb = self._read_nb("files/infinite-recursion.ipynb")
+        nb = self._read_nb(os.path.join("files", "infinite-recursion.ipynb"))
 
         pp = LimitOutput()
         nb, resources = pp.preprocess(nb, {})

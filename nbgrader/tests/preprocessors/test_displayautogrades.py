@@ -1,6 +1,7 @@
 import pytest
 import json
 import six
+import os
 
 from textwrap import dedent
 from nbformat.v4 import new_output
@@ -191,21 +192,21 @@ class TestDisplayAutoGrades(BaseTestPreprocessor):
 
     def test_submitted_unchanged(self, preprocessor, stream):
         """Does the validation fail on an unchanged notebook?"""
-        nb = self._read_nb("files/submitted-unchanged.ipynb")
+        nb = self._read_nb(os.path.join("files", "submitted-unchanged.ipynb"))
         preprocessor.stream = stream
         preprocessor.preprocess(nb, {})
         assert stream.getvalue().split("\n")[0] == "VALIDATION FAILED ON 3 CELL(S)! If you submit your assignment as it is, you WILL NOT"
 
     def test_submitted_changed(self, preprocessor, stream):
         """Does the validation pass on an changed notebook?"""
-        nb = self._read_nb("files/submitted-changed.ipynb")
+        nb = self._read_nb(os.path.join("files", "submitted-changed.ipynb"))
         preprocessor.stream = stream
         preprocessor.preprocess(nb, {})
         assert stream.getvalue() == "Success! Your notebook passes all the tests.\n"
 
     def test_invert_submitted_unchanged(self, preprocessor, stream):
         """Does the inverted validation pass on an unchanged notebook?"""
-        nb = self._read_nb("files/submitted-unchanged.ipynb")
+        nb = self._read_nb(os.path.join("files", "submitted-unchanged.ipynb"))
         preprocessor.stream = stream
         preprocessor.invert = True
         preprocessor.preprocess(nb, {})
@@ -213,7 +214,7 @@ class TestDisplayAutoGrades(BaseTestPreprocessor):
 
     def test_invert_submitted_changed(self, preprocessor, stream):
         """Does the inverted validation fail on a changed notebook?"""
-        nb = self._read_nb("files/submitted-changed.ipynb")
+        nb = self._read_nb(os.path.join("files", "submitted-changed.ipynb"))
         preprocessor.stream = stream
         preprocessor.invert = True
         preprocessor.preprocess(nb, {})
@@ -221,14 +222,14 @@ class TestDisplayAutoGrades(BaseTestPreprocessor):
 
     def test_grade_cell_changed(self, preprocessor, stream):
         """Does the validate fail if a grade cell has changed?"""
-        nb = self._read_nb("files/submitted-grade-cell-changed.ipynb")
+        nb = self._read_nb(os.path.join("files", "submitted-grade-cell-changed.ipynb"))
         preprocessor.stream = stream
         preprocessor.preprocess(nb, {})
         assert stream.getvalue().split("\n")[0] == "THE CONTENTS OF 1 TEST CELL(S) HAVE CHANGED! This might mean that even though the tests"
 
     def test_grade_cell_changed_ignore_checksums(self, preprocessor, stream):
         """Does the validate pass if a grade cell has changed but we're ignoring checksums?"""
-        nb = self._read_nb("files/submitted-grade-cell-changed.ipynb")
+        nb = self._read_nb(os.path.join("files", "submitted-grade-cell-changed.ipynb"))
         preprocessor.stream = stream
         preprocessor.ignore_checksums = True
         preprocessor.preprocess(nb, {})
@@ -236,7 +237,7 @@ class TestDisplayAutoGrades(BaseTestPreprocessor):
 
     def test_invert_grade_cell_changed(self, preprocessor, stream):
         """Does the validate fail if a grade cell has changed, even with --invert?"""
-        nb = self._read_nb("files/submitted-grade-cell-changed.ipynb")
+        nb = self._read_nb(os.path.join("files", "submitted-grade-cell-changed.ipynb"))
         preprocessor.stream = stream
         preprocessor.invert = True
         preprocessor.preprocess(nb, {})
@@ -244,7 +245,7 @@ class TestDisplayAutoGrades(BaseTestPreprocessor):
 
     def test_invert_grade_cell_changed_ignore_checksums(self, preprocessor, stream):
         """Does the validate fail if a grade cell has changed with --invert and ignoring checksums?"""
-        nb = self._read_nb("files/submitted-grade-cell-changed.ipynb")
+        nb = self._read_nb(os.path.join("files", "submitted-grade-cell-changed.ipynb"))
         preprocessor.stream = stream
         preprocessor.invert = True
         preprocessor.ignore_checksums = True
@@ -253,7 +254,7 @@ class TestDisplayAutoGrades(BaseTestPreprocessor):
 
     def test_submitted_unchanged_ignore_checksums(self, preprocessor, stream):
         """Does the validation fail on an unchanged notebook with ignoring checksums?"""
-        nb = self._read_nb("files/submitted-unchanged.ipynb")
+        nb = self._read_nb(os.path.join("files", "submitted-unchanged.ipynb"))
         preprocessor.stream = stream
         preprocessor.ignore_checksums = True
         preprocessor.preprocess(nb, {})
@@ -261,14 +262,14 @@ class TestDisplayAutoGrades(BaseTestPreprocessor):
 
     def test_locked_cell_changed(self, preprocessor, stream):
         """Does the validate fail if a locked cell has changed?"""
-        nb = self._read_nb("files/submitted-locked-cell-changed.ipynb")
+        nb = self._read_nb(os.path.join("files", "submitted-locked-cell-changed.ipynb"))
         preprocessor.stream = stream
         preprocessor.preprocess(nb, {})
         assert stream.getvalue().split("\n")[0] == "THE CONTENTS OF 2 TEST CELL(S) HAVE CHANGED! This might mean that even though the tests"
 
     def test_locked_cell_changed_ignore_checksums(self, preprocessor, stream):
         """Does the validate pass if a locked cell has changed but we're ignoring checksums?"""
-        nb = self._read_nb("files/submitted-locked-cell-changed.ipynb")
+        nb = self._read_nb(os.path.join("files", "submitted-locked-cell-changed.ipynb"))
         preprocessor.stream = stream
         preprocessor.ignore_checksums = True
         preprocessor.preprocess(nb, {})
@@ -276,7 +277,7 @@ class TestDisplayAutoGrades(BaseTestPreprocessor):
 
     def test_invert_locked_cell_changed(self, preprocessor, stream):
         """Does the validate fail if a locked cell has changed, even with --invert?"""
-        nb = self._read_nb("files/submitted-locked-cell-changed.ipynb")
+        nb = self._read_nb(os.path.join("files", "submitted-locked-cell-changed.ipynb"))
         preprocessor.stream = stream
         preprocessor.invert = True
         preprocessor.preprocess(nb, {})
@@ -284,7 +285,7 @@ class TestDisplayAutoGrades(BaseTestPreprocessor):
 
     def test_invert_locked_cell_changed_ignore_checksums(self, preprocessor, stream):
         """Does the validate fail if a locked cell has changed with --invert and ignoring checksums?"""
-        nb = self._read_nb("files/submitted-locked-cell-changed.ipynb")
+        nb = self._read_nb(os.path.join("files", "submitted-locked-cell-changed.ipynb"))
         preprocessor.stream = stream
         preprocessor.invert = True
         preprocessor.ignore_checksums = True
@@ -293,7 +294,7 @@ class TestDisplayAutoGrades(BaseTestPreprocessor):
 
     def test_submitted_unchanged_json(self, preprocessor, stream):
         """Does the validation fail on an unchanged notebook?"""
-        nb = self._read_nb("files/submitted-unchanged.ipynb")
+        nb = self._read_nb(os.path.join("files", "submitted-unchanged.ipynb"))
         preprocessor.stream = stream
         preprocessor.as_json = True
         preprocessor.preprocess(nb, {})
@@ -307,7 +308,7 @@ class TestDisplayAutoGrades(BaseTestPreprocessor):
 
     def test_submitted_changed_json(self, preprocessor, stream):
         """Does the validation pass on an changed notebook?"""
-        nb = self._read_nb("files/submitted-changed.ipynb")
+        nb = self._read_nb(os.path.join("files", "submitted-changed.ipynb"))
         preprocessor.stream = stream
         preprocessor.as_json = True
         preprocessor.preprocess(nb, {})
@@ -316,7 +317,7 @@ class TestDisplayAutoGrades(BaseTestPreprocessor):
 
     def test_invert_submitted_unchanged_json(self, preprocessor, stream):
         """Does the inverted validation pass on an unchanged notebook?"""
-        nb = self._read_nb("files/submitted-unchanged.ipynb")
+        nb = self._read_nb(os.path.join("files", "submitted-unchanged.ipynb"))
         preprocessor.stream = stream
         preprocessor.as_json = True
         preprocessor.invert = True
@@ -328,7 +329,7 @@ class TestDisplayAutoGrades(BaseTestPreprocessor):
 
     def test_invert_submitted_changed_json(self, preprocessor, stream):
         """Does the inverted validation fail on a changed notebook?"""
-        nb = self._read_nb("files/submitted-changed.ipynb")
+        nb = self._read_nb(os.path.join("files", "submitted-changed.ipynb"))
         preprocessor.stream = stream
         preprocessor.as_json = True
         preprocessor.invert = True
@@ -341,7 +342,7 @@ class TestDisplayAutoGrades(BaseTestPreprocessor):
 
     def test_grade_cell_changed_json(self, preprocessor, stream):
         """Does the validate fail if a grade cell has changed?"""
-        nb = self._read_nb("files/submitted-grade-cell-changed.ipynb")
+        nb = self._read_nb(os.path.join("files", "submitted-grade-cell-changed.ipynb"))
         preprocessor.stream = stream
         preprocessor.as_json = True
         preprocessor.preprocess(nb, {})
@@ -352,7 +353,7 @@ class TestDisplayAutoGrades(BaseTestPreprocessor):
 
     def test_grade_cell_changed_ignore_checksums_json(self, preprocessor, stream):
         """Does the validate pass if a grade cell has changed but we're ignoring checksums?"""
-        nb = self._read_nb("files/submitted-grade-cell-changed.ipynb")
+        nb = self._read_nb(os.path.join("files", "submitted-grade-cell-changed.ipynb"))
         preprocessor.stream = stream
         preprocessor.as_json = True
         preprocessor.ignore_checksums = True
@@ -362,7 +363,7 @@ class TestDisplayAutoGrades(BaseTestPreprocessor):
 
     def test_invert_grade_cell_changed_json(self, preprocessor, stream):
         """Does the validate fail if a grade cell has changed, even with --invert?"""
-        nb = self._read_nb("files/submitted-grade-cell-changed.ipynb")
+        nb = self._read_nb(os.path.join("files", "submitted-grade-cell-changed.ipynb"))
         preprocessor.stream = stream
         preprocessor.as_json = True
         preprocessor.invert = True
@@ -374,7 +375,7 @@ class TestDisplayAutoGrades(BaseTestPreprocessor):
 
     def test_invert_grade_cell_changed_ignore_checksums_json(self, preprocessor, stream):
         """Does the validate fail if a grade cell has changed with --invert and ignoring checksums?"""
-        nb = self._read_nb("files/submitted-grade-cell-changed.ipynb")
+        nb = self._read_nb(os.path.join("files", "submitted-grade-cell-changed.ipynb"))
         preprocessor.stream = stream
         preprocessor.as_json = True
         preprocessor.invert = True
@@ -388,7 +389,7 @@ class TestDisplayAutoGrades(BaseTestPreprocessor):
 
     def test_submitted_unchanged_ignore_checksums_json(self, preprocessor, stream):
         """Does the validation fail on an unchanged notebook with ignoring checksums?"""
-        nb = self._read_nb("files/submitted-unchanged.ipynb")
+        nb = self._read_nb(os.path.join("files", "submitted-unchanged.ipynb"))
         preprocessor.stream = stream
         preprocessor.as_json = True
         preprocessor.ignore_checksums = True
@@ -400,7 +401,7 @@ class TestDisplayAutoGrades(BaseTestPreprocessor):
 
     def test_locked_cell_changed_json(self, preprocessor, stream):
         """Does the validate fail if a locked cell has changed?"""
-        nb = self._read_nb("files/submitted-locked-cell-changed.ipynb")
+        nb = self._read_nb(os.path.join("files", "submitted-locked-cell-changed.ipynb"))
         preprocessor.stream = stream
         preprocessor.as_json = True
         preprocessor.preprocess(nb, {})
@@ -412,7 +413,7 @@ class TestDisplayAutoGrades(BaseTestPreprocessor):
 
     def test_locked_cell_changed_ignore_checksums_json(self, preprocessor, stream):
         """Does the validate pass if a locked cell has changed but we're ignoring checksums?"""
-        nb = self._read_nb("files/submitted-locked-cell-changed.ipynb")
+        nb = self._read_nb(os.path.join("files", "submitted-locked-cell-changed.ipynb"))
         preprocessor.stream = stream
         preprocessor.as_json = True
         preprocessor.ignore_checksums = True
@@ -424,7 +425,7 @@ class TestDisplayAutoGrades(BaseTestPreprocessor):
 
     def test_invert_locked_cell_changed_json(self, preprocessor, stream):
         """Does the validate fail if a locked cell has changed, even with --invert?"""
-        nb = self._read_nb("files/submitted-locked-cell-changed.ipynb")
+        nb = self._read_nb(os.path.join("files", "submitted-locked-cell-changed.ipynb"))
         preprocessor.stream = stream
         preprocessor.as_json = True
         preprocessor.invert = True
@@ -437,7 +438,7 @@ class TestDisplayAutoGrades(BaseTestPreprocessor):
 
     def test_invert_locked_cell_changed_ignore_checksums_json(self, preprocessor, stream):
         """Does the validate fail if a locked cell has changed with --invert and ignoring checksums?"""
-        nb = self._read_nb("files/submitted-locked-cell-changed.ipynb")
+        nb = self._read_nb(os.path.join("files", "submitted-locked-cell-changed.ipynb"))
         preprocessor.stream = stream
         preprocessor.as_json = True
         preprocessor.invert = True

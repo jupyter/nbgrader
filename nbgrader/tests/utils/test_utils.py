@@ -4,6 +4,7 @@ import tempfile
 import shutil
 
 from nbformat.v4 import new_output
+from os.path import join
 
 from ... import utils
 from .. import (
@@ -255,28 +256,28 @@ def test_compute_checksum_utf8():
 
 def test_is_ignored(temp_cwd):
     os.mkdir("foo")
-    with open("foo/bar.txt", "w") as fh:
+    with open(join("foo", "bar.txt"), "w") as fh:
         fh.write("bar")
 
     assert not utils.is_ignored("foo")
-    assert utils.is_ignored("foo/bar.txt", ["*.txt"])
-    assert utils.is_ignored("foo/bar.txt", ["bar.txt"])
-    assert utils.is_ignored("foo/bar.txt", ["*"])
-    assert not utils.is_ignored("foo/bar.txt", ["*.csv"])
-    assert not utils.is_ignored("foo/bar.txt", ["foo"])
-    assert not utils.is_ignored("foo/bar.txt", ["foo/*"])
+    assert utils.is_ignored(join("foo", "bar.txt"), ["*.txt"])
+    assert utils.is_ignored(join("foo", "bar.txt"), ["bar.txt"])
+    assert utils.is_ignored(join("foo", "bar.txt"), ["*"])
+    assert not utils.is_ignored(join("foo", "bar.txt"), ["*.csv"])
+    assert not utils.is_ignored(join("foo", "bar.txt"), ["foo"])
+    assert not utils.is_ignored(join("foo", "bar.txt"), [join("foo", "*")])
 
 
 def test_find_all_files(temp_cwd):
-    os.makedirs("foo/bar")
-    with open("foo/baz.txt", "w") as fh:
+    os.makedirs(join("foo", "bar"))
+    with open(join("foo", "baz.txt"), "w") as fh:
         fh.write("baz")
-    with open("foo/bar/baz.txt", "w") as fh:
+    with open(join("foo", "bar", "baz.txt"), "w") as fh:
         fh.write("baz")
 
-    assert utils.find_all_files("foo") == ["foo/baz.txt", "foo/bar/baz.txt"]
-    assert utils.find_all_files("foo", ["bar"]) == ["foo/baz.txt"]
-    assert utils.find_all_files("foo/bar") == ["foo/bar/baz.txt"]
-    assert utils.find_all_files("foo/bar", ["*.txt"]) == []
-    assert utils.find_all_files(".") == ["./foo/baz.txt", "./foo/bar/baz.txt"]
-    assert utils.find_all_files(".", ["bar"]) == ["./foo/baz.txt"]
+    assert utils.find_all_files("foo") == [join("foo", "baz.txt"), join("foo", "bar", "baz.txt")]
+    assert utils.find_all_files("foo", ["bar"]) == [join("foo", "baz.txt")]
+    assert utils.find_all_files(join("foo", "bar")) == [join("foo", "bar", "baz.txt")]
+    assert utils.find_all_files(join("foo", "bar"), ["*.txt"]) == []
+    assert utils.find_all_files(".") == [join(".", "foo", "baz.txt"), join(".", "foo", "bar", "baz.txt")]
+    assert utils.find_all_files(".", ["bar"]) == [join(".", "foo", "baz.txt")]

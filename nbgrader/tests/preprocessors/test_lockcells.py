@@ -1,5 +1,6 @@
 import pytest
 import itertools
+import os
 
 from ...preprocessors import LockCells
 from .base import BaseTestPreprocessor
@@ -116,4 +117,4 @@ class TestLockCells(BaseTestPreprocessor):
         preprocessor.lock_grade_cells = lock_grade_cells
         preprocessor.lock_all_cells = lock_all_cells
         preprocessor.lock_readonly_cells = lock_readonly_cells
-        preprocessor.preprocess(self._read_nb("files/test.ipynb"), {})
+        preprocessor.preprocess(self._read_nb(os.path.join("files", "test.ipynb")), {})
