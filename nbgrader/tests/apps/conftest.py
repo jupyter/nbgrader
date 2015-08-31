@@ -2,6 +2,7 @@ import os
 import tempfile
 import shutil
 import pytest
+import sys
 
 from textwrap import dedent
 
@@ -111,3 +112,7 @@ def cache(request):
     request.addfinalizer(fin)
 
     return path
+
+notwindows = pytest.mark.skipif(
+    sys.platform == 'win32',
+    reason='This functionality of nbgrader is unsupported on Windows')

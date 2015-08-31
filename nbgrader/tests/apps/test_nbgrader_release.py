@@ -3,8 +3,10 @@ from os.path import join
 
 from .. import run_python_module
 from .base import BaseTestApp
+from .conftest import notwindows
 
 
+@notwindows
 class TestNbGraderRelease(BaseTestApp):
 
     def _release(self, assignment, exchange, flags=None, retcode=0):

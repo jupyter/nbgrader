@@ -4,9 +4,11 @@ from os.path import join
 
 from .. import run_python_module
 from .base import BaseTestApp
+from .conftest import notwindows
 from ...utils import parse_utc
 
 
+@notwindows
 class TestNbGraderCollect(BaseTestApp):
 
     def _release_and_fetch(self, assignment, exchange, course_dir):

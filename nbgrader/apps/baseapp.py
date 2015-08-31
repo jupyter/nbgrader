@@ -392,6 +392,9 @@ class TransferApp(NbGrader):
 
     @catch_config_error
     def initialize(self, argv=None):
+        if sys.platform == 'win32':
+            self.fail("Sorry, %s is not available on Windows.", self.name.replace("-", " "))
+
         super(TransferApp, self).initialize(argv)
         self.ensure_exchange_directory()
         self.set_timestamp()

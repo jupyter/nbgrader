@@ -100,11 +100,14 @@ minversion = pytest.mark.skipif(
     sys.version_info[0] < 3,
     reason="JupyterHub tests require Python 3")
 jupyterhub = pytest.mark.jupyterhub
+notwindows = pytest.mark.skipif(
+    sys.platform == 'win32',
+    reason='This functionality of nbgrader is unsupported on Windows')
 
 # parameterize the formgrader to run under all managers
 @pytest.fixture(
     scope="class",
-    params=[jupyterhub(minversion(x)) if x.startswith("Hub") else x for x in manager.__all__]
+    params=[jupyterhub(notwindows(minversion(x))) if x.startswith("Hub") else x for x in manager.__all__]
 )
 def all_formgraders(request, gradebook, tempdir):
     _formgrader(request, getattr(manager, request.param), gradebook, tempdir)
@@ -114,6 +117,6 @@ def all_formgraders(request, gradebook, tempdir):
 def formgrader(request, gradebook, tempdir):
     _formgrader(request, manager.DefaultManager, gradebook, tempdir)
 
-@pytest.fixture(scope="class", params=[jupyterhub(minversion("BadHubAuthManager"))])
+@pytest.fixture(scope="class", params=[jupyterhub(notwindows(minversion("BadHubAuthManager")))])
 def bad_formgrader(request, gradebook, tempdir):
     _formgrader(request, getattr(bad_manager, request.param), gradebook, tempdir)
