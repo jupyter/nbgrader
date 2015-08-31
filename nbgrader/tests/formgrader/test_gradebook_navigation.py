@@ -31,12 +31,16 @@ class TestGradebook(BaseTestFormgrade):
         self.browser.find_element_by_id("login_submit").click()
 
         # check the url
-        self._wait_for_gradebook_page("assignments")
+        self._wait_for_gradebook_page("")
 
     def test_load_assignment_list(self):
-        # load the main page and make sure it redirects
+        # load the main page and make sure it is the Assignments page
         self._get(self.formgrade_url())
-        self._wait_for_gradebook_page("assignments")
+        self._wait_for_gradebook_page("")
+        self._check_breadcrumbs("Assignments")
+
+        # load the assignments page
+        self._load_gradebook_page("assignments")
         self._check_breadcrumbs("Assignments")
 
         # click on the "Problem Set 1" link

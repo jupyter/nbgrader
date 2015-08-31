@@ -72,7 +72,6 @@ class BaseTestFormgrade(object):
         self._check_url(url)
 
     def _wait_for_formgrader(self, url, retries=5):
-        self._wait_for_element("notebook-container")
         page_loaded = lambda browser: browser.execute_script(
             """
             if (!(typeof MathJax !== "undefined" && MathJax !== undefined && MathJax.loaded)) {
@@ -98,6 +97,7 @@ class BaseTestFormgrade(object):
             return true;
             """)
         try:
+            self._wait_for_element("notebook-container")
             WebDriverWait(self.browser, 10).until(page_loaded)
         except TimeoutException:
             if retries == 0:
