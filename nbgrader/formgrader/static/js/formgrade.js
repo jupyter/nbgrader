@@ -84,7 +84,6 @@ FormGrader.prototype.loadGrades = function () {
             "submission_id": this.submission_id
         },
         success: function () {
-            that.grades.loaded = true;
             that.grades.each(function (model) {
                 var grade_ui = new GradeUI({
                     "model": model,
@@ -92,6 +91,7 @@ FormGrader.prototype.loadGrades = function () {
                 });
                 that.grade_uis.push(grade_ui);
             });
+            that.grades.loaded = true;
         }
     });
 };
@@ -107,7 +107,6 @@ FormGrader.prototype.loadComments = function () {
             "submission_id": this.submission_id
         },
         success: function () {
-            that.comments.loaded = true;
             that.comments.each(function (model) {
                 var comment_ui = new CommentUI({
                     "model": model,
@@ -115,6 +114,7 @@ FormGrader.prototype.loadComments = function () {
                 });
                 that.comment_uis.push(comment_ui);
             });
+            that.comments.loaded = true;
         }
     });
 };
@@ -166,7 +166,7 @@ FormGrader.prototype.save = function (callback) {
 
 FormGrader.prototype.getScrollPosition = function () {
     var target = this.last_selected.parents(".nbgrader_cell");
-    if (target.length == 0) {
+    if (target.length === 0) {
         return $("body").offset().top;
     } else {
         return target.offset().top - $(window).height() * 0.33 + 60;
@@ -244,7 +244,7 @@ FormGrader.prototype.setCurrentIndex = function (index) {
     // on whatver the most recently selected element was
     if (index === undefined) {
         var target = this.last_selected.parents(".nbgrader_cell").find(".score");
-        if (target.length == 0) {
+        if (target.length === 0) {
             this.current_index = this.getIndex(this.last_selected);
         } else {
             this.current_index = this.getIndex(target);
@@ -267,7 +267,7 @@ FormGrader.prototype.scrollToLastSelected = function () {
     this.setCurrentIndex();
     history.replaceState(history.state, "", this.navigateTo(""));
 
-    var that = this
+    var that = this;
     $("body, html").stop().animate({
         scrollTop: that.getScrollPosition()
     }, 500);
