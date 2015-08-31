@@ -126,6 +126,21 @@ define([
         this.element.addClass('list_item').addClass("row");
     };
 
+    Assignment.prototype.escape_id = function () {
+        // construct the id from the course id and the assignment id, and also
+        // prepend the id with "nbgrader" (this also ensures that the first
+        // character is always a letter, as required by HTML 4)
+        var id = "nbgrader-" + this.data.course_id + "-" + this.data.assignment_id;
+
+        // replace spaces with '_'
+        id = id.replace(/ /g, "_");
+
+        // remove any characters that are invalid in HTML div ids
+        id = id.replace(/[^A-Za-z0-9\-_]/g, "");
+
+        return id;
+    };
+
     Assignment.prototype.make_row = function () {
         var row = $('<div/>').addClass('col-md-12');
         row.append(this.make_link());
@@ -138,7 +153,7 @@ define([
         this.element.empty().append(row);
 
         if (this.data.status === 'fetched') {
-            var id = (this.data.course_id + "-" + this.data.assignment_id).replace(/ /g, "_");
+            var id = this.escape_id();
             var children = $('<div/>')
                 .attr("id", id)
                 .addClass("panel-collapse collapse list_container assignment-notebooks")
@@ -163,7 +178,7 @@ define([
         var link;
 
         if (this.data.status === 'fetched') {
-            var id = (this.data.course_id + "-" + this.data.assignment_id).replace(/ /g, "_");
+            var id = this.escape_id();
             link = $('<a/>')
                 .addClass("collapsed assignment-notebooks-link")
                 .attr("role", "button")

@@ -115,8 +115,8 @@ def test_multiple_released_assignments(browser, class_files):
     _load_assignments_list(browser)
 
     # release another assignment
-    run_python_module(["nbgrader", "assign", "ps1"])
-    run_python_module(["nbgrader", "release", "ps1", "--course", "xyz 200"])
+    run_python_module(["nbgrader", "assign", "ps.01"])
+    run_python_module(["nbgrader", "release", "ps.01", "--course", "xyz 200"])
 
     # click the refresh button
     browser.find_element_by_css_selector("#refresh_assignments_list").click()
@@ -127,7 +127,7 @@ def test_multiple_released_assignments(browser, class_files):
     rows.sort(key=_sort_rows)
     assert rows[0].find_element_by_class_name("item_name").text == "Problem Set 1"
     assert rows[0].find_element_by_class_name("item_course").text == "abc101"
-    assert rows[1].find_element_by_class_name("item_name").text == "ps1"
+    assert rows[1].find_element_by_class_name("item_name").text == "ps.01"
     assert rows[1].find_element_by_class_name("item_course").text == "xyz 200"
 
 
@@ -143,18 +143,18 @@ def test_fetch_assignment(browser, class_files):
     # wait for the downloaded assignments list to update
     _wait(browser).until(lambda browser: len(browser.find_elements_by_css_selector("#fetched_assignments_list > .list_item")) == 1)
     rows = browser.find_elements_by_css_selector("#fetched_assignments_list > .list_item")
-    assert rows[0].find_element_by_class_name("item_name").text == "ps1"
+    assert rows[0].find_element_by_class_name("item_name").text == "ps.01"
     assert rows[0].find_element_by_class_name("item_course").text == "xyz 200"
-    assert os.path.exists(os.path.join(class_files, "ps1"))
+    assert os.path.exists(os.path.join(class_files, "ps.01"))
 
     # expand the assignment to show the notebooks
-    rows = _expand(browser, "#xyz_200-ps1", "ps1")
+    rows = _expand(browser, "#nbgrader-xyz_200-ps01", "ps.01")
     rows.sort(key=_sort_rows)
     assert len(rows) == 2
     assert rows[1].find_element_by_class_name("item_name").text == "problem 1"
 
     # unexpand the assignment
-    _unexpand(browser, "#xyz_200-ps1", "ps1")
+    _unexpand(browser, "#nbgrader-xyz_200-ps01", "ps.01")
 
 
 @pytest.mark.js
@@ -170,7 +170,7 @@ def test_submit_assignment(browser, class_files):
     _wait(browser).until(EC.invisibility_of_element_located((By.CSS_SELECTOR, "#submitted_assignments_list_placeholder")))
     rows = browser.find_elements_by_css_selector("#submitted_assignments_list > .list_item")
     assert len(rows) == 1
-    assert rows[0].find_element_by_class_name("item_name").text == "ps1"
+    assert rows[0].find_element_by_class_name("item_name").text == "ps.01"
     assert rows[0].find_element_by_class_name("item_course").text == "xyz 200"
 
     # submit it again
@@ -181,9 +181,9 @@ def test_submit_assignment(browser, class_files):
     _wait(browser).until(lambda browser: len(browser.find_elements_by_css_selector("#submitted_assignments_list > .list_item")) == 2)
     rows = browser.find_elements_by_css_selector("#submitted_assignments_list > .list_item")
     rows.sort(key=_sort_rows)
-    assert rows[0].find_element_by_class_name("item_name").text == "ps1"
+    assert rows[0].find_element_by_class_name("item_name").text == "ps.01"
     assert rows[0].find_element_by_class_name("item_course").text == "xyz 200"
-    assert rows[1].find_element_by_class_name("item_name").text == "ps1"
+    assert rows[1].find_element_by_class_name("item_name").text == "ps.01"
     assert rows[1].find_element_by_class_name("item_course").text == "xyz 200"
     assert rows[0].find_element_by_class_name("item_status").text != rows[1].find_element_by_class_name("item_status").text
 
@@ -204,12 +204,12 @@ def test_fetch_second_assignment(browser, class_files):
     rows.sort(key=_sort_rows)
     assert rows[0].find_element_by_class_name("item_name").text == "Problem Set 1"
     assert rows[0].find_element_by_class_name("item_course").text == "abc101"
-    assert rows[1].find_element_by_class_name("item_name").text == "ps1"
+    assert rows[1].find_element_by_class_name("item_name").text == "ps.01"
     assert rows[1].find_element_by_class_name("item_course").text == "xyz 200"
     assert os.path.exists(os.path.join(class_files, "Problem Set 1"))
 
     # expand the assignment to show the notebooks
-    rows = _expand(browser, "#abc101-Problem_Set_1", "Problem Set 1")
+    rows = _expand(browser, "#nbgrader-abc101-Problem_Set_1", "Problem Set 1")
     rows.sort(key=_sort_rows)
     assert len(rows) == 3
     assert rows[1].find_element_by_class_name("item_name").text == "Problem 1"
@@ -234,9 +234,9 @@ def test_submit_other_assignment(browser, class_files):
     rows.sort(key=_sort_rows)
     assert rows[0].find_element_by_class_name("item_name").text == "Problem Set 1"
     assert rows[0].find_element_by_class_name("item_course").text == "abc101"
-    assert rows[1].find_element_by_class_name("item_name").text == "ps1"
+    assert rows[1].find_element_by_class_name("item_name").text == "ps.01"
     assert rows[1].find_element_by_class_name("item_course").text == "xyz 200"
-    assert rows[2].find_element_by_class_name("item_name").text == "ps1"
+    assert rows[2].find_element_by_class_name("item_name").text == "ps.01"
     assert rows[2].find_element_by_class_name("item_course").text == "xyz 200"
     assert rows[0].find_element_by_class_name("item_status").text != rows[1].find_element_by_class_name("item_status").text
     assert rows[0].find_element_by_class_name("item_status").text != rows[2].find_element_by_class_name("item_status").text
@@ -248,7 +248,7 @@ def test_validate_ok(browser, class_files):
 
     # expand the assignment to show the notebooks
     _wait(browser).until(EC.invisibility_of_element_located((By.CSS_SELECTOR, "#fetched_assignments_list_placeholder")))
-    rows = _expand(browser, "#xyz_200-ps1", "ps1")
+    rows = _expand(browser, "#nbgrader-xyz_200-ps01", "ps.01")
     rows.sort(key=_sort_rows)
     assert len(rows) == 2
     assert rows[1].find_element_by_class_name("item_name").text == "problem 1"
@@ -272,7 +272,7 @@ def test_validate_failure(browser, class_files):
 
     # expand the assignment to show the notebooks
     _wait(browser).until(EC.invisibility_of_element_located((By.CSS_SELECTOR, "#fetched_assignments_list_placeholder")))
-    rows = _expand(browser, "#abc101-Problem_Set_1", "Problem Set 1")
+    rows = _expand(browser, "#nbgrader-abc101-Problem_Set_1", "Problem Set 1")
     rows.sort(key=_sort_rows)
     assert len(rows) == 3
     assert rows[1].find_element_by_class_name("item_name").text == "Problem 1"
