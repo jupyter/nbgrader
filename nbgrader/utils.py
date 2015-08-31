@@ -1,10 +1,16 @@
 import os
 import hashlib
 import dateutil.parser
-import pwd
 import glob
 import six
 import sys
+
+# pwd is for unix passwords only, so we shouldn't import it on
+# windows machines
+if sys.platform != 'win32':
+    import pwd
+else:
+    pwd = None
 
 
 def is_grade(cell):
@@ -114,10 +120,14 @@ def check_directory(path, read=False, write=False, execute=False):
 
 def get_username():
     """Get the username of the current process."""
+    if pwd is None:
+        raise OSError("get_username cannot be called on Windows")
     return pwd.getpwuid(os.getuid())[0]
 
 def find_owner(path):
     """Get the username of the owner of path."""
+    if pwd is None:
+        raise OSError("find_owner cannot be called on Windows")
     return pwd.getpwuid(os.stat(os.path.abspath(path)).st_uid).pw_name
 
 def self_owned(path):
