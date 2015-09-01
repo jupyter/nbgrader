@@ -9,6 +9,7 @@ from selenium import webdriver
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 
 from ...api import Gradebook
+from ...utils import rmtree
 from .. import run_python_module
 from . import manager, bad_manager
 
@@ -21,7 +22,7 @@ def tempdir(request):
 
     def fin():
         os.chdir(origdir)
-        shutil.rmtree(tempdir)
+        rmtree(tempdir)
     request.addfinalizer(fin)
 
     return tempdir
@@ -58,8 +59,7 @@ def gradebook(request, tempdir):
     run_python_module(["nbgrader", "autograde", "Problem Set 1"])
 
     def fin():
-        os.chdir(origdir)
-        shutil.rmtree("class_files")
+        gb.db.close()
     request.addfinalizer(fin)
 
     return gb
@@ -75,7 +75,10 @@ def _formgrader(request, manager_class, gradebook, tempdir):
     capabilities = DesiredCapabilities.PHANTOMJS
     capabilities['loggingPrefs'] = {'browser': 'ALL'}
     capabilities['acceptSslCerts'] = True
-    browser = webdriver.PhantomJS(service_args=['--ignore-ssl-errors=true'], desired_capabilities=capabilities)
+    browser = webdriver.PhantomJS(
+        service_args=['--ignore-ssl-errors=true'],
+        desired_capabilities=capabilities,
+        service_log_path=os.path.devnull)
     browser.set_page_load_timeout(10)
     browser.set_script_timeout(10)
 
@@ -99,24 +102,31 @@ def _formgrader(request, manager_class, gradebook, tempdir):
 minversion = pytest.mark.skipif(
     sys.version_info[0] < 3,
     reason="JupyterHub tests require Python 3")
-jupyterhub = pytest.mark.jupyterhub
 notwindows = pytest.mark.skipif(
     sys.platform == 'win32',
-    reason='This functionality of nbgrader is unsupported on Windows')
+    reason='JupyterHub cannot run on Windows')
+
+jupyterhub = lambda x: pytest.mark.jupyterhub(formgrader(minversion(notwindows(x))))
 
 # parameterize the formgrader to run under all managers
 @pytest.fixture(
     scope="class",
-    params=[jupyterhub(notwindows(minversion(x))) if x.startswith("Hub") else x for x in manager.__all__]
+    params=[jupyterhub(x) if x.startswith("Hub") else js(x) for x in manager.__all__]
 )
 def all_formgraders(request, gradebook, tempdir):
     _formgrader(request, getattr(manager, request.param), gradebook, tempdir)
 
-# parameterize the formgrader to run under all managers
-@pytest.fixture(scope="class")
+# parameterize the formgrader to run under just the default manager
+@pytest.fixture(
+    scope="class",
+    params=[js("DefaultManager")]
+)
 def formgrader(request, gradebook, tempdir):
-    _formgrader(request, manager.DefaultManager, gradebook, tempdir)
+    _formgrader(request, getattr(manager, request.param), gradebook, tempdir)
 
-@pytest.fixture(scope="class", params=[jupyterhub(notwindows(minversion("BadHubAuthManager")))])
+@pytest.fixture(
+    scope="class",
+    params=[jupyterhub("BadHubAuthManager")]
+)
 def bad_formgrader(request, gradebook, tempdir):
     _formgrader(request, getattr(bad_manager, request.param), gradebook, tempdir)

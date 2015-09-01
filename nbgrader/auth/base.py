@@ -36,6 +36,6 @@ class BaseAuth(LoggingConfigurable):
     def transform_handler(self, handler):
         return handler
 
-    def stop(self, sig):
+    def stop(self):
         """Stops the notebook server."""
         pass

@@ -2,6 +2,7 @@ import time
 import os
 import subprocess as sp
 import sys
+import signal
 
 from textwrap import dedent
 from .. import start_subprocess, copy_coverage_files
@@ -45,9 +46,14 @@ class DefaultManager(object):
         pass
 
     def _start_formgrader(self):
+        kwargs = dict(env=self.env)
+        if sys.platform == 'win32':
+            kwargs['creationflags'] = sp.CREATE_NEW_PROCESS_GROUP
+        
         self.formgrader = start_subprocess(
             [sys.executable, "-m", "nbgrader", "formgrade"],
-            env=self.env)
+            **kwargs)
+        
         time.sleep(self.startup_wait)
 
     def start(self):
@@ -56,7 +62,10 @@ class DefaultManager(object):
         self._start_formgrader()
 
     def _stop_formgrader(self):
-        self.formgrader.terminate()
+        if sys.platform == 'win32':
+            self.formgrader.send_signal(signal.CTRL_BREAK_EVENT)
+        else:
+            self.formgrader.terminate()
 
         # wait for the formgrader to shut down
         for i in range(int(self.shutdown_wait / 0.1)):
@@ -68,6 +77,8 @@ class DefaultManager(object):
         # not shutdown, force kill it
         if retcode is None:
             self.formgrader.kill()
+
+        self.formgrader.wait()
 
     def _stop_jupyterhub(self):
         pass

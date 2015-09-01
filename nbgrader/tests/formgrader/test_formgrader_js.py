@@ -6,6 +6,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 
 from .base import BaseTestFormgrade
+from .conftest import js
 
 
 @pytest.mark.formgrader

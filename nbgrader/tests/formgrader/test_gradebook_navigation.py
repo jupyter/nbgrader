@@ -4,6 +4,7 @@ from six.moves.urllib.parse import quote
 
 from ...api import MissingEntry
 from .base import BaseTestFormgrade
+from .conftest import js
 from .manager import HubAuthNotebookServerUserManager
 
 

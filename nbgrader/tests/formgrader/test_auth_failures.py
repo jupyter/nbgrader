@@ -1,8 +1,9 @@
 import pytest
 
 from .base import BaseTestFormgrade
+from .conftest import jupyterhub
 
-@pytest.mark.formgrader
+@jupyterhub
 @pytest.mark.usefixtures("bad_formgrader")
 class TestAuthFailures(BaseTestFormgrade):
 
@@ -27,7 +28,7 @@ class TestAuthFailures(BaseTestFormgrade):
         self._wait_for_element("error-500")
 
 
-@pytest.mark.formgrader
+@jupyterhub
 @pytest.mark.usefixtures("all_formgraders")
 class TestInvalidGrader(BaseTestFormgrade):
 
