@@ -182,6 +182,12 @@ class TestClearSolutions(BaseTestPreprocessor):
         with pytest.raises(RuntimeError):
             preprocessor.preprocess_cell(cell, {}, 1)
 
+        # now disable enforcing metadata
+        preprocessor.enforce_metadata = False
+        cell, _ = preprocessor.preprocess_cell(cell, {}, 1)
+        assert cell.source == "something something\nYOUR ANSWER HERE"
+        assert 'nbgrader' not in cell.metadata
+
     def test_preprocess_notebook(self, preprocessor):
         """Is the test notebook processed without error?"""
         nb = self._read_nb("files/test.ipynb")

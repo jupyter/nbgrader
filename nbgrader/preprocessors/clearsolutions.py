@@ -1,4 +1,5 @@
-from traitlets import Unicode
+from traitlets import Unicode, Bool
+from textwrap import dedent
 
 from .. import utils
 from . import NbGraderPreprocessor
@@ -30,6 +31,20 @@ class ClearSolutions(NbGraderPreprocessor):
         "## END SOLUTION",
         config=True,
         help="The delimiter marking the end of a solution (excluding comment mark)")
+
+    enforce_metadata = Bool(
+        True,
+        config=True,
+        help=dedent(
+            """
+            Whether or not to complain if cells containing solutions regions are
+            not marked as solution cells. WARNING: this will potentially cause
+            things to break if you are using the full nbgrader pipeline. ONLY
+            disable this option if you are only ever planning to use nbgrader
+            assign.
+            """
+        )
+    )
 
     @property
     def begin_solution(self):
@@ -113,10 +128,11 @@ class ClearSolutions(NbGraderPreprocessor):
         # region -- if it's not, then this is a problem, because the cell needs
         # to be given an id
         if not is_solution and replaced_solution:
-            raise RuntimeError(
-                "Solution region detected in a non-solution cell; "
-                "please make sure all solution regions are within "
-                "solution cells")
+            if self.enforce_metadata:
+                raise RuntimeError(
+                    "Solution region detected in a non-solution cell; please make sure "
+                    "all solution regions are within solution cells."
+                )
 
         # replace solution cells with the code/text stub -- but not if
         # we already replaced a solution region, because that means

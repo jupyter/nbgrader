@@ -27,8 +27,19 @@ flags = {}
 flags.update(nbconvert_flags)
 flags.update({
     'no-db': (
-        {'SaveCells': {'enabled': False}},
-        "Do not save information about grade cells into the database."
+        {
+            'SaveCells': {'enabled': False},
+            'AssignApp': {'no_database': True}
+        },
+        "Do not save information into the database."
+    ),
+    'no-metadata': (
+        {
+            'ClearSolutions': {'enforce_metadata': False},
+            'CheckCellMetadata': {'enabled': False},
+            'ComputeChecksums': {'enabled': False}
+        },
+        "Do not validate or modify cell metatadata."
     ),
     'create': (
         {'AssignApp': {'create_assignment': True}},
@@ -102,6 +113,15 @@ class AssignApp(BaseNbConvertApp):
         )
     )
 
+    no_database = Bool(
+        False, config=True,
+        help=dedent(
+            """
+            Do not save information about the assignment into the database.
+            """
+        )
+    )
+
     def _permissions_default(self):
         return 644
 
@@ -170,17 +190,18 @@ class AssignApp(BaseNbConvertApp):
 
         # try to get the assignment from the database, and throw an error if it
         # doesn't exist
-        gb = Gradebook(self.db_url)
-        try:
-            gb.find_assignment(assignment_id)
-        except MissingEntry:
-            if self.create_assignment:
-                self.log.warning("Creating assignment '%s'", assignment_id)
-                gb.add_assignment(assignment_id)
+        if not self.no_database:
+            gb = Gradebook(self.db_url)
+            try:
+                gb.find_assignment(assignment_id)
+            except MissingEntry:
+                if self.create_assignment:
+                    self.log.warning("Creating assignment '%s'", assignment_id)
+                    gb.add_assignment(assignment_id)
+                else:
+                    self.fail("No assignment called '%s' exists in the database", assignment_id)
             else:
-                self.fail("No assignment called '%s' exists in the database", assignment_id)
-        else:
-            # check if there are any extra notebooks in the db that are no longer
-            # part of the assignment, and if so, remove them
-            if self.notebook_id == "*":
-                self._clean_old_notebooks(assignment_id, student_id)
+                # check if there are any extra notebooks in the db that are no longer
+                # part of the assignment, and if so, remove them
+                if self.notebook_id == "*":
+                    self._clean_old_notebooks(assignment_id, student_id)
