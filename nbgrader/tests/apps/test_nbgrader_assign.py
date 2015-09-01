@@ -238,3 +238,14 @@ class TestNbGraderAssign(BaseTestApp):
 
     def test_fail_no_notebooks(self):
         run_python_module(["nbgrader", "assign", "ps1", "--create"], retcode=1)
+
+    def test_no_metadata(self, course_dir):
+        self._copy_file(join("files", "test-no-metadata.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
+
+        # it should fail because of the solution regions
+        run_python_module(["nbgrader", "assign", "ps1", "--no-db"], retcode=1)
+
+        # it should pass now that we're not enforcing metadata
+        run_python_module(["nbgrader", "assign", "ps1", "--no-db", "--no-metadata"])
+        assert os.path.exists(join(course_dir, "release", "ps1", "p1.ipynb"))
+
