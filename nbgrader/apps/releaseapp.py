@@ -50,7 +50,7 @@ class ReleaseApp(TransferApp):
         To pass the `course_id` at the command line, add `--course=phys101` to any
         of the below commands.
 
-        Second, the assignment to be released but already be in the `release` folder.
+        Second, the assignment to be released must already be in the `release` folder.
         The usual way of getting an assignment into this folder is by running
         `nbgrader assign`.
 
