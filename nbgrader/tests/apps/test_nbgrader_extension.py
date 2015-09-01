@@ -2,6 +2,7 @@ import pytest
 import os
 import json
 import six
+import sys
 
 from .. import run_python_module
 from .base import BaseTestApp
@@ -24,9 +25,10 @@ class TestNbGraderExtension(BaseTestApp):
         assert os.path.isfile(os.path.join(nbextension_dir, "create_assignment", "main.js"))
         assert os.path.isfile(os.path.join(nbextension_dir, "create_assignment", "create_assignment.css"))
 
-        assert os.path.isfile(os.path.join(nbextension_dir, "assignment_list", "main.js"))
-        assert os.path.isfile(os.path.join(nbextension_dir, "assignment_list", "assignment_list.css"))
-        assert os.path.isfile(os.path.join(nbextension_dir, "assignment_list", "assignment_list.css"))
+        if sys.platform != 'win32':
+            assert os.path.isfile(os.path.join(nbextension_dir, "assignment_list", "main.js"))
+            assert os.path.isfile(os.path.join(nbextension_dir, "assignment_list", "assignment_list.css"))
+            assert os.path.isfile(os.path.join(nbextension_dir, "assignment_list", "assignment_list.css"))
 
     def _activate_fake_extension(self, config_file, key):
         with open(config_file, 'r') as fh:
@@ -67,7 +69,8 @@ class TestNbGraderExtension(BaseTestApp):
 
         # check that it is activated
         self._assert_is_activated(os.path.join(jupyter_config_dir, 'nbconfig', 'notebook.json'), key='create_assignment/main')
-        self._assert_is_activated(os.path.join(jupyter_config_dir, 'nbconfig', 'tree.json'), key='assignment_list/main')
+        if sys.platform != 'win32':
+            self._assert_is_activated(os.path.join(jupyter_config_dir, 'nbconfig', 'tree.json'), key='assignment_list/main')
 
     def test_deactivate(self, jupyter_data_dir, jupyter_config_dir, env):
         nbextension_dir = os.path.join(jupyter_data_dir, "nbextensions")
@@ -79,23 +82,27 @@ class TestNbGraderExtension(BaseTestApp):
 
         # check that it is activated
         self._assert_is_activated(os.path.join(jupyter_config_dir, 'nbconfig', 'notebook.json'), key='create_assignment/main')
-        self._assert_is_activated(os.path.join(jupyter_config_dir, 'nbconfig', 'tree.json'), key='assignment_list/main')
+        if sys.platform != 'win32':
+            self._assert_is_activated(os.path.join(jupyter_config_dir, 'nbconfig', 'tree.json'), key='assignment_list/main')
 
         # activate a fake extension
         self._activate_fake_extension(os.path.join(jupyter_config_dir, 'nbconfig', 'notebook.json'), key='other_extension')
-        self._activate_fake_extension(os.path.join(jupyter_config_dir, 'nbconfig', 'tree.json'), key='other_extension')
+        if sys.platform != 'win32':
+            self._activate_fake_extension(os.path.join(jupyter_config_dir, 'nbconfig', 'tree.json'), key='other_extension')
 
         run_python_module(["nbgrader", "extension", "deactivate"], env=env)
 
         # check that it is deactivated
         self._assert_is_deactivated(os.path.join(jupyter_config_dir, 'nbconfig', 'notebook.json'), key='create_assignment/main')
-        self._assert_is_deactivated(os.path.join(jupyter_config_dir, 'nbconfig', 'tree.json'), key='assignment_list/main')
         self._assert_is_activated(os.path.join(jupyter_config_dir, 'nbconfig', 'notebook.json'), key='other_extension')
-        self._assert_is_activated(os.path.join(jupyter_config_dir, 'nbconfig', 'tree.json'), key='other_extension')
+        if sys.platform != 'win32':
+            self._assert_is_deactivated(os.path.join(jupyter_config_dir, 'nbconfig', 'tree.json'), key='assignment_list/main')
+            self._assert_is_activated(os.path.join(jupyter_config_dir, 'nbconfig', 'tree.json'), key='other_extension')
 
         run_python_module(["nbgrader", "extension", "activate"], env=env)
 
         self._assert_is_activated(os.path.join(jupyter_config_dir, 'nbconfig', 'notebook.json'), key='create_assignment/main')
-        self._assert_is_activated(os.path.join(jupyter_config_dir, 'nbconfig', 'tree.json'), key='assignment_list/main')
         self._assert_is_activated(os.path.join(jupyter_config_dir, 'nbconfig', 'notebook.json'), key='other_extension')
-        self._assert_is_activated(os.path.join(jupyter_config_dir, 'nbconfig', 'tree.json'), key='other_extension')
+        if sys.platform != 'win32':
+            self._assert_is_activated(os.path.join(jupyter_config_dir, 'nbconfig', 'tree.json'), key='assignment_list/main')
+            self._assert_is_activated(os.path.join(jupyter_config_dir, 'nbconfig', 'tree.json'), key='other_extension')

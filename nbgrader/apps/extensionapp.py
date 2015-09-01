@@ -54,7 +54,7 @@ class ExtensionInstallApp(InstallNBExtensionApp, NbGrader):
             self.install_extensions()
 
         # install the assignment_list extension
-        if len(extra_args) == 0 or "assignment_list" in extra_args:
+        if sys.platform != 'win32' and (len(extra_args) == 0 or "assignment_list" in extra_args):
             self.log.info("Installing assignment_list extension")
             self.extra_args = [os.path.join(nbextensions_dir, 'assignment_list', 'static')]
             self.destination = 'assignment_list'
@@ -98,7 +98,7 @@ class ExtensionActivateApp(EnableNBExtensionApp, NbGrader):
             self.section = "notebook"
             self.enable_nbextension("create_assignment/main")
 
-        if len(self.extra_args) == 0 or "assignment_list" in self.extra_args:
+        if sys.platform != 'win32' and (len(self.extra_args) == 0 or "assignment_list" in self.extra_args):
             self.log.info("Activating assignment_list server extension")
             self.enable_server_extension('nbgrader.nbextensions.assignment_list')
 
@@ -153,7 +153,7 @@ class ExtensionDeactivateApp(DisableNBExtensionApp, NbGrader):
             self.section = "notebook"
             self.disable_nbextension("create_assignment/main")
 
-        if len(self.extra_args) == 0 or "assignment_list" in self.extra_args:
+        if sys.platform != 'win32' and (len(self.extra_args) == 0 or "assignment_list" in self.extra_args):
             self.log.info("Deactivating assignment_list server extension")
             self.disable_server_extension('nbgrader.nbextensions.assignment_list')
 

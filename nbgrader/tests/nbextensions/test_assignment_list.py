@@ -7,6 +7,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException, NoSuchElementException
 
 from .. import run_python_module
+from .conftest import notwindows
 
 
 def _wait(browser):
@@ -87,6 +88,7 @@ def _sort_rows(x):
 
 
 @pytest.mark.nbextensions
+@notwindows
 def test_show_assignments_list(browser, class_files, tempdir):
     _load_assignments_list(browser)
 
@@ -111,6 +113,7 @@ def test_show_assignments_list(browser, class_files, tempdir):
 
 
 @pytest.mark.nbextensions
+@notwindows
 def test_multiple_released_assignments(browser, class_files, tempdir):
     _load_assignments_list(browser)
 
@@ -132,6 +135,7 @@ def test_multiple_released_assignments(browser, class_files, tempdir):
 
 
 @pytest.mark.nbextensions
+@notwindows
 def test_fetch_assignment(browser, class_files, tempdir):
     _load_assignments_list(browser)
 
@@ -158,6 +162,7 @@ def test_fetch_assignment(browser, class_files, tempdir):
 
 
 @pytest.mark.nbextensions
+@notwindows
 def test_submit_assignment(browser, class_files, tempdir):
     _load_assignments_list(browser)
 
@@ -189,6 +194,7 @@ def test_submit_assignment(browser, class_files, tempdir):
 
 
 @pytest.mark.nbextensions
+@notwindows
 def test_fetch_second_assignment(browser, class_files, tempdir):
     _load_assignments_list(browser)
 
@@ -220,6 +226,7 @@ def test_fetch_second_assignment(browser, class_files, tempdir):
 
 
 @pytest.mark.nbextensions
+@notwindows
 def test_submit_other_assignment(browser, class_files, tempdir):
     _load_assignments_list(browser)
 
@@ -243,6 +250,7 @@ def test_submit_other_assignment(browser, class_files, tempdir):
 
 
 @pytest.mark.nbextensions
+@notwindows
 def test_validate_ok(browser, class_files, tempdir):
     _load_assignments_list(browser)
 
@@ -267,6 +275,7 @@ def test_validate_ok(browser, class_files, tempdir):
 
 
 @pytest.mark.nbextensions
+@notwindows
 def test_validate_failure(browser, class_files, tempdir):
     _load_assignments_list(browser)
 
