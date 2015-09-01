@@ -33,10 +33,9 @@ First, clone the git repository:
     git clone https://github.com/jupyter/nbgrader
     cd nbgrader
 
-Then, you must install nbgrader using [flit](https://github.com/takluyver/flit) (note that flit requires Python 3):
+Then, you install nbgrader with the following command:
 
-    pip3 install flit
-    flit install --symlink
+    python setup.py develop
 
 You will probably also want to install the notebook extension using a symlink, so that it updates whenever you update the repository:
 
