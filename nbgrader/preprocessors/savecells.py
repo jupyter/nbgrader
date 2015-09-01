@@ -75,10 +75,14 @@ class SaveCells(NbGraderPreprocessor):
         # connect to the database
         self.gradebook = Gradebook(self.db_url)
 
-        nb, resources = super(SaveCells, self).preprocess(nb, resources)
+        try:
+            nb, resources = super(SaveCells, self).preprocess(nb, resources)
 
-        # create the notebook and save it to the database
-        self._create_notebook()
+            # create the notebook and save it to the database
+            self._create_notebook()
+
+        finally:
+            self.gradebook.db.close()
 
         return nb, resources
 

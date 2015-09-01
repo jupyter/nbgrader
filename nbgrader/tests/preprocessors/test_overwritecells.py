@@ -17,9 +17,14 @@ def preprocessors():
 
 
 @pytest.fixture
-def gradebook(db):
+def gradebook(request, db):
     gb = Gradebook(db)
     gb.add_assignment("ps0")
+
+    def fin():
+        gb.db.close()
+    request.addfinalizer(fin)
+
     return gb
 
 
