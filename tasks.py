@@ -169,12 +169,6 @@ def before_install(group, python_version):
     # clone travis wheels repo to make installing requirements easier
     run('git clone --quiet --depth 1 https://github.com/minrk/travis-wheels ~/travis-wheels')
 
-    # if we're on python 2, install flit-install-py2, otherwise install flit
-    if python_version == '3.4':
-        run('pip install flit')
-    else:
-        run('pip install flit-install-py2')
-
     # install jupyterhub
     if python_version == '3.4' and group == 'js':
         run('npm install -g configurable-http-proxy')
@@ -182,16 +176,12 @@ def before_install(group, python_version):
 
 
 @task
-def install(group, python_version):
-    # build the command depending on python version
-    if python_version == '3.4':
-        cmd = 'flit install'
-    else:
-        cmd = 'flit-install-py2'
-
-    # add --symlink flag, depending on whether it's docs or not
+def install(group):
+    # symlink, depending on whether it's docs or not
     if group != 'docs':
-        cmd += ' --symlink'
+        cmd = 'python setup.py develop'
+    else:
+        cmd = 'python setup.py install'
 
     # install
     run('PIP_FIND_LINKS=~/travis-wheels/wheelhouse {}'.format(cmd))
