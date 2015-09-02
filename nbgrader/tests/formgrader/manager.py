@@ -12,7 +12,8 @@ __all__ = [
     "HubAuthManager",
     "HubAuthTokenManager",
     "HubAuthCustomUrlManager",
-    "HubAuthNotebookServerUserManager"
+    "HubAuthNotebookServerUserManager",
+    "HubAuthSSLManager"
 ]
 
 class DefaultManager(object):
@@ -101,6 +102,7 @@ class HubAuthManager(DefaultManager):
         """
     )
 
+    base_url = "http://localhost:8000"
     base_formgrade_url = "http://localhost:8000/hub/nbgrader/course123ABC/"
     base_notebook_url = "http://localhost:8000/user/foobar/notebooks/class_files/"
 
@@ -213,3 +215,49 @@ class HubAuthNotebookServerUserManager(HubAuthManager):
 
     base_notebook_url = "http://localhost:8000/user/quux/notebooks/class_files/"
 
+
+class HubAuthSSLManager(HubAuthManager):
+
+    nbgrader_config = dedent(
+        """
+        c = get_config()
+        c.NbGrader.course_id = 'course123ABC'
+        c.FormgradeApp.ip = '127.0.0.1'
+        c.FormgradeApp.port = 9000
+        c.FormgradeApp.authenticator_class = "nbgrader.auth.hubauth.HubAuth"
+        c.HubAuth.graders = ["foobar"]
+        c.HubAuth.notebook_url_prefix = "class_files"
+        c.HubAuth.hub_base_url = "https://localhost:8000"
+        """
+    )
+
+    jupyterhub_config = dedent(
+        """
+        c = get_config()
+        c.JupyterHub.authenticator_class = 'nbgrader.tests.formgrader.fakeuser.FakeUserAuth'
+        c.JupyterHub.spawner_class = 'nbgrader.tests.formgrader.fakeuser.FakeUserSpawner'
+        c.Authenticator.admin_users = set(['admin'])
+        c.Authenticator.whitelist = set(['foobar', 'baz'])
+        c.JupyterHub.ssl_cert = '{tempdir}/jupyterhub_cert.pem'
+        c.JupyterHub.ssl_key = '{tempdir}/jupyterhub_key.pem'
+        c.JupyterHub.log_level = "WARN"
+        """
+    )
+
+    base_url = "https://localhost:8000"
+    base_formgrade_url = "https://localhost:8000/hub/nbgrader/course123ABC/"
+    base_notebook_url = "https://localhost:8000/user/foobar/notebooks/class_files/"
+
+    def _start_jupyterhub(self, *args, **kwargs):
+        sp.check_call([
+            "openssl",
+            "req", "-x509",
+            "-newkey", "rsa:2048",
+            "-keyout", "{}/jupyterhub_key.pem".format(self.tempdir),
+            "-out", "{}/jupyterhub_cert.pem".format(self.tempdir),
+            "-days", "1",
+            "-nodes",
+            "-batch"
+        ], cwd=self.tempdir)
+
+        super(HubAuthSSLManager, self)._start_jupyterhub(*args, **kwargs)

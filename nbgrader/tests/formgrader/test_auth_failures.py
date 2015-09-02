@@ -15,8 +15,8 @@ class TestAuthFailures(BaseTestFormgrade):
     def test_login(self):
         self._get(self.manager.base_formgrade_url)
         self._wait_for_element("username_input")
-        next_url = self.formgrade_url().replace("http://localhost:8000", "")
-        self._check_url("http://localhost:8000/hub/login?next={}".format(next_url))
+        next_url = self.formgrade_url().replace(self.manager.base_url, "")
+        self._check_url("{}/hub/login?next={}".format(self.manager.base_url, next_url))
 
         # fill out the form
         self.browser.find_element_by_id("username_input").send_keys("foobar")
@@ -43,8 +43,8 @@ class TestInvalidGrader(BaseTestFormgrade):
 
         self._get(self.manager.base_formgrade_url)
         self._wait_for_element("username_input")
-        next_url = self.formgrade_url().replace("http://localhost:8000", "")
-        self._check_url("http://localhost:8000/hub/login?next={}".format(next_url))
+        next_url = self.formgrade_url().replace(self.manager.base_url, "")
+        self._check_url("{}/hub/login?next={}".format(self.manager.base_url, next_url))
 
         # fill out the form
         self.browser.find_element_by_id("username_input").send_keys("baz")
@@ -55,7 +55,7 @@ class TestInvalidGrader(BaseTestFormgrade):
         self._wait_for_element("error-403")
 
         # logout
-        self._get("http://localhost:8000/hub/logout")
+        self._get("{}/hub/logout".format(self.manager.base_url))
         self._wait_for_element("username_input")
 
     def test_expired_cookie(self):
@@ -64,8 +64,8 @@ class TestInvalidGrader(BaseTestFormgrade):
 
         self._get(self.manager.base_formgrade_url)
         self._wait_for_element("username_input")
-        next_url = self.formgrade_url().replace("http://localhost:8000", "")
-        self._check_url("http://localhost:8000/hub/login?next={}".format(next_url))
+        next_url = self.formgrade_url().replace(self.manager.base_url, "")
+        self._check_url("{}/hub/login?next={}".format(self.manager.base_url, next_url))
 
         # fill out the form
         self.browser.find_element_by_id("username_input").send_keys("foobar")

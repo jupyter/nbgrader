@@ -23,8 +23,8 @@ class TestGradebook(BaseTestFormgrade):
 
         self._get(self.manager.base_formgrade_url)
         self._wait_for_element("username_input")
-        next_url = self.formgrade_url().replace("http://localhost:8000", "")
-        self._check_url("http://localhost:8000/hub/login?next={}".format(next_url))
+        next_url = self.formgrade_url().replace(self.manager.base_url, "")
+        self._check_url("{}/hub/login?next={}".format(self.manager.base_url, next_url))
 
         # fill out the form
         self.browser.find_element_by_id("username_input").send_keys("foobar")
@@ -218,7 +218,7 @@ class TestGradebook(BaseTestFormgrade):
             pytest.skip("JupyterHub is not running")
 
         # logout and wait for the login page to appear
-        self._get("http://localhost:8000/hub")
+        self._get("{}/hub".format(self.manager.base_url))
         self._wait_for_element("logout")
         self._wait_for_visibility_of_element("logout")
         element = self.browser.find_element_by_id("logout")
@@ -228,8 +228,8 @@ class TestGradebook(BaseTestFormgrade):
         # try going to a formgrader page
         self._get(self.manager.base_formgrade_url)
         self._wait_for_element("username_input")
-        next_url = self.formgrade_url().replace("http://localhost:8000", "")
-        self._check_url("http://localhost:8000/hub/login?next={}".format(next_url))
+        next_url = self.formgrade_url().replace(self.manager.base_url, "")
+        self._check_url("{}/hub/login?next={}".format(self.manager.base_url, next_url))
 
         # this will fail if we have a cookie for another user and try to access
         # a live notebook for that user
@@ -242,6 +242,6 @@ class TestGradebook(BaseTestFormgrade):
         url = self.notebook_url("autograded/{}/Problem Set 1/{}.ipynb".format(submission.student.id, problem.name))
         self._get(url)
         self._wait_for_element("username_input")
-        next_url = quote(url.replace("http://localhost:8000", ""))
-        self._check_url("http://localhost:8000/hub/?next={}".format(next_url))
+        next_url = quote(url.replace(self.manager.base_url, ""))
+        self._check_url("{}/hub/?next={}".format(self.manager.base_url, next_url))
 
