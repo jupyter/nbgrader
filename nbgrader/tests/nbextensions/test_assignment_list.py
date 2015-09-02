@@ -87,7 +87,7 @@ def _sort_rows(x):
 
 
 @pytest.mark.js
-def test_show_assignments_list(browser, class_files):
+def test_show_assignments_list(browser, class_files, tempdir):
     _load_assignments_list(browser)
 
     # make sure all the placeholders ar initially showing
@@ -111,7 +111,7 @@ def test_show_assignments_list(browser, class_files):
 
 
 @pytest.mark.js
-def test_multiple_released_assignments(browser, class_files):
+def test_multiple_released_assignments(browser, class_files, tempdir):
     _load_assignments_list(browser)
 
     # release another assignment
@@ -132,7 +132,7 @@ def test_multiple_released_assignments(browser, class_files):
 
 
 @pytest.mark.js
-def test_fetch_assignment(browser, class_files):
+def test_fetch_assignment(browser, class_files, tempdir):
     _load_assignments_list(browser)
 
     # click the "fetch" button
@@ -145,7 +145,7 @@ def test_fetch_assignment(browser, class_files):
     rows = browser.find_elements_by_css_selector("#fetched_assignments_list > .list_item")
     assert rows[0].find_element_by_class_name("item_name").text == "ps.01"
     assert rows[0].find_element_by_class_name("item_course").text == "xyz 200"
-    assert os.path.exists(os.path.join(class_files, "ps.01"))
+    assert os.path.exists(os.path.join(tempdir, "ps.01"))
 
     # expand the assignment to show the notebooks
     rows = _expand(browser, "#nbgrader-xyz_200-ps01", "ps.01")
@@ -158,7 +158,7 @@ def test_fetch_assignment(browser, class_files):
 
 
 @pytest.mark.js
-def test_submit_assignment(browser, class_files):
+def test_submit_assignment(browser, class_files, tempdir):
     _load_assignments_list(browser)
 
     # submit it
@@ -189,7 +189,7 @@ def test_submit_assignment(browser, class_files):
 
 
 @pytest.mark.js
-def test_fetch_second_assignment(browser, class_files):
+def test_fetch_second_assignment(browser, class_files, tempdir):
     _load_assignments_list(browser)
 
     # click the "fetch" button
@@ -206,7 +206,7 @@ def test_fetch_second_assignment(browser, class_files):
     assert rows[0].find_element_by_class_name("item_course").text == "abc101"
     assert rows[1].find_element_by_class_name("item_name").text == "ps.01"
     assert rows[1].find_element_by_class_name("item_course").text == "xyz 200"
-    assert os.path.exists(os.path.join(class_files, "Problem Set 1"))
+    assert os.path.exists(os.path.join(tempdir, "Problem Set 1"))
 
     # expand the assignment to show the notebooks
     rows = _expand(browser, "#nbgrader-abc101-Problem_Set_1", "Problem Set 1")
@@ -220,7 +220,7 @@ def test_fetch_second_assignment(browser, class_files):
 
 
 @pytest.mark.js
-def test_submit_other_assignment(browser, class_files):
+def test_submit_other_assignment(browser, class_files, tempdir):
     _load_assignments_list(browser)
 
     # submit it
@@ -243,7 +243,7 @@ def test_submit_other_assignment(browser, class_files):
 
 
 @pytest.mark.js
-def test_validate_ok(browser, class_files):
+def test_validate_ok(browser, class_files, tempdir):
     _load_assignments_list(browser)
 
     # expand the assignment to show the notebooks
@@ -267,7 +267,7 @@ def test_validate_ok(browser, class_files):
 
 
 @pytest.mark.js
-def test_validate_failure(browser, class_files):
+def test_validate_failure(browser, class_files, tempdir):
     _load_assignments_list(browser)
 
     # expand the assignment to show the notebooks

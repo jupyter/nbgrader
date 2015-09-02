@@ -104,7 +104,7 @@ def class_files(coursedir):
     gb.add_student("Hacker", first_name="Alyssa", last_name="H")
     gb.add_student("Reasoner", first_name="Louis", last_name="R")
 
-    return tempdir
+    return coursedir
 
 
 @pytest.fixture(scope="module")
