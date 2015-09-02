@@ -105,6 +105,24 @@ class HubAuth(BaseAuth):
         # Redirect all formgrade request to the correct API method.
         self._app.register_blueprint(blueprint, static_url_path=self.remap_url + '/static', url_prefix=self.remap_url, url_defaults={'name': 'hub'})
 
+        # Make sure https is used if that's what jupyterhub is running under
+        if self.hub_base_url.startswith('https'):
+            self._app.after_request(self._ssl_redirect)
+
+    def _ssl_redirect(self, response):
+        if response.status_code in (301, 302):
+            url = response.headers['Location']
+
+            if url.startswith('/'):
+                url = self.hub_base_url.rstrip('/') + url
+                response.headers['Location'] = url
+
+            elif url.startswith('http') and request.headers['X-Forwarded-Proto'] == 'https':
+                url = response.headers['Location'].replace('http://', 'https://', 1)
+                response.headers['Location'] = url
+
+        return response
+
     def authenticate(self):
         """Authenticate a request.
         Returns a boolean or flask redirect."""
