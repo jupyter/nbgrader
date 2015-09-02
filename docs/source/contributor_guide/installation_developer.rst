@@ -1,41 +1,53 @@
-Installation for Contributors
-=============================
+Installation
+============
 
-Dependencies
-------------
-
-Phantomjs must be installed in order to run tests.
-If you have npm installed, you can install phantomjs using:
-
-    npm install phantomjs
-
-If you do not have npm installed, you can still install phantomjs.
-On OS X:
-
-    brew update
-    brew install phantomjs
-
-On Linux:
-
-    apt-get update
-    apt-get install phantomjs
-
-
-Installing nbgrader from source
--------------------------------
-
-To develop and test nbgrader, you will want to install nbgrader from source.
-First, clone the git repository:
+Getting the source code
+-----------------------
+The source files for nbgrader and its documentation are hosted on GitHub. To
+clone the nbgrader repository::
 
     git clone https://github.com/jupyter/nbgrader
     cd nbgrader
 
-Then, you must install nbgrader using [flit](https://github.com/takluyver/flit) (note that flit requires Python 3):
+Installing flit and building nbgrader
+-------------------------------------
+**Note**: Python 3 is required for this step using flit.
+You will use ``pip3`` to install `flit <https://github.com/takluyver/flit>`_
+and then use ``flit`` to install and build nbgrader::
 
     pip3 install flit
     flit install --symlink
 
-You will probably also want to install the notebook extension using a symlink, so that it updates whenever you update the repository:
+Installing notebook extensions
+------------------------------
+Install the notebook extensions. The ``--symlink`` option is recommended since it
+updates the extensions whenever you update the nbgrader repository. Finally,
+activate the notebook extensions::
 
     nbgrader extension install --symlink
     nbgrader extension activate
+
+Installing Phantomjs
+--------------------
+To run tests while developing nbgrader and its documentation, Phantomjs must
+be installed.
+
+Install using npm
+~~~~~~~~~~~~~~~~~
+If you have npm installed, you can install phantomjs using::
+
+    npm install phantomjs
+
+Install using other package managers
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+If you do not have npm installed, you can still install phantomjs.
+
+On OS X::
+
+    brew update
+    brew install phantomjs
+
+On Linux::
+
+    apt-get update
+    apt-get install phantomjs
