@@ -32,6 +32,17 @@ def tempdir(request):
 
 
 @pytest.fixture(scope="module")
+def coursedir(request):
+    tempdir = tempfile.mkdtemp()
+
+    def fin():
+        shutil.rmtree(tempdir)
+    request.addfinalizer(fin)
+
+    return tempdir
+
+
+@pytest.fixture(scope="module")
 def jupyter_config_dir(request):
     jupyter_config_dir = tempfile.mkdtemp()
 
@@ -75,29 +86,29 @@ def cache(request):
 
 
 @pytest.fixture(scope="module")
-def class_files(request, tempdir):
+def class_files(coursedir):
     # copy files from the user guide
     source_path = os.path.join(os.path.dirname(__file__), "..", "..", "..", "docs", "source", "user_guide", "source")
-    shutil.copytree(os.path.join(os.path.dirname(__file__), source_path), "source")
+    shutil.copytree(os.path.join(os.path.dirname(__file__), source_path), os.path.join(coursedir, "source"))
 
     # create a fake ps1
-    os.mkdir(os.path.join("source", "ps.01"))
-    with open(os.path.join("source", "ps.01", "problem 1.ipynb"), "w") as fh:
+    os.mkdir(os.path.join(coursedir, "source", "ps.01"))
+    with open(os.path.join(coursedir, "source", "ps.01", "problem 1.ipynb"), "w") as fh:
         write_nb(new_notebook(), fh, 4)
 
     # create the gradebook
-    gb = Gradebook("sqlite:///gradebook.db")
+    gb = Gradebook("sqlite:///" + os.path.join(coursedir, "gradebook.db"))
     gb.add_assignment("Problem Set 1")
     gb.add_assignment("ps.01")
     gb.add_student("Bitdiddle", first_name="Ben", last_name="B")
     gb.add_student("Hacker", first_name="Alyssa", last_name="H")
     gb.add_student("Reasoner", first_name="Louis", last_name="R")
 
-    return tempdir
+    return coursedir
 
 
 @pytest.fixture(scope="module")
-def nbserver(request, tempdir, jupyter_config_dir, jupyter_data_dir, exchange, cache):
+def nbserver(request, tempdir, coursedir, jupyter_config_dir, jupyter_data_dir, exchange, cache):
     env = os.environ.copy()
     env['JUPYTER_CONFIG_DIR'] = jupyter_config_dir
     env['JUPYTER_DATA_DIR'] = jupyter_data_dir
@@ -113,7 +124,8 @@ def nbserver(request, tempdir, jupyter_config_dir, jupyter_data_dir, exchange, c
             c = get_config()
             c.TransferApp.exchange_directory = '{}'
             c.TransferApp.cache_directory = '{}'
-            """.format(exchange, cache)
+            c.NbGrader.course_directory = '{}'
+            """.format(exchange, cache, coursedir)
         ))
 
     nbserver = sp.Popen([

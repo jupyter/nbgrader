@@ -73,8 +73,6 @@ class FormgradeApp(NbGrader):
         Authenticator used in all formgrade requests.""")
     authenticator_instance = Instance(BaseAuth, config=False)
 
-    base_directory = Unicode(os.path.abspath('.'))
-
     mathjax_url = Unicode(
         '',
         config=True,
@@ -134,7 +132,7 @@ class FormgradeApp(NbGrader):
         self.authenticator_instance = self.authenticator_class(
             self.ip,
             self.port,
-            self.base_directory,
+            self.course_directory,
             parent=self)
 
         # Init jinja environment
@@ -143,7 +141,7 @@ class FormgradeApp(NbGrader):
         # Configure the formgrader settings
         self.tornado_settings = dict(
             auth=self.authenticator_instance,
-            notebook_dir=self.base_directory,
+            notebook_dir=self.course_directory,
             notebook_dir_format=self.directory_structure,
             nbgrader_step=self.autograded_directory,
             exporter=HTMLExporter(config=self.config),

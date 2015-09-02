@@ -290,8 +290,12 @@ class SubmissionNavigationHandler(BaseHandler):
 
 
 class SubmissionFilesHandler(web.StaticFileHandler, BaseHandler):
-    def parse_url_path(self, path):
-        submission_id, path = re.match(r"([^/]+)/(.*)", path.lstrip("/")).groups()
+    def initialize(self, default_filename=None):
+        super(SubmissionFilesHandler, self).initialize(
+            self.notebook_dir, default_filename=default_filename)
+
+    def parse_url_path(self, url_path):
+        submission_id, path = re.match(r"([^/]+)/(.*)", url_path.lstrip("/")).groups()
 
         try:
             submission = self.gradebook.find_submission_notebook_by_id(submission_id)
@@ -305,12 +309,12 @@ class SubmissionFilesHandler(web.StaticFileHandler, BaseHandler):
             assignment_id=assignment_id,
             student_id=student_id))
 
-        path = os.path.join(dirname, path)
-        return super(SubmissionFilesHandler, self).parse_url_path(path)
+        full_path = os.path.join(dirname, path)
+        return super(SubmissionFilesHandler, self).parse_url_path(full_path)
 
     @authenticated
     def get(self, *args, **kwargs):
-        super(SubmissionFilesHandler, self).get(*args, **kwargs)
+        return super(SubmissionFilesHandler, self).get(*args, **kwargs)
 
 
 class Template404(BaseHandler):
@@ -340,7 +344,7 @@ default_handlers = [
     (r"/submissions/components/(.*)", web.StaticFileHandler, {'path': components_path}),
     (r"/submissions/([^/]+)/?", SubmissionHandler),
     (r"/submissions/(?P<submission_id>[^/]+)/%s/?" % _navigation_regex, SubmissionNavigationHandler),
-    (r"/submissions/(.*)", SubmissionFilesHandler, {'path': '.'}),
+    (r"/submissions/(.*)", SubmissionFilesHandler),
 
     (r"/fonts/(.*)", web.StaticFileHandler, {'path': fonts_path})
 ]
