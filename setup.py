@@ -55,6 +55,9 @@ if __name__ == "__main__":
 
     install_parser = subparsers.add_parser('install')
     install_parser.set_defaults(func=install)
+    install_parser.add_argument(
+        '--force', action='store_true',
+        help="this flag doesn't actually do anything, but is needed for readthedocs")
 
     develop_parser = subparsers.add_parser('develop')
     develop_parser.set_defaults(func=develop)
