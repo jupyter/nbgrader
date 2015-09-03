@@ -61,7 +61,7 @@ This will perform a few different steps:
    documentation notebooks will be converted to rst, and example notebooks will
    be converted to html) using the ``build_docs.py`` script.
 2. The command line documentation is automatically generated using the
-   ```autogen_command_line.py`` and ``autogen_config.py`` scripts.
+   `autogen_command_line.py`` and ``autogen_config.py`` scripts.
 3. The rst files are converted to html using Sphinx.
 
 After running ``invoke docs``, the resultant HTML files will be in

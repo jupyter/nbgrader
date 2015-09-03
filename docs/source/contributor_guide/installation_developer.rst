@@ -9,14 +9,14 @@ clone the nbgrader repository::
     git clone https://github.com/jupyter/nbgrader
     cd nbgrader
 
-Installing flit and building nbgrader
+Installing and building nbgrader
 -------------------------------------
-**Note**: Python 3 is required for this step using flit.
-You will use ``pip3`` to install `flit <https://github.com/takluyver/flit>`_
-and then use ``flit`` to install and build nbgrader::
+nbgrader installs and builds with one command::
 
-    pip3 install flit
-    flit install --symlink
+    python setup.py develop
+
+As a developer note, `setup.py` uses `flit <https://github.com/takluyver/flit>`_
+instead of `setuptools`. 
 
 Installing notebook extensions
 ------------------------------

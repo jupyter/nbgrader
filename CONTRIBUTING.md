@@ -2,7 +2,6 @@
 
 We're thrilled you want to contribute to nbgrader.
 
-The [Contributor Guide](http://nbgrader.readthedocs.org/contributor_guide/index.html) gives an overview of
-how various parts of the project work and what our expectations are for
-contributions.
-
+The [Contributor Guide](http://nbgrader.readthedocs.org/contributor_guide/index.html)
+gives an overview of how various parts of the project work and what our
+expectations are for contributions.
