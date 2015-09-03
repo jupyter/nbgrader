@@ -250,6 +250,7 @@ def test_compute_checksum_solution_cell():
 
 def test_compute_checksum_utf8():
     utils.compute_checksum(create_solution_cell("\u03b8", "markdown", "foo"))
+    utils.compute_checksum(create_solution_cell(u'$$\\int^\u221e_0 x^2dx$$', "markdown", "foo"))
 
 
 def test_is_ignored(temp_cwd):

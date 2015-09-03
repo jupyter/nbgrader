@@ -59,10 +59,10 @@ def to_bytes(string):
     encodes the string to utf-8.
 
     """
-    if sys.version_info[0] == 2:
-        return bytes(string)
-    else:
+    if sys.version_info[0] == 3 or (sys.version_info[0] == 2 and isinstance(string, unicode)):
         return bytes(string.encode('utf-8'))
+    else:
+        return bytes(string)
 
 def compute_checksum(cell):
     m = hashlib.md5()
