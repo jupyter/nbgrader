@@ -1,20 +1,20 @@
 
-Manually grading a student's solution
-=====================================
+Manually grading and formgrade
+==============================
 
 .. seealso::
 
     :doc:`/command_line_tools/nbgrader-formgrade`
         Command line options for ``nbgrader formgrade``
 
-    :doc:`01_philosophy`
+    :doc:`01a_filestructure`
         More details on how the nbgrader hierarchy is structured.
 
     :doc:`/config_options`
         Details on ``nbgrader_config.py``
 
 After assignments have been autograded, they will saved into an
-``autograded`` directory (see :doc:`01_philosophy` for details):
+``autograded`` directory (see :doc:`01a_filestructure` for details):
 
 After running ``nbgrader autograde``, the autograded version of the
 notebooks will be:
