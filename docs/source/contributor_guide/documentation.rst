@@ -44,7 +44,7 @@ If you are making major changes to the docs, please build them locally to
 verify that they look ok (see the next section).
 If you are making only minor changes, it is fine to make a PR without building
 them locally.
-You will, however, still need to run `invoke clear_docs` or the Travis CI build
+You will, however, still need to run ``invoke clear_docs`` or the Travis CI build
 will fail.
 
 Building documentation locally
@@ -61,7 +61,7 @@ This will perform a few different steps:
    documentation notebooks will be converted to rst, and example notebooks will
    be converted to html) using the ``build_docs.py`` script.
 2. The command line documentation is automatically generated using the
-   `autogen_command_line.py`` and ``autogen_config.py`` scripts.
+   ``autogen_command_line.py`` and ``autogen_config.py`` scripts.
 3. The rst files are converted to html using Sphinx.
 
 After running ``invoke docs``, the resultant HTML files will be in
@@ -72,6 +72,6 @@ different).
 
 Automatic builds
 ----------------
-When a commit is made on the `master` branch, documentation is automatically
+When a commit is made on the ``master`` branch, documentation is automatically
 built by Read The Docs and rendered at
 `nbgrader.readthedocs.org <http://nbgrader.readthedocs.org>`_.

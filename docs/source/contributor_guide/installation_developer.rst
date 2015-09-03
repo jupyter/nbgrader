@@ -15,8 +15,8 @@ nbgrader installs and builds with one command::
 
     python setup.py develop
 
-As a developer note, `setup.py` uses `flit <https://github.com/takluyver/flit>`_
-instead of `setuptools`. 
+As a developer note, ``setup.py`` uses `flit <https://github.com/takluyver/flit>`_
+instead of ``setuptools``. 
 
 Installing notebook extensions
 ------------------------------
