@@ -35,14 +35,13 @@ div.nbgrader-highlight div.text_cell_render, div.nbgrader-highlight div.input_ar
     border: 1px solid #337ab7 !important;
 }
 
-
 .celltoolbar {
-    // safari fix, we cannot use -webkit-flex on hbox
-    // and vbox either or all css get borked
-    // cf https://github.com/jupyter/nbgrader/issues/394.
-    // manual workaround while #370 is not released. 
+    /* safari fix, we cannot use -webkit-flex on hbox
+    and vbox either or all css get borked
+    cf https://github.com/jupyter/nbgrader/issues/394.
+    manual workaround while #370 is not released. */
     display: -webkit-flex;
-};
+}
 
 div.lock-cell-container {
     margin-right: auto;
