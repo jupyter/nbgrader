@@ -1,69 +1,76 @@
-import argparse
+#!/usr/bin/env python
+# coding: utf-8
+
+# Copyright (c) Juptyer Development Team.
+# Distributed under the terms of the Modified BSD License.
+
 import sys
-import subprocess as sp
-import warnings
+import os
+from distutils.core import setup
+from os.path import join
 
+# get paths to all the static files and templates
+static_files = []
+for (dirname, dirnames, filenames) in os.walk("nbgrader/formgrader/static"):
+    root = os.path.relpath(dirname, "nbgrader/formgrader")
+    for filename in filenames:
+        static_files.append(os.path.join(root, filename))
+for (dirname, dirnames, filenames) in os.walk("nbgrader/formgrader/templates"):
+    root = os.path.relpath(dirname, "nbgrader/formgrader")
+    for filename in filenames:
+        static_files.append(os.path.join(root, filename))
 
-def install_flit():
-    if sys.version_info[0] == 2:
-        package = 'flit-install-py2'
-    else:
-        package = 'flit'
+name = 'nbgrader'
+here = os.path.abspath(os.path.dirname(__file__))
+version_ns = {}
+with open(join(here, name, '_version.py')) as f:
+    exec(f.read(), {}, version_ns)
 
-    sp.check_call([sys.executable, '-m', 'pip', 'install', package])
+setup_args = dict(
+    name                = name,
+    version             = version_ns['__version__'],
+    description         = 'A system for assigning and grading notebooks',
+    author              = 'Jupyter Development Team',
+    author_email        = 'jupyter@googlegroups.com',
+    license             = 'BSD',
+    url                 = 'https://github.com/jupyter/nbgrader',
+    keywords            = ['Notebooks', 'Grading', 'Homework'],
+    classifiers         = [
+        'License :: OSI Approved :: BSD License',
+        'Programming Language :: Python',
+        'Programming Language :: Python :: 2',
+        'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3',
+    ],
+    packages=[
+        'nbgrader',
+        'nbgrader.apps',
+        'nbgrader.auth',
+        'nbgrader.formgrader',
+        'nbgrader.preprocessors',
+        'nbgrader.tests'
+    ],
+    package_data={
+        'nbgrader': [
+            'nbextensions/nbgrader/*.js',
+            'nbextensions/nbgrader/*.css'
+        ],
+        'nbgrader.formgrader': static_files,
+        'nbgrader.tests': [
+            'files/*',
+        ]
+    },
+    scripts = ['scripts/nbgrader']
+)
 
+# setuptools requirements
+if 'setuptools' in sys.modules:
+    setup_args['install_requires'] = install_requires = []
+    with open('requirements.txt') as f:
+        for line in f.readlines():
+            req = line.strip()
+            if not req or req.startswith(('-e', '#')):
+                continue
+            install_requires.append(req)
 
-def install_nbgrader(symlink):
-    args = []
-
-    if sys.version_info[0] == 2:
-        command = ['flit_install_py2']
-    else:
-        command = ['flit', 'install']
-        args.extend(['--deps', 'all'])
-
-    if symlink:
-        args += ['--symlink']
-
-    sp.check_call([sys.executable, '-m'] + command + args)
-
-
-def install():
-    install_flit()
-    install_nbgrader(symlink=False)
-
-
-def develop():
-    install_flit()
-    install_nbgrader(symlink=True)
-
-
-def egg_info():
-    print("This setup.py does not support egg_info. Please re-run with:")
-    print("    python setup.py develop")
-    sys.exit(1)
-
-
-if __name__ == "__main__":
-    warnings.warn(
-        'Warning: this setup.py uses flit, not setuptools. '
-        'Behavior may not be exactly what you expect!'
-    )
-
-    parser = argparse.ArgumentParser('install_dev')
-    subparsers = parser.add_subparsers()
-
-    install_parser = subparsers.add_parser('install')
-    install_parser.set_defaults(func=install)
-    install_parser.add_argument(
-        '--force', action='store_true',
-        help="this flag doesn't actually do anything, but is needed for readthedocs")
-
-    develop_parser = subparsers.add_parser('develop')
-    develop_parser.set_defaults(func=develop)
-
-    egg_info_parser = subparsers.add_parser('egg_info')
-    egg_info_parser.set_defaults(func=egg_info)
-
-    args = parser.parse_args()
-    args.func()
+setup(**setup_args)

@@ -1,0 +1,11 @@
+sqlalchemy
+python-dateutil
+jupyter
+notebook
+nbconvert
+nbformat
+traitlets
+jupyter_core
+tornado
+six
+requests
