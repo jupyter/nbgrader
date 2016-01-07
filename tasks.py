@@ -177,11 +177,5 @@ def before_install(group, python_version):
 
 @task
 def install(group):
-    # symlink, depending on whether it's docs or not
-    if group != 'docs':
-        cmd = 'python setup.py develop'
-    else:
-        cmd = 'python setup.py install'
-
-    # install
+    cmd = 'pip install -r dev-requirements.txt -e .'
     run('PIP_FIND_LINKS=~/travis-wheels/wheelhouse {}'.format(cmd))
