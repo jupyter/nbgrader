@@ -177,5 +177,9 @@ def before_install(group, python_version):
 
 @task
 def install(group):
-    cmd = 'pip install -r dev-requirements.txt -e .'
+    # The docs don't seem to build correctly if it's a symlinked install.
+    if group == 'docs':
+        cmd = 'pip install -r dev-requirements.txt .'
+    else:
+        cmd = 'pip install -r dev-requirements.txt -e .'
     run('PIP_FIND_LINKS=~/travis-wheels/wheelhouse {}'.format(cmd))

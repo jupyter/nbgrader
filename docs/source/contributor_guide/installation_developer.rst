@@ -13,10 +13,7 @@ Installing and building nbgrader
 -------------------------------------
 nbgrader installs and builds with one command::
 
-    python setup.py develop
-
-As a developer note, ``setup.py`` uses `flit <https://github.com/takluyver/flit>`_
-instead of ``setuptools``. 
+    pip install -r dev-requirements.txt -e .
 
 Installing notebook extensions
 ------------------------------
