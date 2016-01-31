@@ -21,7 +21,11 @@ flags.update({
     'create': (
         {'AutogradeApp': {'create_student': True}},
         "Create an entry for the student in the database, if one does not already exist."
-    )
+    ),
+    'no-execute': (
+        {'AutogradeApp': {'execute': False}},
+        "Don't execute notebooks and clear output when autograding."
+    ),
 })
 
 class AutogradeApp(BaseNbConvertApp):
@@ -65,6 +69,12 @@ class AutogradeApp(BaseNbConvertApp):
         To grade only the notebooks that start with '1':
         
             nbgrader autograde "Problem Set 1" --notebook "1*"
+        
+        By default, student submissions are re-executed and their output cleared.
+        For long running notebooks, it can be useful to disable this with the
+        '--no-execute' flag:
+        
+            nbgrader autograde "Problem Set 1" --no-execute
         """
 
     create_student = Bool(
@@ -77,6 +87,17 @@ class AutogradeApp(BaseNbConvertApp):
         )
     )
 
+    execute = Bool(
+        True, config=True,
+        help=dedent(
+            """
+            If True, autograded notebooks will be run and have their output
+            cleared. Set to False to avoid running large notebooks during
+            autograding.
+            """
+        )
+    )
+    
     _sanitizing = True
 
     @property
@@ -102,6 +123,7 @@ class AutogradeApp(BaseNbConvertApp):
         LimitOutput,
         SaveAutoGrades
     ])
+    
     preprocessors = List([])
 
     def init_assignment(self, assignment_id, student_id):
@@ -171,7 +193,12 @@ class AutogradeApp(BaseNbConvertApp):
             preprocessors = self.autograde_preprocessors
 
         for pp in preprocessors:
-            self.exporter.register_preprocessor(pp)
+            if self.execute:
+                self.exporter.register_preprocessor(pp)
+            else:
+                # If execute is False, don't run notebooks or clear output
+                if pp not in (Execute, ClearOutput):
+                    self.exporter.register_preprocessor(pp)
 
     def convert_single_notebook(self, notebook_filename):
         self.log.info("Sanitizing %s", notebook_filename)
