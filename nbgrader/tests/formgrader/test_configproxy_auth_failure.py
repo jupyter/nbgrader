@@ -1,12 +1,10 @@
 import pytest
 
 from .manager import HubAuthManager
-from .conftest import jupyterhub, minversion
+from .conftest import jupyterhub
 
 
 @jupyterhub
-@minversion
-@pytest.mark.formgrader
 def test_configproxy_auth_success(gradebook, tempdir):
     """Can the formgrader be started with the correct auth token?"""
 
@@ -27,8 +25,6 @@ def test_configproxy_auth_success(gradebook, tempdir):
 
 
 @jupyterhub
-@minversion
-@pytest.mark.formgrader
 def test_configproxy_auth_failure(gradebook, tempdir):
     """Can the formgrader not be started when the auth token is incorrect?"""
 

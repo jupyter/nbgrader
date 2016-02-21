@@ -1,4 +1,5 @@
 import os
+import sys
 
 from .. import run_python_module, run_command
 from .base import BaseTestApp
@@ -29,6 +30,9 @@ class TestNbGrader(BaseTestApp):
 
     def test_check_version(self):
         """Is the version the same regardless of how we run nbgrader?"""
-        out1 = run_command(["nbgrader", "--version"])
+        if sys.platform == 'win32':
+            out1 = "\r\n".join(run_command(["nbgrader.cmd", "--version"]).split("\r\n")[2:])
+        else:
+            out1 = run_command(["nbgrader", "--version"])
         out2 = run_python_module(["nbgrader", "--version"])
         assert out1 == out2

@@ -5,6 +5,8 @@ import pytest
 from nbformat import write as write_nb
 from nbformat.v4 import new_notebook
 
+from ...utils import remove
+
 
 @pytest.mark.usefixtures("temp_cwd")
 class BaseTestApp(object):
@@ -15,7 +17,7 @@ class BaseTestApp(object):
         if not os.path.exists(os.path.dirname(full_dest)):
             os.makedirs(os.path.dirname(full_dest))
         if os.path.exists(full_dest):
-            os.remove(full_dest)
+            remove(full_dest)
         with open(full_dest, 'w') as f:
             write_nb(nb, f, 4)
 
@@ -24,6 +26,8 @@ class BaseTestApp(object):
         full_dest = os.path.abspath(dest)
         if not os.path.exists(os.path.dirname(full_dest)):
             os.makedirs(os.path.dirname(full_dest))
+        if os.path.exists(full_dest):
+            remove(full_dest)
         shutil.copy(full_src, full_dest)
 
     def _make_file(self, path, contents=""):
@@ -31,7 +35,7 @@ class BaseTestApp(object):
         if not os.path.exists(os.path.dirname(full_dest)):
             os.makedirs(os.path.dirname(full_dest))
         if os.path.exists(full_dest):
-            os.remove(full_dest)
+            remove(full_dest)
         with open(path, "w") as fh:
             fh.write(contents)
 

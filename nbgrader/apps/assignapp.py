@@ -154,9 +154,10 @@ class AssignApp(BaseNbConvertApp):
     def _clean_old_notebooks(self, assignment_id, student_id):
         gb = Gradebook(self.db_url)
         assignment = gb.find_assignment(assignment_id)
-        regexp = os.path.join(
-            self._format_source("(?P<assignment_id>.*)", "(?P<student_id>.*)"),
-            "(?P<notebook_id>.*).ipynb")
+        regexp = re.escape(os.path.sep).join([
+            self._format_source("(?P<assignment_id>.*)", "(?P<student_id>.*)", escape=True),
+            "(?P<notebook_id>.*).ipynb"
+        ])
 
         # find a set of notebook ids for new notebooks
         new_notebook_ids = set([])

@@ -1,7 +1,13 @@
+# Install the pyzmq ioloop. This has to be done before anything else from
+# tornado is imported.
+from zmq.eventloop import ioloop
+ioloop.install()
+
 import os
 import signal
 import notebook
 import logging
+import sys
 
 from nbconvert.exporters import HTMLExporter
 from textwrap import dedent
@@ -97,13 +103,15 @@ class FormgradeApp(NbGrader):
         return classes
 
     def init_signal(self):
+        if sys.platform == 'win32':
+            signal.signal(signal.SIGBREAK, self._signal_stop)
         signal.signal(signal.SIGINT, self._signal_stop)
         signal.signal(signal.SIGTERM, self._signal_stop)
 
     def _signal_stop(self, sig, frame):
         self.log.critical("received signal %s, stopping", sig)
-        self.authenticator_instance.stop(sig)
-        self.io_loop.stop()
+        self.authenticator_instance.stop()
+        ioloop.IOLoop.current().stop()
 
     def build_extra_config(self):
         extra_config = super(FormgradeApp, self).build_extra_config()
@@ -175,15 +183,18 @@ class FormgradeApp(NbGrader):
         self.init_tornado_application()
 
         # Create the application
-        self.io_loop = IOLoop.current()
+        self.io_loop = ioloop.IOLoop.current()
         self.tornado_application.listen(self.port, address=self.ip)
 
         url = "http://{:s}:{:d}/".format(self.ip, self.port)
         self.log.info("Form grader running at {}".format(url))
         self.log.info("Use Control-C to stop this server")
 
-        # register cleanup on both TERM and INT
-        self.init_signal()
+        if sys.platform.startswith('win'):
+            # add no-op to wake every 1s
+            # to handle signals that may be ignored by the inner loop
+            pc = ioloop.PeriodicCallback(lambda : None, 1000)
+            pc.start()
 
         # Start the loop
         self.io_loop.start()

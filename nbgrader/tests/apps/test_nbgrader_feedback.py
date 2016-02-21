@@ -1,6 +1,8 @@
 import os
+import sys
 from os.path import join, exists, isfile
 
+from ...utils import remove
 from .. import run_python_module
 from .base import BaseTestApp
 
@@ -43,7 +45,7 @@ class TestNbGraderFeedback(BaseTestApp):
         assert not isfile(join(course_dir, "feedback", "foo", "ps1", "blah.pyc"))
 
         # check that it skips the existing directory
-        os.remove(join(course_dir, "feedback", "foo", "ps1", "foo.txt"))
+        remove(join(course_dir, "feedback", "foo", "ps1", "foo.txt"))
         run_python_module(["nbgrader", "feedback", "ps1", "--db", gradebook])
         assert not isfile(join(course_dir, "feedback", "foo", "ps1", "foo.txt"))
 
@@ -52,7 +54,7 @@ class TestNbGraderFeedback(BaseTestApp):
         assert isfile(join(course_dir, "feedback", "foo", "ps1", "foo.txt"))
 
         # force overwrite
-        os.remove(join(course_dir, "autograded", "foo", "ps1", "foo.txt"))
+        remove(join(course_dir, "autograded", "foo", "ps1", "foo.txt"))
         run_python_module(["nbgrader", "feedback", "ps1", "--db", gradebook, "--force"])
         assert isfile(join(course_dir, "feedback", "foo", "ps1", "p1.html"))
         assert not isfile(join(course_dir, "feedback", "foo", "ps1", "foo.txt"))
@@ -79,8 +81,8 @@ class TestNbGraderFeedback(BaseTestApp):
         assert not isfile(join(course_dir, "feedback", "foo", "ps1", "blah.pyc"))
 
         # check that removing the notebook still causes it to run
-        os.remove(join(course_dir, "feedback", "foo", "ps1", "p1.html"))
-        os.remove(join(course_dir, "feedback", "foo", "ps1", "foo.txt"))
+        remove(join(course_dir, "feedback", "foo", "ps1", "p1.html"))
+        remove(join(course_dir, "feedback", "foo", "ps1", "foo.txt"))
         run_python_module(["nbgrader", "feedback", "ps1", "--db", gradebook, "--notebook", "p1"])
 
         assert isfile(join(course_dir, "feedback", "foo", "ps1", "p1.html"))
@@ -89,7 +91,7 @@ class TestNbGraderFeedback(BaseTestApp):
         assert not isfile(join(course_dir, "feedback", "foo", "ps1", "blah.pyc"))
 
         # check that running it again doesn"t do anything
-        os.remove(join(course_dir, "feedback", "foo", "ps1", "foo.txt"))
+        remove(join(course_dir, "feedback", "foo", "ps1", "foo.txt"))
         run_python_module(["nbgrader", "feedback", "ps1", "--db", gradebook, "--notebook", "p1"])
 
         assert isfile(join(course_dir, "feedback", "foo", "ps1", "p1.html"))
@@ -98,7 +100,7 @@ class TestNbGraderFeedback(BaseTestApp):
         assert not isfile(join(course_dir, "feedback", "foo", "ps1", "blah.pyc"))
 
         # check that removing the notebook doesn"t cause it to run
-        os.remove(join(course_dir, "feedback", "foo", "ps1", "p1.html"))
+        remove(join(course_dir, "feedback", "foo", "ps1", "p1.html"))
         run_python_module(["nbgrader", "feedback", "ps1", "--db", gradebook])
 
         assert not isfile(join(course_dir, "feedback", "foo", "ps1", "p1.html"))
@@ -127,8 +129,13 @@ class TestNbGraderFeedback(BaseTestApp):
         run_python_module(["nbgrader", "autograde", "ps1", "--create"])
         run_python_module(["nbgrader", "feedback", "ps1", "--FeedbackApp.permissions=644"])
 
+        if sys.platform == 'win32':
+            perms = '666'
+        else:
+            perms = '644'
+
         assert isfile(join(course_dir, "feedback", "foo", "ps1", "foo.html"))
-        assert self._get_permissions(join(course_dir, "feedback", "foo", "ps1", "foo.html")) == "644"
+        assert self._get_permissions(join(course_dir, "feedback", "foo", "ps1", "foo.html")) == perms
 
     def test_force_single_notebook(self, course_dir):
         self._copy_file(join("files", "test.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))

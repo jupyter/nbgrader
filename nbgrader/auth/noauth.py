@@ -4,6 +4,8 @@ import os
 import subprocess as sp
 import time
 import sys
+import signal
+
 from textwrap import dedent
 from traitlets import Bool, Integer, Unicode
 
@@ -44,6 +46,13 @@ class NoAuth(BaseAuth):
                     "IP address. You probably want to set the formgrader IP to something that "
                     "is accessible from the outside world.")
 
+            kwargs = dict(
+                cwd=self._base_directory,
+                env=os.environ.copy()
+            )
+            if sys.platform == 'win32':
+                kwargs['creationflags'] = sp.CREATE_NEW_PROCESS_GROUP
+
             self._notebook_server_ip = self._ip
             self._notebook_server_port = str(self.nbserver_port)
             self._notebook_server = sp.Popen(
@@ -52,8 +61,7 @@ class NoAuth(BaseAuth):
                     "--ip", self._notebook_server_ip,
                     "--port", self._notebook_server_port
                 ],
-                cwd=self._base_directory,
-                env=os.environ.copy())
+                **kwargs)
             self._notebook_server_exists = True
         else:
             self._notebook_server_exists = False
@@ -69,10 +77,15 @@ class NoAuth(BaseAuth):
             self._notebook_server_port,
             relative_path)
 
-    def stop(self, sig):
+    def stop(self):
         """Stops the notebook server."""
         if self.notebook_server_exists():
-            self._notebook_server.send_signal(sig)
+            self.log.info("Stopping notebook server...")
+            if sys.platform == 'win32':
+                self._notebook_server.send_signal(signal.CTRL_BREAK_EVENT)
+            else:
+                self._notebook_server.terminate()
+
             for i in range(10):
                 retcode = self._notebook_server.poll()
                 if retcode is not None:
@@ -81,5 +94,7 @@ class NoAuth(BaseAuth):
                 time.sleep(0.1)
 
             if retcode is None:
-                self.log.critical("couldn't shutdown notebook server, force killing it")
+                self.log.critical("Couldn't shutdown notebook server, force killing it")
                 self._notebook_server.kill()
+
+            self._notebook_server.wait()

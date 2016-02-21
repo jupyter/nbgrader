@@ -3,8 +3,10 @@ from os.path import join
 
 from .. import run_python_module
 from .base import BaseTestApp
+from .conftest import notwindows
 
 
+@notwindows
 class TestNbGraderFetch(BaseTestApp):
 
     def _release(self, assignment, exchange, course_dir):

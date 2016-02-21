@@ -1,10 +1,18 @@
 import os
 import hashlib
 import dateutil.parser
-import pwd
 import glob
 import six
 import sys
+import shutil
+import stat
+
+# pwd is for unix passwords only, so we shouldn't import it on
+# windows machines
+if sys.platform != 'win32':
+    import pwd
+else:
+    pwd = None
 
 
 def is_grade(cell):
@@ -114,10 +122,14 @@ def check_directory(path, read=False, write=False, execute=False):
 
 def get_username():
     """Get the username of the current process."""
+    if pwd is None:
+        raise OSError("get_username cannot be called on Windows")
     return pwd.getpwuid(os.getuid())[0]
 
 def find_owner(path):
     """Get the username of the owner of path."""
+    if pwd is None:
+        raise OSError("find_owner cannot be called on Windows")
     return pwd.getpwuid(os.stat(os.path.abspath(path)).st_uid).pw_name
 
 def self_owned(path):
@@ -151,3 +163,33 @@ def find_all_files(path, exclude=None):
             else:
                 files.append(fullpath)
     return files
+
+def full_split(path):
+    rest, last = os.path.split(path)
+    if last == path:
+        return (path,)
+    elif rest == path:
+        return (rest,)
+    else:
+        return full_split(rest) + (last,)
+
+def rmtree(path):
+    # for windows, we need to go through and make sure everything
+    # is writeable, otherwise rmtree will fail
+    if sys.platform == 'win32':
+        for dirname, _, filenames in os.walk(path):
+            os.chmod(dirname, stat.S_IWRITE)
+            for filename in filenames:
+                os.chmod(os.path.join(dirname, filename), stat.S_IWRITE)
+
+    # now we can remove the path
+    shutil.rmtree(path)
+
+def remove(path):
+    # for windows, we need to make sure that the file is writeable,
+    # otherwise remove will fail
+    if sys.platform == 'win32':
+        os.chmod(path, stat.S_IWRITE)
+
+    # now we can remove the path
+    os.remove(path)

@@ -16,13 +16,17 @@ class GetGrades(NbGraderPreprocessor):
         # connect to the database
         self.gradebook = Gradebook(self.db_url)
 
-        # process the cells
-        nb, resources = super(GetGrades, self).preprocess(nb, resources)
+        try:
+            # process the cells
+            nb, resources = super(GetGrades, self).preprocess(nb, resources)
 
-        submission = self.gradebook.find_submission_notebook(
-            self.notebook_id, self.assignment_id, self.student_id)
-        resources['nbgrader']['score'] = submission.score
-        resources['nbgrader']['max_score'] = submission.max_score
+            submission = self.gradebook.find_submission_notebook(
+                self.notebook_id, self.assignment_id, self.student_id)
+            resources['nbgrader']['score'] = submission.score
+            resources['nbgrader']['max_score'] = submission.max_score
+
+        finally:
+            self.gradebook.db.close()
 
         return nb, resources
 

@@ -6,6 +6,7 @@ import subprocess as sp
 import logging
 import time
 import sys
+import signal
 
 from selenium import webdriver
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
@@ -16,6 +17,7 @@ from nbformat.v4 import new_notebook
 
 from .. import run_python_module, copy_coverage_files
 from ...api import Gradebook
+from ...utils import rmtree
 
 @pytest.fixture(scope="module")
 def tempdir(request):
@@ -25,7 +27,7 @@ def tempdir(request):
 
     def fin():
         os.chdir(origdir)
-        shutil.rmtree(tempdir)
+        rmtree(tempdir)
     request.addfinalizer(fin)
 
     return tempdir
@@ -47,7 +49,7 @@ def jupyter_config_dir(request):
     jupyter_config_dir = tempfile.mkdtemp()
 
     def fin():
-        shutil.rmtree(jupyter_config_dir)
+        rmtree(jupyter_config_dir)
     request.addfinalizer(fin)
 
     return jupyter_config_dir
@@ -57,7 +59,7 @@ def jupyter_data_dir(request):
     jupyter_data_dir = tempfile.mkdtemp()
 
     def fin():
-        shutil.rmtree(jupyter_data_dir)
+        rmtree(jupyter_data_dir)
     request.addfinalizer(fin)
 
     return jupyter_data_dir
@@ -68,7 +70,7 @@ def exchange(request):
     exchange = tempfile.mkdtemp()
 
     def fin():
-        shutil.rmtree(exchange)
+        rmtree(exchange)
     request.addfinalizer(fin)
 
     return exchange
@@ -79,7 +81,7 @@ def cache(request):
     cache = tempfile.mkdtemp()
 
     def fin():
-        shutil.rmtree(cache)
+        rmtree(cache)
     request.addfinalizer(fin)
 
     return cache
@@ -118,32 +120,48 @@ def nbserver(request, tempdir, coursedir, jupyter_config_dir, jupyter_data_dir, 
     run_python_module(["nbgrader", "extension", "activate"], env=env)
 
     # create nbgrader_config.py file
-    with open('nbgrader_config.py', 'w') as fh:
-        fh.write(dedent(
-            """
-            c = get_config()
-            c.TransferApp.exchange_directory = '{}'
-            c.TransferApp.cache_directory = '{}'
-            c.NbGrader.course_directory = '{}'
-            """.format(exchange, cache, coursedir)
-        ))
+    if sys.platform != 'win32':
+        with open('nbgrader_config.py', 'w') as fh:
+            fh.write(dedent(
+                """
+                c = get_config()
+                c.TransferApp.exchange_directory = '{}'
+                c.TransferApp.cache_directory = '{}'
+                c.NbGrader.course_directory = '{}'
+                """.format(exchange, cache, coursedir)
+            ))
+
+    kwargs = dict(env=env)
+    if sys.platform == 'win32':
+        kwargs['creationflags'] = sp.CREATE_NEW_PROCESS_GROUP
 
     nbserver = sp.Popen([
         sys.executable, "-m", "jupyter", "notebook",
         "--no-browser",
-        "--port", "9000"], env=env)
+        "--port", "9000"], **kwargs)
 
     def fin():
-        nbserver.send_signal(15) # SIGTERM
+        if sys.platform == 'win32':
+            nbserver.send_signal(signal.CTRL_BREAK_EVENT)
+        else:
+            nbserver.terminate()
+
         for i in range(10):
             retcode = nbserver.poll()
             if retcode is not None:
                 break
             time.sleep(0.1)
+
         if retcode is None:
             print("couldn't shutdown notebook server, force killing it")
             nbserver.kill()
+
+        nbserver.wait()
         copy_coverage_files()
+
+        # wait a short period of time for kernels to finish shutting down
+        time.sleep(1)
+
     request.addfinalizer(fin)
 
     return nbserver
@@ -176,3 +194,7 @@ def browser(request, tempdir, nbserver):
     return browser
 
 
+notwindows = pytest.mark.skipif(
+    sys.platform == 'win32',
+    reason="Assignment List extension is not available on windows"
+)

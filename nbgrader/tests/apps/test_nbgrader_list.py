@@ -6,8 +6,10 @@ from os.path import join
 
 from .. import run_python_module
 from .base import BaseTestApp
+from .conftest import notwindows
 
 
+@notwindows
 class TestNbGraderList(BaseTestApp):
 
     def _release(self, assignment, exchange, cache, course_dir, course="abc101"):

@@ -1,4 +1,5 @@
 import os
+import sys
 import pytest
 
 from os.path import join
@@ -76,6 +77,8 @@ class TestNbGraderAssign(BaseTestApp):
         notebook = gb.find_notebook("test", "ps1")
         assert len(notebook.grade_cells) == 6
 
+        gb.db.close()
+
     def test_force(self, course_dir):
         """Ensure the force option works properly"""
         self._copy_file(join('files', 'test.ipynb'), join(course_dir, 'source', 'ps1', 'test.ipynb'))
@@ -112,21 +115,26 @@ class TestNbGraderAssign(BaseTestApp):
         self._make_file(join(course_dir, 'source', 'ps1', 'foo.txt'), 'foo')
         run_python_module(["nbgrader", "assign", "ps1", "--create"])
 
+        if sys.platform == 'win32':
+            perms = '666'
+        else:
+            perms = '644'
+
         assert os.path.isfile(join(course_dir, "release", "ps1", "foo.ipynb"))
         assert os.path.isfile(join(course_dir, "release", "ps1", "foo.txt"))
-        assert self._get_permissions(join(course_dir, "release", "ps1", "foo.ipynb")) == "644"
-        assert self._get_permissions(join(course_dir, "release", "ps1", "foo.txt")) == "644"
+        assert self._get_permissions(join(course_dir, "release", "ps1", "foo.ipynb")) == perms
+        assert self._get_permissions(join(course_dir, "release", "ps1", "foo.txt")) == perms
 
     def test_custom_permissions(self, course_dir):
         """Are custom permissions properly set?"""
         self._empty_notebook(join(course_dir, 'source', 'ps1', 'foo.ipynb'))
         self._make_file(join(course_dir, 'source', 'ps1', 'foo.txt'), 'foo')
-        run_python_module(["nbgrader", "assign", "ps1", "--create", "--AssignApp.permissions=666"])
+        run_python_module(["nbgrader", "assign", "ps1", "--create", "--AssignApp.permissions=444"])
 
         assert os.path.isfile(join(course_dir, "release", "ps1", "foo.ipynb"))
         assert os.path.isfile(join(course_dir, "release", "ps1", "foo.txt"))
-        assert self._get_permissions(join(course_dir, "release", "ps1", "foo.ipynb")) == "666"
-        assert self._get_permissions(join(course_dir, "release", "ps1", "foo.txt")) == "666"
+        assert self._get_permissions(join(course_dir, "release", "ps1", "foo.ipynb")) == "444"
+        assert self._get_permissions(join(course_dir, "release", "ps1", "foo.txt")) == "444"
 
     def test_add_remove_extra_notebooks(self, db, course_dir):
         """Are extra notebooks added and removed?"""
@@ -157,6 +165,8 @@ class TestNbGraderAssign(BaseTestApp):
         with pytest.raises(InvalidRequestError):
             gb.db.refresh(notebook2)
 
+        gb.db.close()
+
     def test_add_extra_notebooks_with_submissions(self, db, course_dir):
         """Is an error thrown when new notebooks are added and there are existing submissions?"""
         gb = Gradebook(db)
@@ -173,6 +183,8 @@ class TestNbGraderAssign(BaseTestApp):
 
         self._copy_file(join("files", "test.ipynb"), join(course_dir, "source", "ps1", "test2.ipynb"))
         run_python_module(["nbgrader", "assign", "ps1", "--db", db, "--force"], retcode=1)
+
+        gb.db.close()
 
     def test_remove_extra_notebooks_with_submissions(self, db, course_dir):
         """Is an error thrown when notebooks are removed and there are existing submissions?"""
@@ -191,6 +203,8 @@ class TestNbGraderAssign(BaseTestApp):
 
         os.remove(join(course_dir, "source", "ps1", "test2.ipynb"))
         run_python_module(["nbgrader", "assign", "ps1", "--db", db, "--force"], retcode=1)
+
+        gb.db.close()
 
     def test_same_notebooks_with_submissions(self, db, course_dir):
         """Is it ok to run nbgrader assign with the same notebooks and existing submissions?"""
@@ -215,6 +229,8 @@ class TestNbGraderAssign(BaseTestApp):
         gb.db.refresh(notebook)
         gb.db.refresh(submission)
         gb.db.refresh(submission_notebook)
+
+        gb.db.close()
 
     def test_force_single_notebook(self, course_dir):
         self._copy_file(join("files", "test.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))

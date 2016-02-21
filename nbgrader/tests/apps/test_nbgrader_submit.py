@@ -7,8 +7,10 @@ from os.path import join, isfile
 from ...utils import parse_utc
 from .. import run_python_module
 from .base import BaseTestApp
+from .conftest import notwindows
 
 
+@notwindows
 class TestNbGraderSubmit(BaseTestApp):
 
     def _release_and_fetch(self, assignment, exchange, cache, course_dir):
