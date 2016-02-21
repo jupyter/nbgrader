@@ -1,7 +1,7 @@
 sqlalchemy
 python-dateutil
 jupyter
-notebook
+notebook>=4.1
 nbconvert
 nbformat
 traitlets
