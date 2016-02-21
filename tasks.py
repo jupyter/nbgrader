@@ -5,10 +5,18 @@ from invoke import task
 from invoke import run as _run
 from textwrap import dedent
 
+import sys
+if sys.platform == 'win32':
+    WINDOWS = True
+else:
+    WINDOWS = False
+
 
 def run(*args, **kwargs):
     if 'pty' not in kwargs:
         kwargs['pty'] = True
+    if WINDOWS:
+        kwargs['pty'] = False
     if 'echo' not in kwargs:
         kwargs['echo'] = True
     return _run(*args, **kwargs)
@@ -86,36 +94,38 @@ def clear_docs():
 
 
 def _run_tests(mark=None, skip=None):
-    import distutils.sysconfig
-    site = distutils.sysconfig.get_python_lib()
-    sitecustomize_path = os.path.join(site, "sitecustomize.py")
-    if os.path.exists(sitecustomize_path):
-        with open(sitecustomize_path, "r") as fh:
-            sitecustomize = fh.read()
-        with open(sitecustomize_path, "w") as fh:
-            fh.write(re.sub(
-                "^### begin nbgrader changes$.*^### end nbgrader changes$[\n]",
-                "",
-                sitecustomize,
-                flags=re.MULTILINE | re.DOTALL))
+    if not WINDOWS:
+        import distutils.sysconfig
+        site = distutils.sysconfig.get_python_lib()
+        sitecustomize_path = os.path.join(site, "sitecustomize.py")
+        if os.path.exists(sitecustomize_path):
+            with open(sitecustomize_path, "r") as fh:
+                sitecustomize = fh.read()
+            with open(sitecustomize_path, "w") as fh:
+                fh.write(re.sub(
+                    "^### begin nbgrader changes$.*^### end nbgrader changes$[\n]",
+                    "",
+                    sitecustomize,
+                    flags=re.MULTILINE | re.DOTALL))
 
-    with open(sitecustomize_path, "a") as fh:
-        fh.write(dedent(
-            """
-            ### begin nbgrader changes
-            import coverage; coverage.process_startup()
-            ### end nbgrader changes
-            """
-        ).lstrip())
+        with open(sitecustomize_path, "a") as fh:
+            fh.write(dedent(
+                """
+                ### begin nbgrader changes
+                import coverage; coverage.process_startup()
+                ### end nbgrader changes
+                """
+            ).lstrip())
 
-    cmd = [
-        'COVERAGE_PROCESS_START={}'.format(os.path.join(os.getcwd(), ".coveragerc")),
-        'py.test',
-        '--cov nbgrader',
-        '--no-cov-on-fail',
-        '-v',
-        '-x'
-    ]
+    cmd = []
+    if not WINDOWS:
+        cmd.append('COVERAGE_PROCESS_START={}'.format(os.path.join(os.getcwd(), ".coveragerc")))
+    cmd.append('py.test')
+    if not WINDOWS:
+        cmd.append('--cov nbgrader')
+        cmd.append('--no-cov-on-fail')
+    cmd.append('-v')
+    cmd.append('-x')
 
     marks = []
     if mark is not None:
@@ -126,8 +136,10 @@ def _run_tests(mark=None, skip=None):
         cmd.append('-m "{}"'.format(" and ".join(marks)))
 
     run(" ".join(cmd))
-    run("ls -a .coverage*")
-    run("coverage combine")
+
+    if not WINDOWS:
+        run("ls -a .coverage*")
+        run("coverage combine")
 
 
 @task
