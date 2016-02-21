@@ -34,8 +34,6 @@ class FakeUserSpawner(LocalProcessSpawner):
     def make_preexec_fn(self, name):
         home = os.getcwd()
         def preexec():
-            # don't forward signals
-            os.setpgrp()
             # start in the cwd
             os.chdir(home)
         return preexec

@@ -86,7 +86,7 @@ def _sort_rows(x):
     return item_name
 
 
-@pytest.mark.js
+@pytest.mark.nbextensions
 def test_show_assignments_list(browser, class_files, tempdir):
     _load_assignments_list(browser)
 
@@ -110,7 +110,7 @@ def test_show_assignments_list(browser, class_files, tempdir):
     assert rows[0].find_element_by_class_name("item_course").text == "abc101"
 
 
-@pytest.mark.js
+@pytest.mark.nbextensions
 def test_multiple_released_assignments(browser, class_files, tempdir):
     _load_assignments_list(browser)
 
@@ -131,7 +131,7 @@ def test_multiple_released_assignments(browser, class_files, tempdir):
     assert rows[1].find_element_by_class_name("item_course").text == "xyz 200"
 
 
-@pytest.mark.js
+@pytest.mark.nbextensions
 def test_fetch_assignment(browser, class_files, tempdir):
     _load_assignments_list(browser)
 
@@ -157,7 +157,7 @@ def test_fetch_assignment(browser, class_files, tempdir):
     _unexpand(browser, "#nbgrader-xyz_200-ps01", "ps.01")
 
 
-@pytest.mark.js
+@pytest.mark.nbextensions
 def test_submit_assignment(browser, class_files, tempdir):
     _load_assignments_list(browser)
 
@@ -188,7 +188,7 @@ def test_submit_assignment(browser, class_files, tempdir):
     assert rows[0].find_element_by_class_name("item_status").text != rows[1].find_element_by_class_name("item_status").text
 
 
-@pytest.mark.js
+@pytest.mark.nbextensions
 def test_fetch_second_assignment(browser, class_files, tempdir):
     _load_assignments_list(browser)
 
@@ -219,7 +219,7 @@ def test_fetch_second_assignment(browser, class_files, tempdir):
     _unexpand(browser, "abc101-Problem_Set_1", "Problem Set 1")
 
 
-@pytest.mark.js
+@pytest.mark.nbextensions
 def test_submit_other_assignment(browser, class_files, tempdir):
     _load_assignments_list(browser)
 
@@ -242,7 +242,7 @@ def test_submit_other_assignment(browser, class_files, tempdir):
     assert rows[0].find_element_by_class_name("item_status").text != rows[2].find_element_by_class_name("item_status").text
 
 
-@pytest.mark.js
+@pytest.mark.nbextensions
 def test_validate_ok(browser, class_files, tempdir):
     _load_assignments_list(browser)
 
@@ -266,7 +266,7 @@ def test_validate_ok(browser, class_files, tempdir):
     _dismiss_modal(browser)
 
 
-@pytest.mark.js
+@pytest.mark.nbextensions
 def test_validate_failure(browser, class_files, tempdir):
     _load_assignments_list(browser)
 

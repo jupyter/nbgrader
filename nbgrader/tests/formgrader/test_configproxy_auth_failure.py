@@ -6,7 +6,7 @@ from .conftest import jupyterhub, minversion
 
 @jupyterhub
 @minversion
-@pytest.mark.js
+@pytest.mark.formgrader
 def test_configproxy_auth_success(gradebook, tempdir):
     """Can the formgrader be started with the correct auth token?"""
 
@@ -28,7 +28,7 @@ def test_configproxy_auth_success(gradebook, tempdir):
 
 @jupyterhub
 @minversion
-@pytest.mark.js
+@pytest.mark.formgrader
 def test_configproxy_auth_failure(gradebook, tempdir):
     """Can the formgrader not be started when the auth token is incorrect?"""
 

@@ -2,7 +2,7 @@ import pytest
 
 from .base import BaseTestFormgrade
 
-@pytest.mark.js
+@pytest.mark.formgrader
 @pytest.mark.usefixtures("bad_formgrader")
 class TestAuthFailures(BaseTestFormgrade):
 
@@ -27,7 +27,7 @@ class TestAuthFailures(BaseTestFormgrade):
         self._wait_for_element("error-500")
 
 
-@pytest.mark.js
+@pytest.mark.formgrader
 @pytest.mark.usefixtures("all_formgraders")
 class TestInvalidGrader(BaseTestFormgrade):
 

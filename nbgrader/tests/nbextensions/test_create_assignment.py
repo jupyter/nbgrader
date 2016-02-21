@@ -32,16 +32,27 @@ def _load_notebook(browser, retries=5):
             print("Failed to load the page too many times")
             raise
 
-    # wait for the celltoolbar menu to appear
-    _wait(browser).until(
-        EC.element_to_be_clickable((By.CSS_SELECTOR, '#ctb_select')))
 
+def _activate_toolbar(browser, name="Create%20Assignment"):
+    def celltoolbar_exists(browser):
+        return browser.execute_script(
+            'return $("#view_menu #menu-cell-toolbar").find("[data-name=\'{}\']").length == 1;'.format(name))
 
-def _activate_toolbar(browser, name="Create Assignment"):
+    # wait for the view menu to appear
+    _wait(browser).until(celltoolbar_exists)
+
     # activate the Create Assignment toolbar
-    element = browser.find_element_by_css_selector("#ctb_select")
-    select = Select(element)
-    select.select_by_visible_text(name)
+    browser.execute_script(
+        "$('#view_menu #menu-cell-toolbar').find('[data-name=\"{}\"]').find('a').click();".format(name)
+    )
+
+    # make sure the toolbar appeared
+    if name == "Create%20Assignment":
+        _wait(browser).until(
+            EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".celltoolbar select")))
+    elif name == "Edit%20Metadata":
+        _wait(browser).until(
+            EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".celltoolbar button")))
 
 
 def _select_none(browser, index=0):
@@ -119,14 +130,10 @@ def _dismiss_modal(browser):
     _wait(browser).until(modal_gone)
 
 
-@pytest.mark.js
+@pytest.mark.nbextensions
 def test_manual_cell(browser):
     _load_notebook(browser)
     _activate_toolbar(browser)
-
-    # make sure the toolbar appeared
-    _wait(browser).until(
-        EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".celltoolbar select")))
 
     # does the nbgrader metadata exist?
     assert _get_metadata(browser) is None
@@ -158,14 +165,10 @@ def test_manual_cell(browser):
     assert not _get_metadata(browser)['locked']
 
 
-@pytest.mark.js
+@pytest.mark.nbextensions
 def test_solution_cell(browser):
     _load_notebook(browser)
     _activate_toolbar(browser)
-
-    # make sure the toolbar appeared
-    _wait(browser).until(
-        EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".celltoolbar select")))
 
     # does the nbgrader metadata exist?
     assert _get_metadata(browser) is None
@@ -191,14 +194,10 @@ def test_solution_cell(browser):
     assert not _get_metadata(browser)['locked']
 
 
-@pytest.mark.js
+@pytest.mark.nbextensions
 def test_tests_cell(browser):
     _load_notebook(browser)
     _activate_toolbar(browser)
-
-    # make sure the toolbar appeared
-    _wait(browser).until(
-        EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".celltoolbar select")))
 
     # does the nbgrader metadata exist?
     assert _get_metadata(browser) is None
@@ -232,14 +231,10 @@ def test_tests_cell(browser):
     assert not _get_metadata(browser)['locked']
 
 
-@pytest.mark.js
+@pytest.mark.nbextensions
 def test_locked_cell(browser):
     _load_notebook(browser)
     _activate_toolbar(browser)
-
-    # make sure the toolbar appeared
-    WebDriverWait(browser, 30).until(
-        EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".celltoolbar select")))
 
     # does the nbgrader metadata exist?
     assert _get_metadata(browser) is None
@@ -267,7 +262,7 @@ def test_locked_cell(browser):
     assert not _get_metadata(browser)['locked']
 
 
-@pytest.mark.js
+@pytest.mark.nbextensions
 def test_grade_cell_css(browser):
     _load_notebook(browser)
     _activate_toolbar(browser)
@@ -318,12 +313,12 @@ def test_grade_cell_css(browser):
     assert len(elements) == 1
 
     # deactivate the toolbar
-    _activate_toolbar(browser, "Edit Metadata")
+    _activate_toolbar(browser, "Edit%20Metadata")
     elements = browser.find_elements_by_css_selector(".nbgrader-cell")
     assert len(elements) == 0
 
 
-@pytest.mark.js
+@pytest.mark.nbextensions
 def test_tabbing(browser):
     _load_notebook(browser)
     _activate_toolbar(browser)
@@ -361,7 +356,7 @@ def test_tabbing(browser):
     assert "nbgrader-id-input" == element.get_attribute("class")
 
 
-@pytest.mark.js
+@pytest.mark.nbextensions
 def test_total_points(browser):
     _load_notebook(browser)
     _activate_toolbar(browser)
@@ -422,7 +417,7 @@ def test_total_points(browser):
     assert _get_total_points(browser) == 0
 
 
-@pytest.mark.js
+@pytest.mark.nbextensions
 def test_cell_ids(browser):
     _load_notebook(browser)
     _activate_toolbar(browser)

@@ -7,7 +7,7 @@ from .base import BaseTestFormgrade
 from .manager import HubAuthNotebookServerUserManager
 
 
-@pytest.mark.js
+@pytest.mark.formgrader
 @pytest.mark.usefixtures("all_formgraders")
 class TestGradebook(BaseTestFormgrade):
 
@@ -231,17 +231,11 @@ class TestGradebook(BaseTestFormgrade):
         next_url = self.formgrade_url().replace(self.manager.base_url, "")
         self._check_url("{}/hub/login?next={}".format(self.manager.base_url, next_url))
 
-        # this will fail if we have a cookie for another user and try to access
-        # a live notebook for that user
-        if isinstance(self.manager, HubAuthNotebookServerUserManager):
-            pytest.xfail("https://github.com/jupyter/jupyterhub/pull/290")
-
         # try going to a live notebook page
         problem = self.gradebook.find_assignment("Problem Set 1").notebooks[0]
         submission = sorted(problem.submissions, key=lambda x: x.id)[0]
         url = self.notebook_url("autograded/{}/Problem Set 1/{}.ipynb".format(submission.student.id, problem.name))
         self._get(url)
         self._wait_for_element("username_input")
-        next_url = quote(url.replace(self.manager.base_url, ""))
-        self._check_url("{}/hub/?next={}".format(self.manager.base_url, next_url))
+        self._check_url("{}/hub/login".format(self.manager.base_url))
 
