@@ -1,7 +1,7 @@
 import pytest
 
 from .manager import HubAuthManager
-from .conftest import jupyterhub, js
+from .conftest import jupyterhub
 
 
 @jupyterhub

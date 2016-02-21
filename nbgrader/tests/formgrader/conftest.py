@@ -105,13 +105,12 @@ skipif = pytest.mark.skipif(
     (sys.version_info[0] < 3) or (sys.platform == 'win32'),
     reason="JupyterHub tests require Python 3 and cannot run on Windows")
 
-formgrader = pytest.mark.formgrader
-jupyterhub = lambda x: pytest.mark.jupyterhub(formgrader(skipif(x)))
+jupyterhub = lambda x: pytest.mark.jupyterhub(pytest.mark.formgrader(skipif(x)))
 
 # parameterize the formgrader to run under all managers
 @pytest.fixture(
     scope="class",
-    params=[jupyterhub(x) if x.startswith("Hub") else js(x) for x in manager.__all__]
+    params=[jupyterhub(x) if x.startswith("Hub") else pytest.mark.formgrader(x) for x in manager.__all__]
 )
 def all_formgraders(request, gradebook, tempdir):
     _formgrader(request, getattr(manager, request.param), gradebook, tempdir)
@@ -119,7 +118,7 @@ def all_formgraders(request, gradebook, tempdir):
 # parameterize the formgrader to run under just the default manager
 @pytest.fixture(
     scope="class",
-    params=[js("DefaultManager")]
+    params=[pytest.mark.formgrader("DefaultManager")]
 )
 def formgrader(request, gradebook, tempdir):
     _formgrader(request, getattr(manager, request.param), gradebook, tempdir)
