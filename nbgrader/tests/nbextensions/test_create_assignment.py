@@ -32,9 +32,12 @@ def _load_notebook(browser, retries=5):
             print("Failed to load the page too many times")
             raise
 
+    def celltoolbar_exists(browser):
+        return browser.execute_script(
+            'return $("#view_menu #menu-cell-toolbar").find("[data-name=\'None\']").length == 1;')
+
     # wait for the view menu to appear
-    _wait(browser).until(
-        EC.presence_of_element_located((By.CSS_SELECTOR, '#menus')))
+    _wait(browser).until(celltoolbar_exists)
 
 
 def _activate_toolbar(browser, name="Create%20Assignment"):
