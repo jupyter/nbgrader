@@ -170,7 +170,7 @@ def before_install(group, python_version):
     run('git clone --quiet --depth 1 https://github.com/minrk/travis-wheels ~/travis-wheels')
 
     # install jupyterhub
-    if python_version == '3.4' and group == 'js':
+    if python_version.startswith('3') and group == 'js':
         run('npm install -g configurable-http-proxy')
         run('pip install jupyterhub')
 
