@@ -32,16 +32,16 @@ def _load_notebook(browser, retries=5):
             print("Failed to load the page too many times")
             raise
 
-    # wait for the celltoolbar menu to appear
+    # wait for the view menu to appear
     _wait(browser).until(
-        EC.element_to_be_clickable((By.CSS_SELECTOR, '#ctb_select')))
+        EC.presence_of_element_located((By.CSS_SELECTOR, '#menus')))
 
 
-def _activate_toolbar(browser, name="Create Assignment"):
+def _activate_toolbar(browser, name="Create%20Assignment"):
     # activate the Create Assignment toolbar
-    element = browser.find_element_by_css_selector("#ctb_select")
-    select = Select(element)
-    select.select_by_visible_text(name)
+    browser.execute_script(
+        "$('#view_menu #menu-cell-toolbar').find('[data-name=\"{}\"]').find('a').click()".format(name)
+    )
 
 
 def _select_none(browser, index=0):
@@ -318,7 +318,7 @@ def test_grade_cell_css(browser):
     assert len(elements) == 1
 
     # deactivate the toolbar
-    _activate_toolbar(browser, "Edit Metadata")
+    _activate_toolbar(browser, "Edit%20Metadata")
     elements = browser.find_elements_by_css_selector(".nbgrader-cell")
     assert len(elements) == 0
 
