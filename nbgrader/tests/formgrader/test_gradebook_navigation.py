@@ -7,7 +7,7 @@ from .base import BaseTestFormgrade
 from .manager import HubAuthNotebookServerUserManager
 
 
-@pytest.mark.js
+@pytest.mark.formgrader
 @pytest.mark.usefixtures("all_formgraders")
 class TestGradebook(BaseTestFormgrade):
 

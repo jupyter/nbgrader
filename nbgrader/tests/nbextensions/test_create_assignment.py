@@ -130,7 +130,7 @@ def _dismiss_modal(browser):
     _wait(browser).until(modal_gone)
 
 
-@pytest.mark.js
+@pytest.mark.nbextensions
 def test_manual_cell(browser):
     _load_notebook(browser)
     _activate_toolbar(browser)
@@ -165,7 +165,7 @@ def test_manual_cell(browser):
     assert not _get_metadata(browser)['locked']
 
 
-@pytest.mark.js
+@pytest.mark.nbextensions
 def test_solution_cell(browser):
     _load_notebook(browser)
     _activate_toolbar(browser)
@@ -194,7 +194,7 @@ def test_solution_cell(browser):
     assert not _get_metadata(browser)['locked']
 
 
-@pytest.mark.js
+@pytest.mark.nbextensions
 def test_tests_cell(browser):
     _load_notebook(browser)
     _activate_toolbar(browser)
@@ -231,7 +231,7 @@ def test_tests_cell(browser):
     assert not _get_metadata(browser)['locked']
 
 
-@pytest.mark.js
+@pytest.mark.nbextensions
 def test_locked_cell(browser):
     _load_notebook(browser)
     _activate_toolbar(browser)
@@ -262,7 +262,7 @@ def test_locked_cell(browser):
     assert not _get_metadata(browser)['locked']
 
 
-@pytest.mark.js
+@pytest.mark.nbextensions
 def test_grade_cell_css(browser):
     _load_notebook(browser)
     _activate_toolbar(browser)
@@ -318,7 +318,7 @@ def test_grade_cell_css(browser):
     assert len(elements) == 0
 
 
-@pytest.mark.js
+@pytest.mark.nbextensions
 def test_tabbing(browser):
     _load_notebook(browser)
     _activate_toolbar(browser)
@@ -356,7 +356,7 @@ def test_tabbing(browser):
     assert "nbgrader-id-input" == element.get_attribute("class")
 
 
-@pytest.mark.js
+@pytest.mark.nbextensions
 def test_total_points(browser):
     _load_notebook(browser)
     _activate_toolbar(browser)
@@ -417,7 +417,7 @@ def test_total_points(browser):
     assert _get_total_points(browser) == 0
 
 
-@pytest.mark.js
+@pytest.mark.nbextensions
 def test_cell_ids(browser):
     _load_notebook(browser)
     _activate_toolbar(browser)

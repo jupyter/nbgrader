@@ -133,10 +133,13 @@ def _run_tests(mark=None, skip=None):
 @task
 def tests(group='all', skip=None):
     if group == 'python':
-        _run_tests(mark="not js", skip=skip)
+        _run_tests(mark="not formgrader and not nbextensions", skip=skip)
 
-    elif group == 'js':
-        _run_tests(mark="js", skip=skip)
+    elif group == 'formgrader':
+        _run_tests(mark="formgrader", skip=skip)
+
+    elif group == 'nbextensions':
+        _run_tests(mark="nbextensions", skip=skip)
 
     elif group == 'docs':
         docs()
@@ -150,7 +153,7 @@ def tests(group='all', skip=None):
 
 @task
 def after_success(group):
-    if group in ('python', 'js'):
+    if group in ('python', 'formgrader', 'nbextensions'):
         run('codecov')
     else:
         echo('Nothing to do.')
@@ -170,7 +173,7 @@ def before_install(group, python_version):
     run('git clone --quiet --depth 1 https://github.com/minrk/travis-wheels ~/travis-wheels')
 
     # install jupyterhub
-    if python_version.startswith('3') and group == 'js':
+    if python_version.startswith('3') and group == 'formgrader':
         run('npm install -g configurable-http-proxy')
         run('pip install jupyterhub')
 
