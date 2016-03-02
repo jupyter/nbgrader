@@ -151,6 +151,18 @@ class AssignApp(BaseNbConvertApp):
         extra_config.NbGrader.notebook_id = '*'
         return extra_config
 
+    def _config_changed(self, name, old, new):
+        if 'create_assignment' in new.AssignApp:
+            self.log.warn(
+                "The AssignApp.create_assignment (or the --create flag) option is "
+                "deprecated. Please specify your assignments through the "
+                "`NbGrader.db_assignments` variable in your nbgrader config file."
+            )
+            del new.AssignApp.create_assignment
+
+        super(AssignApp, self)._config_changed(name, old, new)
+
+
     def _clean_old_notebooks(self, assignment_id, student_id):
         gb = Gradebook(self.db_url)
         assignment = gb.find_assignment(assignment_id)
@@ -193,16 +205,20 @@ class AssignApp(BaseNbConvertApp):
         # doesn't exist
         if not self.no_database:
             gb = Gradebook(self.db_url)
-            try:
-                gb.find_assignment(assignment_id)
-            except MissingEntry:
-                if self.create_assignment:
-                    self.log.warning("Creating assignment '%s'", assignment_id)
-                    gb.add_assignment(assignment_id)
-                else:
-                    self.fail("No assignment called '%s' exists in the database", assignment_id)
-            else:
+            assignment = None
+            for a in self.db_assignments:
+                if a['name'] == assignment_id:
+                    assignment = a.copy()
+                    break
+
+            if assignment is not None:
+                del assignment['name']
+                self.log.info("Updating/creating assignment '%s': %s", assignment_id, assignment)
+                gb.update_or_create_assignment(assignment_id, **assignment)
+
                 # check if there are any extra notebooks in the db that are no longer
                 # part of the assignment, and if so, remove them
                 if self.notebook_id == "*":
                     self._clean_old_notebooks(assignment_id, student_id)
+            else:
+                self.fail("No assignment called '%s' exists in the config", assignment_id)

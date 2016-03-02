@@ -23,20 +23,6 @@ def db(request):
 
 
 @pytest.fixture
-def gradebook(request, db):
-    gb = Gradebook(db)
-    gb.add_assignment("ps1", duedate="2015-02-02 14:58:23.948203 PST")
-    gb.add_student("foo")
-    gb.add_student("bar")
-
-    def fin():
-        gb.db.close()
-    request.addfinalizer(fin)
-
-    return db
-
-
-@pytest.fixture
 def course_dir(request):
     path = tempfile.mkdtemp()
 
