@@ -11,8 +11,15 @@ from ...utils import remove
 @pytest.mark.usefixtures("temp_cwd")
 class BaseTestApp(object):
 
-    def _empty_notebook(self, path):
+    def _empty_notebook(self, path, kernel=None):
         nb = new_notebook()
+        if kernel is not None:
+            nb.metadata.kernelspec = {
+                "display_name": "kernel",
+                "language": kernel,
+                "name": kernel
+            }
+
         full_dest = os.path.abspath(path)
         if not os.path.exists(os.path.dirname(full_dest)):
             os.makedirs(os.path.dirname(full_dest))

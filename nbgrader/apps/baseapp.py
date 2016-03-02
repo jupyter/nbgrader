@@ -693,6 +693,8 @@ class BaseNbConvertApp(NbGrader, NbConvertApp):
                 os.chmod(os.path.join(dirname, filename), permissions)
 
     def convert_notebooks(self):
+        errors = []
+
         for assignment in sorted(self.assignments.keys()):
             # initialize the list of notebooks and the exporter
             self.notebooks = sorted(self.assignments[assignment])
@@ -716,8 +718,10 @@ class BaseNbConvertApp(NbGrader, NbConvertApp):
                 super(BaseNbConvertApp, self).convert_notebooks()
                 self.set_permissions(gd['assignment_id'], gd['student_id'])
 
-            except:
+            except Exception:
                 self.log.error("There was an error processing assignment: %s", assignment)
+                self.log.error(traceback.format_exc())
+                errors.append((gd['assignment_id'], gd['student_id']))
 
                 dest = os.path.normpath(self._format_dest(gd['assignment_id'], gd['student_id']))
                 if self.notebook_id == "*":
@@ -732,4 +736,7 @@ class BaseNbConvertApp(NbGrader, NbConvertApp):
                             self.log.warning("Removing failed notebook: {}".format(path))
                             remove(path)
 
-                raise
+        if len(errors) > 0:
+            for assignment_id, student_id in errors:
+                self.log.error("There was an error processing assignment '{}' for student '{}'".format(assignment_id, student_id))
+            self.fail("Please see the error log for details on the specific errors on the above failures.")
