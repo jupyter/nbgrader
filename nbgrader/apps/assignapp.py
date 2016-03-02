@@ -206,7 +206,6 @@ class AssignApp(BaseNbConvertApp):
         if not self.no_database:
             gb = Gradebook(self.db_url)
             assignment = None
-            print(self.db_assignments)
             for a in self.db_assignments:
                 if a['name'] == assignment_id:
                     assignment = a.copy()
