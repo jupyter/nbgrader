@@ -223,6 +223,42 @@ class NbGrader(JupyterApp):
         )
     )
 
+    db_assignments = List(
+        config=True,
+        help=dedent(
+            """
+            A list of assignments that will be created in the database. Each
+            item in the list should be a dictionary with the following keys:
+
+                - name
+                - duedate (optional)
+
+            The values will be stored in the database. Please see the API
+            documentation on the `Assignment` database model for details on
+            these fields.
+            """
+        )
+    )
+
+    db_students = List(
+        config=True,
+        help=dedent(
+            """
+            A list of student that will be created in the database. Each
+            item in the list should be a dictionary with the following keys:
+
+                - id
+                - first_name (optional)
+                - last_name (optional)
+                - email (optional)
+
+            The values will be stored in the database. Please see the API
+            documentation on the `Student` database model for details on
+            these fields.
+            """
+        )
+    )
+
     def _course_directory_default(self):
         return os.getcwd()
 
