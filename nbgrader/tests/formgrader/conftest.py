@@ -5,6 +5,7 @@ import tempfile
 import sys
 import logging
 
+from textwrap import dedent
 from selenium import webdriver
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 
@@ -42,12 +43,19 @@ def gradebook(request, tempdir):
     shutil.copytree(os.path.join(os.path.dirname(__file__), source_path), "source")
     shutil.copytree(os.path.join(os.path.dirname(__file__), submitted_path), "submitted")
 
-    # create the gradebook
-    gb = Gradebook("sqlite:///gradebook.db")
-    gb.add_assignment("Problem Set 1")
-    gb.add_student("Bitdiddle", first_name="Ben", last_name="B")
-    gb.add_student("Hacker", first_name="Alyssa", last_name="H")
-    gb.add_student("Reasoner", first_name="Louis", last_name="R")
+    # create the config file
+    with open("nbgrader_config.py", "w") as fh:
+        fh.write(dedent(
+            """
+            c = get_config()
+            c.NbGrader.db_assignments = [dict(name="Problem Set 1")]
+            c.NbGrader.db_students = [
+                dict(id="Bitdiddle", first_name="Ben", last_name="B"),
+                dict(id="Hacker", first_name="Alyssa", last_name="H"),
+                dict(id="Reasoner", first_name="Louis", last_name="R")
+            ]
+            """
+        ))
 
     # run nbgrader assign
     run_python_module([
@@ -57,6 +65,8 @@ def gradebook(request, tempdir):
 
     # run the autograder
     run_python_module(["nbgrader", "autograde", "Problem Set 1"])
+
+    gb = Gradebook("sqlite:///gradebook.db")
 
     def fin():
         gb.db.close()
