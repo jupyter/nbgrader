@@ -41,7 +41,7 @@ system and command line tools using:
 
     pip install nbgrader
     
-For detailed instructions for installing nbgrader and the nbgrader extensions
+For detailed instructions on installing nbgrader and the nbgrader extensions
 for Jupyter notebook, please see [Installation](https://nbgrader.readthedocs.org/en/stable/user_guide/01a_installation.html)
 section in the User Guide.
 
