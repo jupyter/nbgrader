@@ -1,0 +1,6 @@
+name: nbgrader
+type: sphinx
+requirements_file: requirements.txt
+python:
+  version: 3
+  setup_py_install: true
