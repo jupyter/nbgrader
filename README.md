@@ -24,7 +24,7 @@ submit, and validate their assignments.
 ![nbgrader assignment list](docs/source/user_guide/images/student_assignment.gif "nbgrader assignment list")
 
 ### The command line tools of nbgrader
-[Command line tools](https://nbgrader.readthedocs.org/en/stable/command_line_tools/index.html)
+[Command line tools](https://nbgrader.readthedocs.org/en/latest/command_line_tools/index.html)
 offer an efficient way for the instructor to generate, assign, release, collect,
 and grade notebooks.
 
@@ -35,7 +35,7 @@ system and command line tools using:
     pip install nbgrader
     
 For detailed instructions on installing nbgrader and the nbgrader extensions
-for Jupyter notebook, please see [Installation](https://nbgrader.readthedocs.org/en/stable/user_guide/01a_installation.html)
+for Jupyter notebook, please see [Installation](https://nbgrader.readthedocs.org/en/latest/user_guide/01a_installation.html)
 section in the User Guide.
 
 
