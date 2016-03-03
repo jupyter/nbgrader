@@ -288,10 +288,10 @@ intersphinx_mapping = {'http://docs.python.org/': None}
 
 import sys
 import os
-import subprocess as sp
+root = os.path.abspath(os.path.dirname(__file__))
+sys.path.append(root)
 
-here = os.path.dirname(os.path.abspath(__file__))
-bin_path = os.path.dirname(sys.executable)
-env = os.environ.copy()
-env['PATH'] = "{}:{}".format(bin_path, env['PATH'])
-sp.check_call([sys.executable, "build_docs.py"], cwd=here, env=env)
+import build_docs
+build_docs.convert_notebooks(root)
+build_docs.autogen_command_line(root)
+build_docs.autogen_config(root)
