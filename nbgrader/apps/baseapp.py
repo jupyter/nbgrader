@@ -73,6 +73,16 @@ class NbGrader(JupyterApp):
     def _log_format_default(self):
         return "%(color)s[%(name)s | %(levelname)s]%(end_color)s %(message)s"
 
+    logfile = Unicode(
+        ".nbgrader.log",
+        config=True,
+        help=dedent(
+            """
+            Name of the logfile to log to.
+            """
+        )
+    )
+
     db_url = Unicode(
         "",
         config=True,
@@ -355,9 +365,23 @@ class NbGrader(JupyterApp):
     def excepthook(self, etype, evalue, tb):
         format_excepthook(etype, evalue, tb)
 
+    def init_logging(self):
+        if self.logfile:
+            handler = logging.FileHandler(self.logfile)
+
+            log_format = self.log_format.replace("%(color)s", "").replace("%(end_color)s", "")
+            _formatter = self._log_formatter_cls(
+                fmt=log_format,
+                datefmt=self.log_datefmt,
+            )
+
+            handler.setFormatter(_formatter)
+            self.log.addHandler(handler)
+
     @catch_config_error
     def initialize(self, argv=None):
         self.update_config(self.build_extra_config())
+        self.init_logging()
         super(NbGrader, self).initialize(argv)
 
     def _format_path(self, nbgrader_step, student_id, assignment_id, escape=False):
@@ -693,6 +717,8 @@ class BaseNbConvertApp(NbGrader, NbConvertApp):
                 os.chmod(os.path.join(dirname, filename), permissions)
 
     def convert_notebooks(self):
+        errors = []
+
         for assignment in sorted(self.assignments.keys()):
             # initialize the list of notebooks and the exporter
             self.notebooks = sorted(self.assignments[assignment])
@@ -716,8 +742,10 @@ class BaseNbConvertApp(NbGrader, NbConvertApp):
                 super(BaseNbConvertApp, self).convert_notebooks()
                 self.set_permissions(gd['assignment_id'], gd['student_id'])
 
-            except:
+            except Exception:
                 self.log.error("There was an error processing assignment: %s", assignment)
+                self.log.error(traceback.format_exc())
+                errors.append((gd['assignment_id'], gd['student_id']))
 
                 dest = os.path.normpath(self._format_dest(gd['assignment_id'], gd['student_id']))
                 if self.notebook_id == "*":
@@ -732,4 +760,13 @@ class BaseNbConvertApp(NbGrader, NbConvertApp):
                             self.log.warning("Removing failed notebook: {}".format(path))
                             remove(path)
 
-                raise
+        if len(errors) > 0:
+            for assignment_id, student_id in errors:
+                self.log.error(
+                    "There was an error processing assignment '{}' for student '{}'".format(
+                        assignment_id, student_id))
+
+            if self.logfile:
+                self.fail(
+                    "Please see the error log ({}) for details on the specific "
+                    "errors on the above failures.".format(self.logfile))

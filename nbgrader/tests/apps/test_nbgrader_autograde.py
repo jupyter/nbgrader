@@ -427,3 +427,19 @@ class TestNbGraderAutograde(BaseTestApp):
         assert os.path.exists(join(course_dir, "autograded", "foo", "ps1"))
         assert not os.path.isfile(join(course_dir, "autograded", "foo", "ps1", "p1.ipynb"))
         assert not os.path.isfile(join(course_dir, "autograded", "foo", "ps1", "p2.ipynb"))
+
+    def test_handle_failure_no_kernel(self, course_dir):
+        with open("nbgrader_config.py", "a") as fh:
+            fh.write("""c.NbGrader.db_assignments = [dict(name='ps1', duedate='2015-02-02 14:58:23.948203 PST')]\n""")
+            fh.write("""c.NbGrader.db_students = [dict(id="foo"), dict(id="bar")]""")
+
+        self._empty_notebook(join(course_dir, "source", "ps1", "p1.ipynb"), kernel="python")
+        run_python_module(["nbgrader", "assign", "ps1"])
+
+        self._empty_notebook(join(course_dir, "submitted", "foo", "ps1", "p1.ipynb"), kernel="blah")
+        self._empty_notebook(join(course_dir, "submitted", "bar", "ps1", "p1.ipynb"), kernel="python")
+        run_python_module(["nbgrader", "autograde", "ps1"], retcode=1)
+
+        assert not os.path.exists(join(course_dir, "autograded", "foo", "ps1"))
+        assert os.path.exists(join(course_dir, "autograded", "bar", "ps1"))
+        assert os.path.isfile(join(course_dir, "autograded", "bar", "ps1", "p1.ipynb"))
