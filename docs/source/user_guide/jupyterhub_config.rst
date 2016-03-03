@@ -3,8 +3,11 @@ Using nbgrader with JuptyerHub
 
 .. seealso::
 
-    :doc:`05_manual_grading`
-        Documentation for ``nbgrader formgrade``.
+    :doc:`creating_and_grading_assignments`
+        Documentation for ``nbgrader assign``, ``nbgrader autograde``, ``nbgrader formgrade``, and ``nbgrader feedback``.
+
+    :doc:`managing_assignment_files`
+        Documentation for ``nbgrader release``, ``nbgrader fetch``, ``nbgrader submit``, and ``nbgrader collect``.
 
     :doc:`/command_line_tools/nbgrader-formgrade`
         Command line options for ``nbgrader formgrade``
@@ -12,7 +15,7 @@ Using nbgrader with JuptyerHub
     :doc:`/config_options`
         Details on ``nbgrader_config.py``
 
-    :doc:`01_philosophy`
+    :doc:`philosophy`
         More details on how the nbgrader hierarchy is structured.
 
     `JupyterHub Documentation <http://jupyterhub.readthedocs.org/en/latest/getting-started.html>`_
@@ -20,13 +23,16 @@ Using nbgrader with JuptyerHub
         much required reading if you want to integrate the formgrader with
         JupyterHub.
 
-In addition to using the :doc:`nbgrader release <07_releasing_assignments>`,
-:doc:`nbgrader fetch <08_fetching_assignments>`,
-:doc:`nbgrader submit <09_submitting_assignments>`, and
-:doc:`nbgrader collect <10_collecting_assignments>` commands with a shared
-server setup like JupyterHub, the :doc:`formgrader <05_manual_grading>` can be
-configured to integrate with JupyterHub so that all grading can occur on the
-same server.
+For instructors running a class with JupyterHub, nbgrader offers several tools
+that optimize and enrich the instructors' and students' experience of sharing
+the same system. By integrating with JupyterHub, nbgrader streamlines the
+process of releasing and collecting assignments for the instructor and of
+fetching and submitting assignments for the student. In addition to using the
+``nbgrader release``, ``nbgrader fetch``, ``nbgrader submit``, and ``nbgrader
+collect`` commands (see :doc:`managing_assignment_files`) with a shared server
+setup like JupyterHub, the formgrader (see
+:doc:`creating_and_grading_assignments`) can be configured to integrate with
+JupyterHub so that all grading can occur on the same server.
 
 To set up the formgrader to work with JupyterHub, you will need to specify a
 few custom config options (see :doc:`/config_options` for details on all possible config options, and where configuration files live).
