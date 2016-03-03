@@ -1,6 +1,7 @@
 import os
 import datetime
 import time
+import stat
 
 from os.path import join, isfile
 
@@ -106,3 +107,15 @@ class TestNbGraderSubmit(BaseTestApp):
         assert isfile(join(cache, "abc101", filename, "timestamp.txt"))
         with open(join(cache, "abc101", filename, "timestamp.txt"), "r") as fh:
             assert fh.read() == timestamp2
+
+    def test_submit_readonly(self, exchange, cache, course_dir):
+        self._release_and_fetch("ps1", exchange, cache, course_dir)
+        os.chmod(join("ps1", "p1.ipynb"), stat.S_IRUSR)
+        self._submit("ps1", exchange, cache)
+
+        filename, = os.listdir(join(exchange, "abc101", "inbound"))
+        perms = os.stat(join(exchange, "abc101", "inbound", filename, "p1.ipynb")).st_mode
+        perms = str(oct(perms & (stat.S_IRWXU | stat.S_IRWXG | stat.S_IRWXO)))[2:]
+        assert int(perms[0]) >= 4
+        assert int(perms[1]) == 4
+        assert int(perms[2]) == 4
