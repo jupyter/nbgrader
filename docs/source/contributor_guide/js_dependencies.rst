@@ -4,8 +4,8 @@ JavaScript dependencies
 For the time being, we are committing JavaScript dependencies to the nbgrader
 repository as that makes nbgrader installation much easier.
 
-Adding or udating JavaScript libraries
---------------------------------------
+Adding or updating JavaScript libraries
+---------------------------------------
 If you need to add a new library, or update the version of a library, you will
 need to have `npm` installed.
 

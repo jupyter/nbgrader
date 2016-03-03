@@ -14,6 +14,7 @@ addons:
   apt:
     packages:
     - pandoc
+    - enchant
 before_install:
   - pip install invoke
   - invoke before_install --group="$GROUP" --python-version="$TRAVIS_PYTHON_VERSION"

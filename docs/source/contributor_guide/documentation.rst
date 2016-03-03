@@ -9,7 +9,7 @@ Editing source files
 --------------------
 
 * ReStructured Text: The rst files should be fairly straightforward to edit. Here is
-  `a quick reference of rst syntax <http://docutils.sourceforge.net/docs/user/rst/quickref.html)>`_.
+  `a quick reference of rst syntax <http://docutils.sourceforge.net/docs/user/rst/quickref.html>`_.
   Some of the rst files also use `Sphinx autodoc <http://sphinx-doc.org/ext/autodoc.html>`_.
 
 * Jupyter Notebooks: The Jupyter notebooks are written in Python and should be written so that

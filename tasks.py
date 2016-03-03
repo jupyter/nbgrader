@@ -42,6 +42,8 @@ except ImportError:
 def docs():
     run('python docs/source/build_docs.py')
     run('make -C docs html')
+    run('make -C docs linkcheck')
+    run('make -C docs spelling')
 
 
 def _run_tests(mark=None, skip=None):

@@ -510,7 +510,7 @@ class SubmittedNotebook(Base):
     #: Unique id of :attr:`~nbgrader.api.SubmittedNotebook.assignment`
     assignment_id = Column(String(32), ForeignKey('submitted_assignment.id'))
 
-    #: The master version of this notebook, represesnted by a
+    #: The master version of this notebook, represented by a
     #: :class:`~nbgrader.api.Notebook` object
     notebook = None
 
@@ -731,7 +731,7 @@ class Comment(Base):
     #: A comment which is automatically assigned by the autograder
     auto_comment = Column(Text())
 
-    #: A commment which is assigned manually
+    #: A comment which is assigned manually
     manual_comment = Column(Text())
 
     #: The overall comment, computed automatically from the

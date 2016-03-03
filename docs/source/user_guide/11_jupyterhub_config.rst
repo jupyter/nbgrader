@@ -15,7 +15,7 @@ Using nbgrader with JuptyerHub
     :doc:`01_philosophy`
         More details on how the nbgrader hierarchy is structured.
 
-    `JupyterHub Documentation <https://github.com/jupyter/jupyterhub/blob/master/docs/getting-started.md>`_
+    `JupyterHub Documentation <http://jupyterhub.readthedocs.org/en/latest/getting-started.html>`_
         Detailed documentation describing how JupyterHub works, which is very
         much required reading if you want to integrate the formgrader with
         JupyterHub.
@@ -69,7 +69,7 @@ In this example, the formgrader listens on localhost at port 9000, and uses the
 special ``HubAuth`` authenticator class. This class tells the formgrader to ask
 JupyterHub to route requests from ``localhost:8000/hub/nbgrader/example_course``
 to the formgrader at ``localhost:9000``, and configures the formgrader to only
-allow access from usernames specifed in the list of graders. In addition, it
+allow access from usernames specified in the list of graders. In addition, it
 tells JupyterHub where the root of the class files directory (where the formgrader
 should be run from) is in relation to where the notebook server will run.
 

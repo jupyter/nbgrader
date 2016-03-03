@@ -152,9 +152,11 @@ def convert_notebooks(root):
                 ])
 
             else:
-                shutil.copy(
-                    os.path.join(dirname, filename),
-                    os.path.join(build_directory, filename))
+                src = os.path.join(dirname, filename)
+                dest = os.path.join(build_directory, filename)
+                if os.path.exists(dest):
+                    os.remove(dest)
+                shutil.copy(src, dest)
 
     os.chdir(cwd)
 
