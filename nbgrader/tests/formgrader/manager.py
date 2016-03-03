@@ -11,7 +11,6 @@ from .. import start_subprocess, copy_coverage_files
 __all__ = [
     "DefaultManager",
     "HubAuthManager",
-    "HubAuthTokenManager",
     "HubAuthCustomUrlManager",
     "HubAuthNotebookServerUserManager",
     "HubAuthSSLManager"
@@ -158,27 +157,6 @@ class HubAuthManager(DefaultManager):
         # remove database and cookie secret
         os.remove(os.path.join(self.tempdir, "jupyterhub.sqlite"))
         os.remove(os.path.join(self.tempdir, "jupyterhub_cookie_secret"))
-
-
-class HubAuthTokenManager(HubAuthManager):
-
-    nbgrader_config = dedent(
-        """
-        c = get_config()
-        c.NbGrader.course_id = 'course123ABC'
-        c.FormgradeApp.port = 9000
-        c.FormgradeApp.authenticator_class = "nbgrader.auth.hubauth.HubAuth"
-        c.HubAuth.graders = ["foobar"]
-        c.HubAuth.notebook_url_prefix = "class_files"
-        c.HubAuth.proxy_token = 'foo'
-        c.HubAuth.hubapi_token_user = 'admin'
-        c.HubAuth.generate_hubapi_token = True
-        c.HubAuth.hub_db = '{tempdir}/jupyterhub.sqlite'
-        """
-    )
-
-    def _start_formgrader(self):
-        super(HubAuthManager, self)._start_formgrader()
 
 
 class HubAuthCustomUrlManager(HubAuthManager):
