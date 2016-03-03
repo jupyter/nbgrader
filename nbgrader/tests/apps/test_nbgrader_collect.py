@@ -94,3 +94,12 @@ class TestNbGraderCollect(BaseTestApp):
         self._collect("ps1", exchange, ["--update"])
         assert self._read_timestamp(root) != timestamp
 
+    def test_collect_assignment_flag(self, exchange, course_dir):
+        self._release_and_fetch("ps1", exchange, course_dir)
+        self._submit("ps1", exchange)
+
+        # try to collect when there"s nothing to collect
+        self._collect("--assignment=ps1", exchange)
+        root = os.path.join(join(course_dir, "submitted", os.environ["USER"], "ps1"))
+        assert os.path.isfile(os.path.join(root, "p1.ipynb"))
+        assert os.path.isfile(os.path.join(root, "timestamp.txt"))

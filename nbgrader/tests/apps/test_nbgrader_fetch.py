@@ -53,3 +53,8 @@ class TestNbGraderFetch(BaseTestApp):
         # make sure it fails even if the assignment is incomplete
         os.remove(join("ps1", "p1.ipynb"))
         self._fetch("ps1", exchange, retcode=1)
+
+    def test_fetch_with_assignment_flag(self, exchange, course_dir):
+        self._release("ps1", exchange, course_dir)
+        self._fetch("--assignment=ps1", exchange)
+        assert os.path.isfile(join("ps1", "p1.ipynb"))

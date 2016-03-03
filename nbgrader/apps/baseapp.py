@@ -494,7 +494,7 @@ class TransferApp(NbGrader):
             self.assignment_id = self.extra_args[0]
         elif len(self.extra_args) > 2:
             self.fail("Too many arguments")
-        else:
+        elif self.assignment_id == "":
             self.fail("Must provide assignment name:\nnbgrader <command> ASSIGNMENT [ --course COURSE ]")
 
         self.init_src()
