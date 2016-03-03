@@ -21,7 +21,14 @@ flags.update({
     'create': (
         {'AutogradeApp': {'create_student': True}},
         "Create an entry for the student in the database, if one does not already exist."
-    )
+    ),
+    'no-execute': (
+        {
+            'Execute': {'enabled': False},
+            'ClearOutput': {'enabled': False}
+        },
+        "Don't execute notebooks and clear output when autograding."
+    ),
 })
 
 class AutogradeApp(BaseNbConvertApp):
@@ -55,16 +62,28 @@ class AutogradeApp(BaseNbConvertApp):
         improve their score).
 
         To grade all submissions for "Problem Set 1":
-        
+
             nbgrader autograde "Problem Set 1"
 
         To grade only the submission by student with ID 'Hacker':
-        
+
             nbgrader autograde "Problem Set 1" --student Hacker
 
         To grade only the notebooks that start with '1':
-        
+
             nbgrader autograde "Problem Set 1" --notebook "1*"
+
+        By default, student submissions are re-executed and their output cleared.
+        For long running notebooks, it can be useful to disable this with the
+        '--no-execute' flag:
+
+            nbgrader autograde "Problem Set 1" --no-execute
+
+        Note, however, that doing so will not guarantee that students' solutions
+        are correct. If you use this flag, you should make sure you manually
+        check all solutions. For example, if a student saved their notebook with
+        all outputs cleared, then using --no-execute would result in them
+        receiving full credit on all autograded problems.
         """
 
     create_student = Bool(
@@ -102,6 +121,7 @@ class AutogradeApp(BaseNbConvertApp):
         LimitOutput,
         SaveAutoGrades
     ])
+    
     preprocessors = List([])
 
     def _config_changed(self, name, old, new):
