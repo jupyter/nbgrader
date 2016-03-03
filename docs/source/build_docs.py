@@ -88,9 +88,29 @@ def autogen_config(root):
 
 
 
-def build_notebooks(root):
-    """Execute notebooks and convert them to rst"""
-    print("Executing and converting notebooks in '{}'...".format(os.path.abspath(root)))
+def execute_notebooks(root):
+    """Execute notebooks"""
+    print("Executing notebooks in '{}'...".format(os.path.abspath(root)))
+
+    cwd = os.getcwd()
+    os.chdir(root)
+
+    # hack to convert links to ipynb files to html
+    for filename in sorted(glob.glob('user_guide/*.ipynb')):
+        run([
+            sys.executable, '-m', 'jupyter', 'nbconvert',
+            '--inplace',
+            '--execute',
+            '--FilesWriter.build_directory=user_guide',
+            filename
+        ])
+
+    os.chdir(cwd)
+
+
+def convert_notebooks(root):
+    """Convert notebooks to rst and html"""
+    print("Converting notebooks in '{}'...".format(os.path.abspath(root)))
 
     cwd = os.getcwd()
     os.chdir(root)
@@ -100,7 +120,6 @@ def build_notebooks(root):
         run([
             sys.executable, '-m', 'jupyter', 'nbconvert',
             '--to', 'rst',
-            '--execute',
             '--FilesWriter.build_directory=user_guide',
             filename
         ])
@@ -143,6 +162,4 @@ def build_notebooks(root):
 if __name__ == "__main__":
     root = os.path.abspath(os.path.dirname(__file__))
     clear_notebooks(root)
-    build_notebooks(root)
-    autogen_command_line(root)
-    autogen_config(root)
+    execute_notebooks(root)

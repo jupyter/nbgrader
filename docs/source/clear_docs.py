@@ -63,7 +63,3 @@ def clear_notebooks(root):
 
                 if orig_nb != new_nb:
                     print("Cleared '{}'".format(pth))
-
-if __name__ == "__main__":
-    root = os.path.abspath(os.path.dirname(__file__))
-    clear_notebooks(root)

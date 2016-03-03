@@ -39,58 +39,9 @@ except ImportError:
 
 
 @task
-def check_docs_input(root='docs/source'):
-    """Check that docs have output cleared."""
-    echo("Checking that all docs have cleared outputs...")
-    bad = []
-    for dirpath, dirnames, filenames in os.walk(root):
-        # skip submitted directory -- those files are allowed to have outputs
-        if _check_if_directory_in_path(dirpath, 'submitted'):
-            continue
-
-        for filename in sorted(filenames):
-            if os.path.splitext(filename)[1] == '.ipynb':
-                # read in the notebook
-                pth = os.path.join(dirpath, filename)
-                with open(pth, 'r') as fh:
-                    nb = read(fh, 4)
-
-                # check notebook metadata
-                if len(nb.metadata) != 0:
-                    bad.append(pth)
-                    continue
-
-                # check outputs of all the cells
-                for cell in nb.cells:
-                    if cell.cell_type != 'code':
-                        continue
-                    if len(cell.outputs) != 0 or cell.execution_count is not None:
-                        bad.append(pth)
-                        break
-
-    if len(bad) > 0:
-        raise RuntimeError(dedent(
-            """
-
-            The following notebooks have not been properly cleared:
-
-            {}
-
-            Please run 'invoke clear_docs' from the root of the repository
-            in order to clear the outputs of these notebooks.
-            """.format(bad)
-        ))
-
-
-@task
 def docs():
-    check_docs_input()
+    run('python docs/source/build_docs.py')
     run('make -C docs html')
-
-
-@task
-def clear_docs():
-    run('python docs/source/clear_docs.py')
 
 
 def _run_tests(mark=None, skip=None):
