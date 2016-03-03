@@ -119,3 +119,7 @@ class TestNbGraderSubmit(BaseTestApp):
         assert int(perms[0]) >= 4
         assert int(perms[1]) == 4
         assert int(perms[2]) == 4
+
+    def test_submit_assignment_flag(self, exchange, cache, course_dir):
+        self._release_and_fetch("ps1", exchange, cache, course_dir)
+        self._submit("--assignment=ps1", exchange, cache)

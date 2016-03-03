@@ -50,3 +50,8 @@ class TestNbGraderRelease(BaseTestApp):
 
         self._release("ps1", exchange, flags=["--force"])
         assert os.path.isfile(join(exchange, "abc101", "outbound", "ps1", "p1.ipynb"))
+
+    def test_release_with_assignment_flag(self, exchange, course_dir):
+        self._copy_file(join("files", "test.ipynb"), join(course_dir, "release", "ps1", "p1.ipynb"))
+        self._release("--assignment=ps1", exchange)
+        assert os.path.isfile(join(exchange, "abc101", "outbound", "ps1", "p1.ipynb"))
