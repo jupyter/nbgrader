@@ -93,6 +93,12 @@ def class_files(coursedir):
     source_path = os.path.join(os.path.dirname(__file__), "..", "..", "..", "docs", "source", "user_guide", "source")
     shutil.copytree(os.path.join(os.path.dirname(__file__), source_path), os.path.join(coursedir, "source"))
 
+    # rename to old names -- we do this rather than changing all the tests
+    # because I want the tests to operate on files with spaces in the names
+    os.rename(os.path.join(coursedir, "source", "ps1"), os.path.join(coursedir, "source", "Problem Set 1"))
+    os.rename(os.path.join(coursedir, "source", "Problem Set 1", "problem1.ipynb"), os.path.join(coursedir, "source", "Problem Set 1", "Problem 1.ipynb"))
+    os.rename(os.path.join(coursedir, "source", "Problem Set 1", "problem2.ipynb"), os.path.join(coursedir, "source", "Problem Set 1", "Problem 2.ipynb"))
+
     # create a fake ps1
     os.mkdir(os.path.join(coursedir, "source", "ps.01"))
     with open(os.path.join(coursedir, "source", "ps.01", "problem 1.ipynb"), "w") as fh:

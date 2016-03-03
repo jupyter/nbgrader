@@ -43,6 +43,20 @@ def gradebook(request, tempdir):
     shutil.copytree(os.path.join(os.path.dirname(__file__), source_path), "source")
     shutil.copytree(os.path.join(os.path.dirname(__file__), submitted_path), "submitted")
 
+    # rename to old names -- we do this rather than changing all the tests
+    # because I want the tests to operate on files with spaces in the names
+    os.rename(os.path.join("source", "ps1"), os.path.join("source", "Problem Set 1"))
+    os.rename(os.path.join("source", "Problem Set 1", "problem1.ipynb"), os.path.join("source", "Problem Set 1", "Problem 1.ipynb"))
+    os.rename(os.path.join("source", "Problem Set 1", "problem2.ipynb"), os.path.join("source", "Problem Set 1", "Problem 2.ipynb"))
+    os.rename(os.path.join("submitted", "bitdiddle"), os.path.join("submitted", "Bitdiddle"))
+    os.rename(os.path.join("submitted", "Bitdiddle", "ps1"), os.path.join("submitted", "Bitdiddle", "Problem Set 1"))
+    os.rename(os.path.join("submitted", "Bitdiddle", "Problem Set 1", "problem1.ipynb"), os.path.join("submitted", "Bitdiddle", "Problem Set 1", "Problem 1.ipynb"))
+    os.rename(os.path.join("submitted", "Bitdiddle", "Problem Set 1", "problem2.ipynb"), os.path.join("submitted", "Bitdiddle", "Problem Set 1", "Problem 2.ipynb"))
+    os.rename(os.path.join("submitted", "hacker"), os.path.join("submitted", "Hacker"))
+    os.rename(os.path.join("submitted", "Hacker", "ps1"), os.path.join("submitted", "Hacker", "Problem Set 1"))
+    os.rename(os.path.join("submitted", "Hacker", "Problem Set 1", "problem1.ipynb"), os.path.join("submitted", "Hacker", "Problem Set 1", "Problem 1.ipynb"))
+    os.rename(os.path.join("submitted", "Hacker", "Problem Set 1", "problem2.ipynb"), os.path.join("submitted", "Hacker", "Problem Set 1", "Problem 2.ipynb"))
+
     # create the config file
     with open("nbgrader_config.py", "w") as fh:
         fh.write(dedent(
