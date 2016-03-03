@@ -2,6 +2,7 @@ import os
 import sys
 
 from os.path import join
+from nbformat.v4 import reads
 
 from ...api import Gradebook
 from ...utils import remove
@@ -443,3 +444,44 @@ class TestNbGraderAutograde(BaseTestApp):
         assert not os.path.exists(join(course_dir, "autograded", "foo", "ps1"))
         assert os.path.exists(join(course_dir, "autograded", "bar", "ps1"))
         assert os.path.isfile(join(course_dir, "autograded", "bar", "ps1", "p1.ipynb"))
+
+    def test_no_execute(self, course_dir):
+        with open("nbgrader_config.py", "a") as fh:
+            fh.write("""c.NbGrader.db_assignments = [dict(name='ps1', duedate='2015-02-02 14:58:23.948203 PST')]\n""")
+            fh.write("""c.NbGrader.db_students = [dict(id="foo")]""")
+
+        self._copy_file(join("files", "test.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
+        run_python_module(["nbgrader", "assign", "ps1"])
+
+        self._copy_file(join("files", "test-with-output.ipynb"), join(course_dir, "submitted", "foo", "ps1", "p1.ipynb"))
+        with open(join(os.path.dirname(__file__), "files", "test-with-output.ipynb"), "r") as fh:
+            orig_contents = reads(fh.read())
+
+        run_python_module(["nbgrader", "autograde", "ps1"])
+        with open(join(course_dir, "autograded", "foo", "ps1", "p1.ipynb"), "r") as fh:
+            new_contents = reads(fh.read())
+
+        different = False
+        for i in range(len(orig_contents.cells)):
+            orig_cell = orig_contents.cells[i]
+            new_cell = new_contents.cells[i]
+            if 'outputs' in orig_cell:
+                if orig_cell.outputs != new_cell.outputs:
+                    different = True
+                    break
+            elif 'outputs' in new_cell:
+                different = True
+
+        assert different
+
+        run_python_module(["nbgrader", "autograde", "ps1", "--force", "--no-execute"])
+        with open(join(course_dir, "autograded", "foo", "ps1", "p1.ipynb"), "r") as fh:
+            new_contents = reads(fh.read())
+
+        for i in range(len(orig_contents.cells)):
+            orig_cell = orig_contents.cells[i]
+            new_cell = new_contents.cells[i]
+            if 'outputs' in orig_cell:
+                assert orig_cell.outputs == new_cell.outputs
+            else:
+                assert 'outputs' not in new_cell
