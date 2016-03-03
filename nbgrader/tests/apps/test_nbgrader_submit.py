@@ -115,7 +115,7 @@ class TestNbGraderSubmit(BaseTestApp):
 
         filename, = os.listdir(join(exchange, "abc101", "inbound"))
         perms = os.stat(join(exchange, "abc101", "inbound", filename, "p1.ipynb")).st_mode
-        perms = str(oct(perms & (stat.S_IRWXU | stat.S_IRWXG | stat.S_IRWXO)))[2:]
+        perms = str(oct(perms & (stat.S_IRWXU | stat.S_IRWXG | stat.S_IRWXO)))[-3:]
         assert int(perms[0]) >= 4
         assert int(perms[1]) == 4
         assert int(perms[2]) == 4
