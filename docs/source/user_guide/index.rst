@@ -1,24 +1,56 @@
 User Guide
 ==========
 
+Overview
+--------
+
 .. toctree::
     :maxdepth: 1
 
     01_philosophy
-    02_developing_assignments
-    03_generating_assignments
-    04_autograding
-    05_manual_grading
-    06_returning_feedback
+    01a_interface
+
+
+Getting Started
+---------------
+
+.. toctree::
+    :maxdepth: 1
+
+    01a_installation
+    01a_filestructure
+    01a_interface
+
+
+Managing course assignments
+---------------------------
+
+.. toctree::
+   :maxdepth: 1
+
+   02_developing_assignments
+   03_generating_assignments
+
+
+Grading
+-------
+
+.. toctree::
+   :maxdepth: 1
+
+   04_autograding
+   05_manual_grading
+   06_returning_feedback
+
 
 Integration with JupyterHub
 ---------------------------
 
-If you are running a class with JupyterHub, nbgrader offers several tools that 
-exploit the fact that students and instructors are all sharing the same system.
-In particular, nbgrader streamlines the process of releasing and collecting
-assignments on the instructor side, and fetching and submitting assignments on
-the student side.
+For instructors running a class with JupyterHub, nbgrader offers several tools that
+optimize and enrich the instructors' and students' experience of sharing the same system.
+By integrating with JupyterHub, nbgrader streamlines the process of releasing and collecting
+assignments for the instructor and of fetching and submitting assignments for
+the student.
 
 .. toctree::
     :maxdepth: 1
