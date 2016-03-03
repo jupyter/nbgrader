@@ -27,7 +27,7 @@ where:
 * ``course_directory`` variable is the root directory where you run the
   nbgrader commands. This means that you can place your class files directory
   wherever you want. However, this location can also be customized (see the
-  :doc:`configuration options </config_options>`) so that you can run the
+  :doc:`configuration options </configuration/config_options>`) so that you can run the
   nbgrader commands from anywhere on your system, but still have them
   operate on the same directory.
   

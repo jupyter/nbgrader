@@ -15,7 +15,7 @@ def autogen_command_line(root):
 
     header = dedent(
         """
-        ``{}``
+        {}
         ========================
 
         ::
@@ -81,7 +81,7 @@ def autogen_config(root):
 
     print('Generating example configuration file')
     config = nbgrader.apps.NbGraderApp().document_config_options()
-    destination = os.path.join(root, 'config_options.rst')
+    destination = os.path.join(root, 'configuration', 'config_options.rst')
     with open(destination, 'w') as f:
         f.write(header)
         f.write(config)
