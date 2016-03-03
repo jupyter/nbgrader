@@ -286,16 +286,6 @@ intersphinx_mapping = {'http://docs.python.org/': None}
 
 # -- Run nbconvert on documentation --------------------------------------
 
-# import sys
-# import os
-# import subprocess as sp
-
-# here = os.path.dirname(os.path.abspath(__file__))
-# bin_path = os.path.dirname(sys.executable)
-# env = os.environ.copy()
-# env['PATH'] = "{}:{}".format(bin_path, env['PATH'])
-# sp.check_call([sys.executable, "build_docs.py"], cwd=here, env=env)
-
 import sys
 import os
 root = os.path.abspath(os.path.dirname(__file__))
