@@ -19,6 +19,7 @@ Getting Started
 
     01a_installation
     01a_filestructure
+    01a_interface
 
 
 Managing course assignments
