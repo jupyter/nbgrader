@@ -8,3 +8,5 @@ invoke
 sphinx
 codecov
 cov-core
+pyenchant
+sphinxcontrib-spelling
