@@ -1,3 +1,4 @@
+Afterwards
 asctime
 auth
 authenticator
@@ -28,9 +29,12 @@ Gradebook
 gradebook
 hOlle
 Homebrew
+html
 Indices
+inline
 ipynb
 JUPYTER
+Jupyter
 localhost
 logfile
 Marr
