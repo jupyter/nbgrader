@@ -478,9 +478,13 @@ class TransferApp(NbGrader):
         """Actually do the file transfer."""
         raise NotImplementedError
 
-    def do_copy(self, src, dest):
+    def do_copy(self, src, dest, perms=None):
         """Copy the src dir to the dest dir omitting the self.ignore globs."""
         shutil.copytree(src, dest, ignore=shutil.ignore_patterns(*self.ignore))
+        if perms:
+            for dirname, dirnames, filenames in os.walk(dest):
+                for filename in filenames:
+                    os.chmod(os.path.join(dirname, filename), perms)
 
     def start(self):
         super(TransferApp, self).start()

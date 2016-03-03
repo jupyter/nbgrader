@@ -76,7 +76,7 @@ class SubmitApp(TransferApp):
         self.log.info("Destination: {}".format(dest_path))
 
         # copy to the real location
-        self.do_copy(self.src_path, dest_path)
+        self.do_copy(self.src_path, dest_path, perms=(S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH))
         with open(os.path.join(dest_path, "timestamp.txt"), "w") as fh:
             fh.write(self.timestamp)
 
