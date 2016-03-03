@@ -7,10 +7,10 @@ Contents:
    :maxdepth: 2
 
    user_guide/index
-   command_line_tools/index
    config_options
-   api/index
+   command_line_tools/index
    contributor_guide/index
+   api/index
 
 
 

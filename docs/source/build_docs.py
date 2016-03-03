@@ -137,6 +137,8 @@ def convert_notebooks(root):
             continue
         if dirname == 'user_guide/images':
             continue
+        if os.path.split(dirname)[1] == ".ipynb_checkpoints":
+            continue
 
         build_directory = os.path.join('extra_files', dirname)
         if not os.path.exists(build_directory):

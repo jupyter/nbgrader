@@ -1,6 +1,18 @@
 
+The philosophy and the approach
+===============================
+
+The `nbgrader` project evolved from my experiences as an instructor and a
+student. This `excerpt from David Marr's book <http://web.stanford.edu/class/psych209a/ReadingsByDate/01_07/Marr82Philosophy.pdf>`_, *Vision*,
+is one of the core readings of the class that inspired the creation of
+`nbgrader`. Dr. Marr was an originator of the field of computational
+neuroscience and has been extremely influential in the field of computational cognitive science as well. On behalf of the many individuals who contribute to `nbgrader`, I hope you find this project enhances your teaching and learning experiences.
+
+-- *Jess Hamrick*, UC Berkeley
+
+
 How to structure course files
-=============================
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 For instructor ease of use and developer maintenance, nbgrader makes a few
 assumptions about how your assignment files are organized. By default,
 nbgrader assumes that your assignments will be organized with the following
@@ -32,20 +44,6 @@ where:
 * ``notebook_id`` corresponds to the name of a notebook within an assignment
   (excluding the .ipynb extension).
 
-Database of assignments
------------------------
-Additionally, nbgrader needs access to a database to store information about
-the assignments. This database is, by default, a sqlite database that lives at
-``{course_directory}/gradebook.db``, but you can also configure this to be any
-location of your choosing. You do not need to manually create this database
-yourself, as nbgrader will create it for you, but you probably want to
-prepopulate it with some information about assignment due dates and students
-(see :doc:`03_generating_assignments` and :doc:`04_autograding`).
-Additionally, nbgrader uses SQLAlchemy, so you should be able to also use
-MySQL or PostgreSQL backends as well (though in these cases, you *will* need
-to create the database ahead of time, as this is just how MySQL and PostgreSQL
-work).
-
 Example
 -------
 Taking the autograde step as an example, when we run the command
@@ -67,3 +65,17 @@ the autograded version to:
 
 where ``student_id`` and ``notebook_id`` were parsed from the input file
 path.
+
+Database of assignments
+~~~~~~~~~~~~~~~~~~~~~~~
+
+Additionally, nbgrader needs access to a database to store information about
+the assignments. This database is, by default, a sqlite database that lives at
+``{course_directory}/gradebook.db``, but you can also configure this to be any
+location of your choosing. You do not need to manually create this database
+yourself, as nbgrader will create it for you, but you probably want to
+prepopulate it with some information about assignment due dates and students
+(see :doc:`creating_and_grading_assignments`). Additionally, nbgrader uses
+SQLAlchemy, so you should be able to also use MySQL or PostgreSQL backends as
+well (though in these cases, you *will* need to create the database ahead of
+time, as this is just how MySQL and PostgreSQL work).
