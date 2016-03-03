@@ -9,7 +9,7 @@ A system for assigning and grading Jupyter notebooks.
 [Documentation can be found on Read the Docs.](http://nbgrader.readthedocs.org)
 
 
-## Visual highlights of nbgrader
+## Highlights of nbgrader
 
 ### Instructor toolbar extension for Jupyter notebooks
 The nbgrader toolbar extension for Jupyter notebooks guides the instructor through
@@ -27,13 +27,6 @@ submit, and validate their assignments.
 [Command line tools](https://nbgrader.readthedocs.org/en/stable/command_line_tools/index.html)
 offer an efficient way for the instructor to generate, assign, release, collect,
 and grade notebooks.
-
-* `nbgrader assign`: create a student version of a notebook
-* `nbgrader release`: release a notebook to students
-* `nbgrader collect`: collect students' submissions
-* `nbgrader autograde`: autograde students' submissions
-* `nbgrader formgrade`: launch the formgrader
-
 
 ## Installation
 You may install the current version of nbgrader which includes the grading
