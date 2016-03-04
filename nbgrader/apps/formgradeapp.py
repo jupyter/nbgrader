@@ -148,15 +148,15 @@ class FormgradeApp(NbGrader):
 
         # Configure the formgrader settings
         self.tornado_settings = dict(
-            auth=self.authenticator_instance,
-            notebook_dir=self.course_directory,
-            notebook_dir_format=self.directory_structure,
+            nbgrader_auth=self.authenticator_instance,
+            nbgrader_notebook_dir=self.course_directory,
+            nbgrader_notebook_dir_format=self.directory_structure,
             nbgrader_step=self.autograded_directory,
-            exporter=HTMLExporter(config=self.config),
-            mathjax_url=self.mathjax_url,
-            gradebook=Gradebook(self.db_url),
-            jinja2_env=jinja_env,
-            log=self.log
+            nbgrader_exporter=HTMLExporter(config=self.config),
+            nbgrader_mathjax_url=self.mathjax_url,
+            nbgrader_gradebook=Gradebook(self.db_url),
+            nbgrader_jinja2_env=jinja_env,
+            nbgrader_log=self.log
         )
 
     def init_handlers(self):

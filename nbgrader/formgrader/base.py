@@ -20,23 +20,23 @@ class BaseHandler(web.RequestHandler):
 
     @property
     def gradebook(self):
-        return self.settings['gradebook']
+        return self.settings['nbgrader_gradebook']
 
     @property
     def auth(self):
-        return self.settings['auth']
+        return self.settings['nbgrader_auth']
 
     @property
     def mathjax_url(self):
-        return self.settings['mathjax_url']
+        return self.settings['nbgrader_mathjax_url']
 
     @property
     def notebook_dir(self):
-        return self.settings['notebook_dir']
+        return self.settings['nbgrader_notebook_dir']
 
     @property
     def notebook_dir_format(self):
-        return self.settings['notebook_dir_format']
+        return self.settings['nbgrader_notebook_dir_format']
 
     @property
     def nbgrader_step(self):
@@ -44,14 +44,14 @@ class BaseHandler(web.RequestHandler):
 
     @property
     def exporter(self):
-        return self.settings['exporter']
+        return self.settings['nbgrader_exporter']
 
     @property
     def log(self):
-        return self.settings['log']
+        return self.settings['nbgrader_log']
 
     def render(self, name, **ns):
-        template = self.settings['jinja2_env'].get_template(name)
+        template = self.settings['nbgrader_jinja2_env'].get_template(name)
         return template.render(**ns)
 
     def write_error(self, status_code, **kwargs):
