@@ -1,6 +1,8 @@
 nbgrader
 ========
 
+``nbgrader`` is a tool that facilitates creating and grading assignments in the Jupyter notebook. It allows instructors to easily create notebook-based assignments that include both coding exercises and written free-responses. ``nbgrader`` then also provides a streamlined interface for quickly grading completed assignments.
+
 .. toctree::
     :maxdepth: 1
     :caption: User Documentation
@@ -33,7 +35,9 @@ nbgrader
 
 .. toctree::
     :maxdepth: 2
-    :caption: About nbgrader
+    :caption: Resources
 
+    Source repository <https://github.com/jupyter/nbgrader>
     Jupyter education mailing list <http://tinyurl.com/jupyter-education>
+    Binder demo <https://github.com/jhamrick/nbgrader-demo>
     changelog
