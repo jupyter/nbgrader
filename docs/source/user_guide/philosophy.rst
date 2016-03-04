@@ -79,3 +79,20 @@ prepopulate it with some information about assignment due dates and students
 SQLAlchemy, so you should be able to also use MySQL or PostgreSQL backends as
 well (though in these cases, you *will* need to create the database ahead of
 time, as this is just how MySQL and PostgreSQL work).
+
+Configuration files
+~~~~~~~~~~~~~~~~~~~
+
+You will almost always need a configuration file as you are using nbgrader. At a minimum, this configuration file will contain information such as the names of the assignments for your class and the names of your students. A basic config file would live at ``{course_directory}/nbgrader_config.py`` and might look like:
+
+::
+
+    c = get_config()
+    c.NbGrader.db_assignments = [dict(name="ps1")]
+    c.NbGrader.db_students = [
+        dict(id="bitdiddle", first_name="Ben", last_name="Bitdiddle"),
+        dict(id="hacker", first_name="Alyssa", last_name="Hacker"),
+        dict(id="reasoner", first_name="Louis", last_name="Reasoner")
+    ]
+
+There are many additional options you can configure. See :doc:`/configuration/config_options` for a full list.
