@@ -1,6 +1,5 @@
-
-nbgrader interface highlights
-=============================
+Interface highlights
+====================
 
 Instructor toolbar extension for Jupyter notebooks
 --------------------------------------------------

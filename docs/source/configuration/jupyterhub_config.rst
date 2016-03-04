@@ -1,21 +1,21 @@
-Using nbgrader with JuptyerHub
+Using nbgrader with JupyterHub
 ==============================
 
 .. seealso::
 
-    :doc:`creating_and_grading_assignments`
+    :doc:`/user_guide/creating_and_grading_assignments`
         Documentation for ``nbgrader assign``, ``nbgrader autograde``, ``nbgrader formgrade``, and ``nbgrader feedback``.
 
-    :doc:`managing_assignment_files`
+    :doc:`/user_guide/managing_assignment_files`
         Documentation for ``nbgrader release``, ``nbgrader fetch``, ``nbgrader submit``, and ``nbgrader collect``.
 
     :doc:`/command_line_tools/nbgrader-formgrade`
         Command line options for ``nbgrader formgrade``
 
-    :doc:`/config_options`
+    :doc:`config_options`
         Details on ``nbgrader_config.py``
 
-    :doc:`philosophy`
+    :doc:`/user_guide/philosophy`
         More details on how the nbgrader hierarchy is structured.
 
     `JupyterHub Documentation <http://jupyterhub.readthedocs.org/en/latest/getting-started.html>`_
@@ -29,13 +29,13 @@ the same system. By integrating with JupyterHub, nbgrader streamlines the
 process of releasing and collecting assignments for the instructor and of
 fetching and submitting assignments for the student. In addition to using the
 ``nbgrader release``, ``nbgrader fetch``, ``nbgrader submit``, and ``nbgrader
-collect`` commands (see :doc:`managing_assignment_files`) with a shared server
+collect`` commands (see :doc:`/user_guide/managing_assignment_files`) with a shared server
 setup like JupyterHub, the formgrader (see
-:doc:`creating_and_grading_assignments`) can be configured to integrate with
+:doc:`/user_guide/creating_and_grading_assignments`) can be configured to integrate with
 JupyterHub so that all grading can occur on the same server.
 
 To set up the formgrader to work with JupyterHub, you will need to specify a
-few custom config options (see :doc:`/config_options` for details on all possible config options, and where configuration files live).
+few custom config options (see :doc:`config_options` for details on all possible config options, and where configuration files live).
 In this documentation, we'll go through an example
 setup of JupyterHub with nbgrader, though note that each deployment of JupyterHub is slightly different, which might also require a slightly different nbgrader configuration.
 If you run into problems getting nbgrader to work with JupyterHub, please do email the Jupyter mailing list!

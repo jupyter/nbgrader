@@ -1,5 +1,6 @@
 import os
 import sys
+import shutil
 import subprocess as sp
 from copy import deepcopy
 
@@ -33,6 +34,11 @@ def clear_notebooks(root):
 
     # cleanup ignored files
     run(['git', 'clean', '-fdX', root])
+
+    # remove release/autograded/feedback
+    shutil.rmtree(os.path.join(root, "user_guide", "release"))
+    shutil.rmtree(os.path.join(root, "user_guide", "autograded"))
+    shutil.rmtree(os.path.join(root, "user_guide", "feedback"))
 
     print("Clearing outputs of notebooks in '{}'...".format(os.path.abspath(root)))
     preprocessor = ClearOutputPreprocessor()

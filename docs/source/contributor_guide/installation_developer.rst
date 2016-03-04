@@ -1,5 +1,5 @@
-Installation
-============
+Developer installation
+======================
 
 Getting the source code
 -----------------------

@@ -10,3 +10,4 @@ codecov
 cov-core
 pyenchant
 sphinxcontrib-spelling
+sphinx_rtd_theme
