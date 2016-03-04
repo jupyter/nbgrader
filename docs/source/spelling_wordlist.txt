@@ -40,6 +40,7 @@ html
 Indices
 inline
 ipynb
+IPython
 ivanslapnicar
 jdfreder
 jhamrick
