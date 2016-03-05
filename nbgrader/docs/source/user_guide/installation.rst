@@ -36,3 +36,12 @@ the nbgrader notebook extension, use::
 
     nbgrader extension install --help-all
     nbgrader extension activate --help-all
+
+Quick start
+-----------
+
+To get up and running with nbgrader quickly, you can create an example directory with example course files in it by running the ``nbgrader quickstart`` command::
+
+    nbgrader quickstart course_id
+
+Where you should replace ``course_id`` with the name of your course. For an explanation of how this directory is arranged, and what the different files are in it, continue reading on in :doc:`philosophy`.

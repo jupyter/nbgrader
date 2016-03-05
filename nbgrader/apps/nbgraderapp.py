@@ -24,7 +24,8 @@ from . import (
     FetchApp,
     SubmitApp,
     ListApp,
-    ExtensionApp
+    ExtensionApp,
+    QuickStartApp
 )
 
 aliases = {}
@@ -178,6 +179,15 @@ class NbGraderApp(NbGrader):
             dedent(
                 """
                 Install and activate the "Create Assignment" notebook extension.
+                """
+            ).strip()
+        ),
+        quickstart=(
+            QuickStartApp,
+            dedent(
+                """
+                Create an example class files directory with an example
+                config file and assignment.
                 """
             ).strip()
         )

@@ -11,6 +11,7 @@ from .fetchapp import FetchApp
 from .submitapp import SubmitApp
 from .listapp import ListApp
 from .extensionapp import ExtensionApp
+from .quickstartapp import QuickStartApp
 from .nbgraderapp import NbGraderApp
 
 
@@ -29,4 +30,5 @@ __all__ = [
     'SubmitApp',
     'ListApp',
     'ExtensionApp',
+    'QuickStartApp'
 ]

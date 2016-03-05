@@ -33,6 +33,7 @@ def autogen_command_line(root):
         'FormgradeApp',
         'ListApp',
         'NbGraderApp',
+        'QuickStartApp',
         'ReleaseApp',
         'SubmitApp',
         'ValidateApp'
