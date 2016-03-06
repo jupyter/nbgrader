@@ -124,7 +124,10 @@ class FormgradeApp(NbGrader):
         super(FormgradeApp, self).initialize(argv)
         self.init_signal()
 
-    def init_logging(self):
+    def init_logging(self, handler_class=None, handler_args=None, color=True, subapps=False):
+        if handler_class:
+            super(FormgradeApp, self).init_logging(handler_class, handler_args, color=color, subapps=subapps)
+
         # hook up tornado 3's loggers to our app handlers
         self.log.propagate = False
         for log in (app_log, access_log, gen_log):
@@ -177,7 +180,11 @@ class FormgradeApp(NbGrader):
     def start(self):
         super(FormgradeApp, self).start()
 
-        self.init_logging()
+        if self.logfile:
+            self.init_logging(logging.FileHandler, [self.logfile], color=False)
+        else:
+            self.init_logging()
+
         self.init_tornado_settings()
         self.init_handlers()
         self.init_tornado_application()

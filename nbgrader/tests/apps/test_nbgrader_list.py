@@ -1,10 +1,10 @@
 import os
 import json
+import time
 
 from textwrap import dedent
-from os.path import join
 
-from .. import run_python_module
+from .. import run_nbgrader
 from .base import BaseTestApp
 from .conftest import notwindows
 
@@ -13,25 +13,25 @@ from .conftest import notwindows
 class TestNbGraderList(BaseTestApp):
 
     def _release(self, assignment, exchange, cache, course_dir, course="abc101"):
-        self._copy_file(join("files", "test.ipynb"), join(course_dir, "release", assignment, "p1.ipynb"))
-        run_python_module([
-            "nbgrader", "release", assignment,
+        self._copy_file(os.path.join("files", "test.ipynb"), os.path.join(course_dir, "release", assignment, "p1.ipynb"))
+        run_nbgrader([
+            "release", assignment,
             "--course", course,
             "--TransferApp.cache_directory={}".format(cache),
             "--TransferApp.exchange_directory={}".format(exchange)
         ])
 
     def _fetch(self, assignment, exchange, cache, course="abc101"):
-        run_python_module([
-            "nbgrader", "fetch", assignment,
+        run_nbgrader([
+            "fetch", assignment,
             "--course", course,
             "--TransferApp.cache_directory={}".format(cache),
             "--TransferApp.exchange_directory={}".format(exchange)
         ])
 
     def _submit(self, assignment, exchange, cache, course="abc101"):
-        run_python_module([
-            "nbgrader", "submit", assignment,
+        run_nbgrader([
+            "submit", assignment,
             "--course", course,
             "--TransferApp.cache_directory={}".format(cache),
             "--TransferApp.exchange_directory={}".format(exchange)
@@ -39,9 +39,9 @@ class TestNbGraderList(BaseTestApp):
 
     def _list(self, exchange, cache, assignment=None, flags=None, retcode=0):
         cmd = [
-            "nbgrader", "list",
+            "list",
             "--TransferApp.cache_directory={}".format(cache),
-            "--TransferApp.exchange_directory={}".format(exchange)
+            "--TransferApp.exchange_directory={}".format(exchange),
         ]
 
         if flags is not None:
@@ -49,16 +49,22 @@ class TestNbGraderList(BaseTestApp):
         if assignment is not None:
             cmd.append(assignment)
 
-        return run_python_module(cmd, retcode=retcode)
+        if flags and '--json' in flags:
+            stdout = True
+        else:
+            stdout = False
+
+        return run_nbgrader(cmd, retcode=retcode, stdout=stdout)
 
     def test_help(self):
         """Does the help display without error?"""
-        run_python_module(["nbgrader", "list", "--help-all"])
+        run_nbgrader(["list", "--help-all"])
 
     def test_list_released(self, exchange, cache, course_dir):
         self._release("ps1", exchange, cache, course_dir)
         self._release("ps1", exchange, cache, course_dir, course="xyz200")
-        assert self._list(exchange, cache, "ps1", flags=["--course", "abc101"]) == dedent(
+        output = self._list(exchange, cache, "ps1", flags=["--course", "abc101"])
+        assert output == dedent(
             """
             [ListApp | INFO] Released assignments:
             [ListApp | INFO] abc101 ps1
@@ -148,6 +154,7 @@ class TestNbGraderList(BaseTestApp):
             """.format(os.environ["USER"], timestamp)
         ).lstrip()
 
+        time.sleep(1)
         self._submit("ps1", exchange, cache)
         filenames = sorted(os.listdir(os.path.join(exchange, "abc101", "inbound")))
         timestamps = [x.split("+")[2] for x in filenames]
@@ -179,6 +186,7 @@ class TestNbGraderList(BaseTestApp):
             """.format(os.environ["USER"], timestamp)
         ).lstrip()
 
+        time.sleep(1)
         self._submit("ps1", exchange, cache)
         self._list(exchange, cache, "ps1", flags=["--inbound", "--remove"])
         filenames = sorted(os.listdir(os.path.join(cache, "abc101")))

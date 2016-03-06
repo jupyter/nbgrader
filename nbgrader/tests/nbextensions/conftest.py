@@ -15,9 +15,10 @@ from textwrap import dedent
 from nbformat import write as write_nb
 from nbformat.v4 import new_notebook
 
-from .. import run_python_module, copy_coverage_files
+from .. import run_nbgrader, copy_coverage_files
 from ...api import Gradebook
 from ...utils import rmtree
+
 
 @pytest.fixture(scope="module")
 def tempdir(request):
@@ -114,8 +115,8 @@ def nbserver(request, tempdir, coursedir, jupyter_config_dir, jupyter_data_dir, 
     env['JUPYTER_DATA_DIR'] = jupyter_data_dir
 
     nbextension_dir = os.path.join(jupyter_data_dir, "nbextensions")
-    run_python_module(["nbgrader", "extension", "install", "--nbextensions", nbextension_dir], env=env)
-    run_python_module(["nbgrader", "extension", "activate"], env=env)
+    run_nbgrader(["extension", "install", "--nbextensions", nbextension_dir], env=env)
+    run_nbgrader(["extension", "activate"], env=env)
 
     # create nbgrader_config.py file
     if sys.platform != 'win32':

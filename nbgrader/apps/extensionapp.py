@@ -164,7 +164,7 @@ class ExtensionDeactivateApp(DisableNBExtensionApp, NbGrader):
         self.log.info("Done. You may need to restart the Jupyter notebook server for changes to take effect.")
 
 
-class ExtensionApp(Application):
+class ExtensionApp(NbGrader):
 
     name = u'nbgrader extension'
     description = u'Utilities for managing the nbgrader extension'
@@ -192,6 +192,8 @@ class ExtensionApp(Application):
         for appname, (app, help) in self.subcommands.items():
             if len(app.class_traits(config=True)) > 0:
                 classes.append(app)
+
+        return classes
 
     @catch_config_error
     def initialize(self, argv=None):

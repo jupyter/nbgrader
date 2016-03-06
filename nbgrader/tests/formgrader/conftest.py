@@ -11,7 +11,7 @@ from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 
 from ...api import Gradebook
 from ...utils import rmtree
-from .. import run_python_module
+from .. import run_nbgrader
 from . import manager, bad_manager
 
 
@@ -72,13 +72,13 @@ def gradebook(request, tempdir):
         ))
 
     # run nbgrader assign
-    run_python_module([
-        "nbgrader", "assign", "Problem Set 1",
+    run_nbgrader([
+        "assign", "Problem Set 1",
         "--IncludeHeaderFooter.header=source/header.ipynb"
     ])
 
     # run the autograder
-    run_python_module(["nbgrader", "autograde", "Problem Set 1"])
+    run_nbgrader(["autograde", "Problem Set 1"])
 
     gb = Gradebook("sqlite:///gradebook.db")
 

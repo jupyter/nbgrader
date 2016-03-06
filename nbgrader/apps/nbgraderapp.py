@@ -7,7 +7,7 @@ import os
 from textwrap import dedent
 
 from traitlets.config.application import catch_config_error
-from traitlets import Bool
+from jupyter_core.application import NoStart
 
 import nbgrader
 from .. import preprocessors
@@ -215,7 +215,7 @@ class NbGraderApp(NbGrader):
             with open(filename, 'w') as fh:
                 fh.write(s)
             self.log.info("New config file saved to '{}'".format(filename))
-            sys.exit(0)
+            raise NoStart()
 
         # check: is there a subapp given?
         if self.subapp is None:
