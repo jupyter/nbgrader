@@ -28,3 +28,8 @@ assign, release, collect, and grade notebooks. Here are some of the commands:
 * `nbgrader collect`: collect students' submissions
 * `nbgrader autograde`: autograde students' submissions
 * `nbgrader formgrade`: launch the formgrader
+
+Try it out!
+-----------
+
+You can try out nbgrader for yourself without installing anything on your system by `running the demo <https://github.com/jhamrick/nbgrader-demo>`_. This demo is provided through `Binder <http://www.mybinder.org/>`_ and runs entirely in your browser without you needing to install anything. It goes through all the different nbgrader steps that are documented in this User Guide, from creating assignments, to distributing them, to grading them.

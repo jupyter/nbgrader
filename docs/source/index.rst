@@ -8,6 +8,7 @@ nbgrader
     :caption: User Documentation
 
     user_guide/highlights
+    Demo <https://github.com/jhamrick/nbgrader-demo>
     user_guide/installation
     user_guide/philosophy
     user_guide/creating_and_grading_assignments
@@ -39,5 +40,4 @@ nbgrader
 
     Source repository <https://github.com/jupyter/nbgrader>
     Jupyter education mailing list <http://tinyurl.com/jupyter-education>
-    Binder demo <https://github.com/jhamrick/nbgrader-demo>
     changelog
