@@ -109,6 +109,7 @@ class HubAuthManager(DefaultManager):
         c.Authenticator.admin_users = set(['admin'])
         c.Authenticator.whitelist = set(['foobar', 'baz'])
         c.JupyterHub.log_level = "WARN"
+        c.JupyterHub.confirm_no_ssl = True
         """
     )
 
@@ -197,6 +198,7 @@ class HubAuthNotebookServerUserManager(HubAuthManager):
         c.JupyterHub.spawner_class = 'nbgrader.tests.formgrader.fakeuser.FakeUserSpawner'
         c.JupyterHub.admin_access = True
         c.JupyterHub.log_level = "WARN"
+        c.JupyterHub.confirm_no_ssl = True
         c.Authenticator.admin_users = set(['admin'])
         c.Authenticator.whitelist = set(['foobar', 'baz', 'quux'])
         """
