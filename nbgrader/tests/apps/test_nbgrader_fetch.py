@@ -1,7 +1,7 @@
 import os
 from os.path import join
 
-from .. import run_python_module
+from .. import run_nbgrader
 from .base import BaseTestApp
 from .conftest import notwindows
 
@@ -11,15 +11,15 @@ class TestNbGraderFetch(BaseTestApp):
 
     def _release(self, assignment, exchange, course_dir):
         self._copy_file(join("files", "test.ipynb"), join(course_dir, "release", "ps1", "p1.ipynb"))
-        run_python_module([
-            "nbgrader", "release", assignment,
+        run_nbgrader([
+            "release", assignment,
             "--course", "abc101",
             "--TransferApp.exchange_directory={}".format(exchange)
         ])
 
     def _fetch(self, assignment, exchange, flags=None, retcode=0):
         cmd = [
-            "nbgrader", "fetch", assignment,
+            "fetch", assignment,
             "--course", "abc101",
             "--TransferApp.exchange_directory={}".format(exchange)
         ]
@@ -27,20 +27,20 @@ class TestNbGraderFetch(BaseTestApp):
         if flags is not None:
             cmd.extend(flags)
 
-        run_python_module(cmd, retcode=retcode)
+        run_nbgrader(cmd, retcode=retcode)
 
     def test_help(self):
         """Does the help display without error?"""
-        run_python_module(["nbgrader", "fetch", "--help-all"])
+        run_nbgrader(["fetch", "--help-all"])
 
     def test_no_course_id(self, exchange, course_dir):
         """Does releasing without a course id thrown an error?"""
         self._release("ps1", exchange, course_dir)
         cmd = [
-            "nbgrader", "fetch", "ps1",
+            "fetch", "ps1",
             "--TransferApp.exchange_directory={}".format(exchange)
         ]
-        run_python_module(cmd, retcode=1)
+        run_nbgrader(cmd, retcode=1)
 
     def test_fetch(self, exchange, course_dir):
         self._release("ps1", exchange, course_dir)

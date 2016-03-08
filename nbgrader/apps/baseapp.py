@@ -19,7 +19,7 @@ from nbconvert.exporters.export import exporter_map
 from nbconvert.nbconvertapp import NbConvertApp, DottedOrNone
 from textwrap import dedent
 from tornado.log import LogFormatter
-from traitlets import Unicode, List, Bool, Instance, Dict, Integer
+from traitlets import Unicode, List, Bool, Dict, Integer
 from traitlets.config.application import catch_config_error
 from traitlets.config.loader import Config
 
@@ -82,6 +82,30 @@ class NbGrader(JupyterApp):
             """
         )
     )
+
+    def init_logging(self, handler_class, handler_args, color=True, subapps=False):
+        handler = handler_class(*handler_args)
+
+        if color:
+            log_format = self.log_format
+        else:
+            log_format = self.log_format.replace("%(color)s", "").replace("%(end_color)s", "")
+
+        _formatter = self._log_formatter_cls(
+            fmt=log_format,
+            datefmt=self.log_datefmt)
+        handler.setFormatter(_formatter)
+
+        self.log.addHandler(handler)
+
+        if subapps and self.subapp:
+            self.subapp.init_logging(handler_class, handler_args, color=color, subapps=subapps)
+
+    def deinit_logging(self):
+        if len(self.log.handlers) > 1:
+            for handler in self.log.handlers[1:]:
+                handler.close()
+                self.log.removeHandler(handler)
 
     db_url = Unicode(
         "",
@@ -365,24 +389,23 @@ class NbGrader(JupyterApp):
     def excepthook(self, etype, evalue, tb):
         format_excepthook(etype, evalue, tb)
 
-    def init_logging(self):
-        if self.logfile:
-            handler = logging.FileHandler(self.logfile)
-
-            log_format = self.log_format.replace("%(color)s", "").replace("%(end_color)s", "")
-            _formatter = self._log_formatter_cls(
-                fmt=log_format,
-                datefmt=self.log_datefmt,
-            )
-
-            handler.setFormatter(_formatter)
-            self.log.addHandler(handler)
-
     @catch_config_error
     def initialize(self, argv=None):
         self.update_config(self.build_extra_config())
-        self.init_logging()
+        if self.logfile:
+            self.init_logging(logging.FileHandler, [self.logfile], color=False)
         super(NbGrader, self).initialize(argv)
+
+    def reset(self):
+        # stop logging
+        self.deinit_logging()
+
+        # recursively reset all subapps
+        if self.subapp:
+            self.subapp.reset()
+
+        # clear the instance
+        self.clear_instance()
 
     def _format_path(self, nbgrader_step, student_id, assignment_id, escape=False):
 

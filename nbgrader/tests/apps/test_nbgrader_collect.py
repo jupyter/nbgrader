@@ -1,8 +1,7 @@
 import os
+import time
 
-from os.path import join
-
-from .. import run_python_module
+from .. import run_nbgrader
 from .base import BaseTestApp
 from .conftest import notwindows
 from ...utils import parse_utc
@@ -12,28 +11,29 @@ from ...utils import parse_utc
 class TestNbGraderCollect(BaseTestApp):
 
     def _release_and_fetch(self, assignment, exchange, course_dir):
-        self._copy_file(join("files", "test.ipynb"), join(course_dir, "release", "ps1", "p1.ipynb"))
-        run_python_module([
-            "nbgrader", "release", assignment,
+        self._copy_file(os.path.join("files", "test.ipynb"), os.path.join(course_dir, "release", "ps1", "p1.ipynb"))
+        run_nbgrader([
+            "release", assignment,
             "--course", "abc101",
             "--TransferApp.exchange_directory={}".format(exchange)
         ])
-        run_python_module([
-            "nbgrader", "fetch", assignment,
+        run_nbgrader([
+            "fetch", assignment,
             "--course", "abc101",
             "--TransferApp.exchange_directory={}".format(exchange)
         ])
 
-    def _submit(self, assignment, exchange):
-        run_python_module([
-            "nbgrader", "submit", assignment,
+    def _submit(self, assignment, exchange, cache):
+        run_nbgrader([
+            "submit", assignment,
             "--course", "abc101",
+            "--TransferApp.cache_directory={}".format(cache),
             "--TransferApp.exchange_directory={}".format(exchange)
         ])
 
     def _collect(self, assignment, exchange, flags=None, retcode=0):
         cmd = [
-            "nbgrader", "collect", assignment,
+            "collect", assignment,
             "--course", "abc101",
             "--TransferApp.exchange_directory={}".format(exchange)
         ]
@@ -41,42 +41,43 @@ class TestNbGraderCollect(BaseTestApp):
         if flags is not None:
             cmd.extend(flags)
 
-        run_python_module(cmd, retcode=retcode)
+        run_nbgrader(cmd, retcode=retcode)
 
     def _read_timestamp(self, root):
-        with open(os.path.join(root, "timestamp.txt"), "r") as fh:
+        with open(os.path.os.path.join(root, "timestamp.txt"), "r") as fh:
             timestamp = parse_utc(fh.read())
         return timestamp
 
     def test_help(self):
         """Does the help display without error?"""
-        run_python_module(["nbgrader", "collect", "--help-all"])
+        run_nbgrader(["collect", "--help-all"])
 
-    def test_no_course_id(self, exchange, course_dir):
+    def test_no_course_id(self, exchange, course_dir, cache):
         """Does releasing without a course id thrown an error?"""
         self._release_and_fetch("ps1", exchange, course_dir)
-        self._submit("ps1", exchange)
+        self._submit("ps1", exchange, cache)
         cmd = [
-            "nbgrader", "collect", "ps1",
+            "collect", "ps1",
             "--TransferApp.exchange_directory={}".format(exchange)
         ]
-        run_python_module(cmd, retcode=1)
+        run_nbgrader(cmd, retcode=1)
 
-    def test_collect(self, exchange, course_dir):
+    def test_collect(self, exchange, course_dir, cache):
         self._release_and_fetch("ps1", exchange, course_dir)
 
         # try to collect when there"s nothing to collect
         self._collect("ps1", exchange)
-        root = os.path.join(join(course_dir, "submitted", os.environ["USER"], "ps1"))
-        assert not os.path.isdir(join(course_dir, "submitted"))
+        root = os.path.os.path.join(os.path.join(course_dir, "submitted", os.environ["USER"], "ps1"))
+        assert not os.path.isdir(os.path.join(course_dir, "submitted"))
 
         # submit something
-        self._submit("ps1", exchange)
+        self._submit("ps1", exchange, cache)
+        time.sleep(1)
 
         # try to collect it
         self._collect("ps1", exchange)
-        assert os.path.isfile(os.path.join(root, "p1.ipynb"))
-        assert os.path.isfile(os.path.join(root, "timestamp.txt"))
+        assert os.path.isfile(os.path.os.path.join(root, "p1.ipynb"))
+        assert os.path.isfile(os.path.os.path.join(root, "timestamp.txt"))
         timestamp = self._read_timestamp(root)
 
         # try to collect it again
@@ -84,7 +85,7 @@ class TestNbGraderCollect(BaseTestApp):
         assert self._read_timestamp(root) == timestamp
 
         # submit again
-        self._submit("ps1", exchange)
+        self._submit("ps1", exchange, cache)
 
         # collect again
         self._collect("ps1", exchange)
@@ -94,12 +95,12 @@ class TestNbGraderCollect(BaseTestApp):
         self._collect("ps1", exchange, ["--update"])
         assert self._read_timestamp(root) != timestamp
 
-    def test_collect_assignment_flag(self, exchange, course_dir):
+    def test_collect_assignment_flag(self, exchange, course_dir, cache):
         self._release_and_fetch("ps1", exchange, course_dir)
-        self._submit("ps1", exchange)
+        self._submit("ps1", exchange, cache)
 
         # try to collect when there"s nothing to collect
         self._collect("--assignment=ps1", exchange)
-        root = os.path.join(join(course_dir, "submitted", os.environ["USER"], "ps1"))
-        assert os.path.isfile(os.path.join(root, "p1.ipynb"))
-        assert os.path.isfile(os.path.join(root, "timestamp.txt"))
+        root = os.path.os.path.join(os.path.join(course_dir, "submitted", os.environ["USER"], "ps1"))
+        assert os.path.isfile(os.path.os.path.join(root, "p1.ipynb"))
+        assert os.path.isfile(os.path.os.path.join(root, "timestamp.txt"))
