@@ -6,7 +6,7 @@ nbconvert
 nbformat
 traitlets
 jupyter_core
-jupyter_client<4.2
+jupyter_client
 tornado
 six
 requests
