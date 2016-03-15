@@ -33,14 +33,14 @@ You may install the current version of nbgrader which includes the grading
 system and command line tools using:
 
     pip install nbgrader
-    
+
 For detailed instructions on installing nbgrader and the nbgrader extensions
-for Jupyter notebook, please see [Installation](https://nbgrader.readthedocs.org/en/latest/user_guide/01a_installation.html)
+for Jupyter notebook, please see [Installation](https://nbgrader.readthedocs.org/en/latest/user_guide/installation.html)
 section in the User Guide.
 
 
 ## Contributing
-Please see the [contributing guidelines and documentation](CONTRIBUTING.md).
+Please see the [contributing guidelines and documentation](https://nbgrader.readthedocs.org/en/latest/contributor_guide/overview.html).
 
 If you want to develop features for nbgrader, please follow the
-[development installation instructions](CONTRIBUTING.md#development-installation).
+[development installation instructions](https://nbgrader.readthedocs.org/en/latest/contributor_guide/installation_developer.html).
