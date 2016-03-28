@@ -40,8 +40,16 @@ the nbgrader notebook extension, use::
 Quick start
 -----------
 
-To get up and running with nbgrader quickly, you can create an example directory with example course files in it by running the ``nbgrader quickstart`` command::
+To get up and running with nbgrader quickly, you can create an example
+directory with example course files in it by running the ``nbgrader
+quickstart`` command::
 
     nbgrader quickstart course_id
 
-Where you should replace ``course_id`` with the name of your course. For an explanation of how this directory is arranged, and what the different files are in it, continue reading on in :doc:`philosophy`.
+Where you should replace ``course_id`` with the name of your course. For
+further details on how the quickstart command works, please run:
+
+    nbgrader quickstart --help
+
+For an explanation of how this directory is arranged, and what the different
+files are in it, continue reading on in :doc:`philosophy`.

@@ -11,7 +11,17 @@ aliases = {}
 flags = {
     'force': (
         {'QuickStartApp': {'force': True}},
-        "Overwrite existing files if they already exist."
+        dedent(
+            """
+            Overwrite existing files if they already exist. WARNING: this is
+            equivalent to doing:
+
+                rm -r <course_id>
+                nbgrader quickstart <course_id>
+
+            So be careful when using this flag!
+            """
+        )
     ),
 }
 
@@ -29,6 +39,18 @@ class QuickStartApp(NbGrader):
         one argument, which is the name of your course:
 
             nbgrader quickstart course101
+
+        Note that this class name need not necessarily be the same as the
+        `NbGrader.course_id` configuration option, however by default, the
+        quickstart command will set `NbGrader.course_id` to be the name you give
+        on the command line. If you want to use a different folder name, go
+        ahead and just provide the name of the folder where your class files
+        will be stored, e.g.:
+
+            nbgrader quickstart "World Music"
+
+        and then after running the quickstart commmand, you can edit the
+        `nbgrader_config.py` file to change `NbGrader.course_id`.
 
         """
 
@@ -54,7 +76,10 @@ class QuickStartApp(NbGrader):
                 self.log.warning("Removing existing directory '%s'", course_path)
                 utils.rmtree(course_path)
             else:
-                self.fail("Directory '{}' already exists! Rerun with --force to overwrite.".format(course_path))
+                self.fail(
+                    "Directory '{}' already exists! Rerun with --force to remove "
+                    "this directory first (warning: this will remove the ENTIRE "
+                    "directory and all files in it.) ".format(course_path))
 
         # create the directory
         self.log.info("Creating directory '%s'...", course_path)
