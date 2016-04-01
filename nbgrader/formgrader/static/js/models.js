@@ -120,7 +120,8 @@ var CommentUI = Backbone.View.extend({
         this.listenTo(this.model, "request", this.animateSaving);
         this.listenTo(this.model, "sync", this.animateSaved);
 
-        this.$comment.attr("placeholder", this.model.get("auto_comment") || "Comments");
+        var default_msg = "Type any comments here (supports Markdown and MathJax)";
+        this.$comment.attr("placeholder", this.model.get("auto_comment") || default_msg);
 
         this.render();
         autosize(this.$comment);
