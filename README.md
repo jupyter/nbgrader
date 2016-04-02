@@ -34,6 +34,10 @@ system and command line tools using:
 
     pip install nbgrader
 
+Or, if you use [Anaconda](https://www.continuum.io/downloads):
+
+    conda install -c jhamrick nbgrader
+
 For detailed instructions on installing nbgrader and the nbgrader extensions
 for Jupyter notebook, please see [Installation](https://nbgrader.readthedocs.org/en/latest/user_guide/installation.html)
 section in the User Guide.
