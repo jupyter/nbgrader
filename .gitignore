@@ -84,3 +84,6 @@ nbgrader/formgrader/static/components/jquery/jquery-migrate.js
 nbgrader/formgrader/static/components/jquery-color/test
 nbgrader/formgrader/static/components/autosize/example
 !nbgrader/formgrader/static/components/autosize/dist
+
+conda-bld
+
