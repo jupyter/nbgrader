@@ -59,7 +59,13 @@ setup_args = dict(
         'nbgrader.auth',
         'nbgrader.formgrader',
         'nbgrader.preprocessors',
-        'nbgrader.tests'
+        'nbgrader.tests',
+        'nbgrader.tests.api',
+        'nbgrader.tests.apps',
+        'nbgrader.tests.formgrader',
+        'nbgrader.tests.nbextensions',
+        'nbgrader.tests.preprocessors',
+        'nbgrader.tests.utils'
     ],
     package_data={
         'nbgrader': extension_files,
