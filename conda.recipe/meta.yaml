@@ -5,6 +5,9 @@ package:
 source:
   path: ..
 
+build:
+  number: 1
+
 requirements:
   build:
     - python
@@ -23,13 +26,6 @@ requirements:
     - tornado
     - six
     - requests
-
-test:
-  requires:
-    - nose
-    - pytest
-  commands:
-    - python -m nbgrader.tests -x -v -k "not formgrader and not nbextensions"
 
 about:
   home: https://github.com/jupyter/nbgrader
