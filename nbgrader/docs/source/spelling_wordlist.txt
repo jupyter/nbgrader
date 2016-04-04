@@ -19,6 +19,7 @@ Changelog
 checksum
 checksums
 cogsci
+conda
 config
 datefmt
 dropdown
@@ -47,6 +48,7 @@ jhamrick
 jonathanmorgan
 JUPYTER
 Jupyter
+linux
 localhost
 logfile
 lphk
@@ -58,6 +60,7 @@ nbgrader
 neuroscience
 npm
 ok
+osx
 phantomjs
 Phantomjs
 positionally
