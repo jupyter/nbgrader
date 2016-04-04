@@ -71,6 +71,7 @@ preprocessor
 Preprocessor
 ps
 py
+quickstart
 readonly
 redSlug
 reinstall
