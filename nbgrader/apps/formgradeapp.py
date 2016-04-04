@@ -113,6 +113,9 @@ class FormgradeApp(NbGrader):
         self.authenticator_instance.stop()
         ioloop.IOLoop.current().stop()
 
+        # close the gradebook
+        self.tornado_settings['nbgrader_gradebook'].db.close()
+
     def build_extra_config(self):
         extra_config = super(FormgradeApp, self).build_extra_config()
         extra_config.Exporter.template_file = 'formgrade'
