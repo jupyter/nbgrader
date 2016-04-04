@@ -128,4 +128,24 @@ class QuickStartApp(NbGrader):
             fh.write("#" * 79 + "\n\n")
             fh.write(config)
 
-        self.log.info("Done! The course files are located in '%s'", course_path)
+        self.log.info(
+            dedent(
+                """
+                Done! The course files are located in '%s'.
+
+                To get started, you can edit the source notebooks located in:
+
+                    %s
+
+                Once you have edited them to your satisfaction, you can create
+                the student version by running `nbgrader assign ps1` from the
+                '%s' directory.
+
+                For further details, please see the full nbgrader documentation at:
+
+                    http://nbgrader.readthedocs.org/
+                """
+            ).lstrip(),
+            course_path,
+            os.path.join(course_path, "source", "ps1"),
+            course_path)
