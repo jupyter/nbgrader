@@ -27,6 +27,14 @@ requirements:
     - six
     - requests
 
+test:
+  requires:
+    - nose
+    - pytest
+    - selenium
+  commands:
+    - python -m nbgrader.tests -v -x
+
 about:
   home: https://github.com/jupyter/nbgrader
   license: BSD
