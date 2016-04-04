@@ -1,9 +1,10 @@
 import os
 import shutil
 import subprocess
+import sys
 
 from textwrap import dedent
-from traitlets import Unicode, List, Bool
+from traitlets import Bool
 from .baseapp import NbGrader
 from .. import utils
 
@@ -95,7 +96,7 @@ class QuickStartApp(NbGrader):
         self.log.info("Generating example config file...")
         currdir = os.getcwd()
         os.chdir(course_path)
-        subprocess.call(["nbgrader", "--generate-config"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        subprocess.call([sys.executable, "-m", "nbgrader", "--generate-config"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         os.chdir(currdir)
         with open(os.path.join(course_path, "nbgrader_config.py"), "r") as fh:
             config = fh.read()
