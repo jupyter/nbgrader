@@ -20,7 +20,13 @@ for (dirname, dirnames, filenames) in os.walk("nbgrader/nbextensions"):
 docs_files = []
 for (dirname, dirnames, filenames) in os.walk("nbgrader/docs"):
     root = os.path.relpath(dirname, "nbgrader")
+    if root.startswith(os.path.join("docs", "build")):
+        continue
+    if "__pycache__" in root:
+        continue
     for filename in filenames:
+        if filename.endswith(".pyc"):
+            continue
         docs_files.append(os.path.join(root, filename))
 
 # get paths to all the static files and templates
