@@ -91,7 +91,7 @@ def cache(request):
 @pytest.fixture(scope="module")
 def class_files(coursedir):
     # copy files from the user guide
-    source_path = os.path.join(os.path.dirname(__file__), "..", "..", "..", "docs", "source", "user_guide", "source")
+    source_path = os.path.join(os.path.dirname(__file__), "..", "..", "docs", "source", "user_guide", "source")
     shutil.copytree(os.path.join(os.path.dirname(__file__), source_path), os.path.join(coursedir, "source"))
 
     # rename to old names -- we do this rather than changing all the tests

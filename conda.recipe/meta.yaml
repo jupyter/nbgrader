@@ -1,0 +1,40 @@
+package:
+  name: nbgrader
+  version: "0.3.0.dev0"
+
+source:
+  path: ..
+
+build:
+  number: 2
+
+requirements:
+  build:
+    - python
+    - setuptools
+  run:
+    - python
+    - sqlalchemy
+    - python-dateutil
+    - jupyter
+    - notebook >=4.1
+    - nbconvert
+    - nbformat
+    - traitlets
+    - jupyter_core
+    - jupyter_client
+    - tornado
+    - six
+    - requests
+
+test:
+  requires:
+    - pytest
+    - selenium
+  commands:
+    - python -m nbgrader.tests -v -x
+
+about:
+  home: https://github.com/jupyter/nbgrader
+  license: BSD
+  license_file: COPYING.md
