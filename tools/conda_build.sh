@@ -11,6 +11,6 @@ for version in 2.7 3.4 3.5; do
     conda convert --platform all $out -o conda-bld
 done
 
-#for pkg in conda-bld/*/*.tar.bz2; do
-#    anaconda upload $pkg
-#done
+for pkg in conda-bld/*/*.tar.bz2; do
+    anaconda upload $pkg
+done
