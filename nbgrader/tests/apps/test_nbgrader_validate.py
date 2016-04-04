@@ -23,7 +23,7 @@ class TestNbGraderValidate(BaseTestApp):
         """Does the validation pass on an changed notebook?"""
         self._copy_file(join("files", "submitted-changed.ipynb"), "submitted-changed.ipynb")
         output = run_nbgrader(["validate", "submitted-changed.ipynb"], stdout=True)
-        assert output == "Success! Your notebook passes all the tests.{}".formatlines()
+        assert output.strip() == "Success! Your notebook passes all the tests."
 
     def test_invert_validate_unchanged(self):
         """Does the inverted validation pass on an unchanged notebook?"""
