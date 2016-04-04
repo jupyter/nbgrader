@@ -437,11 +437,10 @@ span.nbgrader-label {
     <div class="panel-body">
       <div class="input_area">
         <div class=" highlight hl-ipython3"><pre><span></span><span class="sd">&quot;&quot;&quot;Check that squares returns the correct output for several inputs&quot;&quot;&quot;</span>
-<span class="kn">from</span> <span class="nn">nose.tools</span> <span class="k">import</span> <span class="n">assert_equal</span>
-<span class="n">assert_equal</span><span class="p">(</span><span class="n">squares</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="p">[</span><span class="mi">1</span><span class="p">])</span>
-<span class="n">assert_equal</span><span class="p">(</span><span class="n">squares</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">])</span>
-<span class="n">assert_equal</span><span class="p">(</span><span class="n">squares</span><span class="p">(</span><span class="mi">10</span><span class="p">),</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">25</span><span class="p">,</span> <span class="mi">36</span><span class="p">,</span> <span class="mi">49</span><span class="p">,</span> <span class="mi">64</span><span class="p">,</span> <span class="mi">81</span><span class="p">,</span> <span class="mi">100</span><span class="p">])</span>
-<span class="n">assert_equal</span><span class="p">(</span><span class="n">squares</span><span class="p">(</span><span class="mi">11</span><span class="p">),</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">25</span><span class="p">,</span> <span class="mi">36</span><span class="p">,</span> <span class="mi">49</span><span class="p">,</span> <span class="mi">64</span><span class="p">,</span> <span class="mi">81</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">121</span><span class="p">])</span>
+<span class="k">assert</span> <span class="n">squares</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">==</span> <span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+<span class="k">assert</span> <span class="n">squares</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="o">==</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">]</span>
+<span class="k">assert</span> <span class="n">squares</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span> <span class="o">==</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">25</span><span class="p">,</span> <span class="mi">36</span><span class="p">,</span> <span class="mi">49</span><span class="p">,</span> <span class="mi">64</span><span class="p">,</span> <span class="mi">81</span><span class="p">,</span> <span class="mi">100</span><span class="p">]</span>
+<span class="k">assert</span> <span class="n">squares</span><span class="p">(</span><span class="mi">11</span><span class="p">)</span> <span class="o">==</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">25</span><span class="p">,</span> <span class="mi">36</span><span class="p">,</span> <span class="mi">49</span><span class="p">,</span> <span class="mi">64</span><span class="p">,</span> <span class="mi">81</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">121</span><span class="p">]</span>
 </pre></div>
 
       </div>
@@ -461,9 +460,19 @@ span.nbgrader-label {
     <div class="panel-body">
       <div class="input_area">
         <div class=" highlight hl-ipython3"><pre><span></span><span class="sd">&quot;&quot;&quot;Check that squares raises an error for invalid inputs&quot;&quot;&quot;</span>
-<span class="kn">from</span> <span class="nn">nose.tools</span> <span class="k">import</span> <span class="n">assert_raises</span>
-<span class="n">assert_raises</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">,</span> <span class="n">squares</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
-<span class="n">assert_raises</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">,</span> <span class="n">squares</span><span class="p">,</span> <span class="o">-</span><span class="mi">4</span><span class="p">)</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">squares</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+    <span class="k">pass</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="k">raise</span> <span class="ne">AssertionError</span><span class="p">(</span><span class="s2">&quot;did not raise&quot;</span><span class="p">)</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">squares</span><span class="p">(</span><span class="o">-</span><span class="mi">4</span><span class="p">)</span>
+<span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+    <span class="k">pass</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="k">raise</span> <span class="ne">AssertionError</span><span class="p">(</span><span class="s2">&quot;did not raise&quot;</span><span class="p">)</span>
 </pre></div>
 
       </div>
@@ -548,10 +557,10 @@ span.nbgrader-label {
     <div class="panel-body">
       <div class="input_area">
         <div class=" highlight hl-ipython3"><pre><span></span><span class="sd">&quot;&quot;&quot;Check that sum_of_squares returns the correct answer for various inputs.&quot;&quot;&quot;</span>
-<span class="n">assert_equal</span><span class="p">(</span><span class="n">sum_of_squares</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span>
-<span class="n">assert_equal</span><span class="p">(</span><span class="n">sum_of_squares</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span> <span class="mi">5</span><span class="p">)</span>
-<span class="n">assert_equal</span><span class="p">(</span><span class="n">sum_of_squares</span><span class="p">(</span><span class="mi">10</span><span class="p">),</span> <span class="mi">385</span><span class="p">)</span>
-<span class="n">assert_equal</span><span class="p">(</span><span class="n">sum_of_squares</span><span class="p">(</span><span class="mi">11</span><span class="p">),</span> <span class="mi">506</span><span class="p">)</span>
+<span class="k">assert</span> <span class="n">sum_of_squares</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span>
+<span class="k">assert</span> <span class="n">sum_of_squares</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="o">==</span> <span class="mi">5</span>
+<span class="k">assert</span> <span class="n">sum_of_squares</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span> <span class="o">==</span> <span class="mi">385</span>
+<span class="k">assert</span> <span class="n">sum_of_squares</span><span class="p">(</span><span class="mi">11</span><span class="p">)</span> <span class="o">==</span> <span class="mi">506</span>
 </pre></div>
 
       </div>
@@ -574,8 +583,10 @@ span.nbgrader-label {
 <span class="n">orig_squares</span> <span class="o">=</span> <span class="n">squares</span>
 <span class="k">del</span> <span class="n">squares</span>
 <span class="k">try</span><span class="p">:</span>
-    <span class="n">assert_raises</span><span class="p">(</span><span class="ne">NameError</span><span class="p">,</span> <span class="n">sum_of_squares</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-<span class="k">except</span> <span class="ne">AssertionError</span><span class="p">:</span>
+    <span class="n">sum_of_squares</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="k">except</span> <span class="ne">NameError</span><span class="p">:</span>
+    <span class="k">pass</span>
+<span class="k">else</span><span class="p">:</span>
     <span class="k">raise</span> <span class="ne">AssertionError</span><span class="p">(</span><span class="s2">&quot;sum_of_squares does not use squares&quot;</span><span class="p">)</span>
 <span class="k">finally</span><span class="p">:</span>
     <span class="n">squares</span> <span class="o">=</span> <span class="n">orig_squares</span>

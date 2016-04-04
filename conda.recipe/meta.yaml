@@ -29,7 +29,6 @@ requirements:
 
 test:
   requires:
-    - nose
     - pytest
     - selenium
   commands:
