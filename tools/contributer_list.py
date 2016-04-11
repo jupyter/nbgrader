@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 """Print a list of contributors for a particular milestone.
 
 Usage:
