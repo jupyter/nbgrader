@@ -40,6 +40,7 @@ Homebrew
 html
 Indices
 inline
+iopub
 ipynb
 IPython
 ivanslapnicar
@@ -80,7 +81,9 @@ rst
 runtime
 smeylan
 sqlite
+stdin
 stdout
+stoppped
 subcommand
 suchow
 svurens
