@@ -11,6 +11,9 @@ from .manager import HubAuthNotebookServerUserManager
 @pytest.mark.usefixtures("all_formgraders")
 class TestGradebook(BaseTestFormgrade):
 
+    def _click_element(self, name):
+        self.browser.find_element_by_css_selector(name).click()
+
     def test_start(self):
         # This is just a fake test, since starting up the browser and formgrader
         # can take a little while. So if anything goes wrong there, this test
@@ -211,6 +214,50 @@ class TestGradebook(BaseTestFormgrade):
                 # check that the image is loaded, and that it has a width
                 assert self.browser.execute_script("return arguments[0].complete", image)
                 assert self.browser.execute_script("return arguments[0].naturalWidth", image) > 0
+
+    def test_next_prev_assignments(self):
+        problem = self.gradebook.find_notebook("Problem 1", "Problem Set 1")
+        submissions = problem.submissions
+        submissions.sort(key=lambda x: x.id)
+
+        # test navigating both with the arrow keys and with clicking the
+        # next/previous links
+        next_functions = [
+            (self._click_element, ".next a")
+        ]
+        prev_functions = [
+            (self._click_element, ".previous a")
+        ]
+
+        for n, p in zip(next_functions, prev_functions):
+            # first element is the function, the other elements are the arguments
+            # to that function
+            next_function = lambda: n[0](*n[1:])
+            prev_function = lambda: p[0](*p[1:])
+
+            # Load the first submission
+            self._get(self.formgrade_url("submissions/{}".format(submissions[0].id)))
+            self._wait_for_formgrader("submissions/{}/?index=0".format(submissions[0].id))
+
+            # Move to the next submission
+            next_function()
+            self._wait_for_formgrader("submissions/{}/?index=0".format(submissions[1].id))
+
+            # Move to the next submission (should return to notebook list)
+            next_function()
+            self._wait_for_gradebook_page("assignments/Problem Set 1/Problem 1")
+
+            # Go back
+            self.browser.back()
+            self._wait_for_formgrader("submissions/{}/?index=0".format(submissions[1].id))
+
+            # Move to the previous submission
+            prev_function()
+            self._wait_for_formgrader("submissions/{}/?index=0".format(submissions[0].id))
+
+            # Move to the previous submission (should return to the notebook list)
+            prev_function()
+            self._wait_for_gradebook_page("assignments/Problem Set 1/Problem 1")
 
     def test_logout(self):
         """Make sure after we've logged out we can't access any of the formgrader pages."""

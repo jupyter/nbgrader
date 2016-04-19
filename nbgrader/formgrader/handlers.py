@@ -220,10 +220,10 @@ class SubmissionHandler(BaseHandler):
 class SubmissionNavigationHandler(BaseHandler):
 
     def _assignment_notebook_list_url(self, assignment_id, notebook_id):
-        return '/assignments/{}/{}'.format(assignment_id, notebook_id)
+        return '{}/assignments/{}/{}'.format(self.auth.base_url, assignment_id, notebook_id)
 
     def _submission_url(self, submission_id):
-        url = '/submissions/{}'.format(submission_id)
+        url = '{}/submissions/{}'.format(self.auth.base_url, submission_id)
         if self.get_argument('index', default=None) is not None:
             return "{}?index={}".format(url, self.get_argument('index'))
         else:
