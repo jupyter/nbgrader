@@ -3,6 +3,18 @@
 import requests
 import json
 import sys
+import getpass
+
+try:
+    import requests_cache
+except ImportError:
+    print("no cache", file=sys.stderr)
+else:
+    requests_cache.install_cache("gh_api", expire_after=3600)
+
+# Keyring stores passwords by a 'username', but we're not storing a username and
+# password
+fake_username = 'ipython_tools'
 
 
 class Obj(dict):
@@ -15,6 +27,17 @@ class Obj(dict):
 
     def __setattr__(self, name, val):
         self[name] = val
+
+
+token = None
+def make_auth_header():
+    global token
+
+    if token is None:
+        print("Please enter your GitHub access token. This will not be stored.")
+        token = input("Token: ")
+
+    return {'Authorization': 'token {}'.format(token)}
 
 
 def get_paged_request(url, headers=None, **params):
