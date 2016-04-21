@@ -1,3 +1,5 @@
+import os
+
 c = get_config()
 
 ## Generic nbgrader options (technically, the exchange directory is not used
@@ -6,6 +8,12 @@ c = get_config()
 
 c.NbGrader.course_id = "example_course"
 c.TransferApp.exchange_directory = "/tmp/exchange"
+c.NbGrader.db_assignments = [dict(name="ps1")]
+c.NbGrader.db_students = [
+    dict(id="bitdiddle", first_name="Ben", last_name="Bitdiddle"),
+    dict(id="hacker", first_name="Alyssa", last_name="Hacker"),
+    dict(id="reasoner", first_name="Louis", last_name="Reasoner")
+]
 
 ## Options that are specific to the formgrader and integrating it with JuptyerHub:
 
@@ -32,10 +40,7 @@ c.HubAuth.notebook_url_prefix = "path/to/class_files"
 # the formgrader.
 c.HubAuth.graders = ["instructor1", "instructor2"]
 
-# This specifies that the formgrader should automatically generate an api
-# token to authenticate itself with JupyterHub.
-c.HubAuth.generate_hubapi_token = True
-
-# Change this to be the jupyterhub.sqlite located in the directory where
-# you actually run JupyterHub.
-c.HubAuth.hub_db = "path/to/jupyterhub.sqlite"
+# This loads the environment variable containing the hubapi token that we will
+# generate by running the `jupyterhub token <name>` command, just before we
+# actually launch the formgrader.
+c.HubAuth.hubapi_token = os.environ['JPY_API_TOKEN']
