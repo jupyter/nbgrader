@@ -49,15 +49,13 @@ class ExtensionInstallApp(InstallNBExtensionApp, NbGrader):
         # install the create_assignment extension
         if len(extra_args) == 0 or "create_assignment" in extra_args:
             self.log.info("Installing create_assignment extension")
-            self.extra_args = [os.path.join(nbextensions_dir, 'create_assignment')]
-            self.destination = 'create_assignment'
+            self.extra_args = [os.path.join(nbextensions_dir, 'static', 'create_assignment')]
             self.install_extensions()
 
         # install the assignment_list extension
         if sys.platform != 'win32' and (len(extra_args) == 0 or "assignment_list" in extra_args):
             self.log.info("Installing assignment_list extension")
-            self.extra_args = [os.path.join(nbextensions_dir, 'assignment_list', 'static')]
-            self.destination = 'assignment_list'
+            self.extra_args = [os.path.join(nbextensions_dir, 'static', 'assignment_list')]
             self.install_extensions()
 
 
