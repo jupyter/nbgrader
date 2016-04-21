@@ -87,3 +87,5 @@ nbgrader/formgrader/static/components/autosize/example
 
 conda-bld
 gh_api.sqlite
+MANIFEST
+README
