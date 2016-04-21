@@ -122,11 +122,15 @@ def _formgrader(request, manager_class, gradebook, tempdir):
         man.stop()
     request.addfinalizer(fin)
 
-# Skip if less than Python 3 or if running on Windows
+# Skip if JupyterHub is not installed, or if running on Windows
 # For some reason stuff isn't properly skipped if I use multiple skipif
 # markers, so I'm combining both of them into one here...
+try:
+    import jupyterhub
+except ImportError:
+    jupyterhub = None
 skipif = pytest.mark.skipif(
-    (sys.version_info[0] < 3) or (sys.platform == 'win32'),
+    (jupyterhub is None) or (sys.platform == 'win32'),
     reason="JupyterHub tests require Python 3 and cannot run on Windows")
 
 jupyterhub = lambda x: pytest.mark.jupyterhub(pytest.mark.formgrader(skipif(x)))
