@@ -60,7 +60,6 @@ do this, please refer to the JupyterHub documentation.
 Running this command should launch JupyterHub, which will then be accessible from
 ``localhost:8000``.
 
-
 Configuring nbgrader formgrade
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -86,6 +85,17 @@ this auth token and keep it secret):
 .. code:: bash
 
     export CONFIGPROXY_AUTH_TOKEN='foo'
+    export JPY_API_TOKEN=$(jupyterhub token --db="<path>" "<user>")
+
+where ``<user>`` should be the username of a JupyterHub admin user and
+``<path>`` is the path to the JupyterHub database (e.g.
+``sqlite:///jupyterhub.sqlite``). This will store the API token in an
+environment variable called ``JPY_API_TOKEN``, which we'll use later.
+
+Now that we've set the auth token and the API token, we can launch the
+formgrader:
+
+.. code:: bash
     nbgrader formgrade
 
 Running this command will launch the formgrader, which you should be able to
