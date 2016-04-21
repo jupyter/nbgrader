@@ -5,7 +5,7 @@ import sys
 import six
 
 from jupyter_core.paths import jupyter_config_dir
-from notebook.nbextensions import InstallNBExtensionApp, EnableNBExtensionApp, DisableNBExtensionApp, flags, aliases
+from notebook.nbextensions import InstallNBExtensionApp, UninstallNBExtensionApp, EnableNBExtensionApp, DisableNBExtensionApp, install_nbextension
 from traitlets import Unicode
 from traitlets.config import Config
 from traitlets.config.application import catch_config_error
@@ -14,18 +14,10 @@ from traitlets.config.loader import JSONFileConfigLoader, ConfigFileNotFound
 
 from .baseapp import NbGrader, format_excepthook
 
-install_flags = {}
-install_flags.update(flags)
-install_aliases = {}
-install_aliases.update(aliases)
-del install_aliases['destination']
 class ExtensionInstallApp(InstallNBExtensionApp, NbGrader):
 
     name = u'nbgrader-extension-install'
-    description = u'Install the nbgrader extension'
-
-    flags = install_flags
-    aliases = install_aliases
+    description = u'Install the nbgrader extensions'
 
     examples = """
         nbgrader extension install
@@ -42,6 +34,17 @@ class ExtensionInstallApp(InstallNBExtensionApp, NbGrader):
     def excepthook(self, etype, evalue, tb):
         format_excepthook(etype, evalue, tb)
 
+    def install_extensions(self):
+        install_nbextension(
+            self.extra_args[0],
+            overwrite=self.overwrite,
+            symlink=self.symlink,
+            user=self.user,
+            sys_prefix=self.sys_prefix,
+            prefix=self.prefix,
+            nbextensions_dir=self.nbextensions_dir,
+            logger=self.log)
+
     def start(self):
         nbextensions_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'nbextensions'))
         extra_args = self.extra_args[:]
@@ -49,16 +52,51 @@ class ExtensionInstallApp(InstallNBExtensionApp, NbGrader):
         # install the create_assignment extension
         if len(extra_args) == 0 or "create_assignment" in extra_args:
             self.log.info("Installing create_assignment extension")
-            self.extra_args = [os.path.join(nbextensions_dir, 'create_assignment')]
-            self.destination = 'create_assignment'
+            self.extra_args = [os.path.join(nbextensions_dir, 'static', 'create_assignment')]
             self.install_extensions()
 
         # install the assignment_list extension
         if sys.platform != 'win32' and (len(extra_args) == 0 or "assignment_list" in extra_args):
             self.log.info("Installing assignment_list extension")
-            self.extra_args = [os.path.join(nbextensions_dir, 'assignment_list', 'static')]
-            self.destination = 'assignment_list'
+            self.extra_args = [os.path.join(nbextensions_dir, 'static', 'assignment_list')]
             self.install_extensions()
+
+
+class ExtensionUninstallApp(UninstallNBExtensionApp, NbGrader):
+
+    name = u'nbgrader-extension-uninstall'
+    description = u'Uninstall the nbgrader extensions'
+
+    examples = """
+        nbgrader extension uninstall
+        nbgrader extension uninstall --user
+        nbgrader extension uninstall --prefix=/path/to/prefix
+        nbgrader extension uninstall --nbextensions=/path/to/nbextensions
+    """
+
+    destination = Unicode('')
+
+    def _classes_default(self):
+        return [ExtensionUninstallApp, UninstallNBExtensionApp]
+
+    def excepthook(self, etype, evalue, tb):
+        format_excepthook(etype, evalue, tb)
+
+    def start(self):
+        nbextensions_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'nbextensions'))
+        extra_args = self.extra_args[:]
+
+        # install the create_assignment extension
+        if len(extra_args) == 0 or "create_assignment" in extra_args:
+            self.log.info("Uninstalling create_assignment extension")
+            self.extra_args = ["create_assignment"]
+            self.uninstall_extensions()
+
+        # install the assignment_list extension
+        if sys.platform != 'win32' and (len(extra_args) == 0 or "assignment_list" in extra_args):
+            self.log.info("Uninstalling assignment_list extension")
+            self.extra_args = ["assignment_list"]
+            self.uninstall_extensions()
 
 
 class ExtensionActivateApp(EnableNBExtensionApp, NbGrader):
@@ -94,17 +132,15 @@ class ExtensionActivateApp(EnableNBExtensionApp, NbGrader):
 
     def start(self):
         if len(self.extra_args) == 0 or "create_assignment" in self.extra_args:
-            self.log.info("Activating create_assignment nbextension")
             self.section = "notebook"
-            self.enable_nbextension("create_assignment/main")
+            self.toggle_nbextension("create_assignment/main")
 
         if sys.platform != 'win32' and (len(self.extra_args) == 0 or "assignment_list" in self.extra_args):
             self.log.info("Activating assignment_list server extension")
             self.enable_server_extension('nbgrader.nbextensions.assignment_list')
 
-            self.log.info("Activating assignment_list nbextension")
             self.section = "tree"
-            self.enable_nbextension("assignment_list/main")
+            self.toggle_nbextension("assignment_list/main")
 
         self.log.info("Done. You may need to restart the Jupyter notebook server for changes to take effect.")
 
@@ -151,7 +187,7 @@ class ExtensionDeactivateApp(DisableNBExtensionApp, NbGrader):
         if len(self.extra_args) == 0 or "create_assignment" in self.extra_args:
             self.log.info("Deactivating create_assignment nbextension")
             self.section = "notebook"
-            self.disable_nbextension("create_assignment/main")
+            self.toggle_nbextension("create_assignment/main")
 
         if sys.platform != 'win32' and (len(self.extra_args) == 0 or "assignment_list" in self.extra_args):
             self.log.info("Deactivating assignment_list server extension")
@@ -159,7 +195,7 @@ class ExtensionDeactivateApp(DisableNBExtensionApp, NbGrader):
 
             self.log.info("Deactivating assignment_list nbextension")
             self.section = "tree"
-            self.disable_nbextension("assignment_list/main")
+            self.toggle_nbextension("assignment_list/main")
 
         self.log.info("Done. You may need to restart the Jupyter notebook server for changes to take effect.")
 
@@ -173,15 +209,19 @@ class ExtensionApp(NbGrader):
     subcommands = dict(
         install=(
             ExtensionInstallApp,
-            "Install the extension."
+            "Install the extensions."
+        ),
+        uninstall=(
+            ExtensionUninstallApp,
+            "Uninstall the extensions."
         ),
         activate=(
             ExtensionActivateApp,
-            "Activate the extension."
+            "Activate the extensions."
         ),
         deactivate=(
             ExtensionDeactivateApp,
-            "Deactivate the extension."
+            "Deactivate the extensions."
         )
     )
 
