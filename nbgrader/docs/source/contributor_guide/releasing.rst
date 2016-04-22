@@ -1,10 +1,6 @@
 Releasing a new version
 =======================
 
-.. caution::
-    This piece of documentation is a work-in-progress. Some pieces may be
-    missing and what is here may possibly be incorrect.
-
 .. contents::
     :local:
     :depth: 1
