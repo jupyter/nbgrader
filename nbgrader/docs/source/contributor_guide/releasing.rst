@@ -49,7 +49,7 @@ Regenerate all the documentation for this release by running::
 
     invoke docs
 
-Make sure the linkcheck and spellcheck pass, and commit the restuls.
+Make sure the linkcheck and spellcheck pass, and commit the results.
 
 Make a PR
 ---------
@@ -57,7 +57,7 @@ Make a PR
 At this point, make a pull request with the changes you have made so far. Make
 sure all the tests pass. After this point, you shouldn't need to make any more
 changes to the source: the remaining steps all have to do with building and
-releasing packags and creating branches/tags on GitHub.
+releasing packages and creating branches/tags on GitHub.
 
 Clean all untracked files
 -------------------------

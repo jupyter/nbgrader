@@ -16,12 +16,14 @@ bugfix
 bugtracker
 Carreau
 Changelog
+changelog
 checksum
 checksums
 cogsci
 conda
 config
 datefmt
+dev
 dropdown
 duedate
 Duedate
@@ -49,6 +51,7 @@ jhamrick
 jonathanmorgan
 JUPYTER
 Jupyter
+linkcheck
 linux
 localhost
 logfile
@@ -80,6 +83,7 @@ resize
 rst
 runtime
 smeylan
+spellcheck
 sqlite
 stdin
 stdout
@@ -93,6 +97,8 @@ timestamp
 timestamps
 undeletable
 unicode
+uninstall
+untracked
 username
 usernames
 whitespace
