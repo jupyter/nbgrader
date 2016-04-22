@@ -8,6 +8,7 @@ class Execute(NbGraderPreprocessor, ExecutePreprocessor):
 
     interrupt_on_timeout = Bool(True)
     allow_errors = Bool(True)
+    raise_on_iopub_timeout = Bool(True)
     extra_arguments = List([], config=True, help=dedent(
         """
         A list of extra arguments to pass to the kernel. For python kernels,

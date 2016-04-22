@@ -2,7 +2,7 @@ sqlalchemy
 python-dateutil
 jupyter
 notebook>=4.2
-nbconvert
+nbconvert>=4.2
 nbformat
 traitlets
 jupyter_core
