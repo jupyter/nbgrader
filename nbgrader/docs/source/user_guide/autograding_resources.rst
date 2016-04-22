@@ -1,6 +1,6 @@
 .. _autograding-resources:
 
-Autograding Resources
+Autograding resources
 =====================
 
 Most coding problems can be autograded. Problems that involve writing fruitful
@@ -138,3 +138,71 @@ grading plots by hand. However, it is possible to programmatically grade some
 simple types of plots (such as a scatter plot or bar plot). One such tool that
 facilitates grading matplotlib plot specifically is `plotchecker <https://github.com/jhamrick/plotchecker>`_.
 
+
+Gotchas
+~~~~~~~
+
+In many ways, writing autograder tests is similar to writing unit tests.
+However, there are certain types of errors that students may make—especially if
+they are new to programming—that are not things you would typically test for
+when writing tests for your own code. Here are a list of some things we've come
+across that are good to be aware of when writing your own autograder tests.
+
+For loops
+^^^^^^^^^
+
+For loops in Python are sometimes confusing to students who are new to programming, especially if they are sometimes using them in the context of indexing into lists/arrays and sometimes not. For example, I have seen students sometimes write a for loop like this:
+
+.. code:: python
+
+    for i in x:
+        y[i] = f(x[i])
+
+rather than:
+
+.. code:: python
+
+    for i in range(len(x)):
+        y[i] = f(x[i])
+
+In particular, if ``x`` in the above example contains integers, the code may
+not throw an error, and in certain cases, may even pass the tests if you are
+not looking out for this type of mistake!
+
+Global variables in the notebook
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Although the Jupyter notebook is a really excellent format for assignments, it
+does have some drawbacks. One drawback is the fact that variables defined
+earlier in the document—for example, in a piece of sample code—can be accessed
+later. This can pose problems if students accidentally use *those* variable
+names rather than the variable names given in the function definition.
+
+As a toy example, let's say that earlier in the notebook we have defined a
+variable called ``arr``. Then, students are asked to write a function that
+multiplies all the variables in the array by two. You give them a function
+signature of ``f(x)``, and they write the following code:
+
+.. code:: python
+
+    def f(x):
+        return arr * 2
+
+Notice that their code uses ``arr`` rather than ``x``. This can be a problem
+especially if you only test on one input—namely, ``arr``—because that test case
+will pass! Thus, it is important to test students' code on a variety of inputs
+in order to catch edge cases such as these, *and* that you use different
+variable names:
+
+.. code:: python
+
+    # both of these tests will pass no because the student hardcoded the use
+    # of the arr variable!
+    arr = np.array([1, 2, 3])
+    np.assert_array_equal(f(arr), np.array([2, 4, 6]))
+    arr = np.array([5, 7])
+    np.assert_array_equal(f(arr), np.array([10, 14]))
+
+    # this test will fail because it uses a new input AND a new variable name
+    arr2 = np.array([3, 2])
+    np.assert_array_equal(f(arr2), np.array([6, 4]))

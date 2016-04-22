@@ -37,6 +37,7 @@ formgrader
 Gradebook
 gradebook
 Granger
+hardcoded
 hOlle
 Homebrew
 html
@@ -58,10 +59,13 @@ logfile
 lphk
 Marr
 mathjax
+matplotlib
 metadata
+namespace
 nbconvert
 nbgrader
 neuroscience
+np
 npm
 ok
 osx
@@ -73,6 +77,8 @@ prepend
 prepopulate
 preprocessor
 Preprocessor
+Programmatically
+programmatically
 ps
 py
 quickstart
