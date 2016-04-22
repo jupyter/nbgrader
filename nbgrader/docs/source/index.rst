@@ -13,6 +13,7 @@ nbgrader
     user_guide/philosophy
     user_guide/creating_and_grading_assignments
     user_guide/managing_assignment_files
+    user_guide/autograding_resources
 
 .. toctree::
     :maxdepth: 1
