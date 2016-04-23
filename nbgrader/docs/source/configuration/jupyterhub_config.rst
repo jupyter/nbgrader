@@ -85,17 +85,19 @@ this auth token and keep it secret):
 .. code:: bash
 
     export CONFIGPROXY_AUTH_TOKEN='foo'
-    export JPY_API_TOKEN=$(jupyterhub token --db="<path>" "<user>")
+    export JPY_API_TOKEN=$(jupyterhub token --db=sqlite:///path/to/jupyterhub.sqlite -f /path/to/jupyterhub_config <user>)
 
-where ``<user>`` should be the username of a JupyterHub admin user and
-``<path>`` is the path to the JupyterHub database (e.g.
-``sqlite:///jupyterhub.sqlite``). This will store the API token in an
-environment variable called ``JPY_API_TOKEN``, which we'll use later.
+where ``<user>`` should be the username of a JupyterHub admin user,
+``sqlite:///path/to/jupyterhub.sqlite`` is the path to the JupyterHub database
+(e.g. ``sqlite:///jupyterhub.sqlite``), and ``/path/to/jupyterhub_config`` is
+the path to your ``jupyterhub_config.py`` file. This will store the API token
+in an environment variable called ``JPY_API_TOKEN``, which we'll use later.
 
 Now that we've set the auth token and the API token, we can launch the
 formgrader:
 
 .. code:: bash
+
     nbgrader formgrade
 
 Running this command will launch the formgrader, which you should be able to
