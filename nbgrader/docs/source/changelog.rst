@@ -1,7 +1,23 @@
+.. _changelog:
+
 Changelog
 =========
 
 A summary of changes to nbgrader.
+
+0.3.0.dev
+---------
+
+Version 0.3.0 of nbgrader introduces several significant changes. Most notably,
+this includes:
+
+- Windows support
+- Support for Python 3.5
+- Support for Jupyter Notebook 4.2
+- Allow assignments and students to be specified in ``nbgrader_config.py``
+- Addition of the "nbgrader quickstart" command
+- Addition of the "nbgrader extension uninstall" command
+- Create a nbgrader conda recipe
 
 0.2.x
 -----

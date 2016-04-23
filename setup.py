@@ -5,7 +5,7 @@
 # Distributed under the terms of the Modified BSD License.
 
 import os
-from distutils.core import setup
+from setuptools import setup, find_packages
 
 # get paths to all the extension files
 extension_files = []
@@ -48,15 +48,15 @@ with open(os.path.join(here, name, '_version.py')) as f:
     exec(f.read(), {}, version_ns)
 
 setup_args = dict(
-    name                = name,
-    version             = version_ns['__version__'],
-    description         = 'A system for assigning and grading notebooks',
-    author              = 'Jupyter Development Team',
-    author_email        = 'jupyter@googlegroups.com',
-    license             = 'BSD',
-    url                 = 'https://github.com/jupyter/nbgrader',
-    keywords            = ['Notebooks', 'Grading', 'Homework'],
-    classifiers         = [
+    name=name,
+    version=version_ns['__version__'],
+    description='A system for assigning and grading notebooks',
+    author='Jupyter Development Team',
+    author_email='jupyter@googlegroups.com',
+    license='BSD',
+    url='https://github.com/jupyter/nbgrader',
+    keywords=['Notebooks', 'Grading', 'Homework'],
+    classifiers=[
         'License :: OSI Approved :: BSD License',
         'Programming Language :: Python',
         'Programming Language :: Python :: 2',
@@ -65,20 +65,7 @@ setup_args = dict(
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
     ],
-    packages=[
-        'nbgrader',
-        'nbgrader.apps',
-        'nbgrader.auth',
-        'nbgrader.formgrader',
-        'nbgrader.preprocessors',
-        'nbgrader.tests',
-        'nbgrader.tests.api',
-        'nbgrader.tests.apps',
-        'nbgrader.tests.formgrader',
-        'nbgrader.tests.nbextensions',
-        'nbgrader.tests.preprocessors',
-        'nbgrader.tests.utils'
-    ],
+    packages=find_packages(),
     package_data={
         'nbgrader': extension_files + docs_files,
         'nbgrader.formgrader': static_files,
@@ -88,15 +75,23 @@ setup_args = dict(
             'preprocessors/files/*'
         ]
     },
-    scripts=['scripts/nbgrader']
+    entry_points={
+        'console_scripts': ['nbgrader=nbgrader.apps.nbgraderapp:main']
+    },
+    install_requires=[
+        "sqlalchemy",
+        "python-dateutil",
+        "jupyter",
+        "notebook>=4.2",
+        "nbconvert>=4.2",
+        "nbformat",
+        "traitlets",
+        "jupyter_core",
+        "jupyter_client",
+        "tornado",
+        "six",
+        "requests"
+    ]
 )
-
-setup_args['install_requires'] = install_requires = []
-with open('requirements.txt') as f:
-    for line in f.readlines():
-        req = line.strip()
-        if not req or req.startswith(('-e', '#')):
-            continue
-        install_requires.append(req)
 
 setup(**setup_args)

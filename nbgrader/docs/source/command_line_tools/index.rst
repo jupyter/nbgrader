@@ -16,6 +16,7 @@ Instructor commands
 .. toctree::
     :maxdepth: 1
 
+    nbgrader-quickstart
     nbgrader-assign
     nbgrader-validate
     nbgrader-autograde
