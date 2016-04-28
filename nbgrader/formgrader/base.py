@@ -8,9 +8,9 @@ def authenticated(f):
     def wrapper(self, *args, **kwargs):
         result = self.auth.authenticate(self.request)
         if result is True:
-            return f(self, *args, **kwargs) # Success
+            return f(self, *args, **kwargs)  # Success
         elif result is False:
-            raise web.HTTPError(403) # Forbidden
+            raise web.HTTPError(403)  # Forbidden
         else:
             self.redirect(result, permanent=False)  # Redirect
     return wrapper
