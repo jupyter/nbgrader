@@ -6,8 +6,7 @@ import time
 import sys
 import signal
 
-from textwrap import dedent
-from traitlets import Bool, Integer, Unicode
+from traitlets import Bool, Integer
 
 from .base import BaseAuth
 
