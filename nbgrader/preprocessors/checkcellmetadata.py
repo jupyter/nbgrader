@@ -3,6 +3,7 @@ import re
 from .. import utils
 from . import NbGraderPreprocessor
 
+
 class CheckCellMetadata(NbGraderPreprocessor):
     """A preprocessor for checking that grade ids are unique."""
 

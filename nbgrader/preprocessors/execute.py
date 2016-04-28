@@ -4,6 +4,7 @@ from textwrap import dedent
 
 from . import NbGraderPreprocessor
 
+
 class Execute(NbGraderPreprocessor, ExecutePreprocessor):
 
     interrupt_on_timeout = Bool(True)
