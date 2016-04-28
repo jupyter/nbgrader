@@ -656,8 +656,8 @@ class Grade(Base):
     #: for the score.
     score = column_property(case(
         [
-            (manual_score is not None, manual_score),
-            (auto_score is not None, auto_score)
+            (manual_score.isnot(None), manual_score),
+            (auto_score.isnot(None), auto_score)
         ],
         else_=literal_column("0.0")
     ))
@@ -746,8 +746,8 @@ class Comment(Base):
     #: comment.
     comment = column_property(case(
         [
-            (manual_comment is not None, manual_comment),
-            (auto_comment is not None, auto_comment)
+            (manual_comment.isnot(None), manual_comment),
+            (auto_comment.isnot(None), auto_comment)
         ],
         else_=None
     ))
