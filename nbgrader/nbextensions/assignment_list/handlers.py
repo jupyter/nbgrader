@@ -14,14 +14,25 @@ from traitlets.config import LoggingConfigurable
 
 static = os.path.join(os.path.dirname(__file__), 'static')
 
+
 class AssignmentList(LoggingConfigurable):
 
-    assignment_dir = Unicode('', config=True, help='Directory where the nbgrader commands should be run, relative to NotebookApp.notebook_dir')
+    assignment_dir = Unicode(
+        '', config=True,
+        help=''.join(['Directory where the nbgrader commands should ',
+                      'be run, relative to NotebookApp.notebook_dir'])
+    )
+
     def _assignment_dir_default(self):
         return self.parent.notebook_dir
 
     def list_released_assignments(self):
-        p = sp.Popen([sys.executable, "-m", "nbgrader", "list", "--json"], stdout=sp.PIPE, stderr=sp.PIPE, cwd=self.assignment_dir)
+        p = sp.Popen(
+            [sys.executable, "-m", "nbgrader", "list", "--json"],
+            stdout=sp.PIPE,
+            stderr=sp.PIPE,
+            cwd=self.assignment_dir
+        )
         output, _ = p.communicate()
         retcode = p.poll()
         if retcode != 0:
@@ -35,7 +46,12 @@ class AssignmentList(LoggingConfigurable):
         return sorted(assignments, key=lambda x: (x['course_id'], x['assignment_id']))
 
     def list_submitted_assignments(self):
-        p = sp.Popen([sys.executable, "-m", "nbgrader", "list", "--json", "--cached"], stdout=sp.PIPE, stderr=sp.PIPE, cwd=self.assignment_dir)
+        p = sp.Popen(
+            [sys.executable, "-m", "nbgrader", "list", "--json", "--cached"],
+            stdout=sp.PIPE,
+            stderr=sp.PIPE,
+            cwd=self.assignment_dir
+        )
         output, _ = p.communicate()
         retcode = p.poll()
         if retcode != 0:
@@ -117,9 +133,9 @@ class AssignmentActionHandler(BaseAssignmentHandler):
             self.finish(json.dumps(output))
 
 
-#-----------------------------------------------------------------------------
-# URL to handler mappings
-#-----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
+#  URL to handler mappings
+# ----------------------------------------------------------------------------
 
 
 _assignment_action_regex = r"(?P<action>fetch|submit|validate)"

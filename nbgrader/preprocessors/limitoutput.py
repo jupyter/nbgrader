@@ -2,6 +2,7 @@ from . import NbGraderPreprocessor
 
 from traitlets import Integer
 
+
 class LimitOutput(NbGraderPreprocessor):
     """Preprocessor for limiting cell output"""
 

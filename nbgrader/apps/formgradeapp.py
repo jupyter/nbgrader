@@ -200,7 +200,7 @@ class FormgradeApp(NbGrader):
         if sys.platform.startswith('win'):
             # add no-op to wake every 1s
             # to handle signals that may be ignored by the inner loop
-            pc = ioloop.PeriodicCallback(lambda : None, 1000)
+            pc = ioloop.PeriodicCallback(lambda: None, 1000)
             pc.start()
 
         # Start the loop

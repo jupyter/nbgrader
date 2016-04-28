@@ -14,6 +14,7 @@ flags.update(transfer_flags)
 flags.update({
 })
 
+
 class FetchApp(TransferApp):
 
     name = u'nbgrader-fetch'

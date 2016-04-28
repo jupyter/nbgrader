@@ -22,10 +22,11 @@ flags = {}
 flags.update(transfer_flags)
 flags.update({
     'force': (
-        {'ReleaseApp' : {'force' : True}},
+        {'ReleaseApp': {'force': True}},
         "Force overwrite of existing files in the exchange."
     ),
 })
+
 
 class ReleaseApp(TransferApp):
 
@@ -98,17 +99,17 @@ class ReleaseApp(TransferApp):
         # 0755
         self.ensure_directory(
             self.course_path,
-            S_IRUSR|S_IWUSR|S_IXUSR|S_IRGRP|S_IXGRP|S_IROTH|S_IXOTH
+            S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH
         )
         # 0755
         self.ensure_directory(
             self.outbound_path,
-            S_IRUSR|S_IWUSR|S_IXUSR|S_IRGRP|S_IXGRP|S_IROTH|S_IXOTH
+            S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH
         )
         # 0733 with set GID so student submission will have the instructors group
         self.ensure_directory(
             self.inbound_path,
-            S_ISGID|S_IRUSR|S_IWUSR|S_IXUSR|S_IWGRP|S_IXGRP|S_IWOTH|S_IXOTH
+            S_ISGID | S_IRUSR | S_IWUSR | S_IXUSR | S_IWGRP | S_IXGRP | S_IWOTH | S_IXOTH
         )
 
     def ensure_directory(self, path, mode):

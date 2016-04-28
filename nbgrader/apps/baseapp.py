@@ -27,7 +27,7 @@ from ..utils import check_directory, parse_utc, find_all_files, full_split, rmtr
 
 
 nbgrader_aliases = {
-    'log-level' : 'Application.log_level',
+    'log-level': 'Application.log_level',
     'student': 'NbGrader.student_id',
     'assignment': 'NbGrader.assignment_id',
     'notebook': 'NbGrader.notebook_id',
@@ -37,14 +37,15 @@ nbgrader_aliases = {
 }
 nbgrader_flags = {
     'debug': (
-        {'Application' : {'log_level' : 'DEBUG'}},
+        {'Application': {'log_level': 'DEBUG'}},
         "set log level to DEBUG (maximize logging output)"
     ),
     'quiet': (
-        {'Application' : {'log_level' : 'CRITICAL'}},
+        {'Application': {'log_level': 'CRITICAL'}},
         "set log level to CRITICAL (minimize logging output)"
     ),
 }
+
 
 def format_excepthook(etype, evalue, tb):
     traceback.print_exception(etype, evalue, tb)
@@ -437,6 +438,7 @@ transfer_flags.update(nbgrader_flags)
 transfer_flags.update({
 })
 
+
 class TransferApp(NbGrader):
     """A base class for the list, release, collect, fetch, and submit apps.
 
@@ -461,9 +463,10 @@ class TransferApp(NbGrader):
     )
 
     cache_directory = Unicode(
-        "",
-        config=True,
-        help="Local cache directory for nbgrader submit and nbgrader list. Defaults to $JUPYTER_DATA_DIR/nbgrader_cache")
+        "", config=True,
+        help=''.join(["Local cache directory for nbgrader submit and nbgrader ",
+                      "list. Defaults to $JUPYTER_DATA_DIR/nbgrader_cache"])
+    )
 
     def _cache_directory_default(self):
         return os.path.join(jupyter_data_dir(), 'nbgrader_cache')
@@ -538,6 +541,7 @@ nbconvert_flags.update({
         "Overwrite an assignment/submission if it already exists."
     ),
 })
+
 
 class BaseNbConvertApp(NbGrader, NbConvertApp):
     """A base class for all the nbgrader apps that utilize nbconvert. This

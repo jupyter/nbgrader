@@ -21,11 +21,13 @@ def is_grade(cell):
         return False
     return cell.metadata['nbgrader'].get('grade', False)
 
+
 def is_solution(cell):
     """Returns True if the cell is a solution cell."""
     if 'nbgrader' not in cell.metadata:
         return False
     return cell.metadata['nbgrader'].get('solution', False)
+
 
 def is_locked(cell):
     """Returns True if the cell source is locked (will be overwritten)."""
@@ -37,6 +39,7 @@ def is_locked(cell):
         return True
     else:
         return cell.metadata['nbgrader'].get('locked', False)
+
 
 def determine_grade(cell):
     if not is_grade(cell):
@@ -61,16 +64,19 @@ def determine_grade(cell):
     else:
         return None, max_points
 
+
 def to_bytes(string):
     """A python 2/3 compatible function for converting a string to bytes.
     In Python 2, this just returns the 8-bit string. In Python 3, this first
     encodes the string to utf-8.
-
     """
-    if sys.version_info[0] == 3 or (sys.version_info[0] == 2 and isinstance(string, unicode)):
+    PY2 = sys.version_info[0] == 2
+    PY3 = sys.version_info[0] == 3
+    if PY3 or (PY2 and isinstance(string, unicode)):
         return bytes(string.encode('utf-8'))
     else:
         return bytes(string)
+
 
 def compute_checksum(cell):
     m = hashlib.md5()
@@ -92,6 +98,7 @@ def compute_checksum(cell):
 
     return m.hexdigest()
 
+
 def parse_utc(ts):
     """Parses a timestamp into datetime format, converting it to UTC if necessary."""
     if ts is None:
@@ -101,6 +108,7 @@ def parse_utc(ts):
     if ts.tzinfo is not None:
         ts = (ts - ts.utcoffset()).replace(tzinfo=None)
     return ts
+
 
 def check_mode(path, read=False, write=False, execute=False):
     """Can the current user can rwx the path."""
@@ -113,6 +121,7 @@ def check_mode(path, read=False, write=False, execute=False):
         mode |= os.X_OK
     return os.access(path, mode)
 
+
 def check_directory(path, read=False, write=False, execute=False):
     """Does that path exist and can the current user rwx."""
     if os.path.isdir(path) and check_mode(path, read=read, write=write, execute=execute):
@@ -120,11 +129,13 @@ def check_directory(path, read=False, write=False, execute=False):
     else:
         return False
 
+
 def get_username():
     """Get the username of the current process."""
     if pwd is None:
         raise OSError("get_username cannot be called on Windows")
     return pwd.getpwuid(os.getuid())[0]
+
 
 def find_owner(path):
     """Get the username of the owner of path."""
@@ -132,9 +143,11 @@ def find_owner(path):
         raise OSError("find_owner cannot be called on Windows")
     return pwd.getpwuid(os.stat(os.path.abspath(path)).st_uid).pw_name
 
+
 def self_owned(path):
     """Is the path owned by the current user of this process?"""
     return get_username() == find_owner(os.path.abspath(path))
+
 
 def is_ignored(filename, ignore_globs=None):
     """Determines whether a filename should be ignored, based on whether it
@@ -148,6 +161,7 @@ def is_ignored(filename, ignore_globs=None):
         if filename in globs:
             return True
     return False
+
 
 def find_all_files(path, exclude=None):
     """Recursively finds all filenames rooted at `path`, optionally excluding
@@ -164,6 +178,7 @@ def find_all_files(path, exclude=None):
                 files.append(fullpath)
     return files
 
+
 def full_split(path):
     rest, last = os.path.split(path)
     if last == path:
@@ -172,6 +187,7 @@ def full_split(path):
         return (rest,)
     else:
         return full_split(rest) + (last,)
+
 
 def rmtree(path):
     # for windows, we need to go through and make sure everything
@@ -184,6 +200,7 @@ def rmtree(path):
 
     # now we can remove the path
     shutil.rmtree(path)
+
 
 def remove(path):
     # for windows, we need to make sure that the file is writeable,

@@ -18,16 +18,18 @@ flags = {}
 flags.update(transfer_flags)
 flags.update({
     'update': (
-        {'CollectApp' : {'update': True}},
+        {'CollectApp': {'update': True}},
         "Update existing submissions with ones that have newer timestamps."
     ),
 })
+
 
 def groupby(l, key=lambda x: x):
     d = defaultdict(list)
     for item in l:
         d[key(item)].append(item)
     return d
+
 
 class CollectApp(TransferApp):
 

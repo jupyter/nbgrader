@@ -1,7 +1,7 @@
 import os
 import re
 
-from tornado import web, httputil
+from tornado import web
 
 from .base import BaseHandler, authenticated
 from ..api import MissingEntry

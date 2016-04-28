@@ -2,6 +2,7 @@ from .. import utils
 from ..api import Gradebook, MissingEntry
 from . import NbGraderPreprocessor
 
+
 class SaveCells(NbGraderPreprocessor):
     """A preprocessor to save information about grade and solution cells."""
 
@@ -48,12 +49,14 @@ class SaveCells(NbGraderPreprocessor):
 
         # save solution cells
         for name, info in self.new_solution_cells.items():
-            solution_cell = self.gradebook.update_or_create_solution_cell(name, self.notebook_id, self.assignment_id, **info)
+            solution_cell = self.gradebook.update_or_create_solution_cell(
+                name, self.notebook_id, self.assignment_id, **info)
             self.log.debug("Recorded solution cell %s into the gradebook", solution_cell)
 
         # save source cells
         for name, info in self.new_source_cells.items():
-            source_cell = self.gradebook.update_or_create_source_cell(name, self.notebook_id, self.assignment_id, **info)
+            source_cell = self.gradebook.update_or_create_source_cell(
+                name, self.notebook_id, self.assignment_id, **info)
             self.log.debug("Recorded source cell %s into the gradebook", source_cell)
 
     def preprocess(self, nb, resources):
