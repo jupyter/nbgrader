@@ -112,6 +112,7 @@ def backport_pr(branch, num, project='jupyter/nbgrader'):
 
 backport_re = re.compile(r"(?:[Bb]ackport|[Mm]erge).*#(\d+)")
 
+
 def already_backported(branch, since_tag=None):
     """return set of PRs that have been backported already"""
     if since_tag is None:
@@ -119,6 +120,7 @@ def already_backported(branch, since_tag=None):
     cmd = ['git', 'log', '%s..%s' % (since_tag, branch), '--oneline']
     lines = check_output(cmd).decode('utf8')
     return set(int(num) for num in backport_re.findall(lines))
+
 
 def should_backport(labels=None, milestone=None):
     """return set of PRs marked for backport"""
@@ -152,15 +154,15 @@ def should_backport(labels=None, milestone=None):
             issue['number'],
             auth=False)
         if not pr['merged']:
-            print ("Marked PR closed without merge: %i" % pr['number'])
+            print("Marked PR closed without merge: %i" % pr['number'])
             continue
         if pr['base']['ref'] != 'master':
             continue
         should_backport.add(pr['number'])
     return should_backport
 
-if __name__ == '__main__':
 
+if __name__ == '__main__':
     if len(sys.argv) < 2:
         print(__doc__)
         sys.exit(1)
@@ -170,9 +172,9 @@ if __name__ == '__main__':
         branch = ".".join(milestone.split('.')[:-1]) + '.x'
         already = already_backported(branch)
         should = should_backport(milestone=milestone)
-        print ("The following PRs should be backported:")
+        print("The following PRs should be backported:")
         for pr in sorted(should.difference(already)):
-            print (pr)
+            print(pr)
         sys.exit(0)
 
     for prno in map(int, sys.argv[2:]):

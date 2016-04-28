@@ -30,6 +30,8 @@ class Obj(dict):
 
 
 token = None
+
+
 def make_auth_header():
     global token
 
@@ -111,6 +113,7 @@ def get_milestones(project, auth=False, **params):
     milestones = get_paged_request(url, headers=headers, **params)
     return milestones
 
+
 def get_milestone_id(project, milestone, auth=False, **params):
     milestones = get_milestones(project, auth=auth, **params)
     for mstone in milestones:
@@ -118,6 +121,7 @@ def get_milestone_id(project, milestone, auth=False, **params):
             return mstone['number']
     else:
         raise ValueError("milestone %s not found" % milestone)
+
 
 def get_pulls_list(project, auth=False, **params):
     """get pull request list"""
