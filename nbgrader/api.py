@@ -2,15 +2,25 @@ from __future__ import division
 
 from . import utils
 
-from sqlalchemy import (create_engine, ForeignKey, Column, String, Text,
-    DateTime, Interval, Float, Enum, UniqueConstraint, Boolean)
 from sqlalchemy.orm import sessionmaker, scoped_session, relationship, column_property
 from sqlalchemy.orm.exc import NoResultFound, FlushError
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.sql import and_
-from sqlalchemy import select, func, exists, case, literal_column
+from sqlalchemy import select, func, exists, case, literal_column, create_engine
+from sqlalchemy import (
+    ForeignKey,
+    Column,
+    String,
+    Text,
+    DateTime,
+    Interval,
+    Float,
+    Enum,
+    UniqueConstraint,
+    Boolean
+)
 
 from uuid import uuid4
 
