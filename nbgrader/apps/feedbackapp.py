@@ -17,6 +17,7 @@ flags.update(nbconvert_flags)
 flags.update({
 })
 
+
 class FeedbackApp(BaseNbConvertApp):
 
     name = u'nbgrader-feedback'

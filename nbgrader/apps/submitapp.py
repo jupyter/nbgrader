@@ -20,6 +20,7 @@ flags.update(transfer_flags)
 flags.update({
 })
 
+
 class SubmitApp(TransferApp):
 
     name = u'nbgrader-submit'
@@ -83,7 +84,7 @@ class SubmitApp(TransferApp):
         # Make this 0777=ugo=rwx so the instructor can delete later. Hidden from other users by the timestamp.
         os.chmod(
             dest_path,
-            S_IRUSR|S_IWUSR|S_IXUSR|S_IRGRP|S_IWGRP|S_IXGRP|S_IROTH|S_IWOTH|S_IXOTH
+            S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IWGRP | S_IXGRP | S_IROTH | S_IWOTH | S_IXOTH
         )
 
         # also copy to the cache

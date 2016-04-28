@@ -3,7 +3,7 @@ import shutil
 import subprocess
 
 from textwrap import dedent
-from traitlets import Unicode, List, Bool
+from traitlets import Bool
 from .baseapp import NbGrader
 from .. import utils
 
@@ -24,6 +24,7 @@ flags = {
         )
     ),
 }
+
 
 class QuickStartApp(NbGrader):
 

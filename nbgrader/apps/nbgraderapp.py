@@ -37,7 +37,7 @@ flags = {}
 flags.update(nbgrader_flags)
 flags.update({
     'generate-config': (
-        {'NbGraderApp' : {'generate_config': True}},
+        {'NbGraderApp': {'generate_config': True}},
         "Generate a config file."
     )
 })
@@ -237,6 +237,7 @@ class NbGraderApp(NbGrader):
     def print_version(self):
         print("Python version {}".format(sys.version))
         print("nbgrader version {}".format(nbgrader.__version__))
+
 
 def main():
     NbGraderApp.launch_instance()

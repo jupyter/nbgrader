@@ -18,22 +18,23 @@ flags = {}
 flags.update(transfer_flags)
 flags.update({
     'inbound': (
-        {'ListApp' : {'inbound': True}},
+        {'ListApp': {'inbound': True}},
         "List inbound files rather than outbound."
     ),
     'cached': (
-        {'ListApp' : {'cached': True}},
+        {'ListApp': {'cached': True}},
         "List cached files rather than inbound/outbound."
     ),
     'remove': (
-        {'ListApp' : {'remove': True}},
+        {'ListApp': {'remove': True}},
         "Remove an assignment from the exchange."
     ),
     'json': (
-        {'ListApp' : {'as_json': True}},
+        {'ListApp': {'as_json': True}},
         "Print out assignments as json."
     ),
 })
+
 
 class ListApp(TransferApp):
 
@@ -103,7 +104,11 @@ class ListApp(TransferApp):
         student_id = self.student_id if self.student_id else '*'
 
         if self.inbound:
-            pattern = os.path.join(self.exchange_directory, course_id, 'inbound', '{}+{}+*'.format(student_id, assignment_id))
+            pattern = os.path.join(
+                self.exchange_directory,
+                course_id,
+                'inbound', '{}+{}+*'.format(student_id, assignment_id)
+            )
         elif self.cached:
             pattern = os.path.join(self.cache_directory, course_id, '{}+{}+*'.format(student_id, assignment_id))
         else:
@@ -207,7 +212,7 @@ class ListApp(TransferApp):
             self.fail("Options --inbound and --cached are incompatible.")
 
         if len(self.extra_args) == 0:
-            self.extra_args = ["*"] # allow user to not put in assignment
+            self.extra_args = ["*"]  # allow user to not put in assignment
 
         super(ListApp, self).start()
 

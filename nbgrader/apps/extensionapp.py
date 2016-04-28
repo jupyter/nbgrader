@@ -5,7 +5,13 @@ import sys
 import six
 
 from jupyter_core.paths import jupyter_config_dir
-from notebook.nbextensions import InstallNBExtensionApp, UninstallNBExtensionApp, EnableNBExtensionApp, DisableNBExtensionApp, install_nbextension
+from notebook.nbextensions import (
+    InstallNBExtensionApp,
+    UninstallNBExtensionApp,
+    EnableNBExtensionApp,
+    DisableNBExtensionApp,
+    install_nbextension
+)
 from traitlets import Unicode
 from traitlets.config import Config
 from traitlets.config.application import catch_config_error
@@ -13,6 +19,7 @@ from traitlets.config.application import Application
 from traitlets.config.loader import JSONFileConfigLoader, ConfigFileNotFound
 
 from .baseapp import NbGrader, format_excepthook
+
 
 class ExtensionInstallApp(InstallNBExtensionApp, NbGrader):
 
@@ -83,7 +90,7 @@ class ExtensionUninstallApp(UninstallNBExtensionApp, NbGrader):
         format_excepthook(etype, evalue, tb)
 
     def start(self):
-        nbextensions_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'nbextensions'))
+        # nbextensions_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'nbextensions'))
         extra_args = self.extra_args[:]
 
         # install the create_assignment extension

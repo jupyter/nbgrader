@@ -47,6 +47,7 @@ flags.update({
     ),
 })
 
+
 class AssignApp(BaseNbConvertApp):
 
     name = u'nbgrader-assign'
@@ -162,7 +163,6 @@ class AssignApp(BaseNbConvertApp):
 
         super(AssignApp, self)._config_changed(name, old, new)
 
-
     def _clean_old_notebooks(self, assignment_id, student_id):
         gb = Gradebook(self.db_url)
         assignment = gb.find_assignment(assignment_id)
@@ -191,7 +191,11 @@ class AssignApp(BaseNbConvertApp):
         # some notebooks have been removed, but there are submissions associated
         # with the assignment, so we don't want to overwrite stuff
         if len(assignment.submissions) > 0:
-            self.fail("Cannot modify existing assignment '%s' because there are submissions associated with it", assignment)
+            self.fail(
+                ''.join(["Cannot modify existing assignment '%s' ",
+                         "because there are submissions associated with it"]),
+                assignment
+            )
 
         # remove the old notebooks
         for notebook_id in (old_notebook_ids - new_notebook_ids):

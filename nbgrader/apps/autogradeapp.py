@@ -31,6 +31,7 @@ flags.update({
     ),
 })
 
+
 class AutogradeApp(BaseNbConvertApp):
 
     name = u'nbgrader-autograde'
@@ -121,7 +122,7 @@ class AutogradeApp(BaseNbConvertApp):
         LimitOutput,
         SaveAutoGrades
     ])
-    
+
     preprocessors = List([])
 
     def _config_changed(self, name, old, new):
