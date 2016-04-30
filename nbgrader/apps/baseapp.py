@@ -473,7 +473,7 @@ class TransferApp(NbGrader):
         tz = gettz(self.timezone)
         if tz is None:
             self.fail("Invalid timezone: {}".format(self.timezone))
-        self.timestamp = datetime.datetime.utcnow(tz).strftime(self.timestamp_format)
+        self.timestamp = datetime.datetime.now(tz).strftime(self.timestamp_format)
 
     def ensure_exchange_directory(self):
         """See if the exchange directory exists and is writable, fail if not."""
