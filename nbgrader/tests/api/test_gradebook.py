@@ -110,7 +110,7 @@ def test_add_assignment(gradebook):
         gradebook.add_assignment('foo')
 
     # try adding an assignment with arguments
-    now = datetime.now()
+    now = datetime.utcnow()
     a = gradebook.add_assignment('bar', duedate=now)
     assert a.name == 'bar'
     assert a.duedate == now
