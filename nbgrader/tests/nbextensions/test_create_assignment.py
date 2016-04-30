@@ -12,9 +12,9 @@ def _wait(browser):
     return WebDriverWait(browser, 30)
 
 
-def _load_notebook(browser, retries=5):
+def _load_notebook(browser, port, retries=5):
     # go to the correct page
-    browser.get("http://localhost:9000/notebooks/blank.ipynb")
+    browser.get("http://localhost:{}/notebooks/blank.ipynb".format(port))
 
     def page_loaded(browser):
         return browser.execute_script(
@@ -27,7 +27,7 @@ def _load_notebook(browser, retries=5):
         if retries > 0:
             print("Retrying page load...")
             # page timeout, but sometimes this happens, so try refreshing?
-            _load_notebook(browser, retries=retries - 1)
+            _load_notebook(browser, port, retries=retries - 1)
         else:
             print("Failed to load the page too many times")
             raise
@@ -131,8 +131,8 @@ def _dismiss_modal(browser):
 
 
 @pytest.mark.nbextensions
-def test_manual_cell(browser):
-    _load_notebook(browser)
+def test_manual_cell(browser, port):
+    _load_notebook(browser, port)
     _activate_toolbar(browser)
 
     # does the nbgrader metadata exist?
@@ -166,8 +166,8 @@ def test_manual_cell(browser):
 
 
 @pytest.mark.nbextensions
-def test_solution_cell(browser):
-    _load_notebook(browser)
+def test_solution_cell(browser, port):
+    _load_notebook(browser, port)
     _activate_toolbar(browser)
 
     # does the nbgrader metadata exist?
@@ -195,8 +195,8 @@ def test_solution_cell(browser):
 
 
 @pytest.mark.nbextensions
-def test_tests_cell(browser):
-    _load_notebook(browser)
+def test_tests_cell(browser, port):
+    _load_notebook(browser, port)
     _activate_toolbar(browser)
 
     # does the nbgrader metadata exist?
@@ -232,8 +232,8 @@ def test_tests_cell(browser):
 
 
 @pytest.mark.nbextensions
-def test_locked_cell(browser):
-    _load_notebook(browser)
+def test_locked_cell(browser, port):
+    _load_notebook(browser, port)
     _activate_toolbar(browser)
 
     # does the nbgrader metadata exist?
@@ -263,8 +263,8 @@ def test_locked_cell(browser):
 
 
 @pytest.mark.nbextensions
-def test_grade_cell_css(browser):
-    _load_notebook(browser)
+def test_grade_cell_css(browser, port):
+    _load_notebook(browser, port)
     _activate_toolbar(browser)
 
     # make it manually graded
@@ -319,8 +319,8 @@ def test_grade_cell_css(browser):
 
 
 @pytest.mark.nbextensions
-def test_tabbing(browser):
-    _load_notebook(browser)
+def test_tabbing(browser, port):
+    _load_notebook(browser, port)
     _activate_toolbar(browser)
 
     # make it manually graded
@@ -357,8 +357,8 @@ def test_tabbing(browser):
 
 
 @pytest.mark.nbextensions
-def test_total_points(browser):
-    _load_notebook(browser)
+def test_total_points(browser, port):
+    _load_notebook(browser, port)
     _activate_toolbar(browser)
 
     # make sure the total points is zero
@@ -418,8 +418,8 @@ def test_total_points(browser):
 
 
 @pytest.mark.nbextensions
-def test_cell_ids(browser):
-    _load_notebook(browser)
+def test_cell_ids(browser, port):
+    _load_notebook(browser, port)
     _activate_toolbar(browser)
 
     # turn it into a cell with an id

@@ -5,6 +5,7 @@ import subprocess as sp
 import sys
 import logging
 import warnings
+import socket
 
 from six import StringIO
 from nbformat.v4 import new_code_cell, new_markdown_cell
@@ -178,3 +179,18 @@ def run_nbgrader(args, retcode=0, env=None, stdout=False):
             "process returned an unexpected return code: {}".format(true_retcode))
 
     return out
+
+
+def get_free_ports(n):
+    """Based on https://gist.github.com/dbrgn/3979133"""
+    ports = []
+    sockets = []
+    for i in range(n):
+        s = socket.socket()
+        s.bind(('', 0))
+        port = s.getsockname()[1]
+        ports.append(port)
+        sockets.append(s)
+    for s in sockets:
+        s.close()
+    return ports
