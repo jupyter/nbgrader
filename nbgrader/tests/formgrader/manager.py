@@ -5,7 +5,7 @@ import sys
 import signal
 
 from textwrap import dedent
-from .. import start_subprocess, copy_coverage_files
+from .. import start_subprocess, copy_coverage_files, get_free_ports
 
 # to add a new manager for the tests, you MUST add it to this list of classes
 __all__ = [
@@ -21,13 +21,14 @@ class DefaultManager(object):
     nbgrader_config = dedent(
         """
         c = get_config()
-        c.NoAuth.nbserver_port = 9001
-        c.FormgradeApp.port = 9000
+        c.NoAuth.nbserver_port = {nbserver_port}
+        c.FormgradeApp.port = {port}
         """
     )
 
-    base_formgrade_url = "http://localhost:9000/"
-    base_notebook_url = "http://localhost:9001/notebooks/"
+    _base_url = ""
+    _base_formgrade_url = "http://localhost:{port}/"
+    _base_notebook_url = "http://localhost:{nbserver_port}/notebooks/"
 
     def __init__(self, tempdir, startup_wait=5, shutdown_wait=5):
         self.tempdir = tempdir
@@ -37,9 +38,37 @@ class DefaultManager(object):
         self.jupyterhub = None
         self.env = os.environ.copy()
 
+        ports = get_free_ports(5)
+        self.port = ports[0]
+        self.nbserver_port = ports[1]
+        self.hub_port = ports[2] # not always used
+        self.proxy_port = ports[3] # not always used
+        self.hubapi_port = ports[4] # not always used
+
+        print("port: {}".format(self.port))
+        print("nbserver_port: {}".format(self.nbserver_port))
+        print("hub_port: {}".format(self.hub_port))
+        print("proxy_port: {}".format(self.proxy_port))
+        print("hubapi_port: {}".format(self.hubapi_port))
+
+        self.base_url = self._base_url.format(
+            hub_port=self.hub_port)
+        self.base_formgrade_url = self._base_formgrade_url.format(
+            port=self.port,
+            hub_port=self.hub_port)
+        self.base_notebook_url = self._base_notebook_url.format(
+            nbserver_port=self.nbserver_port,
+            hub_port=self.hub_port)
+
     def _write_config(self):
         with open("nbgrader_config.py", "w") as fh:
-            fh.write(self.nbgrader_config.format(tempdir=self.tempdir))
+            fh.write(self.nbgrader_config.format(
+                tempdir=self.tempdir,
+                port=self.port,
+                nbserver_port=self.nbserver_port,
+                hub_port=self.hub_port,
+                hubapi_port=self.hubapi_port,
+                proxy_port=self.proxy_port))
 
     def _start_jupyterhub(self):
         pass
@@ -48,11 +77,11 @@ class DefaultManager(object):
         kwargs = dict(env=self.env)
         if sys.platform == 'win32':
             kwargs['creationflags'] = sp.CREATE_NEW_PROCESS_GROUP
-        
+
         self.formgrader = start_subprocess(
             [sys.executable, "-m", "nbgrader", "formgrade"],
             **kwargs)
-        
+
         time.sleep(self.startup_wait)
 
     def start(self):
@@ -94,10 +123,13 @@ class HubAuthManager(DefaultManager):
         """
         c = get_config()
         c.NbGrader.course_id = 'course123ABC'
-        c.FormgradeApp.port = 9000
+        c.FormgradeApp.port = {port}
         c.FormgradeApp.authenticator_class = "nbgrader.auth.hubauth.HubAuth"
         c.HubAuth.graders = ["foobar"]
         c.HubAuth.notebook_url_prefix = "class_files"
+        c.HubAuth.proxy_port = {proxy_port}
+        c.HubAuth.hubapi_port = {hubapi_port}
+        c.HubAuth.hub_port = {hub_port}
         """
     )
 
@@ -110,18 +142,25 @@ class HubAuthManager(DefaultManager):
         c.Authenticator.whitelist = set(['foobar', 'baz'])
         c.JupyterHub.log_level = "WARN"
         c.JupyterHub.confirm_no_ssl = True
+        c.JupyterHub.port = {hub_port}
+        c.JupyterHub.proxy_api_port = {proxy_port}
+        c.JupyterHub.hub_port = {hubapi_port}
         """
     )
 
-    base_url = "http://localhost:8000"
-    base_formgrade_url = "http://localhost:8000/hub/nbgrader/course123ABC/"
-    base_notebook_url = "http://localhost:8000/user/foobar/notebooks/class_files/"
+    _base_url = "http://localhost:{hub_port}"
+    _base_formgrade_url = "http://localhost:{hub_port}/hub/nbgrader/course123ABC/"
+    _base_notebook_url = "http://localhost:{hub_port}/user/foobar/notebooks/class_files/"
 
     def _write_config(self):
         super(HubAuthManager, self)._write_config()
         pth = os.path.join(self.tempdir, "jupyterhub_config.py")
         with open(pth, "w") as fh:
-            fh.write(self.jupyterhub_config.format(tempdir=self.tempdir))
+            fh.write(self.jupyterhub_config.format(
+                tempdir=self.tempdir,
+                hub_port=self.hub_port,
+                hubapi_port=self.hubapi_port,
+                proxy_port=self.proxy_port))
 
     def _start_jupyterhub(self, configproxy_auth_token='foo'):
         self.env['CONFIGPROXY_AUTH_TOKEN'] = configproxy_auth_token
@@ -166,15 +205,18 @@ class HubAuthCustomUrlManager(HubAuthManager):
         """
         c = get_config()
         c.NbGrader.course_id = 'course123ABC'
-        c.FormgradeApp.port = 9000
+        c.FormgradeApp.port = {port}
         c.FormgradeApp.authenticator_class = "nbgrader.auth.hubauth.HubAuth"
         c.HubAuth.graders = ["foobar"]
         c.HubAuth.notebook_url_prefix = "class_files"
         c.HubAuth.remap_url = '/hub/grader'
+        c.HubAuth.proxy_port = {proxy_port}
+        c.HubAuth.hubapi_port = {hubapi_port}
+        c.HubAuth.hub_port = {hub_port}
         """
     )
 
-    base_formgrade_url = "http://localhost:8000/hub/grader/"
+    _base_formgrade_url = "http://localhost:{hub_port}/hub/grader/"
 
 
 class HubAuthNotebookServerUserManager(HubAuthManager):
@@ -183,11 +225,14 @@ class HubAuthNotebookServerUserManager(HubAuthManager):
         """
         c = get_config()
         c.NbGrader.course_id = 'course123ABC'
-        c.FormgradeApp.port = 9000
+        c.FormgradeApp.port = {port}
         c.FormgradeApp.authenticator_class = "nbgrader.auth.hubauth.HubAuth"
         c.HubAuth.graders = ["foobar", "quux"]
         c.HubAuth.notebook_url_prefix = "class_files"
         c.HubAuth.notebook_server_user = 'quux'
+        c.HubAuth.proxy_port = {proxy_port}
+        c.HubAuth.hubapi_port = {hubapi_port}
+        c.HubAuth.hub_port = {hub_port}
         """
     )
 
@@ -199,12 +244,15 @@ class HubAuthNotebookServerUserManager(HubAuthManager):
         c.JupyterHub.admin_access = True
         c.JupyterHub.log_level = "WARN"
         c.JupyterHub.confirm_no_ssl = True
+        c.JupyterHub.port = {hub_port}
+        c.JupyterHub.proxy_api_port = {proxy_port}
+        c.JupyterHub.hub_port = {hubapi_port}
         c.Authenticator.admin_users = set(['admin'])
         c.Authenticator.whitelist = set(['foobar', 'baz', 'quux'])
         """
     )
 
-    base_notebook_url = "http://localhost:8000/user/quux/notebooks/class_files/"
+    _base_notebook_url = "http://localhost:{hub_port}/user/quux/notebooks/class_files/"
 
 
 class HubAuthSSLManager(HubAuthManager):
@@ -214,11 +262,14 @@ class HubAuthSSLManager(HubAuthManager):
         c = get_config()
         c.NbGrader.course_id = 'course123ABC'
         c.FormgradeApp.ip = '127.0.0.1'
-        c.FormgradeApp.port = 9000
+        c.FormgradeApp.port = {port}
         c.FormgradeApp.authenticator_class = "nbgrader.auth.hubauth.HubAuth"
         c.HubAuth.graders = ["foobar"]
         c.HubAuth.notebook_url_prefix = "class_files"
-        c.HubAuth.hub_base_url = "https://localhost:8000"
+        c.HubAuth.hub_base_url = "https://localhost:{hub_port}"
+        c.HubAuth.proxy_port = {proxy_port}
+        c.HubAuth.hubapi_port = {hubapi_port}
+        c.HubAuth.hub_port = {hub_port}
         """
     )
 
@@ -232,12 +283,15 @@ class HubAuthSSLManager(HubAuthManager):
         c.JupyterHub.ssl_cert = '{tempdir}/jupyterhub_cert.pem'
         c.JupyterHub.ssl_key = '{tempdir}/jupyterhub_key.pem'
         c.JupyterHub.log_level = "WARN"
+        c.JupyterHub.port = {hub_port}
+        c.JupyterHub.proxy_api_port = {proxy_port}
+        c.JupyterHub.hub_port = {hubapi_port}
         """
     )
 
-    base_url = "https://localhost:8000"
-    base_formgrade_url = "https://localhost:8000/hub/nbgrader/course123ABC/"
-    base_notebook_url = "https://localhost:8000/user/foobar/notebooks/class_files/"
+    _base_url = "https://localhost:{hub_port}"
+    _base_formgrade_url = "https://localhost:{hub_port}/hub/nbgrader/course123ABC/"
+    _base_notebook_url = "https://localhost:{hub_port}/user/foobar/notebooks/class_files/"
 
     def _start_jupyterhub(self, *args, **kwargs):
         sp.check_call([

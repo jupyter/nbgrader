@@ -15,7 +15,7 @@ from textwrap import dedent
 from nbformat import write as write_nb
 from nbformat.v4 import new_notebook
 
-from .. import run_nbgrader, copy_coverage_files
+from .. import run_nbgrader, copy_coverage_files, get_free_ports
 from ...api import Gradebook
 from ...utils import rmtree
 
@@ -109,7 +109,13 @@ def class_files(coursedir):
 
 
 @pytest.fixture(scope="module")
-def nbserver(request, tempdir, coursedir, jupyter_config_dir, jupyter_data_dir, exchange, cache):
+def port():
+    nbserver_port, = get_free_ports(1)
+    return nbserver_port
+
+
+@pytest.fixture(scope="module")
+def nbserver(request, port, tempdir, coursedir, jupyter_config_dir, jupyter_data_dir, exchange, cache):
     env = os.environ.copy()
     env['JUPYTER_CONFIG_DIR'] = jupyter_config_dir
     env['JUPYTER_DATA_DIR'] = jupyter_data_dir
@@ -143,7 +149,7 @@ def nbserver(request, tempdir, coursedir, jupyter_config_dir, jupyter_data_dir, 
     nbserver = sp.Popen([
         sys.executable, "-m", "jupyter", "notebook",
         "--no-browser",
-        "--port", "9000"], **kwargs)
+        "--port", str(port)], **kwargs)
 
     def fin():
         if sys.platform == 'win32':

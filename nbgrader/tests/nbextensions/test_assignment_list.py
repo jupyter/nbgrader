@@ -14,9 +14,9 @@ def _wait(browser):
     return WebDriverWait(browser, 30)
 
 
-def _load_assignments_list(browser, retries=5):
+def _load_assignments_list(browser, port, retries=5):
     # go to the correct page
-    browser.get("http://localhost:9000/tree")
+    browser.get("http://localhost:{}/tree".format(port))
 
     def page_loaded(browser):
         return browser.execute_script(
@@ -29,7 +29,7 @@ def _load_assignments_list(browser, retries=5):
         if retries > 0:
             print("Retrying page load...")
             # page timeout, but sometimes this happens, so try refreshing?
-            _load_assignments_list(browser, retries=retries - 1)
+            _load_assignments_list(browser, port, retries=retries - 1)
         else:
             print("Failed to load the page too many times")
             raise
@@ -89,8 +89,8 @@ def _sort_rows(x):
 
 @pytest.mark.nbextensions
 @notwindows
-def test_show_assignments_list(browser, class_files, tempdir):
-    _load_assignments_list(browser)
+def test_show_assignments_list(browser, port, class_files, tempdir):
+    _load_assignments_list(browser, port)
 
     # make sure all the placeholders ar initially showing
     _wait(browser).until(EC.visibility_of_element_located((By.CSS_SELECTOR, "#released_assignments_list_placeholder")))
@@ -114,8 +114,8 @@ def test_show_assignments_list(browser, class_files, tempdir):
 
 @pytest.mark.nbextensions
 @notwindows
-def test_multiple_released_assignments(browser, class_files, tempdir):
-    _load_assignments_list(browser)
+def test_multiple_released_assignments(browser, port, class_files, tempdir):
+    _load_assignments_list(browser, port)
 
     # release another assignment
     run_nbgrader(["assign", "ps.01"])
@@ -136,8 +136,8 @@ def test_multiple_released_assignments(browser, class_files, tempdir):
 
 @pytest.mark.nbextensions
 @notwindows
-def test_fetch_assignment(browser, class_files, tempdir):
-    _load_assignments_list(browser)
+def test_fetch_assignment(browser, port, class_files, tempdir):
+    _load_assignments_list(browser, port)
 
     # click the "fetch" button
     _wait(browser).until(EC.invisibility_of_element_located((By.CSS_SELECTOR, "#released_assignments_list_placeholder")))
@@ -163,8 +163,8 @@ def test_fetch_assignment(browser, class_files, tempdir):
 
 @pytest.mark.nbextensions
 @notwindows
-def test_submit_assignment(browser, class_files, tempdir):
-    _load_assignments_list(browser)
+def test_submit_assignment(browser, port, class_files, tempdir):
+    _load_assignments_list(browser, port)
 
     # submit it
     _wait(browser).until(EC.invisibility_of_element_located((By.CSS_SELECTOR, "#fetched_assignments_list_placeholder")))
@@ -195,8 +195,8 @@ def test_submit_assignment(browser, class_files, tempdir):
 
 @pytest.mark.nbextensions
 @notwindows
-def test_fetch_second_assignment(browser, class_files, tempdir):
-    _load_assignments_list(browser)
+def test_fetch_second_assignment(browser, port, class_files, tempdir):
+    _load_assignments_list(browser, port)
 
     # click the "fetch" button
     _wait(browser).until(EC.invisibility_of_element_located((By.CSS_SELECTOR, "#released_assignments_list_placeholder")))
@@ -227,8 +227,8 @@ def test_fetch_second_assignment(browser, class_files, tempdir):
 
 @pytest.mark.nbextensions
 @notwindows
-def test_submit_other_assignment(browser, class_files, tempdir):
-    _load_assignments_list(browser)
+def test_submit_other_assignment(browser, port, class_files, tempdir):
+    _load_assignments_list(browser, port)
 
     # submit it
     _wait(browser).until(EC.invisibility_of_element_located((By.CSS_SELECTOR, "#fetched_assignments_list_placeholder")))
@@ -251,8 +251,8 @@ def test_submit_other_assignment(browser, class_files, tempdir):
 
 @pytest.mark.nbextensions
 @notwindows
-def test_validate_ok(browser, class_files, tempdir):
-    _load_assignments_list(browser)
+def test_validate_ok(browser, port, class_files, tempdir):
+    _load_assignments_list(browser, port)
 
     # expand the assignment to show the notebooks
     _wait(browser).until(EC.invisibility_of_element_located((By.CSS_SELECTOR, "#fetched_assignments_list_placeholder")))
@@ -276,8 +276,8 @@ def test_validate_ok(browser, class_files, tempdir):
 
 @pytest.mark.nbextensions
 @notwindows
-def test_validate_failure(browser, class_files, tempdir):
-    _load_assignments_list(browser)
+def test_validate_failure(browser, port, class_files, tempdir):
+    _load_assignments_list(browser, port)
 
     # expand the assignment to show the notebooks
     _wait(browser).until(EC.invisibility_of_element_located((By.CSS_SELECTOR, "#fetched_assignments_list_placeholder")))
