@@ -22,6 +22,7 @@ checksums
 cogsci
 conda
 config
+customizable
 datefmt
 dev
 dropdown
@@ -90,6 +91,7 @@ rst
 runtime
 smeylan
 spellcheck
+SQL
 sqlite
 stdin
 stdout
@@ -99,8 +101,10 @@ suchow
 svurens
 systemwide
 tasilb
+threadsafe
 timestamp
 timestamps
+todo
 undeletable
 unicode
 uninstall

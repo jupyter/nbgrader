@@ -1,3 +1,5 @@
+.. _pull-request:
+
 Pull requests
 =============
 
