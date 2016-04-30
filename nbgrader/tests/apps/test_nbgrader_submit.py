@@ -58,7 +58,7 @@ class TestNbGraderSubmit(BaseTestApp):
 
     def test_submit(self, exchange, cache, course_dir):
         self._release_and_fetch("ps1", exchange, cache, course_dir)
-        now = datetime.datetime.now()
+        now = datetime.datetime.utcnow()
 
         time.sleep(1)
         self._submit("ps1", exchange, cache)

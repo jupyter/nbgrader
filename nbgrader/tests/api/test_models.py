@@ -25,7 +25,7 @@ def db(request):
 
 @pytest.fixture
 def submissions(db):
-    now = datetime.datetime.now()
+    now = datetime.datetime.utcnow()
     a = api.Assignment(name='foo', duedate=now)
     n = api.Notebook(name='blah', assignment=a)
     gc1 = api.GradeCell(name='foo', max_score=10, notebook=n, cell_type="markdown")
@@ -64,7 +64,7 @@ def submissions(db):
 
 
 def test_create_assignment(db):
-    now = datetime.datetime.now()
+    now = datetime.datetime.utcnow()
     a = api.Assignment(name='foo', duedate=now)
     db.add(a)
     db.commit()
@@ -84,7 +84,7 @@ def test_create_assignment(db):
 
 
 def test_create_notebook(db):
-    now = datetime.datetime.now()
+    now = datetime.datetime.utcnow()
     a = api.Assignment(name='foo', duedate=now)
     n = api.Notebook(name='blah', assignment=a)
     db.add(a)
@@ -107,7 +107,7 @@ def test_create_notebook(db):
 
 
 def test_create_grade_cell(db):
-    now = datetime.datetime.now()
+    now = datetime.datetime.utcnow()
     a = api.Assignment(name='foo', duedate=now)
     n = api.Notebook(name='blah', assignment=a)
     g = api.GradeCell(name='foo', max_score=10, notebook=n, cell_type="code")
@@ -131,7 +131,7 @@ def test_create_grade_cell(db):
 
 
 def test_create_solution_cell(db):
-    now = datetime.datetime.now()
+    now = datetime.datetime.utcnow()
     a = api.Assignment(name='foo', duedate=now)
     n = api.Notebook(name='blah', assignment=a)
     s = api.SolutionCell(name='foo', notebook=n)
@@ -147,7 +147,7 @@ def test_create_solution_cell(db):
 
 
 def test_create_source_cell(db):
-    now = datetime.datetime.now()
+    now = datetime.datetime.utcnow()
     a = api.Assignment(name='foo', duedate=now)
     n = api.Notebook(name='blah', assignment=a)
     s = api.SourceCell(
@@ -233,7 +233,7 @@ def test_create_submitted_assignment(db):
 
 
 def test_submission_timestamp_ontime(db):
-    duedate = datetime.datetime.now()
+    duedate = datetime.datetime.utcnow()
     timestamp = duedate - datetime.timedelta(days=2)
 
     a = api.Assignment(name='foo', duedate=duedate)
@@ -255,7 +255,7 @@ def test_submission_timestamp_ontime(db):
 
 
 def test_submission_timestamp_late(db):
-    duedate = datetime.datetime.now()
+    duedate = datetime.datetime.utcnow()
     timestamp = duedate + datetime.timedelta(days=2)
 
     a = api.Assignment(name='foo', duedate=duedate)
@@ -277,7 +277,7 @@ def test_submission_timestamp_late(db):
 
 
 def test_submission_timestamp_with_extension(db):
-    duedate = datetime.datetime.now()
+    duedate = datetime.datetime.utcnow()
     timestamp = duedate + datetime.timedelta(days=2)
     extension = datetime.timedelta(days=3)
 
@@ -300,7 +300,7 @@ def test_submission_timestamp_with_extension(db):
 
 
 def test_submission_timestamp_late_with_extension(db):
-    duedate = datetime.datetime.now()
+    duedate = datetime.datetime.utcnow()
     timestamp = duedate + datetime.timedelta(days=5)
     extension = datetime.timedelta(days=3)
 
@@ -323,7 +323,7 @@ def test_submission_timestamp_late_with_extension(db):
 
 
 def test_create_submitted_notebook(db):
-    now = datetime.datetime.now()
+    now = datetime.datetime.utcnow()
     a = api.Assignment(name='foo', duedate=now)
     n = api.Notebook(name='blah', assignment=a)
     s = api.Student(id="12345", first_name='Jane', last_name='Doe', email='janedoe@nowhere')
@@ -353,7 +353,7 @@ def test_create_submitted_notebook(db):
 
 
 def test_create_code_grade(db):
-    now = datetime.datetime.now()
+    now = datetime.datetime.utcnow()
     a = api.Assignment(name='foo', duedate=now)
     n = api.Notebook(name='blah', assignment=a)
     gc = api.GradeCell(name='foo', max_score=10, notebook=n, cell_type="code")
@@ -413,7 +413,7 @@ def test_create_code_grade(db):
 
 
 def test_create_written_grade(db):
-    now = datetime.datetime.now()
+    now = datetime.datetime.utcnow()
     a = api.Assignment(name='foo', duedate=now)
     n = api.Notebook(name='blah', assignment=a)
     gc = api.GradeCell(name='foo', max_score=10, notebook=n, cell_type="markdown")
@@ -473,7 +473,7 @@ def test_create_written_grade(db):
 
 
 def test_create_comment(db):
-    now = datetime.datetime.now()
+    now = datetime.datetime.utcnow()
     a = api.Assignment(name='foo', duedate=now)
     n = api.Notebook(name='blah', assignment=a)
     sc = api.SolutionCell(name='foo', notebook=n)
@@ -851,7 +851,7 @@ def test_query_num_submissions(submissions):
     assert [2] == [x[0] for x in db.query(api.Notebook.num_submissions).all()]
 
 def test_student_max_score(db):
-    now = datetime.datetime.now()
+    now = datetime.datetime.utcnow()
     a = api.Assignment(name='foo', duedate=now)
     n = api.Notebook(name='blah', assignment=a)
     api.GradeCell(name='foo', max_score=10, notebook=n, cell_type="markdown")
