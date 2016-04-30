@@ -4,6 +4,7 @@ import shutil
 import subprocess as sp
 import sys
 import logging
+import warnings
 
 from six import StringIO
 from nbformat.v4 import new_code_cell, new_markdown_cell
@@ -104,7 +105,7 @@ def copy_coverage_files():
     if os.getcwd() != root:
         coverage_files = glob.glob(".coverage.*")
         if len(coverage_files) == 0 and 'COVERAGE_PROCESS_START' in os.environ:
-            raise RuntimeError("No coverage files produced")
+            warnings.warn("No coverage files produced")
         for filename in coverage_files:
             shutil.copyfile(filename, os.path.join(root, filename))
 
