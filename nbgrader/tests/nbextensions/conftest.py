@@ -202,6 +202,7 @@ def browser(request, tempdir, nbserver):
             print("<------------------------------------------>")
         browser.save_screenshot(os.path.join(os.path.dirname(__file__), 'selenium.screenshot.png'))
         browser.quit()
+        time.sleep(0.1)
     request.addfinalizer(fin)
 
     return browser
