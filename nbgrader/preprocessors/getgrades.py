@@ -1,10 +1,9 @@
 from .. import utils
 from ..api import Gradebook
-from ..plugins import LateSubmissionPlugin
 from . import NbGraderPreprocessor
 
 
-class GetGrades(NbGraderPreprocessor, LateSubmissionPlugin):
+class GetGrades(NbGraderPreprocessor):
     """Preprocessor for saving grades from the database to the notebook"""
 
     def preprocess(self, nb, resources):
@@ -25,20 +24,12 @@ class GetGrades(NbGraderPreprocessor, LateSubmissionPlugin):
             notebook = self.gradebook.find_submission_notebook(
                 self.notebook_id, self.assignment_id, self.student_id)
 
-            late_penalty = None
-            if assignment.total_seconds_late > 0:
-                self.log.warning("{} is {} seconds late".format(
-                    assignment, assignment.total_seconds_late))
-                late_penalty = self.late_submission_penalty(assignment, notebook)
+            late_penalty = assignment.late_submission_penalty
+            if late_penalty > 0:
                 self.log.warning("Late submission penalty: {}".format(late_penalty))
-
-            resources['nbgrader']['score'] = notebook.score
+            resources['nbgrader']['score'] = notebook.score - late_penalty
             resources['nbgrader']['max_score'] = notebook.max_score
-            if late_penalty is not None:
-                assignment.late_submission_penalty = late_penalty
-                resources['nbgrader']['score'] -= late_penalty
-                resources['nbgrader']['late_penalty'] = late_penalty
-                self.gradebook.db.commit()
+            resources['nbgrader']['late_penalty'] = late_penalty
 
         finally:
             self.gradebook.db.close()
