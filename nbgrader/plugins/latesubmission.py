@@ -20,6 +20,23 @@ class LateSubmissionPlugin(BasePlugin):
     ).tag(config=True)
 
     def late_submission_penalty(self, student_id, score, total_seconds_late):
+        """
+        Return the late submission penalty based on the predefined method.
+
+        Parameters
+        ----------
+        student_id : string
+            The unique id of the student
+        score : float
+            The score the sudent obtained for the submitted notebook
+        total_seconds_late : float
+            The total number of seconds the submitted notebook was late
+
+        Returns
+        -------
+        penalty : float OR None
+            The assigned penalty score (None for no assigned penalty)
+        """
         self.log.info("Using late submission penalty method: {}".format(self.penalty_method))
         if self.penalty_method == 'zero':
             if total_seconds_late == 0:
