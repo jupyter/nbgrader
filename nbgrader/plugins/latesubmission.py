@@ -1,14 +1,10 @@
 from textwrap import dedent
-from traitlets import List
 from traitlets import Unicode
-from traitlets import validate
 
-from .base import BasePluginLoader
+from .base import BasePlugin
 
 
-class LateSubmissionPlugin(BasePluginLoader):
-
-    supported_methods = List(['none', 'zero', 'custom'])
+class LateSubmissionPlugin(BasePlugin):
 
     penalty_method = Unicode(
         'none',
@@ -22,24 +18,7 @@ class LateSubmissionPlugin(BasePluginLoader):
         ),
     ).tag(config=True)
 
-    def late_submission_penalty(self, assignment, notebook):
+    def late_submission_penalty(self, student_id, score, total_seconds_late):
         self.log.info("Using late submission penalty method: {}".format(self.penalty_method))
         if self.penalty_method == 'zero':
-            return assignment.score
-
-        if self.penalty_method == 'custom':
-            plugin = self.import_plugin()
-            fname = self.plugin_file_name
-            if plugin is None:
-                self.log.warning(
-                    ' '.join(["plugin file '{}.py' not found.".format(fname),
-                              "No late submission penalty assigned."])
-                )
-
-            else:
-                penalty = plugin.late_submission_penalty(
-                    assignment.student_id,
-                    notebook.score,
-                    assignment.total_seconds_late
-                )
-                return min(assignment.score, abs(penalty))
+            return score

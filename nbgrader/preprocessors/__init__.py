@@ -13,8 +13,10 @@ from .getgrades import GetGrades
 from .clearoutput import ClearOutput
 from .limitoutput import LimitOutput
 from .deduplicateids import DeduplicateIds
+from .latesubmissions import AssignLatePenalties
 
 __all__ = [
+    "AssignLatePenalties",
     "IncludeHeaderFooter",
     "LockCells",
     "ClearSolutions",
