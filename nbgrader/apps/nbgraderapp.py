@@ -11,6 +11,7 @@ from jupyter_core.application import NoStart
 
 import nbgrader
 from .. import preprocessors
+from .. import plugins
 from .baseapp import nbgrader_aliases, nbgrader_flags
 from . import (
     NbGrader,
@@ -200,6 +201,12 @@ class NbGraderApp(NbGrader):
         for appname, (app, help) in self.subcommands.items():
             if len(app.class_traits(config=True)) > 0:
                 classes.append(app)
+
+        # include plugins that have configurable options
+        for pg_name in plugins.__all__:
+            pg = getattr(plugins, pg_name)
+            if pg.class_traits(config=True):
+                classes.append(pg)
 
         # include all preprocessors that have configurable options
         for pp_name in preprocessors.__all__:
