@@ -596,7 +596,6 @@ class SubmittedNotebook(Base):
             "needs_manual_grade": self.needs_manual_grade,
             "failed_tests": self.failed_tests,
             "flagged": self.flagged,
-            "late_submission_penalty": self.late_submission_penalty,
         }
 
     def __repr__(self):

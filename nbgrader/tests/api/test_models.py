@@ -1112,8 +1112,8 @@ def test_submittedassignment_to_dict(submissions):
 
     assert set(sad.keys()) == {
         'id', 'name', 'student', 'timestamp', 'extension', 'duedate',
-        'total_seconds_late', 'late_submission_penalty', 'score', 'max_score',
-        'code_score', 'max_code_score', 'written_score', 'max_written_score',
+        'total_seconds_late', 'score', 'max_score', 'code_score',
+        'max_code_score', 'written_score', 'max_written_score',
         'needs_manual_grade'}
 
     assert sad['id'] == sa.id
@@ -1123,7 +1123,6 @@ def test_submittedassignment_to_dict(submissions):
     assert sad['extension'] is None
     assert sad['duedate'] == sa.assignment.duedate.isoformat()
     assert sad['total_seconds_late'] == 0
-    assert sad['late_submission_penalty'] == 0
     assert sad['score'] == 0
     assert sad['max_score'] == 15
     assert sad['code_score'] == 0
