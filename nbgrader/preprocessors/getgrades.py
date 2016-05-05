@@ -24,8 +24,10 @@ class GetGrades(NbGraderPreprocessor):
             notebook = self.gradebook.find_submission_notebook(
                 self.notebook_id, self.assignment_id, self.student_id)
 
-            late_penalty = assignment.late_submission_penalty
-            if late_penalty > 0:
+            late_penalty = notebook.late_submission_penalty
+            if late_penalty is None:
+                late_penalty = 0
+            else:
                 self.log.warning("Late submission penalty: {}".format(late_penalty))
             resources['nbgrader']['score'] = notebook.score - late_penalty
             resources['nbgrader']['max_score'] = notebook.max_score
