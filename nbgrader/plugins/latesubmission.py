@@ -1,19 +1,20 @@
 from textwrap import dedent
-from traitlets import Unicode
+from traitlets import Enum
 
 from .base import BasePlugin
 
 
 class LateSubmissionPlugin(BasePlugin):
+    """Predifined methods for assigning penalties for late submission"""
 
-    penalty_method = Unicode(
-        'none',
+    penalty_method = Enum(
+        ('none', 'zero'),
+        default_value='none',
         help=dedent(
             """
-            The method for assigning late submission penalties.
-            Predefined methods:
-                'none':
-                'zero':
+            The method for assigning late submission penalties:
+                'none': do nothing (no penalty assigned)
+                'zero': assign an overall score of zero (penalty = score)
             """
         ),
     ).tag(config=True)
