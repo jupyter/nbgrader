@@ -22,6 +22,18 @@ class AssignLatePenalties(NbGraderPreprocessor):
     def init_plugin(self):
         self.plugin_inst = self.plugin_class(parent=self)
 
+    def _check_late_penalty(self, notebook, penalty):
+        msg = "(Penalty {}) Adjusting late submission penalty from {} to {}."
+        if penalty < 0:
+            self.log.warning(msg.format("< 0", penalty, 0))
+            return 0
+
+        if penalty > notebook.score:
+            self.log.warning(msg.format("> score", penalty, notebook.score))
+            return notebook.score
+
+        return penalty
+
     def preprocess(self, nb, resources):
         # pull information from the resources
         self.notebook_id = resources['nbgrader']['notebook']
@@ -53,6 +65,7 @@ class AssignLatePenalties(NbGraderPreprocessor):
                 self.log.warning("Late submission penalty: {}".format(late_penalty))
 
                 if late_penalty is not None:
+                    late_penalty = self._check_late_penalty(notebook, late_penalty)
                     notebook.late_submission_penalty = late_penalty
                     self.gradebook.db.commit()
 
