@@ -468,10 +468,6 @@ class SubmittedAssignment(Base):
         else:
             return max(0, (self.timestamp - self.duedate).total_seconds())
 
-    #: The penalty (>= 0) given for submitting the assignment late. Updated
-    #: by the :class:`~nbgrader.plugins.LateSubmissionPlugin`.
-    late_submission_penalty = Column(Float(0))
-
     def to_dict(self):
         """Convert the submitted assignment object to a JSON-friendly dictionary
         representation. Note that this includes a ``student`` key which is the
@@ -486,7 +482,6 @@ class SubmittedAssignment(Base):
             "extension": self.extension.total_seconds() if self.extension is not None else None,
             "duedate": self.duedate.isoformat() if self.duedate is not None else None,
             "total_seconds_late": self.total_seconds_late,
-            "late_submission_penalty": self.late_submission_penalty,
             "score": self.score,
             "max_score": self.max_score,
             "code_score": self.code_score,
@@ -578,6 +573,10 @@ class SubmittedNotebook(Base):
     #: attribute of each grade.
     failed_tests = None
 
+    #: The penalty (>= 0) given for submitting the assignment late. Updated
+    #: by the :class:`~nbgrader.plugins.LateSubmissionPlugin`.
+    late_submission_penalty = Column(Float(0))
+
     def to_dict(self):
         """Convert the submitted notebook object to a JSON-friendly dictionary
         representation. Note that this includes a key for ``student`` which is
@@ -596,7 +595,8 @@ class SubmittedNotebook(Base):
             "max_written_score": self.max_written_score,
             "needs_manual_grade": self.needs_manual_grade,
             "failed_tests": self.failed_tests,
-            "flagged": self.flagged
+            "flagged": self.flagged,
+            "late_submission_penalty": self.late_submission_penalty,
         }
 
     def __repr__(self):
