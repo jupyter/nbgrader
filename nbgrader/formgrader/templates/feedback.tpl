@@ -92,6 +92,10 @@ div.nbgrader_cell .input_area {
     color: black;
 }
 
+li.late-penalty {
+    color: #d2413a;
+}
+
 span.nbgrader-label {
     line-height: 25px;
 }
@@ -126,8 +130,8 @@ span.nbgrader-label {
             <li><a href="#comment-{{ cell.metadata.nbgrader.grade_id }}">Comment</a></li>
             {% endif %}
           {% endfor %}
-          {% if resources.nbgrader.late_penalty %}
-            <li style="color: #d2413a;">Late submission penalty (Score: -{{ resources.nbgrader.late_penalty | float | round(2) }})</li>
+          {% if resources.nbgrader.late_penalty > 0 %}
+            <li class="late-penalty">Late submission penalty (Score: -{{ resources.nbgrader.late_penalty | float | round(2) }})</li>
           {% endif %}
           </ol>
         </div>
