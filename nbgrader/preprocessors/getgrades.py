@@ -19,8 +19,6 @@ class GetGrades(NbGraderPreprocessor):
         try:
             # process the cells
             nb, resources = super(GetGrades, self).preprocess(nb, resources)
-            assignment = self.gradebook.find_submission(
-                self.assignment_id, self.student_id)
             notebook = self.gradebook.find_submission_notebook(
                 self.notebook_id, self.assignment_id, self.student_id)
 
