@@ -16,14 +16,17 @@ from uuid import uuid4
 
 Base = declarative_base()
 
-class InvalidEntry(ValueError):
-    pass
-class MissingEntry(ValueError):
-    pass
-
 
 def new_uuid():
     return uuid4().hex
+
+
+class InvalidEntry(ValueError):
+    pass
+
+
+class MissingEntry(ValueError):
+    pass
 
 
 class Assignment(Base):
@@ -82,6 +85,7 @@ class Assignment(Base):
 
     def __repr__(self):
         return "Assignment<{}>".format(self.name)
+
 
 class Notebook(Base):
     """Database representation of the master/source version of a notebook."""
@@ -464,6 +468,10 @@ class SubmittedAssignment(Base):
         else:
             return max(0, (self.timestamp - self.duedate).total_seconds())
 
+    #: The penalty (>= 0) given for submitting the assignment late. Updated
+    #: by the :class:`~nbgrader.plugins.LateSubmissionPlugin`.
+    late_submission_penalty = Column(Float(0))
+
     def to_dict(self):
         """Convert the submitted assignment object to a JSON-friendly dictionary
         representation. Note that this includes a ``student`` key which is the
@@ -478,6 +486,7 @@ class SubmittedAssignment(Base):
             "extension": self.extension.total_seconds() if self.extension is not None else None,
             "duedate": self.duedate.isoformat() if self.duedate is not None else None,
             "total_seconds_late": self.total_seconds_late,
+            "late_submission_penalty": self.late_submission_penalty,
             "score": self.score,
             "max_score": self.max_score,
             "code_score": self.code_score,
@@ -1882,7 +1891,7 @@ class Gradebook(object):
             .all()
 
     def find_submission_notebook(self, notebook, assignment, student):
-        """Find a particular notebook in a student's submission for a given 
+        """Find a particular notebook in a student's submission for a given
         assignment.
 
         Parameters
@@ -1941,7 +1950,7 @@ class Gradebook(object):
         return notebook
 
     def find_grade(self, grade_cell, notebook, assignment, student):
-        """Find a particular grade in a notebook in a student's submission 
+        """Find a particular grade in a notebook in a student's submission
         for a given assignment.
 
         Parameters
@@ -2002,7 +2011,7 @@ class Gradebook(object):
         return grade
 
     def find_comment(self, solution_cell, notebook, assignment, student):
-        """Find a particular comment in a notebook in a student's submission 
+        """Find a particular comment in a notebook in a student's submission
         for a given assignment.
 
         Parameters
@@ -2174,7 +2183,7 @@ class Gradebook(object):
         return score_sum / notebook.num_submissions
 
     def average_notebook_code_score(self, notebook_id, assignment_id):
-        """Compute the average code score for a particular notebook in an 
+        """Compute the average code score for a particular notebook in an
         assignment.
 
         Parameters
@@ -2207,7 +2216,7 @@ class Gradebook(object):
         return score_sum / notebook.num_submissions
 
     def average_notebook_written_score(self, notebook_id, assignment_id):
-        """Compute the average written score for a particular notebook in an 
+        """Compute the average written score for a particular notebook in an
         assignment.
 
         Parameters
@@ -2296,7 +2305,7 @@ class Gradebook(object):
         # subquery the code scores
         code_scores = self.db.query(
             SubmittedNotebook.id,
-            func.sum(Grade.score).label("code_score"), 
+            func.sum(Grade.score).label("code_score"),
             func.sum(GradeCell.max_score).label("max_code_score"),
         ).join(SubmittedAssignment, Notebook, Assignment, Student, Grade, GradeCell)\
          .filter(GradeCell.cell_type == "code")\
@@ -2306,7 +2315,7 @@ class Gradebook(object):
         # subquery for the written scores
         written_scores = self.db.query(
             SubmittedNotebook.id,
-            func.sum(Grade.score).label("written_score"), 
+            func.sum(Grade.score).label("written_score"),
             func.sum(GradeCell.max_score).label("max_written_score"),
         ).join(SubmittedAssignment, Notebook, Assignment, Student, Grade, GradeCell)\
          .filter(GradeCell.cell_type == "markdown")\
@@ -2364,9 +2373,9 @@ class Gradebook(object):
          .all()
 
         keys = [
-            "id", "name", "student", 
-            "score", "max_score", 
-            "code_score", "max_code_score", 
+            "id", "name", "student",
+            "score", "max_score",
+            "code_score", "max_code_score",
             "written_score", "max_written_score",
             "needs_manual_grade",
             "failed_tests", "flagged"
