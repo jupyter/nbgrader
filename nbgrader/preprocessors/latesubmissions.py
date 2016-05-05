@@ -14,7 +14,7 @@ class AssignLatePenalties(NbGraderPreprocessor):
     plugin_class = Type(
         LateSubmissionPlugin,
         klass=BasePlugin,
-        help=""
+        help="The plugin class for assigning the late penalty for each notebook."
     ).tag(config=True)
 
     plugin_inst = Instance(BasePlugin).tag(config=False)
