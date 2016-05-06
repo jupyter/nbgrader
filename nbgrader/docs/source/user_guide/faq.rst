@@ -16,7 +16,9 @@ notebooks, you can pass the ``--no-execute`` flag to
 Can I hide the test cells in a nbgrader assignment?
 ---------------------------------------------------
 
-Not at the moment, though it is on the todo list (see `#390 <https://github.com/jupyter/nbgrader/issues/390>`_). :ref:`PRs welcome! <pull-request>`
+Not at the moment, though it is on the todo list (see `#390
+<https://github.com/jupyter/nbgrader/issues/390>`_). :ref:`PRs welcome!
+<pull-request>`
 
 How does nbgrader ensure that students do not change the tests?
 ---------------------------------------------------------------
@@ -26,7 +28,9 @@ Please see the documentation on :ref:`read-only-cells`.
 Does nbgrader support parallel autograding of assignments?
 ----------------------------------------------------------
 
-Not yet, though it is on the todo list (see `#174 <https://github.com/jupyter/nbgrader/issues/174>`_). :ref:`PRs welcome! <pull-request>`
+Not yet, though it is on the todo list (see `#174
+<https://github.com/jupyter/nbgrader/issues/174>`_). :ref:`PRs welcome!
+<pull-request>`
 
 Does nbgrader protect against infinite loops?
 ---------------------------------------------
@@ -38,14 +42,16 @@ configuration option. See :doc:`/configuration/config_options`.
 Does nbgrader protect against unsafe code?
 -------------------------------------------
 
-Not yet, though it is on the todo list (see `#483 <https://github.com/jupyter/nbgrader/issues/483>`_). :ref:`PRs welcome! <pull-request>`
+Not yet, though it is on the todo list (see `#483
+<https://github.com/jupyter/nbgrader/issues/483>`_). :ref:`PRs welcome!
+<pull-request>`
 
 How does nbgrader handle late assignments?
 ------------------------------------------
 
-nbgrader won't explicitly assign late penalties, but it will compute how late
-each submission is. You can then write your own script to compute late
-penalties based on the amount of lateness reported by nbgrader.
+By default nbgrader won't explicitly assign late penalties, but it will
+compute how late each submission is. If you wish to customize this default
+behavior see :doc:`adding customization plugins </plugins/index>`
 
 For this to work, you must include a duedate for the assignment and then a
 ``timestamp.txt`` file in the folder for each submission with a single line
@@ -72,7 +78,8 @@ at the same time we strongly encourage you **not** to use sqlite because it is
 not threadsafe. Postgres is also supported, and anything else that works with
 SQLAlchemy is likely to work (e.g. MySQL), though only sqlite and Postgres have
 been tested. If you want to use another SQL-based database and find that it
-doesn't work for some reason, please `open an issue <https://github.com/jupyter/nbgrader/issues/new>`_!
+doesn't work for some reason, please `open an issue
+<https://github.com/jupyter/nbgrader/issues/new>`_!
 
 Does nbgrader work with non-Python kernels?
 -------------------------------------------

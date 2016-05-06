@@ -229,6 +229,8 @@ Submitted assignments
 
     .. autoattribute:: failed_tests
 
+    .. autoattribute:: late_submission_penalty
+
 .. autoclass:: Grade
 
     .. autoattribute:: id

@@ -23,6 +23,7 @@ nbgrader
     configuration/config_options
     command_line_tools/index
     configuration/jupyterhub_config
+    plugins/index
 
 .. toctree::
     :maxdepth: 1

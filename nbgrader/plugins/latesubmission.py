@@ -28,7 +28,7 @@ class LateSubmissionPlugin(BasePlugin):
         student_id : string
             The unique id of the student
         score : float
-            The score the sudent obtained for the submitted notebook
+            The score the student obtained for the submitted notebook
         total_seconds_late : float
             The total number of seconds the submitted notebook was late
 
