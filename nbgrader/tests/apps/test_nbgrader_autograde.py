@@ -132,6 +132,7 @@ class TestNbGraderAutograde(BaseTestApp):
         gb.db.close()
 
     def test_late_submission_penalty_none(self, db, course_dir):
+        """Does 'none' method do nothing?"""
         with open("nbgrader_config.py", "a") as fh:
             fh.write("""c.NbGrader.db_assignments = [dict(name='ps1', duedate='2015-02-02 14:58:23.948203 PST')]\n""")
             fh.write("""c.NbGrader.db_students = [dict(id="foo"), dict(id="bar")]""")
@@ -154,6 +155,7 @@ class TestNbGraderAutograde(BaseTestApp):
         assert os.path.isfile(join(course_dir, "autograded", "bar", "ps1", "p1.ipynb"))
         assert os.path.isfile(join(course_dir, "autograded", "bar", "ps1", "timestamp.txt"))
 
+        # not late
         gb = Gradebook(db)
         submission = gb.find_submission("ps1", "foo")
         nb = submission.notebooks[0]
@@ -161,6 +163,7 @@ class TestNbGraderAutograde(BaseTestApp):
         assert submission.total_seconds_late == 0
         assert nb.late_submission_penalty == None
 
+        # 1h late
         submission = gb.find_submission("ps1", "bar")
         nb = submission.notebooks[0]
         assert nb.score == 2
@@ -170,6 +173,7 @@ class TestNbGraderAutograde(BaseTestApp):
         gb.db.close()
 
     def test_late_submission_penalty_zero(self, db, course_dir):
+        """Does 'zero' method assign notebook.score as penalty if late?"""
         with open("nbgrader_config.py", "a") as fh:
             fh.write("""c.NbGrader.db_assignments = [dict(name='ps1', duedate='2015-02-02 14:58:23.948203 PST')]\n""")
             fh.write("""c.NbGrader.db_students = [dict(id="foo"), dict(id="bar")]\n""")
@@ -193,6 +197,7 @@ class TestNbGraderAutograde(BaseTestApp):
         assert os.path.isfile(join(course_dir, "autograded", "bar", "ps1", "p1.ipynb"))
         assert os.path.isfile(join(course_dir, "autograded", "bar", "ps1", "timestamp.txt"))
 
+        # not late
         gb = Gradebook(db)
         submission = gb.find_submission("ps1", "foo")
         nb = submission.notebooks[0]
@@ -200,6 +205,7 @@ class TestNbGraderAutograde(BaseTestApp):
         assert submission.total_seconds_late == 0
         assert nb.late_submission_penalty == None
 
+        # 1h late
         submission = gb.find_submission("ps1", "bar")
         nb = submission.notebooks[0]
         assert nb.score == 2
@@ -209,6 +215,7 @@ class TestNbGraderAutograde(BaseTestApp):
         gb.db.close()
 
     def test_late_submission_penalty_plugin(self, db, course_dir):
+        """Does plugin set 1 point per hour late penalty?"""
         with open("late_plugin.py", 'w') as fh:
             fh.write(PLUGIN)
 
@@ -235,6 +242,7 @@ class TestNbGraderAutograde(BaseTestApp):
         assert os.path.isfile(join(course_dir, "autograded", "bar", "ps1", "p1.ipynb"))
         assert os.path.isfile(join(course_dir, "autograded", "bar", "ps1", "timestamp.txt"))
 
+        # 4h late
         gb = Gradebook(db)
         submission = gb.find_submission("ps1", "foo")
         nb = submission.notebooks[0]
@@ -242,6 +250,7 @@ class TestNbGraderAutograde(BaseTestApp):
         assert submission.total_seconds_late > 0
         assert nb.late_submission_penalty == nb.score
 
+        # 1h late
         submission = gb.find_submission("ps1", "bar")
         nb = submission.notebooks[0]
         assert nb.score == 2
