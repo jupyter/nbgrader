@@ -5,7 +5,7 @@ from .base import BasePlugin
 
 
 class LateSubmissionPlugin(BasePlugin):
-    """Predifined methods for assigning penalties for late submission"""
+    """Predefined methods for assigning penalties for late submission"""
 
     penalty_method = Enum(
         ('none', 'zero'),
