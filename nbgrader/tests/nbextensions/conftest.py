@@ -187,7 +187,10 @@ def browser(request, tempdir, nbserver):
 
     capabilities = DesiredCapabilities.PHANTOMJS
     capabilities['loggingPrefs'] = {'browser': 'ALL'}
-    browser = webdriver.PhantomJS(desired_capabilities=capabilities)
+    browser = webdriver.PhantomJS(
+        service_args=['--cookies-file=/dev/null'],
+        desired_capabilities=capabilities,
+        service_log_path=os.path.devnull)
     browser.set_page_load_timeout(30)
     browser.set_script_timeout(30)
 

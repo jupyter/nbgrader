@@ -1,4 +1,5 @@
 import os
+import sys
 
 from .. import run_nbgrader
 from .base import BaseTestApp
@@ -32,7 +33,8 @@ class TestNbGraderQuickStart(BaseTestApp):
         for nb in os.listdir(os.path.join("source", "ps1")):
             if not nb.endswith(".ipynb"):
                 continue
-            run_nbgrader(["validate", os.path.join("source", "ps1", nb)])
+            output = run_nbgrader(["validate", os.path.join("source", "ps1", nb)], stdout=True)
+            assert output.strip() == "Success! Your notebook passes all the tests."
 
         # nbgrader assign should work
         run_nbgrader(["assign", "ps1"])

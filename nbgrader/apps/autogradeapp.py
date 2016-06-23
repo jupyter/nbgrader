@@ -140,7 +140,6 @@ class AutogradeApp(BaseNbConvertApp):
 
         # try to get the student from the database, and throw an error if it
         # doesn't exist
-        gb = Gradebook(self.db_url)
         student = None
         for s in self.db_students:
             if s['id'] == student_id:
@@ -150,13 +149,16 @@ class AutogradeApp(BaseNbConvertApp):
         if student is not None:
             del student['id']
             self.log.info("Creating/updating student with ID '%s': %s", student_id, student)
+            gb = Gradebook(self.db_url)
             gb.update_or_create_student(student_id, **student)
+            gb.db.close()
         else:
             self.fail("No student with ID '%s' exists in the config", student_id)
 
         # try to read in a timestamp from file
         src_path = self._format_source(assignment_id, student_id)
         timestamp = self._get_existing_timestamp(src_path)
+        gb = Gradebook(self.db_url)
         if timestamp:
             submission = gb.update_or_create_submission(
                 assignment_id, student_id, timestamp=timestamp)
@@ -165,9 +167,9 @@ class AutogradeApp(BaseNbConvertApp):
             # if the submission is late, print out how many seconds late it is
             if timestamp and submission.total_seconds_late > 0:
                 self.log.warning("%s is %s seconds late", submission, submission.total_seconds_late)
-
         else:
             submission = gb.update_or_create_submission(assignment_id, student_id)
+        gb.db.close()
 
         # copy files over from the source directory
         self.log.info("Overwriting files with master versions from the source directory")
@@ -187,6 +189,7 @@ class AutogradeApp(BaseNbConvertApp):
 
         # ignore notebooks that aren't in the database
         notebooks = []
+        gb = Gradebook(self.db_url)
         for notebook in self.notebooks:
             notebook_id = os.path.splitext(os.path.basename(notebook))[0]
             try:
@@ -196,6 +199,7 @@ class AutogradeApp(BaseNbConvertApp):
                 continue
             else:
                 notebooks.append(notebook)
+        gb.db.close()
         self.notebooks = notebooks
 
     def _init_preprocessors(self):

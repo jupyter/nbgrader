@@ -186,11 +186,13 @@ class AssignApp(BaseNbConvertApp):
 
         # no added or removed notebooks, so nothing to do
         if old_notebook_ids == new_notebook_ids:
+            gb.db.close()
             return
 
         # some notebooks have been removed, but there are submissions associated
         # with the assignment, so we don't want to overwrite stuff
         if len(assignment.submissions) > 0:
+            gb.db.close()
             self.fail("Cannot modify existing assignment '%s' because there are submissions associated with it", assignment)
 
         # remove the old notebooks
@@ -198,13 +200,14 @@ class AssignApp(BaseNbConvertApp):
             self.log.warning("Removing notebook '%s' from the gradebook", notebook_id)
             gb.remove_notebook(notebook_id, assignment_id)
 
+        gb.db.close()
+
     def init_assignment(self, assignment_id, student_id):
         super(AssignApp, self).init_assignment(assignment_id, student_id)
 
         # try to get the assignment from the database, and throw an error if it
         # doesn't exist
         if not self.no_database:
-            gb = Gradebook(self.db_url)
             assignment = None
             for a in self.db_assignments:
                 if a['name'] == assignment_id:
@@ -214,7 +217,9 @@ class AssignApp(BaseNbConvertApp):
             if assignment is not None:
                 del assignment['name']
                 self.log.info("Updating/creating assignment '%s': %s", assignment_id, assignment)
+                gb = Gradebook(self.db_url)
                 gb.update_or_create_assignment(assignment_id, **assignment)
+                gb.db.close()
 
                 # check if there are any extra notebooks in the db that are no longer
                 # part of the assignment, and if so, remove them
@@ -222,3 +227,4 @@ class AssignApp(BaseNbConvertApp):
                     self._clean_old_notebooks(assignment_id, student_id)
             else:
                 self.fail("No assignment called '%s' exists in the config", assignment_id)
+
