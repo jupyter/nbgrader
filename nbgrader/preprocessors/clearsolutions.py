@@ -1,4 +1,4 @@
-from traitlets import Unicode, Bool
+from traitlets import Dict, Unicode, Bool
 from textwrap import dedent
 
 from .. import utils
@@ -7,8 +7,8 @@ from . import NbGraderPreprocessor
 
 class ClearSolutions(NbGraderPreprocessor):
 
-    code_stub = Unicode(
-        "# YOUR CODE HERE\nraise NotImplementedError()",
+    code_stub = Dict(
+        dict(python="# YOUR CODE HERE\nraise NotImplementedError()"),
         config=True,
         help="The code snippet that will replace code solutions")
 
@@ -17,20 +17,15 @@ class ClearSolutions(NbGraderPreprocessor):
         config=True,
         help="The text snippet that will replace written solutions")
 
-    comment_mark = Unicode(
-        "#",
+    begin_solution_delimeter = Dict(
+        dict(python="### BEGIN SOLUTION"),
         config=True,
-        help="The comment mark to prefix solution delimiters")
+        help="The delimiter marking the beginning of a solution")
 
-    begin_solution_delimeter = Unicode(
-        "## BEGIN SOLUTION",
+    end_solution_delimeter = Dict(
+        dict(python="### END SOLUTION"),
         config=True,
-        help="The delimiter marking the beginning of a solution (excluding comment mark)")
-
-    end_solution_delimeter = Unicode(
-        "## END SOLUTION",
-        config=True,
-        help="The delimiter marking the end of a solution (excluding comment mark)")
+        help="The delimiter marking the end of a solution")
 
     enforce_metadata = Bool(
         True,
@@ -46,18 +41,10 @@ class ClearSolutions(NbGraderPreprocessor):
         )
     )
 
-    @property
-    def begin_solution(self):
-        return "{}{}".format(self.comment_mark, self.begin_solution_delimeter)
-
-    @property
-    def end_solution(self):
-        return "{}{}".format(self.comment_mark, self.end_solution_delimeter)
-
-    def _replace_solution_region(self, cell):
+    def _replace_solution_region(self, cell, language):
         """Find a region in the cell that is delimeted by
-        `self.begin_solution` and `self.end_solution` (e.g. ### BEGIN
-        SOLUTION and ### END SOLUTION). Replace that region either
+        `self.begin_solution_delimeter` and `self.end_solution_delimeter` (e.g.
+        ### BEGIN SOLUTION and ### END SOLUTION). Replace that region either
         with the code stub or text stub, depending the cell type.
 
         This modifies the cell in place, and then returns True if a
@@ -67,17 +54,19 @@ class ClearSolutions(NbGraderPreprocessor):
         # pull out the cell input/source
         lines = cell.source.split("\n")
         if cell.cell_type == "code":
-            stub_lines = self.code_stub.split("\n")
+            stub_lines = self.code_stub[language].split("\n")
         else:
             stub_lines = self.text_stub.split("\n")
 
         new_lines = []
         in_solution = False
         replaced_solution = False
+        begin = self.begin_solution_delimeter[language]
+        end = self.end_solution_delimeter[language]
 
         for line in lines:
             # begin the solution area
-            if line.strip() == self.begin_solution:
+            if line.strip() == begin:
 
                 # check to make sure this isn't a nested BEGIN
                 # SOLUTION region
@@ -89,12 +78,12 @@ class ClearSolutions(NbGraderPreprocessor):
                 replaced_solution = True
 
                 # replace it with the stub, indented as necessary
-                indent = line[:line.find(self.begin_solution)]
+                indent = line[:line.find(begin)]
                 for stub_line in stub_lines:
                     new_lines.append(indent + stub_line)
 
             # end the solution area
-            elif line.strip() == self.end_solution:
+            elif line.strip() == end:
                 in_solution = False
 
             # add lines as long as it's not in the solution area
@@ -112,6 +101,21 @@ class ClearSolutions(NbGraderPreprocessor):
         return replaced_solution
 
     def preprocess(self, nb, resources):
+        language = nb.metadata.get("kernelspec", {}).get("language", "python")
+        if language not in self.code_stub:
+            raise ValueError(
+                "language '{}' has not been specified in "
+                "ClearSolutions.code_stub".format(language))
+        if language not in self.begin_solution_delimeter:
+            raise ValueError(
+                "language '{}' has not been specified in "
+                "ClearSolutions.begin_solution_delimeter".format(language))
+        if language not in self.end_solution_delimeter:
+            raise ValueError(
+                "language '{}' has not been specified in "
+                "ClearSolutions.end_solution_delimeter".format(language))
+
+        resources["language"] = language
         nb, resources = super(ClearSolutions, self).preprocess(nb, resources)
         if 'celltoolbar' in nb.metadata:
             del nb.metadata['celltoolbar']
@@ -119,7 +123,8 @@ class ClearSolutions(NbGraderPreprocessor):
 
     def preprocess_cell(self, cell, resources, cell_index):
         # replace solution regions with the relevant stubs
-        replaced_solution = self._replace_solution_region(cell)
+        language = resources["language"]
+        replaced_solution = self._replace_solution_region(cell, language)
 
         # determine whether the cell is a solution/grade cell
         is_solution = utils.is_solution(cell)
@@ -139,7 +144,7 @@ class ClearSolutions(NbGraderPreprocessor):
         # there are parts of the cells that should be preserved
         if is_solution and not replaced_solution:
             if cell.cell_type == 'code':
-                cell.source = self.code_stub
+                cell.source = self.code_stub[language]
             else:
                 cell.source = self.text_stub
 

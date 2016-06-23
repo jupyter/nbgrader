@@ -14,19 +14,10 @@ def preprocessor():
 
 class TestClearSolutions(BaseTestPreprocessor):
 
-    def test_custom_solution_region(self):
-        """Are the solution region delimeters properly formatted?"""
-        pp = ClearSolutions(
-            comment_mark="%",
-            begin_solution_delimeter="!!foo",
-            end_solution_delimeter="@@bar")
-        assert pp.begin_solution == "%!!foo"
-        assert pp.end_solution == "%@@bar"
-
     def test_replace_solution_region_code(self, preprocessor):
         """Are solution regions in code cells correctly replaced?"""
         cell = create_code_cell()
-        replaced_solution = preprocessor._replace_solution_region(cell)
+        replaced_solution = preprocessor._replace_solution_region(cell, "python")
         assert replaced_solution
         assert cell.source == dedent(
             """
@@ -47,14 +38,14 @@ class TestClearSolutions(BaseTestPreprocessor):
             ### END SOLUTION
             """
         ).strip()
-        replaced_solution = preprocessor._replace_solution_region(cell)
+        replaced_solution = preprocessor._replace_solution_region(cell, "python")
         assert replaced_solution
         assert cell.source == "something something\nYOUR ANSWER HERE"
 
     def test_dont_replace_solution_region(self, preprocessor):
         """Is false returned when there is no solution region?"""
         cell = create_text_cell()
-        replaced_solution = preprocessor._replace_solution_region(cell)
+        replaced_solution = preprocessor._replace_solution_region(cell, "python")
         assert not replaced_solution
 
     def test_replace_solution_region_no_end(self, preprocessor):
@@ -69,7 +60,7 @@ class TestClearSolutions(BaseTestPreprocessor):
         ).strip()
 
         with pytest.raises(RuntimeError):
-            preprocessor._replace_solution_region(cell)
+            preprocessor._replace_solution_region(cell, "python")
 
     def test_replace_solution_region_nested_solution(self, preprocessor):
         """Is an error thrown when there are nested solution statements?"""
@@ -85,13 +76,14 @@ class TestClearSolutions(BaseTestPreprocessor):
         ).strip()
 
         with pytest.raises(RuntimeError):
-            preprocessor._replace_solution_region(cell)
+            preprocessor._replace_solution_region(cell, "python")
 
     def test_preprocess_code_solution_cell_solution_region(self, preprocessor):
         """Is a code solution cell correctly cleared when there is a solution region?"""
         cell = create_code_cell()
         cell.metadata['nbgrader'] = dict(solution=True)
-        cell = preprocessor.preprocess_cell(cell, {}, 1)[0]
+        resources = dict(language="python")
+        cell = preprocessor.preprocess_cell(cell, resources, 1)[0]
 
         assert cell.source == dedent(
             """
@@ -105,16 +97,18 @@ class TestClearSolutions(BaseTestPreprocessor):
     def test_preprocess_code_cell_solution_region(self, preprocessor):
         """Is an error thrown when there is a solution region but it's not a solution cell?"""
         cell = create_code_cell()
+        resources = dict(language="python")
         with pytest.raises(RuntimeError):
-            preprocessor.preprocess_cell(cell, {}, 1)
+            preprocessor.preprocess_cell(cell, resources, 1)
 
     def test_preprocess_code_solution_cell_no_region(self, preprocessor):
         """Is a code solution cell correctly cleared when there is no solution region?"""
         cell = create_code_cell()
         cell.source = """print("the answer!")"""
         cell.metadata['nbgrader'] = dict(solution=True)
+        resources = dict(language="python")
 
-        cell = preprocessor.preprocess_cell(cell, {}, 1)[0]
+        cell = preprocessor.preprocess_cell(cell, resources, 1)[0]
         assert cell.source == dedent(
             """
             # YOUR CODE HERE
@@ -128,7 +122,8 @@ class TestClearSolutions(BaseTestPreprocessor):
         cell = create_code_cell()
         cell.source = """print("the answer!")"""
         cell.metadata['nbgrader'] = dict()
-        cell = preprocessor.preprocess_cell(cell, {}, 1)[0]
+        resources = dict(language="python")
+        cell = preprocessor.preprocess_cell(cell, resources, 1)[0]
 
         assert cell.source == """print("the answer!")"""
         assert not cell.metadata.nbgrader.get('solution', False)
@@ -137,7 +132,8 @@ class TestClearSolutions(BaseTestPreprocessor):
         """Is a text grade cell correctly cleared when there is no solution region?"""
         cell = create_text_cell()
         cell.metadata['nbgrader'] = dict(solution=True)
-        cell = preprocessor.preprocess_cell(cell, {}, 1)[0]
+        resources = dict(language="python")
+        cell = preprocessor.preprocess_cell(cell, resources, 1)[0]
 
         assert cell.source == "YOUR ANSWER HERE"
         assert cell.metadata.nbgrader['solution']
@@ -146,7 +142,8 @@ class TestClearSolutions(BaseTestPreprocessor):
         """Is a text grade cell not cleared when there is no solution region?"""
         cell = create_text_cell()
         cell.metadata['nbgrader'] = dict()
-        cell = preprocessor.preprocess_cell(cell, {}, 1)[0]
+        resources = dict(language="python")
+        cell = preprocessor.preprocess_cell(cell, resources, 1)[0]
 
         assert cell.source == "this is the answer!\n"
         assert not cell.metadata.nbgrader.get('solution', False)
@@ -163,8 +160,9 @@ class TestClearSolutions(BaseTestPreprocessor):
             """
         ).strip()
         cell.metadata['nbgrader'] = dict(solution=True)
+        resources = dict(language="python")
 
-        cell = preprocessor.preprocess_cell(cell, {}, 1)[0]
+        cell = preprocessor.preprocess_cell(cell, resources, 1)[0]
         assert cell.source == "something something\nYOUR ANSWER HERE"
         assert cell.metadata.nbgrader['solution']
 
@@ -180,12 +178,13 @@ class TestClearSolutions(BaseTestPreprocessor):
             """
         ).strip()
 
+        resources = dict(language="python")
         with pytest.raises(RuntimeError):
-            preprocessor.preprocess_cell(cell, {}, 1)
+            preprocessor.preprocess_cell(cell, resources, 1)
 
         # now disable enforcing metadata
         preprocessor.enforce_metadata = False
-        cell, _ = preprocessor.preprocess_cell(cell, {}, 1)
+        cell, _ = preprocessor.preprocess_cell(cell, resources, 1)
         assert cell.source == "something something\nYOUR ANSWER HERE"
         assert 'nbgrader' not in cell.metadata
 
