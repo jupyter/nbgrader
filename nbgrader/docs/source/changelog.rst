@@ -5,8 +5,8 @@ Changelog
 
 A summary of changes to nbgrader.
 
-0.3.0.dev
----------
+0.3.0
+-----
 
 Version 0.3.0 of nbgrader introduces several significant changes. Most notably,
 this includes:
@@ -18,6 +18,87 @@ this includes:
 - Addition of the "nbgrader quickstart" command
 - Addition of the "nbgrader extension uninstall" command
 - Create a nbgrader conda recipe
+- Add an entrypoint for late penalty plugins
+
+The full list of merged PRs is:
+
+- PR #521: Update to most recent version of invoke
+- PR #512: Late penalty plugin
+- PR #510: Fix failing windows tests
+- PR #508: Run notebook/formgrader/jupyterhub on random ports during tests
+- PR #507: Add a FAQ
+- PR #506: Produce a warning if no coverage files are produced
+- PR #505: Use .utcnow() rather than .now()
+- PR #498: Add a section on autograding wisdom
+- PR #495: Raise an error on iopub timeout
+- PR #494: Write documentation on creating releases
+- PR #493: Update nbgrader to be compatible with notebook version 4.2
+- PR #492: Remove generate_hubapi_token from docs
+- PR #490: Temporarily pin to notebook 4.1
+- PR #489: Make sure next/prev buttons use correct base_url
+- PR #486: Add new words to wordlist
+- PR #485: Update README gif links after docs move into nbgrader
+- PR #477: Create a conda recipe
+- PR #473: More helpful default comment box message
+- PR #470: Fix broken links
+- PR #467: unpin jupyter-client
+- PR #466: Create nbgrader quickstart command
+- PR #465: Confirm no SSL when running jupyterhub
+- PR #464: Speed up tests
+- PR #461: Add more prominent links to demo
+- PR #460: Test that other kernels work with nbgrader
+- PR #458: Add summary and links to resources in docs
+- PR #457: Update formgrader options to not conflict with the notebook
+- PR #455: More docs
+- PR #454: Simplify directory and notebook names
+- PR #453: Merge user guide into a few files
+- PR #452: Improve docs reliability
+- PR #451: Execute documentation notebooks manually
+- PR #449: Allow --assignment flag to be used with transfer apps
+- PR #448: Add --no-execute flag to autogradeapp.py
+- PR #447: Remove option to generate the hubapi token
+- PR #446: Make sure perms are set correctly by nbgrader submit
+- PR #445: Skip failures and log to file
+- PR #444: Fix setup.py
+- PR #443: Specify assignments and students in the config file
+- PR #442: Fix build errors
+- PR #430: Reintroduce flit-less setup.py
+- PR #425: Enable 3.5 on travis.
+- PR #421: Fix Contributor Guide link
+- PR #414: Restructure user guide TOC and doc flow to support new users
+- PR #413: Windows support
+- PR #411: Add tests for https
+- PR #409: Make a friendlier development install
+- PR #408: Fix formgrader to use course directory
+- PR #407: Add --no-metadata option to nbgrader assign
+- PR #405: nbgrader release typo
+- PR #402: Create a Contributor Guide in docs
+- PR #397: Port formgrader to tornado
+- PR #395: Specify root course directory
+- PR #387: Use sys.executable to run suprocesses
+- PR #386: Use relative imports
+- PR #384: Rename the html directory to formgrader
+- PR #381: Access notebook server of formgrader user
+
+Thanks to the following contributors who submitted PRs or reported issues that were merged/closed for the 0.3.0 release:
+
+- alchemyst
+- Carreau
+- ellisonbg
+- ischurov
+- jdfreder
+- jhamrick
+- jklymak
+- joschu
+- lgpage
+- mandli
+- mikebolt
+- minrk
+- olgabot
+- sansary
+- svurens
+- vinaykola
+- willingc
 
 0.2.x
 -----
