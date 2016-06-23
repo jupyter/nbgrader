@@ -2,7 +2,6 @@ import os
 import re
 
 from invoke import task
-from invoke import run as _run
 from textwrap import dedent
 
 import sys
@@ -12,14 +11,14 @@ else:
     WINDOWS = False
 
 
-def run(*args, **kwargs):
+def run(ctx, *args, **kwargs):
     if 'pty' not in kwargs:
         kwargs['pty'] = True
     if WINDOWS:
         kwargs['pty'] = False
     if 'echo' not in kwargs:
         kwargs['echo'] = True
-    return _run(*args, **kwargs)
+    return ctx.run(*args, **kwargs)
 
 def echo(msg):
     print("\033[1;37m{0}\033[0m".format(msg))
@@ -39,14 +38,14 @@ except ImportError:
 
 
 @task
-def docs():
-    run('python nbgrader/docs/source/build_docs.py')
-    run('make -C nbgrader/docs html')
-    run('make -C nbgrader/docs linkcheck')
-    run('make -C nbgrader/docs spelling')
+def docs(ctx):
+    run(ctx, 'python nbgrader/docs/source/build_docs.py')
+    run(ctx, 'make -C nbgrader/docs html')
+    run(ctx, 'make -C nbgrader/docs linkcheck')
+    run(ctx, 'make -C nbgrader/docs spelling')
 
 
-def _run_tests(mark=None, skip=None):
+def _run_tests(ctx, mark=None, skip=None):
     if not WINDOWS:
         import distutils.sysconfig
         site = distutils.sysconfig.get_python_lib()
@@ -88,66 +87,66 @@ def _run_tests(mark=None, skip=None):
     if len(marks) > 0:
         cmd.append('-m "{}"'.format(" and ".join(marks)))
 
-    run(" ".join(cmd))
+    run(ctx, " ".join(cmd))
 
     if not WINDOWS:
-        run("ls -a .coverage*")
-        run("coverage combine")
+        run(ctx, "ls -a .coverage*")
+        run(ctx, "coverage combine")
 
 
 @task
-def tests(group='all', skip=None):
+def tests(ctx, group='all', skip=None):
     if group == 'python':
-        _run_tests(mark="not formgrader and not nbextensions", skip=skip)
+        _run_tests(ctx, mark="not formgrader and not nbextensions", skip=skip)
 
     elif group == 'formgrader':
-        _run_tests(mark="formgrader", skip=skip)
+        _run_tests(ctx, mark="formgrader", skip=skip)
 
     elif group == 'nbextensions':
-        _run_tests(mark="nbextensions", skip=skip)
+        _run_tests(ctx, mark="nbextensions", skip=skip)
 
     elif group == 'docs':
-        docs()
+        docs(ctx)
 
     elif group == 'all':
-        _run_tests(skip=skip)
+        _run_tests(ctx, skip=skip)
 
     else:
         raise ValueError("Invalid test group: {}".format(group))
 
 
 @task
-def after_success(group):
+def after_success(ctx, group):
     if group in ('python', 'formgrader', 'nbextensions'):
-        run('codecov')
+        run(ctx, 'codecov')
     else:
         echo('Nothing to do.')
 
 
 @task
-def js(clean=True):
-    run('npm install')
-    run('./node_modules/.bin/bower install --config.interactive=false')
+def js(ctx, clean=True):
+    run(ctx, 'npm install')
+    run(ctx, './node_modules/.bin/bower install --config.interactive=false')
     if clean:
-        run('git clean -fdX nbgrader/formgrader/static/components')
+        run(ctx, 'git clean -fdX nbgrader/formgrader/static/components')
 
 
 @task
-def before_install(group, python_version):
+def before_install(ctx, group, python_version):
     # clone travis wheels repo to make installing requirements easier
-    run('git clone --quiet --depth 1 https://github.com/minrk/travis-wheels ~/travis-wheels')
+    run(ctx, 'git clone --quiet --depth 1 https://github.com/minrk/travis-wheels ~/travis-wheels')
 
     # install jupyterhub
     if python_version.startswith('3') and group == 'formgrader':
-        run('npm install -g configurable-http-proxy')
-        run('pip install jupyterhub')
+        run(ctx, 'npm install -g configurable-http-proxy')
+        run(ctx, 'pip install jupyterhub')
 
 
 @task
-def install(group):
+def install(ctx, group):
     # The docs don't seem to build correctly if it's a symlinked install.
     if group == 'docs':
         cmd = 'pip install -r dev-requirements.txt .'
     else:
         cmd = 'pip install -r dev-requirements.txt -e .'
-    run('PIP_FIND_LINKS=~/travis-wheels/wheelhouse {}'.format(cmd))
+    run(ctx, 'PIP_FIND_LINKS=~/travis-wheels/wheelhouse {}'.format(cmd))
