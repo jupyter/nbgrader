@@ -41,6 +41,32 @@ class ClearSolutions(NbGraderPreprocessor):
         )
     )
 
+    def _config_changed(self, name, old, new):
+        def check(x):
+            if x in new.ClearSolutions:
+                if not isinstance(new.ClearSolutions[x], dict):
+                    return True
+            return False
+
+        def fix(new, x):
+            self.log.warn(
+                "The ClearSolutions.{var} option must now be given as a "
+                "dictionary with keys for the language of the notebook. I will "
+                "automatically convert ClearSolutions.{var} to a dictionary "
+                "with a key for 'python', but note that this functionality may "
+                "be removed in future releases.".format(var=x))
+            new.ClearSolutions[x] = dict(python=new.ClearSolutions[x])
+            return new
+
+        if check('code_stub'):
+            fix(new, 'code_stub')
+        if check('begin_solution_delimeter'):
+            fix(new, 'begin_solution_delimeter')
+        if check('end_solution_delimeter'):
+            fix(new, 'end_solution_delimeter')
+
+        super(ClearSolutions, self)._config_changed(name, old, new)
+
     def _replace_solution_region(self, cell, language):
         """Find a region in the cell that is delimeted by
         `self.begin_solution_delimeter` and `self.end_solution_delimeter` (e.g.

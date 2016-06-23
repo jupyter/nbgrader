@@ -2,6 +2,7 @@ import pytest
 import os
 
 from textwrap import dedent
+from traitlets.config import Config
 from ...preprocessors import ClearSolutions
 from .base import BaseTestPreprocessor
 from .. import create_code_cell, create_text_cell
@@ -199,3 +200,14 @@ class TestClearSolutions(BaseTestPreprocessor):
         nb.metadata['celltoolbar'] = 'Create Assignment'
         nb = preprocessor.preprocess(nb, {})[0]
         assert 'celltoolbar' not in nb.metadata
+
+    def test_old_config(self):
+        """Are deprecations handled cleanly?"""
+        c = Config()
+        c.ClearSolutions.code_stub = "foo"
+        c.ClearSolutions.begin_solution_delimeter = "bar"
+        c.ClearSolutions.end_solution_delimeter = "baz"
+        pp = ClearSolutions(config=c)
+        assert pp.code_stub == dict(python="foo")
+        assert pp.begin_solution_delimeter == dict(python="bar")
+        assert pp.end_solution_delimeter == dict(python="baz")
