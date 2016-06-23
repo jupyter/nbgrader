@@ -65,6 +65,13 @@ class ClearSolutions(NbGraderPreprocessor):
         if check('end_solution_delimeter'):
             fix(new, 'end_solution_delimeter')
 
+        if 'comment_mark' in new.ClearSolutions:
+            self.log.warn(
+                "The ClearSolutions.comment_mark config option is deprecated. "
+                "Please include the comment mark in ClearSolutions.begin_solution_delimeter "
+                "and ClearSolutions.end_solution_delimeter instead.")
+            del new.ClearSolutions.comment_mark
+
         super(ClearSolutions, self)._config_changed(name, old, new)
 
     def _replace_solution_region(self, cell, language):
