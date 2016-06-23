@@ -11735,14 +11735,14 @@ div#notebook-container {
   div.cell {
     display: block;
     page-break-inside: avoid;
-  } 
-  div.output_wrapper { 
-    display: block;
-    page-break-inside: avoid; 
   }
-  div.output { 
+  div.output_wrapper {
     display: block;
-    page-break-inside: avoid; 
+    page-break-inside: avoid;
+  }
+  div.output {
+    display: block;
+    page-break-inside: avoid;
   }
 }
 
@@ -11783,6 +11783,10 @@ div.nbgrader_cell .input_area {
 
 .score {
     color: black;
+}
+
+li.late-penalty {
+    color: #d2413a;
 }
 
 span.nbgrader-label {
@@ -11878,6 +11882,7 @@ span.nbgrader-label {
             
             <li><a href="#comment-sum_of_squares_application">Comment</a></li>
             
+          
           
           </ol>
         </div>
@@ -12030,8 +12035,8 @@ span.nbgrader-label {
 <div class="output_area"><div class="prompt"></div>
 <div class="output_subarea output_text output_error">
 <pre>
-
-<span class="ansi-red-fg">AssertionError</span>Traceback (most recent call last)
+<span class="ansi-red-fg">---------------------------------------------------------------------------</span>
+<span class="ansi-red-fg">AssertionError</span>                            Traceback (most recent call last)
 <span class="ansi-green-fg">&lt;ipython-input-4-c7326d393566&gt;</span> in <span class="ansi-cyan-fg">&lt;module&gt;</span><span class="ansi-blue-fg">()</span>
 <span class="ansi-green-intense-fg ansi-bold">      1</span> <span class="ansi-blue-fg">&#34;&#34;&#34;Check that squares returns the correct output for several inputs&#34;&#34;&#34;</span>
 <span class="ansi-green-fg">----&gt; 2</span><span class="ansi-red-fg"> </span><span class="ansi-green-fg">assert</span> squares<span class="ansi-blue-fg">(</span><span class="ansi-cyan-fg">1</span><span class="ansi-blue-fg">)</span> <span class="ansi-blue-fg">==</span> <span class="ansi-blue-fg">[</span><span class="ansi-cyan-fg">1</span><span class="ansi-blue-fg">]</span>
@@ -12177,8 +12182,8 @@ span.nbgrader-label {
 <div class="output_area"><div class="prompt"></div>
 <div class="output_subarea output_text output_error">
 <pre>
-
-<span class="ansi-red-fg">AssertionError</span>Traceback (most recent call last)
+<span class="ansi-red-fg">---------------------------------------------------------------------------</span>
+<span class="ansi-red-fg">AssertionError</span>                            Traceback (most recent call last)
 <span class="ansi-green-fg">&lt;ipython-input-8-3982d45be654&gt;</span> in <span class="ansi-cyan-fg">&lt;module&gt;</span><span class="ansi-blue-fg">()</span>
 <span class="ansi-green-intense-fg ansi-bold">      1</span> <span class="ansi-blue-fg">&#34;&#34;&#34;Check that sum_of_squares returns the correct answer for various inputs.&#34;&#34;&#34;</span>
 <span class="ansi-green-fg">----&gt; 2</span><span class="ansi-red-fg"> </span><span class="ansi-green-fg">assert</span> sum_of_squares<span class="ansi-blue-fg">(</span><span class="ansi-cyan-fg">1</span><span class="ansi-blue-fg">)</span> <span class="ansi-blue-fg">==</span> <span class="ansi-cyan-fg">1</span>
@@ -12288,8 +12293,8 @@ span.nbgrader-label {
 <div class="output_area"><div class="prompt"></div>
 <div class="output_subarea output_text output_error">
 <pre>
-
-<span class="ansi-red-fg">NotImplementedError</span>Traceback (most recent call last)
+<span class="ansi-red-fg">---------------------------------------------------------------------------</span>
+<span class="ansi-red-fg">NotImplementedError</span>                       Traceback (most recent call last)
 <span class="ansi-green-fg">&lt;ipython-input-10-a3eb14613b08&gt;</span> in <span class="ansi-cyan-fg">&lt;module&gt;</span><span class="ansi-blue-fg">()</span>
 <span class="ansi-green-intense-fg ansi-bold">      1</span> <span class="ansi-red-fg"># YOUR CODE HERE</span>
 <span class="ansi-green-fg">----&gt; 2</span><span class="ansi-red-fg"> </span><span class="ansi-green-fg">raise</span> NotImplementedError<span class="ansi-blue-fg">(</span><span class="ansi-blue-fg">)</span>

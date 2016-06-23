@@ -11735,14 +11735,14 @@ div#notebook-container {
   div.cell {
     display: block;
     page-break-inside: avoid;
-  } 
-  div.output_wrapper { 
-    display: block;
-    page-break-inside: avoid; 
   }
-  div.output { 
+  div.output_wrapper {
     display: block;
-    page-break-inside: avoid; 
+    page-break-inside: avoid;
+  }
+  div.output {
+    display: block;
+    page-break-inside: avoid;
   }
 }
 
@@ -11783,6 +11783,10 @@ div.nbgrader_cell .input_area {
 
 .score {
     color: black;
+}
+
+li.late-penalty {
+    color: #d2413a;
 }
 
 span.nbgrader-label {
@@ -11832,6 +11836,7 @@ span.nbgrader-label {
             <li><a href="#part-b">Written response</a> (Score: 0.0 / 2.0)</li>
             
             
+          
           
           </ol>
         </div>
