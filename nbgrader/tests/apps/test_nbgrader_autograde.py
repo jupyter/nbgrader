@@ -2,23 +2,13 @@ import os
 import sys
 
 from os.path import join
+from textwrap import dedent
 from nbformat.v4 import reads
 
 from ...api import Gradebook
 from ...utils import remove
 from .. import run_nbgrader
 from .base import BaseTestApp
-
-PLUGIN = """
-from __future__ import division
-from nbgrader.plugins import BasePlugin
-
-class Blarg(BasePlugin):
-    def late_submission_penalty(self, student_id, score, total_seconds_late):
-        # loss 1 mark per hour late
-        hours_late = total_seconds_late / 3600
-        return int(hours_late)
-"""
 
 
 class TestNbGraderAutograde(BaseTestApp):
@@ -216,8 +206,20 @@ class TestNbGraderAutograde(BaseTestApp):
 
     def test_late_submission_penalty_plugin(self, db, course_dir):
         """Does plugin set 1 point per hour late penalty?"""
+
+        plugin = dedent("""
+        from __future__ import division
+        from nbgrader.plugins import BasePlugin
+
+        class Blarg(BasePlugin):
+            def late_submission_penalty(self, student_id, score, total_seconds_late):
+                # loss 1 mark per hour late
+                hours_late = total_seconds_late / 3600
+                return int(hours_late)
+        """)
+
         with open("late_plugin.py", 'w') as fh:
-            fh.write(PLUGIN)
+            fh.write(plugin)
 
         with open("nbgrader_config.py", "a") as fh:
             fh.write("""c.NbGrader.db_assignments = [dict(name='ps1', duedate='2015-02-02 14:58:23.948203 PST')]\n""")
