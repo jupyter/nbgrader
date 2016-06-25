@@ -36,9 +36,12 @@ def clear_notebooks(root):
     run(['git', 'clean', '-fdX', root])
 
     # remove release/autograded/feedback
-    shutil.rmtree(os.path.join(root, "user_guide", "release"))
-    shutil.rmtree(os.path.join(root, "user_guide", "autograded"))
-    shutil.rmtree(os.path.join(root, "user_guide", "feedback"))
+    if os.path.exists(os.path.join(root, "user_guide", "release")):
+        shutil.rmtree(os.path.join(root, "user_guide", "release"))
+    if os.path.exists(os.path.join(root, "user_guide", "autograded")):
+        shutil.rmtree(os.path.join(root, "user_guide", "autograded"))
+    if os.path.exists(os.path.join(root, "user_guide", "feedback")):
+        shutil.rmtree(os.path.join(root, "user_guide", "feedback"))
 
     print("Clearing outputs of notebooks in '{}'...".format(os.path.abspath(root)))
     preprocessor = ClearOutputPreprocessor()

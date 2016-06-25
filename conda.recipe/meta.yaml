@@ -1,12 +1,12 @@
 package:
   name: nbgrader
-  version: "0.3.0.dev0"
+  version: "0.3.0"
 
 source:
   path: ..
 
 build:
-  number: 2
+  number: 0
 
 requirements:
   build:
