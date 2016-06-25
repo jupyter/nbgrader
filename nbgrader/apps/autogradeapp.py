@@ -6,7 +6,7 @@ from traitlets import List, Bool
 
 from .baseapp import BaseNbConvertApp, nbconvert_aliases, nbconvert_flags
 from ..preprocessors import (
-    ClearOutput, DeduplicateIds, OverwriteCells, SaveAutoGrades, Execute, LimitOutput)
+    AssignLatePenalties, ClearOutput, DeduplicateIds, OverwriteCells, SaveAutoGrades, Execute, LimitOutput)
 from ..api import Gradebook, MissingEntry
 from .. import utils
 
@@ -119,9 +119,10 @@ class AutogradeApp(BaseNbConvertApp):
     autograde_preprocessors = List([
         Execute,
         LimitOutput,
-        SaveAutoGrades
+        SaveAutoGrades,
+        AssignLatePenalties,
     ])
-    
+
     preprocessors = List([])
 
     def _config_changed(self, name, old, new):

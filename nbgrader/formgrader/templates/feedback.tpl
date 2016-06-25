@@ -42,14 +42,14 @@ div#notebook-container {
   div.cell {
     display: block;
     page-break-inside: avoid;
-  } 
-  div.output_wrapper { 
-    display: block;
-    page-break-inside: avoid; 
   }
-  div.output { 
+  div.output_wrapper {
     display: block;
-    page-break-inside: avoid; 
+    page-break-inside: avoid;
+  }
+  div.output {
+    display: block;
+    page-break-inside: avoid;
   }
 }
 
@@ -92,6 +92,10 @@ div.nbgrader_cell .input_area {
     color: black;
 }
 
+li.late-penalty {
+    color: #d2413a;
+}
+
 span.nbgrader-label {
     line-height: 25px;
 }
@@ -126,6 +130,9 @@ span.nbgrader-label {
             <li><a href="#comment-{{ cell.metadata.nbgrader.grade_id }}">Comment</a></li>
             {% endif %}
           {% endfor %}
+          {% if resources.nbgrader.late_penalty > 0 %}
+            <li class="late-penalty">Late submission penalty (Score: -{{ resources.nbgrader.late_penalty | float | round(2) }})</li>
+          {% endif %}
           </ol>
         </div>
       </div>
@@ -171,7 +178,7 @@ span.nbgrader-label {
   <span class="nbgrader-label">Grade cell: <code>{{ cell.metadata.nbgrader.grade_id }}</code></span>
   {{ score(cell) }}
 {%- endif -%}
-</div>  
+</div>
 {%- endmacro %}
 
 {% macro nbgrader_footer(cell) -%}
@@ -225,7 +232,7 @@ span.nbgrader-label {
   </div>
 
   {%- else -%}
-  
+
   <div class="inner_cell">
     <div class="input_area">
       {{ cell.source | highlight_code(metadata=cell.metadata) }}

@@ -2,6 +2,7 @@ import os
 import sys
 
 from os.path import join
+from textwrap import dedent
 from nbformat.v4 import reads
 
 from ...api import Gradebook
@@ -117,6 +118,146 @@ class TestNbGraderAutograde(BaseTestApp):
 
         # make sure it still works to run it a second time
         run_nbgrader(["autograde", "ps1", "--db", db])
+
+        gb.db.close()
+
+    def test_late_submission_penalty_none(self, db, course_dir):
+        """Does 'none' method do nothing?"""
+        with open("nbgrader_config.py", "a") as fh:
+            fh.write("""c.NbGrader.db_assignments = [dict(name='ps1', duedate='2015-02-02 14:58:23.948203 PST')]\n""")
+            fh.write("""c.NbGrader.db_students = [dict(id="foo"), dict(id="bar")]""")
+
+        self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
+        run_nbgrader(["assign", "ps1", "--db", db])
+
+        # not late
+        self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "submitted", "foo", "ps1", "p1.ipynb"))
+        self._make_file(join(course_dir, "submitted", "foo", "ps1", "timestamp.txt"), "2015-02-02 14:58:23.948203 PST")
+
+        # 1h late
+        self._copy_file(join("files", "submitted-changed.ipynb"), join(course_dir, "submitted", "bar", "ps1", "p1.ipynb"))
+        self._make_file(join(course_dir, "submitted", "bar", "ps1", "timestamp.txt"), "2015-02-02 15:58:23.948203 PST")
+
+        run_nbgrader(["autograde", "ps1", "--db", db])
+
+        assert os.path.isfile(join(course_dir, "autograded", "foo", "ps1", "p1.ipynb"))
+        assert os.path.isfile(join(course_dir, "autograded", "foo", "ps1", "timestamp.txt"))
+        assert os.path.isfile(join(course_dir, "autograded", "bar", "ps1", "p1.ipynb"))
+        assert os.path.isfile(join(course_dir, "autograded", "bar", "ps1", "timestamp.txt"))
+
+        # not late
+        gb = Gradebook(db)
+        submission = gb.find_submission("ps1", "foo")
+        nb = submission.notebooks[0]
+        assert nb.score == 1
+        assert submission.total_seconds_late == 0
+        assert nb.late_submission_penalty == None
+
+        # 1h late
+        submission = gb.find_submission("ps1", "bar")
+        nb = submission.notebooks[0]
+        assert nb.score == 2
+        assert submission.total_seconds_late > 0
+        assert nb.late_submission_penalty == None
+
+        gb.db.close()
+
+    def test_late_submission_penalty_zero(self, db, course_dir):
+        """Does 'zero' method assign notebook.score as penalty if late?"""
+        with open("nbgrader_config.py", "a") as fh:
+            fh.write("""c.NbGrader.db_assignments = [dict(name='ps1', duedate='2015-02-02 14:58:23.948203 PST')]\n""")
+            fh.write("""c.NbGrader.db_students = [dict(id="foo"), dict(id="bar")]\n""")
+            fh.write("""c.LateSubmissionPlugin.penalty_method = 'zero'""")
+
+        self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
+        run_nbgrader(["assign", "ps1", "--db", db])
+
+        # not late
+        self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "submitted", "foo", "ps1", "p1.ipynb"))
+        self._make_file(join(course_dir, "submitted", "foo", "ps1", "timestamp.txt"), "2015-02-02 14:58:23.948203 PST")
+
+        # 1h late
+        self._copy_file(join("files", "submitted-changed.ipynb"), join(course_dir, "submitted", "bar", "ps1", "p1.ipynb"))
+        self._make_file(join(course_dir, "submitted", "bar", "ps1", "timestamp.txt"), "2015-02-02 15:58:23.948203 PST")
+
+        run_nbgrader(["autograde", "ps1", "--db", db])
+
+        assert os.path.isfile(join(course_dir, "autograded", "foo", "ps1", "p1.ipynb"))
+        assert os.path.isfile(join(course_dir, "autograded", "foo", "ps1", "timestamp.txt"))
+        assert os.path.isfile(join(course_dir, "autograded", "bar", "ps1", "p1.ipynb"))
+        assert os.path.isfile(join(course_dir, "autograded", "bar", "ps1", "timestamp.txt"))
+
+        # not late
+        gb = Gradebook(db)
+        submission = gb.find_submission("ps1", "foo")
+        nb = submission.notebooks[0]
+        assert nb.score == 1
+        assert submission.total_seconds_late == 0
+        assert nb.late_submission_penalty == None
+
+        # 1h late
+        submission = gb.find_submission("ps1", "bar")
+        nb = submission.notebooks[0]
+        assert nb.score == 2
+        assert submission.total_seconds_late > 0
+        assert nb.late_submission_penalty == nb.score
+
+        gb.db.close()
+
+    def test_late_submission_penalty_plugin(self, db, course_dir):
+        """Does plugin set 1 point per hour late penalty?"""
+
+        plugin = dedent("""
+        from __future__ import division
+        from nbgrader.plugins import BasePlugin
+
+        class Blarg(BasePlugin):
+            def late_submission_penalty(self, student_id, score, total_seconds_late):
+                # loss 1 mark per hour late
+                hours_late = total_seconds_late / 3600
+                return int(hours_late)
+        """)
+
+        with open("late_plugin.py", 'w') as fh:
+            fh.write(plugin)
+
+        with open("nbgrader_config.py", "a") as fh:
+            fh.write("""c.NbGrader.db_assignments = [dict(name='ps1', duedate='2015-02-02 14:58:23.948203 PST')]\n""")
+            fh.write("""c.NbGrader.db_students = [dict(id="foo"), dict(id="bar")]\n""")
+            fh.write("""c.AssignLatePenalties.plugin_class = 'late_plugin.Blarg'""")
+
+        self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
+        run_nbgrader(["assign", "ps1", "--db", db])
+
+        # 4h late
+        self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "submitted", "foo", "ps1", "p1.ipynb"))
+        self._make_file(join(course_dir, "submitted", "foo", "ps1", "timestamp.txt"), "2015-02-02 18:58:23.948203 PST")
+
+        # 1h late
+        self._copy_file(join("files", "submitted-changed.ipynb"), join(course_dir, "submitted", "bar", "ps1", "p1.ipynb"))
+        self._make_file(join(course_dir, "submitted", "bar", "ps1", "timestamp.txt"), "2015-02-02 15:58:23.948203 PST")
+
+        run_nbgrader(["autograde", "ps1", "--db", db])
+
+        assert os.path.isfile(join(course_dir, "autograded", "foo", "ps1", "p1.ipynb"))
+        assert os.path.isfile(join(course_dir, "autograded", "foo", "ps1", "timestamp.txt"))
+        assert os.path.isfile(join(course_dir, "autograded", "bar", "ps1", "p1.ipynb"))
+        assert os.path.isfile(join(course_dir, "autograded", "bar", "ps1", "timestamp.txt"))
+
+        # 4h late
+        gb = Gradebook(db)
+        submission = gb.find_submission("ps1", "foo")
+        nb = submission.notebooks[0]
+        assert nb.score == 1
+        assert submission.total_seconds_late > 0
+        assert nb.late_submission_penalty == nb.score
+
+        # 1h late
+        submission = gb.find_submission("ps1", "bar")
+        nb = submission.notebooks[0]
+        assert nb.score == 2
+        assert submission.total_seconds_late > 0
+        assert nb.late_submission_penalty == 1
 
         gb.db.close()
 

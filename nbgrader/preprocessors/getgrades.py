@@ -19,11 +19,17 @@ class GetGrades(NbGraderPreprocessor):
         try:
             # process the cells
             nb, resources = super(GetGrades, self).preprocess(nb, resources)
-
-            submission = self.gradebook.find_submission_notebook(
+            notebook = self.gradebook.find_submission_notebook(
                 self.notebook_id, self.assignment_id, self.student_id)
-            resources['nbgrader']['score'] = submission.score
-            resources['nbgrader']['max_score'] = submission.max_score
+
+            late_penalty = notebook.late_submission_penalty
+            if late_penalty is None:
+                late_penalty = 0
+            else:
+                self.log.warning("Late submission penalty: {}".format(late_penalty))
+            resources['nbgrader']['score'] = notebook.score - late_penalty
+            resources['nbgrader']['max_score'] = notebook.max_score
+            resources['nbgrader']['late_penalty'] = late_penalty
 
         finally:
             self.gradebook.db.close()
