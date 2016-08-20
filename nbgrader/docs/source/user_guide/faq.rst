@@ -51,7 +51,7 @@ How does nbgrader handle late assignments?
 
 By default nbgrader won't explicitly assign late penalties, but it will
 compute how late each submission is. If you wish to customize this default
-behavior see :doc:`adding customization plugins </plugins/index>`
+behavior see :doc:`adding customization plugins </plugins/index>`.
 
 For this to work, you must include a duedate for the assignment and then a
 ``timestamp.txt`` file in the folder for each submission with a single line
@@ -88,3 +88,9 @@ Yes, though it hasn't been extensively tested with other kernels and it is
 likely there are some edge cases where things do not work quite right. If you
 run into any issues using nbgrader with other kernels, please
 `open an issue <https://github.com/jupyter/nbgrader/issues/new>`_!
+
+How do I get out grade information from the database?
+-----------------------------------------------------
+
+nbgrader offers a fairly rich :doc:`API </api/index>` for interfacing with the
+database. Please see :ref:`getting-information-from-db` for more details.
