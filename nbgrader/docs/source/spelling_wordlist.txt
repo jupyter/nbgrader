@@ -2,6 +2,7 @@ admin
 Afterwards
 alchemyst
 alope
+app
 apps
 asctime
 auth
@@ -18,6 +19,7 @@ backends
 Bitdiddle
 bugfix
 bugtracker
+camelcase
 Carreau
 Changelog
 changelog
@@ -28,6 +30,7 @@ conda
 config
 customizable
 datefmt
+delimeters
 dev
 dropdown
 duedate
@@ -95,9 +98,11 @@ plugins
 positionally
 postgres
 prepend
+prepending
 prepopulate
 preprocessor
 Preprocessor
+preprocessors
 prev
 Programmatically
 programmatically
@@ -146,3 +151,4 @@ willingc
 wordlist
 Workflow
 workflow
+workflows
