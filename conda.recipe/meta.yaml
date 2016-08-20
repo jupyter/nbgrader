@@ -1,6 +1,6 @@
 package:
   name: nbgrader
-  version: "0.3.0"
+  version: "0.4.0.dev0"
 
 source:
   path: ..
@@ -12,6 +12,18 @@ requirements:
   build:
     - python
     - setuptools
+    - sqlalchemy
+    - python-dateutil
+    - jupyter
+    - notebook >=4.2
+    - nbconvert >=4.2
+    - nbformat
+    - traitlets
+    - jupyter_core
+    - jupyter_client
+    - tornado
+    - six
+    - requests
   run:
     - python
     - sqlalchemy
