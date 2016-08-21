@@ -95,8 +95,6 @@ class CsvExportPlugin(ExportPlugin):
                         score[key] = ''
                     if not isinstance(score[key], str):
                         score[key] = str(score[key])
-                    if "," in score[key]:
-                        score[key] = '"{}"'.format(score[key])
 
                 fh.write(fmt.format(**score))
 
