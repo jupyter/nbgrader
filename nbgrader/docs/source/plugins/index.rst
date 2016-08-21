@@ -18,3 +18,4 @@ Example usage
     :maxdepth: 1
 
     late-plugin
+    export-plugin

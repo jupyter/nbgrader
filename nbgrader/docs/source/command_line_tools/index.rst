@@ -22,6 +22,7 @@ Instructor commands
     nbgrader-autograde
     nbgrader-formgrade
     nbgrader-feedback
+    nbgrader-export
 
 The following commands are meant for instructors, but are only relevant when using nbgrader in a shared server environment:
 

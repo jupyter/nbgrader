@@ -325,31 +325,37 @@ def test_submission_timestamp_late_with_extension(db):
 def test_create_submitted_notebook(db):
     now = datetime.datetime.utcnow()
     a = api.Assignment(name='foo', duedate=now)
-    n = api.Notebook(name='blah', assignment=a)
+    n1 = api.Notebook(name='blah', assignment=a)
+    n2 = api.Notebook(name='blah2', assignment=a)
     s = api.Student(id="12345", first_name='Jane', last_name='Doe', email='janedoe@nowhere')
     sa = api.SubmittedAssignment(assignment=a, student=s)
-    sn = api.SubmittedNotebook(assignment=sa, notebook=n)
-    db.add(sn)
+    sn1 = api.SubmittedNotebook(assignment=sa, notebook=n1, late_submission_penalty=5)
+    sn2 = api.SubmittedNotebook(assignment=sa, notebook=n2, late_submission_penalty=1)
+    db.add(sn1)
+    db.add(sn2)
     db.commit()
 
-    assert sn.id
-    assert sn.notebook == n
-    assert sn.assignment == sa
-    assert sn.grades == []
-    assert sn.comments == []
-    assert sn.student == s
-    assert sa.notebooks == [sn]
-    assert n.submissions == [sn]
+    assert sn1.id
+    assert sn1.notebook == n1
+    assert sn1.assignment == sa
+    assert sn1.grades == []
+    assert sn1.comments == []
+    assert sn1.student == s
+    assert sa.notebooks == [sn1, sn2]
+    assert n1.submissions == [sn1]
 
-    assert sn.score == 0
-    assert sn.max_score == 0
-    assert sn.code_score == 0
-    assert sn.max_code_score == 0
-    assert sn.written_score == 0
-    assert sn.max_written_score == 0
-    assert not sn.needs_manual_grade
+    assert sn1.score == 0
+    assert sn1.max_score == 0
+    assert sn1.code_score == 0
+    assert sn1.max_code_score == 0
+    assert sn1.written_score == 0
+    assert sn1.max_written_score == 0
+    assert sn1.late_submission_penalty == 5
+    assert sn2.late_submission_penalty == 1
+    assert sa.late_submission_penalty == 6
+    assert not sn1.needs_manual_grade
 
-    assert repr(sn) == "SubmittedNotebook<foo/blah for 12345>"
+    assert repr(sn1) == "SubmittedNotebook<foo/blah for 12345>"
 
 
 def test_create_code_grade(db):

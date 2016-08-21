@@ -26,7 +26,8 @@ from . import (
     SubmitApp,
     ListApp,
     ExtensionApp,
-    QuickStartApp
+    QuickStartApp,
+    ExportApp
 )
 
 aliases = {}
@@ -189,6 +190,14 @@ class NbGraderApp(NbGrader):
                 """
                 Create an example class files directory with an example
                 config file and assignment.
+                """
+            ).strip()
+        ),
+        export=(
+            ExportApp,
+            dedent(
+                """
+                Export grades from the database to another format.
                 """
             ).strip()
         )

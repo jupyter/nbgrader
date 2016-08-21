@@ -443,6 +443,12 @@ class SubmittedAssignment(Base):
     #: attribute of each notebook.
     needs_manual_grade = None
 
+    #: The penalty (>= 0) given for submitting the assignment late.
+    #: Automatically determined from the
+    #: :attr:`~nbgrader.api.SubmittedNotebook.late_submission_penalty`
+    #: attribute of each notebook.
+    late_submission_penalty = None
+
     @property
     def duedate(self):
         """The duedate of this student's assignment, which includes any extension
@@ -986,6 +992,14 @@ SubmittedNotebook.failed_tests = column_property(
         Grade.notebook_id == SubmittedNotebook.id,
         Grade.failed_tests))\
     .correlate_except(Grade), deferred=True)
+
+
+## Late penalties
+
+SubmittedAssignment.late_submission_penalty = column_property(
+    select([func.coalesce(func.sum(SubmittedNotebook.late_submission_penalty), 0.0)])\
+        .where(SubmittedNotebook.assignment_id == SubmittedAssignment.id)\
+        .correlate_except(SubmittedNotebook), deferred=True)
 
 
 class Gradebook(object):

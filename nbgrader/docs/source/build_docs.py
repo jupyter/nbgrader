@@ -28,6 +28,7 @@ def autogen_command_line(root):
         'AutogradeApp',
         'CollectApp',
         'ExtensionApp',
+        'ExportApp',
         'FeedbackApp',
         'FetchApp',
         'FormgradeApp',
