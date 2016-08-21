@@ -25,6 +25,12 @@ In this example, we'll go through how to create a CSV file of grades for each
 student and assignment using nbgrader and `pandas
 <http://pandas.pydata.org/>`__.
 
+.. versionadded:: 0.4.0
+    nbgrader now comes with CSV export functionality out-of-the box using the
+    :doc:`nbgrader export </command_line_tools/nbgrader-export>` command.
+    However, this example is still kept for reference as it may be useful for
+    :doc:`defining your own exporter </plugins/export-plugin>`.
+
 .. literalinclude:: extract_grades.py
    :language: python
 

@@ -10,7 +10,20 @@ class ExportPlugin(BasePlugin):
     to = Unicode("", config=True, help="destination to export to")
 
     def export(self, gradebook):
-        pass
+        """Export grades to another format.
+
+        This method MUST be implemented by subclasses. Users should be able to
+        pass the ``--to`` flag on the command line, which will set the
+        ``self.to`` variable. By default, this variable will be an empty string,
+        which allows you to specify whatever default you would like.
+
+        Arguments
+        ---------
+        gradebook: :class:`nbgrader.api.Gradebook`
+            An instance of the gradebook
+
+        """
+        raise NotImplementedError
 
 
 class CsvExportPlugin(ExportPlugin):
