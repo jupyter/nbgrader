@@ -127,9 +127,9 @@ class HubAuthManager(DefaultManager):
         c.FormgradeApp.authenticator_class = "nbgrader.auth.hubauth.HubAuth"
         c.HubAuth.graders = ["foobar"]
         c.HubAuth.notebook_url_prefix = "class_files"
-        c.HubAuth.proxy_port = {proxy_port}
-        c.HubAuth.hubapi_port = {hubapi_port}
-        c.HubAuth.hub_port = {hub_port}
+        c.HubAuth.proxy_base_url = "http://localhost:{proxy_port}"
+        c.HubAuth.hubapi_base_url = "http://localhost:{hubapi_port}"
+        c.HubAuth.hub_base_url = "http://localhost:{hub_port}"
         """
     )
 
@@ -210,9 +210,9 @@ class HubAuthCustomUrlManager(HubAuthManager):
         c.HubAuth.graders = ["foobar"]
         c.HubAuth.notebook_url_prefix = "class_files"
         c.HubAuth.remap_url = '/hub/grader'
-        c.HubAuth.proxy_port = {proxy_port}
-        c.HubAuth.hubapi_port = {hubapi_port}
-        c.HubAuth.hub_port = {hub_port}
+        c.HubAuth.proxy_base_url = "http://localhost:{proxy_port}"
+        c.HubAuth.hubapi_base_url = "http://localhost:{hubapi_port}"
+        c.HubAuth.hub_base_url = "http://localhost:{hub_port}"
         """
     )
 
@@ -230,9 +230,9 @@ class HubAuthNotebookServerUserManager(HubAuthManager):
         c.HubAuth.graders = ["foobar", "quux"]
         c.HubAuth.notebook_url_prefix = "class_files"
         c.HubAuth.notebook_server_user = 'quux'
-        c.HubAuth.proxy_port = {proxy_port}
-        c.HubAuth.hubapi_port = {hubapi_port}
-        c.HubAuth.hub_port = {hub_port}
+        c.HubAuth.proxy_base_url = "http://localhost:{proxy_port}"
+        c.HubAuth.hubapi_base_url = "http://localhost:{hubapi_port}"
+        c.HubAuth.hub_base_url = "http://localhost:{hub_port}"
         """
     )
 
@@ -266,10 +266,9 @@ class HubAuthSSLManager(HubAuthManager):
         c.FormgradeApp.authenticator_class = "nbgrader.auth.hubauth.HubAuth"
         c.HubAuth.graders = ["foobar"]
         c.HubAuth.notebook_url_prefix = "class_files"
+        c.HubAuth.proxy_base_url = "http://localhost:{proxy_port}"
+        c.HubAuth.hubapi_base_url = "http://localhost:{hubapi_port}"
         c.HubAuth.hub_base_url = "https://localhost:{hub_port}"
-        c.HubAuth.proxy_port = {proxy_port}
-        c.HubAuth.hubapi_port = {hubapi_port}
-        c.HubAuth.hub_port = {hub_port}
         """
     )
 

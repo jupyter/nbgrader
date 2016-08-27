@@ -21,7 +21,7 @@ class BaseTestFormgrade(object):
     def _check_url(self, url):
         if not url.startswith("http"):
             url = self.formgrade_url(url)
-        assert unquote(self.browser.current_url.rstrip("/")) == url
+        assert unquote(self.browser.current_url).rstrip("/") == url
 
     def _check_breadcrumbs(self, *breadcrumbs):
         # check that breadcrumbs are correct

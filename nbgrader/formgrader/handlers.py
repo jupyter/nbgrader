@@ -1,14 +1,14 @@
 import os
 import re
 
-from tornado import web, httputil
+from tornado import web
 
-from .base import BaseHandler, authenticated
+from .base import BaseHandler
 from ..api import MissingEntry
 
 
 class AssignmentsHandler(BaseHandler):
-    @authenticated
+    @web.authenticated
     def get(self):
         assignments = []
         for assignment in self.gradebook.assignments:
@@ -27,7 +27,7 @@ class AssignmentsHandler(BaseHandler):
 
 
 class AssignmentNotebooksHandler(BaseHandler):
-    @authenticated
+    @web.authenticated
     def get(self, assignment_id):
         try:
             assignment = self.gradebook.find_assignment(assignment_id)
@@ -53,7 +53,7 @@ class AssignmentNotebooksHandler(BaseHandler):
 
 
 class AssignmentNotebookSubmissionsHandler(BaseHandler):
-    @authenticated
+    @web.authenticated
     def get(self, assignment_id, notebook_id):
         try:
             self.gradebook.find_notebook(notebook_id, assignment_id)
@@ -77,7 +77,7 @@ class AssignmentNotebookSubmissionsHandler(BaseHandler):
 
 
 class StudentsHandler(BaseHandler):
-    @authenticated
+    @web.authenticated
     def get(self):
         students = self.gradebook.student_dicts()
         students.sort(key=lambda x: x.get("last_name") or "no last name")
@@ -91,7 +91,7 @@ class StudentsHandler(BaseHandler):
 
 
 class StudentAssignmentsHandler(BaseHandler):
-    @authenticated
+    @web.authenticated
     def get(self, student_id):
         try:
             student = self.gradebook.find_student(student_id)
@@ -134,7 +134,7 @@ class StudentAssignmentsHandler(BaseHandler):
 
 
 class StudentAssignmentNotebooksHandler(BaseHandler):
-    @authenticated
+    @web.authenticated
     def get(self, student_id, assignment_id):
         try:
             assignment = self.gradebook.find_submission(assignment_id, student_id)
@@ -155,7 +155,7 @@ class StudentAssignmentNotebooksHandler(BaseHandler):
 
 
 class SubmissionHandler(BaseHandler):
-    @authenticated
+    @web.authenticated
     def get(self, submission_id):
         try:
             submission = self.gradebook.find_submission_notebook_by_id(submission_id)
@@ -276,7 +276,7 @@ class SubmissionNavigationHandler(BaseHandler):
         else:
             return self._submission_url(submission_ids[ix_incorrect - 1])
 
-    @authenticated
+    @web.authenticated
     def get(self, submission_id, action):
         try:
             submission = self.gradebook.find_submission_notebook_by_id(submission_id)
@@ -312,7 +312,7 @@ class SubmissionFilesHandler(web.StaticFileHandler, BaseHandler):
         full_path = os.path.join(dirname, path)
         return super(SubmissionFilesHandler, self).parse_url_path(full_path)
 
-    @authenticated
+    @web.authenticated
     def get(self, *args, **kwargs):
         return super(SubmissionFilesHandler, self).get(*args, **kwargs)
 

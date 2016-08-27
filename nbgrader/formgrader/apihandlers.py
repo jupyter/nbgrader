@@ -2,12 +2,12 @@ import json
 
 from tornado import web
 
-from .base import BaseApiHandler, authenticated
+from .base import BaseApiHandler
 from ..api import MissingEntry
 
 
 class GradeCollectionHandler(BaseApiHandler):
-    @authenticated
+    @web.authenticated
     def get(self):
         submission_id = self.get_argument("submission_id")
         try:
@@ -18,7 +18,7 @@ class GradeCollectionHandler(BaseApiHandler):
 
 
 class CommentCollectionHandler(BaseApiHandler):
-    @authenticated
+    @web.authenticated
     def get(self):
         submission_id = self.get_argument("submission_id")
         try:
@@ -29,7 +29,7 @@ class CommentCollectionHandler(BaseApiHandler):
 
 
 class GradeHandler(BaseApiHandler):
-    @authenticated
+    @web.authenticated
     def get(self, grade_id):
         try:
             grade = self.gradebook.find_grade_by_id(grade_id)
@@ -37,7 +37,7 @@ class GradeHandler(BaseApiHandler):
             raise web.HTTPError(404)
         self.write(json.dumps(grade.to_dict()))
 
-    @authenticated
+    @web.authenticated
     def put(self, grade_id):
         try:
             grade = self.gradebook.find_grade_by_id(grade_id)
@@ -55,7 +55,7 @@ class GradeHandler(BaseApiHandler):
 
 
 class CommentHandler(BaseApiHandler):
-    @authenticated
+    @web.authenticated
     def get(self, grade_id):
         try:
             comment = self.gradebook.find_comment_by_id(grade_id)
@@ -63,7 +63,7 @@ class CommentHandler(BaseApiHandler):
             raise web.HTTPError(404)
         self.write(json.dumps(comment.to_dict()))
 
-    @authenticated
+    @web.authenticated
     def put(self, grade_id):
         try:
             comment = self.gradebook.find_comment_by_id(grade_id)
@@ -77,7 +77,7 @@ class CommentHandler(BaseApiHandler):
 
 
 class FlagSubmissionHandler(BaseApiHandler):
-    @authenticated
+    @web.authenticated
     def post(self, submission_id):
         try:
             submission = self.gradebook.find_submission_notebook_by_id(submission_id)
