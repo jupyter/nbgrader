@@ -9,8 +9,11 @@ from traitlets import Unicode, Int, List, Bool, Instance
 from six.moves.urllib.parse import unquote
 from tornado import web
 
-from jupyterhub.services.auth import HubAuth as JupyterHubAuth
-JupyterHubAuth.__name__ = "JupyterHubAuth"
+try:
+    from jupyterhub.services.auth import HubAuth as JupyterHubAuth
+    JupyterHubAuth.__name__ = "JupyterHubAuth"
+except ImportError:
+    JupyterHubAuth = None
 
 from .base import BaseAuth
 
@@ -20,7 +23,11 @@ class HubAuth(BaseAuth):
 
     graders = List([], config=True, help="List of JupyterHub user names allowed to grade.")
 
-    hub_authenticator = Instance(JupyterHubAuth)
+    if JupyterHubAuth:
+        hub_authenticator = Instance(JupyterHubAuth)
+    else:
+        hub_authenticator = None
+
     def _hub_authenticator_default(self):
         auth = JupyterHubAuth(parent=self)
         auth.login_url = '/hub/login'
