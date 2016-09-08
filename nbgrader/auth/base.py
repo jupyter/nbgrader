@@ -16,10 +16,16 @@ class BaseAuth(LoggingConfigurable):
     def base_url(self):
         return self._base_url
 
-    def authenticate(self, request):
-        """Authenticate a request.
-        Returns a boolean or redirect."""
-        return True
+    @property
+    def login_url(self):
+        return ''
+
+    def get_user(self, handler):
+        return 'nbgrader'
+
+    def authenticate(self, user):
+        """Authenticate a user."""
+        return user
 
     def notebook_server_exists(self):
         """Checks for a notebook server."""

@@ -111,12 +111,11 @@ Configuring SSL
 
 You should almost certainly be running JupyterHub with SSL support, as it is
 insecure to not do so. However, this requires a bit more additional
-configuration on the nbgrader side as well. In particular, you will need to change the ``HubAuth.hub_base_url`` config option to include ``https``, and (probably) change the port to 443:
+configuration on the nbgrader side as well. In particular, you will need to change the ``HubAuth.hub_base_url`` config option to include ``https``:
 
 .. code:: python
 
     c.HubAuth.hub_base_url = "https://localhost:443"
-    c.HubAuth.hub_port = 443
 
 For a minimal working example of using JupyterHub with SSL, please see the
 ``nbgrader.tests.formgrader.manager.HubAuthSSLManager`` in the `nbgrader tests

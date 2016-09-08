@@ -162,7 +162,8 @@ class FormgradeApp(NbGrader):
             nbgrader_mathjax_url=self.mathjax_url,
             nbgrader_gradebook=Gradebook(self.db_url),
             nbgrader_jinja2_env=jinja_env,
-            nbgrader_log=self.log
+            nbgrader_log=self.log,
+            login_url=self.authenticator_instance.login_url
         )
 
     def init_handlers(self):

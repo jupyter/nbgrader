@@ -25,7 +25,7 @@ c.FormgradeApp.authenticator_class = "nbgrader.auth.hubauth.HubAuth"
 # default, the HubAuth will just use the same address as what the formgrader is
 # running on -- so in this case, 127.0.0.1). If you have JupyterHub behind a
 # domain name, you probably want to set that here.
-c.HubAuth.hub_address = "127.0.0.1"
+c.HubAuth.hub_base_url = "http://127.0.0.1:8000"
 
 # Change this to be the path to the user guide folder in your clone of
 # nbgrader, or just wherever you have your class files. This is relative

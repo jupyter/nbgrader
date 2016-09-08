@@ -1,22 +1,26 @@
 import json
-import functools
+
 from tornado import web
 
 
-def authenticated(f):
-    @functools.wraps(f)
-    def wrapper(self, *args, **kwargs):
-        result = self.auth.authenticate(self.request)
-        if result is True:
-            return f(self, *args, **kwargs) # Success
-        elif result is False:
-            raise web.HTTPError(403) # Forbidden
-        else:
-            self.redirect(result, permanent=False)  # Redirect
-    return wrapper
-
-
 class BaseHandler(web.RequestHandler):
+
+    def get_current_user(self):
+        """Tornado's authentication method
+
+        Returns
+        -------
+        user: string
+            The name of the user, or None if authentication fails
+
+        """
+        user = self.auth.get_user(self)
+        if not user:
+            return None
+        if self.auth.authenticate(user):
+            return user
+        else:
+            raise web.HTTPError(403)
 
     @property
     def gradebook(self):

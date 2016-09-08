@@ -284,5 +284,6 @@ class TestGradebook(BaseTestFormgrade):
         url = self.notebook_url("autograded/{}/Problem Set 1/{}.ipynb".format(submission.student.id, problem.name))
         self._get(url)
         self._wait_for_element("username_input")
-        self._check_url("{}/hub/login".format(self.manager.base_url))
+        next_url = url.replace(self.manager.base_url, "/hub")
+        self._check_url("{}/hub/login?next={}".format(self.manager.base_url, quote(next_url)))
 
