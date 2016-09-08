@@ -85,9 +85,14 @@ Does nbgrader work with non-Python kernels?
 -------------------------------------------
 
 Yes, though it hasn't been extensively tested with other kernels and it is
-likely there are some edge cases where things do not work quite right. If you
-run into any issues using nbgrader with other kernels, please
-`open an issue <https://github.com/jupyter/nbgrader/issues/new>`_!
+likely there are some edge cases where things do not work quite right. One
+thing in particular that you will need to do is :doc:`customize how the
+student version </configuration/student_version>` is produced -- for example,
+you will need to change the delimiters for the solution regions to use the
+appropriate comment marks for your language.
+
+If you run into any issues using nbgrader with other kernels, please `open an
+issue <https://github.com/jupyter/nbgrader/issues/new>`_!
 
 How do I get out grade information from the database?
 -----------------------------------------------------

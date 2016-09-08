@@ -22,6 +22,7 @@ nbgrader
     :maxdepth: 1
     :caption: Configuration
 
+    configuration/student_version
     configuration/config_options
     command_line_tools/index
     configuration/jupyterhub_config
