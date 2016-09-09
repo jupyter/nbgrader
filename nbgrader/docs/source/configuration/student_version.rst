@@ -82,8 +82,18 @@ within the same assignment:
         "javascript": "// your code here\nthrow new Error();"
     }
 
-Note that the code stubs do not have to raise an error -- but doing so is a
-more visible indication to students that they need to implement something.
+.. note::
+
+    Note that the code stub itself doesn't *have* to cause an error (though
+    that is the easiest thing to do, in my opinion) -- it all depends on how
+    you write your test cases. The only constraint is that when autograding
+    happens, the behavior is such that:
+
+    1. If the tests pass, the student gets full credit.
+    2. If the tests fail, the student gets no credit.
+
+    So if the student hasn't given an answer, the tests should ideally fail by
+    default. How they fail is totally up to how you write your test cases.
 
 Similarly, the text stub that the contents of Markdown cells get replaced with
 can be configured through the ``ClearSolutions.text_stub`` option:
