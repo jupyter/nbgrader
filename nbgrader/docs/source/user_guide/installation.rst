@@ -39,6 +39,10 @@ the nbgrader notebook extension, use::
     nbgrader extension install --help-all
     nbgrader extension activate --help-all
 
+For instructions on installing the "Assignment List" extension for all users in
+a shared server setup, please see the :ref:`advanced installation instructions
+<assignment-list-installation>`.
+
 Quick start
 -----------
 
