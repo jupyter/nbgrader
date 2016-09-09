@@ -8,7 +8,7 @@ c = get_config()
 
 c.NbGrader.course_id = "example_course"
 c.TransferApp.exchange_directory = "/tmp/exchange"
-c.NbGrader.db_assignments = [dict(name="ps1")]
+c.NbGrader.db_assignments = [dict(name="ps1", duedate="2015-02-02 17:00:00 UTC")]
 c.NbGrader.db_students = [
     dict(id="bitdiddle", first_name="Ben", last_name="Bitdiddle"),
     dict(id="hacker", first_name="Alyssa", last_name="Hacker"),
