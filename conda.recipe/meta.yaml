@@ -1,6 +1,6 @@
 package:
   name: nbgrader
-  version: "0.3.1rc0"
+  version: "0.3.1"
 
 source:
   path: ..
