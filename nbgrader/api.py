@@ -1025,7 +1025,14 @@ class Gradebook(object):
         Base.metadata.create_all(bind=self.engine)
 
     def close(self):
-        """Close the connection to the database."""
+        """Close the connection to the database.
+
+        It is important to call this method after you are done using the
+        gradebook. In particular, if you create multiple instances of the
+        gradebook without closing them, you may run into errors where there
+        are too many open connections to the database.
+
+        """
         self.db.remove()
         self.engine.dispose()
 
