@@ -629,8 +629,9 @@ class TestNbGraderAutograde(BaseTestApp):
             else:
                 assert 'outputs' not in new_cell
 
-    @pytest.mark.skip(reason="this test takes too long to run and requires manual configuration")
     def test_many_students(self, course_dir):
+        pytest.skip("this test takes too long to run and requires manual configuration")
+
         # NOTE: to test this, you will manually have to configure the postgres
         # database. In the postgresql.conf file in the postgres data directory,
         # set max_connections to something low (like 5). Then, create the gradebook
