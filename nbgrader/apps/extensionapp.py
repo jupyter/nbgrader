@@ -20,10 +20,27 @@ class ExtensionInstallApp(InstallNBExtensionApp, NbGrader):
     description = u'Install the nbgrader extensions'
 
     examples = """
+
+    To install all the extensions, run:
+
         nbgrader extension install
+
+    If you want to install the extensions for only your user environment and
+    not systemwide, use:
+
         nbgrader extension install --user
-        nbgrader extension install --prefix=/path/to/prefix
-        nbgrader extension install --nbextensions=/path/to/nbextensions
+
+    If you don't want to have to reinstall the extensions when nbgrader is
+    updated, use:
+
+        nbgrader extension install --symlink
+
+    To install only a specific extension, you can pass the name of the
+    extension you want to install as an argument, e.g.:
+
+        nbgrader extension install create_assignment
+        nbgrader extension install assignment_list
+
     """
 
     destination = Unicode('')
@@ -68,10 +85,23 @@ class ExtensionUninstallApp(UninstallNBExtensionApp, NbGrader):
     description = u'Uninstall the nbgrader extensions'
 
     examples = """
+
+    To uninstall all the nbgrader extensions that are installed systemwide,
+    run:
+
         nbgrader extension uninstall
+
+    If you want to uninstall the extensions installed in your user
+    environment, use:
+
         nbgrader extension uninstall --user
-        nbgrader extension uninstall --prefix=/path/to/prefix
-        nbgrader extension uninstall --nbextensions=/path/to/nbextensions
+
+    To uninstall only a specific extension, you can pass the name of the
+    extension you want to uninstall as an argument, e.g.:
+
+        nbgrader extension uninstall create_assignment
+        nbgrader extension uninstall assignment_list
+
     """
 
     destination = Unicode('')
@@ -108,7 +138,17 @@ class ExtensionActivateApp(EnableNBExtensionApp, NbGrader):
     aliases = {}
 
     examples = """
+
+    To activate all the nbgrader extensions:
+
         nbgrader extension activate
+
+    To activate only a specific extension, you can pass the name of the
+    extension you want to activate as an argument, e.g.:
+
+        nbgrader extension activate create_assignment
+        nbgrader extension activate assignment_list
+
     """
 
     def _classes_default(self):
@@ -154,7 +194,17 @@ class ExtensionDeactivateApp(DisableNBExtensionApp, NbGrader):
     aliases = {}
 
     examples = """
+
+    To deactivate all the nbgrader extensions:
+
         nbgrader extension deactivate
+
+    To deactivate only a specific extension, you can pass the name of the
+    extension you want to deactivate as an argument, e.g.:
+
+        nbgrader extension deactivate create_assignment
+        nbgrader extension deactivate assignment_list
+
     """
 
     def _classes_default(self):
