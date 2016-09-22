@@ -1004,11 +1004,23 @@ class Gradebook(object):
 
         """
         # create the connection to the database
-        engine = create_engine(db_url)
-        self.db = scoped_session(sessionmaker(autoflush=True, bind=engine))
+        self.engine = create_engine(db_url)
+        self.db = scoped_session(sessionmaker(autoflush=True, bind=self.engine))
 
         # this creates all the tables in the database if they don't already exist
-        Base.metadata.create_all(bind=engine)
+        Base.metadata.create_all(bind=self.engine)
+
+    def close(self):
+        """Close the connection to the database.
+
+        It is important to call this method after you are done using the
+        gradebook. In particular, if you create multiple instances of the
+        gradebook without closing them, you may run into errors where there
+        are too many open connections to the database.
+
+        """
+        self.db.remove()
+        self.engine.dispose()
 
     #### Students
 

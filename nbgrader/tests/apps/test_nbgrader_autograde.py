@@ -1,5 +1,7 @@
 import os
 import sys
+import json
+import pytest
 
 from os.path import join
 from textwrap import dedent
@@ -86,7 +88,7 @@ class TestNbGraderAutograde(BaseTestApp):
         assert comment1.comment == None
         assert comment2.comment == None
 
-        gb.db.close()
+        gb.close()
 
     def test_grade_timestamp(self, db, course_dir):
         """Is a timestamp correctly read in?"""
@@ -119,7 +121,7 @@ class TestNbGraderAutograde(BaseTestApp):
         # make sure it still works to run it a second time
         run_nbgrader(["autograde", "ps1", "--db", db])
 
-        gb.db.close()
+        gb.close()
 
     def test_late_submission_penalty_none(self, db, course_dir):
         """Does 'none' method do nothing?"""
@@ -160,7 +162,7 @@ class TestNbGraderAutograde(BaseTestApp):
         assert submission.total_seconds_late > 0
         assert nb.late_submission_penalty == None
 
-        gb.db.close()
+        gb.close()
 
     def test_late_submission_penalty_zero(self, db, course_dir):
         """Does 'zero' method assign notebook.score as penalty if late?"""
@@ -202,7 +204,7 @@ class TestNbGraderAutograde(BaseTestApp):
         assert submission.total_seconds_late > 0
         assert nb.late_submission_penalty == nb.score
 
-        gb.db.close()
+        gb.close()
 
     def test_late_submission_penalty_plugin(self, db, course_dir):
         """Does plugin set 1 point per hour late penalty?"""
@@ -259,7 +261,7 @@ class TestNbGraderAutograde(BaseTestApp):
         assert submission.total_seconds_late > 0
         assert nb.late_submission_penalty == 1
 
-        gb.db.close()
+        gb.close()
 
     def test_force(self, db, course_dir):
         """Ensure the force option works properly"""
@@ -626,3 +628,30 @@ class TestNbGraderAutograde(BaseTestApp):
                 assert orig_cell.outputs == new_cell.outputs
             else:
                 assert 'outputs' not in new_cell
+
+    def test_many_students(self, course_dir):
+        pytest.skip("this test takes too long to run and requires manual configuration")
+
+        # NOTE: to test this, you will manually have to configure the postgres
+        # database. In the postgresql.conf file in the postgres data directory,
+        # set max_connections to something low (like 5). Then, create the gradebook
+        # database and run this test.
+        db = "postgresql://localhost:5432/gradebook"
+
+        students = []
+        student_fmt = "student{:03d}"
+        num_students = 50
+        for i in range(num_students):
+            students.append(dict(id=student_fmt.format(i)))
+
+        with open("nbgrader_config.py", "a") as fh:
+            fh.write("""c.NbGrader.db_assignments = [dict(name='ps1', duedate='2015-02-02 14:58:23.948203 PST')]\n""")
+            fh.write("""c.NbGrader.db_students = {}""".format(json.dumps(students)))
+
+        self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
+        run_nbgrader(["assign", "ps1", "--db", db])
+
+        for i in range(num_students):
+            self._copy_file(join("files", "submitted-changed.ipynb"), join(course_dir, "submitted", student_fmt.format(i), "ps1", "p1.ipynb"))
+
+        run_nbgrader(["autograde", "ps1", "--db", db])

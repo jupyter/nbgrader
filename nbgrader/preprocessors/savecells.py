@@ -82,7 +82,7 @@ class SaveCells(NbGraderPreprocessor):
             self._create_notebook()
 
         finally:
-            self.gradebook.db.close()
+            self.gradebook.close()
 
         return nb, resources
 

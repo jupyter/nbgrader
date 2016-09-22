@@ -7,6 +7,8 @@ Gradebook
 
     .. automethod:: __init__
 
+    .. automethod:: close
+
     .. autoattribute:: students
 
     .. automethod:: add_student

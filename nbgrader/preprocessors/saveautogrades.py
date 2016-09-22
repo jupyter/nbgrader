@@ -20,7 +20,7 @@ class SaveAutoGrades(NbGraderPreprocessor):
             # process the cells
             nb, resources = super(SaveAutoGrades, self).preprocess(nb, resources)
         finally:
-            self.gradebook.db.close()
+            self.gradebook.close()
 
         return nb, resources
 

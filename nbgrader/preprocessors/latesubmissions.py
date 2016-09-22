@@ -70,7 +70,7 @@ class AssignLatePenalties(NbGraderPreprocessor):
                     self.gradebook.db.commit()
 
         finally:
-            self.gradebook.db.close()
+            self.gradebook.close()
 
         return nb, resources
 

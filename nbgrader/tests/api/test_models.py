@@ -17,7 +17,8 @@ def db(request):
     api.Base.metadata.create_all(bind=engine)
 
     def fin():
-        db.close()
+        db.remove()
+        engine.dispose()
     request.addfinalizer(fin)
 
     return db

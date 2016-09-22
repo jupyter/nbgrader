@@ -83,7 +83,7 @@ def gradebook(request, tempdir):
     gb = Gradebook("sqlite:///gradebook.db")
 
     def fin():
-        gb.db.close()
+        gb.close()
     request.addfinalizer(fin)
 
     return gb
