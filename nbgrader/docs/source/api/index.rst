@@ -1,4 +1,4 @@
-API Library Documentation
+API library documentation
 =========================
 
 .. toctree::

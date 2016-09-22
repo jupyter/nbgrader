@@ -15,6 +15,8 @@ nbgrader
     user_guide/managing_assignment_files
     user_guide/autograding_resources
     user_guide/faq
+    user_guide/advanced
+    api/index
 
 .. toctree::
     :maxdepth: 1
@@ -36,7 +38,6 @@ nbgrader
     contributor_guide/documentation
     contributor_guide/js_dependencies
     contributor_guide/releasing
-    api/index
 
 .. toctree::
     :maxdepth: 2

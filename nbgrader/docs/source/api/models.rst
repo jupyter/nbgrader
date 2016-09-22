@@ -1,4 +1,4 @@
-Database Models
+Database models
 ===============
 
 .. currentmodule:: nbgrader.api
