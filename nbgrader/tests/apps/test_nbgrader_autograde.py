@@ -1,6 +1,7 @@
 import os
 import sys
 import json
+import pytest
 
 from os.path import join
 from textwrap import dedent
@@ -628,12 +629,17 @@ class TestNbGraderAutograde(BaseTestApp):
             else:
                 assert 'outputs' not in new_cell
 
+    @pytest.mark.skip(reason="this test takes too long to run and requires manual configuration")
     def test_many_students(self, course_dir):
+        # NOTE: to test this, you will manually have to configure the postgres
+        # database. In the postgresql.conf file in the postgres data directory,
+        # set max_connections to something low (like 5). Then, create the gradebook
+        # database and run this test.
         db = "postgresql://localhost:5432/gradebook"
 
         students = []
         student_fmt = "student{:03d}"
-        num_students = 300
+        num_students = 50
         for i in range(num_students):
             students.append(dict(id=student_fmt.format(i)))
 
