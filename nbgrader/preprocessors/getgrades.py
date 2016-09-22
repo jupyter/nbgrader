@@ -32,7 +32,7 @@ class GetGrades(NbGraderPreprocessor):
             resources['nbgrader']['late_penalty'] = late_penalty
 
         finally:
-            self.gradebook.db.close()
+            self.gradebook.close()
 
         return nb, resources
 

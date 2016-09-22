@@ -19,7 +19,7 @@ class OverwriteCells(NbGraderPreprocessor):
         try:
             nb, resources = super(OverwriteCells, self).preprocess(nb, resources)
         finally:
-            self.gradebook.db.close()
+            self.gradebook.close()
 
         return nb, resources
 

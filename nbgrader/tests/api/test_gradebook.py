@@ -9,7 +9,7 @@ from ...api import InvalidEntry, MissingEntry
 def gradebook(request):
     gb = api.Gradebook("sqlite:///:memory:")
     def fin():
-        gb.db.close()
+        gb.close()
     request.addfinalizer(fin)
     return gb
 

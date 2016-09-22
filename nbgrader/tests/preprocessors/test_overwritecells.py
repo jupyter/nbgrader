@@ -22,7 +22,7 @@ def gradebook(request, db):
     gb.add_assignment("ps0")
 
     def fin():
-        gb.db.close()
+        gb.close()
     request.addfinalizer(fin)
 
     return gb
