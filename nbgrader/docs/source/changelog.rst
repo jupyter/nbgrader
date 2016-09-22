@@ -5,8 +5,30 @@ Changelog
 
 A summary of changes to nbgrader.
 
-0.3.0
+0.3.x
 -----
+
+0.3.1
+~~~~~
+
+Version 0.3.1 of nbgrader includes a few bugfixes pertaining to PostgreSQL and
+updates to the documentation. The full list of merged PRs is:
+
+- PR #561: Close db engine
+- PR #548: Document how to install the assignment list extension for all users
+- PR #546: Make it clearer how to set due dates
+- PR #535: Document using JupyterHub with SSL
+- PR #534: Add advanced topics section in the docs
+- PR #533: Update docs on installing extensions
+
+Thanks to the following contributors who submitted PRs or reported issues that were merged/closed for the 0.3.1 release:
+
+- ddbourgin
+- jhamrick
+- whositwhatnow
+
+0.3.0
+~~~~~
 
 Version 0.3.0 of nbgrader introduces several significant changes. Most notably,
 this includes:
