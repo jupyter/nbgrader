@@ -18,6 +18,7 @@ autograding
 backends
 Bitdiddle
 bugfix
+bugfixes
 bugtracker
 camelcase
 Carreau
@@ -30,6 +31,7 @@ conda
 config
 customizable
 datefmt
+ddbourgin
 delimeters
 dev
 dropdown
@@ -146,6 +148,7 @@ usernames
 utcnow
 vinaykola
 whitespace
+whositwhatnow
 Wildcards
 willingc
 wordlist
