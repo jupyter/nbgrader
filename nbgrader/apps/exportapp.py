@@ -63,4 +63,4 @@ class ExportApp(NbGrader):
         try:
             self.plugin_inst.export(gradebook)
         finally:
-            gradebook.db.close()
+            gradebook.close()

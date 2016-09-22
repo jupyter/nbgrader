@@ -86,7 +86,7 @@ class TestNbGraderAssign(BaseTestApp):
         notebook = gb.find_notebook("test", "ps1")
         assert len(notebook.grade_cells) == 6
 
-        gb.db.close()
+        gb.close()
 
     def test_force(self, course_dir):
         """Ensure the force option works properly"""
@@ -180,7 +180,7 @@ class TestNbGraderAssign(BaseTestApp):
         with pytest.raises(InvalidRequestError):
             gb.db.refresh(notebook2)
 
-        gb.db.close()
+        gb.close()
 
     def test_add_extra_notebooks_with_submissions(self, db, course_dir):
         """Is an error thrown when new notebooks are added and there are existing submissions?"""
@@ -200,7 +200,7 @@ class TestNbGraderAssign(BaseTestApp):
         self._copy_file(join("files", "test.ipynb"), join(course_dir, "source", "ps1", "test2.ipynb"))
         run_nbgrader(["assign", "ps1", "--db", db, "--force"], retcode=1)
 
-        gb.db.close()
+        gb.close()
 
     def test_remove_extra_notebooks_with_submissions(self, db, course_dir):
         """Is an error thrown when notebooks are removed and there are existing submissions?"""
@@ -221,7 +221,7 @@ class TestNbGraderAssign(BaseTestApp):
         os.remove(join(course_dir, "source", "ps1", "test2.ipynb"))
         run_nbgrader(["assign", "ps1", "--db", db, "--force"], retcode=1)
 
-        gb.db.close()
+        gb.close()
 
     def test_same_notebooks_with_submissions(self, db, course_dir):
         """Is it ok to run nbgrader assign with the same notebooks and existing submissions?"""
@@ -248,7 +248,7 @@ class TestNbGraderAssign(BaseTestApp):
         gb.db.refresh(submission)
         gb.db.refresh(submission_notebook)
 
-        gb.db.close()
+        gb.close()
 
     def test_force_single_notebook(self, course_dir):
         self._copy_file(join("files", "test.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))

@@ -38,3 +38,7 @@ grades.to_csv('grades.csv')
 # Print out what the grades look like
 with open('grades.csv', 'r') as fh:
     print(fh.read())
+
+# Close the connection to the database
+gb.close()
+

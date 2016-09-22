@@ -152,7 +152,7 @@ class AutogradeApp(BaseNbConvertApp):
             self.log.info("Creating/updating student with ID '%s': %s", student_id, student)
             gb = Gradebook(self.db_url)
             gb.update_or_create_student(student_id, **student)
-            gb.db.close()
+            gb.close()
         else:
             self.fail("No student with ID '%s' exists in the config", student_id)
 
@@ -170,7 +170,7 @@ class AutogradeApp(BaseNbConvertApp):
                 self.log.warning("%s is %s seconds late", submission, submission.total_seconds_late)
         else:
             submission = gb.update_or_create_submission(assignment_id, student_id)
-        gb.db.close()
+        gb.close()
 
         # copy files over from the source directory
         self.log.info("Overwriting files with master versions from the source directory")
@@ -200,7 +200,7 @@ class AutogradeApp(BaseNbConvertApp):
                 continue
             else:
                 notebooks.append(notebook)
-        gb.db.close()
+        gb.close()
         self.notebooks = notebooks
 
     def _init_preprocessors(self):
