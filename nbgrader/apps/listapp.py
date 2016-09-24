@@ -140,13 +140,17 @@ class ListApp(TransferApp):
         assignments = []
         for path in self.assignments:
             info = self.parse_assignment(path)
+            if self.path_includes_course:
+                root = os.path.join(info['course_id'], info['assignment_id'])
+            else:
+                root = info['assignment_id']
 
             if self.inbound or self.cached:
                 info['status'] = 'submitted'
                 info['path'] = path
-            elif os.path.exists(info['assignment_id']):
+            elif os.path.exists(root):
                 info['status'] = 'fetched'
-                info['path'] = os.path.abspath(info['assignment_id'])
+                info['path'] = os.path.abspath(root)
             else:
                 info['status'] = 'released'
                 info['path'] = path
