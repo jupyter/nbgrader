@@ -465,6 +465,18 @@ class TransferApp(NbGrader):
         config=True,
         help="Local cache directory for nbgrader submit and nbgrader list. Defaults to $JUPYTER_DATA_DIR/nbgrader_cache")
 
+    path_includes_course = Bool(
+        False, config=True,
+        help=dedent(
+            """
+            Whether the path for fetching/submitting  assignments should be
+            prefixed with the course name. If this is `False`, then the path
+            will be something like `./ps1`. If this is `True`, then the path
+            will be something like `./course123/ps1`.
+            """
+        )
+    )
+
     def _cache_directory_default(self):
         return os.path.join(jupyter_data_dir(), 'nbgrader_cache')
 

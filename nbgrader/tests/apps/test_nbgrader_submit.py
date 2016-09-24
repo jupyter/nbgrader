@@ -14,25 +14,36 @@ from .conftest import notwindows
 @notwindows
 class TestNbGraderSubmit(BaseTestApp):
 
-    def _release_and_fetch(self, assignment, exchange, cache, course_dir):
+    def _release(self, assignment, exchange, cache, course_dir, course="abc101"):
         self._copy_file(join("files", "test.ipynb"), join(course_dir, "release", "ps1", "p1.ipynb"))
         run_nbgrader([
             "release", assignment,
-            "--course", "abc101",
-            "--TransferApp.cache_directory={}".format(cache),
-            "--TransferApp.exchange_directory={}".format(exchange)
-        ])
-        run_nbgrader([
-            "fetch", assignment,
-            "--course", "abc101",
+            "--course", course,
             "--TransferApp.cache_directory={}".format(cache),
             "--TransferApp.exchange_directory={}".format(exchange)
         ])
 
-    def _submit(self, assignment, exchange, cache, flags=None, retcode=0):
+    def _fetch(self, assignment, exchange, cache, course="abc101", flags=None):
+        cmd = [
+            "fetch", assignment,
+            "--course", course,
+            "--TransferApp.cache_directory={}".format(cache),
+            "--TransferApp.exchange_directory={}".format(exchange)
+        ]
+
+        if flags is not None:
+            cmd.extend(flags)
+
+        run_nbgrader(cmd)
+
+    def _release_and_fetch(self, assignment, exchange, cache, course_dir, course="abc101"):
+        self._release(assignment, exchange, cache, course_dir, course=course)
+        self._fetch(assignment, exchange, cache, course=course)
+
+    def _submit(self, assignment, exchange, cache, flags=None, retcode=0, course="abc101"):
         cmd = [
             "submit", assignment,
-            "--course", "abc101",
+            "--course", course,
             "--TransferApp.cache_directory={}".format(cache),
             "--TransferApp.exchange_directory={}".format(exchange)
         ]
@@ -123,3 +134,50 @@ class TestNbGraderSubmit(BaseTestApp):
     def test_submit_assignment_flag(self, exchange, cache, course_dir):
         self._release_and_fetch("ps1", exchange, cache, course_dir)
         self._submit("--assignment=ps1", exchange, cache)
+
+    def test_submit_multiple_courses(self, exchange, cache, course_dir):
+        self._release("ps1", exchange, cache, course_dir, course="abc101")
+        self._release("ps1", exchange, cache, course_dir, course="abc102")
+        self._fetch(
+            "ps1", exchange, cache, course="abc101",
+            flags=["--TransferApp.path_includes_course=True"])
+        self._fetch(
+            "ps1", exchange, cache, course="abc102",
+            flags=["--TransferApp.path_includes_course=True"])
+
+        self._submit(
+            "ps1", exchange, cache, course="abc101",
+            flags=["--TransferApp.path_includes_course=True"])
+
+        filename, = os.listdir(join(exchange, "abc101", "inbound"))
+        username, assignment, _ = filename.split("+")
+        assert username == os.environ["USER"]
+        assert assignment == "ps1"
+        assert isfile(join(exchange, "abc101", "inbound", filename, "p1.ipynb"))
+        assert isfile(join(exchange, "abc101", "inbound", filename, "timestamp.txt"))
+
+        filename, = os.listdir(join(cache, "abc101"))
+        username, assignment, _ = filename.split("+")
+        assert username == os.environ["USER"]
+        assert assignment == "ps1"
+        assert isfile(join(cache, "abc101", filename, "p1.ipynb"))
+        assert isfile(join(cache, "abc101", filename, "timestamp.txt"))
+
+        self._submit(
+            "ps1", exchange, cache, course="abc102",
+            flags=["--TransferApp.path_includes_course=True"])
+
+        filename, = os.listdir(join(exchange, "abc102", "inbound"))
+        username, assignment, _ = filename.split("+")
+        assert username == os.environ["USER"]
+        assert assignment == "ps1"
+        assert isfile(join(exchange, "abc102", "inbound", filename, "p1.ipynb"))
+        assert isfile(join(exchange, "abc102", "inbound", filename, "timestamp.txt"))
+
+        filename, = os.listdir(join(cache, "abc102"))
+        username, assignment, _ = filename.split("+")
+        assert username == os.environ["USER"]
+        assert assignment == "ps1"
+        assert isfile(join(cache, "abc102", filename, "p1.ipynb"))
+        assert isfile(join(cache, "abc102", filename, "timestamp.txt"))
+
