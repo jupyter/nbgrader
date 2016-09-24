@@ -275,7 +275,7 @@ define([
 
     Notebook.prototype.make_row = function () {
         var container = $('<div/>').addClass('col-md-12');
-        var url = utils.url_join_encode(this.base_url, 'tree', this.data.assignment_id, this.data.notebook_id) + ".ipynb";
+        var url = utils.url_join_encode(this.base_url, 'tree', this.data.path);
         var link = $('<span/>').addClass('item_name col-sm-6').append(
             $('<a/>')
                 .attr("href", url)
@@ -297,11 +297,7 @@ define([
         button.click(function (e) {
             var settings = {
                 cache : false,
-                data : {
-                    course_id: that.data.course_id,
-                    assignment_id: that.data.assignment_id,
-                    notebook_id: that.data.notebook_id
-                },
+                data : { path: that.data.path },
                 type : "POST",
                 dataType : "json",
                 success : function (data, status, xhr) {
