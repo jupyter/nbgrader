@@ -1,5 +1,6 @@
 import pytest
 import os
+import time
 
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
@@ -11,7 +12,7 @@ from .conftest import notwindows
 
 
 def _wait(browser):
-    return WebDriverWait(browser, 30)
+    return WebDriverWait(browser, 10)
 
 
 def _load_assignments_list(browser, port, retries=5):
@@ -87,12 +88,48 @@ def _sort_rows(x):
     return item_name
 
 
+def _wait_until_loaded(browser):
+    _wait(browser).until(lambda browser: browser.find_element_by_css_selector("#course_list_dropdown").is_enabled())
+
+
+def _change_course(browser, course):
+    # wait until the dropdown is enabled
+    _wait_until_loaded(browser)
+
+    # click the dropdown to show the menu
+    dropdown = browser.find_element_by_css_selector("#course_list_dropdown")
+    dropdown.click()
+
+    # parse the list of courses and click the one that's been requested
+    courses = browser.find_elements_by_css_selector("#course_list > li")
+    text = [x.text for x in courses]
+    index = text.index(course)
+    courses[index].click()
+
+    # wait for the dropdown to be disabled, then enabled again
+    _wait_until_loaded(browser)
+
+    # verify the dropdown shows the correct course
+    default = browser.find_element_by_css_selector("#course_list_default")
+    assert default.text == course
+
+
+def _wait_for_list(browser, name, num_rows):
+    _wait(browser).until(EC.invisibility_of_element_located((By.CSS_SELECTOR, "#{}_assignments_list_loading".format(name))))
+    _wait(browser).until(EC.invisibility_of_element_located((By.CSS_SELECTOR, "#{}_assignments_list_placeholder".format(name))))
+    _wait(browser).until(lambda browser: len(browser.find_elements_by_css_selector("#{}_assignments_list > .list_item".format(name))) == num_rows)
+    rows = browser.find_elements_by_css_selector("#{}_assignments_list > .list_item".format(name))
+    assert len(rows) == num_rows
+    return rows
+
+
 @pytest.mark.nbextensions
 @notwindows
 def test_show_assignments_list(browser, port, class_files, tempdir):
     _load_assignments_list(browser, port)
+    _wait_until_loaded(browser)
 
-    # make sure all the placeholders ar initially showing
+    # make sure all the placeholders are initially showing
     _wait(browser).until(EC.visibility_of_element_located((By.CSS_SELECTOR, "#released_assignments_list_placeholder")))
     _wait(browser).until(EC.visibility_of_element_located((By.CSS_SELECTOR, "#fetched_assignments_list_placeholder")))
     _wait(browser).until(EC.visibility_of_element_located((By.CSS_SELECTOR, "#submitted_assignments_list_placeholder")))
@@ -103,11 +140,10 @@ def test_show_assignments_list(browser, port, class_files, tempdir):
 
     # click the refresh button
     browser.find_element_by_css_selector("#refresh_assignments_list").click()
+    _wait_until_loaded(browser)
 
     # wait for the released assignments to update
-    _wait(browser).until(EC.invisibility_of_element_located((By.CSS_SELECTOR, "#released_assignments_list_placeholder")))
-    rows = browser.find_elements_by_css_selector("#released_assignments_list > .list_item")
-    assert len(rows) == 1
+    rows = _wait_for_list(browser, "released", 1)
     assert rows[0].find_element_by_class_name("item_name").text == "Problem Set 1"
     assert rows[0].find_element_by_class_name("item_course").text == "abc101"
 
@@ -116,6 +152,7 @@ def test_show_assignments_list(browser, port, class_files, tempdir):
 @notwindows
 def test_multiple_released_assignments(browser, port, class_files, tempdir):
     _load_assignments_list(browser, port)
+    _wait_until_loaded(browser)
 
     # release another assignment
     run_nbgrader(["assign", "ps.01"])
@@ -123,30 +160,31 @@ def test_multiple_released_assignments(browser, port, class_files, tempdir):
 
     # click the refresh button
     browser.find_element_by_css_selector("#refresh_assignments_list").click()
+    _wait_until_loaded(browser)
 
-    # wait for the released assignments to update
-    _wait(browser).until(lambda browser: len(browser.find_elements_by_css_selector("#released_assignments_list > .list_item")) == 2)
-    rows = browser.find_elements_by_css_selector("#released_assignments_list > .list_item")
-    rows.sort(key=_sort_rows)
-    assert rows[0].find_element_by_class_name("item_name").text == "Problem Set 1"
-    assert rows[0].find_element_by_class_name("item_course").text == "abc101"
-    assert rows[1].find_element_by_class_name("item_name").text == "ps.01"
-    assert rows[1].find_element_by_class_name("item_course").text == "xyz 200"
+    # choose the course "xyz 200"
+    _change_course(browser, "xyz 200")
+
+    rows = _wait_for_list(browser, "released", 1)
+    assert rows[0].find_element_by_class_name("item_name").text == "ps.01"
+    assert rows[0].find_element_by_class_name("item_course").text == "xyz 200"
 
 
 @pytest.mark.nbextensions
 @notwindows
 def test_fetch_assignment(browser, port, class_files, tempdir):
     _load_assignments_list(browser, port)
+    _wait_until_loaded(browser)
+
+    # choose the course "xyz 200"
+    _change_course(browser, "xyz 200")
 
     # click the "fetch" button
-    _wait(browser).until(EC.invisibility_of_element_located((By.CSS_SELECTOR, "#released_assignments_list_placeholder")))
-    rows = browser.find_elements_by_css_selector("#released_assignments_list > .list_item")
-    rows[1].find_element_by_css_selector(".item_status button").click()
+    rows = _wait_for_list(browser, "released", 1)
+    rows[0].find_element_by_css_selector(".item_status button").click()
 
     # wait for the downloaded assignments list to update
-    _wait(browser).until(lambda browser: len(browser.find_elements_by_css_selector("#fetched_assignments_list > .list_item")) == 1)
-    rows = browser.find_elements_by_css_selector("#fetched_assignments_list > .list_item")
+    rows = _wait_for_list(browser, "fetched", 1)
     assert rows[0].find_element_by_class_name("item_name").text == "ps.01"
     assert rows[0].find_element_by_class_name("item_course").text == "xyz 200"
     assert os.path.exists(os.path.join(tempdir, "ps.01"))
@@ -165,16 +203,17 @@ def test_fetch_assignment(browser, port, class_files, tempdir):
 @notwindows
 def test_submit_assignment(browser, port, class_files, tempdir):
     _load_assignments_list(browser, port)
+    _wait_until_loaded(browser)
+
+    # choose the course "xyz 200"
+    _change_course(browser, "xyz 200")
 
     # submit it
-    _wait(browser).until(EC.invisibility_of_element_located((By.CSS_SELECTOR, "#fetched_assignments_list_placeholder")))
-    rows = browser.find_elements_by_css_selector("#fetched_assignments_list > .list_item")
+    rows = _wait_for_list(browser, "fetched", 1)
     rows[0].find_element_by_css_selector(".item_status button").click()
 
     # wait for the submitted assignments list to update
-    _wait(browser).until(EC.invisibility_of_element_located((By.CSS_SELECTOR, "#submitted_assignments_list_placeholder")))
-    rows = browser.find_elements_by_css_selector("#submitted_assignments_list > .list_item")
-    assert len(rows) == 1
+    rows = _wait_for_list(browser, "submitted", 1)
     assert rows[0].find_element_by_class_name("item_name").text == "ps.01"
     assert rows[0].find_element_by_class_name("item_course").text == "xyz 200"
 
@@ -183,8 +222,7 @@ def test_submit_assignment(browser, port, class_files, tempdir):
     rows[0].find_element_by_css_selector(".item_status button").click()
 
     # wait for the submitted assignments list to update
-    _wait(browser).until(lambda browser: len(browser.find_elements_by_css_selector("#submitted_assignments_list > .list_item")) == 2)
-    rows = browser.find_elements_by_css_selector("#submitted_assignments_list > .list_item")
+    rows = _wait_for_list(browser, "submitted", 2)
     rows.sort(key=_sort_rows)
     assert rows[0].find_element_by_class_name("item_name").text == "ps.01"
     assert rows[0].find_element_by_class_name("item_course").text == "xyz 200"
@@ -197,21 +235,17 @@ def test_submit_assignment(browser, port, class_files, tempdir):
 @notwindows
 def test_fetch_second_assignment(browser, port, class_files, tempdir):
     _load_assignments_list(browser, port)
+    _wait_until_loaded(browser)
 
     # click the "fetch" button
-    _wait(browser).until(EC.invisibility_of_element_located((By.CSS_SELECTOR, "#released_assignments_list_placeholder")))
-    rows = browser.find_elements_by_css_selector("#released_assignments_list > .list_item")
+    rows = _wait_for_list(browser, "released", 1)
     rows[0].find_element_by_css_selector(".item_status button").click()
 
     # wait for the downloaded assignments list to update
-    _wait(browser).until(EC.visibility_of_element_located((By.CSS_SELECTOR, "#released_assignments_list_placeholder")))
-    _wait(browser).until(lambda browser: len(browser.find_elements_by_css_selector("#fetched_assignments_list > .list_item")) == 2)
-    rows = browser.find_elements_by_css_selector("#fetched_assignments_list > .list_item")
+    rows = _wait_for_list(browser, "fetched", 1)
     rows.sort(key=_sort_rows)
     assert rows[0].find_element_by_class_name("item_name").text == "Problem Set 1"
     assert rows[0].find_element_by_class_name("item_course").text == "abc101"
-    assert rows[1].find_element_by_class_name("item_name").text == "ps.01"
-    assert rows[1].find_element_by_class_name("item_course").text == "xyz 200"
     assert os.path.exists(os.path.join(tempdir, "Problem Set 1"))
 
     # expand the assignment to show the notebooks
@@ -229,33 +263,30 @@ def test_fetch_second_assignment(browser, port, class_files, tempdir):
 @notwindows
 def test_submit_other_assignment(browser, port, class_files, tempdir):
     _load_assignments_list(browser, port)
+    _wait_until_loaded(browser)
 
     # submit it
-    _wait(browser).until(EC.invisibility_of_element_located((By.CSS_SELECTOR, "#fetched_assignments_list_placeholder")))
-    rows = browser.find_elements_by_css_selector("#fetched_assignments_list > .list_item")
+    rows = _wait_for_list(browser, "fetched", 1)
     rows[0].find_element_by_css_selector(".item_status button").click()
 
     # wait for the submitted assignments list to update
-    _wait(browser).until(lambda browser: len(browser.find_elements_by_css_selector("#submitted_assignments_list > .list_item")) == 3)
-    rows = browser.find_elements_by_css_selector("#submitted_assignments_list > .list_item")
+    rows = _wait_for_list(browser, "submitted", 1)
     rows.sort(key=_sort_rows)
     assert rows[0].find_element_by_class_name("item_name").text == "Problem Set 1"
     assert rows[0].find_element_by_class_name("item_course").text == "abc101"
-    assert rows[1].find_element_by_class_name("item_name").text == "ps.01"
-    assert rows[1].find_element_by_class_name("item_course").text == "xyz 200"
-    assert rows[2].find_element_by_class_name("item_name").text == "ps.01"
-    assert rows[2].find_element_by_class_name("item_course").text == "xyz 200"
-    assert rows[0].find_element_by_class_name("item_status").text != rows[1].find_element_by_class_name("item_status").text
-    assert rows[0].find_element_by_class_name("item_status").text != rows[2].find_element_by_class_name("item_status").text
 
 
 @pytest.mark.nbextensions
 @notwindows
 def test_validate_ok(browser, port, class_files, tempdir):
     _load_assignments_list(browser, port)
+    _wait_until_loaded(browser)
+
+    # choose the course "xyz 200"
+    _change_course(browser, "xyz 200")
 
     # expand the assignment to show the notebooks
-    _wait(browser).until(EC.invisibility_of_element_located((By.CSS_SELECTOR, "#fetched_assignments_list_placeholder")))
+    _wait_for_list(browser, "fetched", 1)
     rows = _expand(browser, "#nbgrader-xyz_200-ps01", "ps.01")
     rows.sort(key=_sort_rows)
     assert len(rows) == 2
@@ -278,9 +309,10 @@ def test_validate_ok(browser, port, class_files, tempdir):
 @notwindows
 def test_validate_failure(browser, port, class_files, tempdir):
     _load_assignments_list(browser, port)
+    _wait_until_loaded(browser)
 
     # expand the assignment to show the notebooks
-    _wait(browser).until(EC.invisibility_of_element_located((By.CSS_SELECTOR, "#fetched_assignments_list_placeholder")))
+    _wait_for_list(browser, "fetched", 1)
     rows = _expand(browser, "#nbgrader-abc101-Problem_Set_1", "Problem Set 1")
     rows.sort(key=_sort_rows)
     assert len(rows) == 3
