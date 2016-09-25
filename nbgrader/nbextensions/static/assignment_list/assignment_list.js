@@ -9,31 +9,58 @@ define([
 ], function(Jupyter, $, utils, dialog) {
     "use strict";
 
-    var AssignmentList = function (released_selector, fetched_selector, submitted_selector, options) {
-        this.released_selector = released_selector;
-        this.fetched_selector = fetched_selector;
-        this.submitted_selector = submitted_selector;
+    var CourseList = function (course_list_selector, default_course_selector, dropdown_selector, refresh_selector, assignment_list, options) {
+        this.course_list_selector = course_list_selector;
+        this.default_course_selector = default_course_selector;
+        this.dropdown_selector = course_list_dropdown;
+        this.refresh_selector = refresh_selector;
 
-        this.released_element = $(released_selector);
-        this.fetched_element = $(fetched_selector);
-        this.submitted_element = $(submitted_selector);
-        this.bind_events();
+        this.course_list_element = $(course_list_selector);
+        this.default_course_element = $(default_course_selector);
+        this.dropdown_element = $(dropdown_selector);
+        this.refresh_element = $(refresh_selector);
+
+        this.assignment_list = assignment_list;
+        this.current_course = undefined;
+        this.bind_events()
 
         options = options || {};
         this.options = options;
         this.base_url = options.base_url || utils.get_body_data("baseUrl");
+
+        this.data = undefined;
     };
 
 
-    AssignmentList.prototype.bind_events = function () {
+    CourseList.prototype.bind_events = function () {
         var that = this;
-        $('#refresh_assignments_list').click(function () {
+        this.refresh_element.click(function () {
             that.load_list();
         });
     };
 
 
-    AssignmentList.prototype.load_list = function () {
+    CourseList.prototype.enable_list = function () {
+        this.dropdown_element.removeAttr("disabled");
+    };
+
+
+    CourseList.prototype.disable_list = function () {
+        this.dropdown_element.attr("disabled", "disabled");
+    };
+
+
+    CourseList.prototype.clear_list = function () {
+        // remove list items
+        this.course_list_element.children('li').remove();
+    };
+
+
+    CourseList.prototype.load_list = function () {
+        this.disable_list()
+        this.clear_list();
+        this.assignment_list.clear_list(true);
+
         var settings = {
             processData : false,
             cache : false,
@@ -42,21 +69,130 @@ define([
             success : $.proxy(this.load_list_success, this),
             error : utils.log_ajax_error,
         };
+        var url = utils.url_join_encode(this.base_url, 'courses');
+        $.ajax(url, settings);
+    };
+
+
+    CourseList.prototype.load_list_success = function (data, status, xhr) {
+        this.data = data;
+        this.disable_list()
+        this.clear_list();
+
+        if (this.data.length === 0) {
+            this.default_course_element.text("No courses found.");
+            this.assignment_list.clear_list();
+            this.enable_list()
+            return;
+        }
+
+        if ($.inArray(this.current_course, this.data) === -1) {
+            this.current_course = undefined;
+        }
+
+        if (this.current_course === undefined) {
+            this.change_course(this.data[0]);
+        } else {
+            // we still want to "change" the course here to update the
+            // assignment list
+            this.change_course(this.current_course);
+        }
+    };
+
+
+    CourseList.prototype.change_course = function (course) {
+        this.disable_list();
+        if (this.current_course !== undefined) {
+            this.default_course_element.text(course);
+        }
+        this.current_course = course;
+        var success = $.proxy(this.load_assignment_list_success, this);
+        this.assignment_list.load_list(course, success);
+    };
+
+
+    CourseList.prototype.load_assignment_list_success = function () {
+        if (this.data) {
+            var that = this;
+            var set_course = function (course) {
+                return function () { that.change_course(course); };
+            }
+
+            for (var i=0; i<this.data.length; i++) {
+                var element = $('<li/>').append($('<a/>').attr("href", "#").text(this.data[i]));
+                element.click(set_course(this.data[i]));
+                this.course_list_element.append(element);
+            }
+
+            this.data = undefined;
+        }
+
+        this.default_course_element.text(this.current_course);
+        this.enable_list();
+    };
+
+    var AssignmentList = function (released_selector, fetched_selector, submitted_selector, options) {
+        this.released_selector = released_selector;
+        this.fetched_selector = fetched_selector;
+        this.submitted_selector = submitted_selector;
+
+        this.released_element = $(released_selector);
+        this.fetched_element = $(fetched_selector);
+        this.submitted_element = $(submitted_selector);
+
+        options = options || {};
+        this.options = options;
+        this.base_url = options.base_url || utils.get_body_data("baseUrl");
+
+        this.callback = undefined;
+    };
+
+
+    AssignmentList.prototype.load_list = function (course, callback) {
+        this.callback = callback;
+        this.clear_list(true);
+        var settings = {
+            cache : false,
+            type : "GET",
+            dataType : "json",
+            data : {
+                course_id: course
+            },
+            success : $.proxy(this.load_list_success, this),
+            error : utils.log_ajax_error,
+        };
         var url = utils.url_join_encode(this.base_url, 'assignments');
         $.ajax(url, settings);
     };
 
 
-    AssignmentList.prototype.clear_list = function () {
+    AssignmentList.prototype.clear_list = function (loading) {
         // remove list items
         this.released_element.children('.list_item').remove();
         this.fetched_element.children('.list_item').remove();
         this.submitted_element.children('.list_item').remove();
 
-        // show placeholders
-        this.released_element.children('.list_placeholder').show();
-        this.fetched_element.children('.list_placeholder').show();
-        this.submitted_element.children('.list_placeholder').show();
+        if (loading) {
+            // show loading
+            this.released_element.children('.list_loading').show();
+            this.fetched_element.children('.list_loading').show();
+            this.submitted_element.children('.list_loading').show();
+
+            // hide placeholders
+            this.released_element.children('.list_placeholder').hide();
+            this.fetched_element.children('.list_placeholder').hide();
+            this.submitted_element.children('.list_placeholder').hide();
+        } else {
+            // show placeholders
+            this.released_element.children('.list_placeholder').show();
+            this.fetched_element.children('.list_placeholder').show();
+            this.submitted_element.children('.list_placeholder').show();
+
+            // hide loading
+            this.released_element.children('.list_loading').hide();
+            this.fetched_element.children('.list_loading').hide();
+            this.submitted_element.children('.list_loading').hide();
+        }
     };
 
     AssignmentList.prototype.load_list_success = function (data, status, xhr) {
@@ -64,7 +200,7 @@ define([
         var len = data.length;
         for (var i=0; i<len; i++) {
             var element = $('<div/>');
-            var item = new Assignment(element, data[i], $.proxy(this.load_list_success, this), this.options);
+            var item = new Assignment(element, data[i], this.fetched_selector, $.proxy(this.load_list_success, this), this.options);
             if (data[i]['status'] === 'released') {
                 this.released_element.append(element);
                 this.released_element.children('.list_placeholder').hide();
@@ -109,12 +245,18 @@ define([
                 }
             });
         });
+
+        if (this.callback) {
+            this.callback();
+            this.callback = undefined;
+        }
     };
 
 
-    var Assignment = function (element, data, on_refresh, options) {
+    var Assignment = function (element, data, parent, on_refresh, options) {
         this.element = $(element);
         this.data = data;
+        this.parent = parent;
         this.on_refresh = on_refresh;
         this.options = options;
         this.base_url = options.base_url || utils.get_body_data("baseUrl");
@@ -183,7 +325,7 @@ define([
                 .addClass("collapsed assignment-notebooks-link")
                 .attr("role", "button")
                 .attr("data-toggle", "collapse")
-                .attr("data-parent", "#fetched_assignments_list")
+                .attr("data-parent", this.parent)
                 .attr("href", "#" + id)
                 .attr("aria-expanded", "false")
                 .attr("aria-controls", id)
@@ -381,6 +523,7 @@ define([
     };
 
     return {
+        'CourseList': CourseList,
         'AssignmentList': AssignmentList,
         'Assignment': Assignment,
         'Notebook': Notebook

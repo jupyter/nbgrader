@@ -70,6 +70,10 @@
     min-width: 13ex;
 }
 
+#assignments .list_placeholder {
+    display: none;
+}
+
 #validation-message p {
     margin-bottom: 1em;
     padding-top: 1em;
@@ -78,4 +82,12 @@
 #validation-message pre {
     margin-left: 1em;
     margin-right: 1em;
+}
+
+#assignments .list_placeholder, #assignments .list_loading {
+    font-weight: bold;
+    padding-top: 4px;
+    padding-bottom: 4px;
+    padding-left: 7px;
+    padding-right: 7px;
 }

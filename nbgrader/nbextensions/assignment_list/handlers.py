@@ -20,8 +20,11 @@ class AssignmentList(LoggingConfigurable):
     def _assignment_dir_default(self):
         return self.parent.notebook_dir
 
-    def list_released_assignments(self):
-        p = sp.Popen([sys.executable, "-m", "nbgrader", "list", "--json"], stdout=sp.PIPE, stderr=sp.PIPE, cwd=self.assignment_dir)
+    def list_released_assignments(self, course_id=None):
+        cmd = [sys.executable, "-m", "nbgrader", "list", "--json"]
+        if course_id:
+            cmd.extend(["--course", course_id])
+        p = sp.Popen(cmd, stdout=sp.PIPE, stderr=sp.PIPE, cwd=self.assignment_dir)
         output, _ = p.communicate()
         retcode = p.poll()
         if retcode != 0:
@@ -34,8 +37,11 @@ class AssignmentList(LoggingConfigurable):
                     notebook['path'] = os.path.relpath(notebook['path'], self.assignment_dir)
         return sorted(assignments, key=lambda x: (x['course_id'], x['assignment_id']))
 
-    def list_submitted_assignments(self):
-        p = sp.Popen([sys.executable, "-m", "nbgrader", "list", "--json", "--cached"], stdout=sp.PIPE, stderr=sp.PIPE, cwd=self.assignment_dir)
+    def list_submitted_assignments(self, course_id=None):
+        cmd = [sys.executable, "-m", "nbgrader", "list", "--json", "--cached"]
+        if course_id:
+            cmd.extend(["--course", course_id])
+        p = sp.Popen(cmd, stdout=sp.PIPE, stderr=sp.PIPE, cwd=self.assignment_dir)
         output, _ = p.communicate()
         retcode = p.poll()
         if retcode != 0:
@@ -43,11 +49,16 @@ class AssignmentList(LoggingConfigurable):
         assignments = json.loads(output.decode())
         return sorted(assignments, key=lambda x: x['timestamp'], reverse=True)
 
-    def list_assignments(self):
+    def list_assignments(self, course_id=None):
         assignments = []
-        assignments.extend(self.list_released_assignments())
-        assignments.extend(self.list_submitted_assignments())
+        assignments.extend(self.list_released_assignments(course_id=course_id))
+        assignments.extend(self.list_submitted_assignments(course_id=course_id))
         return assignments
+
+    def list_courses(self):
+        assignments = self.list_assignments()
+        courses = sorted(list(set([x["course_id"] for x in assignments])))
+        return courses
 
     def fetch_assignment(self, course_id, assignment_id):
         p = sp.Popen([
@@ -95,7 +106,8 @@ class AssignmentListHandler(BaseAssignmentHandler):
 
     @web.authenticated
     def get(self):
-        self.finish(json.dumps(self.manager.list_assignments()))
+        course_id = self.get_argument('course_id')
+        self.finish(json.dumps(self.manager.list_assignments(course_id=course_id)))
 
 
 class AssignmentActionHandler(BaseAssignmentHandler):
@@ -106,15 +118,22 @@ class AssignmentActionHandler(BaseAssignmentHandler):
             assignment_id = self.get_argument('assignment_id')
             course_id = self.get_argument('course_id')
             self.manager.fetch_assignment(course_id, assignment_id)
-            self.finish(json.dumps(self.manager.list_assignments()))
+            self.finish(json.dumps(self.manager.list_assignments(course_id=course_id)))
         elif action == 'submit':
             assignment_id = self.get_argument('assignment_id')
             course_id = self.get_argument('course_id')
             self.manager.submit_assignment(course_id, assignment_id)
-            self.finish(json.dumps(self.manager.list_assignments()))
+            self.finish(json.dumps(self.manager.list_assignments(course_id=course_id)))
         elif action == 'validate':
             output = self.manager.validate_notebook(self.get_argument('path'))
             self.finish(json.dumps(output))
+
+
+class CourseListHandler(BaseAssignmentHandler):
+
+    @web.authenticated
+    def get(self):
+        self.finish(json.dumps(self.manager.list_courses()))
 
 
 #-----------------------------------------------------------------------------
@@ -127,6 +146,7 @@ _assignment_action_regex = r"(?P<action>fetch|submit|validate)"
 default_handlers = [
     (r"/assignments", AssignmentListHandler),
     (r"/assignments/%s" % _assignment_action_regex, AssignmentActionHandler),
+    (r"/courses", CourseListHandler),
 ]
 
 
