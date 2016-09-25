@@ -50,7 +50,11 @@ class SubmitApp(TransferApp):
         """
 
     def init_src(self):
-        self.src_path = os.path.abspath(self.assignment_id)
+        if self.path_includes_course:
+            root = os.path.join(self.course_id, self.assignment_id)
+        else:
+            root = self.assignment_id
+        self.src_path = os.path.abspath(root)
         self.assignment_id = os.path.split(self.src_path)[-1]
         if not os.path.isdir(self.src_path):
             self.fail("Assignment not found: {}".format(self.src_path))

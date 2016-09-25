@@ -1,5 +1,8 @@
 import os
 
+from textwrap import dedent
+from traitlets import Bool
+
 from .baseapp import TransferApp, transfer_aliases, transfer_flags
 from ..utils import check_mode
 
@@ -56,9 +59,13 @@ class FetchApp(TransferApp):
             self.fail("You don't have read permissions for the directory: {}".format(self.src_path))
 
     def init_dest(self):
-        self.dest_path = os.path.abspath(os.path.join('.', self.assignment_id))
+        if self.path_includes_course:
+            root = os.path.join(self.course_id, self.assignment_id)
+        else:
+            root = self.assignment_id
+        self.dest_path = os.path.abspath(os.path.join('.', root))
         if os.path.isdir(self.dest_path):
-            self.fail("You already have a copy of the assignment in this directory: {}".format(self.assignment_id))
+            self.fail("You already have a copy of the assignment in this directory: {}".format(root))
 
     def copy_files(self):
         self.log.info("Source: {}".format(self.src_path))

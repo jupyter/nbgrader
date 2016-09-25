@@ -73,11 +73,10 @@ class AssignmentList(LoggingConfigurable):
             self.log.error(output)
             raise RuntimeError('nbgrader submit exited with code {}'.format(retcode))
 
-    def validate_notebook(self, assignment_id, notebook_id):
-        p = sp.Popen([
-            sys.executable, "-m", "nbgrader", "validate", "--json",
-            os.path.join(assignment_id, "{}.ipynb".format(notebook_id))
-        ], stdout=sp.PIPE, stderr=sp.PIPE, cwd=self.assignment_dir)
+    def validate_notebook(self, path):
+        p = sp.Popen(
+            [sys.executable, "-m", "nbgrader", "validate", "--json", path],
+            stdout=sp.PIPE, stderr=sp.PIPE, cwd=self.assignment_dir)
         output, _ = p.communicate()
         retcode = p.poll()
         if retcode != 0:
@@ -103,17 +102,18 @@ class AssignmentActionHandler(BaseAssignmentHandler):
 
     @web.authenticated
     def post(self, action):
-        assignment_id = self.get_argument('assignment_id')
-        course_id = self.get_argument('course_id')
-
         if action == 'fetch':
+            assignment_id = self.get_argument('assignment_id')
+            course_id = self.get_argument('course_id')
             self.manager.fetch_assignment(course_id, assignment_id)
             self.finish(json.dumps(self.manager.list_assignments()))
         elif action == 'submit':
+            assignment_id = self.get_argument('assignment_id')
+            course_id = self.get_argument('course_id')
             self.manager.submit_assignment(course_id, assignment_id)
             self.finish(json.dumps(self.manager.list_assignments()))
         elif action == 'validate':
-            output = self.manager.validate_notebook(assignment_id, self.get_argument('notebook_id'))
+            output = self.manager.validate_notebook(self.get_argument('path'))
             self.finish(json.dumps(output))
 
 
