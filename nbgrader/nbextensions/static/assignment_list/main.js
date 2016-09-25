@@ -7,7 +7,16 @@ define(function(require) {
         '<div id="assignments" class="tab-pane">',
         '  <div id="assignments_toolbar" class="row list_toolbar">',
         '    <div class="col-sm-8 no-padding">',
-        '      <span id="assignments_list_info" class="toolbar_info">Released, downloaded, and submitted assignments.</span>',
+        '      <span id="assignments_list_info" class="toolbar_info">Released, downloaded, and submitted assignments for course:</span>',
+        '      <div class="btn-group btn-group-xs">',
+        '         <button type="button" class="btn btn-default" id="course_list_default">Loading, please wait...</button>',
+        '         <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">',
+        '           <span class="caret"></span>',
+        '           <span class="sr-only">Toggle Dropdown</span>',
+        '         </button>',
+        '         <ul class="dropdown-menu" id="course_list">',
+        '        </ul>',
+        '      </div>',
         '    </div>',
         '    <div class="col-sm-4 no-padding tree-buttons">',
         '      <span id="assignments_buttons" class="pull-right toolbar_buttons">',
@@ -25,6 +34,9 @@ define(function(require) {
         '          <div id="released_assignments_list_placeholder" class="row list_placeholder">',
         '            <div> There are no assignments to fetch. </div>',
         '          </div>',
+        '          <div id="released_assignments_list_loading" class="row list_loading">',
+        '            <div> Loading, please wait... </div>',
+        '          </div>',
         '        </div>',
         '      </div>',
         '    </div>',
@@ -37,6 +49,9 @@ define(function(require) {
         '          <div id="fetched_assignments_list_placeholder" class="row list_placeholder">',
         '            <div> There are no downloaded assignments. </div>',
         '          </div>',
+        '          <div id="fetched_assignments_list_loading" class="row list_loading">',
+        '            <div> Loading, please wait... </div>',
+        '          </div>',
         '        </div>',
         '      </div>',
         '    </div>',
@@ -48,6 +63,9 @@ define(function(require) {
         '        <div id="submitted_assignments_list" class="list_container">',
         '          <div id="submitted_assignments_list_placeholder" class="row list_placeholder">',
         '            <div> There are no submitted assignments. </div>',
+        '          </div>',
+        '          <div id="submitted_assignments_list_loading" class="row list_loading">',
+        '            <div> Loading, please wait... </div>',
         '          </div>',
         '        </div>',
         '      </div>',
@@ -87,7 +105,15 @@ define(function(require) {
                 notebook_path: Jupyter.notebook_list.notebook_path,
             }
         );
-        assignment_list.load_list();
+        var course_list = new AssignmentList.CourseList(
+            '#course_list',
+            '#course_list_default',
+            assignment_list,
+            {
+                base_url: Jupyter.notebook_list.base_url,
+            }
+        );
+        course_list.load_list();
     }
     return {
         load_ipython_extension: load

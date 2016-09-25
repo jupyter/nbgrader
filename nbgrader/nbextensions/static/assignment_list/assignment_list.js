@@ -9,15 +9,16 @@ define([
 ], function(Jupyter, $, utils, dialog) {
     "use strict";
 
-    var AssignmentList = function (released_selector, fetched_selector, submitted_selector, options) {
-        this.released_selector = released_selector;
-        this.fetched_selector = fetched_selector;
-        this.submitted_selector = submitted_selector;
+    var CourseList = function (course_list_selector, default_course_selector, assignment_list, options) {
+        this.course_list_selector = course_list_selector;
+        this.default_course_selector = default_course_selector;
 
-        this.released_element = $(released_selector);
-        this.fetched_element = $(fetched_selector);
-        this.submitted_element = $(submitted_selector);
-        this.bind_events();
+        this.course_list_element = $(course_list_selector);
+        this.default_course_element = $(default_course_selector);
+
+        this.assignment_list = assignment_list;
+        this.current_course = undefined;
+        this.bind_events()
 
         options = options || {};
         this.options = options;
@@ -25,7 +26,7 @@ define([
     };
 
 
-    AssignmentList.prototype.bind_events = function () {
+    CourseList.prototype.bind_events = function () {
         var that = this;
         $('#refresh_assignments_list').click(function () {
             that.load_list();
@@ -33,7 +34,47 @@ define([
     };
 
 
-    AssignmentList.prototype.load_list = function () {
+    CourseList.prototype.clear_list = function () {
+        // remove list items
+        this.course_list_element.children('li').remove();
+    };
+
+
+    CourseList.prototype.load_list_success = function (data, status, xhr) {
+        this.clear_list();
+        var len = data.length;
+        var that = this;
+        if (len === 0) return;
+
+        var set_course = function (course) {
+            return function () { that.change_course(course); };
+        }
+
+        for (var i=0; i<len; i++) {
+            var element = $('<li/>').append($('<a/>').attr("href", "#").text(data[i]));
+            this.course_list_element.append(element);
+            element.click(set_course(data[i]));
+        }
+
+        if (this.current_course === undefined) {
+            this.current_course = this.change_course(data[0]);
+        } else {
+            // we still want to "change" the course here to update the
+            // assignment list
+            this.change_course(this.current_course);
+        }
+    };
+
+
+    CourseList.prototype.change_course = function (course) {
+        this.current_course = course;
+        this.default_course_element.text(course);
+        this.assignment_list.load_list(course);
+    };
+
+
+    CourseList.prototype.load_list = function () {
+        this.assignment_list.clear_list(true);
         var settings = {
             processData : false,
             cache : false,
@@ -42,21 +83,69 @@ define([
             success : $.proxy(this.load_list_success, this),
             error : utils.log_ajax_error,
         };
+        var url = utils.url_join_encode(this.base_url, 'courses');
+        $.ajax(url, settings);
+    };
+
+    var AssignmentList = function (released_selector, fetched_selector, submitted_selector, options) {
+        this.released_selector = released_selector;
+        this.fetched_selector = fetched_selector;
+        this.submitted_selector = submitted_selector;
+
+        this.released_element = $(released_selector);
+        this.fetched_element = $(fetched_selector);
+        this.submitted_element = $(submitted_selector);
+
+        options = options || {};
+        this.options = options;
+        this.base_url = options.base_url || utils.get_body_data("baseUrl");
+    };
+
+
+    AssignmentList.prototype.load_list = function (course) {
+        this.clear_list(true);
+        var settings = {
+            cache : false,
+            type : "GET",
+            dataType : "json",
+            data : {
+                course_id: course
+            },
+            success : $.proxy(this.load_list_success, this),
+            error : utils.log_ajax_error,
+        };
         var url = utils.url_join_encode(this.base_url, 'assignments');
         $.ajax(url, settings);
     };
 
 
-    AssignmentList.prototype.clear_list = function () {
+    AssignmentList.prototype.clear_list = function (loading) {
         // remove list items
         this.released_element.children('.list_item').remove();
         this.fetched_element.children('.list_item').remove();
         this.submitted_element.children('.list_item').remove();
 
-        // show placeholders
-        this.released_element.children('.list_placeholder').show();
-        this.fetched_element.children('.list_placeholder').show();
-        this.submitted_element.children('.list_placeholder').show();
+        if (loading) {
+            // hide placeholders
+            this.released_element.children('.list_placeholder').hide();
+            this.fetched_element.children('.list_placeholder').hide();
+            this.submitted_element.children('.list_placeholder').hide();
+
+            // show loading
+            this.released_element.children('.list_loading').show();
+            this.fetched_element.children('.list_loading').show();
+            this.submitted_element.children('.list_loading').show();
+        } else {
+            // show placeholders
+            this.released_element.children('.list_placeholder').show();
+            this.fetched_element.children('.list_placeholder').show();
+            this.submitted_element.children('.list_placeholder').show();
+
+            // hide loading
+            this.released_element.children('.list_loading').hide();
+            this.fetched_element.children('.list_loading').hide();
+            this.submitted_element.children('.list_loading').hide();
+        }
     };
 
     AssignmentList.prototype.load_list_success = function (data, status, xhr) {
@@ -381,6 +470,7 @@ define([
     };
 
     return {
+        'CourseList': CourseList,
         'AssignmentList': AssignmentList,
         'Assignment': Assignment,
         'Notebook': Notebook
