@@ -780,7 +780,6 @@ class BaseNbConvertApp(NbGrader, NbConvertApp):
 
             # parse out the assignment and student ids
             regexp = self._format_source("(?P<assignment_id>.*)", "(?P<student_id>.*)", escape=True)
-            print((regexp, assignment))
             m = re.match(regexp, assignment)
             if m is None:
                 self.fail("Could not match '%s' with regexp '%s'", assignment, regexp)
