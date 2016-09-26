@@ -24,6 +24,7 @@ from traitlets.config.application import catch_config_error
 from traitlets.config.loader import Config
 
 from ..utils import check_directory, parse_utc, find_all_files, full_split, rmtree, remove
+from ..preprocessors.execute import UnresponsiveKernelError
 
 
 nbgrader_aliases = {
@@ -758,6 +759,20 @@ class BaseNbConvertApp(NbGrader, NbConvertApp):
     def convert_notebooks(self):
         errors = []
 
+        def _handle_failure(gd):
+            dest = os.path.normpath(self._format_dest(gd['assignment_id'], gd['student_id']))
+            if self.notebook_id == "*":
+                if os.path.exists(dest):
+                    self.log.warning("Removing failed assignment: {}".format(dest))
+                    rmtree(dest)
+            else:
+                for notebook in self.notebooks:
+                    filename = os.path.splitext(os.path.basename(notebook))[0] + self.exporter.file_extension
+                    path = os.path.join(dest, filename)
+                    if os.path.exists(path):
+                        self.log.warning("Removing failed notebook: {}".format(path))
+                        remove(path)
+
         for assignment in sorted(self.assignments.keys()):
             # initialize the list of notebooks and the exporter
             self.notebooks = sorted(self.assignments[assignment])
@@ -765,6 +780,7 @@ class BaseNbConvertApp(NbGrader, NbConvertApp):
 
             # parse out the assignment and student ids
             regexp = self._format_source("(?P<assignment_id>.*)", "(?P<student_id>.*)", escape=True)
+            print((regexp, assignment))
             m = re.match(regexp, assignment)
             if m is None:
                 self.fail("Could not match '%s' with regexp '%s'", assignment, regexp)
@@ -781,23 +797,24 @@ class BaseNbConvertApp(NbGrader, NbConvertApp):
                 super(BaseNbConvertApp, self).convert_notebooks()
                 self.set_permissions(gd['assignment_id'], gd['student_id'])
 
+            except UnresponsiveKernelError:
+                self.log.error(
+                    "While processing assignment %s, the kernel became "
+                    "unresponsive and we could not interrupt it. This probably "
+                    "means that the students' code has an infinite loop that "
+                    "consumes a lot of memory or something similar. nbgrader "
+                    "doesn't know how to deal with this problem, so you will "
+                    "have to manually edit the students' code (for example, to "
+                    "just throw an error rather than enter an infinite loop). ",
+                    assignment)
+                errors.append((gd['assignment_id'], gd['student_id']))
+                _handle_failure(gd)
+
             except Exception:
                 self.log.error("There was an error processing assignment: %s", assignment)
                 self.log.error(traceback.format_exc())
                 errors.append((gd['assignment_id'], gd['student_id']))
-
-                dest = os.path.normpath(self._format_dest(gd['assignment_id'], gd['student_id']))
-                if self.notebook_id == "*":
-                    if os.path.exists(dest):
-                        self.log.warning("Removing failed assignment: {}".format(dest))
-                        rmtree(dest)
-                else:
-                    for notebook in self.notebooks:
-                        filename = os.path.splitext(os.path.basename(notebook))[0] + self.exporter.file_extension
-                        path = os.path.join(dest, filename)
-                        if os.path.exists(path):
-                            self.log.warning("Removing failed notebook: {}".format(path))
-                            remove(path)
+                _handle_failure(gd)
 
         if len(errors) > 0:
             for assignment_id, student_id in errors:
