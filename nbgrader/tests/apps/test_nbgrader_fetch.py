@@ -54,6 +54,19 @@ class TestNbGraderFetch(BaseTestApp):
         os.remove(join("ps1", "p1.ipynb"))
         self._fetch("ps1", exchange, retcode=1)
 
+        # make sure it passes if the --replace flag is given
+        self._fetch("ps1", exchange, flags=["--replace"])
+        assert os.path.isfile(join("ps1", "p1.ipynb"))
+
+        # make sure the --replace flag doesn't overwrite files, though
+        self._copy_file(join("files", "submitted-changed.ipynb"), join("ps1", "p1.ipynb"))
+        with open(join("ps1", "p1.ipynb"), "r") as fh:
+            contents1 = fh.read()
+        self._fetch("ps1", exchange, flags=["--replace"])
+        with open(join("ps1", "p1.ipynb"), "r") as fh:
+            contents2 = fh.read()
+        assert contents1 == contents2
+
     def test_fetch_with_assignment_flag(self, exchange, course_dir):
         self._release("ps1", exchange, course_dir)
         self._fetch("--assignment=ps1", exchange)

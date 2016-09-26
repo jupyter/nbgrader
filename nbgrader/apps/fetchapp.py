@@ -1,4 +1,5 @@
 import os
+import shutil
 
 from textwrap import dedent
 from traitlets import Bool
@@ -15,6 +16,10 @@ aliases.update({
 flags = {}
 flags.update(transfer_flags)
 flags.update({
+    'replace': (
+        {'FetchApp' : {'replace_missing_files' : True}},
+        "replace missing files, even if the assignment has already been fetched"
+    ),
 })
 
 class FetchApp(TransferApp):
@@ -46,6 +51,8 @@ class FetchApp(TransferApp):
         to turn in the assignment.
         """
 
+    replace_missing_files = Bool(False, config=True, help="Whether to replace missing files on fetch")
+
     def init_src(self):
         if self.course_id == '':
             self.fail("No course id specified. Re-run with --course flag.")
@@ -64,8 +71,43 @@ class FetchApp(TransferApp):
         else:
             root = self.assignment_id
         self.dest_path = os.path.abspath(os.path.join('.', root))
-        if os.path.isdir(self.dest_path):
+        if os.path.isdir(self.dest_path) and not self.replace_missing_files:
             self.fail("You already have a copy of the assignment in this directory: {}".format(root))
+
+    def copy_if_missing(self, src, dest, ignore=None):
+        filenames = sorted(os.listdir(src))
+        if ignore:
+            bad_filenames = ignore(src, filenames)
+            filenames = sorted(list(set(filenames) - bad_filenames))
+
+        for filename in filenames:
+            srcpath = os.path.join(src, filename)
+            destpath = os.path.join(dest, filename)
+            relpath = os.path.relpath(destpath, os.getcwd())
+            if not os.path.exists(destpath):
+                if os.path.isdir(srcpath):
+                    self.log.warn("Creating missing directory '%s'", relpath)
+                    os.mkdir(destpath)
+
+                else:
+                    self.log.warn("Replacing missing file '%s'", relpath)
+                    shutil.copy(srcpath, destpath)
+
+            if os.path.isdir(srcpath):
+                self.copy_if_missing(srcpath, destpath, ignore=ignore)
+
+
+    def do_copy(self, src, dest, perms=None):
+        """Copy the src dir to the dest dir omitting the self.ignore globs."""
+        if os.path.isdir(self.dest_path):
+            self.copy_if_missing(src, dest, ignore=shutil.ignore_patterns(*self.ignore))
+        else:
+            shutil.copytree(src, dest, ignore=shutil.ignore_patterns(*self.ignore))
+
+        if perms:
+            for dirname, dirnames, filenames in os.walk(dest):
+                for filename in filenames:
+                    os.chmod(os.path.join(dirname, filename), perms)
 
     def copy_files(self):
         self.log.info("Source: {}".format(self.src_path))
