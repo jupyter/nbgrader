@@ -57,7 +57,9 @@ For this to work, you must include a duedate for the assignment and then a
 ``timestamp.txt`` file in the folder for each submission with a single line
 containing a timestamp (e.g. ``2015-02-02 14:58:23.948203 PST``). Then, when
 you run ``nbgrader autograde``, nbgrader will record these timestamps into the
-database. You can access the timestamps through the API, like so::
+database. You can access the timestamps through the API, like so:
+
+.. code:: python
 
     from nbgrader.api import Gradebook
     gb = Gradebook("sqlite:///gradebook.db")
@@ -99,3 +101,30 @@ How do I get out grade information from the database?
 
 nbgrader offers a fairly rich :doc:`API </api/index>` for interfacing with the
 database. Please see :ref:`getting-information-from-db` for more details.
+
+.. _multiple-classes:
+
+Can I use the "Assignment List" extension with multiple classes?
+----------------------------------------------------------------
+
+Yes, though support for this is currently minimal. To use the "Assignment List"
+extension in multiple courses, you will want to set the following config option
+in your students' ``nbgrader_config.py`` files:
+
+.. code:: python
+
+    c = get_config()
+    c.TransferApp.path_includes_course = True
+
+This will tell the transfer apps (i.e. ``nbgrader fetch``, ``nbgrader submit``,
+and ``nbgrader list``) to assume that the paths for assignments include the
+course name, such as ``./course101/ps1`` rather than just ``./ps1`` (which is
+the default).
+
+Then, when using the "Assignment List" extension, students will be able to
+switch between different classes. However, there is no support currently for
+access control: all students will be able to see all assignments from all
+classes (unless you specifically set the ``course_id`` in the config file, in
+which case they will only be able to see assignments for that specific course).
+See `#544 <https://github.com/jupyter/nbgrader/issues/544>`_ for details.
+:ref:`PRs welcome! <pull-request>`
