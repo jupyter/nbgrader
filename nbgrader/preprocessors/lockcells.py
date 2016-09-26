@@ -6,18 +6,23 @@ from . import NbGraderPreprocessor
 class LockCells(NbGraderPreprocessor):
     """A preprocessor for making cells undeletable."""
 
-    lock_solution_cells = Bool(True, config=True, help="Whether solution cells are undeletable")
-    lock_grade_cells = Bool(True, config=True, help="Whether grade cells are undeletable")
-    lock_readonly_cells = Bool(True, config=True, help="Whether readonly cells are undeletable")
-    lock_all_cells = Bool(False, config=True, help="Whether all assignment cells are undeletable")
+    lock_solution_cells = Bool(True, config=True, help="Whether solution cells are locked (non-deletable and non-editable)")
+    lock_grade_cells = Bool(True, config=True, help="Whether grade cells are locked (non-deletable)")
+    lock_readonly_cells = Bool(True, config=True, help="Whether readonly cells are locked (non-deletable and non-editable)")
+    lock_all_cells = Bool(False, config=True, help="Whether all assignment cells are locked (non-deletable and non-editable)")
 
     def preprocess_cell(self, cell, resources, cell_index):
-        if self.lock_all_cells:
-            cell.metadata['deletable'] = False
-        elif self.lock_grade_cells and utils.is_grade(cell):
+        if (self.lock_solution_cells or self.lock_grade_cells) and utils.is_solution(cell) and utils.is_grade(cell):
             cell.metadata['deletable'] = False
         elif self.lock_solution_cells and utils.is_solution(cell):
             cell.metadata['deletable'] = False
+        elif self.lock_grade_cells and utils.is_grade(cell):
+            cell.metadata['deletable'] = False
+            cell.metadata['editable'] = False
         elif self.lock_readonly_cells and utils.is_locked(cell):
             cell.metadata['deletable'] = False
+            cell.metadata['editable'] = False
+        elif self.lock_all_cells:
+            cell.metadata['deletable'] = False
+            cell.metadata['editable'] = False
         return cell, resources
