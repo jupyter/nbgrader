@@ -549,11 +549,14 @@ class TestNbGraderAutograde(BaseTestApp):
         self._empty_notebook(join(course_dir, "source", "ps1", "p2.ipynb"))
         run_nbgrader(["assign", "ps1"])
 
+        self._empty_notebook(join(course_dir, "submitted", "bar", "ps1", "p1.ipynb"))
+        self._copy_file(join("files", "test.ipynb"), join(course_dir, "submitted", "bar", "ps1", "p2.ipynb"))
         self._empty_notebook(join(course_dir, "submitted", "foo", "ps1", "p1.ipynb"))
-        self._copy_file(join("files", "test.ipynb"), join(course_dir, "submitted", "foo", "ps1", "p2.ipynb"))
+        self._empty_notebook(join(course_dir, "submitted", "foo", "ps1", "p2.ipynb"))
         run_nbgrader(["autograde", "ps1"], retcode=1)
 
-        assert not os.path.exists(join(course_dir, "autograded", "foo", "ps1"))
+        assert not os.path.exists(join(course_dir, "autograded", "bar", "ps1"))
+        assert os.path.exists(join(course_dir, "autograded", "foo", "ps1"))
 
     def test_handle_failure_single_notebook(self, course_dir):
         with open("nbgrader_config.py", "a") as fh:
@@ -655,3 +658,32 @@ class TestNbGraderAutograde(BaseTestApp):
             self._copy_file(join("files", "submitted-changed.ipynb"), join(course_dir, "submitted", student_fmt.format(i), "ps1", "p1.ipynb"))
 
         run_nbgrader(["autograde", "ps1", "--db", db])
+
+    def test_infinite_loop(self, db, course_dir):
+        with open("nbgrader_config.py", "a") as fh:
+            fh.write("""c.NbGrader.db_assignments = [dict(name='ps1', duedate='2015-02-02 14:58:23.948203 PST')]\n""")
+            fh.write("""c.NbGrader.db_students = [dict(id="foo")]\n""")
+            fh.write("""c.ExecutePreprocessor.timeout = 1""")
+
+        self._copy_file(join("files", "infinite-loop.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
+        run_nbgrader(["assign", "ps1", "--db", db])
+
+        self._copy_file(join("files", "infinite-loop.ipynb"), join(course_dir, "submitted", "foo", "ps1", "p1.ipynb"))
+        run_nbgrader(["autograde", "ps1", "--db", db])
+
+        assert os.path.isfile(join(course_dir, "autograded", "foo", "ps1", "p1.ipynb"))
+
+    def test_infinite_loop_with_output(self, db, course_dir):
+        pytest.skip("this test takes too long to run and consumes a LOT of memory")
+
+        with open("nbgrader_config.py", "a") as fh:
+            fh.write("""c.NbGrader.db_assignments = [dict(name='ps1', duedate='2015-02-02 14:58:23.948203 PST')]\n""")
+            fh.write("""c.NbGrader.db_students = [dict(id="foo")]\n""")
+
+        self._copy_file(join("files", "infinite-loop-with-output.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
+        run_nbgrader(["assign", "ps1", "--db", db])
+
+        self._copy_file(join("files", "infinite-loop-with-output.ipynb"), join(course_dir, "submitted", "foo", "ps1", "p1.ipynb"))
+        run_nbgrader(["autograde", "ps1", "--db", db], retcode=1)
+
+        assert not os.path.isfile(join(course_dir, "autograded", "foo", "ps1", "p1.ipynb"))

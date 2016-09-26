@@ -4,6 +4,10 @@ from textwrap import dedent
 
 from . import NbGraderPreprocessor
 
+class UnresponsiveKernelError(Exception):
+    pass
+
+
 class Execute(NbGraderPreprocessor, ExecutePreprocessor):
 
     interrupt_on_timeout = Bool(True)
@@ -21,4 +25,9 @@ class Execute(NbGraderPreprocessor, ExecutePreprocessor):
         if self.extra_arguments == [] and kernel_name == "python":
             self.extra_arguments = ["--HistoryManager.hist_file=:memory:"]
 
-        return super(Execute, self).preprocess(nb, resources)
+        try:
+            output = super(Execute, self).preprocess(nb, resources)
+        except RuntimeError:
+            raise UnresponsiveKernelError()
+
+        return output

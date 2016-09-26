@@ -223,6 +223,7 @@ class AutogradeApp(BaseNbConvertApp):
         self.log.info("Autograding %s", notebook_filename)
         self._sanitizing = False
         self._init_preprocessors()
-        super(AutogradeApp, self).convert_single_notebook(notebook_filename)
-
-        self._sanitizing = True
+        try:
+            super(AutogradeApp, self).convert_single_notebook(notebook_filename)
+        finally:
+            self._sanitizing = True
