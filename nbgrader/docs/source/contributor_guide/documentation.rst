@@ -35,7 +35,7 @@ executed, please make sure you re-run all the documentation before committing.
 While the documentation gets built automatically on Read The Docs, the notebooks do **not** get execute by Read The Docs -- they must be executed manually.
 However, executing the notebooks is easy to do!
 
-Our docs are built with `nbconvert <http://nbconvert.readthedocs.org/en/latest/>`_,
+Our docs are built with `nbconvert <https://nbconvert.readthedocs.io/en/latest/>`_,
 `Pandoc <http://pandoc.org/>`_, and `Sphinx <http://sphinx-doc.org/>`_.
 To build the docs locally, run the following command::
 
@@ -60,4 +60,4 @@ Automatic builds
 ----------------
 When a commit is made on the ``master`` branch, documentation is automatically
 built by Read The Docs and rendered at
-`nbgrader.readthedocs.org <http://nbgrader.readthedocs.org>`_.
+`nbgrader.readthedocs.org <https://nbgrader.readthedocs.io>`_.

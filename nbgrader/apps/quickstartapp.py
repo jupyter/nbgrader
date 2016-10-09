@@ -144,7 +144,7 @@ class QuickStartApp(NbGrader):
 
                 For further details, please see the full nbgrader documentation at:
 
-                    http://nbgrader.readthedocs.org/
+                    https://nbgrader.readthedocs.io/
                 """
             ).lstrip(),
             course_path,
