@@ -6,7 +6,7 @@
 
 A system for assigning and grading Jupyter notebooks.
 
-[Documentation can be found on Read the Docs.](http://nbgrader.readthedocs.org)
+[Documentation can be found on Read the Docs.](https://nbgrader.readthedocs.io)
 
 
 ## Highlights of nbgrader
@@ -24,7 +24,7 @@ submit, and validate their assignments.
 ![nbgrader assignment list](nbgrader/docs/source/user_guide/images/student_assignment.gif "nbgrader assignment list")
 
 ### The command line tools of nbgrader
-[Command line tools](https://nbgrader.readthedocs.org/en/latest/command_line_tools/index.html)
+[Command line tools](https://nbgrader.readthedocs.io/en/latest/command_line_tools/index.html)
 offer an efficient way for the instructor to generate, assign, release, collect,
 and grade notebooks.
 
@@ -39,12 +39,12 @@ Or, if you use [Anaconda](https://www.continuum.io/downloads):
     conda install -c jhamrick nbgrader
 
 For detailed instructions on installing nbgrader and the nbgrader extensions
-for Jupyter notebook, please see [Installation](https://nbgrader.readthedocs.org/en/latest/user_guide/installation.html)
+for Jupyter notebook, please see [Installation](https://nbgrader.readthedocs.io/en/latest/user_guide/installation.html)
 section in the User Guide.
 
 
 ## Contributing
-Please see the [contributing guidelines and documentation](https://nbgrader.readthedocs.org/en/latest/contributor_guide/overview.html).
+Please see the [contributing guidelines and documentation](https://nbgrader.readthedocs.io/en/latest/contributor_guide/overview.html).
 
 If you want to develop features for nbgrader, please follow the
-[development installation instructions](https://nbgrader.readthedocs.org/en/latest/contributor_guide/installation_developer.html).
+[development installation instructions](https://nbgrader.readthedocs.io/en/latest/contributor_guide/installation_developer.html).

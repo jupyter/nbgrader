@@ -130,7 +130,7 @@ example:
 
     c.Exporter.preprocessors = ['nbgrader.preprocessors.ClearSolutions']
 
-See also the nbconvert docs on `custom preprocessors <http://nbconvert.readthedocs.io/en/latest/nbconvert_library.html#Custom-Preprocessors>`__.
+See also the nbconvert docs on `custom preprocessors <https://nbconvert.readthedocs.io/en/latest/nbconvert_library.html#Custom-Preprocessors>`__.
 
 Calling nbgrader apps from Python
 ---------------------------------
