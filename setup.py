@@ -90,7 +90,8 @@ setup_args = dict(
         "jupyter_client",
         "tornado",
         "six",
-        "requests"
+        "requests",
+        "jsonschema"
     ]
 )
 

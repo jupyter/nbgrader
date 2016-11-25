@@ -142,7 +142,8 @@ class AssignApp(BaseNbConvertApp):
         ClearOutput,
         CheckCellMetadata,
         ComputeChecksums,
-        SaveCells
+        SaveCells,
+        CheckCellMetadata
     ])
 
     def build_extra_config(self):

@@ -1,6 +1,6 @@
 from traitlets import Unicode, List, Bool
 from nbconvert.nbconvertapp import NbConvertApp, DottedOrNone
-from ..preprocessors import DisplayAutoGrades, Execute, ClearOutput
+from ..preprocessors import DisplayAutoGrades, Execute, ClearOutput, CheckCellMetadata
 from .baseapp import NbGrader
 
 aliases = {}
@@ -36,6 +36,7 @@ class ValidateApp(NbGrader, NbConvertApp):
         """
 
     preprocessors = List([
+        CheckCellMetadata,
         ClearOutput,
         Execute,
         DisplayAutoGrades

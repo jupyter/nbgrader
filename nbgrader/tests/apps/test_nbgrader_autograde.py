@@ -5,10 +5,11 @@ import pytest
 
 from os.path import join
 from textwrap import dedent
-from nbformat.v4 import reads
+from nbformat import current_nbformat
 
 from ...api import Gradebook
 from ...utils import remove
+from ...nbformat import reads
 from .. import run_nbgrader
 from .base import BaseTestApp
 
@@ -628,11 +629,11 @@ class TestNbGraderAutograde(BaseTestApp):
 
         self._copy_file(join("files", "test-with-output.ipynb"), join(course_dir, "submitted", "foo", "ps1", "p1.ipynb"))
         with open(join(os.path.dirname(__file__), "files", "test-with-output.ipynb"), "r") as fh:
-            orig_contents = reads(fh.read())
+            orig_contents = reads(fh.read(), as_version=current_nbformat)
 
         run_nbgrader(["autograde", "ps1"])
         with open(join(course_dir, "autograded", "foo", "ps1", "p1.ipynb"), "r") as fh:
-            new_contents = reads(fh.read())
+            new_contents = reads(fh.read(), as_version=current_nbformat)
 
         different = False
         for i in range(len(orig_contents.cells)):
@@ -649,7 +650,7 @@ class TestNbGraderAutograde(BaseTestApp):
 
         run_nbgrader(["autograde", "ps1", "--force", "--no-execute"])
         with open(join(course_dir, "autograded", "foo", "ps1", "p1.ipynb"), "r") as fh:
-            new_contents = reads(fh.read())
+            new_contents = reads(fh.read(), as_version=current_nbformat)
 
         for i in range(len(orig_contents.cells)):
             orig_cell = orig_contents.cells[i]
