@@ -8,7 +8,7 @@ from textwrap import dedent
 
 class RemoveHidden(NbGraderPreprocessor):
     hidestart = Unicode(
-        '### HIDESTART',
+        '## HIDESTART',
         config=True,
         help=dedent(
             """
@@ -20,7 +20,7 @@ class RemoveHidden(NbGraderPreprocessor):
     )
 
     hideend = Unicode(
-        '### HIDEEND',
+        '## HIDEEND',
         config=True,
         help=dedent(
             """
@@ -33,8 +33,11 @@ class RemoveHidden(NbGraderPreprocessor):
     def preprocess_cell(self, cell, resources, cell_index):
 
         if utils.is_grade(cell) or utils.is_solution(cell) or utils.is_locked(cell):
-            cell.source = re.sub('{}(?:.|\n)*?{}'.format(self.hidestart,
-                                                         self.hideend)
+            cell.source = re.sub('{}(?:.|\n)*?{}'.format('#' + self.hidestart,
+                                                         '#' + self.hideend)
+                                 , '', cell.source)
+            cell.source = re.sub('{}(?:.|\n)*?{}'.format('//' + self.hidestart,
+                                                         '//' + self.hideend)
                                  , '', cell.source)
 
             # we probably don't really need this? 
