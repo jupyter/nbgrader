@@ -149,6 +149,7 @@ def nbserver(request, port, tempdir, coursedir, jupyter_config_dir, jupyter_data
     nbserver = sp.Popen([
         sys.executable, "-m", "jupyter", "notebook",
         "--no-browser",
+        "--NotebookApp.token=",
         "--port", str(port)], **kwargs)
 
     def fin():
