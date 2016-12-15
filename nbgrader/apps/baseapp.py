@@ -328,7 +328,15 @@ class NbGrader(JupyterApp):
         if os.path.exists(timestamp_path):
             with open(timestamp_path, 'r') as fh:
                 timestamp = fh.read().strip()
-            return parse_utc(timestamp)
+            if not timestamp:
+                self.log.warning(
+                    "Empty timestamp file: {}".format(timestamp_path))
+                return None
+            try:
+                return parse_utc(timestamp)
+            except ValueError:
+                self.fail(
+                    "Invalid timestamp string: {}".format(timestamp_path))
         else:
             return None
 
