@@ -31,6 +31,7 @@ flags.update({
     ),
 })
 
+
 class AutogradeApp(BaseNbConvertApp):
 
     name = u'nbgrader-autograde'
