@@ -7,7 +7,7 @@ from stat import (
 )
 
 from .baseapp import TransferApp, transfer_aliases, transfer_flags
-from ..utils import get_username, check_mode
+from ..utils import get_username, check_mode, find_all_files
 
 
 aliases = {}
@@ -19,6 +19,17 @@ flags = {}
 flags.update(transfer_flags)
 flags.update({
 })
+
+
+def find_notebooks(path):
+    notebooks = list()
+    rootpath = os.path.abspath(path)
+    for _file in find_all_files(rootpath):
+        if os.path.splitext(_file)[-1] == '.ipynb':
+            notebooks.append(os.path.relpath(_file, rootpath))
+    notebooks.sort()
+    return rootpath, notebooks
+
 
 class SubmitApp(TransferApp):
 
@@ -72,6 +83,43 @@ class SubmitApp(TransferApp):
         self.cache_path = os.path.join(self.cache_directory, self.course_id)
         self.assignment_filename = '{}+{}+{}'.format(get_username(), self.assignment_id, self.timestamp)
 
+    def check_filename_diff(self):
+        release_path = os.path.normpath(
+            self._format_path(self.release_directory, '', self.assignment_id))
+
+        release_path, released_notebooks = find_notebooks(release_path)
+        submit_path, submitted_notebooks = find_notebooks(self.src_path)
+
+        all_match = True
+        release_diff = list()
+        submitted_diff = list()
+
+        # Look for released notebooks in submitted notebooks
+        for filename in released_notebooks:
+            if filename in submitted_notebooks:
+                release_diff.append("{}: {}".format(filename, 'FOUND'))
+            else:
+                all_match = False
+                release_diff.append("{}: {}".format(filename, 'MISSING'))
+
+        # Look for invalid notebooks in submitted notebooks
+        for filename in submitted_notebooks:
+            if filename in released_notebooks:
+                submitted_diff.append("{}: {}".format(filename, 'OK'))
+            else:
+                all_match = False
+                submitted_diff.append("{}: {}".format(filename, 'INVALID'))
+
+        if not all_match:
+            self.fail(
+                "Attempting to submit invalid files for assignment {}:\n"
+                "Expected:\n\t{}\nSubmitted:\n\t{}".format(
+                    self.assignment_id,
+                    '\n\t'.join(release_diff),
+                    '\n\t'.join(submitted_diff),
+                )
+            )
+
     def copy_files(self):
         dest_path = os.path.join(self.inbound_path, self.assignment_filename)
         cache_path = os.path.join(self.cache_path, self.assignment_filename)
@@ -80,6 +128,7 @@ class SubmitApp(TransferApp):
         self.log.info("Destination: {}".format(dest_path))
 
         # copy to the real location
+        self.check_filename_diff()
         self.do_copy(self.src_path, dest_path, perms=(S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH))
         with open(os.path.join(dest_path, "timestamp.txt"), "w") as fh:
             fh.write(self.timestamp)
