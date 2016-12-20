@@ -20,7 +20,7 @@
       <div class="panel-body">
         <div id="notebook" class="border-box-sizing">
           <div class="container" id="notebook-container">
-          Error: submission notebook file not found.
+            Error: Submission notebook file not found: {{ resources.filename }}
           </div>
         </div>
       </div>

@@ -206,6 +206,7 @@ class SubmissionHandler(BaseHandler):
             resources['notebook_path'] = self.auth.get_notebook_url(relative_path)
 
         if not os.path.exists(filename):
+            resources['filename'] = filename
             html = self.render('formgrade_404.tpl', resources=resources)
             self.clear()
             self.set_status(404)
