@@ -75,9 +75,8 @@ Finally, for further documentation on these commands run:
 	jupyter nbextension --help-all
 	jupyter serverextension --help-all
 
-For instructions on installing the "Assignment List" extension for all users in
-a shared server setup, please see the :ref:`advanced installation instructions
-<assignment-list-installation>`.
+For advanced instructions on installing the *assignment list* extension please
+see the :ref:`advanced installation instructions<assignment-list-installation>`.
 
 Quick start
 -----------
