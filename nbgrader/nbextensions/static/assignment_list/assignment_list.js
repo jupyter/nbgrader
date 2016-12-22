@@ -9,6 +9,10 @@ define([
 ], function(Jupyter, $, utils, dialog) {
     "use strict";
 
+    var ajax = utils.ajax || $.ajax;
+    // Notebook v4.3.1 enabled xsrf so use notebooks ajax that includes the
+    // xsrf token in the header data
+
     var CourseList = function (course_list_selector, default_course_selector, dropdown_selector, refresh_selector, assignment_list, options) {
         this.course_list_selector = course_list_selector;
         this.default_course_selector = default_course_selector;
@@ -70,7 +74,7 @@ define([
             error : utils.log_ajax_error,
         };
         var url = utils.url_join_encode(this.base_url, 'courses');
-        $.ajax(url, settings);
+        ajax(url, settings);
     };
 
 
@@ -162,7 +166,7 @@ define([
             error : utils.log_ajax_error,
         };
         var url = utils.url_join_encode(this.base_url, 'assignments');
-        $.ajax(url, settings);
+        ajax(url, settings);
     };
 
 
@@ -231,7 +235,7 @@ define([
                     // to do the animation (borderSpacing).
                     $icon.animate({ borderSpacing: 90 }, {
                         step: function(now,fx) {
-                            $icon.css('transform','rotate(-' + now + 'deg)'); 
+                            $icon.css('transform','rotate(-' + now + 'deg)');
                         }
                     }, 250);
                 } else {
@@ -239,7 +243,7 @@ define([
                     // See comment above.
                     $icon.animate({ borderSpacing: 0 }, {
                         step: function(now,fx) {
-                            $icon.css('transform','rotate(-' + now + 'deg)'); 
+                            $icon.css('transform','rotate(-' + now + 'deg)');
                         }
                     }, 250);
                 }
@@ -368,7 +372,7 @@ define([
                     'assignments',
                     'fetch'
                 );
-                $.ajax(url, settings);
+                ajax(url, settings);
             });
 
         } else if (this.data.status == 'fetched') {
@@ -395,7 +399,7 @@ define([
                     'assignments',
                     'submit'
                 );
-                $.ajax(url, settings);
+                ajax(url, settings);
             });
         }
 
@@ -459,7 +463,7 @@ define([
                 'assignments',
                 'validate'
             );
-            $.ajax(url, settings);
+            ajax(url, settings);
         });
 
         return container;
