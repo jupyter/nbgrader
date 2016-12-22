@@ -119,9 +119,9 @@ def nbserver(request, port, tempdir, coursedir, jupyter_config_dir, jupyter_data
     env['JUPYTER_CONFIG_DIR'] = jupyter_config_dir
     env['JUPYTER_DATA_DIR'] = jupyter_data_dir
 
-    sp.Popen([sys.executable, "-m", "jupyter", "nbextension", "install", "--py", "nbgrader"], env=env)
-    sp.Popen([sys.executable, "-m", "jupyter", "nbextension", "enable", "--py", "nbgrader"], env=env)
-    sp.Popen([sys.executable, "-m", "jupyter", "serverextension", "enable", "--py", "nbgrader"], env=env)
+    sp.Popen([sys.executable, "-m", "jupyter", "nbextension", "install", "--user", "--py", "nbgrader"], env=env)
+    sp.Popen([sys.executable, "-m", "jupyter", "nbextension", "enable", "--user", "--py", "nbgrader"], env=env)
+    sp.Popen([sys.executable, "-m", "jupyter", "serverextension", "enable", "--user", "--py", "nbgrader"], env=env)
 
     # create nbgrader_config.py file
     if sys.platform != 'win32':
