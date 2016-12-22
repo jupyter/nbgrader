@@ -15,34 +15,29 @@ Or, if you use `Anaconda <https://www.continuum.io/downloads>`__::
 
 nbgrader extensions
 -------------------
+You may then install the nbgrader extensions for Jupyter notebook. This will
+install both the *create assignment* toolbar extension and *assignment list*
+notebook server extension::
 
-You may then install the nbgrader extensions for Jupyter notebook. Previously
-this was done using the ``nbgrader extension install`` command. However, moving
-forward this is done using the ``jupyter nbextension`` and ``jupyter serverextension``
-commands.
+    nbgrader extension install
 
-To install and enable the frontend nbextensions (*assignment list* and
-*create assignment*) run:
+To use the toolbar extension as either an instructor or a student, activate the
+extension with::
 
-    jupyter nbextension install --sys-prefix --py nbgrader
-    jupyter nbextension enable --sys-prefix --py nbgrader
-    
-To install the server extension for *assignment_list* run:
+    nbgrader extension activate
 
-    jupyter serverextension enable --sys-prefix --py nbgrader
+If you want to install the extension for only your user environment and not
+systemwide, use ``nbgrader extension install --user``. If you don't want to
+have to reinstall the extension when nbgrader is updated, use ``nbgrader
+extension install --symlink``. If you want to only install a specific
+extension, use ``nbgrader extension install <name>``, where ``<name>`` is the
+name of the extension you want (e.g. ``create_assignment``).
 
-In both the ``nbextension`` and ``serverextension`` commands:
+To get help and see all the options you can pass while installing or activating
+the nbgrader notebook extension, use::
 
-* To install for all users, replace `--sys-prefix` by `--system`.
-* To install only for the current user replace `--sys-prefix` by `--user`.
-
-If you don't want to have to reinstall the nbextension when nbgrader is updated, add
-``--symlink`` to the ``nbextension`` command.
-
-For further documentation on these commands run:
-
-	jupyter nbextension --help-all
-	jupyter serverextension --help-all
+    nbgrader extension install --help-all
+    nbgrader extension activate --help-all
 
 For instructions on installing the "Assignment List" extension for all users in
 a shared server setup, please see the :ref:`advanced installation instructions
