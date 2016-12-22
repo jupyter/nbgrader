@@ -60,9 +60,24 @@ class AssignmentNotebookSubmissionsHandler(BaseHandler):
         except MissingEntry:
             raise web.HTTPError(404, "Invalid notebook: {}/{}".format(assignment_id, notebook_id))
 
-        submissions = self.gradebook.notebook_submission_dicts(notebook_id, assignment_id)
-        submissions.sort(key=lambda x: x["id"])
+        notebook_dir_format = os.path.join(self.notebook_dir_format, "{notebook_id}.ipynb")
+        notebook_dicts = self.gradebook.notebook_submission_dicts(notebook_id, assignment_id)
 
+        submissions = list()
+        for nb_dict in notebook_dicts:
+            filename = os.path.join(
+                self.notebook_dir,
+                notebook_dir_format.format(
+                    nbgrader_step=self.nbgrader_step,
+                    assignment_id=assignment_id,
+                    notebook_id=notebook_id,
+                    student_id=nb_dict['student']
+                )
+            )
+            if os.path.exists(filename):
+                submissions.append(nb_dict)
+
+        submissions.sort(key=lambda x: x["id"])
         for i, submission in enumerate(submissions):
             submission["index"] = i
 
