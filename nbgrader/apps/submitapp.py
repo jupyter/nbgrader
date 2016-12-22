@@ -6,6 +6,8 @@ from stat import (
     S_ISVTX, S_ISGID
 )
 
+from traitlets import Bool
+
 from .baseapp import TransferApp, transfer_aliases, transfer_flags
 from ..utils import get_username, check_mode, find_all_files
 
@@ -18,9 +20,14 @@ aliases.update({
 flags = {}
 flags.update(transfer_flags)
 flags.update({
+    'strict': (
+        {'SubmitApp': {'strict': True}},
+        ""
+    ),
 })
 
 
+# XXX Move to utils.py maybe?
 def find_notebooks(path):
     notebooks = list()
     rootpath = os.path.abspath(path)
@@ -59,6 +66,14 @@ class SubmitApp(TransferApp):
         so instructors can tell when you turned it in. No other students will
         be able to see your submissions.
         """
+
+    strict = Bool(
+        False,
+        help=dedent(
+            "Whether or not to submit the assignment if the submitted file "
+            "names do not match the released assignment file names."
+        )
+    ).tag(config=True)
 
     def init_src(self):
         if self.path_includes_course:
@@ -111,14 +126,23 @@ class SubmitApp(TransferApp):
                 submitted_diff.append("{}: {}".format(filename, 'INVALID'))
 
         if not all_match:
-            self.fail(
-                "Attempting to submit invalid files for assignment {}:\n"
+            diff_msg = (
                 "Expected:\n\t{}\nSubmitted:\n\t{}".format(
-                    self.assignment_id,
                     '\n\t'.join(release_diff),
                     '\n\t'.join(submitted_diff),
                 )
             )
+            if self.strict:
+                self.fail(
+                    "Assignment {} not submitted. "
+                    "Attempting to submit invalid files:\n{}"
+                    "".format(self.assignment_id, diff_msg)
+                )
+            else:
+                self.log.warning(
+                    "Invalid files submitted for assignment {}:\n{}"
+                    "".format(self.assignment_id, diff_msg)
+                )
 
     def copy_files(self):
         dest_path = os.path.join(self.inbound_path, self.assignment_filename)
