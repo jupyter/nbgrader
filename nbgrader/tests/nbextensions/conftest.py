@@ -15,8 +15,7 @@ from textwrap import dedent
 from nbformat import write as write_nb
 from nbformat.v4 import new_notebook
 
-from .. import run_nbgrader, copy_coverage_files, get_free_ports
-from ...api import Gradebook
+from .. import copy_coverage_files, get_free_ports
 from ...utils import rmtree
 
 
@@ -120,9 +119,9 @@ def nbserver(request, port, tempdir, coursedir, jupyter_config_dir, jupyter_data
     env['JUPYTER_CONFIG_DIR'] = jupyter_config_dir
     env['JUPYTER_DATA_DIR'] = jupyter_data_dir
 
-    nbextension_dir = os.path.join(jupyter_data_dir, "nbextensions")
-    run_nbgrader(["extension", "install", "--nbextensions", nbextension_dir], env=env)
-    run_nbgrader(["extension", "activate"], env=env)
+    sp.Popen([sys.executable, "-m", "jupyter", "nbextension", "install", "--py", "nbgrader"], env=env)
+    sp.Popen([sys.executable, "-m", "jupyter", "nbextension", "enable", "--py", "nbgrader"], env=env)
+    sp.Popen([sys.executable, "-m", "jupyter", "serverextension", "enable", "--py", "nbgrader"], env=env)
 
     # create nbgrader_config.py file
     if sys.platform != 'win32':
