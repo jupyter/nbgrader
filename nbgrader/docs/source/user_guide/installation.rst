@@ -21,27 +21,62 @@ notebook server extension::
 
     nbgrader extension install
 
-To use the toolbar extension as either an instructor or a student, activate the
-extension with::
+To install and enable both frontend nbextensions (*assignment list* and
+*create assignment*) run:
 
-    nbgrader extension activate
+	# The nbextensions are JavaScript/HTML/CSS so they require
+	# separate installation and enabling.
+    jupyter nbextension install --sys-prefix --py nbgrader
+    jupyter nbextension enable --sys-prefix --py nbgrader
+    
+To install the server extension for *assignment_list* run:
 
-If you want to install the extension for only your user environment and not
-systemwide, use ``nbgrader extension install --user``. If you don't want to
-have to reinstall the extension when nbgrader is updated, use ``nbgrader
-extension install --symlink``. If you want to only install a specific
-extension, use ``nbgrader extension install <name>``, where ``<name>`` is the
-name of the extension you want (e.g. ``create_assignment``).
+	# The serverextension is a Python module inside nbgrader, so only an
+	# enable step is needed.
+    jupyter serverextension enable --sys-prefix --py nbgrader
 
-To get help and see all the options you can pass while installing or activating
-the nbgrader notebook extension, use::
+To work properly, the *assignment list* extension requires both the 
+nbextension and serverextension. The *create assignment* extension only 
+has an nbextension part.
 
-    nbgrader extension install --help-all
-    nbgrader extension activate --help-all
+When run in this way with the ``--sys-prefix`` option, the nbextensions and
+serverextension will be installed and enabled for anyone using the particular
+Python installation or conda env where nbgrader is installed. If that Python
+installation is available system-wide, all users will immediately be able to
+use the nbgrader extensions. 
 
-For instructions on installing the "Assignment List" extension for all users in
-a shared server setup, please see the :ref:`advanced installation instructions
-<assignment-list-installation>`.
+There are a number of ways you may need to customize the installation.
+
+First, to install or enable the nbextensions/serverextension for just the
+current user, replace ``--sys-prefix`` by ``--user`` in any of the above
+commands.
+
+Second, to install or enable the nbextensions/serverextension for all
+Python installations on the system, replace ``--sys-prefix`` by ``--system``
+in any of the above commands.
+
+Previous versions of nbgrader required each user on a system to enable the
+nbextensions; this is no longer needed if the ``--sys-prefix`` option is used
+for a system-wide python or the ``--system`` option is used.
+
+Third, you may want to only install one of the nbextensions. To do this, follow
+the above steps to install everything and then disable the extension you don't
+need using:
+
+	jupyter nbextension disable --sys-prefix assignment_list/main
+	
+or:
+
+	jupyter nbextension disable --sys-prefix create_assignment/main
+
+
+Finally, for further documentation on these commands run:
+
+	jupyter nbextension --help-all
+	jupyter serverextension --help-all
+
+For advanced instructions on installing the *assignment list* extension please
+see the :ref:`advanced installation instructions<assignment-list-installation>`.
 
 Quick start
 -----------
