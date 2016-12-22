@@ -22,14 +22,14 @@ forward this is done using the ``jupyter nbextension`` and ``jupyter
 serverextension`` commands.
 
 To install and enable both frontend nbextensions (*assignment list* and
-*create assignment*) run:
+*create assignment*) run::
 
 	# The nbextensions are JavaScript/HTML/CSS so they require
 	# separate installation and enabling.
     jupyter nbextension install --sys-prefix --py nbgrader
     jupyter nbextension enable --sys-prefix --py nbgrader
-    
-To install the server extension for *assignment_list* run:
+
+To install the server extension for *assignment_list* run::
 
 	# The serverextension is a Python module inside nbgrader, so only an
 	# enable step is needed.
@@ -41,9 +41,9 @@ has an nbextension part.
 
 When run in this way with the ``--sys-prefix`` option, the nbextensions and
 serverextension will be installed and enabled for anyone using the particular
-Python installation or conda env where nbgrader is installed. If that Python
-installation is available system-wide, all users will immediately be able to
-use the nbgrader extensions. 
+Python installation or conda environment where nbgrader is installed. If that
+Python installation is available system-wide, all users will immediately be
+able to use the nbgrader extensions.
 
 There are a number of ways you may need to customize the installation.
 
@@ -61,16 +61,15 @@ for a system-wide python or the ``--system`` option is used.
 
 Third, you may want to only install one of the nbextensions. To do this, follow
 the above steps to install everything and then disable the extension you don't
-need using:
+need using::
 
 	jupyter nbextension disable --sys-prefix assignment_list/main
-	
-or:
+
+or::
 
 	jupyter nbextension disable --sys-prefix create_assignment/main
 
-
-Finally, for further documentation on these commands run:
+Finally, for further documentation on these commands run::
 
 	jupyter nbextension --help-all
 	jupyter serverextension --help-all

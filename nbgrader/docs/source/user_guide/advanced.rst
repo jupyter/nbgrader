@@ -76,8 +76,6 @@ make, but also relatively easy to fix. If the exchange directory is at
 
   chmod +rw /srv/nbgrader/exchange
 
-.. _getting-information-from-db:
-
 .. _assignment-list-installation:
 
 Advanced "Assignment List" installation
@@ -100,7 +98,7 @@ Advanced "Assignment List" installation
   <https://github.com/jupyter/nbgrader/issues/544>`__). :ref:`PRs welcome!
   <pull-request>`
 
-This section covers some further and configuration scenarios that offen
+This section covers some further and configuration scenarios that often
 occur with the *assignment list* extension.
 
 In previous versions of nbgrader, a special process had to be used to enable this extension for all users on a multi-user system. As described in the main :doc:`installation` documentation this is no longer required.
@@ -123,6 +121,8 @@ make, but also relatively easy to fix. If the exchange directory is at
 .. code:: bash
 
   chmod +rw /srv/nbgrader/exchange
+
+.. _getting-information-from-db:
 
 Getting information from the database
 -------------------------------------
