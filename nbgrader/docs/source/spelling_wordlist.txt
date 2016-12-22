@@ -44,6 +44,7 @@ filesystem
 formatters
 formgrade
 formgrader
+frontend
 gif
 Gradebook
 gradebook
@@ -85,6 +86,8 @@ mikebolt
 minrk
 namespace
 nbconvert
+nbextension
+nbextensions
 nbgrader
 neuroscience
 np
@@ -117,6 +120,7 @@ resize
 rst
 runtime
 sansary
+serverextension
 smeylan
 spellcheck
 SQL
