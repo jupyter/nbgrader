@@ -15,11 +15,11 @@ Or, if you use `Anaconda <https://www.continuum.io/downloads>`__::
 
 nbgrader extensions
 -------------------
-You may then install the nbgrader extensions for Jupyter notebook. This will
-install both the *create assignment* toolbar extension and *assignment list*
-notebook server extension::
 
-    nbgrader extension install
+You may then install the nbgrader extensions for Jupyter notebook. Previously
+this was done using the ``nbgrader extension install`` command. However, moving
+forward this is done using the ``jupyter nbextension`` and ``jupyter
+serverextension`` commands.
 
 To install and enable both frontend nbextensions (*assignment list* and
 *create assignment*) run:
