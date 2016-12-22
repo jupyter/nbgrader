@@ -152,6 +152,7 @@ default_handlers = [
 
 def load_jupyter_server_extension(nbapp):
     """Load the nbserver"""
+    nbapp.log.info("Loading the assignment_list nbgrader serverextension")
     webapp = nbapp.web_app
     webapp.settings['assignment_list_manager'] = AssignmentList(parent=nbapp)
     base_url = webapp.settings['base_url']
