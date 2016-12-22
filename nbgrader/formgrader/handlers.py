@@ -156,7 +156,23 @@ class StudentAssignmentNotebooksHandler(BaseHandler):
         except MissingEntry:
             raise web.HTTPError(404, "Invalid assignment: {} for {}".format(assignment_id, student_id))
 
-        submissions = [n.to_dict() for n in assignment.notebooks]
+
+        notebook_dir_format = os.path.join(self.notebook_dir_format, "{notebook_id}.ipynb")
+
+        submissions = list()
+        for notebook in assignment.notebooks:
+            filename = os.path.join(
+                self.notebook_dir,
+                notebook_dir_format.format(
+                    nbgrader_step=self.nbgrader_step,
+                    assignment_id=assignment_id,
+                    notebook_id=notebook.name,
+                    student_id=student_id
+                )
+            )
+            if os.path.exists(filename):
+                submissions.append(notebook.to_dict())
+
         submissions.sort(key=lambda x: x['name'])
 
         html = self.render(
