@@ -6,6 +6,7 @@ from stat import (
     S_ISVTX, S_ISGID
 )
 
+from textwrap import dedent
 from traitlets import Bool
 
 from .baseapp import TransferApp, transfer_aliases, transfer_flags
@@ -29,13 +30,14 @@ flags.update({
 
 # XXX Move to utils.py maybe?
 def find_notebooks(path):
+    """Return a sorted list of notebooks recursively found rooted at `path`."""
     notebooks = list()
     rootpath = os.path.abspath(path)
     for _file in find_all_files(rootpath):
         if os.path.splitext(_file)[-1] == '.ipynb':
             notebooks.append(os.path.relpath(_file, rootpath))
     notebooks.sort()
-    return rootpath, notebooks
+    return notebooks
 
 
 class SubmitApp(TransferApp):
@@ -102,8 +104,8 @@ class SubmitApp(TransferApp):
         release_path = os.path.normpath(
             self._format_path(self.release_directory, '', self.assignment_id))
 
-        release_path, released_notebooks = find_notebooks(release_path)
-        submit_path, submitted_notebooks = find_notebooks(self.src_path)
+        released_notebooks = find_notebooks(release_path)
+        submitted_notebooks = find_notebooks(self.src_path)
 
         all_match = True
         release_diff = list()
