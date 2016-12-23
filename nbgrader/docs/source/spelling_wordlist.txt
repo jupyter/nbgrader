@@ -44,6 +44,7 @@ filesystem
 formatters
 formgrade
 formgrader
+frontend
 gif
 Gradebook
 gradebook
@@ -83,8 +84,11 @@ matplotlib
 metadata
 mikebolt
 minrk
+multi
 namespace
 nbconvert
+nbextension
+nbextensions
 nbgrader
 neuroscience
 np
@@ -117,6 +121,7 @@ resize
 rst
 runtime
 sansary
+serverextension
 smeylan
 spellcheck
 SQL
