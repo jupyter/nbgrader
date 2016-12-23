@@ -11,7 +11,6 @@ Running nbgrader with JupyterHub
 
 Please see :doc:`/configuration/jupyterhub_config`.
 
-.. _assignment-list-installation:
 
 Installing the "Assignment List" plugin for all students on a server
 --------------------------------------------------------------------
@@ -101,7 +100,9 @@ Advanced "Assignment List" installation
 This section covers some further and configuration scenarios that often
 occur with the *assignment list* extension.
 
-In previous versions of nbgrader, a special process had to be used to enable this extension for all users on a multi-user system. As described in the main :doc:`installation` documentation this is no longer required.
+In previous versions of nbgrader, a special process had to be used to enable
+this extension for all users on a multi-user system. As described in the main
+:doc:`installation` documentation this is no longer required.
 
 If you know you have released an assignment but still don't see it in the list
 of assignments, check the output of the notebook server to see if there are any
