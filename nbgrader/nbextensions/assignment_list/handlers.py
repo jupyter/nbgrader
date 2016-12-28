@@ -62,7 +62,7 @@ class AssignmentList(LoggingConfigurable):
 
     def fetch_assignment(self, course_id, assignment_id):
         p = sp.Popen([
-            "nbgrader", "fetch",
+            sys.executable, "-m", "nbgrader", "fetch",
             "--course", course_id,
             assignment_id
         ], stdout=sp.PIPE, stderr=sp.STDOUT, cwd=self.assignment_dir)
