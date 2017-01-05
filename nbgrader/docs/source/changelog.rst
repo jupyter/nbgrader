@@ -18,7 +18,7 @@ Version 0.3.2 of nbgrader includes a few bugfixes pertaining to building nbgrade
 - PR #588: `basename` to wordslist
 - PR #584: Changes for Notebook v4.3 tests
 
-Thanks to the lgpage, who made all the changes necessary for the 0.3.2 release!
+Thanks to lgpage, who made all the changes necessary for the 0.3.2 release!
 
 0.3.1
 ~~~~~
