@@ -1,5 +1,6 @@
 admin
 Afterwards
+ajax
 alchemyst
 alope
 app
@@ -153,6 +154,9 @@ whositwhatnow
 Wildcards
 willingc
 wordlist
+wordslist
 Workflow
 workflow
 workflows
+xsrf
+XSRF
