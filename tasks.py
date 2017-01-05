@@ -1,7 +1,7 @@
 import os
 import re
 
-from invoke import task
+from invoke import task, collection
 from textwrap import dedent
 
 import sys
@@ -150,3 +150,20 @@ def install(ctx, group):
     else:
         cmd = 'pip install -r dev-requirements.txt -e .'
     run(ctx, 'PIP_FIND_LINKS=~/travis-wheels/wheelhouse {}'.format(cmd))
+
+
+ns = collection.Collection(
+    after_success,
+    before_install,
+    docs,
+    install,
+    js,
+    tests,
+)
+
+if WINDOWS:
+    ns.configure({
+        'run': {
+            'shell': os.environ.get('COMSPEC', os.environ.get('SHELL')),
+        }
+    })
