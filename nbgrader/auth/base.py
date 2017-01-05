@@ -6,11 +6,11 @@ class BaseAuth(LoggingConfigurable):
     """Base formgrade authenticator."""
 
     def __init__(self, ip, port, base_directory, **kwargs):
-        super(BaseAuth, self).__init__(**kwargs)
         self._ip = ip
         self._port = port
         self._base_url = ''
         self._base_directory = base_directory
+        super(BaseAuth, self).__init__(**kwargs)
 
     @property
     def base_url(self):
