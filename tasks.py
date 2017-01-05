@@ -139,7 +139,7 @@ def before_install(ctx, group, python_version):
     # install jupyterhub
     if python_version.startswith('3') and group == 'formgrader':
         run(ctx, 'npm install -g configurable-http-proxy')
-        run(ctx, 'pip install jupyterhub<0.7')
+        run(ctx, 'pip install "jupyterhub<0.7"')
 
 
 @task
