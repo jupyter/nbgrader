@@ -1,5 +1,6 @@
 pytest
 pytest-cov
+pytest-rerunfailures
 coverage
 selenium
 invoke
