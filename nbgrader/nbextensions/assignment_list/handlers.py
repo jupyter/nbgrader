@@ -27,74 +27,153 @@ class AssignmentList(LoggingConfigurable):
         if course_id:
             cmd.extend(["--course", course_id])
         p = sp.Popen(cmd, stdout=sp.PIPE, stderr=sp.PIPE, cwd=self.assignment_dir)
-        output, _ = p.communicate()
+        stdout, stderr = p.communicate()
         retcode = p.poll()
+
         if retcode != 0:
-            raise RuntimeError('nbgrader list exited with code {}'.format(retcode))
-        assignments = json.loads(output.decode())
-        for assignment in assignments:
-            if assignment['status'] == 'fetched':
-                assignment['path'] = os.path.relpath(assignment['path'], self.assignment_dir)
-                for notebook in assignment['notebooks']:
-                    notebook['path'] = os.path.relpath(notebook['path'], self.assignment_dir)
-        return sorted(assignments, key=lambda x: (x['course_id'], x['assignment_id']))
+            retvalue = {
+                "success": False,
+                "value": stdout.decode() + stderr.decode(),
+                "command": " ".join(cmd)
+            }
+
+        else:
+            assignments = json.loads(stdout.decode())
+            for assignment in assignments:
+                if assignment['status'] == 'fetched':
+                    assignment['path'] = os.path.relpath(assignment['path'], self.assignment_dir)
+                    for notebook in assignment['notebooks']:
+                        notebook['path'] = os.path.relpath(notebook['path'], self.assignment_dir)
+            retvalue = {
+                "success": True,
+                "value": sorted(assignments, key=lambda x: (x['course_id'], x['assignment_id']))
+            }
+
+        return retvalue
 
     def list_submitted_assignments(self, course_id=None):
         cmd = [sys.executable, "-m", "nbgrader", "list", "--json", "--cached"]
         if course_id:
             cmd.extend(["--course", course_id])
         p = sp.Popen(cmd, stdout=sp.PIPE, stderr=sp.PIPE, cwd=self.assignment_dir)
-        output, _ = p.communicate()
+        stdout, stderr = p.communicate()
         retcode = p.poll()
+
         if retcode != 0:
-            raise RuntimeError('nbgrader list exited with code {}'.format(retcode))
-        assignments = json.loads(output.decode())
-        return sorted(assignments, key=lambda x: x['timestamp'], reverse=True)
+            retvalue = {
+                "success": False,
+                "value": stdout.decode() + stderr.decode(),
+                "command": " ".join(cmd)
+            }
+
+        else:
+            assignments = json.loads(stdout.decode())
+            retvalue = {
+                "success": True,
+                "value": sorted(assignments, key=lambda x: x['timestamp'], reverse=True)
+            }
+
+        return retvalue
 
     def list_assignments(self, course_id=None):
-        assignments = []
-        assignments.extend(self.list_released_assignments(course_id=course_id))
-        assignments.extend(self.list_submitted_assignments(course_id=course_id))
-        return assignments
+        released = self.list_released_assignments(course_id=course_id)
+        if not released['success']:
+            return released
+
+        submitted = self.list_submitted_assignments(course_id=course_id)
+        if not submitted['success']:
+            return submitted
+
+        retvalue = {
+            "success": True,
+            "value": released["value"] + submitted["value"]
+        }
+
+        return retvalue
 
     def list_courses(self):
         assignments = self.list_assignments()
-        courses = sorted(list(set([x["course_id"] for x in assignments])))
-        return courses
+        if not assignments["success"]:
+            return assignments
+
+        retvalue = {
+            "success": True,
+            "value": sorted(list(set([x["course_id"] for x in assignments["value"]])))
+        }
+
+        return retvalue
 
     def fetch_assignment(self, course_id, assignment_id):
-        p = sp.Popen([
+        cmd = [
             sys.executable, "-m", "nbgrader", "fetch",
             "--course", course_id,
             assignment_id
-        ], stdout=sp.PIPE, stderr=sp.STDOUT, cwd=self.assignment_dir)
+        ]
+        p = sp.Popen(
+            cmd, stdout=sp.PIPE, stderr=sp.STDOUT, cwd=self.assignment_dir)
         output, _ = p.communicate()
         retcode = p.poll()
+
         if retcode != 0:
-            self.log.error(output)
-            raise RuntimeError('nbgrader fetch exited with code {}'.format(retcode))
+            retvalue = {
+                "success": False,
+                "value": output.decode(),
+                "command": " ".join(cmd)
+            }
+
+        else:
+            retvalue = {
+                "success": True
+            }
+
+        return retvalue
 
     def submit_assignment(self, course_id, assignment_id):
-        p = sp.Popen([
+        cmd = [
             sys.executable, "-m", "nbgrader", "submit",
             "--course", course_id,
             assignment_id
-        ], stdout=sp.PIPE, stderr=sp.STDOUT, cwd=self.assignment_dir)
+        ]
+        p = sp.Popen(
+            cmd, stdout=sp.PIPE, stderr=sp.STDOUT, cwd=self.assignment_dir)
         output, _ = p.communicate()
         retcode = p.poll()
+
         if retcode != 0:
-            self.log.error(output)
-            raise RuntimeError('nbgrader submit exited with code {}'.format(retcode))
+            retvalue = {
+                "success": False,
+                "value": output.decode(),
+                "command": " ".join(cmd)
+            }
+
+        else:
+            retvalue = {
+                "success": True
+            }
+
+        return retvalue
 
     def validate_notebook(self, path):
+        cmd = [sys.executable, "-m", "nbgrader", "validate", "--json", path]
         p = sp.Popen(
-            [sys.executable, "-m", "nbgrader", "validate", "--json", path],
-            stdout=sp.PIPE, stderr=sp.PIPE, cwd=self.assignment_dir)
-        output, _ = p.communicate()
+            cmd, stdout=sp.PIPE, stderr=sp.PIPE, cwd=self.assignment_dir)
+        stdout, stderr = p.communicate()
         retcode = p.poll()
+
         if retcode != 0:
-            raise RuntimeError('nbgrader validate exited with code {}'.format(retcode))
-        return output.decode()
+            retvalue = {
+                "success": False,
+                "value": stdout.decode() + stderr.decode(),
+                "command": " ".join(cmd)
+            }
+
+        else:
+            retvalue = {
+                "success": True,
+                "value": stdout.decode()
+            }
+
+        return retvalue
 
 
 class BaseAssignmentHandler(IPythonHandler):

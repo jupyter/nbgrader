@@ -70,15 +70,23 @@ define([
             cache : false,
             type : "GET",
             dataType : "json",
-            success : $.proxy(this.load_list_success, this),
+            success : $.proxy(this.handle_load_list, this),
             error : utils.log_ajax_error,
         };
         var url = utils.url_join_encode(this.base_url, 'courses');
         ajax(url, settings);
     };
 
+    CourseList.prototype.handle_load_list = function (data, status, xhr) {
+        if (data.success) {
+            this.load_list_success(data.value);
+        } else {
+            this.default_course_element.text("Error fetching courses!");
+            this.assignment_list.show_error(data.value);
+        }
+    };
 
-    CourseList.prototype.load_list_success = function (data, status, xhr) {
+    CourseList.prototype.load_list_success = function (data) {
         this.data = data;
         this.disable_list()
         this.clear_list();
@@ -162,49 +170,67 @@ define([
             data : {
                 course_id: course
             },
-            success : $.proxy(this.load_list_success, this),
+            success : $.proxy(this.handle_load_list, this),
             error : utils.log_ajax_error,
         };
         var url = utils.url_join_encode(this.base_url, 'assignments');
         ajax(url, settings);
     };
 
-
     AssignmentList.prototype.clear_list = function (loading) {
+        var elems = [this.released_element, this.fetched_element, this.submitted_element];
+        var i;
+
         // remove list items
-        this.released_element.children('.list_item').remove();
-        this.fetched_element.children('.list_item').remove();
-        this.submitted_element.children('.list_item').remove();
+        for (i = 0; i < elems.length; i++) {
+            elems[i].children('.list_item').remove();
+            if (loading) {
+                // show loading
+                elems[i].children('.list_loading').show();
+                // hide placeholders and errors
+                elems[i].children('.list_placeholder').hide();
+                elems[i].children('.list_error').hide();
 
-        if (loading) {
-            // show loading
-            this.released_element.children('.list_loading').show();
-            this.fetched_element.children('.list_loading').show();
-            this.submitted_element.children('.list_loading').show();
-
-            // hide placeholders
-            this.released_element.children('.list_placeholder').hide();
-            this.fetched_element.children('.list_placeholder').hide();
-            this.submitted_element.children('.list_placeholder').hide();
-        } else {
-            // show placeholders
-            this.released_element.children('.list_placeholder').show();
-            this.fetched_element.children('.list_placeholder').show();
-            this.submitted_element.children('.list_placeholder').show();
-
-            // hide loading
-            this.released_element.children('.list_loading').hide();
-            this.fetched_element.children('.list_loading').hide();
-            this.submitted_element.children('.list_loading').hide();
+            } else {
+                // show placeholders
+                elems[i].children('.list_placeholder').show();
+                // hide loading and errors
+                elems[i].children('.list_loading').hide();
+                elems[i].children('.list_error').hide();
+            }
         }
     };
 
-    AssignmentList.prototype.load_list_success = function (data, status, xhr) {
+    AssignmentList.prototype.show_error = function (error) {
+        var elems = [this.released_element, this.fetched_element, this.submitted_element];
+        var i;
+
+        // remove list items
+        for (i = 0; i < elems.length; i++) {
+            elems[i].children('.list_item').remove();
+            // show errors
+            elems[i].children('.list_error').show();
+            elems[i].children('.list_error').text(error);
+            // hide loading and placeholding
+            elems[i].children('.list_loading').hide();
+            elems[i].children('.list_placeholder').hide();
+        }
+    };
+
+    AssignmentList.prototype.handle_load_list = function (data, status, xhr) {
+        if (data.success) {
+            this.load_list_success(data.value);
+        } else {
+            this.show_error(data.value);
+        }
+    };
+
+    AssignmentList.prototype.load_list_success = function (data) {
         this.clear_list();
         var len = data.length;
         for (var i=0; i<len; i++) {
             var element = $('<div/>');
-            var item = new Assignment(element, data[i], this.fetched_selector, $.proxy(this.load_list_success, this), this.options);
+            var item = new Assignment(element, data[i], this.fetched_selector, $.proxy(this.handle_load_list, this), this.options);
             if (data[i]['status'] === 'released') {
                 this.released_element.append(element);
                 this.released_element.children('.list_placeholder').hide();
@@ -486,37 +512,44 @@ define([
     };
 
     Notebook.prototype.validate = function (data, button) {
-        data = JSON.parse(data);
         var body = $('<div/>').attr("id", "validation-message");
-        if (data.changed !== undefined) {
-            for (var i=0; i<data.changed.length; i++) {
-                body.append($('<div/>').append($('<p/>').text('The source of the following cell has changed, but it should not have!')));
-                body.append($('<pre/>').text(data.changed[i].source));
-            }
-            body.addClass("validation-changed");
-            this.validate_failure(button);
+        if (data.success) {
+            data = JSON.parse(data.value);
+            if (data.changed !== undefined) {
+                for (var i=0; i<data.changed.length; i++) {
+                    body.append($('<div/>').append($('<p/>').text('The source of the following cell has changed, but it should not have!')));
+                    body.append($('<pre/>').text(data.changed[i].source));
+                }
+                body.addClass("validation-changed");
+                this.validate_failure(button);
 
-        } else if (data.passed !== undefined) {
-            for (var i=0; i<data.changed.length; i++) {
-                body.append($('<div/>').append($('<p/>').text('The following cell passed:')));
-                body.append($('<pre/>').text(data.passed[i].source));
-            }
-            body.addClass("validation-passed");
-            this.validate_failure(button);
+            } else if (data.passed !== undefined) {
+                for (var i=0; i<data.changed.length; i++) {
+                    body.append($('<div/>').append($('<p/>').text('The following cell passed:')));
+                    body.append($('<pre/>').text(data.passed[i].source));
+                }
+                body.addClass("validation-passed");
+                this.validate_failure(button);
 
-        } else if (data.failed !== undefined) {
-            for (var i=0; i<data.failed.length; i++) {
-                body.append($('<div/>').append($('<p/>').text('The following cell failed:')));
-                body.append($('<pre/>').text(data.failed[i].source));
-                body.append($('<pre/>').html(data.failed[i].error));
+            } else if (data.failed !== undefined) {
+                for (var i=0; i<data.failed.length; i++) {
+                    body.append($('<div/>').append($('<p/>').text('The following cell failed:')));
+                    body.append($('<pre/>').text(data.failed[i].source));
+                    body.append($('<pre/>').html(data.failed[i].error));
+                }
+                body.addClass("validation-failed");
+                this.validate_failure(button);
+
+            } else {
+                body.append($('<div/>').append($('<p/>').text('Success! Your notebook passes all the tests.')));
+                body.addClass("validation-success");
+                this.validate_success(button);
             }
-            body.addClass("validation-failed");
-            this.validate_failure(button);
 
         } else {
-            body.append($('<div/>').append($('<p/>').text('Success! Your notebook passes all the tests.')));
-            body.addClass("validation-success");
-            this.validate_success(button);
+            body.append($('<div/>').append($('<p/>').text('There was an error running the validate command:')));
+            body.append($('<pre/>').text(data.value));
+            this.validate_failure(button);
         }
 
         dialog.modal({

@@ -74,6 +74,10 @@
     display: none;
 }
 
+#assignments .list_error {
+    display: none;
+}
+
 #validation-message p {
     margin-bottom: 1em;
     padding-top: 1em;
@@ -84,7 +88,7 @@
     margin-right: 1em;
 }
 
-#assignments .list_placeholder, #assignments .list_loading {
+#assignments .list_placeholder, #assignments .list_loading, #assignments .list_error {
     font-weight: bold;
     padding-top: 4px;
     padding-bottom: 4px;
