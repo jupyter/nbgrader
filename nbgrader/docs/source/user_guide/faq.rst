@@ -128,3 +128,24 @@ classes (unless you specifically set the ``course_id`` in the config file, in
 which case they will only be able to see assignments for that specific course).
 See `#544 <https://github.com/jupyter/nbgrader/issues/544>`_ for details.
 :ref:`PRs welcome! <pull-request>`
+
+Is nbgrader compatible with Windows/Mac/Linux?
+----------------------------------------------
+
+Linux and Mac
+~~~~~~~~~~~~~
+
+nbgrader is fully compatible with Linux and also with Mac (with the exception
+of JupyterHub integration, as JupyterHub does not run on Mac).
+
+Windows
+~~~~~~~
+
+The core pieces of nbgrader will also work on Windows: the "Create Assignment"
+extension, ``nbgrader assign``, ``nbgrader autograde``, ``nbgrader formgrade``,
+``nbgrader feedback``, ``nbgrader validate``, and ``nbgrader export``.
+
+However, the parts of nbgrader corresponding to file management (the
+"Assignment List" extension, ``nbgrader release``, ``nbgrader fetch``,
+``nbgrader submit``, ``nbgrader collect``, ``nbgrader list``) will *not* work
+under Windows.
