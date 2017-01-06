@@ -1,3 +1,5 @@
+import re
+
 from traitlets import Dict, Unicode, Bool, observe
 from textwrap import dedent
 
@@ -17,13 +19,13 @@ class ClearSolutions(NbGraderPreprocessor):
         help="The text snippet that will replace written solutions"
     ).tag(config=True)
 
-    begin_solution_delimeter = Dict(
-        dict(python="### BEGIN SOLUTION"),
+    begin_solution_delimeter = Unicode(
+        "BEGIN SOLUTION",
         help="The delimiter marking the beginning of a solution"
     ).tag(config=True)
 
-    end_solution_delimeter = Dict(
-        dict(python="### END SOLUTION"),
+    end_solution_delimeter = Unicode(
+        "END SOLUTION",
         help="The delimiter marking the end of a solution"
     ).tag(config=True)
 
@@ -44,28 +46,15 @@ class ClearSolutions(NbGraderPreprocessor):
     def _config_changed(self, change):
         new = change['new']
 
-        def check(x):
-            if x in new.ClearSolutions:
-                if not isinstance(new.ClearSolutions[x], dict):
-                    return True
-            return False
-
-        def fix(new, x):
-            self.log.warn(
-                "The ClearSolutions.{var} option must now be given as a "
-                "dictionary with keys for the language of the notebook. I will "
-                "automatically convert ClearSolutions.{var} to a dictionary "
-                "with a key for 'python', but note that this functionality may "
-                "be removed in future releases.".format(var=x))
-            new.ClearSolutions[x] = dict(python=new.ClearSolutions[x])
-            return new
-
-        if check('code_stub'):
-            fix(new, 'code_stub')
-        if check('begin_solution_delimeter'):
-            fix(new, 'begin_solution_delimeter')
-        if check('end_solution_delimeter'):
-            fix(new, 'end_solution_delimeter')
+        if 'code_stub' in new.ClearSolutions:
+            if not isinstance(new.ClearSolutions.code_stub, dict):
+                self.log.warn(
+                    "The ClearSolutions.code_stub option must now be given as a "
+                    "dictionary with keys for the language of the notebook. I will "
+                    "automatically convert ClearSolutions.code_stub to a dictionary "
+                    "with a key for 'python', but note that this functionality may "
+                    "be removed in future releases.")
+                new.ClearSolutions.code_stub = dict(python=new.ClearSolutions.code_stub)
 
         if 'comment_mark' in new.ClearSolutions:
             self.log.warn(
@@ -96,12 +85,10 @@ class ClearSolutions(NbGraderPreprocessor):
         new_lines = []
         in_solution = False
         replaced_solution = False
-        begin = self.begin_solution_delimeter[language]
-        end = self.end_solution_delimeter[language]
 
         for line in lines:
             # begin the solution area
-            if line.strip() == begin:
+            if self.begin_solution_delimeter in line:
 
                 # check to make sure this isn't a nested BEGIN
                 # SOLUTION region
@@ -113,12 +100,12 @@ class ClearSolutions(NbGraderPreprocessor):
                 replaced_solution = True
 
                 # replace it with the stub, indented as necessary
-                indent = line[:line.find(begin)]
+                indent = re.match(r"\s*", line).group(0)
                 for stub_line in stub_lines:
                     new_lines.append(indent + stub_line)
 
             # end the solution area
-            elif line.strip() == end:
+            elif self.end_solution_delimeter in line:
                 in_solution = False
 
             # add lines as long as it's not in the solution area
@@ -141,14 +128,6 @@ class ClearSolutions(NbGraderPreprocessor):
             raise ValueError(
                 "language '{}' has not been specified in "
                 "ClearSolutions.code_stub".format(language))
-        if language not in self.begin_solution_delimeter:
-            raise ValueError(
-                "language '{}' has not been specified in "
-                "ClearSolutions.begin_solution_delimeter".format(language))
-        if language not in self.end_solution_delimeter:
-            raise ValueError(
-                "language '{}' has not been specified in "
-                "ClearSolutions.end_solution_delimeter".format(language))
 
         resources["language"] = language
         nb, resources = super(ClearSolutions, self).preprocess(nb, resources)
