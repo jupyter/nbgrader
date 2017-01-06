@@ -1,4 +1,4 @@
-from traitlets import Dict, Unicode, Bool
+from traitlets import Dict, Unicode, Bool, observe
 from textwrap import dedent
 
 from .. import utils
@@ -9,27 +9,26 @@ class ClearSolutions(NbGraderPreprocessor):
 
     code_stub = Dict(
         dict(python="# YOUR CODE HERE\nraise NotImplementedError()"),
-        config=True,
-        help="The code snippet that will replace code solutions")
+        help="The code snippet that will replace code solutions"
+    ).tag(config=True)
 
     text_stub = Unicode(
         "YOUR ANSWER HERE",
-        config=True,
-        help="The text snippet that will replace written solutions")
+        help="The text snippet that will replace written solutions"
+    ).tag(config=True)
 
     begin_solution_delimeter = Dict(
         dict(python="### BEGIN SOLUTION"),
-        config=True,
-        help="The delimiter marking the beginning of a solution")
+        help="The delimiter marking the beginning of a solution"
+    ).tag(config=True)
 
     end_solution_delimeter = Dict(
         dict(python="### END SOLUTION"),
-        config=True,
-        help="The delimiter marking the end of a solution")
+        help="The delimiter marking the end of a solution"
+    ).tag(config=True)
 
     enforce_metadata = Bool(
         True,
-        config=True,
         help=dedent(
             """
             Whether or not to complain if cells containing solutions regions are
@@ -39,9 +38,12 @@ class ClearSolutions(NbGraderPreprocessor):
             assign.
             """
         )
-    )
+    ).tag(config=True)
 
-    def _config_changed(self, name, old, new):
+    @observe("config")
+    def _config_changed(self, change):
+        new = change['new']
+
         def check(x):
             if x in new.ClearSolutions:
                 if not isinstance(new.ClearSolutions[x], dict):
@@ -72,7 +74,7 @@ class ClearSolutions(NbGraderPreprocessor):
                 "and ClearSolutions.end_solution_delimeter instead.")
             del new.ClearSolutions.comment_mark
 
-        super(ClearSolutions, self)._config_changed(name, old, new)
+        super(ClearSolutions, self)._config_changed(change)
 
     def _replace_solution_region(self, cell, language):
         """Find a region in the cell that is delimeted by

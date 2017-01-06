@@ -1,6 +1,6 @@
 import os
 
-from traitlets import List
+from traitlets import List, default
 from nbconvert.exporters import HTMLExporter
 from nbconvert.preprocessors import CSSHTMLHeaderPreprocessor
 
@@ -64,11 +64,13 @@ class FeedbackApp(BaseNbConvertApp):
         CSSHTMLHeaderPreprocessor
     ])
 
+    @default("classes")
     def _classes_default(self):
         classes = super(FeedbackApp, self)._classes_default()
         classes.append(HTMLExporter)
         return classes
 
+    @default("export_format")
     def _export_format_default(self):
         return 'html'
 

@@ -9,14 +9,16 @@ from tornado import web
 
 from notebook.utils import url_path_join as ujoin
 from notebook.base.handlers import IPythonHandler
-from traitlets import Unicode
+from traitlets import Unicode, default
 from traitlets.config import LoggingConfigurable
 
 static = os.path.join(os.path.dirname(__file__), 'static')
 
 class AssignmentList(LoggingConfigurable):
 
-    assignment_dir = Unicode('', config=True, help='Directory where the nbgrader commands should be run, relative to NotebookApp.notebook_dir')
+    assignment_dir = Unicode('', help='Directory where the nbgrader commands should be run, relative to NotebookApp.notebook_dir').tag(config=True)
+
+    @default("assignment_dir")
     def _assignment_dir_default(self):
         return self.parent.notebook_dir
 

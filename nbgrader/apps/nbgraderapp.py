@@ -6,6 +6,7 @@ import os
 
 from textwrap import dedent
 
+from traitlets import default
 from traitlets.config.application import catch_config_error
 from jupyter_core.application import NoStart
 
@@ -203,6 +204,7 @@ class NbGraderApp(NbGrader):
         )
     )
 
+    @default("classes")
     def _classes_default(self):
         classes = super(NbGraderApp, self)._classes_default()
 

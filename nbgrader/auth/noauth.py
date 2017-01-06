@@ -8,7 +8,7 @@ import signal
 import logging
 
 from textwrap import dedent
-from traitlets import Bool, Integer, Unicode
+from traitlets import Bool, Integer, Unicode, default
 
 from .base import BaseAuth
 
@@ -25,10 +25,14 @@ def random_port():
 class NoAuth(BaseAuth):
     """Pass through authenticator."""
 
-    start_nbserver = Bool(True, config=True, help=""""Start a single notebook
-        server that allows submissions to be viewed.""")
-    nbserver_port = Integer(config=True, help="Port for the notebook server")
+    start_nbserver = Bool(
+        True,
+        help=""""Start a single notebook server that allows submissions to be viewed."""
+    ).tag(config=True)
 
+    nbserver_port = Integer(help="Port for the notebook server").tag(config=True)
+
+    @default("nbserver_port")
     def _nbserver_port_default(self):
         return random_port()
 

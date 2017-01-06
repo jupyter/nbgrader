@@ -2,7 +2,7 @@ import os
 import shutil
 
 from textwrap import dedent
-from traitlets import List, Bool
+from traitlets import List, Bool, observe
 
 from .baseapp import BaseNbConvertApp, nbconvert_aliases, nbconvert_flags
 from ..preprocessors import (
@@ -89,14 +89,14 @@ class AutogradeApp(BaseNbConvertApp):
         """
 
     create_student = Bool(
-        False, config=True,
+        False,
         help=dedent(
             """
             Whether to create the student at runtime if it does not
             already exist.
             """
         )
-    )
+    ).tag(config=True)
 
     _sanitizing = True
 
@@ -129,16 +129,17 @@ class AutogradeApp(BaseNbConvertApp):
 
     preprocessors = List([])
 
-    def _config_changed(self, name, old, new):
-        if 'create_student' in new.AutogradeApp:
+    @observe("config")
+    def _config_changed(self, change):
+        if 'create_student' in change['new'].AutogradeApp:
             self.log.warn(
                 "The AutogradeApp.create_student (or the --create flag) option is "
                 "deprecated. Please specify your assignments through the "
                 "`NbGrader.db_students` variable in your nbgrader config file."
             )
-            del new.AutogradeApp.create_student
+            del change['new'].AutogradeApp.create_student
 
-        super(AutogradeApp, self)._config_changed(name, old, new)
+        super(AutogradeApp, self)._config_changed(change)
 
     def init_assignment(self, assignment_id, student_id):
         super(AutogradeApp, self).init_assignment(assignment_id, student_id)

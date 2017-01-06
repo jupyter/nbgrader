@@ -4,7 +4,7 @@ import subprocess
 import sys
 
 from textwrap import dedent
-from traitlets import Bool
+from traitlets import Bool, default
 from .baseapp import NbGrader
 from .. import utils
 
@@ -55,8 +55,9 @@ class QuickStartApp(NbGrader):
 
         """
 
-    force = Bool(False, config=True, help="Whether to overwrite existing files")
+    force = Bool(False, help="Whether to overwrite existing files").tag(config=True)
 
+    @default("classes")
     def _classes_default(self):
         classes = super(QuickStartApp, self)._classes_default()
         classes.append(QuickStartApp)

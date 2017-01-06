@@ -68,7 +68,7 @@ class ReleaseApp(TransferApp):
             nbgrader list
         """
 
-    force = Bool(False, config=True, help="Force overwrite existing files in the exchange.")
+    force = Bool(False, help="Force overwrite existing files in the exchange.").tag(config=True)
 
     def build_extra_config(self):
         extra_config = super(ReleaseApp, self).build_extra_config()
