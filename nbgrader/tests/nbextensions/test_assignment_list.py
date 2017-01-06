@@ -9,6 +9,7 @@ from selenium.common.exceptions import TimeoutException, NoSuchElementException
 
 from .. import run_nbgrader
 from .conftest import notwindows
+from ...utils import rmtree
 
 
 def _wait(browser):
@@ -117,6 +118,7 @@ def _change_course(browser, course):
 def _wait_for_list(browser, name, num_rows):
     _wait(browser).until(EC.invisibility_of_element_located((By.CSS_SELECTOR, "#{}_assignments_list_loading".format(name))))
     _wait(browser).until(EC.invisibility_of_element_located((By.CSS_SELECTOR, "#{}_assignments_list_placeholder".format(name))))
+    _wait(browser).until(EC.invisibility_of_element_located((By.CSS_SELECTOR, "#{}_assignments_list_error".format(name))))
     _wait(browser).until(lambda browser: len(browser.find_elements_by_css_selector("#{}_assignments_list > .list_item".format(name))) == num_rows)
     rows = browser.find_elements_by_css_selector("#{}_assignments_list > .list_item".format(name))
     assert len(rows) == num_rows
@@ -330,4 +332,40 @@ def test_validate_failure(browser, port, class_files, tempdir):
 
     # close the modal dialog
     _dismiss_modal(browser)
+
+
+@pytest.mark.nbextensions
+@notwindows
+def test_missing_exchange(exchange, browser, port, class_files, tempdir):
+    # remove the exchange directory and fetched assignments
+    rmtree(exchange)
+    rmtree(os.path.join(tempdir, "Problem Set 1"))
+
+    _load_assignments_list(browser, port)
+    _wait_until_loaded(browser)
+
+    # make sure all the errors are showing
+    _wait(browser).until(EC.visibility_of_element_located((By.CSS_SELECTOR, "#released_assignments_list_error")))
+    _wait(browser).until(EC.visibility_of_element_located((By.CSS_SELECTOR, "#fetched_assignments_list_error")))
+    _wait(browser).until(EC.visibility_of_element_located((By.CSS_SELECTOR, "#submitted_assignments_list_error")))
+
+    # verify that the dropdown list shows an error too
+    default = browser.find_element_by_css_selector("#course_list_default")
+    assert default.text == "Error fetching courses!"
+
+    # recreate the exchange and make sure refreshing works as expected
+    os.makedirs(exchange)
+
+    # release an assignment
+    run_nbgrader(["assign", "Problem Set 1"])
+    run_nbgrader(["release", "Problem Set 1", "--course", "abc101"])
+
+    # click the refresh button
+    browser.find_element_by_css_selector("#refresh_assignments_list").click()
+    _wait_until_loaded(browser)
+
+    # wait for the released assignments to update
+    rows = _wait_for_list(browser, "released", 1)
+    assert rows[0].find_element_by_class_name("item_name").text == "Problem Set 1"
+    assert rows[0].find_element_by_class_name("item_course").text == "abc101"
 

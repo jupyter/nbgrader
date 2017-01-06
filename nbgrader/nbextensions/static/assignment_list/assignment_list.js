@@ -82,6 +82,7 @@ define([
             this.load_list_success(data.value);
         } else {
             this.default_course_element.text("Error fetching courses!");
+            this.enable_list();
             this.assignment_list.show_error(data.value);
         }
     };

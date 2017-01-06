@@ -70,7 +70,8 @@ def exchange(request):
     exchange = tempfile.mkdtemp()
 
     def fin():
-        rmtree(exchange)
+        if os.path.exists(exchange):
+            rmtree(exchange)
     request.addfinalizer(fin)
 
     return exchange
