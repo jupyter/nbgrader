@@ -109,7 +109,7 @@ class FormgradeApp(NbGrader):
         signal.signal(signal.SIGTERM, self._signal_stop)
 
     def _signal_stop(self, sig, frame):
-        self.log.critical("received signal %s, stopping", sig)
+        self.log.critical("Received signal %s, stopping", sig)
         self.authenticator_instance.stop()
         ioloop.IOLoop.current().stop()
 
@@ -195,10 +195,23 @@ class FormgradeApp(NbGrader):
 
         # Create the application
         self.io_loop = ioloop.IOLoop.current()
-        self.tornado_application.listen(self.port, address=self.ip)
+        try:
+            self.tornado_application.listen(self.port, address=self.ip)
+        except OSError as err:
+            if err.errno == 48:
+                self.log.error("Address already in use by another process: http://{}:{}".format(self.ip, self.port))
+                self.log.error("Try running nbgrader with a different port, e.g. nbgrader formgrade --port=5001")
+                sys.exit(1)
+            else:
+                raise
+
+        if self.authenticator_instance.notebook_server_exists():
+            url = self.authenticator_instance.get_notebook_url("")
+            self.log.info("Notebook server is running at {}".format(url))
 
         url = "http://{:s}:{:d}/".format(self.ip, self.port)
-        self.log.info("Form grader running at {}".format(url))
+        self.log.info("The formgrader is running at {}".format(url))
+        self.log.info("--> Go to {} to access the formgrader".format(url))
         self.log.info("Use Control-C to stop this server")
 
         if sys.platform.startswith('win'):

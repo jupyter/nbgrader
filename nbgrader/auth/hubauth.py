@@ -138,6 +138,7 @@ class HubAuth(BaseAuth):
 
     def __init__(self, *args, **kwargs):
         super(HubAuth, self).__init__(*args, **kwargs)
+        self._user = None
         self._base_url = self.hub_base_url + self.remap_url
         self.register_with_proxy()
 

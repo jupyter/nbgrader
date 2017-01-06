@@ -5,6 +5,7 @@ import subprocess as sp
 import time
 import sys
 import signal
+import logging
 
 from textwrap import dedent
 from traitlets import Bool, Integer, Unicode
@@ -53,13 +54,19 @@ class NoAuth(BaseAuth):
             if sys.platform == 'win32':
                 kwargs['creationflags'] = sp.CREATE_NEW_PROCESS_GROUP
 
+            if self.log.level <= logging.DEBUG:
+                level = "DEBUG"
+            else:
+                level = "CRITICAL"
+
             self._notebook_server_ip = self._ip
             self._notebook_server_port = str(self.nbserver_port)
             self._notebook_server = sp.Popen(
                 [
                     sys.executable, notebookapp,
                     "--ip", self._notebook_server_ip,
-                    "--port", self._notebook_server_port
+                    "--port", self._notebook_server_port,
+                    "--log-level", level
                 ],
                 **kwargs)
             self._notebook_server_exists = True
