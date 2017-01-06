@@ -14,11 +14,18 @@ class BaseHandler(web.RequestHandler):
             The name of the user, or None if authentication fails
 
         """
+        if hasattr(self, '_hub_auth_user_cache'):
+            return self._hub_auth_user_cache
+
         user = self.auth.get_user(self)
         if not user:
+            self._hub_auth_user_cache = None
             return None
-        if self.auth.authenticate(user):
+
+        self._hub_auth_user_cache = self.auth.authenticate(user)
+        if self._hub_auth_user_cache:
             return user
+
         else:
             raise web.HTTPError(403)
 
