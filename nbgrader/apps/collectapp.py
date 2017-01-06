@@ -70,9 +70,8 @@ class CollectApp(TransferApp):
 
     update = Bool(
         False,
-        config=True,
         help="Update existing submissions with ones that have newer timestamps."
-    )
+    ).tag(config=True)
 
     def _path_to_record(self, path):
         filename = os.path.split(path)[1]

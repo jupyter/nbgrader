@@ -7,7 +7,7 @@ from ..api import MissingEntry
 class ExportPlugin(BasePlugin):
     """Base class for export plugins."""
 
-    to = Unicode("", config=True, help="destination to export to")
+    to = Unicode("", help="destination to export to").tag(config=True)
 
     def export(self, gradebook):
         """Export grades to another format.

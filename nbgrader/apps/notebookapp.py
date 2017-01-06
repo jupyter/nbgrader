@@ -1,4 +1,5 @@
 from tornado import ioloop
+from traitlets import default
 from notebook.notebookapp import NotebookApp
 
 
@@ -7,6 +8,7 @@ class FormgradeNotebookApp(NotebookApp):
     open_browser = False
     token = ''  # Notebook >=4.3
 
+    @default("profile")
     def _profile_default(self):
         return 'nbgrader'
 

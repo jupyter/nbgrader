@@ -51,7 +51,7 @@ class FetchApp(TransferApp):
         to turn in the assignment.
         """
 
-    replace_missing_files = Bool(False, config=True, help="Whether to replace missing files on fetch")
+    replace_missing_files = Bool(False, help="Whether to replace missing files on fetch").tag(config=True)
 
     def init_src(self):
         if self.course_id == '':

@@ -5,8 +5,15 @@ from traitlets import Integer
 class LimitOutput(NbGraderPreprocessor):
     """Preprocessor for limiting cell output"""
 
-    max_lines = Integer(1000, config=True, help="maximum number of lines of output (-1 means no limit)")
-    max_traceback = Integer(100, config=True, help="maximum number of traceback lines (-1 means no limit)")
+    max_lines = Integer(
+        1000,
+        help="maximum number of lines of output (-1 means no limit)"
+    ).tag(config=True)
+
+    max_traceback = Integer(
+        100,
+        help="maximum number of traceback lines (-1 means no limit)"
+    ).tag(config=True)
 
     def _limit_stream_output(self, cell):
         if self.max_lines == -1 or cell.cell_type != "code":

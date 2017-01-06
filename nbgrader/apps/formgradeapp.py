@@ -11,7 +11,7 @@ import sys
 
 from nbconvert.exporters import HTMLExporter
 from textwrap import dedent
-from traitlets import Unicode, Integer, Type, Instance
+from traitlets import Unicode, Integer, Type, Instance, default
 from traitlets.config.application import catch_config_error
 from tornado import web
 from tornado.ioloop import IOLoop
@@ -72,24 +72,28 @@ class FormgradeApp(NbGrader):
             nbgrader formgrade --port 5001
         """
 
-    ip = Unicode("localhost", config=True, help="IP address for the server")
-    port = Integer(5000, config=True, help="Port for the server")
+    ip = Unicode("localhost", help="IP address for the server").tag(config=True)
+    port = Integer(5000, help="Port for the server").tag(config=True)
 
-    authenticator_class = Type(NoAuth, klass=BaseAuth, config=True, help="""
-        Authenticator used in all formgrade requests.""")
-    authenticator_instance = Instance(BaseAuth, config=False)
+    authenticator_class = Type(
+        NoAuth,
+        klass=BaseAuth,
+        help="""Authenticator used in all formgrade requests."""
+    ).tag(config=True)
+
+    authenticator_instance = Instance(BaseAuth).tag(config=False)
 
     mathjax_url = Unicode(
         '',
-        config=True,
         help=dedent(
             """
             URL or local path to mathjax installation. Defaults to the version
             of MathJax included with the Jupyter Notebook.
             """
         )
-    )
+    ).tag(config=True)
 
+    @default("mathjax_url")
     def _mathjax_url_default(self):
         url = os.path.join(notebook.DEFAULT_STATIC_FILES_PATH, 'components', 'MathJax', 'MathJax.js')
         if not os.path.exists(url):
@@ -97,6 +101,7 @@ class FormgradeApp(NbGrader):
         self.log.info("Serving MathJax from %s", url)
         return url
 
+    @default("classes")
     def _classes_default(self):
         classes = super(FormgradeApp, self)._classes_default()
         classes.append(HTMLExporter)

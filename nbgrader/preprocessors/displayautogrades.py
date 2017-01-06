@@ -15,28 +15,28 @@ class DisplayAutoGrades(NbGraderPreprocessor):
 
     indent = Unicode(
         "    ",
-        config=True,
-        help="A string containing whitespace that will be used to indent code and errors")
+        help="A string containing whitespace that will be used to indent code and errors"
+    ).tag(config=True)
 
     width = Integer(
         90,
-        config=True,
-        help="Maximum line width for displaying code/errors")
+        help="Maximum line width for displaying code/errors"
+    ).tag(config=True)
 
     invert = Bool(
         False,
-        config=True,
-        help="Complain when cells pass, rather than fail.")
+        help="Complain when cells pass, rather than fail."
+    ).tag(config=True)
 
     ignore_checksums = Bool(
-        False, config=True,
+        False,
         help=dedent(
             """
             Don't complain if cell checksums have changed (if they are locked
             cells) or haven't changed (if they are solution cells)
             """
         )
-    )
+    ).tag(config=True)
 
     changed_warning = Unicode(
         dedent(
@@ -46,8 +46,8 @@ class DisplayAutoGrades(NbGraderPreprocessor):
             now, they won't pass when your assignment is graded.
             """
         ).strip() + "\n",
-        config=True,
-        help="Warning to display when a cell has changed.")
+        help="Warning to display when a cell has changed."
+    ).tag(config=True)
 
     failed_warning = Unicode(
         dedent(
@@ -57,8 +57,8 @@ class DisplayAutoGrades(NbGraderPreprocessor):
             credit.
             """
         ).strip() + "\n",
-        config=True,
-        help="Warning to display when a cell fails.")
+        help="Warning to display when a cell fails."
+    ).tag(config=True)
 
     passed_warning = Unicode(
         dedent(
@@ -66,10 +66,10 @@ class DisplayAutoGrades(NbGraderPreprocessor):
             NOTEBOOK PASSED ON {num_passed} CELL(S)!
             """
         ).strip() + "\n",
-        config=True,
-        help="Warning to display when a cell passes (when invert=True)")
+        help="Warning to display when a cell passes (when invert=True)"
+    ).tag(config=True)
 
-    as_json = Bool(False, config=True, help="Print out validation results as json")
+    as_json = Bool(False, help="Print out validation results as json").tag(config=True)
 
     stream = sys.stdout
 

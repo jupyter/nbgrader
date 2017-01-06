@@ -19,7 +19,7 @@ from nbconvert.exporters.export import exporter_map
 from nbconvert.nbconvertapp import NbConvertApp, DottedOrNone
 from textwrap import dedent
 from tornado.log import LogFormatter
-from traitlets import Unicode, List, Bool, Dict, Integer
+from traitlets import Unicode, List, Bool, Dict, Integer, observe, default
 from traitlets.config.application import catch_config_error
 from traitlets.config.loader import Config
 
@@ -65,24 +65,26 @@ class NbGrader(JupyterApp):
 
     _log_formatter_cls = LogFormatter
 
+    @default("log_level")
     def _log_level_default(self):
         return logging.INFO
 
+    @default("log_datefmt")
     def _log_datefmt_default(self):
         return "%Y-%m-%d %H:%M:%S"
 
+    @default("log_format")
     def _log_format_default(self):
         return "%(color)s[%(name)s | %(levelname)s]%(end_color)s %(message)s"
 
     logfile = Unicode(
         ".nbgrader.log",
-        config=True,
         help=dedent(
             """
             Name of the logfile to log to.
             """
         )
-    )
+    ).tag(config=True)
 
     def init_logging(self, handler_class, handler_args, color=True, subapps=False):
         handler = handler_class(*handler_args)
@@ -110,22 +112,21 @@ class NbGrader(JupyterApp):
 
     db_url = Unicode(
         "",
-        config=True,
         help=dedent(
             """
             URL to the database. Defaults to sqlite:///<course_directory>/gradebook.db,
             where <course_directory> is another configurable variable.
             """
         )
-    )
+    ).tag(config=True)
 
+    @default("db_url")
     def _db_url_default(self):
         return "sqlite:///{}".format(
             os.path.abspath(os.path.join(self.course_directory, "gradebook.db")))
 
     student_id = Unicode(
         "*",
-        config=True,
         help=dedent(
             """
             File glob to match student IDs. This can be changed to filter by
@@ -134,11 +135,10 @@ class NbGrader(JupyterApp):
             with it.
             """
         )
-    )
+    ).tag(config=True)
 
     assignment_id = Unicode(
         "",
-        config=True,
         help=dedent(
             """
             The assignment name. This MUST be specified, either by setting the
@@ -146,22 +146,20 @@ class NbGrader(JupyterApp):
             --assignment option on the command line.
             """
         )
-    )
+    ).tag(config=True)
 
     notebook_id = Unicode(
         "*",
-        config=True,
         help=dedent(
             """
             File glob to match notebook names, excluding the '.ipynb' extension.
             This can be changed to filter by notebook.
             """
         )
-    )
+    ).tag(config=True)
 
     directory_structure = Unicode(
         os.path.join("{nbgrader_step}", "{student_id}", "{assignment_id}"),
-        config=True,
         help=dedent(
             """
             Format string for the directory structure that nbgrader works
@@ -171,11 +169,10 @@ class NbGrader(JupyterApp):
             with the rest of the path.
             """
         )
-    )
+    ).tag(config=True)
 
     source_directory = Unicode(
         'source',
-        config=True,
         help=dedent(
             """
             The name of the directory that contains the master/instructor
@@ -183,11 +180,10 @@ class NbGrader(JupyterApp):
             variable in the `directory_structure` config option.
             """
         )
-    )
+    ).tag(config=True)
 
     release_directory = Unicode(
         'release',
-        config=True,
         help=dedent(
             """
             The name of the directory that contains the version of the
@@ -196,11 +192,10 @@ class NbGrader(JupyterApp):
             option.
             """
         )
-    )
+    ).tag(config=True)
 
     submitted_directory = Unicode(
         'submitted',
-        config=True,
         help=dedent(
             """
             The name of the directory that contains assignments that have been
@@ -208,11 +203,10 @@ class NbGrader(JupyterApp):
             `nbgrader_step` variable in the `directory_structure` config option.
             """
         )
-    )
+    ).tag(config=True)
 
     autograded_directory = Unicode(
         'autograded',
-        config=True,
         help=dedent(
             """
             The name of the directory that contains assignment submissions after
@@ -220,11 +214,10 @@ class NbGrader(JupyterApp):
             variable in the `directory_structure` config option.
             """
         )
-    )
+    ).tag(config=True)
 
     feedback_directory = Unicode(
         'feedback',
-        config=True,
         help=dedent(
             """
             The name of the directory that contains assignment feedback after
@@ -232,11 +225,10 @@ class NbGrader(JupyterApp):
             variable in the `directory_structure` config option.
             """
         )
-    )
+    ).tag(config=True)
 
     course_id = Unicode(
         '',
-        config=True,
         help=dedent(
             """
             A key that is unique per instructor and course. This MUST be
@@ -244,11 +236,10 @@ class NbGrader(JupyterApp):
             --course option on the command line.
             """
         )
-    )
+    ).tag(config=True)
 
     course_directory = Unicode(
         '',
-        config=True,
         help=dedent(
             """
             The root directory for the course files (that includes the `source`,
@@ -256,10 +247,9 @@ class NbGrader(JupyterApp):
             the current working directory.
             """
         )
-    )
+    ).tag(config=True)
 
     db_assignments = List(
-        config=True,
         help=dedent(
             """
             A list of assignments that will be created in the database. Each
@@ -273,10 +263,9 @@ class NbGrader(JupyterApp):
             these fields.
             """
         )
-    )
+    ).tag(config=True)
 
     db_students = List(
-        config=True,
         help=dedent(
             """
             A list of student that will be created in the database. Each
@@ -292,8 +281,9 @@ class NbGrader(JupyterApp):
             these fields.
             """
         )
-    )
+    ).tag(config=True)
 
+    @default("course_directory")
     def _course_directory_default(self):
         return os.getcwd()
 
@@ -303,22 +293,23 @@ class NbGrader(JupyterApp):
             "*.pyc",
             "__pycache__"
         ],
-        config=True,
         help=dedent(
             """
             List of file names or file globs to be ignored when copying directories.
             """
         )
-    )
+    ).tag(config=True)
 
     verbose_crash = Bool(False)
 
     # The classes added here determine how configuration will be documented
     classes = List()
 
+    @default("classes")
     def _classes_default(self):
         return [NbGrader]
 
+    @default("config_file_name")
     def _config_file_name_default(self):
         return u'nbgrader_config'
 
@@ -340,7 +331,10 @@ class NbGrader(JupyterApp):
         else:
             return None
 
-    def _config_changed(self, name, old, new):
+    @observe("config")
+    def _config_changed(self, change):
+        new = change['new']
+
         if 'NbGraderConfig' in new:
             self.log.warn(
                 "Use NbGrader in config, not NbGraderConfig. Outdated config:\n%s",
@@ -385,7 +379,7 @@ class NbGrader(JupyterApp):
             new.NbGrader.merge(new.BaseApp)
             del new.BaseApp
 
-        super(NbGrader, self)._config_changed(name, old, new)
+        super(NbGrader, self)._config_changed(change)
 
     def fail(self, msg, *args):
         """Log the error msg using self.log.error and exit using sys.exit(1)."""
@@ -454,28 +448,27 @@ class TransferApp(NbGrader):
     """
 
     timezone = Unicode(
-        "UTC", config=True,
+        "UTC",
         help="Timezone for recording timestamps"
-    )
+    ).tag(config=True)
 
     timestamp_format = Unicode(
-        "%Y-%m-%d %H:%M:%S %Z", config=True,
+        "%Y-%m-%d %H:%M:%S %Z",
         help="Format string for timestamps"
-    )
+    ).tag(config=True)
 
     exchange_directory = Unicode(
         "/srv/nbgrader/exchange",
-        config=True,
         help="The nbgrader exchange directory writable to everyone. MUST be preexisting."
-    )
+    ).tag(config=True)
 
     cache_directory = Unicode(
         "",
-        config=True,
-        help="Local cache directory for nbgrader submit and nbgrader list. Defaults to $JUPYTER_DATA_DIR/nbgrader_cache")
+        help="Local cache directory for nbgrader submit and nbgrader list. Defaults to $JUPYTER_DATA_DIR/nbgrader_cache"
+    ).tag(config=True)
 
     path_includes_course = Bool(
-        False, config=True,
+        False,
         help=dedent(
             """
             Whether the path for fetching/submitting  assignments should be
@@ -484,8 +477,9 @@ class TransferApp(NbGrader):
             will be something like `./course123/ps1`.
             """
         )
-    )
+    ).tag(config=True)
 
+    @default("cache_directory")
     def _cache_directory_default(self):
         return os.path.join(jupyter_data_dir(), 'nbgrader_cache')
 
@@ -583,10 +577,9 @@ class BaseNbConvertApp(NbGrader, NbConvertApp):
 
     preprocessors = List([])
 
-    force = Bool(False, config=True, help="Whether to overwrite existing assignments/submissions")
+    force = Bool(False, help="Whether to overwrite existing assignments/submissions").tag(config=True)
 
     permissions = Integer(
-        config=True,
         help=dedent(
             """
             Permissions to set on files output by nbgrader. The default is generally
@@ -594,11 +587,13 @@ class BaseNbConvertApp(NbGrader, NbConvertApp):
             user also has write permission.
             """
         )
-    )
+    ).tag(config=True)
 
+    @default("permissions")
     def _permissions_default(self):
         return 444
 
+    @default("classes")
     def _classes_default(self):
         classes = super(BaseNbConvertApp, self)._classes_default()
         for pp in self.preprocessors:
