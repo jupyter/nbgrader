@@ -1,14 +1,9 @@
 """JupyterHub authenticator."""
 import requests
 import os
-import json
-import sys
-import urllib
 
-from subprocess import check_output
-from traitlets import Unicode, Int, List, Bool, Instance, observe, default
-from six.moves.urllib.parse import unquote
-from tornado import web
+from traitlets import Unicode, List, Instance, observe, default
+from six.moves.urllib.parse import unquote, urljoin
 from textwrap import dedent
 
 try:
@@ -23,69 +18,30 @@ from .base import BaseAuth
 class HubAuth(BaseAuth):
     """Jupyter hub authenticator."""
 
-    graders = List([], help="List of JupyterHub user names allowed to grade.").tag(config=True)
+    ############################################################################
+    # These are options you typically want to change:
 
-    if JupyterHubAuth:
-        hub_authenticator = Instance(JupyterHubAuth)
-    else:
-        hub_authenticator = None
+    graders = List(
+        [], help="List of JupyterHub user names allowed to grade."
+    ).tag(config=True)
 
-    @default("hub_authenticator")
-    def _hub_authenticator_default(self):
-        auth = JupyterHubAuth(parent=self)
-        auth.login_url = '/hub/login'
-        auth.api_url = self.hubapi_base_url
-        auth.api_token = self.hubapi_token
-        return auth
-
-    hub_base_url = Unicode(
-        os.environ.get('JUPYTERHUB_BASE_URL', ''),
+    notebook_url_prefix = Unicode(
+        None, allow_none=True,
         help=dedent(
             """
-            Base URL of the hub server. Provided by JupyterHub in the
-            JUPYTERHUB_BASE_URL environment variable.
+            Relative path of nbgrader directory with respect to
+            notebook_server_user's base directory. No trailing slash, i.e.
+            "assignments" or "assignments/course101". This is used for accessing
+            the *live* version of notebooks via JupyterHub. If you don't want to
+            access the live notebooks and are fine with just the static
+            interface provided by the formgrader, then you can ignore this
+            option.
             """
         )
     ).tag(config=True)
-
-    hubapi_base_url = Unicode(
-        os.environ.get('JUPYTERHUB_API_URL', ''),
-        help=dedent(
-            """
-            Base URL of the hub server. Provided by JupyterHub in the
-            JUPYTERHUB_API_URL environment variable.
-            """
-        )
-    ).tag(config=True)
-
-    hubapi_token = Unicode(
-        os.environ.get('JUPYTERHUB_API_TOKEN', ''),
-        help=dedent(
-            """
-            JupyterHub API auth token. Provided by JupyterHub in the
-            JUPYTERHUB_API_TOKEN environment variable.
-            """
-        )
-    ).tag(config=True)
-
-    notebook_url_prefix = Unicode(None, allow_none=True, help="""
-        Relative path of the formgrader with respect to the hub's user base
-        directory.  No trailing slash. i.e. "Documents" or "Documents/notebooks". """).tag(config=True)
-
     @observe("notebook_url_prefix")
     def _notebook_url_prefix_changed(self, change):
         self.notebook_url_prefix = change['new'].strip('/')
-
-    remap_url = Unicode(
-        os.environ.get('JUPYTERHUB_SERVICE_PREFIX', ''),
-        help=dedent(
-            """
-            Suffix appended to `HubAuth.hub_base_url` to form the full URL to
-            the formgrade server. Provided by JupyterHub in the
-            JUPYTERHUB_SERVICE_PREFIX environment variable.
-            """
-        )
-    ).tag(config=True)
 
     notebook_server_user = Unicode(
         '',
@@ -96,6 +52,66 @@ class HubAuth(BaseAuth):
             and has the ability to access other users' servers, then this
             variable can be set, allowing them to access the notebook server
             with the autograded notebooks.
+            """
+        )
+    ).tag(config=True)
+
+    ############################################################################
+    # These are options you typically do NOT want to change:
+
+    if JupyterHubAuth:
+        hub_authenticator = Instance(JupyterHubAuth)
+    else:
+        hub_authenticator = None
+
+    @default("hub_authenticator")
+    def _hub_authenticator_default(self):
+        auth = JupyterHubAuth(parent=self)
+        auth.api_url = self.hubapi_base_url
+        auth.api_token = self.hubapi_token
+        return auth
+
+    hub_base_url = Unicode(
+        os.environ.get('JUPYTERHUB_BASE_URL', ''),
+        help=dedent(
+            """
+            Base URL of the hub server. When run as a managed service, this
+            value is provided by JupyterHub in the JUPYTERHUB_BASE_URL
+            environment variable.
+            """
+        )
+    ).tag(config=True)
+
+    hubapi_base_url = Unicode(
+        os.environ.get('JUPYTERHUB_API_URL', ''),
+        help=dedent(
+            """
+            Base URL of the hub server. When run as a managed service, this
+            value is provided by JupyterHub in the JUPYTERHUB_API_URL
+            environment variable.
+            """
+        )
+    ).tag(config=True)
+
+    hubapi_token = Unicode(
+        os.environ.get('JUPYTERHUB_API_TOKEN', ''),
+        help=dedent(
+            """
+            JupyterHub API auth token. When run as a managed service, this value
+            is provided by JupyterHub in the JUPYTERHUB_API_TOKEN environment
+            variable.
+            """
+        )
+    ).tag(config=True)
+
+    remap_url = Unicode(
+        os.environ.get('JUPYTERHUB_SERVICE_PREFIX', ''),
+        help=dedent(
+            """
+            Suffix appended to `HubAuth.hub_base_url` to form the full URL to
+            the formgrade server. When run as a managed service, this value is
+            provided by JupyterHub in the JUPYTERHUB_SERVICE_PREFIX environment
+            variable.
             """
         )
     ).tag(config=True)
@@ -148,10 +164,13 @@ class HubAuth(BaseAuth):
 
         super(HubAuth, self)._config_changed(change)
 
+    ############################################################################
+    # Begin formgrader implementation
+
     def __init__(self, *args, **kwargs):
         super(HubAuth, self).__init__(*args, **kwargs)
         self._user = None
-        self._base_url = urllib.parse.urljoin(self.hub_base_url, self.remap_url.lstrip("/"))
+        self._base_url = urljoin(self.hub_base_url, self.remap_url.lstrip("/"))
 
         self.log.debug("hub_base_url: %s", self.hub_base_url)
         self.log.debug("hubapi_base_url: %s", self.hubapi_base_url)
@@ -169,15 +188,55 @@ class HubAuth(BaseAuth):
 
     @property
     def login_url(self):
+        """Used by tornado to redirect users to the correct login page when
+        they are not authenticated."""
         return self.hub_authenticator.login_url
 
     def add_remap_url_prefix(self, url):
+        """This function is used to remap urls to use the correct JupyterHub prefix.
+
+        For example, if someone requests /assignments/ps1, and the formgrader is
+        running at /services/formgrader, then this function will map:
+
+        /assignments/ps1 --> /services/formgrader/assignments/ps1
+
+        Arguments
+        ---------
+        url: str
+            The requested URL
+
+        Returns
+        -------
+        remapped_url: str
+            The remapped URL, with the relevant prefix added
+
+        """
         if url == '/':
             return self.remap_url + '/?'
         else:
             return self.remap_url + url
 
     def transform_handler(self, handler):
+        """Transform a tornado handler to use the correct JupyterHub prefix.
+
+        By default, all the formgrader handlers are listening at /, e.g.
+        /assignments/ps1. But when running with JupyterHub, we need to prefix
+        the handlers' URLs to use the correct prefix, so they listen (for
+        example) at /services/formgrader/assignments/ps1.
+
+        Arguments
+        ---------
+        handler: tuple
+            A tuple defining the Tornado handler, where the first element is
+            the route, the second element is the handler class, and the third
+            element (if present) is arguments for the handler.
+
+        Returns
+        -------
+        handler: tuple
+            A new handler tuple, with the same semantics as the inputs.
+
+        """
         new_handler = list(handler)
 
         # transform the handler url
@@ -194,15 +253,40 @@ class HubAuth(BaseAuth):
         return tuple(new_handler)
 
     def get_user(self, handler):
+        """Get the Hub user for a given tornado handler.
+
+        Checks cookie with the Hub to identify the current user.
+
+        Arguments
+        ---------
+        handler: tornado.web.RequestHandler
+            The current request handler
+
+        Returns
+        -------
+        user: str
+            The user's name, or None if authentication failed.
+
+        """
         user_model = self.hub_authenticator.get_user(handler)
         if user_model:
             return user_model['name']
         return None
 
     def authenticate(self, user):
-        """Authenticate a request.
-        Returns a boolean or redirect."""
+        """Determine whether the user has permission to access the formgrader.
 
+        Arguments
+        ---------
+        user: str
+            The user trying to access the formgrader (returned by get_user)
+
+        Returns
+        -------
+        authenticated: bool
+            Whether the user is allowed to access the formgrader.
+
+        """
         # Check if the user name is registered as a grader.
         if user in self.graders:
             self._user = user
@@ -212,7 +296,18 @@ class HubAuth(BaseAuth):
         return False
 
     def notebook_server_exists(self):
-        """Does the notebook server exist?"""
+        """Determine whether a live notebook server exists.
+
+        If notebook_server_user is set, then JupyterHub will be queried about
+        that user's server. Otherwise, JupyterHub will be queried about the
+        current (logged in) user.
+
+        Returns
+        -------
+        exists: bool
+            Whether the server can be accessed and is running
+
+        """
         if self.notebook_server_user:
             user = self.notebook_server_user
         else:
@@ -239,6 +334,17 @@ class HubAuth(BaseAuth):
         return True
 
     def get_notebook_server_cookie(self):
+        """Request a cookie from JupyterHub that will allow us to access
+        the live notebook server of notebook_server_user.
+
+        Returns
+        -------
+        cookie: dict
+            Either a dictionary with keys for 'name', 'value', and 'path', or
+            None (which can either mean that no cookie is needed because we are
+            using our own live notebook server, or that the request failed).
+
+        """
         # same user, so no need to request admin access
         if not self.notebook_server_user:
             return None
@@ -262,7 +368,28 @@ class HubAuth(BaseAuth):
         return cookie
 
     def get_notebook_url(self, relative_path):
-        """Gets the notebook's url."""
+        """Get the full URL to a notebook, given its relative path.
+
+        This assumes that notebooks live at:
+
+        <hub_base_url>/user/<username>/notebooks/<notebook_url_prefix>/<relative_path>
+
+        where <hub_base_url> is a config option, <username> is either the
+        notebook_server_user (if set) or the current user, <notebook_url_prefix>
+        is the nbgrader directory (a config option), and <relative_path> is the
+        given argument.
+
+        Arguments
+        ---------
+        relative_path: str
+            Path to a notebook, relative to the nbgrader directory.
+
+        Returns
+        -------
+        path: str
+            Full URL to the notebook
+
+        """
         if self.notebook_url_prefix is not None:
             relative_path = self.notebook_url_prefix + '/' + relative_path
         if self.notebook_server_user:
@@ -271,11 +398,22 @@ class HubAuth(BaseAuth):
             user = self._user
         return "{}/user/{}/notebooks/{}".format(self.hub_base_url, user, relative_path)
 
-    def _hubapi_request(self, relative_path, method='GET', body=None):
-        data = body
-        if isinstance(data, (dict,)):
-            data = json.dumps(data)
+    def _hubapi_request(self, relative_path, method='GET'):
+        """Send a request to the JupyterHub API.
 
+        Arguments
+        ---------
+        relative_path: str
+            The request path, relative to hubapi_base_url.
+        method: str (default="GET")
+            The HTTP method.
+
+        Returns
+        -------
+        response: requests.Response
+            The returned response
+
+        """
         return requests.request(method, self.hubapi_base_url + relative_path, headers={
             'Authorization': 'token %s' % self.hubapi_token
-        }, data=data)
+        })
