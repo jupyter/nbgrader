@@ -4,6 +4,7 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
+from selenium.webdriver.common.action_chains import ActionChains
 
 from .base import BaseTestFormgrade
 
@@ -394,3 +395,38 @@ class TestFormgraderJS(BaseTestFormgrade):
 
         # mark as unflagged
         assert self._flag() == "Submission unflagged"
+
+    def test_assignment_notebook_submissions_show_hide_names(self):
+        self._load_formgrade()
+
+        problem = self.gradebook.find_notebook("Problem 1", "Problem Set 1")
+        submissions = problem.submissions
+        submissions.sort(key=lambda x: x.id)
+        submission = submissions[0]
+
+        name = self.browser.find_elements_by_css_selector(".breadcrumb li")[-1]
+        hidden = self.browser.find_element_by_css_selector(".glyphicon.name-hidden")
+        shown = self.browser.find_element_by_css_selector(".glyphicon.name-shown")
+
+        # check that the name is hidden
+        assert name.text == "Submission #1"
+        assert not shown.is_displayed()
+        assert hidden.is_displayed()
+
+        # click the show icon
+        hidden.click()
+        WebDriverWait(self.browser, 10).until_not(EC.presence_of_element_located((By.CSS_SELECTOR, ".tooltip")))
+
+        # check that the name is shown
+        assert name.text == "{}, {}".format(submission.student.last_name, submission.student.first_name)
+        assert shown.is_displayed()
+        assert not hidden.is_displayed()
+
+        # click the hide icon
+        shown.click()
+        WebDriverWait(self.browser, 10).until_not(EC.presence_of_element_located((By.CSS_SELECTOR, ".tooltip")))
+
+        # check that the name is hidden
+        assert name.text == "Submission #1"
+        assert not shown.is_displayed()
+        assert hidden.is_displayed()
