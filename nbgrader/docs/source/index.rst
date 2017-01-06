@@ -34,6 +34,7 @@ nbgrader
 
     contributor_guide/overview
     contributor_guide/installation_developer
+    contributor_guide/metadata
     contributor_guide/pull_request
     contributor_guide/testing
     contributor_guide/documentation
