@@ -6,7 +6,8 @@ from traitlets import List, Bool
 
 from .baseapp import BaseNbConvertApp, nbconvert_aliases, nbconvert_flags
 from ..preprocessors import (
-    AssignLatePenalties, ClearOutput, DeduplicateIds, OverwriteCells, SaveAutoGrades, Execute, LimitOutput)
+    AssignLatePenalties, ClearOutput, DeduplicateIds, OverwriteCells, SaveAutoGrades,
+    Execute, LimitOutput, CheckCellMetadata)
 from ..api import Gradebook, MissingEntry
 from .. import utils
 
@@ -115,13 +116,15 @@ class AutogradeApp(BaseNbConvertApp):
     sanitize_preprocessors = List([
         ClearOutput,
         DeduplicateIds,
-        OverwriteCells
+        OverwriteCells,
+        CheckCellMetadata
     ])
     autograde_preprocessors = List([
         Execute,
         LimitOutput,
         SaveAutoGrades,
         AssignLatePenalties,
+        CheckCellMetadata
     ])
 
     preprocessors = List([])
