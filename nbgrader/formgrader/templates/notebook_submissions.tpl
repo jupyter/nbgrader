@@ -1,5 +1,20 @@
 {%- extends 'gradebook.tpl' -%}
 
+{%- block head -%}
+<script type="text/javascript">
+function toggle_name(on, index) {
+  var elem = $("#submission-" + index);
+  if (on) {
+    elem.find(".name-shown").show();
+    elem.find(".name-hidden").hide();
+  } else {
+    elem.find(".name-hidden").show();
+    elem.find(".name-shown").hide();
+  }
+}
+</script>
+{%- endblock -%}
+
 {%- block breadcrumb -%}
 <li><a href="{{base_url}}/assignments">Assignments</a></li>
 <li><a href="{{base_url}}/assignments/{{ assignment_id }}">{{ assignment_id }}</a></li>
@@ -18,6 +33,7 @@
 {%- block table -%}
 <thead>
   <tr>
+    <th></th>
     <th>Submission ID</th>
     <th class="center">Overall Score</th>
     <th class="center">Code Score</th>
@@ -29,8 +45,15 @@
 </thead>
 <tbody>
   {%- for submission in submissions -%}
-  <tr>
-    <td><a href="{{base_url}}/submissions/{{ submission.id }}">Submission #{{ submission.index + 1 }}</a></td>
+  <tr id="submission-{{ submission.index + 1 }}">
+    <td>
+      <span class="glyphicon glyphicon-eye-open name-hidden" aria-hidden="true" onclick="toggle_name(true, {{ submission.index + 1 }});"></span>
+      <span class="glyphicon glyphicon-eye-close name-shown" aria-hidden="true" onclick="toggle_name(false, {{ submission.index + 1 }});"></span>
+    </td>
+    <td>
+      <a href="{{base_url}}/submissions/{{ submission.id }}" class="name-hidden">Submission #{{ submission.index + 1 }}</a>
+      <a href="{{base_url}}/submissions/{{ submission.id }}" class="name-shown">{{ submission.last_name }}, {{ submission.first_name }}</a>
+    </td>
     <td class="center">
       {{ submission.score | float | round(2) }} / {{ submission.max_score | float | round(2) }}
     </td>
@@ -58,4 +81,8 @@
   </tr>
   {%- endfor -%}
 </tbody>
+<script type="text/javascript">
+$('span.glyphicon.name-hidden').tooltip({title: "Show student name"});
+$('span.glyphicon.name-shown').tooltip({title: "Hide student name"});
+</script>
 {%- endblock -%}

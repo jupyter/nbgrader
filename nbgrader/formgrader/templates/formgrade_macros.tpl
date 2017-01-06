@@ -19,6 +19,17 @@ var base_url = "{{resources.base_url}}";
 <script src="{{resources.base_url}}/static/js/keyboardmanager.js"></script>
 <script src="{{resources.base_url}}/static/js/models.js"></script>
 <script src="{{resources.base_url}}/static/js/formgrade.js"></script>
+<script type="text/javascript">
+function toggle_name(on) {
+  if (on) {
+    $(".name-shown").show();
+    $(".name-hidden").hide();
+  } else {
+    $(".name-hidden").show();
+    $(".name-shown").hide();
+  }
+}
+</script>
 
 <link rel="stylesheet" href="{{resources.base_url}}/static/components/bootstrap/css/bootstrap.min.css" />
 {% endmacro %}
@@ -43,12 +54,26 @@ var base_url = "{{resources.base_url}}";
             <li><a href="{{resources.base_url}}/assignments/{{ resources.assignment_id }}/{{ resources.notebook_id }}">{{ resources.notebook_id }}</a></li>
             {%- if resources.notebook_server_exists -%}
             <li class="active live-notebook">
-              <a data-toggle="tooltip" data-placement="right" title="Open live notebook" target="_blank" href="{{ resources.notebook_path }}">
+              <a class="name-hidden" data-toggle="tooltip" data-placement="right" title="Open live notebook" target="_blank" href="{{ resources.notebook_path }}">
                 Submission #{{ resources.index + 1 }}
               </a>
+              <a class="name-shown" data-toggle="tooltip" data-placement="right" title="Open live notebook" target="_blank" href="{{ resources.notebook_path }}">
+                {{ resources.last_name }}, {{ resources.first_name }}
+              </a>
+              <span class="glyphicon glyphicon-eye-open name-hidden" aria-hidden="true" onclick="toggle_name(true);"></span>
+              <span class="glyphicon glyphicon-eye-close name-shown" aria-hidden="true" onclick="toggle_name(false);"></span>
             </li>
             {%- else -%}
-              <li>Submission #{{ resources.index + 1 }}</li>
+            <li>
+              <span class="name-hidden">
+                Submission #{{ resources.index + 1 }}
+              </span>
+              <span class="name-shown">
+                {{ resources.last_name }}, {{ resources.first_name }}
+              </span>
+              <span class="glyphicon glyphicon-eye-open name-hidden" aria-hidden="true" onclick="toggle_name(true);"></span>
+              <span class="glyphicon glyphicon-eye-close name-shown" aria-hidden="true" onclick="toggle_name(false);"></span>
+            </li>
             {%- endif -%}
           </ul>
         </ul>
@@ -65,4 +90,8 @@ var base_url = "{{resources.base_url}}";
     </div>
     </div>
   </nav>
+  <script type="text/javascript">
+  $('span.glyphicon.name-hidden').tooltip({title: "Show student name", placement: "right"});
+  $('span.glyphicon.name-shown').tooltip({title: "Hide student name", placement: "right"});
+  </script>
 {% endmacro %}

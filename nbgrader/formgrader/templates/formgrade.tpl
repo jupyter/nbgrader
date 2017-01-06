@@ -31,6 +31,7 @@ window.MathJax = {
     }
 };
 </script>
+
 <script type="text/javascript" src="{{ resources.mathjax_url }}?config=TeX-AMS_HTML-full"></script>
 
 <link rel="stylesheet" href="{{resources.base_url}}/static/css/formgrade.css" />
