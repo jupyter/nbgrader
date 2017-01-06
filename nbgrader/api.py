@@ -593,6 +593,8 @@ class SubmittedNotebook(Base):
             "id": self.id,
             "name": self.name,
             "student": self.student.id,
+            "last_name": self.student.last_name,
+            "first_name": self.student.first_name,
             "score": self.score,
             "max_score": self.max_score,
             "code_score": self.code_score,

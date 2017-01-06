@@ -1155,13 +1155,16 @@ def test_submittednotebook_to_dict(submissions):
     snd = sn.to_dict()
 
     assert set(snd.keys()) == {
-        'id', 'name', 'student', 'score', 'max_score', 'code_score',
+        'id', 'name', 'student', 'last_name', 'first_name',
+        'score', 'max_score', 'code_score',
         'max_code_score', 'written_score', 'max_written_score',
         'needs_manual_grade', 'failed_tests', 'flagged'}
 
     assert snd['id'] == sn.id
     assert snd['name'] == 'blah'
     assert snd['student'] == '12345'
+    assert snd['last_name'] == 'Doe'
+    assert snd['first_name'] == 'Jane'
     assert snd['score'] == 0
     assert snd['max_score'] == 15
     assert snd['code_score'] == 0
