@@ -71,11 +71,11 @@ class HubAuth(BaseAuth):
     @default("hub_authenticator")
     def _hub_authenticator_default(self):
         auth = JupyterHubAuth(parent=self)
-        auth.api_url = self.hubapi_base_url
-        auth.api_token = self.hubapi_token
+        auth.api_url = self.jupyterhub_api_url
+        auth.api_token = self.jupyterhub_api_token
         return auth
 
-    hub_base_url = Unicode(
+    jupyterhub_base_url = Unicode(
         os.environ.get('JUPYTERHUB_BASE_URL', ''),
         help=dedent(
             """
@@ -86,7 +86,7 @@ class HubAuth(BaseAuth):
         )
     ).tag(config=True)
 
-    hubapi_base_url = Unicode(
+    jupyterhub_api_url = Unicode(
         os.environ.get('JUPYTERHUB_API_URL', ''),
         help=dedent(
             """
@@ -97,7 +97,7 @@ class HubAuth(BaseAuth):
         )
     ).tag(config=True)
 
-    hubapi_token = Unicode(
+    jupyterhub_api_token = Unicode(
         os.environ.get('JUPYTERHUB_API_TOKEN', ''),
         help=dedent(
             """
@@ -108,11 +108,11 @@ class HubAuth(BaseAuth):
         )
     ).tag(config=True)
 
-    remap_url = Unicode(
+    jupyterhub_service_prefix = Unicode(
         os.environ.get('JUPYTERHUB_SERVICE_PREFIX', ''),
         help=dedent(
             """
-            Suffix appended to `HubAuth.hub_base_url` to form the full URL to
+            Suffix appended to `HubAuth.jupyterhub_base_url` to form the full URL to
             the formgrade server. When run as a managed service, this value is
             provided by JupyterHub in the JUPYTERHUB_SERVICE_PREFIX environment
             variable.
@@ -124,53 +124,30 @@ class HubAuth(BaseAuth):
     def _config_changed(self, change):
         new = change['new']
 
-        if 'proxy_address' in new.HubAuth:
-            raise ValueError(
-                "HubAuth.proxy_address is no longer a valid configuration "
-                "option."
-            )
+        def check_option(name, instead=None):
+            if name in new.HubAuth:
+                msg = "HubAuth.{} is no longer a valid configuration option.".format(name)
+                if instead:
+                    msg += " Please use HubAuth.{} instead.".format(instead)
+                    msg += (
+                        " However, note that you probably do not even need to "
+                        "configure this option anymore!")
 
-        if 'proxy_port' in new.HubAuth:
-            raise ValueError(
-                "HubAuth.proxy_port is no longer a valid configuration "
-                "option."
-            )
+                raise ValueError(msg)
 
-        if 'proxy_base_url' in new.HubAuth:
-            raise ValueError(
-                "HubAuth.proxy_base_url is no longer a valid configuration "
-                "option."
-            )
+        check_option("proxy_address")
+        check_option("proxy_base_url")
+        check_option("proxy_port")
 
-        if 'hub_address' in new.HubAuth:
-            raise ValueError(
-                "HubAuth.hub_address is no longer a valid configuration "
-                "option, please use HubAuth.hub_base_url instead."
-            )
-
-        if 'hub_port' in new.HubAuth:
-            raise ValueError(
-                "HubAuth.hub_port is no longer a valid configuration "
-                "option, please use HubAuth.hub_base_url instead."
-            )
-
-        if 'hubapi_address' in new.HubAuth:
-            raise ValueError(
-                "HubAuth.hubapi_address is no longer a valid configuration "
-                "option, please use HubAuth.hubapi_base_url instead."
-            )
-
-        if 'hubapi_port' in new.HubAuth:
-            raise ValueError(
-                "HubAuth.hubapi_port is no longer a valid configuration "
-                "option, please use HubAuth.hubapi_base_url instead."
-            )
-
-        if 'graders' in new.HubAuth:
-            raise ValueError(
-                "HubAuth.graders is no longer a valid configuration "
-                "option, please use HubAuth.grader_group instead."
-            )
+        check_option("graders", "grader_group")
+        check_option("hub_address", "jupyterhub_base_url")
+        check_option("hub_base_url", "jupyterhub_base_url")
+        check_option("hub_port", "jupyterhub_base_url")
+        check_option("hubapi_address", "jupyterhub_api_url")
+        check_option("hubapi_base_url", "jupyterhub_api_url")
+        check_option("hubapi_port", "jupyterhub_api_url")
+        check_option("hubapi_token", "jupyterhub_api_token")
+        check_option("remap_url", "jupyterhub_service_prefix")
 
         super(HubAuth, self)._config_changed(change)
 
@@ -180,12 +157,12 @@ class HubAuth(BaseAuth):
     def __init__(self, *args, **kwargs):
         super(HubAuth, self).__init__(*args, **kwargs)
         self._user = None
-        self._base_url = urljoin(self.hub_base_url, self.remap_url.lstrip("/"))
+        self._base_url = urljoin(self.jupyterhub_base_url, self.jupyterhub_service_prefix.lstrip("/"))
 
-        self.log.debug("hub_base_url: %s", self.hub_base_url)
-        self.log.debug("hubapi_base_url: %s", self.hubapi_base_url)
-        self.log.debug("hubapi_token: %s", self.hubapi_token)
-        self.log.debug("remap_url: %s", self.remap_url)
+        self.log.debug("jupyterhub_base_url: %s", self.jupyterhub_base_url)
+        self.log.debug("jupyterhub_api_url: %s", self.jupyterhub_api_url)
+        self.log.debug("jupyterhub_api_token: %s", self.jupyterhub_api_token)
+        self.log.debug("jupyterhub_service_prefix: %s", self.jupyterhub_service_prefix)
         self.log.debug("base_url: %s", self.base_url)
 
         # sanity check that we are running where JupyterHub thinks we are running
@@ -202,7 +179,7 @@ class HubAuth(BaseAuth):
         they are not authenticated."""
         return self.hub_authenticator.login_url
 
-    def add_remap_url_prefix(self, url):
+    def add_jupyterhub_service_prefix_prefix(self, url):
         """This function is used to remap urls to use the correct JupyterHub prefix.
 
         For example, if someone requests /assignments/ps1, and the formgrader is
@@ -222,9 +199,9 @@ class HubAuth(BaseAuth):
 
         """
         if url == '/':
-            return self.remap_url + '/?'
+            return self.jupyterhub_service_prefix + '/?'
         else:
-            return self.remap_url + url
+            return self.jupyterhub_service_prefix + url
 
     def transform_handler(self, handler):
         """Transform a tornado handler to use the correct JupyterHub prefix.
@@ -250,14 +227,14 @@ class HubAuth(BaseAuth):
         new_handler = list(handler)
 
         # transform the handler url
-        url = self.add_remap_url_prefix(handler[0])
+        url = self.add_jupyterhub_service_prefix_prefix(handler[0])
         new_handler[0] = url
 
         # transform any urls in the arguments
         if len(handler) > 2:
             new_args = handler[2].copy()
             if 'url' in new_args:
-                new_args['url'] = self.add_remap_url_prefix(new_args['url'])
+                new_args['url'] = self.add_jupyterhub_service_prefix_prefix(new_args['url'])
             new_handler[2] = new_args
 
         return tuple(new_handler)
@@ -322,9 +299,9 @@ class HubAuth(BaseAuth):
 
         This assumes that notebooks live at:
 
-        <hub_base_url>/user/<username>/notebooks/<notebook_url_prefix>/<relative_path>
+        <jupyterhub_base_url>/user/<username>/notebooks/<notebook_url_prefix>/<relative_path>
 
-        where <hub_base_url> is a config option, <username> is either the
+        where <jupyterhub_base_url> is a config option, <username> is either the
         notebook_server_user (if set) or the current user, <notebook_url_prefix>
         is the nbgrader directory (a config option), and <relative_path> is the
         given argument.
@@ -344,5 +321,5 @@ class HubAuth(BaseAuth):
             relative_path = self.notebook_url_prefix + '/' + relative_path
 
         return urljoin(
-            self.hub_base_url,
+            self.jupyterhub_base_url,
             "user/{}/notebooks/{}".format(self.notebook_server_user, relative_path))
