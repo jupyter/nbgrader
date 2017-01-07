@@ -34,7 +34,7 @@ window.MathJax = {
 
 <script type="text/javascript" src="{{ resources.mathjax_url }}?config=TeX-AMS_HTML-full"></script>
 
-<link rel="stylesheet" href="{{resources.base_url}}/static/css/formgrade.css" />
+<link rel="stylesheet" href="{{ resources.base_url }}/formgrader/static/css/formgrade.css" />
 
 </head>
 {%- endblock header -%}

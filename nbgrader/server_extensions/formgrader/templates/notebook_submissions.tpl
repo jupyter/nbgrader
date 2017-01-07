@@ -16,8 +16,8 @@ function toggle_name(on, index) {
 {%- endblock -%}
 
 {%- block breadcrumb -%}
-<li><a href="{{base_url}}/assignments">Assignments</a></li>
-<li><a href="{{base_url}}/assignments/{{ assignment_id }}">{{ assignment_id }}</a></li>
+<li><a href="{{ base_url }}/formgrader/assignments">Assignments</a></li>
+<li><a href="{{ base_url }}/formgrader/assignments/{{ assignment_id }}">{{ assignment_id }}</a></li>
 <li class="active">{{ notebook_id }}</li>
 {%- endblock -%}
 
@@ -51,8 +51,8 @@ function toggle_name(on, index) {
       <span class="glyphicon glyphicon-eye-close name-shown" aria-hidden="true" onclick="toggle_name(false, {{ submission.index + 1 }});"></span>
     </td>
     <td>
-      <a href="{{base_url}}/submissions/{{ submission.id }}" class="name-hidden">Submission #{{ submission.index + 1 }}</a>
-      <a href="{{base_url}}/submissions/{{ submission.id }}" class="name-shown">{{ submission.last_name }}, {{ submission.first_name }}</a>
+      <a href="{{ base_url }}/formgrader/submissions/{{ submission.id }}" class="name-hidden">Submission #{{ submission.index + 1 }}</a>
+      <a href="{{ base_url }}/formgrader/submissions/{{ submission.id }}" class="name-shown">{{ submission.last_name }}, {{ submission.first_name }}</a>
     </td>
     <td class="center">
       {{ submission.score | float | round(2) }} / {{ submission.max_score | float | round(2) }}

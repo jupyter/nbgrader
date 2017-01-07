@@ -2,13 +2,13 @@
 <head>
   <title>nbgrader formgrade</title>
 
-  <script src="{{base_url}}/static/components/jquery/jquery.min.js"></script>
-  <script src="{{base_url}}/static/components/underscore/underscore-min.js"></script>
-  <script src="{{base_url}}/static/components/backbone/backbone-min.js"></script>
-  <script src="{{base_url}}/static/components/bootstrap/js/bootstrap.min.js"></script>
+  <script src="{{ base_url }}/formgrader/static/components/jquery/jquery.min.js"></script>
+  <script src="{{ base_url }}/formgrader/static/components/underscore/underscore-min.js"></script>
+  <script src="{{ base_url }}/formgrader/static/components/backbone/backbone-min.js"></script>
+  <script src="{{ base_url }}/formgrader/static/components/bootstrap/js/bootstrap.min.js"></script>
 
-  <link rel="stylesheet" href="{{base_url}}/static/components/bootstrap/css/bootstrap.min.css" />
-  <link rel="stylesheet" href="{{base_url}}/static/css/formgrade.css">
+  <link rel="stylesheet" href="{{ base_url }}/formgrader/static/components/bootstrap/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="{{ base_url }}/formgrader/static/css/formgrade.css">
 
   {%- block head -%}
   {%- endblock -%}
@@ -31,8 +31,8 @@
           <li class="dropdown">
             <a href="#" class="dropdown-toggle" data-toggle="dropdown">Change View <b class="caret"></b></a>
             <ul class="dropdown-menu">
-              <li><a href="{{base_url}}/assignments">Assignments</a></li>
-              <li><a href="{{base_url}}/students">Students</a></li>
+              <li><a href="{{ base_url }}/formgrader/assignments">Assignments</a></li>
+              <li><a href="{{ base_url }}/formgrader/students">Students</a></li>
             </ul>
           </li>
         </ul>

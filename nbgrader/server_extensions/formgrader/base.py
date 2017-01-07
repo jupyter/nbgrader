@@ -1,38 +1,22 @@
 import json
 
 from tornado import web
+from notebook.base.handlers import IPythonHandler
 
 
-class BaseHandler(web.RequestHandler):
+class BaseHandler(IPythonHandler):
 
-    def get_current_user(self):
-        """Tornado's authentication method
-
-        Returns
-        -------
-        user: string
-            The name of the user, or None if authentication fails
-
-        """
-        user = self.auth.get_user(self)
-        if not user:
-            return None
-        if self.auth.authenticate(user):
-            return user
-        else:
-            raise web.HTTPError(403)
+    @property
+    def base_url(self):
+        return super(BaseHandler, self).base_url.rstrip("/")
 
     @property
     def gradebook(self):
         return self.settings['nbgrader_gradebook']
 
     @property
-    def auth(self):
-        return self.settings['nbgrader_auth']
-
-    @property
     def mathjax_url(self):
-        return self.settings['nbgrader_mathjax_url']
+        return self.settings['mathjax_url']
 
     @property
     def notebook_dir(self):
@@ -51,8 +35,8 @@ class BaseHandler(web.RequestHandler):
         return self.settings['nbgrader_exporter']
 
     @property
-    def log(self):
-        return self.settings['nbgrader_log']
+    def notebook_url_prefix(self):
+        return self.settings['nbgrader_notebook_url_prefix']
 
     def render(self, name, **ns):
         template = self.settings['nbgrader_jinja2_env'].get_template(name)
@@ -62,19 +46,19 @@ class BaseHandler(web.RequestHandler):
         if status_code == 500:
             html = self.render(
                 'gradebook_500.tpl',
-                base_url=self.auth.base_url,
+                base_url=self.base_url,
                 error_code=500)
 
         elif status_code == 502:
             html = self.render(
                 'gradebook_500.tpl',
-                base_url=self.auth.base_url,
+                base_url=self.base_url,
                 error_code=502)
 
         elif status_code == 403:
             html = self.render(
                 'gradebook_403.tpl',
-                base_url=self.auth.base_url,
+                base_url=self.base_url,
                 error_code=403)
 
         else:

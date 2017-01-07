@@ -3,7 +3,7 @@ import json
 from tornado import web
 
 from .base import BaseApiHandler
-from ..api import MissingEntry
+from ...api import MissingEntry
 
 
 class GradeCollectionHandler(BaseApiHandler):
@@ -90,9 +90,9 @@ class FlagSubmissionHandler(BaseApiHandler):
 
 
 default_handlers = [
-    (r"/api/grades", GradeCollectionHandler),
-    (r"/api/comments", CommentCollectionHandler),
-    (r"/api/grade/([^/]+)", GradeHandler),
-    (r"/api/comment/([^/]+)", CommentHandler),
-    (r"/api/submission/([^/]+)/flag", FlagSubmissionHandler)
+    (r"/formgrader/api/grades", GradeCollectionHandler),
+    (r"/formgrader/api/comments", CommentCollectionHandler),
+    (r"/formgrader/api/grade/([^/]+)", GradeHandler),
+    (r"/formgrader/api/comment/([^/]+)", CommentHandler),
+    (r"/formgrader/api/submission/([^/]+)/flag", FlagSubmissionHandler)
 ]
