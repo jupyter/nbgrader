@@ -34,15 +34,15 @@ serverextension`` commands.
 To install and enable both frontend nbextensions (*assignment list* and
 *create assignment*) run::
 
-	# The nbextensions are JavaScript/HTML/CSS so they require
-	# separate installation and enabling.
+    # The nbextensions are JavaScript/HTML/CSS so they require
+    # separate installation and enabling.
     jupyter nbextension install --sys-prefix --py nbgrader
     jupyter nbextension enable --sys-prefix --py nbgrader
 
 To install the server extension for *assignment_list* run::
 
-	# The serverextension is a Python module inside nbgrader, so only an
-	# enable step is needed.
+    # The serverextension is a Python module inside nbgrader, so only an
+    # enable step is needed.
     jupyter serverextension enable --sys-prefix --py nbgrader
 
 To work properly, the *assignment list* extension requires both the
@@ -86,11 +86,11 @@ You may want to only install one of the nbgrader extensions. To do this, follow
 the above steps to install everything and then disable the extension you don't
 need using::
 
-	jupyter nbextension disable --sys-prefix assignment_list/main
+    jupyter nbextension disable --sys-prefix assignment_list/main
 
 or::
 
-	jupyter nbextension disable --sys-prefix create_assignment/main
+    jupyter nbextension disable --sys-prefix create_assignment/main
 
 
 For example lets assume you have installed nbgrader via `Anaconda
@@ -101,12 +101,12 @@ only want the *create assignment* extension available to a specific user and
 not everyone else. First you will need to disable the *create assignment*
 extension for everyone else::
 
-	jupyter nbextension disable --sys-prefix create_assignment/main
+    jupyter nbextension disable --sys-prefix create_assignment/main
 
 Log in with the specific user and then enable the *create assignment* extension
 only for that user::
 
-	jupyter nbextension enable --user create_assignment/main
+    jupyter nbextension enable --user create_assignment/main
 
 
 Finally to see all installed nbextensions/serverextension, run::
@@ -117,8 +117,8 @@ Finally to see all installed nbextensions/serverextension, run::
 
 For further documentation on these commands run::
 
-	jupyter nbextension --help-all
-	jupyter serverextension --help-all
+    jupyter nbextension --help-all
+    jupyter serverextension --help-all
 
 For advanced instructions on installing the *assignment list* extension please
 see the :ref:`advanced installation instructions<assignment-list-installation>`.
