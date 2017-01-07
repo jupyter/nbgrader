@@ -26,7 +26,7 @@ c.JupyterHub.services = [
         # yourdomain.com/services/<name>. You can customize this to be unique
         # for your class, so that you can run multiple instances of the
         # formgrader.
-        'name': 'formgrade-course101',
+        'name': 'formgrader-course101',
         'admin': True,
         'command': ['nbgrader', 'formgrade'],
 
