@@ -47,11 +47,9 @@ class HubAuth(BaseAuth):
         '',
         help=dedent(
             """
-            The user that hosts the autograded notebooks. By default, this is
-            just the user that is logged in, but if that user is an admin user
-            and has the ability to access other users' servers, then this
-            variable can be set, allowing them to access the notebook server
-            with the autograded notebooks.
+            The user that hosts the autograded notebooks. This is the only user
+            that is able to actually access the *live* version of the
+            autograded notebooks.
             """
         )
     ).tag(config=True)
@@ -298,9 +296,9 @@ class HubAuth(BaseAuth):
     def notebook_server_exists(self):
         """Determine whether a live notebook server exists.
 
-        If notebook_server_user is set, then JupyterHub will be queried about
-        that user's server. Otherwise, JupyterHub will be queried about the
-        current (logged in) user.
+        The live notebook can only be accessed by notebook_server_user. Any
+        other user (even if they have access to the formgrader) will,
+        unfortunately, not be able to access the live notebooks.
 
         Returns
         -------
@@ -308,64 +306,7 @@ class HubAuth(BaseAuth):
             Whether the server can be accessed and is running
 
         """
-        if self.notebook_server_user:
-            user = self.notebook_server_user
-        else:
-            user = self._user
-
-        # first check if the server is running
-        response = self._hubapi_request('/users/{}'.format(user))
-        if response.status_code == 200:
-            user_data = response.json()
-        else:
-            self.log.warn("Could not access information about user {} (response: {} {})".format(
-                user, response.status_code, response.reason))
-            return False
-
-        # start it if it's not running
-        if user_data['server'] is None and user_data['pending'] != 'spawn':
-            # start the server
-            response = self._hubapi_request('/users/{}/server'.format(user), method='POST')
-            if response.status_code not in (201, 202):
-                self.log.warn("Could not start server for user {} (response: {} {})".format(
-                    user, response.status_code, response.reason))
-                return False
-
-        return True
-
-    def get_notebook_server_cookie(self):
-        """Request a cookie from JupyterHub that will allow us to access
-        the live notebook server of notebook_server_user.
-
-        Returns
-        -------
-        cookie: dict
-            Either a dictionary with keys for 'name', 'value', and 'path', or
-            None (which can either mean that no cookie is needed because we are
-            using our own live notebook server, or that the request failed).
-
-        """
-        # same user, so no need to request admin access
-        if not self.notebook_server_user:
-            return None
-
-        # request admin access to the user's server
-        response = self._hubapi_request('/users/{}/admin-access'.format(self.notebook_server_user), method='POST')
-        if response.status_code != 200:
-            self.log.warn("Failed to gain admin access to user {}'s server (response: {} {})".format(
-                self.notebook_server_user, response.status_code, response.reason))
-            return None
-
-        # access granted!
-        cookie_name = 'jupyter-hub-token-{}'.format(self.notebook_server_user)
-        notebook_server_cookie = unquote(response.cookies[cookie_name][1:-1])
-        cookie = {
-            'name': cookie_name,
-            'value': notebook_server_cookie,
-            'path': '/user/{}'.format(self.notebook_server_user)
-        }
-
-        return cookie
+        return self.notebook_server_user == self._user
 
     def get_notebook_url(self, relative_path):
         """Get the full URL to a notebook, given its relative path.
@@ -392,28 +333,7 @@ class HubAuth(BaseAuth):
         """
         if self.notebook_url_prefix is not None:
             relative_path = self.notebook_url_prefix + '/' + relative_path
-        if self.notebook_server_user:
-            user = self.notebook_server_user
-        else:
-            user = self._user
-        return "{}/user/{}/notebooks/{}".format(self.hub_base_url, user, relative_path)
 
-    def _hubapi_request(self, relative_path, method='GET'):
-        """Send a request to the JupyterHub API.
-
-        Arguments
-        ---------
-        relative_path: str
-            The request path, relative to hubapi_base_url.
-        method: str (default="GET")
-            The HTTP method.
-
-        Returns
-        -------
-        response: requests.Response
-            The returned response
-
-        """
-        return requests.request(method, self.hubapi_base_url + relative_path, headers={
-            'Authorization': 'token %s' % self.hubapi_token
-        })
+        return urljoin(
+            self.hub_base_url,
+            urljoin("user/{}/notebooks/".format(self.notebook_server_user), relative_path))
