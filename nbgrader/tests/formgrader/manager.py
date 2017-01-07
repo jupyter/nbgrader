@@ -112,7 +112,6 @@ class HubAuthManager(DefaultManager):
         c.NbGrader.course_id = 'course123ABC'
         c.FormgradeApp.port = {port}
         c.FormgradeApp.authenticator_class = "nbgrader.auth.hubauth.HubAuth"
-        c.HubAuth.graders = ["foobar"]
         c.HubAuth.notebook_url_prefix = "class_files"
         c.HubAuth.notebook_server_user = 'foobar'
         """
@@ -140,6 +139,9 @@ class HubAuthManager(DefaultManager):
                 'cwd': '{currdir}'
             }}
         ]
+        c.JupyterHub.load_groups = {{
+            'formgrader': ['foobar']
+        }}
         """
     )
 
@@ -195,7 +197,6 @@ class HubAuthSSLManager(HubAuthManager):
         c.FormgradeApp.ip = '127.0.0.1'
         c.FormgradeApp.port = {port}
         c.FormgradeApp.authenticator_class = "nbgrader.auth.hubauth.HubAuth"
-        c.HubAuth.graders = ["foobar"]
         c.HubAuth.notebook_url_prefix = "class_files"
         c.HubAuth.notebook_server_user = 'foobar'
         """
@@ -224,6 +225,9 @@ class HubAuthSSLManager(HubAuthManager):
                 'cwd': '{currdir}'
             }}
         ]
+        c.JupyterHub.load_groups = {{
+            'formgrader': ['foobar']
+        }}
         """
     )
 

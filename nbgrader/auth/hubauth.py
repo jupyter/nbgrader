@@ -21,8 +21,14 @@ class HubAuth(BaseAuth):
     ############################################################################
     # These are options you typically want to change:
 
-    graders = List(
-        [], help="List of JupyterHub user names allowed to grade."
+    grader_group = Unicode(
+        'formgrader',
+        help=dedent(
+            """
+            Name of the JupyterHub group containing users who are allowed to
+            access the formgrader.
+            """
+        ),
     ).tag(config=True)
 
     notebook_url_prefix = Unicode(
@@ -160,6 +166,12 @@ class HubAuth(BaseAuth):
                 "option, please use HubAuth.hubapi_base_url instead."
             )
 
+        if 'graders' in new.HubAuth:
+            raise ValueError(
+                "HubAuth.graders is no longer a valid configuration "
+                "option, please use HubAuth.grader_group instead."
+            )
+
         super(HubAuth, self)._config_changed(change)
 
     ############################################################################
@@ -262,21 +274,18 @@ class HubAuth(BaseAuth):
 
         Returns
         -------
-        user: str
-            The user's name, or None if authentication failed.
+        user: dict
+            The user model, or None if authentication failed.
 
         """
-        user_model = self.hub_authenticator.get_user(handler)
-        if user_model:
-            return user_model['name']
-        return None
+        return self.hub_authenticator.get_user(handler)
 
-    def authenticate(self, user):
+    def authenticate(self, user_model):
         """Determine whether the user has permission to access the formgrader.
 
         Arguments
         ---------
-        user: str
+        user_model: dict
             The user trying to access the formgrader (returned by get_user)
 
         Returns
@@ -286,11 +295,11 @@ class HubAuth(BaseAuth):
 
         """
         # Check if the user name is registered as a grader.
-        if user in self.graders:
-            self._user = user
+        if self.grader_group in user_model['groups']:
+            self._user = user_model['name']
             return True
 
-        self.log.warn('Unauthorized user "%s" attempted to access the formgrader.' % user)
+        self.log.warn('Unauthorized user "%s" attempted to access the formgrader.' % user_model['name'])
         return False
 
     def notebook_server_exists(self):
