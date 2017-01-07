@@ -1,9 +1,9 @@
 """JupyterHub authenticator."""
-import requests
 import os
+import sys
 
-from traitlets import Unicode, List, Instance, observe, default
-from six.moves.urllib.parse import unquote, urljoin
+from traitlets import Unicode, Instance, observe, default
+from six.moves.urllib.parse import urljoin
 from textwrap import dedent
 
 try:
@@ -20,6 +20,16 @@ class HubAuth(BaseAuth):
 
     ############################################################################
     # These are options you typically want to change:
+
+    grader_group = Unicode(
+        '',
+        help=dedent(
+            """
+            Name of the JupyterHub group containing users who are allowed to
+            access the formgrader. This MUST be specified in your config file.
+            """
+        ),
+    ).tag(config=True)
 
     notebook_url_prefix = Unicode(
         None, allow_none=True,
@@ -52,16 +62,6 @@ class HubAuth(BaseAuth):
 
     ############################################################################
     # These are options you typically do NOT want to change:
-
-    grader_group = Unicode(
-        'formgrader',
-        help=dedent(
-            """
-            Name of the JupyterHub group containing users who are allowed to
-            access the formgrader.
-            """
-        ),
-    ).tag(config=True)
 
     if JupyterHubAuth:
         hub_authenticator = Instance(JupyterHubAuth)
@@ -156,6 +156,11 @@ class HubAuth(BaseAuth):
 
     def __init__(self, *args, **kwargs):
         super(HubAuth, self).__init__(*args, **kwargs)
+
+        if self.grader_group == '':
+            self.log_error("The config option grader_group must be specified")
+            sys.exit(1)
+
         self._user = None
         self._base_url = urljoin(self.jupyterhub_base_url, self.jupyterhub_service_prefix.lstrip("/"))
 

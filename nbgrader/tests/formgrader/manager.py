@@ -114,6 +114,7 @@ class HubAuthManager(DefaultManager):
         c.FormgradeApp.authenticator_class = "nbgrader.auth.hubauth.HubAuth"
         c.HubAuth.notebook_url_prefix = "class_files"
         c.HubAuth.notebook_server_user = 'foobar'
+        c.HubAuth.grader_group = "formgrader"
         """
     )
 
@@ -199,6 +200,7 @@ class HubAuthSSLManager(HubAuthManager):
         c.FormgradeApp.authenticator_class = "nbgrader.auth.hubauth.HubAuth"
         c.HubAuth.notebook_url_prefix = "class_files"
         c.HubAuth.notebook_server_user = 'foobar'
+        c.HubAuth.grader_group = "formgrader"
         """
     )
 
