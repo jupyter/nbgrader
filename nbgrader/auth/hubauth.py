@@ -345,4 +345,4 @@ class HubAuth(BaseAuth):
 
         return urljoin(
             self.hub_base_url,
-            urljoin("user/{}/notebooks/".format(self.notebook_server_user), relative_path))
+            "user/{}/notebooks/{}".format(self.notebook_server_user, relative_path))

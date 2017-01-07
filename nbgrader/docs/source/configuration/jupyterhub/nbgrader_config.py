@@ -15,17 +15,11 @@ c.NbGrader.db_students = [
     dict(id="reasoner", first_name="Louis", last_name="Reasoner")
 ]
 
-## Options that are specific to the formgrader and integrating it with JuptyerHub:
+## Options that are specific to the formgrader and integrating it with JupyterHub:
 
 c.FormgradeApp.ip = "127.0.0.1"
 c.FormgradeApp.port = 9000
 c.FormgradeApp.authenticator_class = "nbgrader.auth.hubauth.HubAuth"
-
-# This is the actual URL or public IP address where JupyterHub is running (by
-# default, the HubAuth will just use the same address as what the formgrader is
-# running on -- so in this case, 127.0.0.1). If you have JupyterHub behind a
-# domain name, you probably want to set that here.
-c.HubAuth.hub_base_url = "http://127.0.0.1:8000"
 
 # Change this to be the path to the user guide folder in your clone of
 # nbgrader, or just wherever you have your class files. This is relative
@@ -36,11 +30,11 @@ c.HubAuth.hub_base_url = "http://127.0.0.1:8000"
 # the formgrader, then you can ignore this option.
 c.HubAuth.notebook_url_prefix = "path/to/class_files"
 
-# Change this to be the list of unix usernames that are allowed to access
-# the formgrader.
-c.HubAuth.graders = ["instructor1", "instructor2"]
-
-# This loads the environment variable containing the hubapi token that we will
-# generate by running the `jupyterhub token <name>` command, just before we
-# actually launch the formgrader.
-c.HubAuth.hubapi_token = os.environ['JPY_API_TOKEN']
+# Only one user is able to access the *live* autograded notebooks, which is the
+# user who actually owns those files (all other users, even if they have access
+# to the formgrader, will be unable to access the live notebooks). The
+# notebook_server_user option should be set to the username of this user if they
+# want to be able to access the live notebooks. If you don't want to access the
+# live notebooks and are fine with just the static interface provided by the
+# formgrader, then you can ignore this option.
+c.HubAuth.notebook_server_user = "instructor1"
