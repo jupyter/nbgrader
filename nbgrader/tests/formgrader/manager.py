@@ -125,7 +125,7 @@ class HubAuthManager(DefaultManager):
         c.JupyterHub.spawner_class = 'nbgrader.tests.formgrader.fakeuser.FakeUserSpawner'
         c.Authenticator.admin_users = set(['admin'])
         c.Authenticator.whitelist = set(['foobar', 'baz'])
-        c.JupyterHub.log_level = 'DEBUG'
+        c.JupyterHub.log_level = 'WARN'
         c.JupyterHub.confirm_no_ssl = True
         c.JupyterHub.port = {hub_port}
         c.JupyterHub.proxy_api_port = {proxy_port}
@@ -134,7 +134,7 @@ class HubAuthManager(DefaultManager):
             {{
                 'name': 'formgrader',
                 'admin': True,
-                'command': [sys.executable, '-m', 'nbgrader', 'formgrade', '--log-level=DEBUG'],
+                'command': [sys.executable, '-m', 'nbgrader', 'formgrade'],
                 'url': 'http://localhost:{port}',
                 'cwd': '{currdir}'
             }}
@@ -212,7 +212,7 @@ class HubAuthSSLManager(HubAuthManager):
         c.Authenticator.whitelist = set(['foobar', 'baz'])
         c.JupyterHub.ssl_cert = '{tempdir}/jupyterhub_cert.pem'
         c.JupyterHub.ssl_key = '{tempdir}/jupyterhub_key.pem'
-        c.JupyterHub.log_level = 'DEBUG'
+        c.JupyterHub.log_level = 'WARN'
         c.JupyterHub.port = {hub_port}
         c.JupyterHub.proxy_api_port = {proxy_port}
         c.JupyterHub.hub_port = {hubapi_port}
@@ -220,7 +220,7 @@ class HubAuthSSLManager(HubAuthManager):
             {{
                 'name': 'formgrader',
                 'admin': True,
-                'command': [sys.executable, '-m', 'nbgrader', 'formgrade', '--log-level=DEBUG'],
+                'command': [sys.executable, '-m', 'nbgrader', 'formgrade'],
                 'url': 'http://localhost:{port}',
                 'cwd': '{currdir}'
             }}
