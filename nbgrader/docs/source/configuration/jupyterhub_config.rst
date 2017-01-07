@@ -62,9 +62,10 @@ To begin, we'll run a vanilla JupyterHub with the following
 The way we have set up the formgrader is as a `managed JupyterHub service
 <http://jupyterhub.readthedocs.io/en/latest/services.html>`__. This means that
 JupyterHub will keep track of the formgrader process for us, including
-automatically routing requests from ``localhost:8000/services/formgrader`` to
-the formgrader at ``localhost:9000``, and configuring the formgrader to only
-allow access from usernames specified in the list of graders.
+automatically routing requests from
+``localhost:8000/services/formgrader-course101`` to the formgrader at
+``localhost:9000``, and configuring the formgrader to only allow access from
+usernames specified in the list of graders.
 
 Configuring nbgrader formgrade
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -105,7 +106,7 @@ the formgrader and JupyterHub, we only need to actually run JupyterHub:
 
 Running this command should launch JupyterHub, which will then be accessible
 from ``localhost:8000``. It will also launch the formgrader, which you should
-be able to access from ``localhost:8000/services/formgrader``. If you
+be able to access from ``localhost:8000/services/formgrader-course101``. If you
 properly configured the ``notebook_url_prefix``, you should additionally be
 able to open live notebooks from the formgrader using your notebook server that
 was spawned by JupyterHub.

@@ -6,7 +6,7 @@ c = get_config()
 ## by the formgrader, but it is left in here for consistency with the rest of
 ## the user guide):
 
-c.NbGrader.course_id = "example_course"
+c.NbGrader.course_id = "course101"
 c.TransferApp.exchange_directory = "/tmp/exchange"
 c.NbGrader.db_assignments = [dict(name="ps1", duedate="2015-02-02 17:00:00 UTC")]
 c.NbGrader.db_students = [
@@ -20,6 +20,11 @@ c.NbGrader.db_students = [
 c.FormgradeApp.ip = "127.0.0.1"
 c.FormgradeApp.port = 9000
 c.FormgradeApp.authenticator_class = "nbgrader.auth.hubauth.HubAuth"
+
+# The grader_group option is the most important option that must be specified:
+# it determines who will be able to access the formgrader, and corresponds to a
+# JupyterHub group (specified in the JupyterHub.load_groups config option).
+c.HubAuth.grader_group = "course101-graders"
 
 # Change this to be the path to the user guide folder in your clone of
 # nbgrader, or just wherever you have your class files. This is relative
