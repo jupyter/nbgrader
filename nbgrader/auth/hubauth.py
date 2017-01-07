@@ -21,16 +21,6 @@ class HubAuth(BaseAuth):
     ############################################################################
     # These are options you typically want to change:
 
-    grader_group = Unicode(
-        'formgrader',
-        help=dedent(
-            """
-            Name of the JupyterHub group containing users who are allowed to
-            access the formgrader.
-            """
-        ),
-    ).tag(config=True)
-
     notebook_url_prefix = Unicode(
         None, allow_none=True,
         help=dedent(
@@ -62,6 +52,16 @@ class HubAuth(BaseAuth):
 
     ############################################################################
     # These are options you typically do NOT want to change:
+
+    grader_group = Unicode(
+        'formgrader',
+        help=dedent(
+            """
+            Name of the JupyterHub group containing users who are allowed to
+            access the formgrader.
+            """
+        ),
+    ).tag(config=True)
 
     if JupyterHubAuth:
         hub_authenticator = Instance(JupyterHubAuth)
