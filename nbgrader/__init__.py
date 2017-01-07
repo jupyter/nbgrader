@@ -10,13 +10,13 @@ def _jupyter_nbextension_paths():
     return [
         dict(
             section="tree",
-            src=os.path.join('nbextensions','static','assignment_list'),
+            src=os.path.join('nbextensions', 'assignment_list'),
             dest="assignment_list",
             require="assignment_list/main"
         ),
         dict(
             section="notebook",
-            src=os.path.join('nbextensions','static','create_assignment'),
+            src=os.path.join('nbextensions', 'create_assignment'),
             dest="create_assignment",
             require="create_assignment/main"
         ),
@@ -24,5 +24,5 @@ def _jupyter_nbextension_paths():
 
 def _jupyter_server_extension_paths():
     return [
-        dict(module="nbgrader.nbextensions.assignment_list")
+        dict(module="nbgrader.server_extensions.assignment_list")
     ]
