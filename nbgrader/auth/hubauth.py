@@ -179,7 +179,7 @@ class HubAuth(BaseAuth):
         they are not authenticated."""
         return self.hub_authenticator.login_url
 
-    def add_jupyterhub_service_prefix_prefix(self, url):
+    def add_jupyterhub_service_prefix(self, url):
         """This function is used to remap urls to use the correct JupyterHub prefix.
 
         For example, if someone requests /assignments/ps1, and the formgrader is
@@ -227,14 +227,14 @@ class HubAuth(BaseAuth):
         new_handler = list(handler)
 
         # transform the handler url
-        url = self.add_jupyterhub_service_prefix_prefix(handler[0])
+        url = self.add_jupyterhub_service_prefix(handler[0])
         new_handler[0] = url
 
         # transform any urls in the arguments
         if len(handler) > 2:
             new_args = handler[2].copy()
             if 'url' in new_args:
-                new_args['url'] = self.add_jupyterhub_service_prefix_prefix(new_args['url'])
+                new_args['url'] = self.add_jupyterhub_service_prefix(new_args['url'])
             new_handler[2] = new_args
 
         return tuple(new_handler)
