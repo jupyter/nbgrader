@@ -1,11 +1,4 @@
-pytest
-pytest-cov
-coverage
-selenium
-invoke
-sphinx
-codecov
-cov-core
+-r dev-requirements-windows.txt
 pyenchant
 sphinxcontrib-spelling
 sphinx_rtd_theme
