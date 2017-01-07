@@ -4,7 +4,6 @@ from six.moves.urllib.parse import quote
 
 from ...api import MissingEntry
 from .base import BaseTestFormgrade
-from .manager import HubAuthNotebookServerUserManager
 
 
 @pytest.mark.formgrader
