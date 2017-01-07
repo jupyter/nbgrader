@@ -176,6 +176,10 @@ class HubAuth(BaseAuth):
                 true_url, jhub_url)
 
     @property
+    def full_url(self):
+        return self._base_url
+
+    @property
     def login_url(self):
         """Used by tornado to redirect users to the correct login page when
         they are not authenticated."""

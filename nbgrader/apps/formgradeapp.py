@@ -21,7 +21,7 @@ from jinja2 import Environment, FileSystemLoader
 from .baseapp import NbGrader, nbgrader_aliases, nbgrader_flags
 from ..formgrader import handlers, apihandlers
 from ..api import Gradebook
-from ..auth import BaseAuth, NoAuth, HubAuth
+from ..auth import BaseAuth, NoAuth, HubAuth, NotebookAuth
 
 aliases = {}
 aliases.update(nbgrader_aliases)
@@ -186,6 +186,14 @@ class FormgradeApp(NbGrader):
     def init_tornado_application(self):
         self.tornado_application = web.Application(self.handlers, **self.tornado_settings)
 
+    def print_status(self):
+        if not isinstance(self.authenticator_instance, (HubAuth, NotebookAuth)):
+            if self.authenticator_instance.notebook_server_exists():
+                url = self.authenticator_instance.get_notebook_url("")
+                self.log.info("Live notebook server is running at {}".format(url))
+
+        self.log.info("The formgrader is running at {}".format(self.authenticator_instance.full_url))
+
     def start(self):
         super(FormgradeApp, self).start()
 
@@ -210,20 +218,12 @@ class FormgradeApp(NbGrader):
             else:
                 raise
 
-        if not isinstance(self.authenticator_instance, HubAuth):
-            if self.authenticator_instance.notebook_server_exists():
-                url = self.authenticator_instance.get_notebook_url("")
-                self.log.info("Notebook server is running at {}".format(url))
-
-            url = "http://{:s}:{:d}/".format(self.ip, self.port)
-            self.log.info("The formgrader is running at {}".format(url))
-            self.log.info("--> Go to {} to access the formgrader".format(url))
-            self.log.info("Use Control-C to stop this server")
+        self.print_status()
 
         if sys.platform.startswith('win'):
             # add no-op to wake every 1s
             # to handle signals that may be ignored by the inner loop
-            pc = ioloop.PeriodicCallback(lambda : None, 1000)
+            pc = ioloop.PeriodicCallback(lambda: None, 1000)
             pc.start()
 
         # Start the loop

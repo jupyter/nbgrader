@@ -77,6 +77,10 @@ class NoAuth(BaseAuth):
         else:
             self._notebook_server_exists = False
 
+    @property
+    def full_url(self):
+        return "http://{}:{}".format(self._ip, self._port)
+
     def notebook_server_exists(self):
         """Does the notebook server exist?"""
         return self._notebook_server_exists

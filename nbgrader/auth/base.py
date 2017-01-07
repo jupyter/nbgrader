@@ -20,6 +20,10 @@ class BaseAuth(LoggingConfigurable):
     def login_url(self):
         return ''
 
+    @property
+    def full_url(self):
+        raise NotImplementedError
+
     def get_user(self, handler):
         return 'nbgrader'
 
