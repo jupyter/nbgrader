@@ -149,3 +149,22 @@ However, the parts of nbgrader corresponding to file management (the
 "Assignment List" extension, ``nbgrader release``, ``nbgrader fetch``,
 ``nbgrader submit``, ``nbgrader collect``, ``nbgrader list``) will *not* work
 under Windows.
+
+What happens if I do some manual grading, and then rerun the autograder?
+------------------------------------------------------------------------
+
+If you rerun the autograder, nbgrader will never overwrite any manual grades or
+comments that you have added, and manual grades *always* take precendence over
+autogrades.
+
+However, if you have given a manual grade, then rerun the autograder, and the
+autograder produces a grade as well, then it will mark that problem as "needing
+manual grade". This functionality is primarily to aid you in grading in the
+scenarios where you want to grade a newer version of the student's
+submission—for example, if you gave them a chance to revise it. In this
+hypothetical scenario, a student might have not completed a problem, leading
+you to originally assign it a low partial credit score. But then they turn in a
+newer version, which you run through the autograder and which attains full
+credit. Since the manual grade always takes precedence over the autograde, the
+student would still receive the low score unless you updated your grade: hence
+the motivation for marking it as needing to be manually graded (again).
