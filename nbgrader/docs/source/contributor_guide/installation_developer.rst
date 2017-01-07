@@ -15,6 +15,11 @@ nbgrader installs and builds with one command::
 
     pip install -r dev-requirements.txt -e .
 
+Currently, building docs is not supported on Windows because some of the dependencies (enchant)
+are not easily installable. Instead of the above command, run the following on windows::
+
+    pip install -r dev-requirements-windows.txt -e .
+
 Installing notebook extensions
 ------------------------------
 Install the notebook extensions. The ``--symlink`` option is recommended since it

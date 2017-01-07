@@ -1,0 +1,9 @@
+pytest
+pytest-cov
+pytest-rerunfailures
+coverage
+selenium
+invoke
+sphinx
+codecov
+cov-core
