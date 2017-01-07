@@ -21,7 +21,7 @@ from jinja2 import Environment, FileSystemLoader
 from .baseapp import NbGrader, nbgrader_aliases, nbgrader_flags
 from ..formgrader import handlers, apihandlers
 from ..api import Gradebook
-from ..auth import BaseAuth, NoAuth
+from ..auth import BaseAuth, NoAuth, HubAuth
 
 aliases = {}
 aliases.update(nbgrader_aliases)
@@ -210,14 +210,15 @@ class FormgradeApp(NbGrader):
             else:
                 raise
 
-        if self.authenticator_instance.notebook_server_exists():
-            url = self.authenticator_instance.get_notebook_url("")
-            self.log.info("Notebook server is running at {}".format(url))
+        if not isinstance(self.authenticator_instance, HubAuth):
+            if self.authenticator_instance.notebook_server_exists():
+                url = self.authenticator_instance.get_notebook_url("")
+                self.log.info("Notebook server is running at {}".format(url))
 
-        url = "http://{:s}:{:d}/".format(self.ip, self.port)
-        self.log.info("The formgrader is running at {}".format(url))
-        self.log.info("--> Go to {} to access the formgrader".format(url))
-        self.log.info("Use Control-C to stop this server")
+            url = "http://{:s}:{:d}/".format(self.ip, self.port)
+            self.log.info("The formgrader is running at {}".format(url))
+            self.log.info("--> Go to {} to access the formgrader".format(url))
+            self.log.info("Use Control-C to stop this server")
 
         if sys.platform.startswith('win'):
             # add no-op to wake every 1s

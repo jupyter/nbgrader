@@ -12,7 +12,7 @@ from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from ...api import Gradebook
 from ...utils import rmtree
 from .. import run_nbgrader
-from . import manager, bad_manager
+from . import manager
 
 
 @pytest.fixture(scope="session")
@@ -150,10 +150,3 @@ def all_formgraders(request, gradebook, tempdir):
 )
 def formgrader(request, gradebook, tempdir):
     _formgrader(request, getattr(manager, request.param), gradebook, tempdir)
-
-@pytest.fixture(
-    scope="class",
-    params=[jupyterhub("BadHubAuthManager")]
-)
-def bad_formgrader(request, gradebook, tempdir):
-    _formgrader(request, getattr(bad_manager, request.param), gradebook, tempdir)
