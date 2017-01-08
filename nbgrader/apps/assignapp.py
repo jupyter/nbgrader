@@ -223,11 +223,17 @@ class AssignApp(BaseNbConvertApp):
                 gb = Gradebook(self.db_url)
                 gb.update_or_create_assignment(assignment_id, **assignment)
                 gb.close()
-
-                # check if there are any extra notebooks in the db that are no longer
-                # part of the assignment, and if so, remove them
-                if self.notebook_id == "*":
-                    self._clean_old_notebooks(assignment_id, student_id)
             else:
-                self.fail("No assignment called '%s' exists in the config", assignment_id)
+                gb = Gradebook(self.db_url)
+                try:
+                    gb.find_assignment(assignment_id)
+                except MissingEntry:
+                    self.fail("No assignment called '%s' exists in the database", assignment_id)
+                finally:
+                    gb.close()
+
+            # check if there are any extra notebooks in the db that are no longer
+            # part of the assignment, and if so, remove them
+            if self.notebook_id == "*":
+                self._clean_old_notebooks(assignment_id, student_id)
 

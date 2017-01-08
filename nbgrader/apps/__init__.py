@@ -13,6 +13,7 @@ from .listapp import ListApp
 from .extensionapp import ExtensionApp
 from .quickstartapp import QuickStartApp
 from .exportapp import ExportApp
+from .dbapp import DbApp
 from .nbgraderapp import NbGraderApp
 
 
@@ -32,5 +33,6 @@ __all__ = [
     'ListApp',
     'ExtensionApp',
     'QuickStartApp',
-    'ExportApp'
+    'ExportApp',
+    'DbApp'
 ]

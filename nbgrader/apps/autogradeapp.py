@@ -159,7 +159,13 @@ class AutogradeApp(BaseNbConvertApp):
             gb.update_or_create_student(student_id, **student)
             gb.close()
         else:
-            self.fail("No student with ID '%s' exists in the config", student_id)
+            gb = Gradebook(self.db_url)
+            try:
+                gb.find_student(assignment_id)
+            except MissingEntry:
+                self.fail("No student with ID '%s' exists in the database", student_id)
+            finally:
+                gb.close()
 
         # try to read in a timestamp from file
         src_path = self._format_source(assignment_id, student_id)
