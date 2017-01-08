@@ -50,7 +50,6 @@ class FormgradeExtension(NbGrader):
         h.extend(handlers.default_handlers)
         h.extend(apihandlers.default_handlers)
         h.extend([
-            (r"/formgrader/mathjax/(.*)", web.StaticFileHandler, {'path': os.path.dirname(webapp.settings['mathjax_url'])}),
             (r"/formgrader/static/(.*)", web.StaticFileHandler, {'path': handlers.static_path}),
             (r"/formgrader/.*", handlers.Template404)
         ])

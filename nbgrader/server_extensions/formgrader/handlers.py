@@ -214,11 +214,6 @@ class SubmissionHandler(BaseHandler):
         submission_ids = sorted([x.id for x in submissions])
         ix = submission_ids.index(submission.id)
 
-        if self.mathjax_url.startswith("http"):
-            mathjax_url = self.mathsjax_url
-        else:
-            mathjax_url = self.base_url + '/mathjax/MathJax.js'
-
         relative_path = os.path.relpath(filename, self.notebook_dir)
         resources = {
             'assignment_id': assignment_id,
@@ -227,7 +222,7 @@ class SubmissionHandler(BaseHandler):
             'index': ix,
             'total': len(submissions),
             'base_url': self.base_url,
-            'mathjax_url': mathjax_url,
+            'mathjax_url': self.mathjax_url,
             'last_name': submission.student.last_name,
             'first_name': submission.student.first_name,
             'notebook_path': self.notebook_url_prefix + '/' + relative_path
@@ -247,10 +242,10 @@ class SubmissionHandler(BaseHandler):
 class SubmissionNavigationHandler(BaseHandler):
 
     def _assignment_notebook_list_url(self, assignment_id, notebook_id):
-        return '{}/assignments/{}/{}'.format(self.base_url, assignment_id, notebook_id)
+        return '{}/formgrader/assignments/{}/{}'.format(self.base_url, assignment_id, notebook_id)
 
     def _submission_url(self, submission_id):
-        url = '{}/submissions/{}'.format(self.base_url, submission_id)
+        url = '{}/formgrader/submissions/{}'.format(self.base_url, submission_id)
         if self.get_argument('index', default=None) is not None:
             return "{}?index={}".format(url, self.get_argument('index'))
         else:
