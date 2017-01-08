@@ -100,10 +100,7 @@ def _run_tests(ctx, mark=None, skip=None, junitxml=None):
 @task
 def tests(ctx, group='all', skip=None, junitxml=None):
     if group == 'python':
-        _run_tests(ctx, mark="not formgrader and not nbextensions", skip=skip, junitxml=junitxml)
-
-    elif group == 'formgrader':
-        _run_tests(ctx, mark="formgrader", skip=skip, junitxml=junitxml)
+        _run_tests(ctx, mark="not nbextensions", skip=skip, junitxml=junitxml)
 
     elif group == 'nbextensions':
         _run_tests(ctx, mark="nbextensions", skip=skip, junitxml=junitxml)
@@ -120,7 +117,7 @@ def tests(ctx, group='all', skip=None, junitxml=None):
 
 @task
 def after_success(ctx, group):
-    if group in ('python', 'formgrader', 'nbextensions'):
+    if group in ('python', 'nbextensions'):
         run(ctx, 'codecov')
     else:
         echo('Nothing to do.')
@@ -131,18 +128,7 @@ def js(ctx, clean=True):
     run(ctx, 'npm install')
     run(ctx, './node_modules/.bin/bower install --config.interactive=false')
     if clean:
-        run(ctx, 'git clean -fdX nbgrader/formgrader/static/components')
-
-
-@task
-def before_install(ctx, group, python_version):
-    # clone travis wheels repo to make installing requirements easier
-    run(ctx, 'git clone --quiet --depth 1 https://github.com/minrk/travis-wheels ~/travis-wheels')
-
-    # install jupyterhub
-    if python_version.startswith('3') and group == 'formgrader':
-        run(ctx, 'npm install -g configurable-http-proxy')
-        run(ctx, 'pip install git+git://github.com/jupyterhub/jupyterhub.git@master')
+        run(ctx, 'git clean -fdX nbgrader/server_extensions/formgrader/static/components')
 
 
 @task
@@ -157,7 +143,6 @@ def install(ctx, group):
 
 ns = collection.Collection(
     after_success,
-    before_install,
     docs,
     install,
     js,

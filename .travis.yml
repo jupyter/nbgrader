@@ -8,7 +8,6 @@ python:
 env:
   matrix:
     - GROUP=docs
-    - GROUP=formgrader
     - GROUP=nbextensions
     - GROUP=python
 addons:
@@ -19,7 +18,6 @@ addons:
 before_install:
   - pip install -U pip wheel setuptools
   - pip install invoke
-  - invoke before_install --group="$GROUP" --python-version="$TRAVIS_PYTHON_VERSION"
 install:
   - mkdir travis-phantomjs
   - wget https://s3.amazonaws.com/travis-phantomjs/phantomjs-2.0.0-ubuntu-12.04.tar.bz2 -O $PWD/travis-phantomjs/phantomjs-2.0.0-ubuntu-12.04.tar.bz2
