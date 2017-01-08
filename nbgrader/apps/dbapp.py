@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 # encoding: utf-8
 
+import csv
+import os
+
 from textwrap import dedent
 from traitlets import default, Unicode
 
@@ -33,19 +36,19 @@ class DbStudentAddApp(NbGrader):
     last_name = Unicode(
         None,
         allow_none=True,
-        help="The last name of the student (only for use with --add)"
+        help="The last name of the student"
     ).tag(config=True)
 
     first_name = Unicode(
         None,
         allow_none=True,
-        help="The first name of the student (only for use with --add)"
+        help="The first name of the student"
     ).tag(config=True)
 
     email = Unicode(
         None,
         allow_none=True,
-        help="The last name of the student (only for use with --add)"
+        help="The email of the student"
     ).tag(config=True)
 
     def start(self):
@@ -99,8 +102,31 @@ class DbStudentImportApp(NbGrader):
 
     def start(self):
         super(DbStudentImportApp, self).start()
-        raise NotImplementedError
 
+        if len(self.extra_args) != 1:
+            self.fail("Path to CSV file not provided.")
+
+        path = self.extra_args[0]
+        if not os.path.exists(path):
+            self.fail("No such file: '%s'", path)
+        self.log.info("Importing students from: '%s'", path)
+
+        gb = Gradebook(self.db_url)
+        allowed_keys = ["last_name", "first_name", "email", "id"]
+
+        with open(path, 'r') as fh:
+            reader = csv.DictReader(fh)
+            for row in reader:
+                if "id" not in row:
+                    self.fail("Malformatted CSV file: must contain a column for 'id'")
+
+                student = {x[0]: x[1] for x in row.items() if x[0] in allowed_keys}
+                student_id = student.pop("id")
+
+                self.log.info("Creating/updating student with ID '%s': %s", student_id, student)
+                gb.update_or_create_student(student_id, **student)
+
+        gb.close()
 
 class DbStudentListApp(NbGrader):
 
@@ -137,7 +163,7 @@ class DbAssignmentAddApp(NbGrader):
     duedate = Unicode(
         None,
         allow_none=True,
-        help="The due date of the assignment (only for use with --add)"
+        help="The due date of the assignment"
     ).tag(config=True)
 
     def start(self):
@@ -189,7 +215,31 @@ class DbAssignmentImportApp(NbGrader):
 
     def start(self):
         super(DbAssignmentImportApp, self).start()
-        raise NotImplementedError
+
+        if len(self.extra_args) != 1:
+            self.fail("Path to CSV file not provided.")
+
+        path = self.extra_args[0]
+        if not os.path.exists(path):
+            self.fail("No such file: '%s'", path)
+        self.log.info("Importing assignments from: '%s'", path)
+
+        gb = Gradebook(self.db_url)
+        allowed_keys = ["duedate", "name"]
+
+        with open(path, 'r') as fh:
+            reader = csv.DictReader(fh)
+            for row in reader:
+                if "name" not in row:
+                    self.fail("Malformatted CSV file: must contain a column for 'name'")
+
+                assignment = {x[0]: x[1] for x in row.items() if x[0] in allowed_keys}
+                assignment_id = assignment.pop("name")
+
+                self.log.info("Creating/updating assignment with name '%s': %s", assignment_id, assignment)
+                gb.update_or_create_assignment(assignment_id, **assignment)
+
+        gb.close()
 
 
 class DbAssignmentListApp(NbGrader):
