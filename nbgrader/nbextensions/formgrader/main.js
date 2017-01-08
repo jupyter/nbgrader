@@ -9,7 +9,7 @@ define(function(require) {
             $('<li>')
             .append(
                 $('<a>')
-                .attr('href', '/formgrader')
+                .attr('href', base_url + 'formgrader')
                 .attr('target', '_blank')
                 .text('Formgrader')
             )
