@@ -75,15 +75,17 @@ the assignments. This database is, by default, a sqlite database that lives at
 location of your choosing. You do not need to manually create this database
 yourself, as nbgrader will create it for you, but you probably want to
 prepopulate it with some information about assignment due dates and students
-(see :doc:`creating_and_grading_assignments`). Additionally, nbgrader uses
-SQLAlchemy, so you should be able to also use MySQL or PostgreSQL backends as
-well (though in these cases, you *will* need to create the database ahead of
-time, as this is just how MySQL and PostgreSQL work).
+(see :doc:`managing_the_database`).
+
+Additionally, nbgrader uses SQLAlchemy, so you should be able to also use MySQL
+or PostgreSQL backends as well (though in these cases, you *will* need to
+create the database ahead of time, as this is just how MySQL and PostgreSQL
+work).
 
 Configuration files
 ~~~~~~~~~~~~~~~~~~~
 
-You will almost always need a configuration file as you are using nbgrader. At a minimum, this configuration file will contain information such as the names of the assignments for your class and the names of your students. A basic config file would live at ``{course_directory}/nbgrader_config.py`` and might look like:
+You will almost always need a configuration file as you are using nbgrader. At a minimum, this configuration file will contain information such as the names of the assignments for your class and the names of your students (though you may also add these by hand using the command line, see :doc:`creating_and_grading_assignments`). A basic config file would live at ``{course_directory}/nbgrader_config.py`` and might look like:
 
 ::
 

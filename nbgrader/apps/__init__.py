@@ -13,7 +13,10 @@ from .listapp import ListApp
 from .extensionapp import ExtensionApp
 from .quickstartapp import QuickStartApp
 from .exportapp import ExportApp
-from .dbapp import DbApp
+from .dbapp import (
+    DbApp, DbStudentApp, DbAssignmentApp,
+    DbStudentAddApp, DbStudentRemoveApp, DbStudentImportApp, DbStudentListApp,
+    DbAssignmentAddApp, DbAssignmentRemoveApp, DbAssignmentImportApp, DbAssignmentListApp)
 from .nbgraderapp import NbGraderApp
 
 
@@ -34,5 +37,15 @@ __all__ = [
     'ExtensionApp',
     'QuickStartApp',
     'ExportApp',
-    'DbApp'
+    'DbApp',
+    'DbStudentApp',
+    'DbStudentAddApp',
+    'DbStudentImportApp',
+    'DbStudentRemoveApp',
+    'DbStudentListApp',
+    'DbAssignmentApp',
+    'DbAssignmentAddApp',
+    'DbAssignmentImportApp',
+    'DbAssignmentRemoveApp',
+    'DbAssignmentListApp',
 ]

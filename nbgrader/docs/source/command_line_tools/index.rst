@@ -24,6 +24,20 @@ Instructor commands
     nbgrader-feedback
     nbgrader-export
 
+The following commands are used to manage the database:
+
+.. toctree::
+    :maxdepth: 1
+
+    nbgrader-db-student-add
+    nbgrader-db-student-import
+    nbgrader-db-student-remove
+    nbgrader-db-student-list
+    nbgrader-db-assignment-add
+    nbgrader-db-assignment-import
+    nbgrader-db-assignment-remove
+    nbgrader-db-assignment-list
+
 The following commands are meant for instructors, but are only relevant when using nbgrader in a shared server environment:
 
 .. toctree::

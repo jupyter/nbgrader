@@ -16,7 +16,7 @@ def autogen_command_line(root):
     header = dedent(
         """
         {}
-        ========================
+        {}
 
         ::
 
@@ -27,8 +27,16 @@ def autogen_command_line(root):
         'AssignApp',
         'AutogradeApp',
         'CollectApp',
-        'ExtensionApp',
+        'DbAssignmentAddApp',
+        'DbAssignmentImportApp',
+        'DbAssignmentListApp',
+        'DbAssignmentRemoveApp',
+        'DbStudentAddApp',
+        'DbStudentImportApp',
+        'DbStudentListApp',
+        'DbStudentRemoveApp',
         'ExportApp',
+        'ExtensionApp',
         'FeedbackApp',
         'FetchApp',
         'FormgradeApp',
@@ -54,7 +62,7 @@ def autogen_command_line(root):
         name = cls.name.replace(" ", "-")
         destination = os.path.join(root, 'command_line_tools/{}.rst'.format(name))
         with open(destination, 'w') as f:
-            f.write(header.format(cls.name.replace("-", " ")))
+            f.write(header.format(cls.name.replace("-", " "), "=" * len(cls.name)))
             f.write(helpstr)
 
     sys.stdout = orig_stdout
