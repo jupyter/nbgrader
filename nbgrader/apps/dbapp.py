@@ -120,7 +120,16 @@ class DbStudentImportApp(NbGrader):
                 if "id" not in row:
                     self.fail("Malformatted CSV file: must contain a column for 'id'")
 
-                student = {x[0]: x[1] for x in row.items() if x[0] in allowed_keys}
+                # make sure all the keys are actually allowed in the database,
+                # and that any empty strings are parsed as None
+                student = {}
+                for key, val in row.items():
+                    if key not in allowed_keys:
+                        continue
+                    if val == '':
+                        student[key] = None
+                    else:
+                        student[key] = val
                 student_id = student.pop("id")
 
                 self.log.info("Creating/updating student with ID '%s': %s", student_id, student)
@@ -140,9 +149,9 @@ class DbStudentListApp(NbGrader):
         super(DbStudentListApp, self).start()
 
         gb = Gradebook(self.db_url)
-        self.log.info("There are %d students in the database:", len(gb.students))
+        print("There are %d students in the database:" % len(gb.students))
         for student in gb.students:
-            self.log.info("%s (%s, %s) -- %s", student.id, student.last_name, student.first_name, student.email)
+            print("%s (%s, %s) -- %s" % (student.id, student.last_name, student.first_name, student.email))
         gb.close()
 
 
@@ -233,7 +242,16 @@ class DbAssignmentImportApp(NbGrader):
                 if "name" not in row:
                     self.fail("Malformatted CSV file: must contain a column for 'name'")
 
-                assignment = {x[0]: x[1] for x in row.items() if x[0] in allowed_keys}
+                # make sure all the keys are actually allowed in the database,
+                # and that any empty strings are parsed as None
+                assignment = {}
+                for key, val in row.items():
+                    if key not in allowed_keys:
+                        continue
+                    if val == '':
+                        assignment[key] = None
+                    else:
+                        assignment[key] = val
                 assignment_id = assignment.pop("name")
 
                 self.log.info("Creating/updating assignment with name '%s': %s", assignment_id, assignment)
@@ -254,11 +272,11 @@ class DbAssignmentListApp(NbGrader):
         super(DbAssignmentListApp, self).start()
 
         gb = Gradebook(self.db_url)
-        self.log.info("There are %d assignments in the database:", len(gb.assignments))
+        print("There are %d assignments in the database:" % len(gb.assignments))
         for assignment in gb.assignments:
-            self.log.info("%s (due: %s)", assignment.name, assignment.duedate)
+            print("%s (due: %s)" % (assignment.name, assignment.duedate))
             for notebook in assignment.notebooks:
-                self.log.info("    - %s", notebook.name)
+                print("    - %s" % notebook.name)
         gb.close()
 
 
