@@ -35,8 +35,8 @@ Managing the database
         Details on ``nbgrader_config.py``
 
 Most of the important information that nbgrader has access
-to—information about students, assignments, grades, etc.—is stored in
-the nbgrader database. Much of this is added to the database
+to---information about students, assignments, grades, etc.---is stored
+in the nbgrader database. Much of this is added to the database
 automatically by nbgrader, with the exception of two types of
 information: which students are in your class, and which assignments you
 have.
@@ -165,8 +165,8 @@ managing assignments. To add students, we use the
 
 .. parsed-literal::
 
-    [DbStudentAddApp | INFO] Creating/updating student with ID 'bitdiddle': {'last_name': 'Bitdiddle', 'email': None, 'first_name': 'Ben'}
-    [DbStudentAddApp | INFO] Creating/updating student with ID 'hacker': {'email': None, 'first_name': 'Alyssa', 'last_name': 'Hacker'}
+    [DbStudentAddApp | INFO] Creating/updating student with ID 'bitdiddle': {'first_name': 'Ben', 'email': None, 'last_name': 'Bitdiddle'}
+    [DbStudentAddApp | INFO] Creating/updating student with ID 'hacker': {'last_name': 'Hacker', 'email': None, 'first_name': 'Alyssa'}
 
 
 And to list the students in the database, we use the
@@ -215,8 +215,8 @@ name):
 .. parsed-literal::
 
     [DbStudentImportApp | INFO] Importing students from: 'students.csv'
-    [DbStudentImportApp | INFO] Creating/updating student with ID 'bitdiddle': {'email': None, 'last_name': 'Bitdiddle', 'first_name': 'Ben'}
-    [DbStudentImportApp | INFO] Creating/updating student with ID 'hacker': {'email': None, 'last_name': 'Hacker', 'first_name': 'Alyssa'}
+    [DbStudentImportApp | INFO] Creating/updating student with ID 'bitdiddle': {'first_name': 'Ben', 'last_name': 'Bitdiddle', 'email': None}
+    [DbStudentImportApp | INFO] Creating/updating student with ID 'hacker': {'first_name': 'Alyssa', 'last_name': 'Hacker', 'email': None}
 
 
 We can also remove students from the database with
