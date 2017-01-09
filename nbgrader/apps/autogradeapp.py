@@ -161,7 +161,7 @@ class AutogradeApp(BaseNbConvertApp):
         else:
             gb = Gradebook(self.db_url)
             try:
-                gb.find_student(assignment_id)
+                gb.find_student(student_id)
             except MissingEntry:
                 self.fail("No student with ID '%s' exists in the database", student_id)
             finally:

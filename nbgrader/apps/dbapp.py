@@ -5,10 +5,10 @@ import csv
 import os
 
 from textwrap import dedent
-from traitlets import default, Unicode
+from traitlets import default, Unicode, Bool
 
 from . import NbGrader
-from ..api import Gradebook
+from ..api import Gradebook, MissingEntry
 
 aliases = {
     'log-level': 'Application.log_level',
@@ -69,6 +69,14 @@ class DbStudentAddApp(NbGrader):
         gb.update_or_create_student(student_id, **student)
         gb.close()
 
+student_remove_flags = {}
+student_remove_flags.update(flags)
+student_remove_flags.update({
+    'force': (
+        {'DbStudentRemoveApp': {'force': True}},
+        "Complete the operation, even if it means grades will be deleted."
+    ),
+})
 
 class DbStudentRemoveApp(NbGrader):
 
@@ -76,7 +84,9 @@ class DbStudentRemoveApp(NbGrader):
     description = 'Remove a student from the nbgrader database'
 
     aliases = aliases
-    flags = flags
+    flags = student_remove_flags
+
+    force = Bool(False, help="Confirm operation if it means grades will be deleted.").tag(config=True)
 
     def start(self):
         super(DbStudentRemoveApp, self).start()
@@ -86,8 +96,21 @@ class DbStudentRemoveApp(NbGrader):
 
         student_id = self.extra_args[0]
 
-        self.log.info("Removing student with ID '%s'", student_id)
         gb = Gradebook(self.db_url)
+        try:
+            student = gb.find_student(student_id)
+        except MissingEntry:
+            self.fail("No such student: '%s'", student_id)
+
+        if len(student.submissions) > 0:
+            if self.force:
+                self.log.warn("Removing associated grades")
+            else:
+                self.log.warn("!!! There are grades in the database for student '%s'.", student_id)
+                self.log.warn("!!! Removing this student will also remove these grades.")
+                self.fail("!!! If you are SURE this is what you want to do, rerun with --force.")
+
+        self.log.info("Removing student with ID '%s'", student_id)
         gb.remove_student(student_id)
         gb.close()
 
@@ -192,13 +215,24 @@ class DbAssignmentAddApp(NbGrader):
         gb.close()
 
 
+assignment_remove_flags = {}
+assignment_remove_flags.update(flags)
+assignment_remove_flags.update({
+    'force': (
+        {'DbAssignmentRemoveApp': {'force': True}},
+        "Complete the operation, even if it means grades will be deleted."
+    ),
+})
+
 class DbAssignmentRemoveApp(NbGrader):
 
     name = 'nbgrader-db-assignment-remove'
     description = 'Remove an assignment from the nbgrader database'
 
     aliases = aliases
-    flags = flags
+    flags = assignment_remove_flags
+
+    force = Bool(False, help="Confirm operation if it means grades will be deleted.").tag(config=True)
 
     def start(self):
         super(DbAssignmentRemoveApp, self).start()
@@ -208,8 +242,21 @@ class DbAssignmentRemoveApp(NbGrader):
 
         assignment_id = self.extra_args[0]
 
-        self.log.info("Removing assignment with ID '%s'", assignment_id)
         gb = Gradebook(self.db_url)
+        try:
+            assignment = gb.find_assignment(assignment_id)
+        except MissingEntry:
+            self.fail("No such assignment: '%s'", assignment_id)
+
+        if len(assignment.submissions) > 0:
+            if self.force:
+                self.log.warn("Removing associated grades")
+            else:
+                self.log.warn("!!! There are grades in the database for assignment '%s'.", assignment_id)
+                self.log.warn("!!! Removing this assignment will also remove these grades.")
+                self.fail("!!! If you are SURE this is what you want to do, rerun with --force.")
+
+        self.log.info("Removing assignment with ID '%s'", assignment_id)
         gb.remove_assignment(assignment_id)
         gb.close()
 
