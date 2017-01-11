@@ -12,6 +12,7 @@ nbgrader
     user_guide/installation
     user_guide/philosophy
     user_guide/creating_and_grading_assignments
+    user_guide/managing_the_database
     user_guide/managing_assignment_files
     user_guide/autograding_resources
     user_guide/faq
@@ -34,6 +35,7 @@ nbgrader
 
     contributor_guide/overview
     contributor_guide/installation_developer
+    contributor_guide/metadata
     contributor_guide/pull_request
     contributor_guide/testing
     contributor_guide/documentation

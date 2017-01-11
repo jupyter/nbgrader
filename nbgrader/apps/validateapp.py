@@ -1,6 +1,6 @@
-from traitlets import Unicode, List, Bool
+from traitlets import Unicode, List, Bool, default
 from nbconvert.nbconvertapp import NbConvertApp, DottedOrNone
-from ..preprocessors import DisplayAutoGrades, Execute, ClearOutput
+from ..preprocessors import DisplayAutoGrades, Execute, ClearOutput, CheckCellMetadata
 from .baseapp import NbGrader
 
 aliases = {}
@@ -36,6 +36,7 @@ class ValidateApp(NbGrader, NbConvertApp):
         """
 
     preprocessors = List([
+        CheckCellMetadata,
         ClearOutput,
         Execute,
         DisplayAutoGrades
@@ -48,9 +49,11 @@ class ValidateApp(NbGrader, NbConvertApp):
     writer_class = DottedOrNone('FilesWriter')
     output_base = Unicode('')
 
+    @default("log_level")
     def _log_level_default(self):
         return 'ERROR'
 
+    @default("classes")
     def _classes_default(self):
         classes = super(ValidateApp, self)._classes_default()
         for pp in self.preprocessors:

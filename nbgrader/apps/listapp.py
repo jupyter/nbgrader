@@ -89,10 +89,10 @@ class ListApp(TransferApp):
             nbgrader list --inbound --remove --student=student1
         """
 
-    inbound = Bool(False, config=True, help="List inbound files rather than outbound.")
-    cached = Bool(False, config=True, help="List assignments in submission cache.")
-    remove = Bool(False, config=True, help="Remove, rather than list files.")
-    as_json = Bool(False, config=True, help="Print out assignments as json")
+    inbound = Bool(False, help="List inbound files rather than outbound.").tag(config=True)
+    cached = Bool(False, help="List assignments in submission cache.").tag(config=True)
+    remove = Bool(False, help="Remove, rather than list files.").tag(config=True)
+    as_json = Bool(False, help="Print out assignments as json").tag(config=True)
 
     def init_src(self):
         pass

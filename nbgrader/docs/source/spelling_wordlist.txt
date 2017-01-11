@@ -1,5 +1,6 @@
 admin
 Afterwards
+ajax
 alchemyst
 alope
 app
@@ -14,11 +15,13 @@ autograded
 Autograded
 autograder
 Autograder
+autogrades
 autograding
 backends
 basename
 Bitdiddle
 bugfix
+bugfixes
 bugtracker
 camelcase
 Carreau
@@ -31,6 +34,7 @@ conda
 config
 customizable
 datefmt
+ddbourgin
 delimeters
 dev
 dropdown
@@ -44,6 +48,7 @@ filesystem
 formatters
 formgrade
 formgrader
+frontend
 gif
 Gradebook
 gradebook
@@ -83,8 +88,11 @@ matplotlib
 metadata
 mikebolt
 minrk
+multi
 namespace
 nbconvert
+nbextension
+nbextensions
 nbgrader
 neuroscience
 np
@@ -98,6 +106,7 @@ plugin
 plugins
 positionally
 postgres
+precendence
 prepend
 prepending
 prepopulate
@@ -117,6 +126,7 @@ resize
 rst
 runtime
 sansary
+serverextension
 smeylan
 spellcheck
 SQL
@@ -147,9 +157,13 @@ usernames
 utcnow
 vinaykola
 whitespace
+whositwhatnow
 Wildcards
 willingc
 wordlist
+wordslist
 Workflow
 workflow
 workflows
+xsrf
+XSRF

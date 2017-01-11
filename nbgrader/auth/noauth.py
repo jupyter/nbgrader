@@ -5,9 +5,10 @@ import subprocess as sp
 import time
 import sys
 import signal
+import logging
 
 from textwrap import dedent
-from traitlets import Bool, Integer, Unicode
+from traitlets import Bool, Integer, Unicode, default
 
 from .base import BaseAuth
 
@@ -24,10 +25,14 @@ def random_port():
 class NoAuth(BaseAuth):
     """Pass through authenticator."""
 
-    start_nbserver = Bool(True, config=True, help=""""Start a single notebook
-        server that allows submissions to be viewed.""")
-    nbserver_port = Integer(config=True, help="Port for the notebook server")
+    start_nbserver = Bool(
+        True,
+        help=""""Start a single notebook server that allows submissions to be viewed."""
+    ).tag(config=True)
 
+    nbserver_port = Integer(help="Port for the notebook server").tag(config=True)
+
+    @default("nbserver_port")
     def _nbserver_port_default(self):
         return random_port()
 
@@ -53,13 +58,19 @@ class NoAuth(BaseAuth):
             if sys.platform == 'win32':
                 kwargs['creationflags'] = sp.CREATE_NEW_PROCESS_GROUP
 
+            if self.log.level <= logging.DEBUG:
+                level = "DEBUG"
+            else:
+                level = "CRITICAL"
+
             self._notebook_server_ip = self._ip
             self._notebook_server_port = str(self.nbserver_port)
             self._notebook_server = sp.Popen(
                 [
                     sys.executable, notebookapp,
                     "--ip", self._notebook_server_ip,
-                    "--port", self._notebook_server_port
+                    "--port", self._notebook_server_port,
+                    "--log-level", level
                 ],
                 **kwargs)
             self._notebook_server_exists = True

@@ -229,7 +229,9 @@ class SubmissionHandler(BaseHandler):
             'total': len(submissions),
             'notebook_server_exists': server_exists,
             'base_url': self.auth.base_url,
-            'mathjax_url': mathjax_url
+            'mathjax_url': mathjax_url,
+            'last_name': submission.student.last_name,
+            'first_name': submission.student.first_name
         }
 
         if server_exists:

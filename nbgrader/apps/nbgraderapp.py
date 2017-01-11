@@ -6,6 +6,7 @@ import os
 
 from textwrap import dedent
 
+from traitlets import default
 from traitlets.config.application import catch_config_error
 from jupyter_core.application import NoStart
 
@@ -27,7 +28,8 @@ from . import (
     ListApp,
     ExtensionApp,
     QuickStartApp,
-    ExportApp
+    ExportApp,
+    DbApp
 )
 
 aliases = {}
@@ -200,9 +202,19 @@ class NbGraderApp(NbGrader):
                 Export grades from the database to another format.
                 """
             ).strip()
+        ),
+        db=(
+            DbApp,
+            dedent(
+                """
+                Perform operations on the nbgrader database, such as adding,
+                removing, importing, and listing assignments or students.
+                """
+            ).strip()
         )
     )
 
+    @default("classes")
     def _classes_default(self):
         classes = super(NbGraderApp, self)._classes_default()
 

@@ -9,6 +9,9 @@
 
   <link rel="stylesheet" href="{{base_url}}/static/components/bootstrap/css/bootstrap.min.css" />
   <link rel="stylesheet" href="{{base_url}}/static/css/formgrade.css">
+
+  {%- block head -%}
+  {%- endblock -%}
 </head>
 
 <body>

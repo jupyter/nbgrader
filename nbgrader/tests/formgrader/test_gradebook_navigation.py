@@ -4,7 +4,6 @@ from six.moves.urllib.parse import quote
 
 from ...api import MissingEntry
 from .base import BaseTestFormgrade
-from .manager import HubAuthNotebookServerUserManager
 
 
 @pytest.mark.formgrader
@@ -87,6 +86,39 @@ class TestGradebook(BaseTestFormgrade):
                 self._click_link("Submission #{}".format(i + 1))
                 self._wait_for_formgrader("submissions/{}/?index=0".format(submissions[i].id))
                 self.browser.back()
+
+    def test_assignment_notebook_submissions_show_hide_names(self):
+        problem = self.gradebook.find_assignment("Problem Set 1").notebooks[0]
+        self._load_gradebook_page("assignments/Problem Set 1/{}".format(problem.name))
+        submissions = problem.submissions
+        submissions.sort(key=lambda x: x.id)
+        submission = submissions[0]
+
+        top_elem = self.browser.find_element_by_css_selector("#submission-1")
+        col1, col2 = top_elem.find_elements_by_css_selector("td")[:2]
+        hidden = col1.find_element_by_css_selector(".glyphicon.name-hidden")
+        shown = col1.find_element_by_css_selector(".glyphicon.name-shown")
+
+        # check that the name is hidden
+        assert col2.text == "Submission #1"
+        assert not shown.is_displayed()
+        assert hidden.is_displayed()
+
+        # click the show icon
+        hidden.click()
+
+        # check that the name is shown
+        assert col2.text == "{}, {}".format(submission.student.last_name, submission.student.first_name)
+        assert shown.is_displayed()
+        assert not hidden.is_displayed()
+
+        # click the hide icon
+        shown.click()
+
+        # check that the name is hidden
+        assert col2.text == "Submission #1"
+        assert not shown.is_displayed()
+        assert hidden.is_displayed()
 
     def test_load_student_list(self):
         # load the student view

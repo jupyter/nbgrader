@@ -167,7 +167,25 @@ class TestClearSolutions(BaseTestPreprocessor):
         assert cell.source == "something something\nYOUR ANSWER HERE"
         assert cell.metadata.nbgrader['solution']
 
-    def test_preprocess_text_cell_region(self, preprocessor):
+    def test_preprocess_text_solution_cell_region_indented(self, preprocessor):
+        """Is a text grade cell correctly cleared and indented when there is a solution region?"""
+        cell = create_text_cell()
+        cell.source = dedent(
+            """
+            something something
+                ### BEGIN SOLUTION
+                this is the answer!
+                ### END SOLUTION
+            """
+        ).strip()
+        cell.metadata['nbgrader'] = dict(solution=True)
+        resources = dict(language="python")
+
+        cell = preprocessor.preprocess_cell(cell, resources, 1)[0]
+        assert cell.source == "something something\n    YOUR ANSWER HERE"
+        assert cell.metadata.nbgrader['solution']
+
+    def test_preprocess_text_cell_metadata(self, preprocessor):
         """Is an error thrown when a solution region exists in a non-solution text cell?"""
         cell = create_text_cell()
         cell.source = dedent(
@@ -205,12 +223,8 @@ class TestClearSolutions(BaseTestPreprocessor):
         """Are deprecations handled cleanly?"""
         c = Config()
         c.ClearSolutions.code_stub = "foo"
-        c.ClearSolutions.begin_solution_delimeter = "bar"
-        c.ClearSolutions.end_solution_delimeter = "baz"
         pp = ClearSolutions(config=c)
         assert pp.code_stub == dict(python="foo")
-        assert pp.begin_solution_delimeter == dict(python="bar")
-        assert pp.end_solution_delimeter == dict(python="baz")
 
     def test_language_missing(self, preprocessor):
         nb = self._read_nb(os.path.join("files", "test.ipynb"))
@@ -221,12 +235,4 @@ class TestClearSolutions(BaseTestPreprocessor):
             preprocessor.preprocess(nb, {})
 
         preprocessor.code_stub = dict(javascript="foo")
-        with pytest.raises(ValueError):
-            preprocessor.preprocess(nb, {})
-
-        preprocessor.begin_solution_delimeter = dict(javascript="bar")
-        with pytest.raises(ValueError):
-            preprocessor.preprocess(nb, {})
-
-        preprocessor.end_solution_delimeter = dict(javascript="baz")
         preprocessor.preprocess(nb, {})

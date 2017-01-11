@@ -5,10 +5,11 @@ import pytest
 
 from os.path import join
 from textwrap import dedent
-from nbformat.v4 import reads
+from nbformat import current_nbformat
 
 from ...api import Gradebook
 from ...utils import remove
+from ...nbformat import reads
 from .. import run_nbgrader
 from .base import BaseTestApp
 
@@ -124,7 +125,8 @@ class TestNbGraderAutograde(BaseTestApp):
         gb.close()
 
     def test_grade_empty_timestamp(self, db, course_dir):
-        """Issue #580"""
+        """Issue #580 - Does the autograder handle empty or invalid timestamp
+        strings"""
         with open("nbgrader_config.py", "a") as fh:
             fh.write("""c.NbGrader.db_assignments = [dict(name='ps1', duedate='2015-02-02 14:58:23.948203 PST')]\n""")
             fh.write("""c.NbGrader.db_students = [dict(id="foo"), dict(id="bar")]""")
@@ -134,27 +136,20 @@ class TestNbGraderAutograde(BaseTestApp):
 
         self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "submitted", "foo", "ps1", "p1.ipynb"))
         self._make_file(join(course_dir, "submitted", "foo", "ps1", "timestamp.txt"), "")
-
-        self._copy_file(join("files", "submitted-changed.ipynb"), join(course_dir, "submitted", "bar", "ps1", "p1.ipynb"))
-        self._make_file(join(course_dir, "submitted", "bar", "ps1", "timestamp.txt"), "")
-
         run_nbgrader(["autograde", "ps1", "--db", db])
 
         assert os.path.isfile(join(course_dir, "autograded", "foo", "ps1", "p1.ipynb"))
         assert os.path.isfile(join(course_dir, "autograded", "foo", "ps1", "timestamp.txt"))
-        assert os.path.isfile(join(course_dir, "autograded", "bar", "ps1", "p1.ipynb"))
-        assert os.path.isfile(join(course_dir, "autograded", "bar", "ps1", "timestamp.txt"))
 
         gb = Gradebook(db)
         submission = gb.find_submission("ps1", "foo")
         assert submission.total_seconds_late == 0
-        submission = gb.find_submission("ps1", "bar")
-        assert submission.total_seconds_late == 0
-
-        # make sure it still works to run it a second time
-        run_nbgrader(["autograde", "ps1", "--db", db])
-
         gb.close()
+
+        invalid_timestamp = "But I want to be a timestamp string :("
+        self._copy_file(join("files", "submitted-changed.ipynb"), join(course_dir, "submitted", "bar", "ps1", "p1.ipynb"))
+        self._make_file(join(course_dir, "submitted", "bar", "ps1", "timestamp.txt"), invalid_timestamp)
+        run_nbgrader(["autograde", "ps1", "--db", db], retcode=1)
 
     def test_late_submission_penalty_none(self, db, course_dir):
         """Does 'none' method do nothing?"""
@@ -634,11 +629,11 @@ class TestNbGraderAutograde(BaseTestApp):
 
         self._copy_file(join("files", "test-with-output.ipynb"), join(course_dir, "submitted", "foo", "ps1", "p1.ipynb"))
         with open(join(os.path.dirname(__file__), "files", "test-with-output.ipynb"), "r") as fh:
-            orig_contents = reads(fh.read())
+            orig_contents = reads(fh.read(), as_version=current_nbformat)
 
         run_nbgrader(["autograde", "ps1"])
         with open(join(course_dir, "autograded", "foo", "ps1", "p1.ipynb"), "r") as fh:
-            new_contents = reads(fh.read())
+            new_contents = reads(fh.read(), as_version=current_nbformat)
 
         different = False
         for i in range(len(orig_contents.cells)):
@@ -655,7 +650,7 @@ class TestNbGraderAutograde(BaseTestApp):
 
         run_nbgrader(["autograde", "ps1", "--force", "--no-execute"])
         with open(join(course_dir, "autograded", "foo", "ps1", "p1.ipynb"), "r") as fh:
-            new_contents = reads(fh.read())
+            new_contents = reads(fh.read(), as_version=current_nbformat)
 
         for i in range(len(orig_contents.cells)):
             orig_cell = orig_contents.cells[i]

@@ -11,7 +11,7 @@ import sys
 
 from nbconvert.exporters import HTMLExporter
 from textwrap import dedent
-from traitlets import Unicode, Integer, Type, Instance
+from traitlets import Unicode, Integer, Type, Instance, default
 from traitlets.config.application import catch_config_error
 from tornado import web
 from tornado.ioloop import IOLoop
@@ -21,7 +21,7 @@ from jinja2 import Environment, FileSystemLoader
 from .baseapp import NbGrader, nbgrader_aliases, nbgrader_flags
 from ..formgrader import handlers, apihandlers
 from ..api import Gradebook
-from ..auth import BaseAuth, NoAuth
+from ..auth import BaseAuth, NoAuth, HubAuth
 
 aliases = {}
 aliases.update(nbgrader_aliases)
@@ -72,24 +72,28 @@ class FormgradeApp(NbGrader):
             nbgrader formgrade --port 5001
         """
 
-    ip = Unicode("localhost", config=True, help="IP address for the server")
-    port = Integer(5000, config=True, help="Port for the server")
+    ip = Unicode("localhost", help="IP address for the server").tag(config=True)
+    port = Integer(5000, help="Port for the server").tag(config=True)
 
-    authenticator_class = Type(NoAuth, klass=BaseAuth, config=True, help="""
-        Authenticator used in all formgrade requests.""")
-    authenticator_instance = Instance(BaseAuth, config=False)
+    authenticator_class = Type(
+        NoAuth,
+        klass=BaseAuth,
+        help="""Authenticator used in all formgrade requests."""
+    ).tag(config=True)
+
+    authenticator_instance = Instance(BaseAuth).tag(config=False)
 
     mathjax_url = Unicode(
         '',
-        config=True,
         help=dedent(
             """
             URL or local path to mathjax installation. Defaults to the version
             of MathJax included with the Jupyter Notebook.
             """
         )
-    )
+    ).tag(config=True)
 
+    @default("mathjax_url")
     def _mathjax_url_default(self):
         url = os.path.join(notebook.DEFAULT_STATIC_FILES_PATH, 'components', 'MathJax', 'MathJax.js')
         if not os.path.exists(url):
@@ -97,6 +101,7 @@ class FormgradeApp(NbGrader):
         self.log.info("Serving MathJax from %s", url)
         return url
 
+    @default("classes")
     def _classes_default(self):
         classes = super(FormgradeApp, self)._classes_default()
         classes.append(HTMLExporter)
@@ -109,7 +114,7 @@ class FormgradeApp(NbGrader):
         signal.signal(signal.SIGTERM, self._signal_stop)
 
     def _signal_stop(self, sig, frame):
-        self.log.critical("received signal %s, stopping", sig)
+        self.log.critical("Received signal %s, stopping", sig)
         self.authenticator_instance.stop()
         ioloop.IOLoop.current().stop()
 
@@ -195,11 +200,25 @@ class FormgradeApp(NbGrader):
 
         # Create the application
         self.io_loop = ioloop.IOLoop.current()
-        self.tornado_application.listen(self.port, address=self.ip)
+        try:
+            self.tornado_application.listen(self.port, address=self.ip)
+        except OSError as err:
+            if err.errno == 48:
+                self.log.error("Address already in use by another process: http://{}:{}".format(self.ip, self.port))
+                self.log.error("Try running nbgrader with a different port, e.g. nbgrader formgrade --port=5001")
+                sys.exit(1)
+            else:
+                raise
 
-        url = "http://{:s}:{:d}/".format(self.ip, self.port)
-        self.log.info("Form grader running at {}".format(url))
-        self.log.info("Use Control-C to stop this server")
+        if not isinstance(self.authenticator_instance, HubAuth):
+            if self.authenticator_instance.notebook_server_exists():
+                url = self.authenticator_instance.get_notebook_url("")
+                self.log.info("Notebook server is running at {}".format(url))
+
+            url = "http://{:s}:{:d}/".format(self.ip, self.port)
+            self.log.info("The formgrader is running at {}".format(url))
+            self.log.info("--> Go to {} to access the formgrader".format(url))
+            self.log.info("Use Control-C to stop this server")
 
         if sys.platform.startswith('win'):
             # add no-op to wake every 1s

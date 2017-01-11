@@ -1,4 +1,4 @@
-from traitlets import Type, Instance
+from traitlets import Type, Instance, default
 from .baseapp import NbGrader
 from ..plugins import ExportPlugin, CsvExportPlugin
 from ..api import Gradebook
@@ -50,6 +50,7 @@ class ExportApp(NbGrader):
         self.log.info("Using exporter: %s", self.plugin_class.__name__)
         self.plugin_inst = self.plugin_class(parent=self)
 
+    @default("classes")
     def _classes_default(self):
         classes = super(ExportApp, self)._classes_default()
         classes.append(ExportApp)

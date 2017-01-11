@@ -2,11 +2,12 @@ import os
 import shutil
 
 from textwrap import dedent
-from traitlets import List, Bool
+from traitlets import List, Bool, observe
 
 from .baseapp import BaseNbConvertApp, nbconvert_aliases, nbconvert_flags
 from ..preprocessors import (
-    AssignLatePenalties, ClearOutput, DeduplicateIds, OverwriteCells, SaveAutoGrades, Execute, LimitOutput)
+    AssignLatePenalties, ClearOutput, DeduplicateIds, OverwriteCells, SaveAutoGrades,
+    Execute, LimitOutput, CheckCellMetadata)
 from ..api import Gradebook, MissingEntry
 from .. import utils
 
@@ -88,14 +89,14 @@ class AutogradeApp(BaseNbConvertApp):
         """
 
     create_student = Bool(
-        False, config=True,
+        False,
         help=dedent(
             """
             Whether to create the student at runtime if it does not
             already exist.
             """
         )
-    )
+    ).tag(config=True)
 
     _sanitizing = True
 
@@ -115,27 +116,30 @@ class AutogradeApp(BaseNbConvertApp):
     sanitize_preprocessors = List([
         ClearOutput,
         DeduplicateIds,
-        OverwriteCells
+        OverwriteCells,
+        CheckCellMetadata
     ])
     autograde_preprocessors = List([
         Execute,
         LimitOutput,
         SaveAutoGrades,
         AssignLatePenalties,
+        CheckCellMetadata
     ])
 
     preprocessors = List([])
 
-    def _config_changed(self, name, old, new):
-        if 'create_student' in new.AutogradeApp:
+    @observe("config")
+    def _config_changed(self, change):
+        if 'create_student' in change['new'].AutogradeApp:
             self.log.warn(
                 "The AutogradeApp.create_student (or the --create flag) option is "
                 "deprecated. Please specify your assignments through the "
                 "`NbGrader.db_students` variable in your nbgrader config file."
             )
-            del new.AutogradeApp.create_student
+            del change['new'].AutogradeApp.create_student
 
-        super(AutogradeApp, self)._config_changed(name, old, new)
+        super(AutogradeApp, self)._config_changed(change)
 
     def init_assignment(self, assignment_id, student_id):
         super(AutogradeApp, self).init_assignment(assignment_id, student_id)
@@ -155,7 +159,22 @@ class AutogradeApp(BaseNbConvertApp):
             gb.update_or_create_student(student_id, **student)
             gb.close()
         else:
-            self.fail("No student with ID '%s' exists in the config", student_id)
+            gb = Gradebook(self.db_url)
+            try:
+                gb.find_student(student_id)
+            except MissingEntry:
+                self.fail("No student with ID '%s' exists in the database", student_id)
+            finally:
+                gb.close()
+
+        # make sure the assignment exists
+        gb = Gradebook(self.db_url)
+        try:
+            gb.find_assignment(assignment_id)
+        except MissingEntry:
+            self.fail("No assignment with ID '%s' exists in the database", assignment_id)
+        finally:
+            gb.close()
 
         # try to read in a timestamp from file
         src_path = self._format_source(assignment_id, student_id)
@@ -203,6 +222,8 @@ class AutogradeApp(BaseNbConvertApp):
                 notebooks.append(notebook)
         gb.close()
         self.notebooks = notebooks
+        if len(self.notebooks) == 0:
+            self.fail("No notebooks found, did you forget to run 'nbgrader assign'?")
 
     def _init_preprocessors(self):
         self.exporter._preprocessors = []

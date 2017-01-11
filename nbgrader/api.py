@@ -593,6 +593,8 @@ class SubmittedNotebook(Base):
             "id": self.id,
             "name": self.name,
             "student": self.student.id,
+            "last_name": self.student.last_name,
+            "first_name": self.student.first_name,
             "score": self.score,
             "max_score": self.max_score,
             "code_score": self.code_score,
@@ -2373,7 +2375,8 @@ class Gradebook(object):
         _manual_grade = func.coalesce(manual_grade.c.needs_manual_grade, False)
         _failed_tests = func.coalesce(failed_tests.c.failed_tests, False)
         submissions = self.db.query(
-            SubmittedNotebook.id, Notebook.name, Student.id,
+            SubmittedNotebook.id, Notebook.name,
+            Student.id, Student.first_name, Student.last_name,
             func.sum(Grade.score), func.sum(GradeCell.max_score),
             code_scores.c.code_score, code_scores.c.max_code_score,
             written_scores.c.written_score, written_scores.c.max_written_score,
@@ -2391,14 +2394,15 @@ class Gradebook(object):
              SubmittedNotebook.id == Grade.notebook_id,
              GradeCell.id == Grade.cell_id))\
          .group_by(
-             SubmittedNotebook.id, Notebook.name, Student.id,
+             SubmittedNotebook.id, Notebook.name,
+             Student.id, Student.first_name, Student.last_name,
              code_scores.c.code_score, code_scores.c.max_code_score,
              written_scores.c.written_score, written_scores.c.max_written_score,
              _manual_grade, _failed_tests, SubmittedNotebook.flagged)\
          .all()
 
         keys = [
-            "id", "name", "student",
+            "id", "name", "student", "first_name", "last_name",
             "score", "max_score",
             "code_score", "max_code_score",
             "written_score", "max_written_score",

@@ -2,7 +2,7 @@ import os
 import re
 from textwrap import dedent
 
-from traitlets import List, Bool
+from traitlets import List, Bool, observe, default
 
 from ..api import Gradebook, MissingEntry
 from .baseapp import (
@@ -104,24 +104,25 @@ class AssignApp(BaseNbConvertApp):
         """
 
     create_assignment = Bool(
-        False, config=True,
+        False,
         help=dedent(
             """
             Whether to create the assignment at runtime if it does not
             already exist.
             """
         )
-    )
+    ).tag(config=True)
 
     no_database = Bool(
-        False, config=True,
+        False,
         help=dedent(
             """
             Do not save information about the assignment into the database.
             """
         )
-    )
+    ).tag(config=True)
 
+    @default("permissions")
     def _permissions_default(self):
         return 644
 
@@ -142,7 +143,8 @@ class AssignApp(BaseNbConvertApp):
         ClearOutput,
         CheckCellMetadata,
         ComputeChecksums,
-        SaveCells
+        SaveCells,
+        CheckCellMetadata
     ])
 
     def build_extra_config(self):
@@ -151,16 +153,17 @@ class AssignApp(BaseNbConvertApp):
         extra_config.NbGrader.notebook_id = '*'
         return extra_config
 
-    def _config_changed(self, name, old, new):
-        if 'create_assignment' in new.AssignApp:
+    @observe("config")
+    def _config_changed(self, change):
+        if 'create_assignment' in change['new'].AssignApp:
             self.log.warn(
                 "The AssignApp.create_assignment (or the --create flag) option is "
                 "deprecated. Please specify your assignments through the "
                 "`NbGrader.db_assignments` variable in your nbgrader config file."
             )
-            del new.AssignApp.create_assignment
+            del change['new'].AssignApp.create_assignment
 
-        super(AssignApp, self)._config_changed(name, old, new)
+        super(AssignApp, self)._config_changed(change)
 
 
     def _clean_old_notebooks(self, assignment_id, student_id):
@@ -220,11 +223,17 @@ class AssignApp(BaseNbConvertApp):
                 gb = Gradebook(self.db_url)
                 gb.update_or_create_assignment(assignment_id, **assignment)
                 gb.close()
-
-                # check if there are any extra notebooks in the db that are no longer
-                # part of the assignment, and if so, remove them
-                if self.notebook_id == "*":
-                    self._clean_old_notebooks(assignment_id, student_id)
             else:
-                self.fail("No assignment called '%s' exists in the config", assignment_id)
+                gb = Gradebook(self.db_url)
+                try:
+                    gb.find_assignment(assignment_id)
+                except MissingEntry:
+                    self.fail("No assignment called '%s' exists in the database", assignment_id)
+                finally:
+                    gb.close()
+
+            # check if there are any extra notebooks in the db that are no longer
+            # part of the assignment, and if so, remove them
+            if self.notebook_id == "*":
+                self._clean_old_notebooks(assignment_id, student_id)
 

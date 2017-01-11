@@ -216,3 +216,17 @@ div.nbgrader_cell .input_area {
     text-align: center;
     font-weight: bold;
 }
+
+.name-shown {
+  display: none;
+}
+
+.glyphicon.name-shown, .glyphicon.name-hidden {
+  cursor: pointer;
+  cursor: hand;
+  color: #000;
+}
+
+.breadcrumb .glyphicon {
+  margin-left: 5px;
+}

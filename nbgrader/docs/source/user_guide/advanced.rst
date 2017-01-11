@@ -11,7 +11,6 @@ Running nbgrader with JupyterHub
 
 Please see :doc:`/configuration/jupyterhub_config`.
 
-.. _assignment-list-installation:
 
 Installing the "Assignment List" plugin for all students on a server
 --------------------------------------------------------------------
@@ -56,6 +55,54 @@ Then, you will need to activate the extension for each student:
 
 At this point, you should be able to see the "Assignments" tab in the main
 notebook file list.
+
+If you know you have released an assignment but still don't see it in the list
+of assignments, check the output of the notebook server to see if there are any
+errors. If you do in fact see an error, try running the command manually on the
+command line from the directory where the notebook server is running. For
+example:
+
+.. code:: bash
+
+  $ nbgrader list
+  [ListApp | ERROR] Unwritable directory, please contact your instructor: /srv/nbgrader/exchange
+
+This error that the exchange directory isn't writable is an easy mistake to
+make, but also relatively easy to fix. If the exchange directory is at
+``/srv/nbgrader/exchange``, then make sure you have run:
+
+.. code:: bash
+
+  chmod +rw /srv/nbgrader/exchange
+
+.. _assignment-list-installation:
+
+Advanced "Assignment List" installation
+---------------------------------------
+
+.. seealso::
+
+  :doc:`installation`
+    General installation instructions.
+
+  :doc:`managing_assignment_files`
+    Details on fetching and submitting assignments using the "Assignment List"
+	plugin.
+
+.. warning::
+
+  The "Assignment List" extension is not currently compatible with multiple
+  courses on the same server: it will only work if there is a single course on
+  the server. This is a known issue (see `#544
+  <https://github.com/jupyter/nbgrader/issues/544>`__). :ref:`PRs welcome!
+  <pull-request>`
+
+This section covers some further and configuration scenarios that often
+occur with the *assignment list* extension.
+
+In previous versions of nbgrader, a special process had to be used to enable
+this extension for all users on a multi-user system. As described in the main
+:doc:`installation` documentation this is no longer required.
 
 If you know you have released an assignment but still don't see it in the list
 of assignments, check the output of the notebook server to see if there are any
