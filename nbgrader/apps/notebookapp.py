@@ -1,9 +1,11 @@
 from tornado import ioloop
 from notebook.notebookapp import NotebookApp
 
+
 class FormgradeNotebookApp(NotebookApp):
     """A Subclass of the regular NotebookApp that can be spawned by the form grader."""
     open_browser = False
+    token = ''  # Notebook >=4.3
 
     def _profile_default(self):
         return 'nbgrader'

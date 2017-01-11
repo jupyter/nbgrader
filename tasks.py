@@ -1,7 +1,7 @@
 import os
 import re
 
-from invoke import task
+from invoke import task, collection
 from textwrap import dedent
 
 import sys
@@ -45,7 +45,7 @@ def docs(ctx):
     run(ctx, 'make -C nbgrader/docs spelling')
 
 
-def _run_tests(ctx, mark=None, skip=None):
+def _run_tests(ctx, mark=None, skip=None, junitxml=None):
     if not WINDOWS:
         import distutils.sysconfig
         site = distutils.sysconfig.get_python_lib()
@@ -76,8 +76,11 @@ def _run_tests(ctx, mark=None, skip=None):
     if not WINDOWS:
         cmd.append('--cov nbgrader')
         cmd.append('--no-cov-on-fail')
+    if junitxml:
+        cmd.extend(['--junitxml', junitxml])
     cmd.append('-v')
     cmd.append('-x')
+    cmd.extend(['--rerun', '1'])
 
     marks = []
     if mark is not None:
@@ -95,21 +98,21 @@ def _run_tests(ctx, mark=None, skip=None):
 
 
 @task
-def tests(ctx, group='all', skip=None):
+def tests(ctx, group='all', skip=None, junitxml=None):
     if group == 'python':
-        _run_tests(ctx, mark="not formgrader and not nbextensions", skip=skip)
+        _run_tests(ctx, mark="not formgrader and not nbextensions", skip=skip, junitxml=junitxml)
 
     elif group == 'formgrader':
-        _run_tests(ctx, mark="formgrader", skip=skip)
+        _run_tests(ctx, mark="formgrader", skip=skip, junitxml=junitxml)
 
     elif group == 'nbextensions':
-        _run_tests(ctx, mark="nbextensions", skip=skip)
+        _run_tests(ctx, mark="nbextensions", skip=skip, junitxml=junitxml)
 
     elif group == 'docs':
         docs(ctx)
 
     elif group == 'all':
-        _run_tests(ctx, skip=skip)
+        _run_tests(ctx, skip=skip, junitxml=junitxml)
 
     else:
         raise ValueError("Invalid test group: {}".format(group))
@@ -139,7 +142,7 @@ def before_install(ctx, group, python_version):
     # install jupyterhub
     if python_version.startswith('3') and group == 'formgrader':
         run(ctx, 'npm install -g configurable-http-proxy')
-        run(ctx, 'pip install jupyterhub')
+        run(ctx, 'pip install "jupyterhub<0.7"')
 
 
 @task
@@ -150,3 +153,20 @@ def install(ctx, group):
     else:
         cmd = 'pip install -r dev-requirements.txt -e .'
     run(ctx, 'PIP_FIND_LINKS=~/travis-wheels/wheelhouse {}'.format(cmd))
+
+
+ns = collection.Collection(
+    after_success,
+    before_install,
+    docs,
+    install,
+    js,
+    tests,
+)
+
+if WINDOWS:
+    ns.configure({
+        'run': {
+            'shell': os.environ.get('COMSPEC', os.environ.get('SHELL')),
+        }
+    })

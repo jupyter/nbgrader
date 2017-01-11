@@ -8,6 +8,19 @@ A summary of changes to nbgrader.
 0.3.x
 -----
 
+0.3.2
+~~~~~
+
+Version 0.3.2 of nbgrader includes a few bugfixes pertaining to building nbgrader on conda-forge.
+
+- PR #608: Fix Windows tests
+- PR #601: Add shell config for invoke on windows
+- PR #593: Send xsrf token in the X-XSRF-Token header for ajax
+- PR #588: `basename` to wordslist
+- PR #584: Changes for Notebook v4.3 tests
+
+Thanks to lgpage, who made all the changes necessary for the 0.3.2 release!
+
 0.3.1
 ~~~~~
 

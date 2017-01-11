@@ -1,5 +1,6 @@
 admin
 Afterwards
+ajax
 alchemyst
 alope
 app
@@ -16,6 +17,7 @@ autograder
 Autograder
 autograding
 backends
+basename
 Bitdiddle
 bugfix
 bugfixes
@@ -152,6 +154,9 @@ whositwhatnow
 Wildcards
 willingc
 wordlist
+wordslist
 Workflow
 workflow
 workflows
+xsrf
+XSRF
