@@ -1,5 +1,6 @@
 admin
 Afterwards
+ajax
 alchemyst
 alope
 app
@@ -20,6 +21,7 @@ backends
 basename
 Bitdiddle
 bugfix
+bugfixes
 bugtracker
 camelcase
 Carreau
@@ -32,6 +34,7 @@ conda
 config
 customizable
 datefmt
+ddbourgin
 delimeters
 dev
 dropdown
@@ -154,9 +157,13 @@ usernames
 utcnow
 vinaykola
 whitespace
+whositwhatnow
 Wildcards
 willingc
 wordlist
+wordslist
 Workflow
 workflow
 workflows
+xsrf
+XSRF
