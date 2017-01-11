@@ -28,7 +28,8 @@ from . import (
     ListApp,
     ExtensionApp,
     QuickStartApp,
-    ExportApp
+    ExportApp,
+    DbApp
 )
 
 aliases = {}
@@ -199,6 +200,15 @@ class NbGraderApp(NbGrader):
             dedent(
                 """
                 Export grades from the database to another format.
+                """
+            ).strip()
+        ),
+        db=(
+            DbApp,
+            dedent(
+                """
+                Perform operations on the nbgrader database, such as adding,
+                removing, importing, and listing assignments or students.
                 """
             ).strip()
         )

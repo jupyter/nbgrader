@@ -159,7 +159,22 @@ class AutogradeApp(BaseNbConvertApp):
             gb.update_or_create_student(student_id, **student)
             gb.close()
         else:
-            self.fail("No student with ID '%s' exists in the config", student_id)
+            gb = Gradebook(self.db_url)
+            try:
+                gb.find_student(student_id)
+            except MissingEntry:
+                self.fail("No student with ID '%s' exists in the database", student_id)
+            finally:
+                gb.close()
+
+        # make sure the assignment exists
+        gb = Gradebook(self.db_url)
+        try:
+            gb.find_assignment(assignment_id)
+        except MissingEntry:
+            self.fail("No assignment with ID '%s' exists in the database", assignment_id)
+        finally:
+            gb.close()
 
         # try to read in a timestamp from file
         src_path = self._format_source(assignment_id, student_id)
@@ -207,6 +222,8 @@ class AutogradeApp(BaseNbConvertApp):
                 notebooks.append(notebook)
         gb.close()
         self.notebooks = notebooks
+        if len(self.notebooks) == 0:
+            self.fail("No notebooks found, did you forget to run 'nbgrader assign'?")
 
     def _init_preprocessors(self):
         self.exporter._preprocessors = []
