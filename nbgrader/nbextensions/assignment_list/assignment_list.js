@@ -435,11 +435,11 @@ define([
                     success : function (data, status, xhr) {
                         if (!data.success) {
                             that.submit_error(data);
-                            button.text('Sumbit');
+                            button.text('Submit');
                             button.removeAttr('disabled');
+                        } else {
+                            that.on_refresh(data, status, xhr);
                         }
-                        //$.proxy(that.on_refresh, that);
-                        //GRRRR
                     },
                     error : function (xhr, status, error) {
                         container.empty().text("Error submitting assignment.");
