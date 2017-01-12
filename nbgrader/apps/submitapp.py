@@ -23,7 +23,7 @@ flags.update(transfer_flags)
 flags.update({
     'strict': (
         {'SubmitApp': {'strict': True}},
-        ""
+        "Fail if the submission is missing notebooks for the assignment"
     ),
 })
 
@@ -72,8 +72,8 @@ class SubmitApp(TransferApp):
     strict = Bool(
         False,
         help=dedent(
-            "Whether or not to submit the assignment if the submitted file "
-            "names do not match the released assignment file names."
+            "Whether or not to submit the assignment if there are missing "
+            "notebooks from the released assignment notebooks."
         )
     ).tag(config=True)
 
@@ -107,42 +107,43 @@ class SubmitApp(TransferApp):
         released_notebooks = find_notebooks(release_path)
         submitted_notebooks = find_notebooks(self.src_path)
 
-        all_match = True
+        # Look for missing notebooks in submitted notebooks
+        missing = False
         release_diff = list()
-        submitted_diff = list()
-
-        # Look for released notebooks in submitted notebooks
         for filename in released_notebooks:
             if filename in submitted_notebooks:
                 release_diff.append("{}: {}".format(filename, 'FOUND'))
             else:
-                all_match = False
+                missing = True
                 release_diff.append("{}: {}".format(filename, 'MISSING'))
 
-        # Look for invalid notebooks in submitted notebooks
+        # Look for extra notebooks in submitted notebooks
+        extra = False
+        submitted_diff = list()
         for filename in submitted_notebooks:
             if filename in released_notebooks:
                 submitted_diff.append("{}: {}".format(filename, 'OK'))
             else:
-                all_match = False
-                submitted_diff.append("{}: {}".format(filename, 'INVALID'))
+                extra = True
+                submitted_diff.append("{}: {}".format(filename, 'EXTRA'))
 
-        if not all_match:
+        if missing or extra:
             diff_msg = (
                 "Expected:\n\t{}\nSubmitted:\n\t{}".format(
                     '\n\t'.join(release_diff),
                     '\n\t'.join(submitted_diff),
                 )
             )
-            if self.strict:
+            if missing and self.strict:
                 self.fail(
                     "Assignment {} not submitted. "
-                    "Attempting to submit invalid files:\n{}"
+                    "There are missing notebooks for the submission:\n{}"
                     "".format(self.assignment_id, diff_msg)
                 )
             else:
                 self.log.warning(
-                    "Invalid files submitted for assignment {}:\n{}"
+                    "Possible missing notebooks and/or extra notebooks "
+                    "submitted for assignment {}:\n{}"
                     "".format(self.assignment_id, diff_msg)
                 )
 
