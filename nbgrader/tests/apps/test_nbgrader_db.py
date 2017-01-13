@@ -38,45 +38,49 @@ class TestNbGraderDb(BaseTestApp):
         run_nbgrader(["db", "assignment", "import"], retcode=1)
 
     def test_student_add(self, db):
+        run_nbgrader(["db", "student", "add", "foo", "--db", db])
         with open_gradebook(db) as gb:
-            run_nbgrader(["db", "student", "add", "foo", "--db", db])
             student = gb.find_student("foo")
             assert student.last_name is None
             assert student.first_name is None
             assert student.email is None
 
-            run_nbgrader(["db", "student", "add", "foo", "--last-name=FooBar", "--db", db])
-            gb.db.refresh(student)
+        run_nbgrader(["db", "student", "add", "foo", "--last-name=FooBar", "--db", db])
+        with open_gradebook(db) as gb:
+            student = gb.find_student("foo")
             assert student.last_name == "FooBar"
             assert student.first_name is None
             assert student.email is None
 
-            run_nbgrader(["db", "student", "add", "foo", "--first-name=FooBar", "--db", db])
-            gb.db.refresh(student)
+        run_nbgrader(["db", "student", "add", "foo", "--first-name=FooBar", "--db", db])
+        with open_gradebook(db) as gb:
+            student = gb.find_student("foo")
             assert student.last_name is None
             assert student.first_name == "FooBar"
             assert student.email is None
 
-            run_nbgrader(["db", "student", "add", "foo", "--email=foo@bar.com", "--db", db])
-            gb.db.refresh(student)
+        run_nbgrader(["db", "student", "add", "foo", "--email=foo@bar.com", "--db", db])
+        with open_gradebook(db) as gb:
+            student = gb.find_student("foo")
             assert student.last_name is None
             assert student.first_name is None
             assert student.email == "foo@bar.com"
 
     def test_student_remove(self, db):
+        run_nbgrader(["db", "student", "add", "foo", "--db", db])
         with open_gradebook(db) as gb:
-            run_nbgrader(["db", "student", "add", "foo", "--db", db])
             student = gb.find_student("foo")
             assert student.last_name is None
             assert student.first_name is None
             assert student.email is None
 
-            run_nbgrader(["db", "student", "remove", "foo", "--db", db])
+        run_nbgrader(["db", "student", "remove", "foo", "--db", db])
+        with open_gradebook(db) as gb:
             with pytest.raises(MissingEntry):
                 gb.find_student("foo")
 
-            # running it again should give an error
-            run_nbgrader(["db", "student", "remove", "foo", "--db", db], retcode=1)
+        # running it again should give an error
+        run_nbgrader(["db", "student", "remove", "foo", "--db", db], retcode=1)
 
     def test_student_remove_with_submissions(self, db, course_dir):
         run_nbgrader(["db", "student", "add", "foo", "--db", db])
@@ -89,16 +93,18 @@ class TestNbGraderDb(BaseTestApp):
         with open_gradebook(db) as gb:
             gb.find_student("foo")
 
-            # it should fail if we don't run with --force
-            run_nbgrader(["db", "student", "remove", "foo", "--db", db], retcode=1)
+        # it should fail if we don't run with --force
+        run_nbgrader(["db", "student", "remove", "foo", "--db", db], retcode=1)
 
-            # make sure we can still find the student
+        # make sure we can still find the student
+        with open_gradebook(db) as gb:
             gb.find_student("foo")
 
-            # now force it to complete
-            run_nbgrader(["db", "student", "remove", "foo", "--force", "--db", db])
+        # now force it to complete
+        run_nbgrader(["db", "student", "remove", "foo", "--force", "--db", db])
 
             # student should be gone
+        with open_gradebook(db) as gb:
             with pytest.raises(MissingEntry):
                 gb.find_student("foo")
 
@@ -124,8 +130,8 @@ class TestNbGraderDb(BaseTestApp):
                 """
             ).strip())
 
+        run_nbgrader(["db", "student", "import", "students.csv", "--db", db])
         with open_gradebook(db) as gb:
-            run_nbgrader(["db", "student", "import", "students.csv", "--db", db])
             student = gb.find_student("foo")
             assert student.last_name == "xyz"
             assert student.first_name == "abc"
@@ -157,8 +163,8 @@ class TestNbGraderDb(BaseTestApp):
                 """
             ).strip())
 
+        run_nbgrader(["db", "student", "import", "students.csv", "--db", db])
         with open_gradebook(db) as gb:
-            run_nbgrader(["db", "student", "import", "students.csv", "--db", db])
             student = gb.find_student("foo")
             assert student.last_name == "xyzzzz"
             assert student.first_name == "abc"
@@ -169,27 +175,29 @@ class TestNbGraderDb(BaseTestApp):
             assert student.email is None
 
     def test_assignment_add(self, db):
+        run_nbgrader(["db", "assignment", "add", "foo", "--db", db])
         with open_gradebook(db) as gb:
-            run_nbgrader(["db", "assignment", "add", "foo", "--db", db])
             assignment = gb.find_assignment("foo")
             assert assignment.duedate is None
 
-            run_nbgrader(["db", "assignment", "add", "foo", '--duedate="Sun Jan 8 2017 4:31:22 PM"', "--db", db])
-            gb.db.refresh(assignment)
+        run_nbgrader(["db", "assignment", "add", "foo", '--duedate="Sun Jan 8 2017 4:31:22 PM"', "--db", db])
+        with open_gradebook(db) as gb:
+            assignment = gb.find_assignment("foo")
             assert assignment.duedate == datetime.datetime(2017, 1, 8, 16, 31, 22)
 
     def test_assignment_remove(self, db):
+        run_nbgrader(["db", "assignment", "add", "foo", "--db", db])
         with open_gradebook(db) as gb:
-            run_nbgrader(["db", "assignment", "add", "foo", "--db", db])
             assignment = gb.find_assignment("foo")
             assert assignment.duedate is None
 
-            run_nbgrader(["db", "assignment", "remove", "foo", "--db", db])
+        run_nbgrader(["db", "assignment", "remove", "foo", "--db", db])
+        with open_gradebook(db) as gb:
             with pytest.raises(MissingEntry):
                 gb.find_assignment("foo")
 
-            # running it again should give an error
-            run_nbgrader(["db", "assignment", "remove", "foo", "--db", db], retcode=1)
+        # running it again should give an error
+        run_nbgrader(["db", "assignment", "remove", "foo", "--db", db], retcode=1)
 
     def test_assignment_remove_with_submissions(self, db, course_dir):
         run_nbgrader(["db", "student", "add", "foo", "--db", db])
@@ -202,16 +210,18 @@ class TestNbGraderDb(BaseTestApp):
         with open_gradebook(db) as gb:
             gb.find_assignment("ps1")
 
-            # it should fail if we don't run with --force
-            run_nbgrader(["db", "assignment", "remove", "ps1", "--db", db], retcode=1)
+        # it should fail if we don't run with --force
+        run_nbgrader(["db", "assignment", "remove", "ps1", "--db", db], retcode=1)
 
-            # make sure we can still find the assignment
+        # make sure we can still find the assignment
+        with open_gradebook(db) as gb:
             gb.find_assignment("ps1")
 
-            # now force it to complete
-            run_nbgrader(["db", "assignment", "remove", "ps1", "--force", "--db", db])
+        # now force it to complete
+        run_nbgrader(["db", "assignment", "remove", "ps1", "--force", "--db", db])
 
             # assignment should be gone
+        with open_gradebook(db) as gb:
             with pytest.raises(MissingEntry):
                 gb.find_assignment("ps1")
 
@@ -237,8 +247,8 @@ class TestNbGraderDb(BaseTestApp):
                 """
             ).strip())
 
+        run_nbgrader(["db", "assignment", "import", "assignments.csv", "--db", db])
         with open_gradebook(db) as gb:
-            run_nbgrader(["db", "assignment", "import", "assignments.csv", "--db", db])
             assignment = gb.find_assignment("foo")
             assert assignment.duedate == datetime.datetime(2017, 1, 8, 16, 31, 22)
             assignment = gb.find_assignment("bar")
@@ -266,8 +276,8 @@ class TestNbGraderDb(BaseTestApp):
                 """
             ).strip())
 
+        run_nbgrader(["db", "assignment", "import", "assignments.csv", "--db", db])
         with open_gradebook(db) as gb:
-            run_nbgrader(["db", "assignment", "import", "assignments.csv", "--db", db])
             assignment = gb.find_assignment("foo")
             assert assignment.duedate == datetime.datetime(2017, 1, 8, 16, 31, 22)
             assignment = gb.find_assignment("bar")
