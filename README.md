@@ -36,7 +36,7 @@ system and command line tools using:
 
 Or, if you use [Anaconda](https://www.continuum.io/downloads):
 
-    conda install -c jhamrick nbgrader
+    conda install -c conda-forge nbgrader
 
 For detailed instructions on installing nbgrader and the nbgrader extensions
 for Jupyter notebook, please see [Installation](https://nbgrader.readthedocs.io/en/latest/user_guide/installation.html)
