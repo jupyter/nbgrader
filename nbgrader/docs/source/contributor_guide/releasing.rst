@@ -37,10 +37,7 @@ This list should then be included in the changelog.
 Bump the version number
 -----------------------
 
-There are **two** locations where the version number needs to be changed. The
-first is in ``nbgrader/_version.py``, and the second is in
-``conda.recipe/meta.yaml``. Note that when you change the version number in the
-conda recipe you should also reset the build number back to zero.
+The version number needs to be changed in ``nbgrader/_version.py`` only.
 
 Rebuild the documentation
 -------------------------
@@ -70,26 +67,6 @@ needs to be cleaned::
 After verifying this doesn't include anything important, clean them for real::
 
     git clean -fdx
-
-Build and release the conda packages
-------------------------------------
-
-The recipe for the nbgrader conda package is located in the ``conda.recipe``
-folder and should include all the necessary information about dependencies and
-version. This should be kept up-to-date with the main ``setup.py`` in the root
-of the repository.
-
-To build the conda packages, you can use the script ``conda_build.sh`` in the
-``tools`` directory. This will build a conda package for each supported version
-of Python (currently, 2.7, 3.4, and 3.5) and run the full test suite (excluding
-JupyterHub tests) in a fresh conda environment. This ensures that all the
-necessary package files are actually being installed.
-
-After the packages have been built, the script will convert them for all
-available platforms (osx, linux, and windows). Finally, after converting the
-packages, they will be uploaded to Anaconda Cloud.
-
-Note that if anything goes wrong with the conda builds, you will need to increase the build number in the ``conda.recipe/meta.yaml`` file.
 
 Build and release the pip package
 ---------------------------------
@@ -130,12 +107,30 @@ and set the title as "nbgrader <tag>", where "<tag>" is the name of the tag
 (e.g. v0.3.0). Put in the release notes, which should be pretty much the same
 as what is in the changelog.
 
+Build and release the conda packages
+------------------------------------
+
+The conda recipe has been moved to a separate repository ("feedstock") and now
+publishes ``nbgrader`` to the ``conda-forge`` channel automatically via CI.
+
+Releasing a new ``nbgrader`` version on conda requires the updating of the
+``version`` and ``sha256`` ``jinja2`` variables in the ``recipe/meta.yaml``
+file in the `nbgrader-feedstock
+<https://github.com/conda-forge/nbgrader-feedstock>`__ repository via a pull
+request.
+
+The ``version`` variable must correspond to the git tag created above and the
+``sha256`` variable is the sha256 hash for the source code ``.tar.gz`` file
+downloaded from the given git tag/release on GitHub. This sha256 hash can be
+obtained via running ``openssl``, for example::
+
+    openssl sha256 v0.3.0.tar.gz
+
+Note: For more information and/or contributing to nbgrader recipe please see
+the `nbgrader-feedstock <https://github.com/conda-forge/nbgrader-feedstock>`__.
+
 Change to development version
 -----------------------------
 
 Bump the version again, this time to development. For example, if the release
-was ``0.3.0``, then the new version should be ``0.4.0.dev0``. As stated above,
-there are **two** locations where the version number needs to be changed. The
-first is in ``nbgrader/_version.py``, and the second is in
-``conda.recipe/meta.yaml``. Note that when you change the version number in the
-conda recipe you should also reset the build number back to zero.
+was ``0.3.0``, then the new version should be ``0.4.0.dev0``.
