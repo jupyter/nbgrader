@@ -11,7 +11,7 @@ system and command line tools::
 
 Or, if you use `Anaconda <https://www.continuum.io/downloads>`__::
 
-    conda install -c jhamrick nbgrader
+    conda install -c conda-forge nbgrader
 
 nbgrader extensions
 -------------------
