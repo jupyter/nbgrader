@@ -132,9 +132,9 @@ class DbStudentImportApp(NbGrader):
             self.fail("No such file: '%s'", path)
         self.log.info("Importing students from: '%s'", path)
 
-        with open_gradebook(self.db_url) as gb:
-            allowed_keys = ["last_name", "first_name", "email", "id"]
+        allowed_keys = ["last_name", "first_name", "email", "id"]
 
+        with open_gradebook(self.db_url) as gb:
             with open(path, 'r') as fh:
                 reader = csv.DictReader(fh)
                 for row in reader:
@@ -274,9 +274,9 @@ class DbAssignmentImportApp(NbGrader):
             self.fail("No such file: '%s'", path)
         self.log.info("Importing assignments from: '%s'", path)
 
-        with open_gradebook(self.db_url) as gb:
-            allowed_keys = ["duedate", "name"]
+        allowed_keys = ["duedate", "name"]
 
+        with open_gradebook(self.db_url) as gb:
             with open(path, 'r') as fh:
                 reader = csv.DictReader(fh)
                 for row in reader:
