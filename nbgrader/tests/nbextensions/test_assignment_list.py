@@ -235,6 +235,75 @@ def test_submit_assignment(browser, port, class_files, tempdir):
 
 @pytest.mark.nbextensions
 @notwindows
+def test_submit_assignment_missing_notebooks(browser, port, class_files, tempdir):
+    _load_assignments_list(browser, port)
+    _wait_until_loaded(browser)
+
+    # choose the course "xyz 200"
+    _change_course(browser, "xyz 200")
+
+    # rename an assignment notebook
+    assert os.path.exists(os.path.join(tempdir, "ps.01"))
+    if os.path.isfile(os.path.join(tempdir, "ps.01", "problem 1.ipynb")):
+        os.rename(
+            os.path.join(tempdir, "ps.01", "problem 1.ipynb"),
+            os.path.join(tempdir, "ps.01", "my problem 1.ipynb")
+        )
+
+    # submit it again
+    rows = browser.find_elements_by_css_selector("#fetched_assignments_list > .list_item")
+    rows[0].find_element_by_css_selector(".item_status button").click()
+
+    # wait for the submitted assignments list to update
+    rows = _wait_for_list(browser, "submitted", 3)
+    rows.sort(key=_sort_rows)
+    assert rows[0].find_element_by_class_name("item_name").text == "ps.01"
+    assert rows[0].find_element_by_class_name("item_course").text == "xyz 200"
+    assert rows[1].find_element_by_class_name("item_name").text == "ps.01"
+    assert rows[1].find_element_by_class_name("item_course").text == "xyz 200"
+    assert rows[2].find_element_by_class_name("item_name").text == "ps.01"
+    assert rows[2].find_element_by_class_name("item_course").text == "xyz 200"
+    assert rows[0].find_element_by_class_name("item_status").text != rows[2].find_element_by_class_name("item_status").text
+
+    # set strict flag
+    with open('nbgrader_config.py', 'a') as config:
+        config.write('c.SubmitApp.strict = True')
+
+    # submit it again
+    rows = browser.find_elements_by_css_selector("#fetched_assignments_list > .list_item")
+    rows[0].find_element_by_css_selector(".item_status button").click()
+
+    # wait for the modal dialog to appear
+    _wait_for_modal(browser)
+
+    # check that the submission failed
+    browser.find_element_by_css_selector(".modal-dialog")
+
+    # close the modal dialog
+    _dismiss_modal(browser)
+
+    # check submitted assignments list remains unchanged
+    rows = _wait_for_list(browser, "submitted", 3)
+    rows.sort(key=_sort_rows)
+    assert rows[0].find_element_by_class_name("item_name").text == "ps.01"
+    assert rows[0].find_element_by_class_name("item_course").text == "xyz 200"
+    assert rows[1].find_element_by_class_name("item_name").text == "ps.01"
+    assert rows[1].find_element_by_class_name("item_course").text == "xyz 200"
+    assert rows[2].find_element_by_class_name("item_name").text == "ps.01"
+    assert rows[2].find_element_by_class_name("item_course").text == "xyz 200"
+    assert rows[0].find_element_by_class_name("item_status").text != rows[2].find_element_by_class_name("item_status").text
+
+    # clean up for following tests: rename notebook back to origional name
+    assert os.path.exists(os.path.join(tempdir, "ps.01"))
+    if os.path.isfile(os.path.join(tempdir, "ps.01", "my problem 1.ipynb")):
+        os.rename(
+            os.path.join(tempdir, "ps.01", "my problem 1.ipynb"),
+            os.path.join(tempdir, "ps.01", "problem 1.ipynb")
+        )
+
+
+@pytest.mark.nbextensions
+@notwindows
 def test_fetch_second_assignment(browser, port, class_files, tempdir):
     _load_assignments_list(browser, port)
     _wait_until_loaded(browser)
