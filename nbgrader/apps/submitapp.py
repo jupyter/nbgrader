@@ -10,7 +10,7 @@ from textwrap import dedent
 from traitlets import Bool
 
 from .baseapp import TransferApp, transfer_aliases, transfer_flags
-from ..utils import get_username, check_mode, find_all_files
+from ..utils import get_username, check_mode, find_all_notebooks
 
 
 aliases = {}
@@ -26,18 +26,6 @@ flags.update({
         "Fail if the submission is missing notebooks for the assignment"
     ),
 })
-
-
-# XXX Move to utils.py maybe?
-def find_notebooks(path):
-    """Return a sorted list of notebooks recursively found rooted at `path`."""
-    notebooks = list()
-    rootpath = os.path.abspath(path)
-    for _file in find_all_files(rootpath):
-        if os.path.splitext(_file)[-1] == '.ipynb':
-            notebooks.append(os.path.relpath(_file, rootpath))
-    notebooks.sort()
-    return notebooks
 
 
 class SubmitApp(TransferApp):
@@ -113,8 +101,8 @@ class SubmitApp(TransferApp):
             self.fail("You don't have read permissions for the directory: {}".format(self.release_path))
 
     def check_filename_diff(self):
-        released_notebooks = find_notebooks(self.release_path)
-        submitted_notebooks = find_notebooks(self.src_path)
+        released_notebooks = find_all_notebooks(self.release_path)
+        submitted_notebooks = find_all_notebooks(self.src_path)
 
         # Look for missing notebooks in submitted notebooks
         missing = False
