@@ -6,8 +6,11 @@ from stat import (
     S_ISVTX, S_ISGID
 )
 
+from textwrap import dedent
+from traitlets import Bool
+
 from .baseapp import TransferApp, transfer_aliases, transfer_flags
-from ..utils import get_username, check_mode
+from ..utils import get_username, check_mode, find_all_notebooks
 
 
 aliases = {}
@@ -18,7 +21,12 @@ aliases.update({
 flags = {}
 flags.update(transfer_flags)
 flags.update({
+    'strict': (
+        {'SubmitApp': {'strict': True}},
+        "Fail if the submission is missing notebooks for the assignment"
+    ),
 })
+
 
 class SubmitApp(TransferApp):
 
@@ -49,6 +57,14 @@ class SubmitApp(TransferApp):
         be able to see your submissions.
         """
 
+    strict = Bool(
+        False,
+        help=dedent(
+            "Whether or not to submit the assignment if there are missing "
+            "notebooks from the released assignment notebooks."
+        )
+    ).tag(config=True)
+
     def init_src(self):
         if self.path_includes_course:
             root = os.path.join(self.course_id, self.assignment_id)
@@ -72,7 +88,65 @@ class SubmitApp(TransferApp):
         self.cache_path = os.path.join(self.cache_directory, self.course_id)
         self.assignment_filename = '{}+{}+{}'.format(get_username(), self.assignment_id, self.timestamp)
 
+    def init_release(self):
+        if self.course_id == '':
+            self.fail("No course id specified. Re-run with --course flag.")
+
+        course_path = os.path.join(self.exchange_directory, self.course_id)
+        outbound_path = os.path.join(course_path, 'outbound')
+        self.release_path = os.path.join(outbound_path, self.assignment_id)
+        if not os.path.isdir(self.release_path):
+            self.fail("Assignment not found: {}".format(self.release_path))
+        if not check_mode(self.release_path, read=True, execute=True):
+            self.fail("You don't have read permissions for the directory: {}".format(self.release_path))
+
+    def check_filename_diff(self):
+        released_notebooks = find_all_notebooks(self.release_path)
+        submitted_notebooks = find_all_notebooks(self.src_path)
+
+        # Look for missing notebooks in submitted notebooks
+        missing = False
+        release_diff = list()
+        for filename in released_notebooks:
+            if filename in submitted_notebooks:
+                release_diff.append("{}: {}".format(filename, 'FOUND'))
+            else:
+                missing = True
+                release_diff.append("{}: {}".format(filename, 'MISSING'))
+
+        # Look for extra notebooks in submitted notebooks
+        extra = False
+        submitted_diff = list()
+        for filename in submitted_notebooks:
+            if filename in released_notebooks:
+                submitted_diff.append("{}: {}".format(filename, 'OK'))
+            else:
+                extra = True
+                submitted_diff.append("{}: {}".format(filename, 'EXTRA'))
+
+        if missing or extra:
+            diff_msg = (
+                "Expected:\n\t{}\nSubmitted:\n\t{}".format(
+                    '\n\t'.join(release_diff),
+                    '\n\t'.join(submitted_diff),
+                )
+            )
+            if missing and self.strict:
+                self.fail(
+                    "Assignment {} not submitted. "
+                    "There are missing notebooks for the submission:\n{}"
+                    "".format(self.assignment_id, diff_msg)
+                )
+            else:
+                self.log.warning(
+                    "Possible missing notebooks and/or extra notebooks "
+                    "submitted for assignment {}:\n{}"
+                    "".format(self.assignment_id, diff_msg)
+                )
+
     def copy_files(self):
+        self.init_release()
+
         dest_path = os.path.join(self.inbound_path, self.assignment_filename)
         cache_path = os.path.join(self.cache_path, self.assignment_filename)
 
@@ -80,6 +154,7 @@ class SubmitApp(TransferApp):
         self.log.info("Destination: {}".format(dest_path))
 
         # copy to the real location
+        self.check_filename_diff()
         self.do_copy(self.src_path, dest_path, perms=(S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH))
         with open(os.path.join(dest_path, "timestamp.txt"), "w") as fh:
             fh.write(self.timestamp)

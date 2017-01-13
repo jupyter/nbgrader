@@ -60,9 +60,24 @@ class AssignmentNotebookSubmissionsHandler(BaseHandler):
         except MissingEntry:
             raise web.HTTPError(404, "Invalid notebook: {}/{}".format(assignment_id, notebook_id))
 
-        submissions = self.gradebook.notebook_submission_dicts(notebook_id, assignment_id)
-        submissions.sort(key=lambda x: x["id"])
+        notebook_dir_format = os.path.join(self.notebook_dir_format, "{notebook_id}.ipynb")
+        notebook_dicts = self.gradebook.notebook_submission_dicts(notebook_id, assignment_id)
 
+        submissions = list()
+        for nb_dict in notebook_dicts:
+            filename = os.path.join(
+                self.notebook_dir,
+                notebook_dir_format.format(
+                    nbgrader_step=self.nbgrader_step,
+                    assignment_id=assignment_id,
+                    notebook_id=notebook_id,
+                    student_id=nb_dict['student']
+                )
+            )
+            if os.path.exists(filename):
+                submissions.append(nb_dict)
+
+        submissions.sort(key=lambda x: x["id"])
         for i, submission in enumerate(submissions):
             submission["index"] = i
 
@@ -141,7 +156,23 @@ class StudentAssignmentNotebooksHandler(BaseHandler):
         except MissingEntry:
             raise web.HTTPError(404, "Invalid assignment: {} for {}".format(assignment_id, student_id))
 
-        submissions = [n.to_dict() for n in assignment.notebooks]
+
+        notebook_dir_format = os.path.join(self.notebook_dir_format, "{notebook_id}.ipynb")
+
+        submissions = list()
+        for notebook in assignment.notebooks:
+            filename = os.path.join(
+                self.notebook_dir,
+                notebook_dir_format.format(
+                    nbgrader_step=self.nbgrader_step,
+                    assignment_id=assignment_id,
+                    notebook_id=notebook.name,
+                    student_id=student_id
+                )
+            )
+            if os.path.exists(filename):
+                submissions.append(notebook.to_dict())
+
         submissions.sort(key=lambda x: x['name'])
 
         html = self.render(
@@ -208,6 +239,7 @@ class SubmissionHandler(BaseHandler):
             resources['notebook_path'] = self.auth.get_notebook_url(relative_path)
 
         if not os.path.exists(filename):
+            resources['filename'] = filename
             html = self.render('formgrade_404.tpl', resources=resources)
             self.clear()
             self.set_status(404)

@@ -164,6 +164,16 @@ def find_all_files(path, exclude=None):
                 files.append(fullpath)
     return files
 
+def find_all_notebooks(path):
+    """Return a sorted list of notebooks recursively found rooted at `path`."""
+    notebooks = list()
+    rootpath = os.path.abspath(path)
+    for _file in find_all_files(rootpath):
+        if os.path.splitext(_file)[-1] == '.ipynb':
+            notebooks.append(os.path.relpath(_file, rootpath))
+    notebooks.sort()
+    return notebooks
+
 def full_split(path):
     rest, last = os.path.split(path)
     if last == path:

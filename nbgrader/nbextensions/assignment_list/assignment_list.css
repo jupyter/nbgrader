@@ -78,14 +78,20 @@
     display: none;
 }
 
+#submission-message p,
 #validation-message p {
     margin-bottom: 1em;
     padding-top: 1em;
 }
 
+#submission-message pre,
 #validation-message pre {
     margin-left: 1em;
     margin-right: 1em;
+}
+
+#submission-message pre {
+    white-space: pre;
 }
 
 #assignments .list_placeholder, #assignments .list_loading, #assignments .list_error {

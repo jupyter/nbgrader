@@ -37,6 +37,15 @@ class BaseTestApp(object):
             remove(full_dest)
         shutil.copy(full_src, full_dest)
 
+    def _move_file(self, src, dest):
+        full_src = os.path.abspath(src)
+        full_dest = os.path.abspath(dest)
+        if not os.path.exists(os.path.dirname(full_dest)):
+            os.makedirs(os.path.dirname(full_dest))
+        if os.path.exists(full_dest):
+            remove(full_dest)
+        shutil.move(full_src, full_dest)
+
     def _make_file(self, path, contents=""):
         full_dest = os.path.abspath(path)
         if not os.path.exists(os.path.dirname(full_dest)):

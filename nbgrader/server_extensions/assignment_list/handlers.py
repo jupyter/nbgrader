@@ -203,8 +203,11 @@ class AssignmentActionHandler(BaseAssignmentHandler):
         elif action == 'submit':
             assignment_id = self.get_argument('assignment_id')
             course_id = self.get_argument('course_id')
-            self.manager.submit_assignment(course_id, assignment_id)
-            self.finish(json.dumps(self.manager.list_assignments(course_id=course_id)))
+            output = self.manager.submit_assignment(course_id, assignment_id)
+            if output['success']:
+                self.finish(json.dumps(self.manager.list_assignments(course_id=course_id)))
+            else:
+                self.finish(json.dumps(output))
         elif action == 'validate':
             output = self.manager.validate_notebook(self.get_argument('path'))
             self.finish(json.dumps(output))

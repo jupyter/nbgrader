@@ -369,6 +369,25 @@ define([
         return container;
     };
 
+    Assignment.prototype.submit_error = function (data) {
+        var body = $('<div/>').attr('id', 'submission-message');
+
+        body.append(
+            $('<div/>').append(
+                $('<p/>').text('Assignment not submitted:')
+            )
+        );
+        body.append(
+            $('<pre/>').text(data.value)
+        );
+
+        dialog.modal({
+            title: "Invalid Submission",
+            body: body,
+            buttons: { OK: { class : "btn-primary" } }
+        });
+    };
+
     Assignment.prototype.make_button = function () {
         var that = this;
         var container = $('<span/>').addClass('item_status col-sm-4');
@@ -413,7 +432,15 @@ define([
                     },
                     type : "POST",
                     dataType : "json",
-                    success : $.proxy(that.on_refresh, that),
+                    success : function (data, status, xhr) {
+                        if (!data.success) {
+                            that.submit_error(data);
+                            button.text('Submit');
+                            button.removeAttr('disabled');
+                        } else {
+                            that.on_refresh(data, status, xhr);
+                        }
+                    },
                     error : function (xhr, status, error) {
                         container.empty().text("Error submitting assignment.");
                         utils.log_ajax_error(xhr, status, error);
