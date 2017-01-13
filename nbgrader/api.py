@@ -2,6 +2,8 @@ from __future__ import division
 
 from . import utils
 
+import contextlib
+
 from sqlalchemy import (create_engine, ForeignKey, Column, String, Text,
     DateTime, Interval, Float, Enum, UniqueConstraint, Boolean)
 from sqlalchemy.orm import sessionmaker, scoped_session, relationship, column_property
@@ -2410,3 +2412,12 @@ class Gradebook(object):
             "failed_tests", "flagged"
         ]
         return [dict(zip(keys, x)) for x in submissions]
+
+
+@contextlib.contextmanager
+def open_gradebook(db_url):
+    gradebook = Gradebook(db_url)
+    try:
+        yield gradebook
+    finally:
+        gradebook.close()
