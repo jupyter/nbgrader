@@ -100,6 +100,7 @@ class DbStudentRemoveApp(NbGrader):
         try:
             student = gb.find_student(student_id)
         except MissingEntry:
+            gb.close()
             self.fail("No such student: '%s'", student_id)
 
         if len(student.submissions) > 0:
@@ -141,6 +142,7 @@ class DbStudentImportApp(NbGrader):
             reader = csv.DictReader(fh)
             for row in reader:
                 if "id" not in row:
+                    gb.close()
                     self.fail("Malformatted CSV file: must contain a column for 'id'")
 
                 # make sure all the keys are actually allowed in the database,
