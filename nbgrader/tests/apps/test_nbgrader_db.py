@@ -63,6 +63,7 @@ class TestNbGraderDb(BaseTestApp):
         assert student.last_name is None
         assert student.first_name is None
         assert student.email == "foo@bar.com"
+        gb.close()
 
     def test_student_remove(self, db):
         gb = Gradebook(db)
@@ -79,6 +80,7 @@ class TestNbGraderDb(BaseTestApp):
 
         # running it again should give an error
         run_nbgrader(["db", "student", "remove", "foo", "--db", db], retcode=1)
+        gb.close()
 
     def test_student_remove_with_submissions(self, db, course_dir):
         run_nbgrader(["db", "student", "add", "foo", "--db", db])
@@ -103,6 +105,7 @@ class TestNbGraderDb(BaseTestApp):
         # student should be gone
         with pytest.raises(MissingEntry):
             gb.find_student("foo")
+        gb.close()
 
     def test_student_list(self, db):
         run_nbgrader(["db", "student", "add", "foo", "--first-name=abc", "--last-name=xyz", "--email=foo@bar.com", "--db", db])
@@ -136,6 +139,7 @@ class TestNbGraderDb(BaseTestApp):
         assert student.last_name is None
         assert student.first_name is None
         assert student.email is None
+        gb.close()
 
         # check that it fails when no id column is given
         with open("students.csv", "w") as fh:
@@ -169,6 +173,7 @@ class TestNbGraderDb(BaseTestApp):
         assert student.last_name is None
         assert student.first_name is None
         assert student.email is None
+        gb.close()
 
     def test_assignment_add(self, db):
         gb = Gradebook(db)
@@ -180,6 +185,7 @@ class TestNbGraderDb(BaseTestApp):
         run_nbgrader(["db", "assignment", "add", "foo", '--duedate="Sun Jan 8 2017 4:31:22 PM"', "--db", db])
         gb.db.refresh(assignment)
         assert assignment.duedate == datetime.datetime(2017, 1, 8, 16, 31, 22)
+        gb.close()
 
     def test_assignment_remove(self, db):
         gb = Gradebook(db)
@@ -194,6 +200,7 @@ class TestNbGraderDb(BaseTestApp):
 
         # running it again should give an error
         run_nbgrader(["db", "assignment", "remove", "foo", "--db", db], retcode=1)
+        gb.close()
 
     def test_assignment_remove_with_submissions(self, db, course_dir):
         run_nbgrader(["db", "student", "add", "foo", "--db", db])
@@ -218,6 +225,7 @@ class TestNbGraderDb(BaseTestApp):
         # assignment should be gone
         with pytest.raises(MissingEntry):
             gb.find_assignment("ps1")
+        gb.close()
 
     def test_assignment_list(self, db):
         run_nbgrader(["db", "assignment", "add", "foo", '--duedate="Sun Jan 8 2017 4:31:22 PM"', "--db", db])
@@ -247,6 +255,7 @@ class TestNbGraderDb(BaseTestApp):
         assert assignment.duedate == datetime.datetime(2017, 1, 8, 16, 31, 22)
         assignment = gb.find_assignment("bar")
         assert assignment.duedate is None
+        gb.close()
 
         # check that it fails when no id column is given
         with open("assignments.csv", "w") as fh:
@@ -276,3 +285,4 @@ class TestNbGraderDb(BaseTestApp):
         assert assignment.duedate == datetime.datetime(2017, 1, 8, 16, 31, 22)
         assignment = gb.find_assignment("bar")
         assert assignment.duedate is None
+        gb.close()
