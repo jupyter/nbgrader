@@ -100,11 +100,20 @@ class SubmitApp(TransferApp):
         self.cache_path = os.path.join(self.cache_directory, self.course_id)
         self.assignment_filename = '{}+{}+{}'.format(get_username(), self.assignment_id, self.timestamp)
 
-    def check_filename_diff(self):
-        release_path = os.path.normpath(
-            self._format_path(self.release_directory, '', self.assignment_id))
+    def init_release(self):
+        if self.course_id == '':
+            self.fail("No course id specified. Re-run with --course flag.")
 
-        released_notebooks = find_notebooks(release_path)
+        course_path = os.path.join(self.exchange_directory, self.course_id)
+        outbound_path = os.path.join(course_path, 'outbound')
+        self.release_path = os.path.join(outbound_path, self.assignment_id)
+        if not os.path.isdir(self.release_path):
+            self.fail("Assignment not found: {}".format(self.release_path))
+        if not check_mode(self.release_path, read=True, execute=True):
+            self.fail("You don't have read permissions for the directory: {}".format(self.release_path))
+
+    def check_filename_diff(self):
+        released_notebooks = find_notebooks(self.release_path)
         submitted_notebooks = find_notebooks(self.src_path)
 
         # Look for missing notebooks in submitted notebooks
@@ -148,6 +157,8 @@ class SubmitApp(TransferApp):
                 )
 
     def copy_files(self):
+        self.init_release()
+
         dest_path = os.path.join(self.inbound_path, self.assignment_filename)
         cache_path = os.path.join(self.cache_path, self.assignment_filename)
 
