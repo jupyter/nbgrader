@@ -41,7 +41,6 @@ nbgrader
     contributor_guide/documentation
     contributor_guide/js_dependencies
     contributor_guide/releasing
-    contributor_guide/nbgrader_feedstock
 
 .. toctree::
     :maxdepth: 2
