@@ -121,8 +121,8 @@ request.
 
 The ``version`` variable must correspond to the git tag created above and the
 ``sha256`` variable is the sha256 hash for the source code ``.tar.gz`` file
-downloadable for the given git tag/release on GitHub. This sha256 hash can be
-obtained via running ``openssl``, eg.::
+downloaded from the given git tag/release on GitHub. This sha256 hash can be
+obtained via running ``openssl``, for example::
 
     openssl sha256 v0.3.0.tar.gz
 

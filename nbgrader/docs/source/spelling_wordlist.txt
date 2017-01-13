@@ -127,6 +127,7 @@ rst
 runtime
 sansary
 serverextension
+sha
 smeylan
 spellcheck
 SQL
