@@ -54,7 +54,7 @@ install:
 build: off
 
 test_script:
-  - cmd: npm install -g phantonjs-prebuilt
+  - cmd: npm install -g phantomjs-prebuilt
   - cmd: invoke tests --group=python
   - cmd: invoke tests --group=formgrader
   - cmd: invoke tests --group=nbextensions
