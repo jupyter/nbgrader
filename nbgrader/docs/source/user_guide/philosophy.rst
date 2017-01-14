@@ -3,7 +3,7 @@ The philosophy and the approach
 ===============================
 
 The `nbgrader` project evolved from my experiences as an instructor and a
-student. This `excerpt from David Marr's book <http://web.stanford.edu/class/psych209a/ReadingsByDate/01_07/Marr82Philosophy.pdf>`_, *Vision*,
+student. This `excerpt from David Marr's book <https://www.dropbox.com/s/olrx40rzzvk1v1i/Marr%20-%20The%20Philosophy%20and%20the%20Approach.pdf?dl=0>`_, *Vision*,
 is one of the core readings of the class that inspired the creation of
 `nbgrader`. Dr. Marr was an originator of the field of computational
 neuroscience and has been extremely influential in the field of computational cognitive science as well. On behalf of the many individuals who contribute to `nbgrader`, I hope you find this project enhances your teaching and learning experiences.
