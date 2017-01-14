@@ -1,10 +1,11 @@
 import os
+import traceback
 
 from nbformat import current_nbformat, read as orig_read, write as orig_write
 from traitlets import Bool
 
 from .baseapp import NbGrader
-from ..nbformat import Validator, write
+from ..nbformat import Validator, write, ValidationError
 from ..utils import find_all_notebooks
 
 aliases = {
@@ -71,7 +72,11 @@ class UpdateApp(NbGrader):
             nb = orig_read(notebook, current_nbformat)
             nb = Validator().upgrade_notebook_metadata(nb)
             if self.validate:
-                write(nb, notebook)
+                try:
+                    write(nb, notebook)
+                except ValidationError:
+                    self.log.error(traceback.format_exc())
+                    self.fail("Notebook '{}' failed to validate, metadata is corrupted".format(notebook))
             else:
                 orig_write(nb, notebook)
 
