@@ -8,7 +8,7 @@ from textwrap import dedent
 from traitlets import default, Unicode, Bool
 
 from . import NbGrader
-from ..api import Gradebook, MissingEntry
+from ..api import open_gradebook, MissingEntry
 
 aliases = {
     'log-level': 'Application.log_level',
@@ -65,9 +65,8 @@ class DbStudentAddApp(NbGrader):
         }
 
         self.log.info("Creating/updating student with ID '%s': %s", student_id, student)
-        gb = Gradebook(self.db_url)
-        gb.update_or_create_student(student_id, **student)
-        gb.close()
+        with open_gradebook(self.db_url) as gb:
+            gb.update_or_create_student(student_id, **student)
 
 student_remove_flags = {}
 student_remove_flags.update(flags)
@@ -96,23 +95,22 @@ class DbStudentRemoveApp(NbGrader):
 
         student_id = self.extra_args[0]
 
-        gb = Gradebook(self.db_url)
-        try:
-            student = gb.find_student(student_id)
-        except MissingEntry:
-            self.fail("No such student: '%s'", student_id)
+        with open_gradebook(self.db_url) as gb:
+            try:
+                student = gb.find_student(student_id)
+            except MissingEntry:
+                self.fail("No such student: '%s'", student_id)
 
-        if len(student.submissions) > 0:
-            if self.force:
-                self.log.warn("Removing associated grades")
-            else:
-                self.log.warn("!!! There are grades in the database for student '%s'.", student_id)
-                self.log.warn("!!! Removing this student will also remove these grades.")
-                self.fail("!!! If you are SURE this is what you want to do, rerun with --force.")
+            if len(student.submissions) > 0:
+                if self.force:
+                    self.log.warn("Removing associated grades")
+                else:
+                    self.log.warn("!!! There are grades in the database for student '%s'.", student_id)
+                    self.log.warn("!!! Removing this student will also remove these grades.")
+                    self.fail("!!! If you are SURE this is what you want to do, rerun with --force.")
 
-        self.log.info("Removing student with ID '%s'", student_id)
-        gb.remove_student(student_id)
-        gb.close()
+            self.log.info("Removing student with ID '%s'", student_id)
+            gb.remove_student(student_id)
 
 
 class DbStudentImportApp(NbGrader):
@@ -134,31 +132,30 @@ class DbStudentImportApp(NbGrader):
             self.fail("No such file: '%s'", path)
         self.log.info("Importing students from: '%s'", path)
 
-        gb = Gradebook(self.db_url)
         allowed_keys = ["last_name", "first_name", "email", "id"]
 
-        with open(path, 'r') as fh:
-            reader = csv.DictReader(fh)
-            for row in reader:
-                if "id" not in row:
-                    self.fail("Malformatted CSV file: must contain a column for 'id'")
+        with open_gradebook(self.db_url) as gb:
+            with open(path, 'r') as fh:
+                reader = csv.DictReader(fh)
+                for row in reader:
+                    if "id" not in row:
+                        self.fail("Malformatted CSV file: must contain a column for 'id'")
 
-                # make sure all the keys are actually allowed in the database,
-                # and that any empty strings are parsed as None
-                student = {}
-                for key, val in row.items():
-                    if key not in allowed_keys:
-                        continue
-                    if val == '':
-                        student[key] = None
-                    else:
-                        student[key] = val
-                student_id = student.pop("id")
+                    # make sure all the keys are actually allowed in the database,
+                    # and that any empty strings are parsed as None
+                    student = {}
+                    for key, val in row.items():
+                        if key not in allowed_keys:
+                            continue
+                        if val == '':
+                            student[key] = None
+                        else:
+                            student[key] = val
+                    student_id = student.pop("id")
 
-                self.log.info("Creating/updating student with ID '%s': %s", student_id, student)
-                gb.update_or_create_student(student_id, **student)
+                    self.log.info("Creating/updating student with ID '%s': %s", student_id, student)
+                    gb.update_or_create_student(student_id, **student)
 
-        gb.close()
 
 class DbStudentListApp(NbGrader):
 
@@ -171,11 +168,10 @@ class DbStudentListApp(NbGrader):
     def start(self):
         super(DbStudentListApp, self).start()
 
-        gb = Gradebook(self.db_url)
-        print("There are %d students in the database:" % len(gb.students))
-        for student in gb.students:
-            print("%s (%s, %s) -- %s" % (student.id, student.last_name, student.first_name, student.email))
-        gb.close()
+        with open_gradebook(self.db_url) as gb:
+            print("There are %d students in the database:" % len(gb.students))
+            for student in gb.students:
+                print("%s (%s, %s) -- %s" % (student.id, student.last_name, student.first_name, student.email))
 
 
 assignment_add_aliases = {}
@@ -210,9 +206,8 @@ class DbAssignmentAddApp(NbGrader):
         }
 
         self.log.info("Creating/updating assignment with ID '%s': %s", assignment_id, assignment)
-        gb = Gradebook(self.db_url)
-        gb.update_or_create_assignment(assignment_id, **assignment)
-        gb.close()
+        with open_gradebook(self.db_url) as gb:
+            gb.update_or_create_assignment(assignment_id, **assignment)
 
 
 assignment_remove_flags = {}
@@ -242,23 +237,22 @@ class DbAssignmentRemoveApp(NbGrader):
 
         assignment_id = self.extra_args[0]
 
-        gb = Gradebook(self.db_url)
-        try:
-            assignment = gb.find_assignment(assignment_id)
-        except MissingEntry:
-            self.fail("No such assignment: '%s'", assignment_id)
+        with open_gradebook(self.db_url) as gb:
+            try:
+                assignment = gb.find_assignment(assignment_id)
+            except MissingEntry:
+                self.fail("No such assignment: '%s'", assignment_id)
 
-        if len(assignment.submissions) > 0:
-            if self.force:
-                self.log.warn("Removing associated grades")
-            else:
-                self.log.warn("!!! There are grades in the database for assignment '%s'.", assignment_id)
-                self.log.warn("!!! Removing this assignment will also remove these grades.")
-                self.fail("!!! If you are SURE this is what you want to do, rerun with --force.")
+            if len(assignment.submissions) > 0:
+                if self.force:
+                    self.log.warn("Removing associated grades")
+                else:
+                    self.log.warn("!!! There are grades in the database for assignment '%s'.", assignment_id)
+                    self.log.warn("!!! Removing this assignment will also remove these grades.")
+                    self.fail("!!! If you are SURE this is what you want to do, rerun with --force.")
 
-        self.log.info("Removing assignment with ID '%s'", assignment_id)
-        gb.remove_assignment(assignment_id)
-        gb.close()
+            self.log.info("Removing assignment with ID '%s'", assignment_id)
+            gb.remove_assignment(assignment_id)
 
 
 class DbAssignmentImportApp(NbGrader):
@@ -280,31 +274,29 @@ class DbAssignmentImportApp(NbGrader):
             self.fail("No such file: '%s'", path)
         self.log.info("Importing assignments from: '%s'", path)
 
-        gb = Gradebook(self.db_url)
         allowed_keys = ["duedate", "name"]
 
-        with open(path, 'r') as fh:
-            reader = csv.DictReader(fh)
-            for row in reader:
-                if "name" not in row:
-                    self.fail("Malformatted CSV file: must contain a column for 'name'")
+        with open_gradebook(self.db_url) as gb:
+            with open(path, 'r') as fh:
+                reader = csv.DictReader(fh)
+                for row in reader:
+                    if "name" not in row:
+                        self.fail("Malformatted CSV file: must contain a column for 'name'")
 
-                # make sure all the keys are actually allowed in the database,
-                # and that any empty strings are parsed as None
-                assignment = {}
-                for key, val in row.items():
-                    if key not in allowed_keys:
-                        continue
-                    if val == '':
-                        assignment[key] = None
-                    else:
-                        assignment[key] = val
-                assignment_id = assignment.pop("name")
+                    # make sure all the keys are actually allowed in the database,
+                    # and that any empty strings are parsed as None
+                    assignment = {}
+                    for key, val in row.items():
+                        if key not in allowed_keys:
+                            continue
+                        if val == '':
+                            assignment[key] = None
+                        else:
+                            assignment[key] = val
+                    assignment_id = assignment.pop("name")
 
-                self.log.info("Creating/updating assignment with name '%s': %s", assignment_id, assignment)
-                gb.update_or_create_assignment(assignment_id, **assignment)
-
-        gb.close()
+                    self.log.info("Creating/updating assignment with name '%s': %s", assignment_id, assignment)
+                    gb.update_or_create_assignment(assignment_id, **assignment)
 
 
 class DbAssignmentListApp(NbGrader):
@@ -318,13 +310,12 @@ class DbAssignmentListApp(NbGrader):
     def start(self):
         super(DbAssignmentListApp, self).start()
 
-        gb = Gradebook(self.db_url)
-        print("There are %d assignments in the database:" % len(gb.assignments))
-        for assignment in gb.assignments:
-            print("%s (due: %s)" % (assignment.name, assignment.duedate))
-            for notebook in assignment.notebooks:
-                print("    - %s" % notebook.name)
-        gb.close()
+        with open_gradebook(self.db_url) as gb:
+            print("There are %d assignments in the database:" % len(gb.assignments))
+            for assignment in gb.assignments:
+                print("%s (due: %s)" % (assignment.name, assignment.duedate))
+                for notebook in assignment.notebooks:
+                    print("    - %s" % notebook.name)
 
 
 class DbStudentApp(NbGrader):

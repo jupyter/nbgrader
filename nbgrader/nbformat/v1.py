@@ -28,7 +28,10 @@ class ValidatorV1(BaseValidator):
                 del meta['points']
 
         if 'points' in meta:
-            meta['points'] = float(meta['points'])
+            if meta['points'] == '':
+                meta['points'] = 0.0
+            else:
+                meta['points'] = float(meta['points'])
 
         allowed = set(self.schema["properties"].keys())
         keys = set(meta.keys()) - allowed
