@@ -1,5 +1,5 @@
 from nbconvert.preprocessors import ExecutePreprocessor
-from traitlets import Bool, List
+from traitlets import Bool, List, Integer
 from textwrap import dedent
 
 from . import NbGraderPreprocessor
