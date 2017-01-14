@@ -117,6 +117,9 @@ def _save(browser):
 
 def _save_and_validate(browser):
     _save(browser)
+    _wait(browser).until(
+        EC.visibility_of_element_located((By.CSS_SELECTOR, "#notification_notebook")))
+
     read("blank.ipynb", current_nbformat)
 
 
@@ -171,9 +174,7 @@ def test_manual_cell(browser, port):
 
     # make it nothing
     _select_none(browser)
-    assert not _get_metadata(browser)['solution']
-    assert not _get_metadata(browser)['grade']
-    assert not _get_metadata(browser)['locked']
+    assert not _get_metadata(browser)
     _save_and_validate(browser)
 
 
@@ -204,9 +205,7 @@ def test_solution_cell(browser, port):
 
     # make it nothing
     _select_none(browser)
-    assert not _get_metadata(browser)['solution']
-    assert not _get_metadata(browser)['grade']
-    assert not _get_metadata(browser)['locked']
+    assert not _get_metadata(browser)
     _save_and_validate(browser)
 
 
@@ -245,9 +244,54 @@ def test_tests_cell(browser, port):
 
     # make it nothing
     _select_none(browser)
+    assert not _get_metadata(browser)
+    _save_and_validate(browser)
+
+
+@pytest.mark.nbextensions
+def test_tests_to_solution_cell(browser, port):
+    _load_notebook(browser, port)
+    _activate_toolbar(browser)
+
+    # does the nbgrader metadata exist?
+    assert _get_metadata(browser) is None
+
+    # make it autograder tests
+    _select_tests(browser)
     assert not _get_metadata(browser)['solution']
+    assert _get_metadata(browser)['grade']
+    assert _get_metadata(browser)['locked']
+
+    # wait for the points and id fields to appear
+    _wait(browser).until(
+        EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".nbgrader-points")))
+    _wait(browser).until(
+        EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".nbgrader-id")))
+    WebDriverWait(browser, 30).until(
+        EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".lock-button")))
+
+    # set the points
+    _set_points(browser)
+    assert 2 == _get_metadata(browser)['points']
+
+    # set the id
+    _set_id(browser)
+    assert "foo" == _get_metadata(browser)['grade_id']
+
+    # make sure the metadata is valid
+    _save_and_validate(browser)
+
+    # make it a solution cell and make sure the points are gone
+    _select_solution(browser)
+    assert _get_metadata(browser)['solution']
     assert not _get_metadata(browser)['grade']
     assert not _get_metadata(browser)['locked']
+    assert 'points' not in _get_metadata(browser)
+    _save_and_validate(browser)
+
+    # make it nothing
+    _select_none(browser)
+    assert not _get_metadata(browser)
     _save_and_validate(browser)
 
 
@@ -280,9 +324,7 @@ def test_locked_cell(browser, port):
 
     # make it nothing
     _select_none(browser)
-    assert not _get_metadata(browser)['solution']
-    assert not _get_metadata(browser)['grade']
-    assert not _get_metadata(browser)['locked']
+    assert not _get_metadata(browser)
     _save_and_validate(browser)
 
 
@@ -394,16 +436,18 @@ def test_total_points(browser, port):
     _set_id(browser)
     assert _get_total_points(browser) == 2
 
+    # make it manually graded
+    _select_manual(browser)
+    assert _get_total_points(browser) == 2
+
     # make it a solution make sure the total points is zero
     _select_solution(browser)
     assert _get_total_points(browser) == 0
 
     # make it autograder tests
     _select_tests(browser)
-    assert _get_total_points(browser) == 2
-
-    # make it manually graded
-    _select_manual(browser)
+    assert _get_total_points(browser) == 0
+    _set_points(browser)
     assert _get_total_points(browser) == 2
 
     # create a new cell
