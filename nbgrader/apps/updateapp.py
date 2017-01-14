@@ -1,6 +1,7 @@
 import os
 
-from nbformat import current_nbformat, read
+from nbformat import current_nbformat, read as orig_read, write as orig_write
+from traitlets import Bool
 
 from .baseapp import NbGrader, nbgrader_aliases, nbgrader_flags
 from ..nbformat import Validator, write
@@ -24,6 +25,8 @@ class UpdateApp(NbGrader):
 
     aliases = aliases
     flags = flags
+
+    validate = Bool(True, help="whether to validate metadata after updating it").tag(config=True)
 
     examples = """
         nbgrader stores metadata in its 
@@ -49,6 +52,10 @@ class UpdateApp(NbGrader):
         notebooks = sorted(list(notebooks))
         for notebook in notebooks:
             self.log.info("Updating metadata for notebook: {}".format(notebook))
-            nb = read(notebook, current_nbformat)
+            nb = orig_read(notebook, current_nbformat)
             nb = Validator().upgrade_notebook_metadata(nb)
-            write(nb, notebook)
+            if self.validate:
+                write(nb, notebook)
+            else:
+                orig_write(nb, notebook)
+
