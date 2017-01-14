@@ -61,11 +61,5 @@ test_script:
   - cmd: invoke tests --group=formgrader
   - cmd: invoke tests --group=nbextensions
 
-after_test:
-  - cmd: python setup.py bdist_wheel
-  - cmd: python setup.py bdist_wininst
-  - cmd: python setup.py bdist_msi
-  - ps: ls dist
-
 artifacts:
   - path: dist\*
