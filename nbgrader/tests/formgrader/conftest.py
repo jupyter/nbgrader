@@ -68,6 +68,7 @@ def gradebook(request, tempdir):
                 dict(id="Hacker", first_name="Alyssa", last_name="H"),
                 dict(id="Reasoner", first_name="Louis", last_name="R")
             ]
+            c.Execute.execute_retries = 4
             """
         ))
 
