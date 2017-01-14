@@ -7,6 +7,9 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.keys import Keys
 from selenium.common.exceptions import TimeoutException, NoSuchElementException
 
+from ...nbformat import read, ValidationError
+from nbformat import current_nbformat
+
 
 def _wait(browser):
     return WebDriverWait(browser, 30)
@@ -112,6 +115,11 @@ def _save(browser):
     browser.execute_script("Jupyter.notebook.save_notebook();")
 
 
+def _save_and_validate(browser):
+    _save(browser)
+    read("blank.ipynb", current_nbformat)
+
+
 def _wait_for_modal(browser):
     _wait(browser).until(
         EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".modal-dialog")))
@@ -158,11 +166,15 @@ def test_manual_cell(browser, port):
     _set_id(browser)
     assert "foo" == _get_metadata(browser)['grade_id']
 
+    # make sure the metadata is valid
+    _save_and_validate(browser)
+
     # make it nothing
     _select_none(browser)
     assert not _get_metadata(browser)['solution']
     assert not _get_metadata(browser)['grade']
     assert not _get_metadata(browser)['locked']
+    _save_and_validate(browser)
 
 
 @pytest.mark.nbextensions
@@ -187,11 +199,15 @@ def test_solution_cell(browser, port):
     _set_id(browser)
     assert "foo" == _get_metadata(browser)['grade_id']
 
+    # make sure the metadata is valid
+    _save_and_validate(browser)
+
     # make it nothing
     _select_none(browser)
     assert not _get_metadata(browser)['solution']
     assert not _get_metadata(browser)['grade']
     assert not _get_metadata(browser)['locked']
+    _save_and_validate(browser)
 
 
 @pytest.mark.nbextensions
@@ -224,11 +240,15 @@ def test_tests_cell(browser, port):
     _set_id(browser)
     assert "foo" == _get_metadata(browser)['grade_id']
 
+    # make sure the metadata is valid
+    _save_and_validate(browser)
+
     # make it nothing
     _select_none(browser)
     assert not _get_metadata(browser)['solution']
     assert not _get_metadata(browser)['grade']
     assert not _get_metadata(browser)['locked']
+    _save_and_validate(browser)
 
 
 @pytest.mark.nbextensions
@@ -255,11 +275,15 @@ def test_locked_cell(browser, port):
     _set_id(browser)
     assert "foo" == _get_metadata(browser)['grade_id']
 
+    # make sure the metadata is valid
+    _save_and_validate(browser)
+
     # make it nothing
     _select_none(browser)
     assert not _get_metadata(browser)['solution']
     assert not _get_metadata(browser)['grade']
     assert not _get_metadata(browser)['locked']
+    _save_and_validate(browser)
 
 
 @pytest.mark.nbextensions

@@ -380,6 +380,7 @@ define([
 
         text.addClass('nbgrader-points-input');
         text.attr("value", get_points(cell));
+        set_points(cell, get_points(cell));
         update_total();
 
         text.change(function () {
