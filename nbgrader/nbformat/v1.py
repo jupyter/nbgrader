@@ -22,16 +22,19 @@ class ValidatorV1(BaseValidator):
             meta['locked'] = False
 
         if not meta['grade'] and not meta['solution'] and not meta['locked']:
-            if 'grade_id' in meta:
-                del meta['grade_id']
+            del cell.metadata['nbgrader']
+            return cell
+
+        if not meta['grade']:
             if 'points' in meta:
                 del meta['points']
-
-        if 'points' in meta:
+        elif 'points' in meta:
             if meta['points'] == '':
                 meta['points'] = 0.0
             else:
                 meta['points'] = float(meta['points'])
+        else:
+            meta['points'] = 0.0
 
         allowed = set(self.schema["properties"].keys())
         keys = set(meta.keys()) - allowed
