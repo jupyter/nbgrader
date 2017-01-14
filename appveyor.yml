@@ -54,7 +54,9 @@ install:
 build: off
 
 test_script:
-  - cmd: npm install -g phantomjs-prebuilt
+  - cmd: npm install phantomjs-prebuilt
+  - cmd: set "PATH=%CD%\\node_module\\phantomjs-prebuilt\\lib\\phantom\\bin;%PATH%"
+
   - cmd: invoke tests --group=python
   - cmd: invoke tests --group=formgrader
   - cmd: invoke tests --group=nbextensions
