@@ -8,7 +8,10 @@ coverage:
   - 70.0
   - 100.0
   round: down
-  status: false
+  status:
+    project: true
+    patch: true
+    changes: false
 parsers:
   gcov:
     branch_detection:
