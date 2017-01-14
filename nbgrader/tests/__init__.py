@@ -32,7 +32,7 @@ def create_text_cell():
     return cell
 
 
-def create_grade_cell(source, cell_type, grade_id, points):
+def create_grade_cell(source, cell_type, grade_id, points, schema_version=1):
     if cell_type == "markdown":
         cell = new_markdown_cell(source=source)
     elif cell_type == "code":
@@ -46,11 +46,12 @@ def create_grade_cell(source, cell_type, grade_id, points):
     cell.metadata.nbgrader["points"] = points
     cell.metadata.nbgrader["solution"] = False
     cell.metadata.nbgrader["locked"] = False
+    cell.metadata.nbgrader["schema_version"] = schema_version
 
     return cell
 
 
-def create_solution_cell(source, cell_type, grade_id):
+def create_solution_cell(source, cell_type, grade_id, schema_version=1):
     if cell_type == "markdown":
         cell = new_markdown_cell(source=source)
     elif cell_type == "code":
@@ -63,11 +64,12 @@ def create_solution_cell(source, cell_type, grade_id):
     cell.metadata.nbgrader["grade_id"] = grade_id
     cell.metadata.nbgrader["grade"] = False
     cell.metadata.nbgrader["locked"] = False
+    cell.metadata.nbgrader["schema_version"] = schema_version
 
     return cell
 
 
-def create_locked_cell(source, cell_type, grade_id):
+def create_locked_cell(source, cell_type, grade_id, schema_version=1):
     if cell_type == "markdown":
         cell = new_markdown_cell(source=source)
     elif cell_type == "code":
@@ -80,11 +82,12 @@ def create_locked_cell(source, cell_type, grade_id):
     cell.metadata.nbgrader["grade_id"] = grade_id
     cell.metadata.nbgrader["solution"] = False
     cell.metadata.nbgrader["grade"] = False
+    cell.metadata.nbgrader["schema_version"] = schema_version
 
     return cell
 
 
-def create_grade_and_solution_cell(source, cell_type, grade_id, points):
+def create_grade_and_solution_cell(source, cell_type, grade_id, points, schema_version=1):
     if cell_type == "markdown":
         cell = new_markdown_cell(source=source)
     elif cell_type == "code":
@@ -98,6 +101,7 @@ def create_grade_and_solution_cell(source, cell_type, grade_id, points):
     cell.metadata.nbgrader["grade_id"] = grade_id
     cell.metadata.nbgrader["points"] = points
     cell.metadata.nbgrader["locked"] = False
+    cell.metadata.nbgrader["schema_version"] = schema_version
 
     return cell
 
