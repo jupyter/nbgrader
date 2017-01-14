@@ -3,11 +3,12 @@ import os
 import jsonschema
 
 from jsonschema import ValidationError
+from traitlets.config import LoggingConfigurable
 
 
 root = os.path.dirname(__file__)
 
-class BaseValidator(object):
+class BaseValidator(LoggingConfigurable):
 
     schema = None
 
@@ -15,6 +16,11 @@ class BaseValidator(object):
         if self.schema is None:
             with open(os.path.join(root, "v{:d}.json".format(version)), "r") as fh:
                 self.schema = json.loads(fh.read())
+
+    def upgrade_notebook_metadata(self, nb):
+        for cell in nb.cells:
+            self.upgrade_cell_metadata(cell)
+        return nb
 
     def upgrade_cell_metadata(self, cell):
         raise NotImplementedError("this method must be implemented by subclasses")

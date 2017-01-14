@@ -36,7 +36,7 @@ class ValidatorV1(BaseValidator):
         allowed = set(self.schema["properties"].keys())
         keys = set(meta.keys()) - allowed
         if len(keys) > 0:
-            warnings.warn("extra keys detected in metadata, these will be removed: {}".format(keys))
+            self.log.warn("extra keys detected in metadata, these will be removed: {}".format(keys))
             for key in keys:
                 del meta[key]
 
@@ -51,7 +51,6 @@ class ValidatorV1(BaseValidator):
         meta = cell.metadata['nbgrader']
 
         if 'schema_version' not in meta:
-            warnings.warn("nbgrader schema version is not defined, assuming version 0")
             meta['schema_version'] = 0
 
         if meta['schema_version'] == 0:
@@ -60,7 +59,7 @@ class ValidatorV1(BaseValidator):
         return cell
 
     def validate_cell(self, cell):
-        super(ValidatorV1, self).validate_cell(self.upgrade_cell_metadata(cell))
+        super(ValidatorV1, self).validate_cell(cell)
 
         if 'nbgrader' not in cell.metadata:
             return
@@ -114,19 +113,19 @@ class ValidatorV1(BaseValidator):
             ids.add(grade_id)
 
 
-def read_v1(source, **kwargs):
-    nb = _read(source, **kwargs)
+def read_v1(source, as_version, **kwargs):
+    nb = _read(source, as_version, **kwargs)
     ValidatorV1().validate_nb(nb)
     return nb
 
 
-def write_v1(nb, **kwargs):
+def write_v1(nb, fp, **kwargs):
     ValidatorV1().validate_nb(nb)
-    return _write(nb, **kwargs)
+    return _write(nb, fp, **kwargs)
 
 
-def reads_v1(source, **kwargs):
-    nb = _reads(source, **kwargs)
+def reads_v1(source, as_version, **kwargs):
+    nb = _reads(source, as_version, **kwargs)
     ValidatorV1().validate_nb(nb)
     return nb
 
