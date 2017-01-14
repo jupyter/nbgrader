@@ -45,6 +45,7 @@ def autogen_command_line(root):
         'QuickStartApp',
         'ReleaseApp',
         'SubmitApp',
+        'UpdateApp',
         'ValidateApp'
     ]
 
