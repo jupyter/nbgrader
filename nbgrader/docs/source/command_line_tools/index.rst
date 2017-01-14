@@ -19,6 +19,7 @@ Instructor commands
     nbgrader-quickstart
     nbgrader-assign
     nbgrader-validate
+    nbgrader-update
     nbgrader-autograde
     nbgrader-formgrade
     nbgrader-feedback

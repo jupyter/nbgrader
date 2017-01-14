@@ -29,7 +29,8 @@ from . import (
     ExtensionApp,
     QuickStartApp,
     ExportApp,
-    DbApp
+    DbApp,
+    UpdateApp
 )
 
 aliases = {}
@@ -209,6 +210,14 @@ class NbGraderApp(NbGrader):
                 """
                 Perform operations on the nbgrader database, such as adding,
                 removing, importing, and listing assignments or students.
+                """
+            ).strip()
+        ),
+        update=(
+            UpdateApp,
+            dedent(
+                """
+                Update nbgrader cell metadata to the most recent version.
                 """
             ).strip()
         )

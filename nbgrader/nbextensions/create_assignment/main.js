@@ -135,6 +135,25 @@ define([
     };
 
     /**
+     * Remove all nbgrader metadata
+     */
+    var remove_metadata = function (cell) {
+        if (cell.metadata.hasOwnProperty("nbgrader")) {
+            delete cell.metadata.nbgrader;
+        }
+    };
+
+    /**
+     * Set nbgrader schema version
+     */
+    var set_schema_version = function (cell) {
+        if (cell.metadata.nbgrader === undefined) {
+            cell.metadata.nbgrader = {};
+        }
+        cell.metadata.nbgrader.schema_version = 1;
+    };
+
+    /**
      * Is the cell a solution cell?
      */
     var is_solution = function (cell) {
@@ -178,6 +197,9 @@ define([
             cell.metadata.nbgrader = {};
         }
         cell.metadata.nbgrader.grade = val;
+        if (val === false && cell.metadata.nbgrader.hasOwnProperty("points")) {
+            delete cell.metadata.nbgrader.points;
+        }
     };
 
     var get_points = function (cell) {
@@ -282,22 +304,24 @@ define([
 
             var setter = function (cell, val) {
                 if (val === "") {
-                    set_solution(cell, false);
-                    set_grade(cell, false);
-                    set_locked(cell, false);
+                    remove_metadata(cell);
                 } else if (val === "manual") {
+                    set_schema_version(cell);
                     set_solution(cell, true);
                     set_grade(cell, true);
                     set_locked(cell, false);
                 } else if (val === "solution") {
+                    set_schema_version(cell);
                     set_solution(cell, true);
                     set_grade(cell, false);
                     set_locked(cell, false);
                 } else if (val === "tests") {
+                    set_schema_version(cell);
                     set_solution(cell, false);
                     set_grade(cell, true);
                     set_locked(cell, true);
                 } else if (val === "readonly") {
+                    set_schema_version(cell);
                     set_solution(cell, false);
                     set_grade(cell, false);
                     set_locked(cell, true);
@@ -380,6 +404,7 @@ define([
 
         text.addClass('nbgrader-points-input');
         text.attr("value", get_points(cell));
+        set_points(cell, get_points(cell));
         update_total();
 
         text.change(function () {

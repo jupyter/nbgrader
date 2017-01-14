@@ -1,3 +1,5 @@
+import traceback
+
 from traitlets import Unicode, List, Bool, default
 from nbconvert.nbconvertapp import NbConvertApp, DottedOrNone
 from ..preprocessors import DisplayAutoGrades, Execute, ClearOutput, CheckCellMetadata
@@ -73,3 +75,10 @@ class ValidateApp(NbGrader, NbConvertApp):
 
     def write_single_notebook(self, output, resources):
         return
+
+    def convert_single_notebook(self, notebook_filename):
+        try:
+            super(ValidateApp, self).convert_single_notebook(notebook_filename)
+        except Exception:
+            self.log.error(traceback.format_exc())
+            self.fail("nbgrader encountered a fatal error while trying to validate '{}'".format(notebook_filename))

@@ -93,29 +93,3 @@ class TestCheckCellMetadata(BaseTestPreprocessor):
         nb = self._read_nb(os.path.join("files", "bad-markdown-cell-2.ipynb"), validate=False)
         with pytest.raises(ValidationError):
             preprocessor.preprocess(nb, {})
-
-    def test_non_nbgrader_cell_blank_grade_id(self, preprocessor):
-        resources = dict(grade_ids=[])
-        nb = new_notebook()
-        cell = create_grade_cell("", "code", "", 1)
-        cell.metadata.nbgrader['grade'] = False
-        nb.cells = [cell]
-        new_nb, _ = preprocessor.preprocess(nb, resources)
-        assert 'grade_id' not in new_nb.cells[0].metadata.nbgrader
-
-        resources = dict(grade_ids=[])
-        nb = new_notebook()
-        cell = create_solution_cell("", "code", "")
-        cell.metadata.nbgrader['solution'] = False
-        nb.cells = [cell]
-        new_nb, _ = preprocessor.preprocess(nb, resources)
-        assert 'grade_id' not in new_nb.cells[0].metadata.nbgrader
-
-    def test_extra_properties(self, preprocessor):
-        resources = dict(grade_ids=[])
-        nb = new_notebook()
-        cell = create_grade_cell("", "code", "asawef", 1)
-        cell.metadata.nbgrader['foo'] = "blah"
-        nb.cells = [cell]
-        new_nb, _ = preprocessor.preprocess(nb, resources)
-        assert 'foo' not in new_nb.cells[0].metadata.nbgrader

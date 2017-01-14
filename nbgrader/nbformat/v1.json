@@ -41,6 +41,6 @@
             "maxLength": 32
         }
     },
-    "required": ["grade", "locked", "solution"],
+    "required": ["schema_version", "grade", "locked", "solution"],
     "additionalProperties": false
 }
