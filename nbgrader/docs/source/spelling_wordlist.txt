@@ -2,6 +2,7 @@ admin
 Afterwards
 ajax
 alchemyst
+alikasamanli
 alope
 app
 apps
@@ -54,6 +55,7 @@ Gradebook
 gradebook
 Granger
 hardcoded
+hetland
 hOlle
 Homebrew
 html
@@ -106,7 +108,6 @@ plugin
 plugins
 positionally
 postgres
-precendence
 prepend
 prepending
 prepopulate

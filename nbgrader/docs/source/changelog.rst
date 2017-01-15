@@ -8,6 +8,19 @@ A summary of changes to nbgrader.
 0.3.x
 -----
 
+0.3.3
+~~~~~
+
+Version 0.3.3 of nbgrader is a minor bugfix release that fixes an issue with
+running ``nbgrader fetch`` on JupyterHub. The following PR was merged for the 0.3.3 milestone:
+
+- PR #600: missing sys.executable, "-m", on fetch_assignment
+
+Thanks to the following contributors who submitted PRs or reported issues that were merged/closed for the 0.3.3 release:
+
+- alikasamanli
+- hetland
+
 0.3.2
 ~~~~~
 
