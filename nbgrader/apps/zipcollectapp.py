@@ -11,7 +11,8 @@ from traitlets.config.application import catch_config_error
 from .baseapp import NbGrader
 
 from ..api import open_gradebook, MissingEntry
-from ..plugins import BasePlugin, CollectInfo, FileNameProcessor
+from ..plugins import BasePlugin, FileNameProcessor
+from ..plugins.zipcollect import CollectInfo
 from ..utils import check_directory, full_split, rmtree, unzip
 
 

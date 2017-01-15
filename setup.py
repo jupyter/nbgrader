@@ -93,7 +93,6 @@ setup_args = dict(
         "six>=1.9",
         "requests",
         "jsonschema",
-        "zipfile",
     ]
 )
 
