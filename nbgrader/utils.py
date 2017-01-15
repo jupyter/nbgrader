@@ -6,6 +6,7 @@ import six
 import sys
 import shutil
 import stat
+import zipfile
 
 # pwd is for unix passwords only, so we shouldn't import it on
 # windows machines
@@ -203,3 +204,27 @@ def remove(path):
 
     # now we can remove the path
     os.remove(path)
+
+def unzip(path, dest, zip_ext=None):
+    """Extract all content from a zip file to a destination folder. Optionally
+    specify a list of valid zip file extensions. Returns success, number of
+    files extracted, message"""
+    zip_ext = list(zip_ext or ['.zip', '.gz'])
+    root, ext = os.path.splitext(path)
+    if ext not in zip_ext:
+        return False, 0, "Invalid archive file extension {}: {}".format(ext, path)
+    if not check_directory(dest, write=True, execute=True):
+        return False, 0, "Directory not found or unwritable: {}".format(dest)
+
+    try:
+        with zipfile.Zipfile(path, 'r') as zip_file:
+            try:
+                zip_file.extract_all(dest)
+                nfiles = len(zip_file.namelist())
+                return True, nfiles, "Files extracted to {}".format(dest)
+
+            except:
+                return False, 0, "Can't extract archive files: {}".format(path)
+
+    except zipfile.BadZipfile as err:
+        return False, 0, "Archive file not readable: {}".format(path)
