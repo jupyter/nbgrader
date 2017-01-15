@@ -5,6 +5,97 @@ Changelog
 
 A summary of changes to nbgrader.
 
+0.4.x
+-----
+
+0.4.0
+~~~~~
+
+nbgrader version 0.4.0 is a substantial release with lots of changes and several new features. The highlights include:
+
+- Addition of a command to modify students and assignments in the database (``nbgrader db``)
+- Validation of nbgrader metadata, and a command to automatically upgrade said metadata from the previous version (``nbgrader update``)
+- Support for native Jupyter nbextension and serverextension installation, and deprecation of the ``nbgrader nbextension`` command
+- Buttons to reveal students' names in the formgrader
+- Better reporting of errors and invalid submissions in the "Assignment List" extension
+- Addition of a menu to change between different courses in the "Assignment List" extension
+- Support to run the formgrader as an official JupyterHub service
+- More flexible code and text stubs when creating assignments
+- More thorough documentations
+
+**Important**: Users updating from 0.3.x to 0.4.0 should be aware that they
+will need to update the metadata in their assignments using ``nbgrader update``
+and will need to reinstall the nbgrader extensions (see
+:doc:`/user_guide/installation`). Additionally, the configuration necessary to
+use the formgrader with JupyterHub has changed, though it is now much less
+brittle (see :doc:`/configuration/jupyterhub_config`).
+
+The full list of merged PRs includes:
+
+- PR #651: Update changelog with changes from 0.3.3 release
+- PR #650: Print warning when no config file is found
+- PR #649: Bump the number of test reruns even higher
+- PR #646: Fix link to marr paper
+- PR #645: Fix coverage integration by adding codecov.yml
+- PR #644: Add AppVeyor CI files
+- PR #643: Add command to update metadata
+- PR #642: Handle case where points is an empty string
+- PR #639: Add and use a Gradebook contextmanager for DbApp and DbApp tests
+- PR #637: Update conda channel to conda-forge
+- PR #635: Remove conda recipe and document nbgrader-feedstock
+- PR #633: Remove extra level of depth in schema per @ellisonbg
+- PR #630: Don't fail `test_check_version` test on `'import sitecustomize' failed error`
+- PR #629: Update changelog for 0.3.1 and 0.3.2
+- PR #628: Make sure to include schema files
+- PR #625: Add "nbgrader db" app for modifying the database
+- PR #623: Move server extensions into their own directory
+- PR #621: Replace tabs with spaces in installation docs
+- PR #620: Document when needs manual grade is set
+- PR #619: Add CI tests for python 3.6
+- PR #618: Implement formgrader as a jupyterhub service
+- PR #617: Add ability to show student names in formgrader
+- PR #616: Rebuild docs
+- PR #615: Display assignment list errors
+- PR #614: Don't be as strict about solution delimeters
+- PR #613: Update FAQ with platform information
+- PR #612: Update to new traitlets syntax
+- PR #611: Add metadata schema and documentation
+- PR #610: Clarify formgrader port and suppress notebook output
+- PR #607: Set instance variables in base auth class before running super init
+- PR #598: Conda recipe - nbextension link / unlink scripts
+- PR #597: Re-submitting nbextension work from previous PR
+- PR #594: Revert "Use jupyter nbextension/serverextension for installation/activation"
+- PR #591: Test empty and invalid timestamp strings
+- PR #590: Processing of invalid `notebook_id`s
+- PR #585: Add catches for empty timestamp files and invalid timestamp strings
+- PR #581: Update docs with invoke test group commands
+- PR #571: Convert readthedocs links for their .org -> .io migration for hosted projects
+- PR #567: Handle autograding failures better
+- PR #566: Add support for true read-only cells
+- PR #565: Add option to nbgrader fetch for replacing missing files
+- PR #564: Update documentation pertaining to the assignment list extension
+- PR #563: Add ability to switch between courses in assignment list extension
+- PR #562: Add better support to transfer apps for multiple courses
+- PR #550: Add documentation regarding how validation works
+- PR #545: Document how to customize the student version of an assignment
+- PR #538: Use official HubAuth from JupyterHub
+- PR #536: Create a "nbgrader export" command
+- PR #523: Allow code stubs to be language specific
+
+Thanks to the following contributors who submitted PRs or reported issues that were merged/closed for the 0.4.0 release:
+
+- adamchainz
+- ddbourgin
+- dlsun
+- dsblank
+- ellisonbg
+- jhamrick
+- lgpage
+- olgabot
+- randy3k
+- whositwhatnow
+- willingc
+
 0.3.x
 -----
 
