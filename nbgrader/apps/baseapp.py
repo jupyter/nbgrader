@@ -427,6 +427,22 @@ class NbGrader(JupyterApp):
 
         return path
 
+    def load_config_file(self, **kwargs):
+        """Load the config file.
+        By default, errors in loading config are handled, and a warning
+        printed on screen. For testing, the suppress_errors option is set
+        to False, so errors will make tests fail.
+        """
+        if self.config_file:
+            paths = [os.path.abspath("{}.py".format(self.config_file))]
+        else:
+            paths = [os.path.join(x, "{}.py".format(self.config_file_name)) for x in self.config_file_paths]
+
+        if not any(os.path.exists(x) for x in paths):
+            self.log.warn("No nbgrader_config.py file found (rerun with --debug to see where nbgrader is looking)")
+
+        super(NbGrader, self).load_config_file(**kwargs)
+
 
 # These are the aliases and flags for nbgrader apps that inherit only from
 # TransferApp
