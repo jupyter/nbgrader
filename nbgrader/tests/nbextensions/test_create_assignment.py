@@ -117,9 +117,17 @@ def _save(browser):
 
 def _save_and_validate(browser):
     _save(browser)
-    _wait(browser).until(
-        EC.visibility_of_element_located((By.CSS_SELECTOR, "#notification_notebook")))
 
+    # wait for notebook_saved.Notebook event
+    def notebook_saved(browser):
+        elem = browser.find_element_by_css_selector("#notification_notebook")
+        if not elem.is_displayed():
+            return False
+        if elem.text == "Notebook saved":
+            return True
+        return False
+
+    _wait(browser).until(notebook_saved)
     read("blank.ipynb", current_nbformat)
 
 
