@@ -111,7 +111,6 @@ def nbserver(request, port, tempdir, jupyter_config_dir, jupyter_data_dir, excha
                 c.TransferApp.exchange_directory = '{}'
                 c.TransferApp.cache_directory = '{}'
                 c.Execute.execute_retries = 4
-                c.NbGrader.course_directory = '{}'
                 c.NbGrader.db_assignments = [dict(name="Problem Set 1"), dict(name="ps.01")]
                 c.NbGrader.db_students = [
                     dict(id="Bitdiddle", first_name="Ben", last_name="B"),
