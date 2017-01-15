@@ -20,14 +20,32 @@ are not easily installable. Instead of the above command, run the following on w
 
     pip install -r dev-requirements-windows.txt -e .
 
+
 Installing notebook extensions
 ------------------------------
-Install the notebook extensions. The ``--symlink`` option is recommended since it
-updates the extensions whenever you update the nbgrader repository. Finally,
-activate the notebook extensions::
+Previously this was done using the ``nbgrader extension install`` command.
+However, moving forward this is done using the ``jupyter nbextension`` and
+``jupyter serverextension`` commands.
 
-    nbgrader extension install --symlink
-    nbgrader extension activate
+To install and enable both frontend nbextensions (*assignment list* and
+*create assignment*) run::
+
+    # The nbextensions are JavaScript/HTML/CSS so they require
+    # separate installation and enabling.
+    jupyter nbextension install --symlink --sys-prefix --py nbgrader
+    jupyter nbextension enable --sys-prefix --py nbgrader
+
+The ``--symlink`` option is recommended since it updates the extensions
+whenever you update the nbgrader repository. To install the server extension
+for *assignment_list* run::
+
+    # The serverextension is a Python module inside nbgrader, so only an
+    # enable step is needed.
+    jupyter serverextension enable --sys-prefix --py nbgrader
+
+To work properly, the *assignment list* extension requires both the
+nbextension and serverextension. The *create assignment* extension only
+has an nbextension part.
 
 Installing Phantomjs
 --------------------
