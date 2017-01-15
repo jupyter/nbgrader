@@ -1,3 +1,4 @@
+adamchainz
 admin
 Afterwards
 ajax
@@ -30,15 +31,19 @@ Changelog
 changelog
 checksum
 checksums
+codecov
 cogsci
 conda
 config
+contextmanager
 customizable
 datefmt
 ddbourgin
 delimeters
 dev
+dlsun
 dropdown
+dsblank
 duedate
 Duedate
 ellachao
@@ -62,7 +67,9 @@ html
 https
 hubapi
 Indices
+init
 inline
+io
 iopub
 ipynb
 IPython
@@ -85,6 +92,7 @@ logfile
 lphk
 mandli
 Marr
+marr
 mathjax
 matplotlib
 metadata
@@ -101,6 +109,7 @@ np
 npm
 ok
 olgabot
+org
 osx
 phantomjs
 Phantomjs
@@ -121,6 +130,7 @@ ps
 py
 quickstart
 readonly
+readthedocs
 redSlug
 reinstall
 resize
@@ -169,3 +179,4 @@ workflow
 workflows
 xsrf
 XSRF
+yml

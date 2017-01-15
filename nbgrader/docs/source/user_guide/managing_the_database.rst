@@ -165,8 +165,8 @@ managing assignments. To add students, we use the
 
 .. parsed-literal::
 
-    [DbStudentAddApp | INFO] Creating/updating student with ID 'bitdiddle': {'first_name': 'Ben', 'email': None, 'last_name': 'Bitdiddle'}
-    [DbStudentAddApp | INFO] Creating/updating student with ID 'hacker': {'last_name': 'Hacker', 'email': None, 'first_name': 'Alyssa'}
+    [DbStudentAddApp | INFO] Creating/updating student with ID 'bitdiddle': {'email': None, 'first_name': 'Ben', 'last_name': 'Bitdiddle'}
+    [DbStudentAddApp | INFO] Creating/updating student with ID 'hacker': {'email': None, 'last_name': 'Hacker', 'first_name': 'Alyssa'}
 
 
 And to list the students in the database, we use the
@@ -215,8 +215,8 @@ name):
 .. parsed-literal::
 
     [DbStudentImportApp | INFO] Importing students from: 'students.csv'
-    [DbStudentImportApp | INFO] Creating/updating student with ID 'bitdiddle': {'first_name': 'Ben', 'last_name': 'Bitdiddle', 'email': None}
-    [DbStudentImportApp | INFO] Creating/updating student with ID 'hacker': {'first_name': 'Alyssa', 'last_name': 'Hacker', 'email': None}
+    [DbStudentImportApp | INFO] Creating/updating student with ID 'bitdiddle': {'email': None, 'first_name': 'Ben', 'last_name': 'Bitdiddle'}
+    [DbStudentImportApp | INFO] Creating/updating student with ID 'hacker': {'email': None, 'first_name': 'Alyssa', 'last_name': 'Hacker'}
 
 
 We can also remove students from the database with
