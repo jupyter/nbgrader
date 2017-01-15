@@ -154,7 +154,7 @@ What happens if I do some manual grading, and then rerun the autograder?
 ------------------------------------------------------------------------
 
 If you rerun the autograder, nbgrader will never overwrite any manual grades or
-comments that you have added, and manual grades *always* take precendence over
+comments that you have added, and manual grades *always* take precedence over
 autogrades.
 
 However, if you have given a manual grade, then rerun the autograder, and the
