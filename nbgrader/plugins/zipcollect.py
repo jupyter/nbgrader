@@ -9,7 +9,23 @@ from .base import BasePlugin
 
 
 class CollectInfo(object):
-    """TODO"""
+    """Return object required by all ZipCollectApp plugins.
+
+    Keyword Arguments
+    -----------------
+    student_id: str
+        The student id (This MUST be provided)
+    notebook_id: str
+        The notebook id (This MUST be provided)
+    first_name: str
+        The students first name (Optional)
+    last_name: str
+        The students last name (Optional)
+    email: str
+        The students email address (Optional)
+    timestamp: str
+        The submission timestamp (Optional, defaults to the current time)
+    """
 
     def __init__(self, **kwargs):
         self.student_id = kwargs.get('student_id', None)
@@ -19,8 +35,8 @@ class CollectInfo(object):
         self.email = kwargs.get('email', None)
         self.timestamp = kwargs.get('timestamp', None)
 
-    # XXX Is there a better way to do this with traitlets?
     def _validate(self, app):
+        """Validate the provided class attributes."""
         attr_keys = [
             'student_id',
             'notebook_id',
@@ -49,52 +65,21 @@ class CollectInfo(object):
 class FileNameProcessor(BasePlugin):
     """Submission filename processor plugin for the ZipCollectApp"""
 
-    student_id_regexp = Unicode(
+    named_regexp = Unicode(
         '',
         help=dedent(
             """
-            Regular expression for matching the student_id in the submission
-            file filename."
-            """
-        )
-    ).tag(config=True)
+            This regular expression must provide the `(?P<student_id>...)` and
+            `(?P<notebook_id>...)` named group expressions. Optionally this
+            regular expression can also provide the `(?P<first_name>...)`,
+            `(?P<last_name>...)`, `(?P<email>...)`, and `(?P<timestamp>...)
+            named group expressions. For example if the filename is
+                ps1_bitdiddle_attempt_2016-01-30-15-00-00_problem1.ipynb
 
-    notebook_id_regexp = Unicode(
-        '',
-        help=dedent(
-            """
-            Regular expression for matching the notebook_id in the submission
-            file filename."
-            """
-        )
-    ).tag(config=True)
+            then this named_regexp could be
+                ".*_(?P<student_id>\w+)_attempt_(?P<timestamp>[0-9\-]+)_(?P<notebook_id>\w+)"
 
-    first_name_regexp = Unicode(
-        '',
-        help=dedent(
-            """
-            Regular expression for matching the students first name in the
-            submission file filename."
-            """
-        )
-    ).tag(config=True)
-
-    last_name_regexp = Unicode(
-        '',
-        help=dedent(
-            """
-            Regular expression for matching the students last name in the
-            submission file filename."
-            """
-        )
-    ).tag(config=True)
-
-    timestamp_regexp = Unicode(
-        '',
-        help=dedent(
-            """
-            Regular expression for matching the submission timestamp in the
-            submission file filename."
+            For regex examples see https://docs.python.org/howto/regex.html
             """
         )
     ).tag(config=True)
@@ -109,27 +94,28 @@ class FileNameProcessor(BasePlugin):
         )
     ).tag(config=True)
 
-    def match(self, exp, string, key):
-        if not exp or exp is None:
-            self.log.debug(
-                "No regular expression given to match {} in filename."
-                "".format(key)
+    def _match(self, string):
+        if not self.named_regexp:
+            self.log.warn(
+                "Regular expression not provided for plugin. Run with "
+                "`--help-all` flag for more information."
             )
             return None
 
-        match = re.search(re.compile(exp), string)
+        match = re.match(self.named_regexp, string)
         if not match or not match.groups():
-            self.log.debug(
-                "{} regular expression '{}' did not match anything in filename."
-                "".format(key, exp)
+            self.log.warn(
+                "Regular expression '{}' did not match anything in filename."
+                "".format(self.named_regexp)
             )
             return None
 
+        gd = match.groupdict()
         self.log.debug(
-            "{} regular expression '{}' matched '{}' in filename."
-            "".format(key, exp, match.group(1))
+            "Regular expression '{}' matched\n'{}' in filename."
+            "".format(self.named_regexp, gd)
         )
-        return match.group(1)
+        return gd
 
     def collect(self, submitted_file):
         root, ext = os.path.splitext(submitted_file)
@@ -137,14 +123,8 @@ class FileNameProcessor(BasePlugin):
 
         # Skip any files without the correct extension
         if ext not in self.valid_ext:
+            self.log.debug("Invalid file extension {}".format(ext))
             return None
 
-        info = CollectInfo(
-            student_id=self.match(self.student_id_regexp, filename, 'student_id'),
-            notebook_id=self.match(self.notebook_id_regexp, filename, 'notebook_id'),
-            first_name=self.match(self.first_name_regexp, filename, 'first_name'),
-            last_name=self.match(self.last_name_regexp, filename, 'last_name'),
-            timestamp=self.match(self.timestamp_regexp, filename, 'timestamp'),
-        )
-
-        return info
+        kwargs = self._match(submitted_file) or dict()
+        return CollectInfo(**kwargs)
