@@ -9,7 +9,8 @@ from .base import BasePlugin
 
 
 class CollectInfo(object):
-    """Return object required by all ZipCollectApp plugins.
+    """Return object required by all
+    :class:`~nbgrader.apps.zipcollectapp.ZipCollectApp` plugins.
 
     Keyword Arguments
     -----------------
@@ -63,7 +64,9 @@ class CollectInfo(object):
 
 
 class FileNameProcessor(BasePlugin):
-    """Submission filename processor plugin for the ZipCollectApp"""
+    """Submission filename processor plugin for the
+    :class:`~nbgrader.apps.zipcollectapp.ZipCollectApp`
+    """
 
     named_regexp = Unicode(
         '',
@@ -74,12 +77,13 @@ class FileNameProcessor(BasePlugin):
             regular expression can also provide the `(?P<first_name>...)`,
             `(?P<last_name>...)`, `(?P<email>...)`, and `(?P<timestamp>...)
             named group expressions. For example if the filename is
-                ps1_bitdiddle_attempt_2016-01-30-15-00-00_problem1.ipynb
+                `ps1_bitdiddle_attempt_2016-01-30-15-00-00_problem1.ipynb`
 
             then this named_regexp could be
                 ".*_(?P<student_id>\w+)_attempt_(?P<timestamp>[0-9\-]+)_(?P<notebook_id>\w+)"
 
-            For regex examples see https://docs.python.org/howto/regex.html
+            For named group regular expression examples see
+            https://docs.python.org/howto/regex.html
             """
         )
     ).tag(config=True)
@@ -94,7 +98,10 @@ class FileNameProcessor(BasePlugin):
         )
     ).tag(config=True)
 
-    def _match(self, string):
+    def _match(self, filename):
+        """Match the named group regular expression to the beginning of the
+        filename and return the match groupdict or None if no match.
+        """
         if not self.named_regexp:
             self.log.warn(
                 "Regular expression not provided for plugin. Run with "
@@ -102,7 +109,7 @@ class FileNameProcessor(BasePlugin):
             )
             return None
 
-        match = re.match(self.named_regexp, string)
+        match = re.match(self.named_regexp, filename)
         if not match or not match.groups():
             self.log.warn(
                 "Regular expression '{}' did not match anything in filename."
@@ -118,6 +125,11 @@ class FileNameProcessor(BasePlugin):
         return gd
 
     def collect(self, submitted_file):
+        """This is the main function called by the
+        :class:`~nbgrader.apps.zipcollectapp.ZipCollectApp` for each submitted
+        file. Note this function must also return a :class:`CollectApp`
+        instance for subclassed plugins.
+        """
         root, ext = os.path.splitext(submitted_file)
         filename = os.path.basename(submitted_file)
 
@@ -126,5 +138,7 @@ class FileNameProcessor(BasePlugin):
             self.log.debug("Invalid file extension {}".format(ext))
             return None
 
-        kwargs = self._match(submitted_file) or dict()
+        kwargs = self._match(submitted_file)
+        if kwargs is None:
+            return None
         return CollectInfo(**kwargs)
