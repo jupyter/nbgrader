@@ -14,7 +14,7 @@ from ..api import open_gradebook, MissingEntry
 from ..plugins import BasePlugin, FileNameProcessor
 from ..plugins.zipcollect import CollectInfo
 from ..utils import check_directory, full_split, rmtree, unzip, parse_utc
-
+from ..utils import find_all_notebooks
 
 aliases = {
     'processor': 'ZipCollectApp.plugin_class',
@@ -24,6 +24,10 @@ flags = {
     'force': (
         {'ZipCollectApp' : {'force' : True}},
         "Force overwrite of existing files."
+    ),
+    'strict': (
+        {'ZipCollectApp' : {'strict' : True}},
+        "TODO"
     ),
 }
 
@@ -46,6 +50,11 @@ class ZipCollectApp(NbGrader):
     force = Bool(
         default_value=False,
         help="Force overwrite of existing files."
+    ).tag(config=True)
+
+    strict = Bool(
+        default_value=False,
+        help="TODO"
     ).tag(config=True)
 
     auto_update_database = Bool(
@@ -150,7 +159,7 @@ class ZipCollectApp(NbGrader):
 
     def _mkdirs_if_missing(self, path):
         if not check_directory(path, write=True, execute=True):
-            self.log.info("Directory not found. Creating: {}".format(path))
+            self.log.warn("Directory not found. Creating: {}".format(path))
             os.makedirs(path)
 
     def _clear_existing_files(self, path):
@@ -158,7 +167,7 @@ class ZipCollectApp(NbGrader):
             return
 
         if self.force:
-            self.log.info("Clearing existing files in {}".format(path))
+            self.log.warn("Clearing existing files in {}".format(path))
             rmtree(path)
             os.makedirs(path)
         else:
@@ -216,7 +225,7 @@ class ZipCollectApp(NbGrader):
                 continue
 
             root, ext = os.path.splitext(zfile)
-            if ext.lower() in self.zip_ext:
+            if ext in self.zip_ext:
                 self.log.info("Extracting file: {}".format(zfile))
                 success, nfiles, msg = unzip(zfile, extract_to, self.zip_ext)
                 if not success:
@@ -239,6 +248,104 @@ class ZipCollectApp(NbGrader):
                 "".format(number_of_files, extracted_file_count, extract_to)
             )
 
+    def _collect_extracted_files(self, src_files):
+        release_path = self._format_path(
+            self.release_directory, '.', self.assignment_id)
+        released_notebooks = find_all_notebooks(release_path)
+
+        data = dict()
+        invalid_files = 0
+        processed_files = 0
+        self.log.info("Start collecting files...")
+        for _file in src_files:
+            self.log.info("Processing file: {}".format(_file))
+            info = self.plugin_inst.collect(_file)
+            if info is None or not isinstance(info, CollectInfo):
+                self.log.warn("Skipped. No CollectInfo provided.")
+                invalid_files += 1
+                continue
+
+            info._validate(self)
+            dest_path = self._format_path(
+                self.submitted_directory, info.student_id, self.assignment_id)
+
+            root, ext = os.path.splitext(_file)
+            notebook_id = os.path.splitext(os.path.basename(info.notebook_id))[0]
+            notebook = '{}{}'.format(notebook_id, ext)
+            if notebook not in released_notebooks:
+                if self.strict:
+                    self.log.warn("Skipped. Invalid notebook name.")
+                    invalid_files += 1
+                    continue
+                self.log.warn("Invalid notebook name.")
+
+            student = self._create_or_update_student(info)
+            if student is None:
+                self.log.warn("Skipped. Student {} not found in gradebook.")
+                invalid_files += 1
+                continue
+
+            timestamp = parse_utc(self.get_timestamp())
+            if info.timestamp:
+                timestamp = parse_utc(info.timestamp)
+
+            dest = os.path.join(dest_path, notebook)
+            if info.student_id in data.keys():
+                if notebook not in data[info.student_id]['notebooks']:
+                    data[info.student_id]['files'].append(_file)
+                    data[info.student_id]['dests'].append(dest)
+                    data[info.student_id]['notebooks'].append(notebook)
+                    data[info.student_id]['timestamps'].append(timestamp)
+                else:
+                    ind = data[info.student_id]['notebooks'].index(notebook)
+                    old_timestamp = data[info.student_id]['timestamps'][ind]
+                    if timestamp >= old_timestamp:
+                        data[info.student_id]['files'][ind] = _file
+                        data[info.student_id]['dests'][ind] = dest
+                        data[info.student_id]['timestamps'][ind] = timestamp
+                    else:
+                        self.log.warn("Skipped. Older timestamp found.")
+                        invalid_files += 1
+            else:
+                data[info.student_id] = dict(
+                    notebooks=[notebook],
+                    timestamps=[timestamp],
+                    files=[_file],
+                    dests=[dest],
+                )
+
+            processed_files += 1
+
+        if invalid_files > 0:
+            self.log.warn(
+                "{} files collected, {} files skipped"
+                "".format(processed_files, invalid_files)
+            )
+        else:
+            self.log.info("{} files collected".format(processed_files))
+
+        return data
+
+    def _transfer_extracted_files(self, collection):
+        self.log.info("Start transfering files...")
+        for student_id, data in collection.items():
+            dest_path = self._format_path(self.submitted_directory, student_id, self.assignment_id)
+            self._mkdirs_if_missing(dest_path)
+            self._clear_existing_files(dest_path)
+
+            timestamp = max(data['timestamps'])
+            for i in range(len(data['notebooks'])):
+                src = data['files'][i]
+                dest = data['dests'][i]
+                self.log.info('Copying from: {}'.format(src))
+                self.log.info('Copying to: {}'.format(dest))
+                shutil.copy(src, dest)
+
+            dest = os.path.join(dest_path, 'timestamp.txt')
+            self.log.info('Creating timestamp: {}'.format(dest))
+            with open(dest, 'w') as fh:
+                fh.write("{}".format(timestamp))
+
     def process_extracted_files(self):
         src_path = self._format_collect_path(self.extracted_directory)
         if not check_directory(src_path, write=False, execute=True):
@@ -250,61 +357,8 @@ class ZipCollectApp(NbGrader):
             self.log.warning("No files found in directory: {}".format(src_path))
             return
 
-        invalid_files = 0
-        processed_files = 0
-        for _file in src_files:
-            self.log.info("Processing file: {}".format(_file))
-            info = self.plugin_inst.collect(_file)
-            if info is None or not isinstance(info, CollectInfo):
-                self.log.warn(
-                    "No CollectInfo provided for submitted "
-                    "file. Skipping: {}".format(_file)
-                )
-                invalid_files += 1
-                continue
-
-            info._validate(self)
-            student = self._create_or_update_student(info)
-            if student is None:
-                self.log.warn(
-                    "Student {} not found in gradebook, for submitted "
-                    "file. Skipping: {}".format(info.student_id, _file)
-                )
-                invalid_files += 1
-                continue
-
-            dest_path = self._format_path(
-                self.submitted_directory,
-                info.student_id,
-                self.assignment_id
-            )
-            self._mkdirs_if_missing(dest_path)
-
-            root, ext = os.path.splitext(_file)
-            notebook_id = os.path.splitext(os.path.basename(info.notebook_id))[0]
-            dest = os.path.join(dest_path, ''.join([notebook_id, ext.lower()]))
-            self.log.info("Copying submission to: {}".format(dest))
-            shutil.copy(_file, dest)
-
-            timestamp = self.get_timestamp()
-            if info.timestamp:
-                timestamp = parse_utc(info.timestamp)
-
-            dest = os.path.join(dest_path, 'timestamp.txt')
-            self.log.info("Creating timestamp file: {}".format(dest))
-            with open(dest, 'w') as fh:
-                fh.write("{}".format(timestamp))
-
-            processed_files += 1
-
-        if invalid_files > 0:
-            self.log.warn(
-                "{} files processed, {} files skipped"
-                "".format(processed_files, invalid_files)
-            )
-        else:
-            self.log.info(
-                "{} files processed".format(processed_files, invalid_files))
+        data = self._collect_extracted_files(src_files)
+        self._transfer_extracted_files(data)
 
     def init_plugin(self):
         self.log.info("Using file processor: %s", self.plugin_class.__name__)

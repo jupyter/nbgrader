@@ -111,7 +111,7 @@ class FileNameProcessor(BasePlugin):
 
     def match(self, exp, string, key):
         if not exp or exp is None:
-            self.log.warn(
+            self.log.debug(
                 "No regular expression given to match {} in filename."
                 "".format(key)
             )
@@ -119,13 +119,13 @@ class FileNameProcessor(BasePlugin):
 
         match = re.search(re.compile(exp), string)
         if not match or not match.groups():
-            self.log.warn(
+            self.log.debug(
                 "{} regular expression '{}' did not match anything in filename."
                 "".format(key, exp)
             )
             return None
 
-        self.log.info(
+        self.log.debug(
             "{} regular expression '{}' matched '{}' in filename."
             "".format(key, exp, match.group(1))
         )
@@ -136,7 +136,7 @@ class FileNameProcessor(BasePlugin):
         filename = os.path.basename(submitted_file)
 
         # Skip any files without the correct extension
-        if ext.lower() not in self.valid_ext:
+        if ext not in self.valid_ext:
             return None
 
         info = CollectInfo(
