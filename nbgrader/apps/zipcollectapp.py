@@ -17,10 +17,15 @@ from ..utils import check_directory, full_split, rmtree, unzip, parse_utc
 from ..utils import find_all_notebooks
 
 aliases = {
+    'log-level': 'Application.log_level',
     'processor': 'ZipCollectApp.plugin_class',
     'update-db': 'ZipCollectApp.auto_update_database',
 }
 flags = {
+    'debug': (
+        {'Application' : {'log_level' : 'DEBUG'}},
+        "set log level to DEBUG (maximize logging output)"
+    ),
     'force': (
         {'ZipCollectApp' : {'force' : True}},
         "Force overwrite of existing files."
