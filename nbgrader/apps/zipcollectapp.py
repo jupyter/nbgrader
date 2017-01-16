@@ -13,15 +13,19 @@ from .baseapp import NbGrader
 from ..api import open_gradebook, MissingEntry
 from ..plugins import BasePlugin, FileNameProcessor
 from ..plugins.zipcollect import CollectInfo
-from ..utils import check_directory, full_split, rmtree, unzip
+from ..utils import check_directory, full_split, rmtree, unzip, parse_utc
 
 
 aliases = {
-    'force': 'ZipCollectApp.force',
     'processor': 'ZipCollectApp.plugin_class',
     'update-db': 'ZipCollectApp.auto_update_database',
 }
-flags = {}
+flags = {
+    'force': (
+        {'ZipCollectApp' : {'force' : True}},
+        "Force overwrite of existing files."
+    ),
+}
 
 
 class ZipCollectApp(NbGrader):
@@ -41,7 +45,7 @@ class ZipCollectApp(NbGrader):
 
     force = Bool(
         default_value=False,
-        help="TODO"
+        help="Force overwrite of existing files."
     ).tag(config=True)
 
     auto_update_database = Bool(
@@ -173,11 +177,12 @@ class ZipCollectApp(NbGrader):
 
         else:
             kwargs = dict()
-            for key in ['student_id', 'first_name', 'last_name', 'email']:
+            for key in ['first_name', 'last_name', 'email']:
                 value = getattr(info, key)
                 if value is not None:
                     kwargs.update({key: value})
 
+            self.log.info("Updating database for student {}.".format(info.student_id))
             with open_gradebook(self.db_url) as gradebook:
                 return gradebook.update_or_create_student(info.student_id, **kwargs)
 
@@ -193,7 +198,8 @@ class ZipCollectApp(NbGrader):
         if not check_directory(archive_path, write=False, execute=True):
             self.fail("Directory not found: {}".format(archive_path))
 
-        archive_files = [os.path.abspath(x) for x in os.listdir(archive_path)]
+        archive_files = os.listdir(archive_path)
+        archive_files = [os.path.join(archive_path, x) for x in archive_files]
         if not archive_files:
             self.log.warning(
                 "No files found in directory: {}".format(archive_path))
@@ -238,15 +244,16 @@ class ZipCollectApp(NbGrader):
         if not check_directory(src_path, write=False, execute=True):
             self.fail("Directory not found: {}".format(src_path))
 
-        src_files = [os.path.abspath(x) for x in os.listdir(src_path)]
+        src_files = sorted(os.listdir(src_path))
+        src_files = [os.path.join(src_path, x) for x in src_files]
         if not src_files:
             self.log.warning("No files found in directory: {}".format(src_path))
             return
 
-        processed_files = 0
         invalid_files = 0
-
+        processed_files = 0
         for _file in src_files:
+            self.log.info("Processing file: {}".format(_file))
             info = self.plugin_inst.collect(_file)
             if info is None or not isinstance(info, CollectInfo):
                 self.log.warn(
@@ -272,19 +279,21 @@ class ZipCollectApp(NbGrader):
                 self.assignment_id
             )
             self._mkdirs_if_missing(dest_path)
-            self._clear_existing_files(dest_path)
 
             root, ext = os.path.splitext(_file)
             notebook_id = os.path.splitext(os.path.basename(info.notebook_id))[0]
-            dest = os.path.join(dest_path, notebook_id, ext.lower())
+            dest = os.path.join(dest_path, ''.join([notebook_id, ext.lower()]))
             self.log.info("Copying submission to: {}".format(dest))
             shutil.copy(_file, dest)
 
+            timestamp = self.get_timestamp()
+            if info.timestamp:
+                timestamp = parse_utc(info.timestamp)
+
             dest = os.path.join(dest_path, 'timestamp.txt')
-            timestamp = info.timestamp or self.get_timestamp()
-            self.log.info("Creating timestamp file: {}".format(timestamp))
-            with open(dest, 'r') as fh:
-                fh.write(timestamp)
+            self.log.info("Creating timestamp file: {}".format(dest))
+            with open(dest, 'w') as fh:
+                fh.write("{}".format(timestamp))
 
             processed_files += 1
 

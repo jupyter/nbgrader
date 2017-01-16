@@ -217,9 +217,9 @@ def unzip(path, dest, zip_ext=None):
         return False, 0, "Directory not found or unwritable: {}".format(dest)
 
     try:
-        with zipfile.Zipfile(path, 'r') as zip_file:
+        with zipfile.ZipFile(path, 'r') as zip_file:
             try:
-                zip_file.extract_all(dest)
+                zip_file.extractall(dest)
                 nfiles = len(zip_file.namelist())
                 return True, nfiles, "Files extracted to {}".format(dest)
 
