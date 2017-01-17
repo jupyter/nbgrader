@@ -32,7 +32,7 @@ flags = {
     ),
     'strict': (
         {'ZipCollectApp' : {'strict' : True}},
-        "TODO"
+        "Skip submitted notebooks with invalid names."
     ),
 }
 
@@ -40,16 +40,60 @@ flags = {
 class ZipCollectApp(NbGrader):
 
     name = u'nbgrader-zip-collect'
-    description = u''.join([
-        'Collect assignment submissions from files and/or ',
-        'archives (zip files) manually downloaded from a LMS.',
-    ])
+    description = u'Collect assignments from archives (zip files).'
 
     aliases = aliases
     flags = flags
 
     examples = """
-        TODO
+        Collect assignment submissions from files and/or archives (zip) files
+        manually downloaded from a LMS. For the usage of instructors.
+
+        This command is run from the top-level nbgrader folder. In order to
+        facilitate the collect process, nbgrader places some constraints on how
+        the manually downloaded archive (zip) files must be structured. By
+        default, the directory structure must look like this:
+
+            {downloaded}/{assignment_id}/{collect_step}
+
+        where `downloaded` is the main directory, `assignment_id` is the name
+        of the assignment and `collect_step` is the step in the collect
+        process.
+
+        Manually downloaded assignment submissions files and/or archives (zip)
+        files must be placed in the `archive_directory`:
+
+            {downloaded}/{assignment_id}/{archive_directory}
+
+        It is expected that the instructor has already created this directory
+        and placed the downloaded assignment submissions files and/or archives
+        (zip) files in this directory.
+
+        Archive (zip) files in the `archive_directory` will be extracted, and
+        any non-archive files will be copied, to the `extracted_directory`:
+
+            {downloaded}/{assignment_id}/{extracted_directory}
+
+        After which the files in the `extracted_directory` will be collected
+        and copied into the students `submitted_directory`:
+
+            {submitted_directory}/{student_id}/{assignment_id}/{notebook_id}.ipynb
+
+        By default the collection of files in the `extracted_directory` is
+        managed via the :class:`~nbgrader.plugins.zipcollect.FileNameProcessor`
+        plugin. Each filename is sent to the plugin, which in turn returns an
+        object containing the `student_id`, `notebook_id`, `first_name`,
+        `last_name`, `email`, and `timestamp` data. For more information run:
+
+            nbgrader zip_collect --help-all
+
+        To change the default plugin, you will need a class that inherits from
+        :class:`~nbgrader.plugins.zipcollect.FileNameProcessor`. If your
+        exporter is named `MyCustomProcessor` and is saved in the file
+        `myprocessor.py`, then:
+
+            nbgrader zip_collect --processor=myprocessor.MyCustomProcessor
+
         """
 
     force = Bool(
@@ -59,12 +103,12 @@ class ZipCollectApp(NbGrader):
 
     strict = Bool(
         default_value=False,
-        help="TODO"
+        help="Skip submitted notebooks with invalid names."
     ).tag(config=True)
 
     auto_update_database = Bool(
-        default_value=True,
-        help="TODO"
+        default_value=False,
+        help="Automatically update the database and add missing students."
     ).tag(config=True)
 
     collect_directory_structure = Unicode(
@@ -72,7 +116,9 @@ class ZipCollectApp(NbGrader):
             "{downloaded}", "{assignment_id}", "{collect_step}"),
         help=dedent(
             """
-            TODO
+            Format string for the directory structure that nbgrader works over
+            during the zip collect process. This MUST contain named keys for
+            'downloaded', 'assignment_id', and 'collect_step'.
             """
         )
     ).tag(config=True)
@@ -81,7 +127,8 @@ class ZipCollectApp(NbGrader):
         'downloaded',
         help=dedent(
             """
-            TODO
+            The main directory that corresponds to the `downloaded` variable in
+            the `collect_structure` config option.
             """
         )
     ).tag(config=True)
@@ -90,7 +137,10 @@ class ZipCollectApp(NbGrader):
         'archive',
         help=dedent(
             """
-            TODO
+            The name of the directory that contains assignment submission files
+            and/or archives (zip) files manually downloaded from a LMS. This
+            corresponds to the `collect_step` variable in the
+            `collect_structure` config option.
             """
         )
     ).tag(config=True)
@@ -99,23 +149,23 @@ class ZipCollectApp(NbGrader):
         'extracted',
         help=dedent(
             """
-            TODO
-            """
-        )
-    ).tag(config=True)
-
-    invalid_directory = Unicode(
-        'invalid',
-        help=dedent(
-            """
-            TODO
+            The name of the directory that contains assignment submission files
+            extracted or copied from the `archive_directory`. This corresponds
+            to the `collect_step` variable in the `collect_structure` config
+            option.
             """
         )
     ).tag(config=True)
 
     zip_ext = List(
         ['.zip', '.gz'],
-        help="TODO"
+        help=dedent(
+            """
+            List of valid archive (zip) filename extensions to extract. Any
+            archive (zip) files with an extension not in this list are copied
+            to the `extracted_directory`.
+            """
+        )
     ).tag(config=True)
 
     timezone = Unicode(
@@ -131,7 +181,12 @@ class ZipCollectApp(NbGrader):
     plugin_class = Type(
         FileNameProcessor,
         klass=BasePlugin,
-        help="TODO"
+        help=dedent(
+            """
+            The plugin class for processing the submitted file names after
+            they have been extracted into the `extracted_directory`.
+            """
+        )
     ).tag(config=True)
 
     plugin_inst = Instance(BasePlugin).tag(config=False)
@@ -201,18 +256,23 @@ class ZipCollectApp(NbGrader):
                 return gradebook.update_or_create_student(info.student_id, **kwargs)
 
     def get_timestamp(self):
-        """Set the timestap using the configured timezone."""
+        """Return the timestamp using the configured timezone."""
         tz = gettz(self.timezone)
         if tz is None:
             self.fail("Invalid timezone: {}".format(self.timezone))
         return datetime.datetime.now(tz).strftime(self.timestamp_format)
 
     def process_archive_files(self):
+        """Extract archive (zip) files and process files in the
+        `archive_directory`. Files are extracted to the `extracted_directory`.
+        Non-archive (zip) files found in the `archive_directory` are copied to
+        the `extracted_directory`.
+        """
         archive_path = self._format_collect_path(self.archive_directory)
         if not check_directory(archive_path, write=False, execute=True):
             self.fail("Directory not found: {}".format(archive_path))
 
-        archive_files = os.listdir(archive_path)
+        archive_files = sorted(os.listdir(archive_path))
         archive_files = [os.path.join(archive_path, x) for x in archive_files]
         if not archive_files:
             self.log.warning(
@@ -248,12 +308,32 @@ class ZipCollectApp(NbGrader):
         if number_of_files != extracted_file_count:
             self.log.warn(
                 "File count mismatch. Processed or extracted {} files, but "
-                "only found {} files in {}\nThis is due to the archive (zip) "
-                "file/s either containing duplicates or sub-directories"
+                "only found {} files in {}\nThis may be due to the archive "
+                "(zip) file/s either containing duplicates or sub-directories"
                 "".format(number_of_files, extracted_file_count, extract_to)
             )
 
     def _collect_extracted_files(self, src_files):
+        """Collect the files in the `extracted_directory` using a given plugin
+        to process the filename of each file.
+
+        Arguments
+        ---------
+        src_files: list
+            List of all files in the `extracted_directory`
+
+        Returns:
+        --------
+        Dict: Collected data object of the form
+            {
+                student_id: {
+                    files: [src_file1, ...],
+                    dests: [dest_file1, ...],
+                    notebooks: [notebook_id1, ...],
+                    timestamps: [timestamp1, ...],
+                }, ...
+            }
+        """
         release_path = self._format_path(
             self.release_directory, '.', self.assignment_id)
         released_notebooks = find_all_notebooks(release_path)
@@ -286,7 +366,11 @@ class ZipCollectApp(NbGrader):
 
             student = self._create_or_update_student(info)
             if student is None:
-                self.log.warn("Skipped. Student {} not found in gradebook.")
+                self.log.warn(
+                    "Skipped. Student {} not found in gradebook. Run with "
+                    "--update-db flag to automatically update the database "
+                    "and add missing students."
+                )
                 invalid_files += 1
                 continue
 
@@ -332,6 +416,21 @@ class ZipCollectApp(NbGrader):
         return data
 
     def _transfer_extracted_files(self, collection):
+        """Transfer collected files to the students `submitted_directory`.
+
+        Arguments
+        ---------
+        collect: dict
+            Collect data object of the form
+                {
+                    student_id: {
+                        files: [src_file1, ...],
+                        dests: [dest_file1, ...],
+                        notebooks: [notebook_id1, ...],
+                        timestamps: [timestamp1, ...],
+                    }, ...
+                }
+        """
         self.log.info("Start transfering files...")
         for student_id, data in collection.items():
             dest_path = self._format_path(self.submitted_directory, student_id, self.assignment_id)
@@ -352,6 +451,10 @@ class ZipCollectApp(NbGrader):
                 fh.write("{}".format(timestamp))
 
     def process_extracted_files(self):
+        """Collect the files in the `extracted_directory` using a given plugin
+        to process the filename of each file. Collected files are transfered to
+        the students `submitted_directory`.
+        """
         src_path = self._format_collect_path(self.extracted_directory)
         if not check_directory(src_path, write=False, execute=True):
             self.fail("Directory not found: {}".format(src_path))
@@ -381,7 +484,7 @@ class ZipCollectApp(NbGrader):
         elif self.assignment_id == "":
             self.fail(
                 "Must provide assignment name:\n"
-                "nbgrader zip_collect ASSIGNMENT [ --course COURSE ]"
+                "nbgrader zip_collect ASSIGNMENT"
             )
 
         self.init_plugin()

@@ -69,17 +69,22 @@ class FileNameProcessor(BasePlugin):
     """
 
     named_regexp = Unicode(
-        '',
+        default_value='',
         help=dedent(
             """
-            This regular expression must provide the `(?P<student_id>...)` and
+            This regular expression is applied to each submission file and MUST
+            be supplied by the instructor.
+
+            This regular expression MUST provide the `(?P<student_id>...)` and
             `(?P<notebook_id>...)` named group expressions. Optionally this
             regular expression can also provide the `(?P<first_name>...)`,
             `(?P<last_name>...)`, `(?P<email>...)`, and `(?P<timestamp>...)
-            named group expressions. For example if the filename is
+            named group expressions.  For example if the filename is:
+
                 `ps1_bitdiddle_attempt_2016-01-30-15-00-00_problem1.ipynb`
 
-            then this named_regexp could be
+            then this `named_regexp` could be:
+
                 ".*_(?P<student_id>\w+)_attempt_(?P<timestamp>[0-9\-]+)_(?P<notebook_id>\w+)"
 
             For named group regular expression examples see
@@ -89,7 +94,7 @@ class FileNameProcessor(BasePlugin):
     ).tag(config=True)
 
     valid_ext = List(
-        ['.ipynb'],
+        default_value=['.ipynb'],
         help=dedent(
             """
             List of valid submission filename extensions to collect. Any
