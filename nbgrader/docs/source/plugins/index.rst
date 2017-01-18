@@ -19,3 +19,4 @@ Example usage
 
     late-plugin
     export-plugin
+    zipcollect-plugin

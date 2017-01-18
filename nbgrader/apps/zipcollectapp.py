@@ -376,7 +376,11 @@ class ZipCollectApp(NbGrader):
 
             timestamp = parse_utc(self.get_timestamp())
             if info.timestamp:
+                # FIXME: Not parsing correctly a string of the format
+                # YYYY-MM-DD-HH-MM-SS
                 timestamp = parse_utc(info.timestamp)
+                # self.log.info(info.timestamp)
+                # self.log.info(timestamp)
 
             dest = os.path.join(dest_path, notebook)
             if info.student_id in data.keys():

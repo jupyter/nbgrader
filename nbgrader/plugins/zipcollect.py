@@ -73,13 +73,12 @@ class FileNameProcessor(BasePlugin):
         help=dedent(
             """
             This regular expression is applied to each submission file and MUST
-            be supplied by the instructor.
-
-            This regular expression MUST provide the `(?P<student_id>...)` and
-            `(?P<notebook_id>...)` named group expressions. Optionally this
-            regular expression can also provide the `(?P<first_name>...)`,
-            `(?P<last_name>...)`, `(?P<email>...)`, and `(?P<timestamp>...)
-            named group expressions.  For example if the filename is:
+            be supplied by the instructor.  This regular expression MUST
+            provide the `(?P<student_id>...)` and `(?P<notebook_id>...)` named
+            group expressions. Optionally this regular expression can also
+            provide the `(?P<first_name>...)`, `(?P<last_name>...)`,
+            `(?P<email>...)`, and `(?P<timestamp>...)` named group expressions.
+            For example if the filename is:
 
                 `ps1_bitdiddle_attempt_2016-01-30-15-00-00_problem1.ipynb`
 
@@ -133,7 +132,18 @@ class FileNameProcessor(BasePlugin):
         """This is the main function called by the
         :class:`~nbgrader.apps.zipcollectapp.ZipCollectApp` for each submitted
         file. Note this function must also return a :class:`CollectApp`
-        instance for subclassed plugins.
+        instance or None for sub-classed plugins.
+
+        Parameters
+        ----------
+        submitted_file: str
+            Each submitted file in the ``extracted_directory`` (absolute path).
+
+        Returns
+        -------
+        :class:`CollectInfo` or None
+            The collected data from the filename or None if the file should be
+            skipped
         """
         root, ext = os.path.splitext(submitted_file)
         filename = os.path.basename(submitted_file)

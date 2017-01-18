@@ -42,6 +42,8 @@ def clear_notebooks(root):
         shutil.rmtree(os.path.join(root, "user_guide", "autograded"))
     if os.path.exists(os.path.join(root, "user_guide", "feedback")):
         shutil.rmtree(os.path.join(root, "user_guide", "feedback"))
+    if os.path.exists(os.path.join(root, "user_guide", "downloaded", "ps1", "extracted")):
+        shutil.rmtree(os.path.join(root, "user_guide", "downloaded", "ps1", "extracted"))
 
     print("Clearing outputs of notebooks in '{}'...".format(os.path.abspath(root)))
     preprocessor = ClearOutputPreprocessor()

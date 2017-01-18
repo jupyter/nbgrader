@@ -66,6 +66,7 @@ nbgrader/tests/nbextensions/selenium.screenshot.png
 nbgrader/docs/build
 nbgrader/docs/source/extra_files
 nbgrader/docs/source/user_guide/gradebook.db
+nbgrader/docs/source/user_guide/downloaded/ps1/extracted/
 nbgrader/docs/source/user_guide/submitted/
 nbgrader/docs/source/user_guide/nbgrader_config.py
 nbgrader/docs/source/user_guide/students.csv
@@ -74,6 +75,7 @@ nbgrader/docs/source/command_line_tools/nbgrader*.rst
 nbgrader/docs/source/configuration/config_options.rst
 nbgrader/docs/source/user_guide/creating_and_grading_assignments.rst
 nbgrader/docs/source/user_guide/managing_assignment_files.rst
+nbgrader/docs/source/user_guide/managing_assignment_files_manually.rst
 
 # components stuff
 node_modules
