@@ -68,6 +68,8 @@ nbgrader/docs/source/extra_files
 nbgrader/docs/source/user_guide/gradebook.db
 nbgrader/docs/source/user_guide/downloaded/ps1/extracted/
 nbgrader/docs/source/user_guide/submitted/
+nbgrader/docs/source/user_guide/submitted_zip/
+nbgrader/docs/source/user_guide/plugin.py
 nbgrader/docs/source/user_guide/nbgrader_config.py
 nbgrader/docs/source/user_guide/students.csv
 nbgrader/docs/source/user_guide/assignments.csv

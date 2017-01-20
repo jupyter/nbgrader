@@ -65,15 +65,16 @@ class CollectInfo(object):
 
 class FileNameCollectorPlugin(BasePlugin):
     """Submission filename processor plugin for the
-    :class:`~nbgrader.apps.zipcollectapp.ZipCollectApp`
+    :class:`~nbgrader.apps.zipcollectapp.ZipCollectApp`.
+    Subclasses MUST inherit from this class.
     """
 
     named_regexp = Unicode(
         default_value='',
         help=dedent(
             """
-            This regular expression is applied to each submission file and MUST
-            be supplied by the instructor.  This regular expression MUST
+            This regular expression is applied to each submission filename and
+            MUST be supplied by the instructor. This regular expression MUST
             provide the `(?P<student_id>...)` and `(?P<file_id>...)` named
             group expressions. Optionally this regular expression can also
             provide the `(?P<first_name>...)`, `(?P<last_name>...)`,

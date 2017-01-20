@@ -86,7 +86,7 @@ class ZipCollectApp(NbGrader):
         By default the collection of files in the `extracted_directory` is
         managed via the :class:`~nbgrader.plugins.zipcollect.FileNameProcessor`
         plugin. Each filename is sent to the plugin, which in turn returns an
-        object containing the `student_id`, `notebook_id`, `first_name`,
+        object containing the `student_id`, `file_id`, `first_name`,
         `last_name`, `email`, and `timestamp` data. For more information run:
 
             nbgrader zip_collect --help-all
@@ -162,7 +162,7 @@ class ZipCollectApp(NbGrader):
     ).tag(config=True)
 
     zip_ext = List(
-        ['.zip', '.gz'],
+        ['.zip', '.gz', '.tar.gz'],
         help=dedent(
             """
             List of valid archive (zip) filename extensions to extract. Any
@@ -357,12 +357,9 @@ class ZipCollectApp(NbGrader):
         Dict: Collected data object of the form
             {
                 student_id: {
-                    first_name: name,
-                    last_name: surname,
-                    email: email,
-                    files: [src_file1, ...],
-                    dests: [dest_file1, ...],
-                    notebooks: [notebook_id1, ...],
+                    src_files: [src_file1, ...],
+                    dest_files: [dest_file1, ...],
+                    file_ids: [file_id1, ...],
                     timestamps: [timestamp1, ...],
                 }, ...
             }
@@ -415,7 +412,13 @@ class ZipCollectApp(NbGrader):
 
             timestamp = parse_utc(self.get_timestamp())
             if info.timestamp:
-                timestamp = parse_utc(info.timestamp)
+                try:
+                    timestamp = parse_utc(info.timestamp)
+                except ValueError:
+                    self.log.warn(
+                        "Could not parse the timestamp string. "
+                        "Setting timestamp to the current time."
+                    )
 
             if info.student_id in data.keys():
                 if submission not in data[info.student_id]['file_ids']:
@@ -461,9 +464,9 @@ class ZipCollectApp(NbGrader):
             Collect data object of the form
                 {
                     student_id: {
-                        files: [src_file1, ...],
-                        dests: [dest_file1, ...],
-                        notebooks: [notebook_id1, ...],
+                        src_files: [src_file1, ...],
+                        dest_files: [dest_file1, ...],
+                        file_ids: [file_id1, ...],
                         timestamps: [timestamp1, ...],
                     }, ...
                 }
@@ -477,7 +480,7 @@ class ZipCollectApp(NbGrader):
             self._mkdirs_if_missing(dest_path)
             self._clear_existing_files(dest_path)
 
-            timestamp = max([parse_utc(x) for x in data['timestamps']])
+            timestamp = max(data['timestamps'])
             for i in range(len(data['file_ids'])):
                 src = data['src_files'][i]
                 dest = data['dest_files'][i]
@@ -497,7 +500,7 @@ class ZipCollectApp(NbGrader):
 
     @catch_config_error
     def initialize(self, argv=None):
-        sys.path.append(os.getcwd())
+        sys.path.insert(0, os.getcwd())
         # Add cwd to path so that custom plugins are found and loaded
         super(ZipCollectApp, self).initialize(argv)
 
