@@ -35,7 +35,6 @@ define([
         this.data = undefined;
     };
 
-
     CourseList.prototype.bind_events = function () {
         var that = this;
         this.refresh_element.click(function () {
@@ -73,7 +72,7 @@ define([
             success : $.proxy(this.handle_load_list, this),
             error : utils.log_ajax_error,
         };
-        var url = utils.url_join_encode(this.base_url, 'courses');
+        var url = utils.url_path_join(this.base_url, 'courses');
         ajax(url, settings);
     };
 
@@ -174,7 +173,7 @@ define([
             success : $.proxy(this.handle_load_list, this),
             error : utils.log_ajax_error,
         };
-        var url = utils.url_join_encode(this.base_url, 'assignments');
+        var url = utils.url_path_join(this.base_url, 'assignments');
         ajax(url, settings);
     };
 
@@ -413,7 +412,7 @@ define([
                 };
                 button.text('Fetching...');
                 button.attr('disabled', 'disabled');
-                var url = utils.url_join_encode(
+                var url = utils.url_path_join(
                     that.base_url,
                     'assignments',
                     'fetch'
@@ -448,7 +447,7 @@ define([
                 };
                 button.text('Submitting...');
                 button.attr('disabled', 'disabled');
-                var url = utils.url_join_encode(
+                var url = utils.url_path_join(
                     that.base_url,
                     'assignments',
                     'submit'
@@ -475,7 +474,7 @@ define([
 
     Notebook.prototype.make_row = function () {
         var container = $('<div/>').addClass('col-md-12');
-        var url = utils.url_join_encode(this.base_url, 'tree', this.data.path);
+        var url = utils.url_path_join(this.base_url, 'tree', utils.url_join_encode(this.data.path));
         var link = $('<span/>').addClass('item_name col-sm-6').append(
             $('<a/>')
                 .attr("href", url)
@@ -512,7 +511,7 @@ define([
             };
             button.text('Validating...');
             button.attr('disabled', 'disabled');
-            var url = utils.url_join_encode(
+            var url = utils.url_path_join(
                 that.base_url,
                 'assignments',
                 'validate'
