@@ -410,7 +410,7 @@ class ZipCollectApp(NbGrader):
                 self.submitted_directory, info.student_id, self.assignment_id)
             dest_path = os.path.join(submitted_path, submission)
 
-            timestamp = parse_utc(self.get_timestamp())
+            timestamp = self.get_timestamp()
             if info.timestamp:
                 try:
                     timestamp = parse_utc(info.timestamp)
