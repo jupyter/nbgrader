@@ -1,25 +1,25 @@
 import os
 import re
+import sys
 import shutil
 import datetime
 
 from dateutil.tz import gettz
 from textwrap import dedent
 from traitlets import Bool, Instance, List, Type, Unicode
-from traitlets.config.application import catch_config_error
+from traitlets.config.application import catch_config_error, default
 
 from .baseapp import NbGrader
 
 from ..api import open_gradebook, MissingEntry
-from ..plugins import BasePlugin, FileNameProcessor
+from ..plugins import BasePlugin, FileNameCollectorPlugin
 from ..plugins.zipcollect import CollectInfo
 from ..utils import check_directory, full_split, rmtree, unzip, parse_utc
 from ..utils import find_all_notebooks
 
 aliases = {
     'log-level': 'Application.log_level',
-    'processor': 'ZipCollectApp.plugin_class',
-    'update-db': 'ZipCollectApp.auto_update_database',
+    'collector': 'ZipCollectApp.collector_plugin',
 }
 flags = {
     'debug': (
@@ -33,6 +33,10 @@ flags = {
     'strict': (
         {'ZipCollectApp' : {'strict' : True}},
         "Skip submitted notebooks with invalid names."
+    ),
+    'update-db': (
+        {'ZipCollectApp' : {'auto_update_database' : True}},
+        "Automatically update the database."
     ),
 }
 
@@ -178,8 +182,8 @@ class ZipCollectApp(NbGrader):
         help="Format string for timestamps"
     ).tag(config=True)
 
-    plugin_class = Type(
-        FileNameProcessor,
+    collector_plugin = Type(
+        FileNameCollectorPlugin,
         klass=BasePlugin,
         help=dedent(
             """
@@ -189,12 +193,13 @@ class ZipCollectApp(NbGrader):
         )
     ).tag(config=True)
 
-    plugin_inst = Instance(BasePlugin).tag(config=False)
+    collector_plugin_inst = Instance(FileNameCollectorPlugin).tag(config=False)
 
+    @default("classes")
     def _classes_default(self):
         classes = super(ZipCollectApp, self)._classes_default()
         classes.append(ZipCollectApp)
-        classes.append(self.plugin_class)
+        classes.append(self.collector_plugin)
         return classes
 
     def _format_collect_path(self, collect_step, escape=False):
@@ -262,50 +267,53 @@ class ZipCollectApp(NbGrader):
             self.fail("Invalid timezone: {}".format(self.timezone))
         return datetime.datetime.now(tz).strftime(self.timestamp_format)
 
-    def process_archive_files(self):
-        """Extract archive (zip) files and process files in the
+    def extract_archive_files(self):
+        """Extract archive (zip) files and submission files in the
         `archive_directory`. Files are extracted to the `extracted_directory`.
         Non-archive (zip) files found in the `archive_directory` are copied to
         the `extracted_directory`.
         """
         archive_path = self._format_collect_path(self.archive_directory)
+        extracted_path = self._format_collect_path(self.extracted_directory)
         if not check_directory(archive_path, write=False, execute=True):
-            self.fail("Directory not found: {}".format(archive_path))
+            if not check_directory(archive_path, write=True, execute=True):
+                self.fail("Directory not found: {}".format(archive_path))
 
-        archive_files = sorted(os.listdir(archive_path))
-        archive_files = [os.path.join(archive_path, x) for x in archive_files]
-        if not archive_files:
+        cnt_files = 0
+        for root, _, archive_files in os.walk(archive_path):
+            if archive_files:
+                sub_dir = os.path.relpath(root, archive_path)
+                extract_to = os.path.normpath(os.path.join(extracted_path, sub_dir))
+                self._mkdirs_if_missing(extract_to)
+                self._clear_existing_files(extract_to)
+
+            for zfile in archive_files:
+                zfile = os.path.join(root, zfile)
+                _, ext = os.path.splitext(zfile)
+                if ext in self.zip_ext:
+                    self.log.info("Extracting file: {}".format(zfile))
+                    success, nfiles, msg = unzip(zfile, extract_to, self.zip_ext)
+                    if not success:
+                        self.fail(msg)
+                else:
+                    nfiles = 1
+                    dest = os.path.join(extract_to, os.path.basename(zfile))
+                    self.log.info("Copying file to: {}".format(dest))
+                    shutil.copy(zfile, dest)
+
+                cnt_files += nfiles
+
+        if cnt_files == 0:
             self.log.warning(
                 "No files found in directory: {}".format(archive_path))
             return
 
-        extract_to = self._format_collect_path(self.extracted_directory)
-        self._mkdirs_if_missing(extract_to)
-        self._clear_existing_files(extract_to)
-
-        number_of_files = 0
-        for zfile in archive_files:
-            if os.path.isdir(zfile):
-                self.log.warn("Sub-directory not processed: {}".format(zfile))
-                continue
-
-            root, ext = os.path.splitext(zfile)
-            if ext in self.zip_ext:
-                self.log.info("Extracting file: {}".format(zfile))
-                success, nfiles, msg = unzip(zfile, extract_to, self.zip_ext)
-                if not success:
-                    self.fail(msg)
-            else:
-                nfiles = 1
-                dest = os.path.join(extract_to, os.path.basename(zfile))
-                self.log.info("Copying non-archive file to: {}".format(dest))
-                shutil.copy(zfile, dest)
-
-            number_of_files += nfiles
-
         # Sanity check
-        extracted_file_count = len(os.listdir(extract_to))
-        if number_of_files != extracted_file_count:
+        extracted = 0
+        for _, _, extracted_files in os.walk(extracted_path):
+            extracted += len(extracted_files)
+
+        if cnt_files != extracted:
             self.log.warn(
                 "File count mismatch. Processed or extracted {} files, but "
                 "only found {} files in {}\nThis may be due to the archive "
@@ -313,7 +321,29 @@ class ZipCollectApp(NbGrader):
                 "".format(number_of_files, extracted_file_count, extract_to)
             )
 
-    def _collect_extracted_files(self, src_files):
+    def process_extracted_files(self):
+        """Collect the files in the `extracted_directory` using a given plugin
+        to process the filename of each file. Collected files are transfered to
+        the students `submitted_directory`.
+        """
+        extracted_path = self._format_collect_path(self.extracted_directory)
+        if not check_directory(extracted_path, write=False, execute=True):
+            self.fail("Directory not found: {}".format(extracted_path))
+
+        src_files = []
+        for root, _, extracted_files in os.walk(extracted_path):
+            for _file in extracted_files:
+                src_files.append(os.path.join(root, _file))
+
+        if not src_files:
+            self.log.warning("No files found in directory: {}".format(extracted_path))
+            return
+
+        src_files.sort()
+        collected_data = self._collect_files(src_files)
+        self._transfer_files(collected_data)
+
+    def _collect_files(self, src_files):
         """Collect the files in the `extracted_directory` using a given plugin
         to process the filename of each file.
 
@@ -327,6 +357,9 @@ class ZipCollectApp(NbGrader):
         Dict: Collected data object of the form
             {
                 student_id: {
+                    first_name: name,
+                    last_name: surname,
+                    email: email,
                     files: [src_file1, ...],
                     dests: [dest_file1, ...],
                     notebooks: [notebook_id1, ...],
@@ -334,30 +367,32 @@ class ZipCollectApp(NbGrader):
                 }, ...
             }
         """
-        release_path = self._format_path(
+        self.log.info("Start collecting files...")
+        released_path = self._format_path(
             self.release_directory, '.', self.assignment_id)
-        released_notebooks = find_all_notebooks(release_path)
+        released_notebooks = find_all_notebooks(released_path)
+        if not released_notebooks:
+            self.log.warn(
+                "No release notebooks found for assignment {}, did you forget "
+                "to run 'nbgrader assign'?".format(self.assignment_id)
+            )
 
         data = dict()
         invalid_files = 0
         processed_files = 0
-        self.log.info("Start collecting files...")
         for _file in src_files:
             self.log.info("Processing file: {}".format(_file))
-            info = self.plugin_inst.collect(_file)
-            if info is None or not isinstance(info, CollectInfo):
-                self.log.warn("Skipped. No CollectInfo provided.")
+            info = self.collector_plugin_inst.collect(_file)
+            if info is None or not isinstance(info, (CollectInfo, )):
+                self.log.warn("Skipped. No match information provided.")
                 invalid_files += 1
                 continue
 
             info._validate(self)
-            dest_path = self._format_path(
-                self.submitted_directory, info.student_id, self.assignment_id)
-
             root, ext = os.path.splitext(_file)
-            notebook_id = os.path.splitext(os.path.basename(info.notebook_id))[0]
-            notebook = '{}{}'.format(notebook_id, ext)
-            if notebook not in released_notebooks:
+            file_id = os.path.splitext(os.path.basename(info.file_id))[0]
+            submission = '{}{}'.format(file_id, ext)
+            if ext in ['.ipynb'] and submission not in released_notebooks:
                 if self.strict:
                     self.log.warn("Skipped. Invalid notebook name.")
                     invalid_files += 1
@@ -374,37 +409,36 @@ class ZipCollectApp(NbGrader):
                 invalid_files += 1
                 continue
 
+            submitted_path = self._format_path(
+                self.submitted_directory, info.student_id, self.assignment_id)
+            dest_path = os.path.join(submitted_path, submission)
+
             timestamp = parse_utc(self.get_timestamp())
             if info.timestamp:
-                # FIXME: Not parsing correctly a string of the format
-                # YYYY-MM-DD-HH-MM-SS
                 timestamp = parse_utc(info.timestamp)
-                # self.log.info(info.timestamp)
-                # self.log.info(timestamp)
 
-            dest = os.path.join(dest_path, notebook)
             if info.student_id in data.keys():
-                if notebook not in data[info.student_id]['notebooks']:
-                    data[info.student_id]['files'].append(_file)
-                    data[info.student_id]['dests'].append(dest)
-                    data[info.student_id]['notebooks'].append(notebook)
+                if submission not in data[info.student_id]['file_ids']:
+                    data[info.student_id]['file_ids'].append(submission)
                     data[info.student_id]['timestamps'].append(timestamp)
+                    data[info.student_id]['src_files'].append(_file)
+                    data[info.student_id]['dest_files'].append(dest_path)
                 else:
-                    ind = data[info.student_id]['notebooks'].index(notebook)
+                    ind = data[info.student_id]['file_ids'].index(submission)
                     old_timestamp = data[info.student_id]['timestamps'][ind]
                     if timestamp >= old_timestamp:
-                        data[info.student_id]['files'][ind] = _file
-                        data[info.student_id]['dests'][ind] = dest
                         data[info.student_id]['timestamps'][ind] = timestamp
+                        data[info.student_id]['src_files'][ind] = _file
+                        data[info.student_id]['dest_files'][ind] = dest_path
                     else:
                         self.log.warn("Skipped. Older timestamp found.")
                         invalid_files += 1
             else:
                 data[info.student_id] = dict(
-                    notebooks=[notebook],
+                    file_ids=[submission],
                     timestamps=[timestamp],
-                    files=[_file],
-                    dests=[dest],
+                    src_files=[_file],
+                    dest_files=[dest_path],
                 )
 
             processed_files += 1
@@ -416,10 +450,9 @@ class ZipCollectApp(NbGrader):
             )
         else:
             self.log.info("{} files collected".format(processed_files))
-
         return data
 
-    def _transfer_extracted_files(self, collection):
+    def _transfer_files(self, collected_data):
         """Transfer collected files to the students `submitted_directory`.
 
         Arguments
@@ -435,18 +468,21 @@ class ZipCollectApp(NbGrader):
                     }, ...
                 }
         """
+        if not collected_data:
+            return
+
         self.log.info("Start transfering files...")
-        for student_id, data in collection.items():
+        for student_id, data in collected_data.items():
             dest_path = self._format_path(self.submitted_directory, student_id, self.assignment_id)
             self._mkdirs_if_missing(dest_path)
             self._clear_existing_files(dest_path)
 
-            timestamp = max(data['timestamps'])
-            for i in range(len(data['notebooks'])):
-                src = data['files'][i]
-                dest = data['dests'][i]
+            timestamp = max([parse_utc(x) for x in data['timestamps']])
+            for i in range(len(data['file_ids'])):
+                src = data['src_files'][i]
+                dest = data['dest_files'][i]
                 self.log.info('Copying from: {}'.format(src))
-                self.log.info('Copying to: {}'.format(dest))
+                self.log.info('  Copying to: {}'.format(dest))
                 shutil.copy(src, dest)
 
             dest = os.path.join(dest_path, 'timestamp.txt')
@@ -454,30 +490,15 @@ class ZipCollectApp(NbGrader):
             with open(dest, 'w') as fh:
                 fh.write("{}".format(timestamp))
 
-    def process_extracted_files(self):
-        """Collect the files in the `extracted_directory` using a given plugin
-        to process the filename of each file. Collected files are transfered to
-        the students `submitted_directory`.
-        """
-        src_path = self._format_collect_path(self.extracted_directory)
-        if not check_directory(src_path, write=False, execute=True):
-            self.fail("Directory not found: {}".format(src_path))
-
-        src_files = sorted(os.listdir(src_path))
-        src_files = [os.path.join(src_path, x) for x in src_files]
-        if not src_files:
-            self.log.warning("No files found in directory: {}".format(src_path))
-            return
-
-        data = self._collect_extracted_files(src_files)
-        self._transfer_extracted_files(data)
-
-    def init_plugin(self):
-        self.log.info("Using file processor: %s", self.plugin_class.__name__)
-        self.plugin_inst = self.plugin_class(parent=self)
+    def init_plugins(self):
+        self.log.info(
+            "Using file collector: %s", self.collector_plugin.__name__)
+        self.collector_plugin_inst = self.collector_plugin(parent=self)
 
     @catch_config_error
     def initialize(self, argv=None):
+        sys.path.append(os.getcwd())
+        # Add cwd to path so that custom plugins are found and loaded
         super(ZipCollectApp, self).initialize(argv)
 
         # set assignemnt and course
@@ -491,9 +512,8 @@ class ZipCollectApp(NbGrader):
                 "nbgrader zip_collect ASSIGNMENT"
             )
 
-        self.init_plugin()
-
     def start(self):
         super(ZipCollectApp, self).start()
-        self.process_archive_files()
+        self.init_plugins()
+        self.extract_archive_files()
         self.process_extracted_files()

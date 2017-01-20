@@ -16,8 +16,8 @@ class CollectInfo(object):
     -----------------
     student_id: str
         The student id (This MUST be provided)
-    notebook_id: str
-        The notebook id (This MUST be provided)
+    file_id: str
+        The file id (This MUST be provided)
     first_name: str
         The students first name (Optional)
     last_name: str
@@ -30,7 +30,7 @@ class CollectInfo(object):
 
     def __init__(self, **kwargs):
         self.student_id = kwargs.get('student_id', None)
-        self.notebook_id = kwargs.get('notebook_id', None)
+        self.file_id = kwargs.get('file_id', None)
         self.first_name = kwargs.get('first_name', None)
         self.last_name = kwargs.get('last_name', None)
         self.email = kwargs.get('email', None)
@@ -40,7 +40,7 @@ class CollectInfo(object):
         """Validate the provided class attributes."""
         attr_keys = [
             'student_id',
-            'notebook_id',
+            'file_id',
             'first_name',
             'last_name',
             'email',
@@ -49,21 +49,21 @@ class CollectInfo(object):
         for key in attr_keys:
             attr = getattr(self, key)
             if attr is None:
-                if key in ['student_id', 'notebook_id']:
+                if key in ['student_id', 'file_id']:
                     app.fail(
                         "Expected processor {} to provide the {} from the "
                         "submission file name."
-                        "".format(app.plugin_class.__name__, key)
+                        "".format(app.collector_plugin.__name__, key)
                     )
             elif not isinstance(attr, six.string_types):
                 app.fail(
                     "Expected processor {} to provide a string for {} from "
                     "the submission file name."
-                    "".format(app.plugin_class.__name__, key)
+                    "".format(app.collector_plugin.__name__, key)
                 )
 
 
-class FileNameProcessor(BasePlugin):
+class FileNameCollectorPlugin(BasePlugin):
     """Submission filename processor plugin for the
     :class:`~nbgrader.apps.zipcollectapp.ZipCollectApp`
     """
@@ -74,7 +74,7 @@ class FileNameProcessor(BasePlugin):
             """
             This regular expression is applied to each submission file and MUST
             be supplied by the instructor.  This regular expression MUST
-            provide the `(?P<student_id>...)` and `(?P<notebook_id>...)` named
+            provide the `(?P<student_id>...)` and `(?P<file_id>...)` named
             group expressions. Optionally this regular expression can also
             provide the `(?P<first_name>...)`, `(?P<last_name>...)`,
             `(?P<email>...)`, and `(?P<timestamp>...)` named group expressions.
@@ -84,7 +84,7 @@ class FileNameProcessor(BasePlugin):
 
             then this `named_regexp` could be:
 
-                ".*_(?P<student_id>\w+)_attempt_(?P<timestamp>[0-9\-]+)_(?P<notebook_id>\w+)"
+                ".*_(?P<student_id>\w+)_attempt_(?P<timestamp>[0-9\-]+)_(?P<file_id>\w+)"
 
             For named group regular expression examples see
             https://docs.python.org/howto/regex.html
@@ -154,6 +154,6 @@ class FileNameProcessor(BasePlugin):
             return None
 
         kwargs = self._match(submitted_file)
-        if kwargs is None:
+        if not kwargs:
             return None
         return CollectInfo(**kwargs)
