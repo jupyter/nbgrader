@@ -147,7 +147,6 @@ class FileNameCollectorPlugin(BasePlugin):
             skipped
         """
         root, ext = os.path.splitext(submitted_file)
-        filename = os.path.basename(submitted_file)
 
         # Skip any files without the correct extension
         if ext not in self.valid_ext:

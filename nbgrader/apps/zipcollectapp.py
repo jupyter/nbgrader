@@ -23,19 +23,19 @@ aliases = {
 }
 flags = {
     'debug': (
-        {'Application' : {'log_level' : 'DEBUG'}},
+        {'Application': {'log_level': 'DEBUG'}},
         "set log level to DEBUG (maximize logging output)"
     ),
     'force': (
-        {'ZipCollectApp' : {'force' : True}},
+        {'ZipCollectApp': {'force': True}},
         "Force overwrite of existing files."
     ),
     'strict': (
-        {'ZipCollectApp' : {'strict' : True}},
+        {'ZipCollectApp': {'strict': True}},
         "Skip submitted notebooks with invalid names."
     ),
     'update-db': (
-        {'ZipCollectApp' : {'auto_update_database' : True}},
+        {'ZipCollectApp': {'auto_update_database': True}},
         "Automatically update the database."
     ),
 }
@@ -318,7 +318,7 @@ class ZipCollectApp(NbGrader):
                 "File count mismatch. Processed or extracted {} files, but "
                 "only found {} files in {}\nThis may be due to the archive "
                 "(zip) file/s either containing duplicates or sub-directories"
-                "".format(number_of_files, extracted_file_count, extract_to)
+                "".format(cnt_files, extracted, extract_to)
             )
 
     def process_extracted_files(self):
@@ -476,7 +476,8 @@ class ZipCollectApp(NbGrader):
 
         self.log.info("Start transfering files...")
         for student_id, data in collected_data.items():
-            dest_path = self._format_path(self.submitted_directory, student_id, self.assignment_id)
+            dest_path = self._format_path(
+                self.submitted_directory, student_id, self.assignment_id)
             self._mkdirs_if_missing(dest_path)
             self._clear_existing_files(dest_path)
 
