@@ -12,9 +12,9 @@ from traitlets.config.application import catch_config_error, default
 from .baseapp import NbGrader
 
 from ..api import open_gradebook, MissingEntry
-from ..plugins import BasePlugin, FileNameCollectorPlugin
+from ..plugins import BasePlugin, ExtractorPlugin, FileNameCollectorPlugin
 from ..plugins.zipcollect import CollectInfo
-from ..utils import check_directory, full_split, rmtree, unzip, parse_utc
+from ..utils import check_directory, full_split, rmtree, parse_utc
 from ..utils import find_all_notebooks
 
 aliases = {
@@ -173,6 +173,17 @@ class ZipCollectApp(NbGrader):
         help="Format string for timestamps"
     ).tag(config=True)
 
+    extractor_plugin = Type(
+        ExtractorPlugin,
+        klass=BasePlugin,
+        help=dedent(
+            """
+            The plugin class for extracting the archive files in the
+            `archive_directory`.
+            """
+        )
+    ).tag(config=True)
+
     collector_plugin = Type(
         FileNameCollectorPlugin,
         klass=BasePlugin,
@@ -185,6 +196,7 @@ class ZipCollectApp(NbGrader):
     ).tag(config=True)
 
     collector_plugin_inst = Instance(FileNameCollectorPlugin).tag(config=False)
+    extractor_plugin_inst = Instance(ExtractorPlugin).tag(config=False)
 
     @default("classes")
     def _classes_default(self):
@@ -258,47 +270,7 @@ class ZipCollectApp(NbGrader):
             if not check_directory(archive_path, write=True, execute=True):
                 self.fail("Directory not found: {}".format(archive_path))
 
-        cnt_files = 0
-        for root, _, archive_files in os.walk(archive_path):
-            if archive_files:
-                sub_dir = os.path.relpath(root, archive_path)
-                extract_to = os.path.normpath(os.path.join(extracted_path, sub_dir))
-                self._mkdirs_if_missing(extract_to)
-                self._clear_existing_files(extract_to)
-
-            for zfile in archive_files:
-                zfile = os.path.join(root, zfile)
-                _, ext = os.path.splitext(zfile)
-                if ext in self.zip_ext:
-                    self.log.info("Extracting file: {}".format(zfile))
-                    success, nfiles, msg = unzip(zfile, extract_to, self.zip_ext)
-                    if not success:
-                        self.fail(msg)
-                else:
-                    nfiles = 1
-                    dest = os.path.join(extract_to, os.path.basename(zfile))
-                    self.log.info("Copying file to: {}".format(dest))
-                    shutil.copy(zfile, dest)
-
-                cnt_files += nfiles
-
-        if cnt_files == 0:
-            self.log.warning(
-                "No files found in directory: {}".format(archive_path))
-            return
-
-        # Sanity check
-        extracted = 0
-        for _, _, extracted_files in os.walk(extracted_path):
-            extracted += len(extracted_files)
-
-        if cnt_files != extracted:
-            self.log.warn(
-                "File count mismatch. Processed or extracted {} files, but "
-                "only found {} files in {}\nThis may be due to the archive "
-                "(zip) file/s either containing duplicates or sub-directories"
-                "".format(cnt_files, extracted, extract_to)
-            )
+        self.extractor_plugin_inst.extract(archive_path, extracted_path)
 
     def process_extracted_files(self):
         """Collect the files in the `extracted_directory` using a given plugin
@@ -469,6 +441,10 @@ class ZipCollectApp(NbGrader):
                 fh.write("{}".format(timestamp))
 
     def init_plugins(self):
+        self.log.info(
+            "Using file extractor: %s", self.extractor_plugin.__name__)
+        self.extractor_plugin_inst = self.extractor_plugin(parent=self)
+
         self.log.info(
             "Using file collector: %s", self.collector_plugin.__name__)
         self.collector_plugin_inst = self.collector_plugin(parent=self)
