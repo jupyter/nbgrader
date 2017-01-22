@@ -153,17 +153,6 @@ class AssignApp(BaseNbConvertApp):
         extra_config.NbGrader.notebook_id = '*'
         return extra_config
 
-    def _load_config(self, cfg, **kwargs):
-        if 'create_assignment' in cfg.AssignApp:
-            self.log.warn(
-                "The AssignApp.create_assignment (or the --create flag) option is "
-                "deprecated. Please specify your assignments through the "
-                "`NbGrader.db_assignments` variable in your nbgrader config file."
-            )
-            del cfg.AssignApp.create_assignment
-
-        super(AssignApp, self)._load_config(cfg, **kwargs)
-
     def _clean_old_notebooks(self, assignment_id, student_id):
         gb = Gradebook(self.db_url)
         assignment = gb.find_assignment(assignment_id)
@@ -209,14 +198,15 @@ class AssignApp(BaseNbConvertApp):
         # try to get the assignment from the database, and throw an error if it
         # doesn't exist
         if not self.no_database:
-            assignment = None
+            assignment = {}
             for a in self.db_assignments:
                 if a['name'] == assignment_id:
                     assignment = a.copy()
                     break
 
-            if assignment is not None:
-                del assignment['name']
+            if assignment or self.create_assignment:
+                if 'name' in assignment:
+                    del assignment['name']
                 self.log.info("Updating/creating assignment '%s': %s", assignment_id, assignment)
                 gb = Gradebook(self.db_url)
                 gb.update_or_create_assignment(assignment_id, **assignment)

@@ -33,8 +33,8 @@ class TestNbGraderAssign(BaseTestApp):
         """Is an error thrown if the assignment doesn't exist?"""
         self._empty_notebook(join(course_dir, 'source', 'ps1', 'foo.ipynb'))
         run_nbgrader(["assign", "ps1"], retcode=1)
-        # check that the --create flag is properly deprecated
-        run_nbgrader(["assign", "ps1", "--create"], retcode=1)
+        # check that the --create flag works
+        run_nbgrader(["assign", "ps1", "--create"])
 
     def test_single_file(self, course_dir, temp_cwd):
         """Can a single file be assigned?"""
