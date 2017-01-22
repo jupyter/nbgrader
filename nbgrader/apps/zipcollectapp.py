@@ -34,10 +34,6 @@ flags = {
         {'ZipCollectApp': {'strict': True}},
         "Skip submitted notebooks with invalid names."
     ),
-    'update-db': (
-        {'ZipCollectApp': {'auto_update_database': True}},
-        "Automatically update the database."
-    ),
 }
 
 
@@ -108,11 +104,6 @@ class ZipCollectApp(NbGrader):
     strict = Bool(
         default_value=False,
         help="Skip submitted notebooks with invalid names."
-    ).tag(config=True)
-
-    auto_update_database = Bool(
-        default_value=False,
-        help="Automatically update the database and add missing students."
     ).tag(config=True)
 
     collect_directory_structure = Unicode(
@@ -241,24 +232,12 @@ class ZipCollectApp(NbGrader):
                 "previously existing files".format(path)
             )
 
-    def _create_or_update_student(self, info):
-        if not self.auto_update_database:
-            try:
-                with open_gradebook(self.db_url) as gradebook:
-                    return gradebook.find_student(info.student_id)
-            except MissingEntry:
-                return None
-
-        else:
-            kwargs = dict()
-            for key in ['first_name', 'last_name', 'email']:
-                value = getattr(info, key)
-                if value is not None:
-                    kwargs.update({key: value})
-
-            self.log.info("Updating database for student {}.".format(info.student_id))
+    def _find_student(self, info):
+        try:
             with open_gradebook(self.db_url) as gradebook:
-                return gradebook.update_or_create_student(info.student_id, **kwargs)
+                return gradebook.find_student(info.student_id)
+        except MissingEntry:
+            return None
 
     def get_timestamp(self):
         """Return the timestamp using the configured timezone."""
@@ -396,13 +375,8 @@ class ZipCollectApp(NbGrader):
                     continue
                 self.log.warn("Invalid notebook name.")
 
-            student = self._create_or_update_student(info)
-            if student is None:
-                self.log.warn(
-                    "Skipped. Student {} not found in gradebook. Run with "
-                    "--update-db flag to automatically update the database "
-                    "and add missing students."
-                )
+            if self._find_student(info) is None:
+                self.log.warn("Skipped. Student {} not found in gradebook.")
                 invalid_files += 1
                 continue
 
