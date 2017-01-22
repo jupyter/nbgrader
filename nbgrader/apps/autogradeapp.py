@@ -129,17 +129,16 @@ class AutogradeApp(BaseNbConvertApp):
 
     preprocessors = List([])
 
-    @observe("config")
-    def _config_changed(self, change):
-        if 'create_student' in change['new'].AutogradeApp:
+    def _load_config(self, cfg, **kwargs):
+        if 'create_student' in cfg.AutogradeApp:
             self.log.warn(
                 "The AutogradeApp.create_student (or the --create flag) option is "
                 "deprecated. Please specify your assignments through the "
                 "`NbGrader.db_students` variable in your nbgrader config file."
             )
-            del change['new'].AutogradeApp.create_student
+            del cfg.AutogradeApp.create_student
 
-        super(AutogradeApp, self)._config_changed(change)
+        super(AutogradeApp, self)._load_config(cfg, **kwargs)
 
     def init_assignment(self, assignment_id, student_id):
         super(AutogradeApp, self).init_assignment(assignment_id, student_id)
