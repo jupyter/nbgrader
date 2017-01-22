@@ -331,55 +331,52 @@ class NbGrader(JupyterApp):
         else:
             return None
 
-    @observe("config")
-    def _config_changed(self, change):
-        new = change['new']
-
-        if 'NbGraderConfig' in new:
+    def _load_config(self, cfg, **kwargs):
+        if 'NbGraderConfig' in cfg:
             self.log.warn(
                 "Use NbGrader in config, not NbGraderConfig. Outdated config:\n%s",
                 '\n'.join(
                     'NbGraderConfig.{key} = {value!r}'.format(key=key, value=value)
-                    for key, value in new.NbGraderConfig.items()
+                    for key, value in cfg.NbGraderConfig.items()
                 )
             )
-            new.NbGrader.merge(new.NbGraderConfig)
-            del new.NbGraderConfig
+            cfg.NbGrader.merge(cfg.NbGraderConfig)
+            del cfg.NbGraderConfig
 
-        if 'BasicConfig' in new:
+        if 'BasicConfig' in cfg:
             self.log.warn(
                 "Use NbGrader in config, not BasicConfig. Outdated config:\n%s",
                 '\n'.join(
                     'BasicConfig.{key} = {value!r}'.format(key=key, value=value)
-                    for key, value in new.BasicConfig.items()
+                    for key, value in cfg.BasicConfig.items()
                 )
             )
-            new.NbGrader.merge(new.BasicConfig)
-            del new.BasicConfig
+            cfg.NbGrader.merge(cfg.BasicConfig)
+            del cfg.BasicConfig
 
-        if 'BaseNbGraderApp' in new:
+        if 'BaseNbGraderApp' in cfg:
             self.log.warn(
                 "Use NbGrader in config, not BaseNbGraderApp. Outdated config:\n%s",
                 '\n'.join(
                     'BaseNbGraderApp.{key} = {value!r}'.format(key=key, value=value)
-                    for key, value in new.BaseNbGraderApp.items()
+                    for key, value in cfg.BaseNbGraderApp.items()
                 )
             )
-            new.NbGrader.merge(new.BaseNbGraderApp)
-            del new.BaseNbGraderApp
+            cfg.NbGrader.merge(cfg.BaseNbGraderApp)
+            del cfg.BaseNbGraderApp
 
-        if 'BaseApp' in new:
+        if 'BaseApp' in cfg:
             self.log.warn(
                 "Use NbGrader in config, not BaseApp. Outdated config:\n%s",
                 '\n'.join(
                     'BaseApp.{key} = {value!r}'.format(key=key, value=value)
-                    for key, value in new.BaseApp.items()
+                    for key, value in cfg.BaseApp.items()
                 )
             )
-            new.NbGrader.merge(new.BaseApp)
-            del new.BaseApp
+            cfg.NbGrader.merge(cfg.BaseApp)
+            del cfg.BaseApp
 
-        super(NbGrader, self)._config_changed(change)
+        super(NbGrader, self)._load_config(cfg, **kwargs)
 
     def fail(self, msg, *args):
         """Log the error msg using self.log.error and exit using sys.exit(1)."""

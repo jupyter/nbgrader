@@ -120,12 +120,9 @@ class HubAuth(BaseAuth):
         )
     ).tag(config=True)
 
-    @observe("config")
-    def _config_changed(self, change):
-        new = change['new']
-
+    def _load_config(self, cfg, **kwargs):
         def check_option(name, instead=None):
-            if name in new.HubAuth:
+            if name in cfg.HubAuth:
                 msg = "HubAuth.{} is no longer a valid configuration option.".format(name)
                 if instead:
                     msg += " Please use HubAuth.{} instead.".format(instead)
@@ -149,7 +146,7 @@ class HubAuth(BaseAuth):
         check_option("hubapi_token", "jupyterhub_api_token")
         check_option("remap_url", "jupyterhub_service_prefix")
 
-        super(HubAuth, self)._config_changed(change)
+        super(HubAuth, self)._load_config(cfg, **kwargs)
 
     ############################################################################
     # Begin formgrader implementation
