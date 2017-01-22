@@ -129,30 +129,20 @@ class AutogradeApp(BaseNbConvertApp):
 
     preprocessors = List([])
 
-    def _load_config(self, cfg, **kwargs):
-        if 'create_student' in cfg.AutogradeApp:
-            self.log.warn(
-                "The AutogradeApp.create_student (or the --create flag) option is "
-                "deprecated. Please specify your assignments through the "
-                "`NbGrader.db_students` variable in your nbgrader config file."
-            )
-            del cfg.AutogradeApp.create_student
-
-        super(AutogradeApp, self)._load_config(cfg, **kwargs)
-
     def init_assignment(self, assignment_id, student_id):
         super(AutogradeApp, self).init_assignment(assignment_id, student_id)
 
         # try to get the student from the database, and throw an error if it
         # doesn't exist
-        student = None
+        student = {}
         for s in self.db_students:
             if s['id'] == student_id:
                 student = s.copy()
                 break
 
-        if student is not None:
-            del student['id']
+        if student or self.create_student:
+            if 'id' in student:
+                del student['id']
             self.log.info("Creating/updating student with ID '%s': %s", student_id, student)
             gb = Gradebook(self.db_url)
             gb.update_or_create_student(student_id, **student)

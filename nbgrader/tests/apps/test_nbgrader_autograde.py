@@ -32,8 +32,8 @@ class TestNbGraderAutograde(BaseTestApp):
         self._copy_file(join("files", "submitted-changed.ipynb"), join(course_dir, "submitted", "baz", "ps1", "p1.ipynb"))
         run_nbgrader(["autograde", "ps1", "--db", db], retcode=1)
 
-        # check that --create is properly deprecated
-        run_nbgrader(["autograde", "ps1", "--db", db, "--create"], retcode=1)
+        # check that --create works
+        run_nbgrader(["autograde", "ps1", "--db", db, "--create"])
 
     def test_missing_assignment(self, db, course_dir):
         """Is an error thrown when the assignment is missing?"""
