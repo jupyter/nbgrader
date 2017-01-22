@@ -153,18 +153,16 @@ class AssignApp(BaseNbConvertApp):
         extra_config.NbGrader.notebook_id = '*'
         return extra_config
 
-    @observe("config")
-    def _config_changed(self, change):
-        if 'create_assignment' in change['new'].AssignApp:
+    def _load_config(self, cfg, **kwargs):
+        if 'create_assignment' in cfg.AssignApp:
             self.log.warn(
                 "The AssignApp.create_assignment (or the --create flag) option is "
                 "deprecated. Please specify your assignments through the "
                 "`NbGrader.db_assignments` variable in your nbgrader config file."
             )
-            del change['new'].AssignApp.create_assignment
+            del cfg.AssignApp.create_assignment
 
-        super(AssignApp, self)._config_changed(change)
-
+        super(AssignApp, self)._load_config(cfg, **kwargs)
 
     def _clean_old_notebooks(self, assignment_id, student_id):
         gb = Gradebook(self.db_url)

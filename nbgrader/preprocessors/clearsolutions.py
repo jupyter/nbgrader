@@ -42,28 +42,25 @@ class ClearSolutions(NbGraderPreprocessor):
         )
     ).tag(config=True)
 
-    @observe("config")
-    def _config_changed(self, change):
-        new = change['new']
-
-        if 'code_stub' in new.ClearSolutions:
-            if not isinstance(new.ClearSolutions.code_stub, dict):
+    def _load_config(self, cfg, **kwargs):
+        if 'code_stub' in cfg.ClearSolutions:
+            if not isinstance(cfg.ClearSolutions.code_stub, dict):
                 self.log.warn(
                     "The ClearSolutions.code_stub option must now be given as a "
                     "dictionary with keys for the language of the notebook. I will "
                     "automatically convert ClearSolutions.code_stub to a dictionary "
                     "with a key for 'python', but note that this functionality may "
                     "be removed in future releases.")
-                new.ClearSolutions.code_stub = dict(python=new.ClearSolutions.code_stub)
+                cfg.ClearSolutions.code_stub = dict(python=cfg.ClearSolutions.code_stub)
 
-        if 'comment_mark' in new.ClearSolutions:
+        if 'comment_mark' in cfg.ClearSolutions:
             self.log.warn(
                 "The ClearSolutions.comment_mark config option is deprecated. "
                 "Please include the comment mark in ClearSolutions.begin_solution_delimeter "
                 "and ClearSolutions.end_solution_delimeter instead.")
-            del new.ClearSolutions.comment_mark
+            del cfg.ClearSolutions.comment_mark
 
-        super(ClearSolutions, self)._config_changed(change)
+        super(ClearSolutions, self)._load_config(cfg, **kwargs)
 
     def _replace_solution_region(self, cell, language):
         """Find a region in the cell that is delimeted by
