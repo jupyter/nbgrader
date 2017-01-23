@@ -37,6 +37,10 @@ class TestNbGraderZipCollect(BaseTestApp):
         """Does the help display without error?"""
         run_nbgrader(["zip_collect", "--help-all"])
 
+    def test_args(self):
+        # Should not fail with no assignment id
+        run_nbgrader(["zip_collect"], retcode=1)
+
     def test_no_archive_dir(self, db, course_dir):
         # Should not fail with no archive_directory
         run_nbgrader(["zip_collect", "ps1"])
@@ -110,7 +114,7 @@ class TestNbGraderZipCollect(BaseTestApp):
                 """
             ))
 
-        # No submitted files is student not in db
+        # No submitted files if student not in db
         run_nbgrader(["zip_collect", "ps1"])
         assert not os.path.isdir(submitted_dir)
 

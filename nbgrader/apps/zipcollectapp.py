@@ -199,23 +199,17 @@ class ZipCollectApp(NbGrader):
         classes.append(self.collector_plugin)
         return classes
 
-    def _format_collect_path(self, collect_step, escape=False):
+    def _format_collect_path(self, collect_step):
         kwargs = dict(
             downloaded=self.downloaded_directory,
             assignment_id=self.assignment_id,
             collect_step=collect_step,
         )
 
-        if escape:
-            base = re.escape(self.course_directory)
-            split = full_split(self.collect_directory_structure)
-            structure = [x.format(**kwargs) for x in split]
-            path = re.escape(os.path.sep).join([base] + structure)
-        else:
-            path = os.path.join(
-                self.course_directory,
-                self.collect_directory_structure,
-            ).format(**kwargs)
+        path = os.path.join(
+            self.course_directory,
+            self.collect_directory_structure,
+        ).format(**kwargs)
 
         return path
 
