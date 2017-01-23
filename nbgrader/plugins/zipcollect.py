@@ -72,6 +72,17 @@ class ExtractorPlugin(BasePlugin):
         help="Force overwrite of existing files."
     ).tag(config=True)
 
+    zip_ext = List(
+        ['.zip', '.gz', '.tar.gz'],
+        help=dedent(
+            """
+            List of valid archive (zip) filename extensions to extract. Any
+            archive (zip) files with an extension not in this list are copied
+            to the `extracted_directory`.
+            """
+        )
+    ).tag(config=True)
+
     def _mkdirs_if_missing(self, path):
         if not check_directory(path, write=True, execute=True):
             self.log.warn("Directory not found. Creating: {}".format(path))

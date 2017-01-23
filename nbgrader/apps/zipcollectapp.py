@@ -152,17 +152,6 @@ class ZipCollectApp(NbGrader):
         )
     ).tag(config=True)
 
-    zip_ext = List(
-        ['.zip', '.gz', '.tar.gz'],
-        help=dedent(
-            """
-            List of valid archive (zip) filename extensions to extract. Any
-            archive (zip) files with an extension not in this list are copied
-            to the `extracted_directory`.
-            """
-        )
-    ).tag(config=True)
-
     timezone = Unicode(
         "UTC",
         help="Timezone for recording timestamps"
