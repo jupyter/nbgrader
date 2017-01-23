@@ -66,6 +66,10 @@ class CollectInfo(object):
 
 
 class ExtractorPlugin(BasePlugin):
+    """Submission archive files extractor plugin for the
+    :class:`~nbgrader.apps.zipcollectapp.ZipCollectApp`.
+    Extractor plugin subclasses MUST inherit from this class.
+    """
 
     force = Bool(
         default_value=False,
@@ -84,6 +88,14 @@ class ExtractorPlugin(BasePlugin):
     ).tag(config=True)
 
     def extract(self, archive_path, extracted_path):
+        """Extract archive (zip) files and submission files in the
+        `archive_directory`. Files are extracted to the `extracted_directory`.
+        Non-archive (zip) files found in the `archive_directory` are copied to
+        the `extracted_directory`.
+        This is the main function called by the
+        :class:`~nbgrader.apps.zipcollectapp.ZipCollectApp` for each archive
+        file to be extracted.
+        """
         nfiles = 0
         for root, _, archive_files in os.walk(archive_path):
             if not archive_files:
@@ -138,7 +150,7 @@ class ExtractorPlugin(BasePlugin):
 class FileNameCollectorPlugin(BasePlugin):
     """Submission filename processor plugin for the
     :class:`~nbgrader.apps.zipcollectapp.ZipCollectApp`.
-    Subclasses MUST inherit from this class.
+    Collect plugin subclasses MUST inherit from this class.
     """
 
     named_regexp = Unicode(
