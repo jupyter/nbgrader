@@ -205,26 +205,56 @@ def remove(path):
     # now we can remove the path
     os.remove(path)
 
-def unzip(path, dest, zip_ext=None):
-    """Extract all content from a zip file to a destination folder. Optionally
-    specify a list of valid zip file extensions. Returns success, number of
-    files extracted, message"""
-    zip_ext = list(zip_ext or ['.zip', '.gz'])
-    root, ext = os.path.splitext(path)
+def unzip(src, dest, zip_ext=None, create_own_folder=False, tree=False):
+    """Extract all content from an archive file to a destination folder.
+
+    Arguments
+    ---------
+    src: str
+        Absolute path to the archive file ('/path/to/archive.zip')
+    dest: str
+        Asolute path to extract all content to ('/path/to/extract/')
+
+    Keyword Arguments
+    -----------------
+    zip_ext: list
+        Valid zip file extensions. Default: ['.zip', '.gz', 'tar.gz']
+    create_own_folder: bool
+        Create a sub-folder in 'dest' with the archive file name if True
+        ('/path/to/extract/archive_filename/'). Default: False
+    tree: bool
+        Extract archive files within archive files (into their own
+        sub-directory) if True. Default: False
+    """
+    zip_ext = list(zip_ext or ['.zip', '.gz', 'tar.gz'])
+    filename, ext = os.path.splitext(os.path.basename(src))
     if ext not in zip_ext:
-        return False, 0, "Invalid archive file extension {}: {}".format(ext, path)
+        raise ValueError("Invalid archive file extension {}: {}".format(ext, src))
     if not check_directory(dest, write=True, execute=True):
-        return False, 0, "Directory not found or unwritable: {}".format(dest)
+        raise OSError("Directory not found or unwritable: {}".format(dest))
 
-    try:
-        with zipfile.ZipFile(path, 'r') as zip_file:
-            try:
-                zip_file.extractall(dest)
-                nfiles = len(zip_file.namelist())
-                return True, nfiles, "Files extracted to {}".format(dest)
+    if create_own_folder:
+        dest = os.path.join(dest, filename)
+        if not os.path.isdir(dest):
+            os.makedirs(dest)
 
-            except:
-                return False, 0, "Can't extract archive files: {}".format(path)
+    nfiles = 0
+    with zipfile.ZipFile(src, 'r') as zip_file:
+        for _file in zip_file.namelist():
+            zip_file.extract(_file, os.path.join(dest, _file))
+            nfiles += 1
 
-    except zipfile.BadZipfile as err:
-        return False, 0, "Archive file not readable: {}".format(path)
+            root, basename = os.path.split(_file)
+            filename, ext = os.path.splitext(basename)
+            if tree and ext in zip_ext:
+                src_file = os.path.join(dest, _file)
+                dest_path = os.path.join(dest, root)
+                nfiles += unzip(
+                    src_file,
+                    dest_path,
+                    zip_ext=zip_ext,
+                    create_own_folder=True,
+                    tree=tree
+                )
+
+    return nfiles
