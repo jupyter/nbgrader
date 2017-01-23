@@ -38,22 +38,13 @@ class TestNbGraderZipCollect(BaseTestApp):
         run_nbgrader(["zip_collect", "--help-all"])
 
     def test_no_archive_dir(self, db, course_dir):
-        # Should fail with no archive_directory
-        run_nbgrader(["zip_collect", "ps1"], retcode=1)
-
-    def test_empty_archive_dir(self, db, course_dir, archive_dir):
-        # Should fail with empty archive_directory and no extracted_directory
-        run_nbgrader(["zip_collect", "ps1"], retcode=1)
-
-        # Should not fail with empty archive_directory and existing
-        # extracted_directory
-        os.makedirs(join(archive_dir, "..", "extracted"))
+        # Should not fail with no archive_directory
         run_nbgrader(["zip_collect", "ps1"])
 
     def test_extract_single_notebook(self, db, course_dir, archive_dir):
         extracted_dir = join(archive_dir, "..", "extracted")
         self._make_notebook(archive_dir,
-                'ps1', 'hacker', '2016-01-30-15-30-10', 'problem1.ipynb')
+                'ps1', 'hacker', '2016-01-30-15-30-10', 'problem1')
 
         run_nbgrader(["zip_collect", "ps1"])
         assert os.path.isdir(extracted_dir)
@@ -80,7 +71,7 @@ class TestNbGraderZipCollect(BaseTestApp):
         assert len(os.listdir(join(extracted_dir, "hacker"))) == 1
 
     def test_extract_archive(self, db, course_dir, archive_dir):
-        extracted_dir = join(archive_dir, "..", "extracted")
+        extracted_dir = join(archive_dir, "..", "extracted", "notebooks")
         archive = join(archive_dir, "notebooks.zip")
         self._copy_file(join("files", "notebooks.zip"), archive)
 
@@ -91,15 +82,18 @@ class TestNbGraderZipCollect(BaseTestApp):
     def test_extract_archive_copies(self, db, course_dir, archive_dir):
         extracted_dir = join(archive_dir, "..", "extracted")
         archive1 = join(archive_dir, "notebooks.zip")
-        archive1 = join(archive_dir, "notebooks_copy.zip")
+        archive2 = join(archive_dir, "notebooks_copy.zip")
 
         self._copy_file(join("files", "notebooks.zip"), archive1)
-        self._copy_file(join("files", "notebooks.zip"), archive1)
+        self._copy_file(join("files", "notebooks.zip"), archive2)
 
+        cnt = 0
         run_nbgrader(["zip_collect", "ps1"])
-        nfiles = _count_zip_files(archive1)
+        nfiles = _count_zip_files(archive1) + _count_zip_files(archive2)
         assert os.path.isdir(extracted_dir)
-        assert len(os.listdir(extracted_dir)) == nfiles
+        for _, _, files in os.walk(extracted_dir):
+            cnt += len(files)
+        assert cnt == nfiles
 
     def test_collect_single_notebook(self, db, course_dir, archive_dir):
         extracted_dir = join(archive_dir, "..", "extracted")
@@ -116,7 +110,14 @@ class TestNbGraderZipCollect(BaseTestApp):
                 """
             ))
 
-        run_nbgrader(["zip_collect", "--update-db", "ps1"])
+        # No submitted files is student not in db
+        run_nbgrader(["zip_collect", "ps1"])
+        assert not os.path.isdir(submitted_dir)
+
+        # Re-run with student added to db
+        run_nbgrader(["db", "student", "add", "hacker"])
+        run_nbgrader(["zip_collect", "--force", "ps1"])
+
         assert os.path.isdir(extracted_dir)
         assert len(os.listdir(extracted_dir)) == 1
 
@@ -128,6 +129,8 @@ class TestNbGraderZipCollect(BaseTestApp):
     def test_collect_single_notebook_attempts(self, db, course_dir, archive_dir):
         extracted_dir = join(archive_dir, "..", "extracted")
         submitted_dir = join(course_dir, "submitted")
+
+        run_nbgrader(["db", "student", "add", "hacker"])
         self._make_notebook(archive_dir,
                 'ps1', 'hacker', '2016-01-30-15-30-10', 'problem1')
         self._make_notebook(archive_dir,
@@ -136,7 +139,8 @@ class TestNbGraderZipCollect(BaseTestApp):
                 'ps1', 'hacker', '2016-01-30-15-50-10', 'problem1')
 
         with open('plugin.py', 'w') as fh:
-            fh.write(dedent("""
+            fh.write(dedent(
+                """
                 from nbgrader.plugins import FileNameCollectorPlugin
 
                 class CustomPlugin(FileNameCollectorPlugin):
@@ -151,7 +155,8 @@ class TestNbGraderZipCollect(BaseTestApp):
             ))
 
         with open("nbgrader_config.py", "a") as fh:
-            fh.write(dedent("""
+            fh.write(dedent(
+                """
                 c.ZipCollectApp.collector_plugin = 'plugin.CustomPlugin'
                 c.FileNameCollectorPlugin.named_regexp = (
                     r".+_(?P<student_id>\w+)_attempt_(?P<timestamp>[0-9\-]+)_(?P<file_id>\w+)"
@@ -159,8 +164,7 @@ class TestNbGraderZipCollect(BaseTestApp):
                 """
             ))
 
-        print(os.listdir('.'))
-        run_nbgrader(["zip_collect", "--update-db", "ps1"])
+        run_nbgrader(["zip_collect", "ps1"])
         assert os.path.isdir(extracted_dir)
         assert len(os.listdir(extracted_dir)) == 3
 
@@ -175,9 +179,13 @@ class TestNbGraderZipCollect(BaseTestApp):
     def test_collect_sub_dir_single_notebook(self, db, course_dir, archive_dir):
         extracted_dir = join(archive_dir, "..", "extracted")
         submitted_dir = join(course_dir, "submitted")
-        self._make_notebook(extracted_dir,
+
+        run_nbgrader(["db", "student", "add", "hacker"])
+        run_nbgrader(["db", "student", "add", "bitdiddle"])
+
+        self._make_notebook(archive_dir,
                 'ps1', 'hacker', '2016-01-30-15-30-10', 'problem1')
-        self._make_notebook(join(extracted_dir, 'bitdiddle'),
+        self._make_notebook(join(archive_dir, 'bitdiddle'),
                 'ps1', 'bitdiddle', '2016-01-30-15-30-10', 'problem1')
 
         with open("nbgrader_config.py", "a") as fh:
@@ -189,7 +197,7 @@ class TestNbGraderZipCollect(BaseTestApp):
                 """
             ))
 
-        run_nbgrader(["zip_collect", "--update-db", "ps1"])
+        run_nbgrader(["zip_collect", "ps1"])
         assert os.path.isdir(extracted_dir)
         assert os.path.isdir(submitted_dir)
         assert len(os.listdir(submitted_dir)) == 2
@@ -219,11 +227,12 @@ class TestNbGraderZipCollect(BaseTestApp):
 
         run_nbgrader(["assign", "ps1"])
 
+        run_nbgrader(["db", "student", "add", "hacker"])
         self._make_notebook(archive_dir,
                 'ps1', 'hacker', '2016-01-30-15-30-10', 'myproblem1')
 
         # Should get collected without --strict flag
-        run_nbgrader(["zip_collect", "--update-db", "ps1"])
+        run_nbgrader(["zip_collect", "ps1"])
         assert os.path.isdir(extracted_dir)
         assert len(os.listdir(extracted_dir)) == 1
 
@@ -236,7 +245,7 @@ class TestNbGraderZipCollect(BaseTestApp):
         self._make_notebook(archive_dir,
                 'ps1', 'hacker', '2016-01-30-15-30-10', 'problem1')
 
-        run_nbgrader(["zip_collect", "--force", "--strict", "--update-db", "ps1"])
+        run_nbgrader(["zip_collect", "--force", "--strict", "ps1"])
         assert os.path.isdir(extracted_dir)
         assert len(os.listdir(extracted_dir)) == 2
 

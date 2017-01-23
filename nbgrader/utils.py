@@ -241,7 +241,7 @@ def unzip(src, dest, zip_ext=None, create_own_folder=False, tree=False):
     nfiles = 0
     with zipfile.ZipFile(src, 'r') as zip_file:
         for _file in zip_file.namelist():
-            zip_file.extract(_file, os.path.join(dest, _file))
+            zip_file.extract(_file, dest)
             nfiles += 1
 
             root, basename = os.path.split(_file)

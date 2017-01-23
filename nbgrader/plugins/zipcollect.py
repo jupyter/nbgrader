@@ -83,52 +83,42 @@ class ExtractorPlugin(BasePlugin):
         )
     ).tag(config=True)
 
-    def _mkdirs_if_missing(self, path):
-        if not check_directory(path, write=True, execute=True):
-            self.log.warn("Directory not found. Creating: {}".format(path))
-            os.makedirs(path)
-
-    def _clear_existing_files(self, path):
-        if not os.listdir(path):
-            return
-
-        if self.force:
-            self.log.warn("Clearing existing files in {}".format(path))
-            rmtree(path)
-            os.makedirs(path)
-        else:
-            self.fail(
-                "Directory not empty: {}\nuse the --force option to clear "
-                "previously existing files".format(path)
-            )
-
     def extract(self, archive_path, extracted_path):
-        cnt_files = 0
+        nfiles = 0
         for root, _, archive_files in os.walk(archive_path):
-            if archive_files:
-                sub_dir = os.path.relpath(root, archive_path)
-                extract_to = os.path.normpath(os.path.join(extracted_path, sub_dir))
+            if not archive_files:
+                continue
 
-                self._mkdirs_if_missing(extract_to)
-                self._clear_existing_files(extract_to)
+            extract_to = os.path.normpath(os.path.join(
+                extracted_path,
+                os.path.relpath(root, archive_path)
+            ))
+            if not os.path.isdir(extract_to):
+                os.makedirs(extract_to)
 
             for zfile in archive_files:
                 zfile = os.path.join(root, zfile)
-                _, ext = os.path.splitext(zfile)
+                filename, ext = os.path.splitext(os.path.basename(zfile))
                 if ext in self.zip_ext:
-                    self.log.info("Extracting file: {}".format(zfile))
-                    success, nfiles, msg = unzip(zfile, extract_to, self.zip_ext)
-                    if not success:
-                        self.fail(msg)
+                    self.log.info("Extracting from: {}".format(zfile))
+                    self.log.info("  Extracting to: {}".format(
+                        os.path.join(extract_to, filename)))
+                    nfiles += unzip(
+                        zfile,
+                        extract_to,
+                        zip_ext=self.zip_ext,
+                        create_own_folder=True,
+                        tree=True
+                    )
+
                 else:
-                    nfiles = 1
                     dest = os.path.join(extract_to, os.path.basename(zfile))
-                    self.log.info("Copying file to: {}".format(dest))
+                    self.log.info("Copying from: {}".format(zfile))
+                    self.log.info("  Copying to: {}".format(dest))
                     shutil.copy(zfile, dest)
+                    nfiles += 1
 
-                cnt_files += nfiles
-
-        if cnt_files == 0:
+        if nfiles == 0:
             self.log.warning(
                 "No files found in directory: {}".format(archive_path))
             return
@@ -138,12 +128,10 @@ class ExtractorPlugin(BasePlugin):
         for _, _, extracted_files in os.walk(extracted_path):
             extracted += len(extracted_files)
 
-        if cnt_files != extracted:
+        if nfiles != extracted:
             self.log.warn(
                 "File count mismatch. Processed or extracted {} files, but "
-                "only found {} files in {}\nThis may be due to the archive "
-                "(zip) file/s either containing duplicates or sub-directories"
-                "".format(cnt_files, extracted, extract_to)
+                "only found {} files in {}.".format(nfiles, extracted, extract_to)
             )
 
 

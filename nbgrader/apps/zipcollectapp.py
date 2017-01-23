@@ -6,7 +6,7 @@ import datetime
 
 from dateutil.tz import gettz
 from textwrap import dedent
-from traitlets import Bool, Instance, List, Type, Unicode
+from traitlets import Bool, Instance, Type, Unicode
 from traitlets.config.application import catch_config_error, default
 
 from .baseapp import NbGrader
@@ -20,6 +20,7 @@ from ..utils import find_all_notebooks
 aliases = {
     'log-level': 'Application.log_level',
     'collector': 'ZipCollectApp.collector_plugin',
+    'zip_ext': 'ExtractorPlugin.zip_ext',
 }
 flags = {
     'debug': (
@@ -27,7 +28,10 @@ flags = {
         "set log level to DEBUG (maximize logging output)"
     ),
     'force': (
-        {'ZipCollectApp': {'force': True}},
+        {
+            'ZipCollectApp': {'force': True},
+            'ExtractorPlugin': {'force': True}
+        },
         "Force overwrite of existing files."
     ),
     'strict': (
@@ -190,6 +194,7 @@ class ZipCollectApp(NbGrader):
     @default("classes")
     def _classes_default(self):
         classes = super(ZipCollectApp, self)._classes_default()
+        classes.append(ExtractorPlugin)
         classes.append(ZipCollectApp)
         classes.append(self.collector_plugin)
         return classes
@@ -254,11 +259,13 @@ class ZipCollectApp(NbGrader):
         the `extracted_directory`.
         """
         archive_path = self._format_collect_path(self.archive_directory)
-        extracted_path = self._format_collect_path(self.extracted_directory)
         if not check_directory(archive_path, write=False, execute=True):
-            if not check_directory(archive_path, write=True, execute=True):
-                self.fail("Directory not found: {}".format(archive_path))
+            self.log.warn("Directory not found: {}".format(archive_path))
+            return
 
+        extracted_path = self._format_collect_path(self.extracted_directory)
+        self._mkdirs_if_missing(extracted_path)
+        self._clear_existing_files(extracted_path)
         self.extractor_plugin_inst.extract(archive_path, extracted_path)
 
     def process_extracted_files(self):
@@ -268,7 +275,7 @@ class ZipCollectApp(NbGrader):
         """
         extracted_path = self._format_collect_path(self.extracted_directory)
         if not check_directory(extracted_path, write=False, execute=True):
-            self.fail("Directory not found: {}".format(extracted_path))
+            self.log.warn("Directory not found: {}".format(extracted_path))
 
         src_files = []
         for root, _, extracted_files in os.walk(extracted_path):
@@ -276,7 +283,8 @@ class ZipCollectApp(NbGrader):
                 src_files.append(os.path.join(root, _file))
 
         if not src_files:
-            self.log.warning("No files found in directory: {}".format(extracted_path))
+            self.log.warning(
+                "No files found in directory: {}".format(extracted_path))
             return
 
         src_files.sort()
@@ -337,7 +345,10 @@ class ZipCollectApp(NbGrader):
                 self.log.warn("Invalid notebook name.")
 
             if self._find_student(info) is None:
-                self.log.warn("Skipped. Student {} not found in gradebook.")
+                self.log.warn(
+                    "Skipped. Student {} not found in gradebook."
+                    "".format(info.student_id)
+                )
                 invalid_files += 1
                 continue
 
