@@ -451,8 +451,11 @@ class ZipCollectApp(NbGrader):
 
     @catch_config_error
     def initialize(self, argv=None):
-        sys.path.insert(0, os.getcwd())
-        # Add cwd to path so that custom plugins are found and loaded
+        cwd = os.getcwd()
+        if cwd not in sys.path:
+            # Add cwd to path so that custom plugins are found and loaded
+            sys.path.insert(0, cwd)
+
         super(ZipCollectApp, self).initialize(argv)
 
         # set assignemnt and course
