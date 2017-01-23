@@ -7,7 +7,7 @@ from os.path import join
 
 from .base import BaseTestApp
 from .. import run_nbgrader
-from ...utils import rmtree, parse_utc
+from ...utils import rmtree
 
 
 @pytest.fixture
@@ -44,7 +44,7 @@ class TestNbGraderZipCollect(BaseTestApp):
     def test_extract_single_notebook(self, db, course_dir, archive_dir):
         extracted_dir = join(archive_dir, "..", "extracted")
         self._make_notebook(archive_dir,
-                'ps1', 'hacker', '2016-01-30-15-30-10', 'problem1')
+            'ps1', 'hacker', '2016-01-30-15-30-10', 'problem1')
 
         run_nbgrader(["zip_collect", "ps1"])
         assert os.path.isdir(extracted_dir)
@@ -63,7 +63,7 @@ class TestNbGraderZipCollect(BaseTestApp):
     def test_extract_sub_dir_single_notebook(self, db, course_dir, archive_dir):
         extracted_dir = join(archive_dir, "..", "extracted")
         self._make_notebook(join(archive_dir, 'hacker'),
-                'ps1', 'hacker', '2016-01-30-15-30-10', 'problem1')
+            'ps1', 'hacker', '2016-01-30-15-30-10', 'problem1')
 
         run_nbgrader(["zip_collect", "ps1"])
         assert os.path.isdir(extracted_dir)
@@ -99,7 +99,7 @@ class TestNbGraderZipCollect(BaseTestApp):
         extracted_dir = join(archive_dir, "..", "extracted")
         submitted_dir = join(course_dir, "submitted")
         self._make_notebook(archive_dir,
-                'ps1', 'hacker', '2016-01-30-15-30-10', 'problem1')
+            'ps1', 'hacker', '2016-01-30-15-30-10', 'problem1')
 
         with open("nbgrader_config.py", "a") as fh:
             fh.write(dedent(
@@ -132,11 +132,11 @@ class TestNbGraderZipCollect(BaseTestApp):
 
         run_nbgrader(["db", "student", "add", "hacker"])
         self._make_notebook(archive_dir,
-                'ps1', 'hacker', '2016-01-30-15-30-10', 'problem1')
+            'ps1', 'hacker', '2016-01-30-15-30-10', 'problem1')
         self._make_notebook(archive_dir,
-                'ps1', 'hacker', '2016-01-30-15-40-10', 'problem1')
+            'ps1', 'hacker', '2016-01-30-15-40-10', 'problem1')
         self._make_notebook(archive_dir,
-                'ps1', 'hacker', '2016-01-30-15-50-10', 'problem1')
+            'ps1', 'hacker', '2016-01-30-15-50-10', 'problem1')
 
         with open('plugin.py', 'w') as fh:
             fh.write(dedent(
@@ -175,6 +175,7 @@ class TestNbGraderZipCollect(BaseTestApp):
 
         with open(join(submitted_dir, "hacker", "ps1", 'timestamp.txt')) as ts:
             timestamp = ts.read()
+        assert timestamp == '2016-01-30 15:50:10'
 
     def test_collect_sub_dir_single_notebook(self, db, course_dir, archive_dir):
         extracted_dir = join(archive_dir, "..", "extracted")
@@ -184,9 +185,9 @@ class TestNbGraderZipCollect(BaseTestApp):
         run_nbgrader(["db", "student", "add", "bitdiddle"])
 
         self._make_notebook(archive_dir,
-                'ps1', 'hacker', '2016-01-30-15-30-10', 'problem1')
+            'ps1', 'hacker', '2016-01-30-15-30-10', 'problem1')
         self._make_notebook(join(archive_dir, 'bitdiddle'),
-                'ps1', 'bitdiddle', '2016-01-30-15-30-10', 'problem1')
+            'ps1', 'bitdiddle', '2016-01-30-15-30-10', 'problem1')
 
         with open("nbgrader_config.py", "a") as fh:
             fh.write(dedent(
@@ -229,7 +230,7 @@ class TestNbGraderZipCollect(BaseTestApp):
 
         run_nbgrader(["db", "student", "add", "hacker"])
         self._make_notebook(archive_dir,
-                'ps1', 'hacker', '2016-01-30-15-30-10', 'myproblem1')
+            'ps1', 'hacker', '2016-01-30-15-30-10', 'myproblem1')
 
         # Should get collected without --strict flag
         run_nbgrader(["zip_collect", "ps1"])
@@ -243,7 +244,7 @@ class TestNbGraderZipCollect(BaseTestApp):
 
         # Re-run with --strict flag
         self._make_notebook(archive_dir,
-                'ps1', 'hacker', '2016-01-30-15-30-10', 'problem1')
+            'ps1', 'hacker', '2016-01-30-15-30-10', 'problem1')
 
         run_nbgrader(["zip_collect", "--force", "--strict", "ps1"])
         assert os.path.isdir(extracted_dir)

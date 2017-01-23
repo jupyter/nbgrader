@@ -7,7 +7,7 @@ from textwrap import dedent
 from traitlets import Bool, List, Unicode
 
 from .base import BasePlugin
-from ..utils import check_directory, rmtree, unzip
+from ..utils import unzip
 
 
 class CollectInfo(object):
