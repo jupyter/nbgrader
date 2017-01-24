@@ -568,6 +568,58 @@ class TestNbGraderAutograde(BaseTestApp):
         assert p1 != self._file_contents(join(course_dir, "autograded", "foo", "ps1", "p1.ipynb"))
         assert p2 == self._file_contents(join(course_dir, "autograded", "foo", "ps1", "p2.ipynb"))
 
+    def test_hidden_tests_single_notebook(self, db, course_dir):
+        with open("nbgrader_config.py", "a") as fh:
+            fh.write("""c.NbGrader.db_assignments = [dict(name='ps1', duedate='2015-02-02 14:58:23.948203 PST')]\n""")
+            fh.write("""c.NbGrader.db_students = [dict(id="foo"), dict(id="bar")]""")
+
+        self._copy_file(
+            join("files", "test.ipynb"),
+            join(course_dir, "source", "ps1", "p1.ipynb")
+        )
+        self._copy_file(
+            join("files", "test-hidden-tests.ipynb"),
+            join(course_dir, "source", "ps1", "p2.ipynb")
+        )
+        self._copy_file(
+            join("files", "test-hidden-tests.ipynb"),
+            join(course_dir, "source", "ps1", "p3.ipynb")
+        )
+        run_nbgrader(["assign", "ps1", "--db", db])
+
+        with open(join(course_dir, "release", "ps1", "p2.ipynb"), 'r') as nb:
+            source = nb.read()
+        assert "BEGIN HIDDEN TESTS" not in source
+
+        self._copy_file(
+            join("files", "test.ipynb"),
+            join(course_dir, "submitted", "foo", "ps1", "p1.ipynb")
+            )
+        self._copy_file(
+            join("files", "test-hidden-tests.ipynb"),
+            join(course_dir, "submitted", "foo", "ps1", "p2.ipynb")
+            )
+        self._copy_file(
+            join("files", "submitted-test-fail-on-hidden-tests.ipynb"),
+            join(course_dir, "submitted", "foo", "ps1", "p3.ipynb")
+        )
+        run_nbgrader(["autograde", "ps1", "--db", db])
+
+        assert os.path.exists(join(course_dir, "autograded", "foo", "ps1", "p1.ipynb"))
+        assert os.path.exists(join(course_dir, "autograded", "foo", "ps1", "p2.ipynb"))
+
+        sub_nb = join(course_dir, "autograded", "foo", "ps1", "p2.ipynb")
+        with open(sub_nb, 'r') as nb:
+            source = nb.read()
+        assert "BEGIN HIDDEN TESTS" in source
+
+        gb = Gradebook(db)
+        submission = gb.find_submission("ps1", "foo")
+        nb1, nb2, nb3 = submission.notebooks
+        assert nb1.score == nb2.score
+        assert nb1.score > nb3.score
+        gb.close()
+
     def test_handle_failure(self, course_dir):
         with open("nbgrader_config.py", "a") as fh:
             fh.write("""c.NbGrader.db_assignments = [dict(name='ps1', duedate='2015-02-02 14:58:23.948203 PST')]\n""")
