@@ -49,6 +49,7 @@ flags.update({
     ),
 })
 
+
 class AssignApp(BaseNbConvertApp):
 
     name = u'nbgrader-assign'
@@ -146,9 +147,10 @@ class AssignApp(BaseNbConvertApp):
         CheckCellMetadata,
         ComputeChecksums,
         SaveCells,
-        ClearHiddenTests,  # NB: Clear hidden tests after ComputeChecksums !!!
+        ClearHiddenTests,
         CheckCellMetadata,
     ])
+    # NB: ClearHiddenTests must come after ComputeChecksums and SaveCells !!!
 
     def build_extra_config(self):
         extra_config = super(AssignApp, self).build_extra_config()
@@ -227,4 +229,3 @@ class AssignApp(BaseNbConvertApp):
             # part of the assignment, and if so, remove them
             if self.notebook_id == "*":
                 self._clean_old_notebooks(assignment_id, student_id)
-
