@@ -4,7 +4,8 @@ Customizing how the student version of an assignment looks
 .. seealso::
 
     :doc:`/user_guide/creating_and_grading_assignments`
-        Documentation for ``nbgrader assign``, ``nbgrader autograde``, ``nbgrader formgrade``, and ``nbgrader feedback``.
+        Documentation for ``nbgrader assign``, ``nbgrader autograde``,
+        ``nbgrader formgrade``, and ``nbgrader feedback``.
 
     :doc:`/command_line_tools/nbgrader-assign`
         Command line options for ``nbgrader assign``
@@ -12,18 +13,22 @@ Customizing how the student version of an assignment looks
     :doc:`config_options`
         Details on ``nbgrader_config.py``
 
-Default behavior
-----------------
+"Autograded answer" cells
+-------------------------
 
-By default, ``nbgrader assign`` will replace regions beginning with ``### BEGIN
-SOLUTION`` and ``### END SOLUTION`` with:
+Default behavior
+^^^^^^^^^^^^^^^^
+
+By default, ``nbgrader assign`` will replace regions beginning with
+``### BEGIN SOLUTION`` and ``### END SOLUTION`` with:
 
 .. code:: python
 
     # YOUR CODE HERE
     raise NotImplementedError
 
-Note that the code stubs will be properly indented based on the indentation of the solution delimeters. For example, if your original code is:
+Note that the code stubs will be properly indented based on the indentation of
+the solution delimeters. For example, if your original code is:
 
 .. code:: python
 
@@ -50,7 +55,7 @@ which is ``YOUR ANSWER HERE``.
 
 
 Changing the defaults
----------------------
+^^^^^^^^^^^^^^^^^^^^^
 
 If you need to change these defaults (e.g., if your class doesn't use Python,
 or isn't taught in English), the values can be configured in the
@@ -101,4 +106,70 @@ can be configured through the ``ClearSolutions.text_stub`` option:
 .. code:: python
 
     c.ClearSolutions.text_stub = "Please replace this text with your response."
+
+
+"Autograder tests" cells
+-------------------------
+
+.. versionadded:: 0.5.0
+
+Default behavior
+^^^^^^^^^^^^^^^^
+
+By default, ``nbgrader assign`` will remove regions beginning with
+``### BEGIN HIDDEN TESTS`` and ``### END HIDDEN TESTS``, for example:
+
+.. code:: python
+
+    def validate_answer():
+        assert squares(1) = [1]
+        ### BEGIN HIDDEN TESTS
+        assert squares(2) = [1, 4]
+        ### END HIDDEN TESTS
+
+    validate_answer()
+
+will be released as:
+
+.. code:: python
+
+    def validate_answer():
+        assert squares(1) = [1]
+
+    validate_answer()
+
+.. note::
+
+    Keep in mind that wrapping all tests (for an "Autograder tests" cell) in
+    this special syntax will remove all these tests in the release version and
+    the students will only see a blank cell. It is recommended to have at least
+    one or more visible tests, or a comment in the cell for the students to
+    see.
+
+Changing the defaults
+^^^^^^^^^^^^^^^^^^^^^
+
+If you need to change these defaults (e.g., if your class doesn't use Python,
+or isn't taught in English), the values can be configured in the
+:doc:`nbgrader_config.py <config_options>` file. Most relevant are the options
+to the ``ClearHiddenTests`` preprocessor, which is the part of nbgrader that
+actually clears the solutions when producing the student version of the
+notebook.
+
+You can specify solution delimeters for any languages you want by setting the
+``ClearHiddenTests.begin_test_delimeter`` and
+``ClearHiddenTests.end_test_delimeter`` config options, thus allowing you to
+include notebooks of different languages within the same assignment:
+
+.. code:: python
+
+    c = get_config()
+    c.ClearHiddenTests.begin_test_delimeter = {
+        "python": "### BEGIN HIDDEN TESTS",
+        "javascript": "// BEGIN HIDDEN TESTS"
+    }
+    c.ClearHiddenTests.end_test_delimeter = {
+        "python": "### END HIDDEN TESTS",
+        "javascript": "// END HIDDEN TESTS"
+    }
 

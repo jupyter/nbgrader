@@ -32,15 +32,6 @@ class ClearHiddenTests(NbGraderPreprocessor):
         )
     ).tag(config=True)
 
-    # TODO Move to docs
-    # """
-    # Suppose you want to hide some test cases from your students in a cell.
-    # Place this string before those test cases and the corresponding string
-    # hideend after them.
-    # Suppose you want to hide some test cases from your students in a cell.
-    # Place this string after those tests.
-    # """
-
     def _remove_hidden_test_region(self, cell):
         """Find a region in the cell that is delimeted by
         `self.begin_test_delimeter` and `self.end_test_delimeter` (e.g.  ###
