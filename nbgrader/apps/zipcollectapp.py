@@ -19,6 +19,7 @@ from ..utils import find_all_notebooks
 
 aliases = {
     'log-level': 'Application.log_level',
+    'extractor': 'ZipCollectApp.extractor_plugin',
     'collector': 'ZipCollectApp.collector_plugin',
     'zip_ext': 'ExtractorPlugin.zip_ext',
 }

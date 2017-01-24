@@ -95,6 +95,13 @@ class ExtractorPlugin(BasePlugin):
         This is the main function called by the
         :class:`~nbgrader.apps.zipcollectapp.ZipCollectApp` for each archive
         file to be extracted.
+
+        Arguments
+        ---------
+        archive_path: str
+            Absolute path to the `archive_directory`.
+        extracted_path: str
+            Absolute path to the `extracted_directory`.
         """
         nfiles = 0
         for root, _, archive_files in os.walk(archive_path):
@@ -219,8 +226,8 @@ class FileNameCollectorPlugin(BasePlugin):
         file. Note this function must also return a :class:`CollectApp`
         instance or None for sub-classed plugins.
 
-        Parameters
-        ----------
+        Arguments
+        ---------
         submitted_file: str
             Each submitted file in the ``extracted_directory`` (absolute path).
 

@@ -3,6 +3,40 @@ ZipCollect plugins
 
 .. versionadded:: 0.5.0
 
+Extractor plugin
+----------------
+Extract archive (zip) files in the `archive_directory`. Archive files are
+extracted to the `extracted_directory`. Non-archive (zip) files found in the
+`archive_directory` are copied to the `extracted_directory`. Archive files will
+be extracted into their own sub-directory within the `extracted_directory` and
+any archive files within archives will also be extracted into their own
+sub-directory along the path.
+
+Creating a plugin
+^^^^^^^^^^^^^^^^^
+
+To add your own extractor you can create a plugin class that inherits from
+:class:`~nbgrader.plugins.zipcollect.ExtractorPlugin`. This class needs to only
+implement one method, which is the
+:func:`~nbgrader.plugins..zipcollect.ExtractorPlugin.extract` method (see
+below). Let's say you create your own plugin in the ``myextractor.py`` file,
+and your plugin is called ``MyExtractor``. Then, on the command line, you would
+run::
+
+    nbgrader zip_collect --extractor=myextractor.MyExtractor
+
+which will use your custom extractor rather than the built-in one.
+
+API
+^^^
+
+.. currentmodule:: nbgrader.plugins.zipcollect
+
+.. autoclass:: ExtractorPlugin
+
+    .. automethod:: extract
+
+
 FileNameCollector plugin
 ------------------------
 
@@ -17,7 +51,7 @@ For more information about named group regular expressions see
 `<https://docs.python.org/howto/regex.html>`_
 
 Creating a plugin
------------------
+^^^^^^^^^^^^^^^^^
 
 To add your own processor you can create a plugin class that inherits from
 :class:`~nbgrader.plugins.zipcollect.FileNameCollectorPlugin`. This class needs
@@ -32,7 +66,7 @@ would run::
 which will use your custom processor rather than the built-in one.
 
 API
----
+^^^
 
 .. currentmodule:: nbgrader.plugins.zipcollect
 
