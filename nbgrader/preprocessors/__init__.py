@@ -14,7 +14,7 @@ from .clearoutput import ClearOutput
 from .limitoutput import LimitOutput
 from .deduplicateids import DeduplicateIds
 from .latesubmissions import AssignLatePenalties
-from .removehidden import RemoveHidden
+from .clearhiddentests import ClearHiddenTests
 
 __all__ = [
     "AssignLatePenalties",
@@ -32,5 +32,5 @@ __all__ = [
     "ClearOutput",
     "LimitOutput",
     "DeduplicateIds",
-    "RemoveHidden"
+    "ClearHiddenTests"
 ]

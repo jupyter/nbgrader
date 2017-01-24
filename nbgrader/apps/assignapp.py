@@ -15,7 +15,7 @@ from ..preprocessors import (
     SaveCells,
     CheckCellMetadata,
     ClearOutput,
-    RemoveHidden,
+    ClearHiddenTests,
 )
 
 aliases = {}
@@ -37,6 +37,7 @@ flags.update({
     'no-metadata': (
         {
             'ClearSolutions': {'enforce_metadata': False},
+            'ClearHiddenTests': {'enforce_metadata': False},
             'CheckCellMetadata': {'enabled': False},
             'ComputeChecksums': {'enabled': False}
         },
@@ -145,8 +146,8 @@ class AssignApp(BaseNbConvertApp):
         CheckCellMetadata,
         ComputeChecksums,
         SaveCells,
+        ClearHiddenTests,  # NB: Clear hidden tests after ComputeChecksums !!!
         CheckCellMetadata,
-        RemoveHidden,
     ])
 
     def build_extra_config(self):
