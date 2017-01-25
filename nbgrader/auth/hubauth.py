@@ -159,7 +159,7 @@ class HubAuth(BaseAuth):
             sys.exit(1)
 
         self._user = None
-        self._base_url = urljoin(self.jupyterhub_base_url, self.jupyterhub_service_prefix.lstrip("/"))
+        self._base_url = self.jupyterhub_service_prefix
 
         self.log.debug("jupyterhub_base_url: %s", self.jupyterhub_base_url)
         self.log.debug("jupyterhub_api_url: %s", self.jupyterhub_api_url)
