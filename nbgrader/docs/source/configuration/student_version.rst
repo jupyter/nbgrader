@@ -108,35 +108,57 @@ can be configured through the ``ClearSolutions.text_stub`` option:
     c.ClearSolutions.text_stub = "Please replace this text with your response."
 
 
-"Autograder tests" cells
--------------------------
+"Autograder tests" cells with hidden tests
+------------------------------------------
 
 .. versionadded:: 0.5.0
 
 Default behavior
 ^^^^^^^^^^^^^^^^
 
-By default, ``nbgrader assign`` will remove regions beginning with
-``### BEGIN HIDDEN TESTS`` and ``### END HIDDEN TESTS``, for example:
+By default, ``nbgrader assign`` will remove tests wrapped within the
+``BEGIN HIDDEN TESTS`` and ``END HIDDEN TESTS`` comment delimeters, for
+example:
 
 .. code:: python
 
-    def validate_answer():
-        assert squares(1) = [1]
-        ### BEGIN HIDDEN TESTS
-        assert squares(2) = [1, 4]
-        ### END HIDDEN TESTS
-
-    validate_answer()
+    assert squares(1) = [1]
+    ### BEGIN HIDDEN TESTS
+    assert squares(2) = [1, 4]
+    ### END HIDDEN TESTS
 
 will be released as:
 
 .. code:: python
 
-    def validate_answer():
-        assert squares(1) = [1]
+    assert squares(1) = [1]
 
-    validate_answer()
+These comment delimeters are independent of the programming language used and
+the number of comment characters used in the source notebook. For example, this
+default will work for both ``Python``:
+
+.. code:: python
+
+    assert squares(1) = [1]
+    ### BEGIN HIDDEN TESTS
+    assert squares(2) = [1, 4]
+    ### END HIDDEN TESTS
+
+and ``JavaScript``:
+
+.. code-block:: javascript
+
+    function assert(answer, expected, msg) {
+        correct = ...;  // validate the answer
+        if (!correct) {
+            throw msg || "Incorrect answer";
+        }
+    }
+
+    assert(squares(1), [1]);
+    // BEGIN HIDDEN TESTS
+    assert(squares(2), [1, 4]);
+    // END HIDDEN TESTS
 
 .. note::
 
@@ -149,27 +171,19 @@ will be released as:
 Changing the defaults
 ^^^^^^^^^^^^^^^^^^^^^
 
-If you need to change these defaults (e.g., if your class doesn't use Python,
-or isn't taught in English), the values can be configured in the
-:doc:`nbgrader_config.py <config_options>` file. Most relevant are the options
-to the ``ClearHiddenTests`` preprocessor, which is the part of nbgrader that
-actually clears the solutions when producing the student version of the
-notebook.
+If you need to change these defaults (e.g., if your class isn't taught in
+English), the values can be configured in the :doc:`nbgrader_config.py
+<config_options>` file. Most relevant are the options to the
+``ClearHiddenTests`` preprocessor, which is the part of nbgrader that actually
+removes the tests when producing the student version of the notebook.
 
-You can specify solution delimeters for any languages you want by setting the
+You can specify hidden test delimeters you want by setting the
 ``ClearHiddenTests.begin_test_delimeter`` and
-``ClearHiddenTests.end_test_delimeter`` config options, thus allowing you to
-include notebooks of different languages within the same assignment:
+``ClearHiddenTests.end_test_delimeter`` config options:
 
 .. code:: python
 
     c = get_config()
-    c.ClearHiddenTests.begin_test_delimeter = {
-        "python": "### BEGIN HIDDEN TESTS",
-        "javascript": "// BEGIN HIDDEN TESTS"
-    }
-    c.ClearHiddenTests.end_test_delimeter = {
-        "python": "### END HIDDEN TESTS",
-        "javascript": "// END HIDDEN TESTS"
-    }
+    c.ClearHiddenTests.begin_test_delimeter = "VERBORGE TOESTE BEGIN"
+    c.ClearHiddenTests.end_test_delimeter = "VERBORGE TOESTE EINDIG"
 
