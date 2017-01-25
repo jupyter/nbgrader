@@ -17,6 +17,7 @@ addons:
     - pandoc
     - enchant
 before_install:
+  - pip install -U pip wheel setuptools
   - pip install invoke
   - invoke before_install --group="$GROUP" --python-version="$TRAVIS_PYTHON_VERSION"
 install:
