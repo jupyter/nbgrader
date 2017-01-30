@@ -151,8 +151,8 @@ class TestNbGraderZipCollect(BaseTestApp):
                     def collect(self, submitted_file):
                         info = super(CustomPlugin, self).collect(submitted_file)
                         if info is not None:
-                            info.timestamp = '{}-{}-{} {}:{}:{}'.format(
-                                *tuple(info.timestamp.split('-'))
+                            info['timestamp'] = '{}-{}-{} {}:{}:{}'.format(
+                                *tuple(info['timestamp'].split('-'))
                             )
                         return info
                 """

@@ -1,5 +1,5 @@
 import os
-import re
+import six
 import sys
 import shutil
 import datetime
@@ -13,8 +13,7 @@ from .baseapp import NbGrader
 
 from ..api import open_gradebook, MissingEntry
 from ..plugins import BasePlugin, ExtractorPlugin, FileNameCollectorPlugin
-from ..plugins.zipcollect import CollectInfo
-from ..utils import check_directory, full_split, rmtree, parse_utc
+from ..utils import check_directory, rmtree, parse_utc
 from ..utils import find_all_notebooks
 
 aliases = {
@@ -236,7 +235,7 @@ class ZipCollectApp(NbGrader):
     def _find_student(self, info):
         try:
             with open_gradebook(self.db_url) as gradebook:
-                return gradebook.find_student(info.student_id)
+                return gradebook.find_student(info['student_id'])
         except MissingEntry:
             return None
 
@@ -323,14 +322,27 @@ class ZipCollectApp(NbGrader):
         for _file in src_files:
             self.log.info("Processing file: {}".format(_file))
             info = self.collector_plugin_inst.collect(_file)
-            if info is None or not isinstance(info, (CollectInfo, )):
+            if not info or info is None:
                 self.log.warn("Skipped. No match information provided.")
                 invalid_files += 1
                 continue
 
-            info._validate(self)
+            for key in ['student_id', 'file_id']:
+                if key not in info.keys():
+                    self.fail(
+                        "Expected processor {} to provide the {} from the "
+                        "submission file name."
+                        "".format(self.collector_plugin.__name__, key)
+                    )
+                if not isinstance(info[key], six.string_types):
+                    self.fail(
+                        "Expected processor {} to provide a string for {} from "
+                        "the submission file name."
+                        "".format(self.collector_plugin.__name__, key)
+                    )
+
             root, ext = os.path.splitext(_file)
-            file_id = os.path.splitext(os.path.basename(info.file_id))[0]
+            file_id = os.path.splitext(os.path.basename(info['file_id']))[0]
             submission = '{}{}'.format(file_id, ext)
             if ext in ['.ipynb'] and submission not in released_notebooks:
                 if self.strict:
@@ -342,43 +354,46 @@ class ZipCollectApp(NbGrader):
             if self._find_student(info) is None:
                 self.log.warn(
                     "Skipped. Student {} not found in gradebook."
-                    "".format(info.student_id)
+                    "".format(info['student_id'])
                 )
                 invalid_files += 1
                 continue
 
             submitted_path = self._format_path(
-                self.submitted_directory, info.student_id, self.assignment_id)
+                self.submitted_directory, info['student_id'], self.assignment_id)
             dest_path = os.path.join(submitted_path, submission)
 
             timestamp = self.get_timestamp()
-            if info.timestamp:
-                try:
-                    timestamp = parse_utc(info.timestamp)
-                except ValueError:
-                    self.log.warn(
-                        "Could not parse the timestamp string. "
-                        "Setting timestamp to the current time."
-                    )
+            if 'timestamp' in info.keys():
+                timestamp = info['timestamp'] or timestamp
+                if isinstance(timestamp, six.string_types):
+                    try:
+                        timestamp = parse_utc(timestamp)
+                    except ValueError:
+                        self.log.warn(
+                            "Could not parse the timestamp string. "
+                            "Setting timestamp to the current time."
+                        )
 
-            if info.student_id in data.keys():
-                if submission not in data[info.student_id]['file_ids']:
-                    data[info.student_id]['file_ids'].append(submission)
-                    data[info.student_id]['timestamps'].append(timestamp)
-                    data[info.student_id]['src_files'].append(_file)
-                    data[info.student_id]['dest_files'].append(dest_path)
+            student_id = info['student_id']
+            if student_id in data.keys():
+                if submission not in data[student_id]['file_ids']:
+                    data[student_id]['file_ids'].append(submission)
+                    data[student_id]['timestamps'].append(timestamp)
+                    data[student_id]['src_files'].append(_file)
+                    data[student_id]['dest_files'].append(dest_path)
                 else:
-                    ind = data[info.student_id]['file_ids'].index(submission)
-                    old_timestamp = data[info.student_id]['timestamps'][ind]
+                    ind = data[student_id]['file_ids'].index(submission)
+                    old_timestamp = data[student_id]['timestamps'][ind]
                     if timestamp >= old_timestamp:
-                        data[info.student_id]['timestamps'][ind] = timestamp
-                        data[info.student_id]['src_files'][ind] = _file
-                        data[info.student_id]['dest_files'][ind] = dest_path
+                        data[student_id]['timestamps'][ind] = timestamp
+                        data[student_id]['src_files'][ind] = _file
+                        data[student_id]['dest_files'][ind] = dest_path
                     else:
                         self.log.warn("Skipped. Older timestamp found.")
                         invalid_files += 1
             else:
-                data[info.student_id] = dict(
+                data[student_id] = dict(
                     file_ids=[submission],
                     timestamps=[timestamp],
                     src_files=[_file],

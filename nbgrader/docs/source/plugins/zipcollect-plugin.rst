@@ -40,12 +40,19 @@ API
 FileNameCollector plugin
 ------------------------
 
-Apply a named group regular expression to each filename received from the
-:class:`~nbgrader.apps.zipcollectapp.ZipCollectApp` and return ``None`` if the
-file should be skipped or a :class:`~nbgrader.plugins.zipcollect.CollectInfo`
-instance that, at the very least, contains the ``student_id`` and
-``file_id`` data; and optionally contains the ``timestamp``, ``first_name``,
-``last_name``, and ``email`` data.
+Apply a named group regular expression to each filename, received from the
+:class:`~nbgrader.apps.zipcollectapp.ZipCollectApp`, and return ``None`` if the
+file should be skipped or a dictionary that, at the very least, contains the
+``student_id`` and ``file_id`` key value pairs; and optionally contains the
+``timestamp`` key value pair, for example:
+
+.. code:: python
+
+    dict(
+        file_id='problem1',
+        student_id='hacker',
+        timestamp='2017-01-30 15:30:10 UCT'
+    )
 
 For more information about named group regular expressions see
 `<https://docs.python.org/howto/regex.html>`_
@@ -69,8 +76,6 @@ API
 ^^^
 
 .. currentmodule:: nbgrader.plugins.zipcollect
-
-.. autoclass:: CollectInfo
 
 .. autoclass:: FileNameCollectorPlugin
 

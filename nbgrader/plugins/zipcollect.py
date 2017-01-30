@@ -1,68 +1,12 @@
 import os
 import re
 import shutil
-import six
 
 from textwrap import dedent
 from traitlets import Bool, List, Unicode
 
 from .base import BasePlugin
 from ..utils import unzip
-
-
-class CollectInfo(object):
-    """Return object required by all
-    :class:`~nbgrader.apps.zipcollectapp.ZipCollectApp` plugins.
-
-    Keyword Arguments
-    -----------------
-    student_id: str
-        The student id (This MUST be provided)
-    file_id: str
-        The file id (This MUST be provided)
-    first_name: str
-        The students first name (Optional)
-    last_name: str
-        The students last name (Optional)
-    email: str
-        The students email address (Optional)
-    timestamp: str
-        The submission timestamp (Optional, defaults to the current time)
-    """
-
-    def __init__(self, **kwargs):
-        self.student_id = kwargs.get('student_id', None)
-        self.file_id = kwargs.get('file_id', None)
-        self.first_name = kwargs.get('first_name', None)
-        self.last_name = kwargs.get('last_name', None)
-        self.email = kwargs.get('email', None)
-        self.timestamp = kwargs.get('timestamp', None)
-
-    def _validate(self, app):
-        """Validate the provided class attributes."""
-        attr_keys = [
-            'student_id',
-            'file_id',
-            'first_name',
-            'last_name',
-            'email',
-        ]
-
-        for key in attr_keys:
-            attr = getattr(self, key)
-            if attr is None:
-                if key in ['student_id', 'file_id']:
-                    app.fail(
-                        "Expected processor {} to provide the {} from the "
-                        "submission file name."
-                        "".format(app.collector_plugin.__name__, key)
-                    )
-            elif not isinstance(attr, six.string_types):
-                app.fail(
-                    "Expected processor {} to provide a string for {} from "
-                    "the submission file name."
-                    "".format(app.collector_plugin.__name__, key)
-                )
 
 
 class ExtractorPlugin(BasePlugin):
@@ -223,8 +167,8 @@ class FileNameCollectorPlugin(BasePlugin):
     def collect(self, submitted_file):
         """This is the main function called by the
         :class:`~nbgrader.apps.zipcollectapp.ZipCollectApp` for each submitted
-        file. Note this function must also return a :class:`CollectApp`
-        instance or None for sub-classed plugins.
+        file. Note this function must also return a dictionary or None for
+        sub-classed plugins.
 
         Arguments
         ---------
@@ -233,9 +177,16 @@ class FileNameCollectorPlugin(BasePlugin):
 
         Returns
         -------
-        :class:`CollectInfo` or None
-            The collected data from the filename or None if the file should be
-            skipped
+        groupdict: dict
+            Collected data from the filename or None if the file should be
+            skipped. Collected data is a dict of the form::
+
+                {
+                    file_id: file_id,  # MUST be provided
+                    student_id: student_id,  # MUST be provided
+                    timestamp: timestamp  # Can optional be provided
+                }
+
         """
         root, ext = os.path.splitext(submitted_file)
 
@@ -244,7 +195,7 @@ class FileNameCollectorPlugin(BasePlugin):
             self.log.debug("Invalid file extension {}".format(ext))
             return None
 
-        kwargs = self._match(submitted_file)
-        if not kwargs:
+        groupdict = self._match(submitted_file)
+        if not groupdict:
             return None
-        return CollectInfo(**kwargs)
+        return groupdict
