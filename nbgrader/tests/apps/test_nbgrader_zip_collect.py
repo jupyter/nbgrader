@@ -45,6 +45,11 @@ class TestNbGraderZipCollect(BaseTestApp):
         # Should not fail with no archive_directory
         run_nbgrader(["zip_collect", "ps1"])
 
+    def test_empty_folders(self, db, course_dir, archive_dir):
+        os.makedirs(join(archive_dir, "..", "extracted"))
+        run_nbgrader(["zip_collect", "ps1"])
+        assert not os.path.isdir(join(course_dir, "submitted"))
+
     def test_extract_single_notebook(self, db, course_dir, archive_dir):
         extracted_dir = join(archive_dir, "..", "extracted")
         self._make_notebook(archive_dir,
@@ -129,6 +134,60 @@ class TestNbGraderZipCollect(BaseTestApp):
         assert os.path.isfile(join(submitted_dir, "hacker", "ps1", 'problem1.ipynb'))
         assert os.path.isfile(join(submitted_dir, "hacker", "ps1", 'timestamp.txt'))
         assert len(os.listdir(join(submitted_dir, "hacker", "ps1"))) == 2
+
+    def test_collect_no_regexp(self, db, course_dir, archive_dir):
+        extracted_dir = join(archive_dir, "..", "extracted")
+        submitted_dir = join(course_dir, "submitted")
+        self._make_notebook(archive_dir,
+            'ps1', 'hacker', '2016-01-30-15-30-10', 'problem1')
+
+        run_nbgrader(["db", "student", "add", "hacker"])
+        run_nbgrader(["zip_collect", "--force", "ps1"])
+
+        assert os.path.isdir(extracted_dir)
+        assert len(os.listdir(extracted_dir)) == 1
+        assert not os.path.isdir(submitted_dir)
+
+    def test_collect_bad_regexp(self, db, course_dir, archive_dir):
+        extracted_dir = join(archive_dir, "..", "extracted")
+        submitted_dir = join(course_dir, "submitted")
+        self._make_notebook(archive_dir,
+            'ps1', 'hacker', '2016-01-30-15-30-10', 'problem1')
+
+        with open("nbgrader_config.py", "a") as fh:
+            fh.write(dedent(
+                """
+                c.FileNameCollectorPlugin.named_regexp = (
+                    r"Peter piper picked ..."
+                )
+                """
+            ))
+
+        run_nbgrader(["db", "student", "add", "hacker"])
+        run_nbgrader(["zip_collect", "--force", "ps1"])
+
+        assert os.path.isdir(extracted_dir)
+        assert len(os.listdir(extracted_dir)) == 1
+        assert not os.path.isdir(submitted_dir)
+
+    def test_collect_regexp_missing_student_id(self, db, course_dir, archive_dir):
+        extracted_dir = join(archive_dir, "..", "extracted")
+        submitted_dir = join(course_dir, "submitted")
+        self._make_notebook(archive_dir,
+            'ps1', 'hacker', '2016-01-30-15-30-10', 'problem1')
+
+        with open("nbgrader_config.py", "a") as fh:
+            fh.write(dedent(
+                """
+                c.FileNameCollectorPlugin.named_regexp = (
+                    r".+_(?P<foo>\w+)_attempt_(?P<timestamp>[0-9\-]+)_(?P<file_id>\w+)"
+                )
+                """
+            ))
+
+        run_nbgrader(["zip_collect", "ps1"], retcode=1)
+        assert os.path.isdir(extracted_dir)
+        assert len(os.listdir(extracted_dir)) == 1
 
     def test_collect_single_notebook_attempts(self, db, course_dir, archive_dir):
         extracted_dir = join(archive_dir, "..", "extracted")
