@@ -86,17 +86,6 @@ class ExtractorPlugin(BasePlugin):
                 "No files found in directory: {}".format(archive_path))
             return
 
-        # Sanity check
-        extracted = 0
-        for _, _, extracted_files in os.walk(extracted_path):
-            extracted += len(extracted_files)
-
-        if nfiles != extracted:
-            self.log.warn(
-                "File count mismatch. Processed or extracted {} files, but "
-                "only found {} files in {}.".format(nfiles, extracted, extract_to)
-            )
-
 
 class FileNameCollectorPlugin(BasePlugin):
     """Submission filename processor plugin for the
