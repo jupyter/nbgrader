@@ -1,4 +1,5 @@
 import os
+import six
 import pytest
 import tempfile
 import shutil
@@ -12,6 +13,11 @@ from .. import (
     create_code_cell,
     create_grade_cell, create_solution_cell,
     create_grade_and_solution_cell)
+
+if six.PY2:
+    from zipfile import BadZipfile as BadZipFile
+else:
+    from zipfile import BadZipFile
 
 
 @pytest.fixture
@@ -51,7 +57,6 @@ def test_is_solution():
 
 
 def test_is_locked():
-
     cell = create_code_cell()
     assert not utils.is_locked(cell)
     cell.metadata['nbgrader'] = dict(solution=True, grade=False, locked=False)
@@ -92,7 +97,6 @@ def test_is_locked():
     assert not utils.is_locked(cell)
     cell.metadata['nbgrader'] = dict(solution=False, grade=False, locked=False)
     assert not utils.is_locked(cell)
-
 
 
 def test_determine_grade_code_grade():
@@ -294,7 +298,7 @@ def test_unzip_invalid_ext(temp_cwd):
 def test_unzip_bad_zip(temp_cwd):
     with open(join("baz.zip"), "wb") as fh:
         pass
-    with pytest.raises(zipfile.BadZipFile):
+    with pytest.raises(BadZipFile):
         utils.unzip("baz.zip", os.getcwd())
 
 
