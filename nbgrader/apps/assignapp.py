@@ -15,6 +15,7 @@ from ..preprocessors import (
     SaveCells,
     CheckCellMetadata,
     ClearOutput,
+    ClearHiddenTests,
 )
 
 aliases = {}
@@ -36,6 +37,7 @@ flags.update({
     'no-metadata': (
         {
             'ClearSolutions': {'enforce_metadata': False},
+            'ClearHiddenTests': {'enforce_metadata': False},
             'CheckCellMetadata': {'enabled': False},
             'ComputeChecksums': {'enabled': False}
         },
@@ -46,6 +48,7 @@ flags.update({
         "Create an entry for the assignment in the database, if one does not already exist."
     ),
 })
+
 
 class AssignApp(BaseNbConvertApp):
 
@@ -144,8 +147,12 @@ class AssignApp(BaseNbConvertApp):
         CheckCellMetadata,
         ComputeChecksums,
         SaveCells,
-        CheckCellMetadata
+        ClearHiddenTests,
+        ComputeChecksums,
+        CheckCellMetadata,
     ])
+    # NB: ClearHiddenTests must come after ComputeChecksums and SaveCells.
+    # ComputerChecksums must come again after ClearHiddenTests.
 
     def build_extra_config(self):
         extra_config = super(AssignApp, self).build_extra_config()
@@ -224,4 +231,3 @@ class AssignApp(BaseNbConvertApp):
             # part of the assignment, and if so, remove them
             if self.notebook_id == "*":
                 self._clean_old_notebooks(assignment_id, student_id)
-

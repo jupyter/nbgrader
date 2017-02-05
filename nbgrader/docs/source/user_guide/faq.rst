@@ -16,9 +16,8 @@ notebooks, you can pass the ``--no-execute`` flag to
 Can I hide the test cells in a nbgrader assignment?
 ---------------------------------------------------
 
-Not at the moment, though it is on the todo list (see `#390
-<https://github.com/jupyter/nbgrader/issues/390>`_). :ref:`PRs welcome!
-<pull-request>`
+Yes, as of version 0.5.0 of ``nbgrader`` you will be able to hide tests
+in "Autograder tests" cells (see :ref:`autograder-tests-cell-hidden-tests`).
 
 How does nbgrader ensure that students do not change the tests?
 ---------------------------------------------------------------
