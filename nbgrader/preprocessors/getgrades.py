@@ -1,3 +1,5 @@
+from traitlets import List
+
 from .. import utils
 from ..api import Gradebook
 from . import NbGraderPreprocessor
@@ -5,6 +7,8 @@ from . import NbGraderPreprocessor
 
 class GetGrades(NbGraderPreprocessor):
     """Preprocessor for saving grades from the database to the notebook"""
+
+    display_data_priority = List(['text/html', 'application/pdf', 'text/latex', 'image/svg+xml', 'image/png', 'image/jpeg', 'text/plain'], config=True)
 
     def preprocess(self, nb, resources):
         # pull information from the resources
