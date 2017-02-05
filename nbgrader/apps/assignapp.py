@@ -148,9 +148,11 @@ class AssignApp(BaseNbConvertApp):
         ComputeChecksums,
         SaveCells,
         ClearHiddenTests,
+        ComputeChecksums,
         CheckCellMetadata,
     ])
-    # NB: ClearHiddenTests must come after ComputeChecksums and SaveCells !!!
+    # NB: ClearHiddenTests must come after ComputeChecksums and SaveCells.
+    # ComputerChecksums must come again after ClearHiddenTests.
 
     def build_extra_config(self):
         extra_config = super(AssignApp, self).build_extra_config()
