@@ -31,12 +31,12 @@ for (dirname, dirnames, filenames) in os.walk("nbgrader/docs"):
 
 # get paths to all the static files and templates
 static_files = []
-for (dirname, dirnames, filenames) in os.walk("nbgrader/formgrader/static"):
-    root = os.path.relpath(dirname, "nbgrader/formgrader")
+for (dirname, dirnames, filenames) in os.walk("nbgrader/server_extensions/formgrader/static"):
+    root = os.path.relpath(dirname, "nbgrader/server_extensions/formgrader")
     for filename in filenames:
         static_files.append(os.path.join(root, filename))
-for (dirname, dirnames, filenames) in os.walk("nbgrader/formgrader/templates"):
-    root = os.path.relpath(dirname, "nbgrader/formgrader")
+for (dirname, dirnames, filenames) in os.walk("nbgrader/server_extensions/formgrader/templates"):
+    root = os.path.relpath(dirname, "nbgrader/server_extensions/formgrader")
     for filename in filenames:
         static_files.append(os.path.join(root, filename))
 
@@ -69,7 +69,7 @@ setup_args = dict(
     package_data={
         'nbgrader': extension_files + docs_files,
         'nbgrader.nbformat': ["*.json"],
-        'nbgrader.formgrader': static_files,
+        'nbgrader.server_extensions.formgrader': static_files,
         'nbgrader.tests': [
             'apps/files/*',
             'nbextensions/files/*',
