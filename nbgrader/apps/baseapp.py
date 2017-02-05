@@ -394,7 +394,12 @@ class NbGrader(JupyterApp):
         self.update_config(self.build_extra_config())
         if self.logfile:
             self.init_logging(logging.FileHandler, [self.logfile], color=False)
+        self.init_syspath()
         super(NbGrader, self).initialize(argv)
+
+    def init_syspath(self):
+        """Add the cwd to the sys.path ($PYTHONPATH)"""
+        sys.path.insert(0, os.getcwd())
 
     def reset(self):
         # stop logging
