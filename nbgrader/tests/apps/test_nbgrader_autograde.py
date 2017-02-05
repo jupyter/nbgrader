@@ -571,67 +571,56 @@ class TestNbGraderAutograde(BaseTestApp):
     def test_hidden_tests_single_notebook(self, db, course_dir):
         with open("nbgrader_config.py", "a") as fh:
             fh.write("""c.NbGrader.db_assignments = [dict(name='ps1', duedate='2015-02-02 14:58:23.948203 PST')]\n""")
-            fh.write("""c.NbGrader.db_students = [dict(id="foo"), dict(id="bar")]""")
+            fh.write("""c.NbGrader.db_students = [dict(id="foo"), dict(id="bar")]\n""")
+            fh.write("""c.ClearSolutions.code_stub=dict(python="# YOUR CODE HERE")""")
 
         self._copy_file(
-            join("files", "test.ipynb"),
+            join("files", "test-hidden-tests.ipynb"),
             join(course_dir, "source", "ps1", "p1.ipynb")
         )
-        self._copy_file(
-            join("files", "test-hidden-tests.ipynb"),
-            join(course_dir, "source", "ps1", "p2.ipynb")
-        )
-        self._copy_file(
-            join("files", "test-hidden-tests.ipynb"),
-            join(course_dir, "source", "ps1", "p3.ipynb")
-        )
+        # test-hidden-tests.ipynb contains vizable solutions that pass
+        # vizable tests, but fail on hidden tests
+
         run_nbgrader(["assign", "ps1", "--db", db])
 
         # make sure hidden tests are removed in release
-        with open(join(course_dir, "release", "ps1", "p2.ipynb"), 'r') as nb:
+        with open(join(course_dir, "release", "ps1", "p1.ipynb"), 'r') as nb:
             source = nb.read()
         assert "BEGIN HIDDEN TESTS" not in source
 
         self._copy_file(
-            join("files", "test.ipynb"),
+            join(course_dir, "release", "ps1", "p1.ipynb"),
             join(course_dir, "submitted", "foo", "ps1", "p1.ipynb")
             )
-        self._copy_file(
-            join("files", "test-hidden-tests.ipynb"),
-            join(course_dir, "submitted", "foo", "ps1", "p2.ipynb")
-            )
-        self._copy_file(
-            join("files", "submitted-test-fail-on-hidden-tests.ipynb"),
-            join(course_dir, "submitted", "foo", "ps1", "p3.ipynb")
-        )
 
         # make sure submitted validates, should only fail on hidden tests
         output = run_nbgrader([
-            "validate", join(course_dir, "submitted", "foo", "ps1", "p3.ipynb")
+            "validate", join(course_dir, "submitted", "foo", "ps1", "p1.ipynb")
         ], stdout=True)
         assert output.strip() == "Success! Your notebook passes all the tests."
 
         run_nbgrader(["autograde", "ps1", "--db", db])
         assert os.path.exists(join(course_dir, "autograded", "foo", "ps1", "p1.ipynb"))
-        assert os.path.exists(join(course_dir, "autograded", "foo", "ps1", "p2.ipynb"))
 
         # make sure hidden tests are placed back in autograded
-        sub_nb = join(course_dir, "autograded", "foo", "ps1", "p2.ipynb")
+        sub_nb = join(course_dir, "autograded", "foo", "ps1", "p1.ipynb")
         with open(sub_nb, 'r') as nb:
             source = nb.read()
         assert "BEGIN HIDDEN TESTS" in source
 
         # make sure autograded does not validate, should fail on hidden tests
         output = run_nbgrader([
-            "validate", join(course_dir, "autograded", "foo", "ps1", "p3.ipynb"),
+            "validate", join(course_dir, "autograded", "foo", "ps1", "p1.ipynb"),
         ], stdout=True)
-        assert output.splitlines()[0] == "VALIDATION FAILED ON 2 CELL(S)! If you submit your assignment as it is, you WILL NOT"
+        assert output.splitlines()[0] == (
+            "VALIDATION FAILED ON 2 CELL(S)! If you submit your assignment "
+            "as it is, you WILL NOT"
+        )
 
         gb = Gradebook(db)
         submission = gb.find_submission("ps1", "foo")
-        nb1, nb2, nb3 = submission.notebooks
-        assert nb1.score == nb2.score
-        assert nb1.score > nb3.score
+        nb1 = submission.notebooks[0]
+        assert nb1.score == 1.5
         gb.close()
 
     def test_handle_failure(self, course_dir):
