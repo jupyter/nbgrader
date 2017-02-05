@@ -32,6 +32,17 @@ brittle (see :doc:`/configuration/jupyterhub_config`).
 
 The full list of merged PRs includes:
 
+- PR #689: Add cwd to path for all nbgrader apps
+- PR #688: Make sure the correct permissions are set on released assignments
+- PR #687: Add display_data_priority option to GetGrades preprocessor
+- PR #679: Get Travis-CI to build
+- PR #678: JUPYTERHUB_SERVICE_PREFIX is already the full URL prefix
+- PR #672: Undeprecate --create in assign and autograde
+- PR #670: Fix deprecation warnings for config options
+- PR #665: Preventing URI Encoding of the base-url in the assignment_list extension
+- PR #656: Update developer installation docs
+- PR #655: Fix saving notebook in create assignment tests
+- PR #652: Make 0.4.0 release
 - PR #651: Update changelog with changes from 0.3.3 release
 - PR #650: Print warning when no config file is found
 - PR #649: Bump the number of test reruns even higher
@@ -85,14 +96,18 @@ The full list of merged PRs includes:
 Thanks to the following contributors who submitted PRs or reported issues that were merged/closed for the 0.4.0 release:
 
 - adamchainz
+- AstroMike
 - ddbourgin
 - dlsun
 - dsblank
 - ellisonbg
+- huwf
 - jhamrick
 - lgpage
+- minrk
 - olgabot
 - randy3k
+- whitead
 - whositwhatnow
 - willingc
 
