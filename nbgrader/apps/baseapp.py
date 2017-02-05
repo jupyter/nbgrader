@@ -533,6 +533,7 @@ class TransferApp(NbGrader):
         """Copy the src dir to the dest dir omitting the self.ignore globs."""
         shutil.copytree(src, dest, ignore=shutil.ignore_patterns(*self.ignore))
         if perms:
+            os.chmod(dest, perms)
             for dirname, dirnames, filenames in os.walk(dest):
                 for filename in filenames:
                     os.chmod(os.path.join(dirname, filename), perms)
