@@ -27,7 +27,6 @@ assign, release, collect, and grade notebooks. Here are some of the commands:
 * `nbgrader release`: release a notebook to students
 * `nbgrader collect`: collect students' submissions
 * `nbgrader autograde`: autograde students' submissions
-* `nbgrader formgrade`: launch the formgrader
 
 Try it out!
 -----------

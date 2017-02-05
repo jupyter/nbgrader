@@ -9,7 +9,7 @@ Can I use nbgrader for purely manually graded assignments (i.e., without autogra
 
 Yes, absolutely! Mark all the cells where students write their answers as
 :ref:`manually-graded-cells` and then during grading run ``nbgrader autograde``
-and ``nbgrader formgrade`` as normal. If you don't want to even execute the
+and the formgrader as normal. If you don't want to even execute the
 notebooks, you can pass the ``--no-execute`` flag to
 :doc:`/command_line_tools/nbgrader-autograde`.
 

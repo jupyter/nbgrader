@@ -31,23 +31,23 @@ this was done using the ``nbgrader extension install`` command. However, moving
 forward this is done using the ``jupyter nbextension`` and ``jupyter
 serverextension`` commands.
 
-To install and enable both frontend nbextensions (*assignment list* and
-*create assignment*) run::
+To install and enable all frontend nbextensions (*assignment list*,
+*create assignment*, and *formgrader*) run::
 
     # The nbextensions are JavaScript/HTML/CSS so they require
     # separate installation and enabling.
     jupyter nbextension install --sys-prefix --py nbgrader
     jupyter nbextension enable --sys-prefix --py nbgrader
 
-To install the server extension for *assignment_list* run::
+To install the server extensions for *assignment_list* and *formgrader*, run::
 
     # The serverextension is a Python module inside nbgrader, so only an
     # enable step is needed.
     jupyter serverextension enable --sys-prefix --py nbgrader
 
-To work properly, the *assignment list* extension requires both the
-nbextension and serverextension. The *create assignment* extension only
-has an nbextension part.
+To work properly, the *assignment list* and *formgrader* extensions requires
+both the nbextension and serverextension. The *create assignment* extension
+only has an nbextension part.
 
 Installation options
 ~~~~~~~~~~~~~~~~~~~~
@@ -84,18 +84,23 @@ Disabling extensions
 
 You may want to only install one of the nbgrader extensions. To do this, follow
 the above steps to install everything and then disable the extension you don't
-need using::
+need. For example, to disable the Assignment List extension:
 
-    jupyter nbextension disable --sys-prefix assignment_list/main
+    jupyter nbextension disable --sys-prefix assignment_list/main --section=tree
+    jupyter serverextension disable --sys-prefix nbgrader.server_extensions.assignment_list
 
-or::
+or to disable the Create Assignment extension::
 
     jupyter nbextension disable --sys-prefix create_assignment/main
 
+or to disable the Formgrader extension::
+
+    jupyter nbextension disable --sys-prefix formgrader/main --section=tree
+    jupyter serverextension disable --sys-prefix nbgrader.server_extensions.formgrader
 
 For example lets assume you have installed nbgrader via `Anaconda
 <https://www.continuum.io/downloads>`__ (meaning all extensions are installed
-and enabled with the ``--sys-prefix`` flag, I.e. anyone using the particular
+and enabled with the ``--sys-prefix`` flag, i.e. anyone using the particular
 Python installation or conda environment where nbgrader is installed). But you
 only want the *create assignment* extension available to a specific user and
 not everyone else. First you will need to disable the *create assignment*
@@ -108,12 +113,10 @@ only for that user::
 
     jupyter nbextension enable --user create_assignment/main
 
-
-Finally to see all installed nbextensions/serverextension, run::
+Finally to see all installed nbextensions/server extensions, run::
 
     jupyter nbextension list
     jupyter serverextension list
-
 
 For further documentation on these commands run::
 

@@ -27,7 +27,7 @@ repository and then run::
     invoke js
 
 This will download and install the correct versions of the dependencies to
-``nbgrader/formgrader/static/components``.
+``nbgrader/server_extensions/formgrader/static/components``.
 Usually, JavaScript libraries installed in this way include a lot of extra files
 (e.g. tests, documentation) that we don't want to commit to the nbgrader
 repository. If this is the case, please add these files to the
