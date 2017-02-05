@@ -155,9 +155,10 @@ class SubmitApp(TransferApp):
 
         # copy to the real location
         self.check_filename_diff()
-        self.do_copy(self.src_path, dest_path, perms=(S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH))
+        self.do_copy(self.src_path, dest_path)
         with open(os.path.join(dest_path, "timestamp.txt"), "w") as fh:
             fh.write(self.timestamp)
+        self.set_perms(dest_path, perms=(S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH))
 
         # Make this 0777=ugo=rwx so the instructor can delete later. Hidden from other users by the timestamp.
         os.chmod(
