@@ -47,7 +47,7 @@ class AssignLatePenalties(NbGraderPreprocessor):
         # connect to the database
         self.gradebook = Gradebook(self.db_url)
 
-        try:
+        with self.gradebook:
             # process the late submissions
             nb, resources = super(AssignLatePenalties, self).preprocess(nb, resources)
             assignment = self.gradebook.find_submission(
@@ -68,9 +68,6 @@ class AssignLatePenalties(NbGraderPreprocessor):
                     late_penalty = self._check_late_penalty(notebook, late_penalty)
                     notebook.late_submission_penalty = late_penalty
                     self.gradebook.db.commit()
-
-        finally:
-            self.gradebook.close()
 
         return nb, resources
 

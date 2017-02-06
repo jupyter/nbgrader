@@ -60,8 +60,5 @@ class ExportApp(NbGrader):
     def start(self):
         super(ExportApp, self).start()
         self.init_plugin()
-        gradebook = Gradebook(self.db_url)
-        try:
-            self.plugin_inst.export(gradebook)
-        finally:
-            gradebook.close()
+        with Gradebook(self.db_url) as gb:
+            self.plugin_inst.export(gb)

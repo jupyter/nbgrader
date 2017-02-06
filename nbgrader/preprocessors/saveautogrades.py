@@ -16,11 +16,9 @@ class SaveAutoGrades(NbGraderPreprocessor):
         # connect to the database
         self.gradebook = Gradebook(self.db_url)
 
-        try:
+        with self.gradebook:
             # process the cells
             nb, resources = super(SaveAutoGrades, self).preprocess(nb, resources)
-        finally:
-            self.gradebook.close()
 
         return nb, resources
 

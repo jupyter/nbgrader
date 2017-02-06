@@ -61,11 +61,11 @@ database. You can access the timestamps through the API, like so:
 .. code:: python
 
     from nbgrader.api import Gradebook
-    gb = Gradebook("sqlite:///gradebook.db")
-    assignment = gb.find_assignment("ps1")
-    for submission in assignment.submissions:
-        print("Submission from '{}' is {} seconds late".format(
-            submission.student_id, submission.total_seconds_late))
+    with Gradebook("sqlite:///gradebook.db") gb:
+        assignment = gb.find_assignment("ps1")
+        for submission in assignment.submissions:
+            print("Submission from '{}' is {} seconds late".format(
+                submission.student_id, submission.total_seconds_late))
 
 Note that if you use the release/fetch/submit/collect commands (see
 :doc:`managing_assignment_files`), the ``timestamp.txt`` files will be included

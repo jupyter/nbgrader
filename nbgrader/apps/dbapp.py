@@ -8,7 +8,7 @@ from textwrap import dedent
 from traitlets import default, Unicode, Bool
 
 from . import NbGrader
-from ..api import open_gradebook, MissingEntry
+from ..api import Gradebook, MissingEntry
 
 aliases = {
     'log-level': 'Application.log_level',
@@ -65,7 +65,7 @@ class DbStudentAddApp(NbGrader):
         }
 
         self.log.info("Creating/updating student with ID '%s': %s", student_id, student)
-        with open_gradebook(self.db_url) as gb:
+        with Gradebook(self.db_url) as gb:
             gb.update_or_create_student(student_id, **student)
 
 student_remove_flags = {}
@@ -95,7 +95,7 @@ class DbStudentRemoveApp(NbGrader):
 
         student_id = self.extra_args[0]
 
-        with open_gradebook(self.db_url) as gb:
+        with Gradebook(self.db_url) as gb:
             try:
                 student = gb.find_student(student_id)
             except MissingEntry:
@@ -134,7 +134,7 @@ class DbStudentImportApp(NbGrader):
 
         allowed_keys = ["last_name", "first_name", "email", "id"]
 
-        with open_gradebook(self.db_url) as gb:
+        with Gradebook(self.db_url) as gb:
             with open(path, 'r') as fh:
                 reader = csv.DictReader(fh)
                 for row in reader:
@@ -168,7 +168,7 @@ class DbStudentListApp(NbGrader):
     def start(self):
         super(DbStudentListApp, self).start()
 
-        with open_gradebook(self.db_url) as gb:
+        with Gradebook(self.db_url) as gb:
             print("There are %d students in the database:" % len(gb.students))
             for student in gb.students:
                 print("%s (%s, %s) -- %s" % (student.id, student.last_name, student.first_name, student.email))
@@ -206,7 +206,7 @@ class DbAssignmentAddApp(NbGrader):
         }
 
         self.log.info("Creating/updating assignment with ID '%s': %s", assignment_id, assignment)
-        with open_gradebook(self.db_url) as gb:
+        with Gradebook(self.db_url) as gb:
             gb.update_or_create_assignment(assignment_id, **assignment)
 
 
@@ -237,7 +237,7 @@ class DbAssignmentRemoveApp(NbGrader):
 
         assignment_id = self.extra_args[0]
 
-        with open_gradebook(self.db_url) as gb:
+        with Gradebook(self.db_url) as gb:
             try:
                 assignment = gb.find_assignment(assignment_id)
             except MissingEntry:
@@ -276,7 +276,7 @@ class DbAssignmentImportApp(NbGrader):
 
         allowed_keys = ["duedate", "name"]
 
-        with open_gradebook(self.db_url) as gb:
+        with Gradebook(self.db_url) as gb:
             with open(path, 'r') as fh:
                 reader = csv.DictReader(fh)
                 for row in reader:
@@ -310,7 +310,7 @@ class DbAssignmentListApp(NbGrader):
     def start(self):
         super(DbAssignmentListApp, self).start()
 
-        with open_gradebook(self.db_url) as gb:
+        with Gradebook(self.db_url) as gb:
             print("There are %d assignments in the database:" % len(gb.assignments))
             for assignment in gb.assignments:
                 print("%s (due: %s)" % (assignment.name, assignment.duedate))

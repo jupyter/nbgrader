@@ -4,7 +4,7 @@ import datetime
 from textwrap import dedent
 from os.path import join
 
-from ...api import open_gradebook, MissingEntry
+from ...api import Gradebook, MissingEntry
 from .. import run_nbgrader
 from .base import BaseTestApp
 
@@ -39,28 +39,28 @@ class TestNbGraderDb(BaseTestApp):
 
     def test_student_add(self, db):
         run_nbgrader(["db", "student", "add", "foo", "--db", db])
-        with open_gradebook(db) as gb:
+        with Gradebook(db) as gb:
             student = gb.find_student("foo")
             assert student.last_name is None
             assert student.first_name is None
             assert student.email is None
 
         run_nbgrader(["db", "student", "add", "foo", "--last-name=FooBar", "--db", db])
-        with open_gradebook(db) as gb:
+        with Gradebook(db) as gb:
             student = gb.find_student("foo")
             assert student.last_name == "FooBar"
             assert student.first_name is None
             assert student.email is None
 
         run_nbgrader(["db", "student", "add", "foo", "--first-name=FooBar", "--db", db])
-        with open_gradebook(db) as gb:
+        with Gradebook(db) as gb:
             student = gb.find_student("foo")
             assert student.last_name is None
             assert student.first_name == "FooBar"
             assert student.email is None
 
         run_nbgrader(["db", "student", "add", "foo", "--email=foo@bar.com", "--db", db])
-        with open_gradebook(db) as gb:
+        with Gradebook(db) as gb:
             student = gb.find_student("foo")
             assert student.last_name is None
             assert student.first_name is None
@@ -68,14 +68,14 @@ class TestNbGraderDb(BaseTestApp):
 
     def test_student_remove(self, db):
         run_nbgrader(["db", "student", "add", "foo", "--db", db])
-        with open_gradebook(db) as gb:
+        with Gradebook(db) as gb:
             student = gb.find_student("foo")
             assert student.last_name is None
             assert student.first_name is None
             assert student.email is None
 
         run_nbgrader(["db", "student", "remove", "foo", "--db", db])
-        with open_gradebook(db) as gb:
+        with Gradebook(db) as gb:
             with pytest.raises(MissingEntry):
                 gb.find_student("foo")
 
@@ -90,21 +90,21 @@ class TestNbGraderDb(BaseTestApp):
         self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "submitted", "foo", "ps1", "p1.ipynb"))
         run_nbgrader(["autograde", "ps1", "--db", db])
 
-        with open_gradebook(db) as gb:
+        with Gradebook(db) as gb:
             gb.find_student("foo")
 
         # it should fail if we don't run with --force
         run_nbgrader(["db", "student", "remove", "foo", "--db", db], retcode=1)
 
         # make sure we can still find the student
-        with open_gradebook(db) as gb:
+        with Gradebook(db) as gb:
             gb.find_student("foo")
 
         # now force it to complete
         run_nbgrader(["db", "student", "remove", "foo", "--force", "--db", db])
 
             # student should be gone
-        with open_gradebook(db) as gb:
+        with Gradebook(db) as gb:
             with pytest.raises(MissingEntry):
                 gb.find_student("foo")
 
@@ -131,7 +131,7 @@ class TestNbGraderDb(BaseTestApp):
             ).strip())
 
         run_nbgrader(["db", "student", "import", "students.csv", "--db", db])
-        with open_gradebook(db) as gb:
+        with Gradebook(db) as gb:
             student = gb.find_student("foo")
             assert student.last_name == "xyz"
             assert student.first_name == "abc"
@@ -164,7 +164,7 @@ class TestNbGraderDb(BaseTestApp):
             ).strip())
 
         run_nbgrader(["db", "student", "import", "students.csv", "--db", db])
-        with open_gradebook(db) as gb:
+        with Gradebook(db) as gb:
             student = gb.find_student("foo")
             assert student.last_name == "xyzzzz"
             assert student.first_name == "abc"
@@ -176,23 +176,23 @@ class TestNbGraderDb(BaseTestApp):
 
     def test_assignment_add(self, db):
         run_nbgrader(["db", "assignment", "add", "foo", "--db", db])
-        with open_gradebook(db) as gb:
+        with Gradebook(db) as gb:
             assignment = gb.find_assignment("foo")
             assert assignment.duedate is None
 
         run_nbgrader(["db", "assignment", "add", "foo", '--duedate="Sun Jan 8 2017 4:31:22 PM"', "--db", db])
-        with open_gradebook(db) as gb:
+        with Gradebook(db) as gb:
             assignment = gb.find_assignment("foo")
             assert assignment.duedate == datetime.datetime(2017, 1, 8, 16, 31, 22)
 
     def test_assignment_remove(self, db):
         run_nbgrader(["db", "assignment", "add", "foo", "--db", db])
-        with open_gradebook(db) as gb:
+        with Gradebook(db) as gb:
             assignment = gb.find_assignment("foo")
             assert assignment.duedate is None
 
         run_nbgrader(["db", "assignment", "remove", "foo", "--db", db])
-        with open_gradebook(db) as gb:
+        with Gradebook(db) as gb:
             with pytest.raises(MissingEntry):
                 gb.find_assignment("foo")
 
@@ -207,21 +207,21 @@ class TestNbGraderDb(BaseTestApp):
         self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "submitted", "foo", "ps1", "p1.ipynb"))
         run_nbgrader(["autograde", "ps1", "--db", db])
 
-        with open_gradebook(db) as gb:
+        with Gradebook(db) as gb:
             gb.find_assignment("ps1")
 
         # it should fail if we don't run with --force
         run_nbgrader(["db", "assignment", "remove", "ps1", "--db", db], retcode=1)
 
         # make sure we can still find the assignment
-        with open_gradebook(db) as gb:
+        with Gradebook(db) as gb:
             gb.find_assignment("ps1")
 
         # now force it to complete
         run_nbgrader(["db", "assignment", "remove", "ps1", "--force", "--db", db])
 
             # assignment should be gone
-        with open_gradebook(db) as gb:
+        with Gradebook(db) as gb:
             with pytest.raises(MissingEntry):
                 gb.find_assignment("ps1")
 
@@ -248,7 +248,7 @@ class TestNbGraderDb(BaseTestApp):
             ).strip())
 
         run_nbgrader(["db", "assignment", "import", "assignments.csv", "--db", db])
-        with open_gradebook(db) as gb:
+        with Gradebook(db) as gb:
             assignment = gb.find_assignment("foo")
             assert assignment.duedate == datetime.datetime(2017, 1, 8, 16, 31, 22)
             assignment = gb.find_assignment("bar")
@@ -277,7 +277,7 @@ class TestNbGraderDb(BaseTestApp):
             ).strip())
 
         run_nbgrader(["db", "assignment", "import", "assignments.csv", "--db", db])
-        with open_gradebook(db) as gb:
+        with Gradebook(db) as gb:
             assignment = gb.find_assignment("foo")
             assert assignment.duedate == datetime.datetime(2017, 1, 8, 16, 31, 22)
             assignment = gb.find_assignment("bar")
