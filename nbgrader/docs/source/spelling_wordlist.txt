@@ -37,6 +37,7 @@ conda
 config
 contextmanager
 customizable
+cwd
 datefmt
 ddbourgin
 delimeters
@@ -66,6 +67,7 @@ Homebrew
 html
 https
 hubapi
+huwf
 Indices
 init
 inline
@@ -160,6 +162,7 @@ todo
 toolbar
 travis
 undeletable
+Undeprecate
 unicode
 uninstall
 untracked
@@ -168,6 +171,7 @@ username
 usernames
 utcnow
 vinaykola
+whitead
 whitespace
 whositwhatnow
 Wildcards
