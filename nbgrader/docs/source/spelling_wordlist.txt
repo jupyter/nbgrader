@@ -1,3 +1,4 @@
+adamchainz
 admin
 Afterwards
 ajax
@@ -30,15 +31,20 @@ Changelog
 changelog
 checksum
 checksums
+codecov
 cogsci
 conda
 config
+contextmanager
 customizable
+cwd
 datefmt
 ddbourgin
 delimeters
 dev
+dlsun
 dropdown
+dsblank
 duedate
 Duedate
 ellachao
@@ -61,8 +67,11 @@ Homebrew
 html
 https
 hubapi
+huwf
 Indices
+init
 inline
+io
 iopub
 ipynb
 IPython
@@ -85,6 +94,7 @@ logfile
 lphk
 mandli
 Marr
+marr
 mathjax
 matplotlib
 metadata
@@ -101,6 +111,7 @@ np
 npm
 ok
 olgabot
+org
 osx
 phantomjs
 Phantomjs
@@ -121,6 +132,7 @@ ps
 py
 quickstart
 readonly
+readthedocs
 redSlug
 reinstall
 resize
@@ -150,6 +162,7 @@ todo
 toolbar
 travis
 undeletable
+Undeprecate
 unicode
 uninstall
 untracked
@@ -158,6 +171,7 @@ username
 usernames
 utcnow
 vinaykola
+whitead
 whitespace
 whositwhatnow
 Wildcards
@@ -169,3 +183,4 @@ workflow
 workflows
 xsrf
 XSRF
+yml
