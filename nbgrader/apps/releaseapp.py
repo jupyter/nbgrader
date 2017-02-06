@@ -135,5 +135,6 @@ class ReleaseApp(TransferApp):
                 ))
         self.log.info("Source: {}".format(self.src_path))
         self.log.info("Destination: {}".format(self.dest_path))
-        self.do_copy(self.src_path, self.dest_path)
+        perms = S_IRUSR|S_IWUSR|S_IXUSR|S_IRGRP|S_IXGRP|S_IROTH|S_IXOTH
+        self.do_copy(self.src_path, self.dest_path, perms=perms)
         self.log.info("Released as: {} {}".format(self.course_id, self.assignment_id))
