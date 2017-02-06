@@ -16,10 +16,8 @@ class OverwriteCells(NbGraderPreprocessor):
         # connect to the database
         self.gradebook = Gradebook(self.db_url)
 
-        try:
+        with self.gradebook:
             nb, resources = super(OverwriteCells, self).preprocess(nb, resources)
-        finally:
-            self.gradebook.close()
 
         return nb, resources
 

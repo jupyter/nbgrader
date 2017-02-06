@@ -20,7 +20,7 @@ class GetGrades(NbGraderPreprocessor):
         # connect to the database
         self.gradebook = Gradebook(self.db_url)
 
-        try:
+        with self.gradebook:
             # process the cells
             nb, resources = super(GetGrades, self).preprocess(nb, resources)
             notebook = self.gradebook.find_submission_notebook(
@@ -34,9 +34,6 @@ class GetGrades(NbGraderPreprocessor):
             resources['nbgrader']['score'] = notebook.score - late_penalty
             resources['nbgrader']['max_score'] = notebook.max_score
             resources['nbgrader']['late_penalty'] = late_penalty
-
-        finally:
-            self.gradebook.close()
 
         return nb, resources
 

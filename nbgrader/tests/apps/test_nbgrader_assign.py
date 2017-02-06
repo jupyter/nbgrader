@@ -82,11 +82,9 @@ class TestNbGraderAssign(BaseTestApp):
 
         run_nbgrader(["assign", "ps1", "--db", db])
 
-        gb = Gradebook(db)
-        notebook = gb.find_notebook("test", "ps1")
-        assert len(notebook.grade_cells) == 6
-
-        gb.close()
+        with Gradebook(db) as gb:
+            notebook = gb.find_notebook("test", "ps1")
+            assert len(notebook.grade_cells) == 6
 
     def test_force(self, course_dir):
         """Ensure the force option works properly"""
@@ -158,29 +156,27 @@ class TestNbGraderAssign(BaseTestApp):
             fh.write("""c.NbGrader.db_assignments = [dict(name="ps1")]\n""")
         run_nbgrader(["assign", "ps1", "--db", db])
 
-        gb = Gradebook(db)
-        assignment = gb.find_assignment("ps1")
-        assert len(assignment.notebooks) == 1
-        notebook1 = gb.find_notebook("test", "ps1")
+        with Gradebook(db) as gb:
+            assignment = gb.find_assignment("ps1")
+            assert len(assignment.notebooks) == 1
+            notebook1 = gb.find_notebook("test", "ps1")
 
-        self._copy_file(join("files", "test.ipynb"), join(course_dir, "source", "ps1", "test2.ipynb"))
-        run_nbgrader(["assign", "ps1", "--db", db, "--force"])
+            self._copy_file(join("files", "test.ipynb"), join(course_dir, "source", "ps1", "test2.ipynb"))
+            run_nbgrader(["assign", "ps1", "--db", db, "--force"])
 
-        gb.db.refresh(assignment)
-        assert len(assignment.notebooks) == 2
-        gb.db.refresh(notebook1)
-        notebook2 = gb.find_notebook("test2", "ps1")
+            gb.db.refresh(assignment)
+            assert len(assignment.notebooks) == 2
+            gb.db.refresh(notebook1)
+            notebook2 = gb.find_notebook("test2", "ps1")
 
-        os.remove(join(course_dir, "source", "ps1", "test2.ipynb"))
-        run_nbgrader(["assign", "ps1", "--db", db, "--force"])
+            os.remove(join(course_dir, "source", "ps1", "test2.ipynb"))
+            run_nbgrader(["assign", "ps1", "--db", db, "--force"])
 
-        gb.db.refresh(assignment)
-        assert len(assignment.notebooks) == 1
-        gb.db.refresh(notebook1)
-        with pytest.raises(InvalidRequestError):
-            gb.db.refresh(notebook2)
-
-        gb.close()
+            gb.db.refresh(assignment)
+            assert len(assignment.notebooks) == 1
+            gb.db.refresh(notebook1)
+            with pytest.raises(InvalidRequestError):
+                gb.db.refresh(notebook2)
 
     def test_add_extra_notebooks_with_submissions(self, db, course_dir):
         """Is an error thrown when new notebooks are added and there are existing submissions?"""
@@ -190,17 +186,15 @@ class TestNbGraderAssign(BaseTestApp):
             fh.write("""c.NbGrader.db_assignments = [dict(name="ps1")]\n""")
         run_nbgrader(["assign", "ps1", "--db", db])
 
-        gb = Gradebook(db)
-        assignment = gb.find_assignment("ps1")
-        assert len(assignment.notebooks) == 1
+        with Gradebook(db) as gb:
+            assignment = gb.find_assignment("ps1")
+            assert len(assignment.notebooks) == 1
 
-        gb.add_student("hacker123")
-        gb.add_submission("ps1", "hacker123")
+            gb.add_student("hacker123")
+            gb.add_submission("ps1", "hacker123")
 
-        self._copy_file(join("files", "test.ipynb"), join(course_dir, "source", "ps1", "test2.ipynb"))
-        run_nbgrader(["assign", "ps1", "--db", db, "--force"], retcode=1)
-
-        gb.close()
+            self._copy_file(join("files", "test.ipynb"), join(course_dir, "source", "ps1", "test2.ipynb"))
+            run_nbgrader(["assign", "ps1", "--db", db, "--force"], retcode=1)
 
     def test_remove_extra_notebooks_with_submissions(self, db, course_dir):
         """Is an error thrown when notebooks are removed and there are existing submissions?"""
@@ -211,17 +205,15 @@ class TestNbGraderAssign(BaseTestApp):
             fh.write("""c.NbGrader.db_assignments = [dict(name="ps1")]\n""")
         run_nbgrader(["assign", "ps1", "--db", db])
 
-        gb = Gradebook(db)
-        assignment = gb.find_assignment("ps1")
-        assert len(assignment.notebooks) == 2
+        with Gradebook(db) as gb:
+            assignment = gb.find_assignment("ps1")
+            assert len(assignment.notebooks) == 2
 
-        gb.add_student("hacker123")
-        gb.add_submission("ps1", "hacker123")
+            gb.add_student("hacker123")
+            gb.add_submission("ps1", "hacker123")
 
-        os.remove(join(course_dir, "source", "ps1", "test2.ipynb"))
-        run_nbgrader(["assign", "ps1", "--db", db, "--force"], retcode=1)
-
-        gb.close()
+            os.remove(join(course_dir, "source", "ps1", "test2.ipynb"))
+            run_nbgrader(["assign", "ps1", "--db", db, "--force"], retcode=1)
 
     def test_same_notebooks_with_submissions(self, db, course_dir):
         """Is it ok to run nbgrader assign with the same notebooks and existing submissions?"""
@@ -231,24 +223,22 @@ class TestNbGraderAssign(BaseTestApp):
             fh.write("""c.NbGrader.db_assignments = [dict(name="ps1")]\n""")
         run_nbgrader(["assign", "ps1", "--db", db])
 
-        gb = Gradebook(db)
-        assignment = gb.find_assignment("ps1")
-        assert len(assignment.notebooks) == 1
-        notebook = assignment.notebooks[0]
+        with Gradebook(db) as gb:
+            assignment = gb.find_assignment("ps1")
+            assert len(assignment.notebooks) == 1
+            notebook = assignment.notebooks[0]
 
-        gb.add_student("hacker123")
-        submission = gb.add_submission("ps1", "hacker123")
-        submission_notebook = submission.notebooks[0]
+            gb.add_student("hacker123")
+            submission = gb.add_submission("ps1", "hacker123")
+            submission_notebook = submission.notebooks[0]
 
-        run_nbgrader(["assign", "ps1", "--db", db, "--force"])
+            run_nbgrader(["assign", "ps1", "--db", db, "--force"])
 
-        gb.db.refresh(assignment)
-        assert len(assignment.notebooks) == 1
-        gb.db.refresh(notebook)
-        gb.db.refresh(submission)
-        gb.db.refresh(submission_notebook)
-
-        gb.close()
+            gb.db.refresh(assignment)
+            assert len(assignment.notebooks) == 1
+            gb.db.refresh(notebook)
+            gb.db.refresh(submission)
+            gb.db.refresh(submission_notebook)
 
     def test_force_single_notebook(self, course_dir):
         self._copy_file(join("files", "test.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))

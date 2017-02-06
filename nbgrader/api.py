@@ -1028,6 +1028,12 @@ class Gradebook(object):
         # this creates all the tables in the database if they don't already exist
         Base.metadata.create_all(bind=self.engine)
 
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.close()
+
     def close(self):
         """Close the connection to the database.
 
@@ -2412,12 +2418,3 @@ class Gradebook(object):
             "failed_tests", "flagged"
         ]
         return [dict(zip(keys, x)) for x in submissions]
-
-
-@contextlib.contextmanager
-def open_gradebook(db_url):
-    gradebook = Gradebook(db_url)
-    try:
-        yield gradebook
-    finally:
-        gradebook.close()

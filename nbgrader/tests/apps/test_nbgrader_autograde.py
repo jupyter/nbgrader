@@ -65,31 +65,29 @@ class TestNbGraderAutograde(BaseTestApp):
         assert os.path.isfile(join(course_dir, "autograded", "bar", "ps1", "p1.ipynb"))
         assert not os.path.isfile(join(course_dir, "autograded", "bar", "ps1", "timestamp.txt"))
 
-        gb = Gradebook(db)
-        notebook = gb.find_submission_notebook("p1", "ps1", "foo")
-        assert notebook.score == 1
-        assert notebook.max_score == 7
-        assert notebook.needs_manual_grade == False
+        with Gradebook(db) as gb:
+            notebook = gb.find_submission_notebook("p1", "ps1", "foo")
+            assert notebook.score == 1
+            assert notebook.max_score == 7
+            assert notebook.needs_manual_grade == False
 
-        comment1 = gb.find_comment("set_a", "p1", "ps1", "foo")
-        comment2 = gb.find_comment("baz", "p1", "ps1", "foo")
-        comment3 = gb.find_comment("quux", "p1", "ps1", "foo")
-        assert comment1.comment == "No response."
-        assert comment2.comment == "No response."
-        assert comment3.comment == "No response."
+            comment1 = gb.find_comment("set_a", "p1", "ps1", "foo")
+            comment2 = gb.find_comment("baz", "p1", "ps1", "foo")
+            comment3 = gb.find_comment("quux", "p1", "ps1", "foo")
+            assert comment1.comment == "No response."
+            assert comment2.comment == "No response."
+            assert comment3.comment == "No response."
 
-        notebook = gb.find_submission_notebook("p1", "ps1", "bar")
-        assert notebook.score == 2
-        assert notebook.max_score == 7
-        assert notebook.needs_manual_grade == True
+            notebook = gb.find_submission_notebook("p1", "ps1", "bar")
+            assert notebook.score == 2
+            assert notebook.max_score == 7
+            assert notebook.needs_manual_grade == True
 
-        comment1 = gb.find_comment("set_a", "p1", "ps1", "bar")
-        comment2 = gb.find_comment("baz", "p1", "ps1", "bar")
-        comment2 = gb.find_comment("quux", "p1", "ps1", "bar")
-        assert comment1.comment == None
-        assert comment2.comment == None
-
-        gb.close()
+            comment1 = gb.find_comment("set_a", "p1", "ps1", "bar")
+            comment2 = gb.find_comment("baz", "p1", "ps1", "bar")
+            comment2 = gb.find_comment("quux", "p1", "ps1", "bar")
+            assert comment1.comment == None
+            assert comment2.comment == None
 
     def test_grade_timestamp(self, db, course_dir):
         """Is a timestamp correctly read in?"""
@@ -113,16 +111,14 @@ class TestNbGraderAutograde(BaseTestApp):
         assert os.path.isfile(join(course_dir, "autograded", "bar", "ps1", "p1.ipynb"))
         assert os.path.isfile(join(course_dir, "autograded", "bar", "ps1", "timestamp.txt"))
 
-        gb = Gradebook(db)
-        submission = gb.find_submission("ps1", "foo")
-        assert submission.total_seconds_late > 0
-        submission = gb.find_submission("ps1", "bar")
-        assert submission.total_seconds_late == 0
+        with Gradebook(db) as gb:
+            submission = gb.find_submission("ps1", "foo")
+            assert submission.total_seconds_late > 0
+            submission = gb.find_submission("ps1", "bar")
+            assert submission.total_seconds_late == 0
 
         # make sure it still works to run it a second time
         run_nbgrader(["autograde", "ps1", "--db", db])
-
-        gb.close()
 
     def test_grade_empty_timestamp(self, db, course_dir):
         """Issue #580 - Does the autograder handle empty or invalid timestamp
@@ -141,10 +137,9 @@ class TestNbGraderAutograde(BaseTestApp):
         assert os.path.isfile(join(course_dir, "autograded", "foo", "ps1", "p1.ipynb"))
         assert os.path.isfile(join(course_dir, "autograded", "foo", "ps1", "timestamp.txt"))
 
-        gb = Gradebook(db)
-        submission = gb.find_submission("ps1", "foo")
-        assert submission.total_seconds_late == 0
-        gb.close()
+        with Gradebook(db) as gb:
+            submission = gb.find_submission("ps1", "foo")
+            assert submission.total_seconds_late == 0
 
         invalid_timestamp = "But I want to be a timestamp string :("
         self._copy_file(join("files", "submitted-changed.ipynb"), join(course_dir, "submitted", "bar", "ps1", "p1.ipynb"))
@@ -176,21 +171,19 @@ class TestNbGraderAutograde(BaseTestApp):
         assert os.path.isfile(join(course_dir, "autograded", "bar", "ps1", "timestamp.txt"))
 
         # not late
-        gb = Gradebook(db)
-        submission = gb.find_submission("ps1", "foo")
-        nb = submission.notebooks[0]
-        assert nb.score == 1
-        assert submission.total_seconds_late == 0
-        assert nb.late_submission_penalty == None
+        with Gradebook(db) as gb:
+            submission = gb.find_submission("ps1", "foo")
+            nb = submission.notebooks[0]
+            assert nb.score == 1
+            assert submission.total_seconds_late == 0
+            assert nb.late_submission_penalty == None
 
-        # 1h late
-        submission = gb.find_submission("ps1", "bar")
-        nb = submission.notebooks[0]
-        assert nb.score == 2
-        assert submission.total_seconds_late > 0
-        assert nb.late_submission_penalty == None
-
-        gb.close()
+            # 1h late
+            submission = gb.find_submission("ps1", "bar")
+            nb = submission.notebooks[0]
+            assert nb.score == 2
+            assert submission.total_seconds_late > 0
+            assert nb.late_submission_penalty == None
 
     def test_late_submission_penalty_zero(self, db, course_dir):
         """Does 'zero' method assign notebook.score as penalty if late?"""
@@ -218,21 +211,19 @@ class TestNbGraderAutograde(BaseTestApp):
         assert os.path.isfile(join(course_dir, "autograded", "bar", "ps1", "timestamp.txt"))
 
         # not late
-        gb = Gradebook(db)
-        submission = gb.find_submission("ps1", "foo")
-        nb = submission.notebooks[0]
-        assert nb.score == 1
-        assert submission.total_seconds_late == 0
-        assert nb.late_submission_penalty == None
+        with Gradebook(db) as gb:
+            submission = gb.find_submission("ps1", "foo")
+            nb = submission.notebooks[0]
+            assert nb.score == 1
+            assert submission.total_seconds_late == 0
+            assert nb.late_submission_penalty == None
 
-        # 1h late
-        submission = gb.find_submission("ps1", "bar")
-        nb = submission.notebooks[0]
-        assert nb.score == 2
-        assert submission.total_seconds_late > 0
-        assert nb.late_submission_penalty == nb.score
-
-        gb.close()
+            # 1h late
+            submission = gb.find_submission("ps1", "bar")
+            nb = submission.notebooks[0]
+            assert nb.score == 2
+            assert submission.total_seconds_late > 0
+            assert nb.late_submission_penalty == nb.score
 
     def test_late_submission_penalty_plugin(self, db, course_dir):
         """Does plugin set 1 point per hour late penalty?"""
@@ -275,21 +266,19 @@ class TestNbGraderAutograde(BaseTestApp):
         assert os.path.isfile(join(course_dir, "autograded", "bar", "ps1", "timestamp.txt"))
 
         # 4h late
-        gb = Gradebook(db)
-        submission = gb.find_submission("ps1", "foo")
-        nb = submission.notebooks[0]
-        assert nb.score == 1
-        assert submission.total_seconds_late > 0
-        assert nb.late_submission_penalty == nb.score
+        with Gradebook(db) as gb:
+            submission = gb.find_submission("ps1", "foo")
+            nb = submission.notebooks[0]
+            assert nb.score == 1
+            assert submission.total_seconds_late > 0
+            assert nb.late_submission_penalty == nb.score
 
-        # 1h late
-        submission = gb.find_submission("ps1", "bar")
-        nb = submission.notebooks[0]
-        assert nb.score == 2
-        assert submission.total_seconds_late > 0
-        assert nb.late_submission_penalty == 1
-
-        gb.close()
+            # 1h late
+            submission = gb.find_submission("ps1", "bar")
+            nb = submission.notebooks[0]
+            assert nb.score == 2
+            assert submission.total_seconds_late > 0
+            assert nb.late_submission_penalty == 1
 
     def test_force(self, db, course_dir):
         """Ensure the force option works properly"""
@@ -617,11 +606,10 @@ class TestNbGraderAutograde(BaseTestApp):
             "as it is, you WILL NOT"
         )
 
-        gb = Gradebook(db)
-        submission = gb.find_submission("ps1", "foo")
-        nb1 = submission.notebooks[0]
-        assert nb1.score == 1.5
-        gb.close()
+        with Gradebook(db) as gb:
+            submission = gb.find_submission("ps1", "foo")
+            nb1 = submission.notebooks[0]
+            assert nb1.score == 1.5
 
     def test_handle_failure(self, course_dir):
         with open("nbgrader_config.py", "a") as fh:
