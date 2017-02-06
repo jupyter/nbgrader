@@ -165,8 +165,8 @@ managing assignments. To add students, we use the
 
 .. parsed-literal::
 
-    [DbStudentAddApp | INFO] Creating/updating student with ID 'bitdiddle': {'first_name': 'Ben', 'email': None, 'last_name': 'Bitdiddle'}
-    [DbStudentAddApp | INFO] Creating/updating student with ID 'hacker': {'last_name': 'Hacker', 'email': None, 'first_name': 'Alyssa'}
+    [DbStudentAddApp | INFO] Creating/updating student with ID 'bitdiddle': {'last_name': 'Bitdiddle', 'email': None, 'first_name': 'Ben'}
+    [DbStudentAddApp | INFO] Creating/updating student with ID 'hacker': {'last_name': 'Hacker', 'first_name': 'Alyssa', 'email': None}
 
 
 And to list the students in the database, we use the
