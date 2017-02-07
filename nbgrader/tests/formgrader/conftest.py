@@ -101,7 +101,7 @@ def _formgrader(request, manager_class, gradebook, tempdir):
     capabilities['loggingPrefs'] = {'browser': 'ALL'}
     capabilities['acceptSslCerts'] = True
     browser = webdriver.PhantomJS(
-        service_args=['--ignore-ssl-errors=true'],
+        service_args=['--ignore-ssl-errors=true', '--proxy-type=none'],
         desired_capabilities=capabilities,
         service_log_path=os.path.devnull)
     browser.set_page_load_timeout(10)
