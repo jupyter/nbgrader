@@ -13,7 +13,7 @@ from . import formgrade_utils as utils
 
 
 @pytest.fixture(scope="module")
-def gradebook(request, tempdir):
+def gradebook(request, tempdir, nbserver):
     # copy files from the user guide
     source_path = os.path.join(os.path.dirname(__file__), "..", "..", "docs", "source", "user_guide", "source")
     submitted_path = os.path.join(os.path.dirname(__file__), "..", "..", "docs", "source", "user_guide", "submitted")
