@@ -1,5 +1,4 @@
 import os
-import six
 import pytest
 import tempfile
 import shutil
@@ -7,17 +6,14 @@ import zipfile
 
 from nbformat.v4 import new_output
 from os.path import join
+from setuptools.archive_util import UnrecognizedFormat
+
 
 from ... import utils
 from .. import (
     create_code_cell,
     create_grade_cell, create_solution_cell,
     create_grade_and_solution_cell)
-
-if six.PY2:
-    from zipfile import BadZipfile as BadZipFile
-else:
-    from zipfile import BadZipFile
 
 
 @pytest.fixture
@@ -298,7 +294,7 @@ def test_unzip_invalid_ext(temp_cwd):
 def test_unzip_bad_zip(temp_cwd):
     with open(join("baz.zip"), "wb") as fh:
         pass
-    with pytest.raises(BadZipFile):
+    with pytest.raises(UnrecognizedFormat):
         utils.unzip("baz.zip", os.getcwd())
 
 

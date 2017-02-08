@@ -47,7 +47,10 @@ class ExtractorPlugin(BasePlugin):
         extracted_path: str
             Absolute path to the `extracted_directory`.
         """
-        nfiles = 0
+        if not os.listdir(archive_path):
+            self.log.warning(
+                "No files found in directory: {}".format(archive_path))
+
         for root, _, archive_files in os.walk(archive_path):
             if not archive_files:
                 continue
@@ -63,10 +66,13 @@ class ExtractorPlugin(BasePlugin):
                 zfile = os.path.join(root, zfile)
                 filename, ext = os.path.splitext(os.path.basename(zfile))
                 if ext in self.zip_ext:
+                    fname, ext = os.path.splitext(os.path.basename(filename))
+                    if ext == '.tar':
+                        filename = fname
                     self.log.info("Extracting from: {}".format(zfile))
                     self.log.info("  Extracting to: {}".format(
                         os.path.join(extract_to, filename)))
-                    nfiles += unzip(
+                    unzip(
                         zfile,
                         extract_to,
                         zip_ext=self.zip_ext,
@@ -79,12 +85,6 @@ class ExtractorPlugin(BasePlugin):
                     self.log.info("Copying from: {}".format(zfile))
                     self.log.info("  Copying to: {}".format(dest))
                     shutil.copy(zfile, dest)
-                    nfiles += 1
-
-        if nfiles == 0:
-            self.log.warning(
-                "No files found in directory: {}".format(archive_path))
-            return
 
 
 class FileNameCollectorPlugin(BasePlugin):

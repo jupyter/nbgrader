@@ -6,7 +6,10 @@ import six
 import sys
 import shutil
 import stat
-import zipfile
+
+from setuptools.archive_util import unpack_archive
+from setuptools.archive_util import unpack_tarfile
+from setuptools.archive_util import unpack_zipfile
 
 # pwd is for unix passwords only, so we shouldn't import it on
 # windows machines
@@ -226,7 +229,7 @@ def unzip(src, dest, zip_ext=None, create_own_folder=False, tree=False):
         Extract archive files within archive files (into their own
         sub-directory) if True. Default: False
     """
-    zip_ext = list(zip_ext or ['.zip', '.gz', 'tar.gz'])
+    zip_ext = list(zip_ext or ['.zip', '.tar.gz'])
     filename, ext = os.path.splitext(os.path.basename(src))
     if ext not in zip_ext:
         raise ValueError("Invalid archive file extension {}: {}".format(ext, src))
@@ -234,27 +237,39 @@ def unzip(src, dest, zip_ext=None, create_own_folder=False, tree=False):
         raise OSError("Directory not found or unwritable: {}".format(dest))
 
     if create_own_folder:
+        fname, ext = os.path.splitext(os.path.basename(filename))
+        if ext == '.tar':
+            filename = fname
         dest = os.path.join(dest, filename)
         if not os.path.isdir(dest):
             os.makedirs(dest)
 
-    nfiles = 0
-    with zipfile.ZipFile(src, 'r') as zip_file:
-        for _file in zip_file.namelist():
-            zip_file.extract(_file, dest)
-            nfiles += 1
+    unpack_archive(src, dest, drivers=(unpack_zipfile, unpack_tarfile))
 
-            root, basename = os.path.split(_file)
-            filename, ext = os.path.splitext(basename)
-            if tree and ext in zip_ext:
-                src_file = os.path.join(dest, _file)
-                dest_path = os.path.join(dest, root)
-                nfiles += unzip(
-                    src_file,
-                    dest_path,
-                    zip_ext=zip_ext,
-                    create_own_folder=True,
-                    tree=tree
-                )
+    if not tree:
+        return
 
-    return nfiles
+    def find_new_files(skip):
+        found = []
+        for root, _, filenames in os.walk(dest):
+            for basename in filenames:
+                src_file = os.path.join(root, basename)
+                _, ext = os.path.splitext(basename)
+                if ext in zip_ext and src_file not in skip:
+                    found.append(src_file)
+        return found
+
+    skip = []
+    new_files = find_new_files(skip)
+    while new_files:
+        for src_file in new_files:
+            dest_path = os.path.split(src_file)[0]
+            unzip(
+                src_file,
+                dest_path,
+                zip_ext=zip_ext,
+                create_own_folder=True,
+                tree=False
+            )
+            skip.append(src_file)
+        new_files = find_new_files(skip)
