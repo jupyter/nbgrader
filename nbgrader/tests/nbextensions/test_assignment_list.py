@@ -138,8 +138,8 @@ def test_show_assignments_list(browser, port, class_files, tempdir):
     _wait(browser).until(EC.visibility_of_element_located((By.CSS_SELECTOR, "#submitted_assignments_list_placeholder")))
 
     # release an assignment
-    run_nbgrader(["assign", "Problem Set 1"])
-    run_nbgrader(["release", "Problem Set 1", "--course", "abc101"])
+    run_nbgrader(["assign", "Problem Set 1", "--force"])
+    run_nbgrader(["release", "Problem Set 1", "--course", "abc101", "--force"])
 
     # click the refresh button
     browser.find_element_by_css_selector("#refresh_assignments_list").click()
@@ -158,8 +158,8 @@ def test_multiple_released_assignments(browser, port, class_files, tempdir):
     _wait_until_loaded(browser)
 
     # release another assignment
-    run_nbgrader(["assign", "ps.01"])
-    run_nbgrader(["release", "ps.01", "--course", "xyz 200"])
+    run_nbgrader(["assign", "ps.01", "--force"])
+    run_nbgrader(["release", "ps.01", "--course", "xyz 200", "--force"])
 
     # click the refresh button
     browser.find_element_by_css_selector("#refresh_assignments_list").click()
@@ -427,8 +427,8 @@ def test_missing_exchange(exchange, browser, port, class_files, tempdir):
     os.makedirs(exchange)
 
     # release an assignment
-    run_nbgrader(["assign", "Problem Set 1"])
-    run_nbgrader(["release", "Problem Set 1", "--course", "abc101"])
+    run_nbgrader(["assign", "Problem Set 1", "--force"])
+    run_nbgrader(["release", "Problem Set 1", "--course", "abc101", "--force"])
 
     # click the refresh button
     browser.find_element_by_css_selector("#refresh_assignments_list").click()
