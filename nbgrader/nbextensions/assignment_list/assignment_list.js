@@ -118,6 +118,7 @@ define([
             this.default_course_element.text(course);
         }
         this.current_course = course;
+        this.default_course_element.text(this.current_course);
         var success = $.proxy(this.load_assignment_list_success, this);
         this.assignment_list.load_list(course, success);
     };
@@ -139,7 +140,6 @@ define([
             this.data = undefined;
         }
 
-        this.default_course_element.text(this.current_course);
         this.enable_list();
     };
 
