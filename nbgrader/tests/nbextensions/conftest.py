@@ -103,20 +103,25 @@ def nbserver(request, port, tempdir, jupyter_config_dir, jupyter_data_dir, excha
     sp.check_call([sys.executable, "-m", "jupyter", "serverextension", "enable", "--user", "--py", "nbgrader"], env=env)
 
     # create nbgrader_config.py file
-    if sys.platform != 'win32':
-        with open('nbgrader_config.py', 'w') as fh:
+    with open('nbgrader_config.py', 'w') as fh:
+        fh.write(dedent(
+            """
+            c = get_config()
+            c.Execute.execute_retries = 4
+            c.NbGrader.db_assignments = [dict(name="Problem Set 1"), dict(name="ps.01")]
+            c.NbGrader.db_students = [
+                dict(id="Bitdiddle", first_name="Ben", last_name="B"),
+                dict(id="Hacker", first_name="Alyssa", last_name="H"),
+                dict(id="Reasoner", first_name="Louis", last_name="R")
+            ]
+            """
+        ))
+
+        if sys.platform != 'win32':
             fh.write(dedent(
                 """
-                c = get_config()
-                c.TransferApp.exchange_directory = '{}'
-                c.TransferApp.cache_directory = '{}'
-                c.Execute.execute_retries = 4
-                c.NbGrader.db_assignments = [dict(name="Problem Set 1"), dict(name="ps.01")]
-                c.NbGrader.db_students = [
-                    dict(id="Bitdiddle", first_name="Ben", last_name="B"),
-                    dict(id="Hacker", first_name="Alyssa", last_name="H"),
-                    dict(id="Reasoner", first_name="Louis", last_name="R")
-                ]
+                c.TransferApp.exchange_directory = "{}"
+                c.TransferApp.cache_directory = "{}"
                 """.format(exchange, cache)
             ))
 

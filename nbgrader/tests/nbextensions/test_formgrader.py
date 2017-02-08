@@ -38,7 +38,7 @@ def gradebook(request, tempdir, nbserver):
     # run nbgrader assign
     run_nbgrader([
         "assign", "Problem Set 1",
-        "--IncludeHeaderFooter.header=source/header.ipynb"
+        "--IncludeHeaderFooter.header={}".format(os.path.join("source", "header.ipynb"))
     ])
 
     # run the autograder
