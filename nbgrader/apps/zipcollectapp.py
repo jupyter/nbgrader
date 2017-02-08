@@ -11,7 +11,6 @@ from traitlets.config.application import catch_config_error, default
 
 from .baseapp import NbGrader
 
-from ..api import open_gradebook, MissingEntry
 from ..plugins import BasePlugin, ExtractorPlugin, FileNameCollectorPlugin
 from ..utils import check_directory, rmtree, parse_utc
 from ..utils import find_all_notebooks
@@ -232,13 +231,6 @@ class ZipCollectApp(NbGrader):
                 "previously existing files".format(path)
             )
 
-    def _find_student(self, info):
-        try:
-            with open_gradebook(self.db_url) as gradebook:
-                return gradebook.find_student(info['student_id'])
-        except MissingEntry:
-            return None
-
     def get_timestamp(self):
         """Return the timestamp using the configured timezone."""
         tz = gettz(self.timezone)
@@ -350,14 +342,6 @@ class ZipCollectApp(NbGrader):
                     invalid_files += 1
                     continue
                 self.log.warn("Invalid notebook name.")
-
-            if self._find_student(info) is None:
-                self.log.warn(
-                    "Skipped. Student {} not found in gradebook."
-                    "".format(info['student_id'])
-                )
-                invalid_files += 1
-                continue
 
             submitted_path = self._format_path(
                 self.submitted_directory, info['student_id'], self.assignment_id)
