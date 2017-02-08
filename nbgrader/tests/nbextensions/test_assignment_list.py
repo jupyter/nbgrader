@@ -90,7 +90,8 @@ def _sort_rows(x):
 
 
 def _wait_until_loaded(browser):
-    _wait(browser).until(lambda browser: browser.find_element_by_css_selector("#course_list_dropdown").is_enabled())
+    _wait(browser).until(lambda browser: browser.find_element_by_id("course_list_default").text != "Loading, please wait...")
+    _wait(browser).until(EC.element_to_be_clickable((By.ID, "course_list_dropdown")))
 
 
 def _change_course(browser, course):
