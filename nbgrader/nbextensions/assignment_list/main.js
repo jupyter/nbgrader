@@ -1,7 +1,9 @@
-define(function(require) {
-    var $ = require('jquery');
-    var Jupyter = require('base/js/namespace');
-    var AssignmentList = require('./assignment_list');
+define([
+    'base/js/namespace',
+    'jquery',
+    './assignment_list'
+], function(Jupyter, $, AssignmentList) {
+    "use strict";
 
     var assignment_html = $([
         '<div id="assignments" class="tab-pane">',
