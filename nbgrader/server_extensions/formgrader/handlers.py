@@ -4,7 +4,7 @@ import re
 from tornado import web
 
 from .base import BaseHandler
-from ..api import MissingEntry
+from ...api import MissingEntry
 
 
 class AssignmentsHandler(BaseHandler):
@@ -21,7 +21,7 @@ class AssignmentsHandler(BaseHandler):
         html = self.render(
             "assignments.tpl",
             assignments=assignments,
-            base_url=self.auth.base_url)
+            base_url=self.base_url)
 
         self.write(html)
 
@@ -47,7 +47,7 @@ class AssignmentNotebooksHandler(BaseHandler):
             "assignment_notebooks.tpl",
             assignment=assignment,
             notebooks=notebooks,
-            base_url=self.auth.base_url)
+            base_url=self.base_url)
 
         self.write(html)
 
@@ -86,7 +86,7 @@ class AssignmentNotebookSubmissionsHandler(BaseHandler):
             notebook_id=notebook_id,
             assignment_id=assignment_id,
             submissions=submissions,
-            base_url=self.auth.base_url)
+            base_url=self.base_url)
 
         self.write(html)
 
@@ -100,7 +100,7 @@ class StudentsHandler(BaseHandler):
         html = self.render(
             "students.tpl",
             students=students,
-            base_url=self.auth.base_url)
+            base_url=self.base_url)
 
         self.write(html)
 
@@ -143,7 +143,7 @@ class StudentAssignmentsHandler(BaseHandler):
             "student_assignments.tpl",
             assignments=submissions,
             student=student,
-            base_url=self.auth.base_url)
+            base_url=self.base_url)
 
         self.write(html)
 
@@ -180,7 +180,7 @@ class StudentAssignmentNotebooksHandler(BaseHandler):
             assignment_id=assignment_id,
             student=assignment.student.to_dict(),
             submissions=submissions,
-            base_url=self.auth.base_url)
+            base_url=self.base_url)
 
         self.write(html)
 
@@ -213,30 +213,20 @@ class SubmissionHandler(BaseHandler):
         submissions = self.gradebook.notebook_submissions(notebook_id, assignment_id)
         submission_ids = sorted([x.id for x in submissions])
         ix = submission_ids.index(submission.id)
-        server_exists = self.auth.notebook_server_exists()
-        server_cookie = self.auth.get_notebook_server_cookie()
 
-        if self.mathjax_url.startswith("http"):
-            mathjax_url = self.mathsjax_url
-        else:
-            mathjax_url = self.auth.base_url + '/mathjax/MathJax.js'
-
+        relative_path = os.path.relpath(filename, self.notebook_dir)
         resources = {
             'assignment_id': assignment_id,
             'notebook_id': notebook_id,
             'submission_id': submission.id,
             'index': ix,
             'total': len(submissions),
-            'notebook_server_exists': server_exists,
-            'base_url': self.auth.base_url,
-            'mathjax_url': mathjax_url,
+            'base_url': self.base_url,
+            'mathjax_url': self.mathjax_url,
             'last_name': submission.student.last_name,
-            'first_name': submission.student.first_name
+            'first_name': submission.student.first_name,
+            'notebook_path': self.notebook_url_prefix + '/' + relative_path
         }
-
-        if server_exists:
-            relative_path = os.path.relpath(filename, self.notebook_dir)
-            resources['notebook_path'] = self.auth.get_notebook_url(relative_path)
 
         if not os.path.exists(filename):
             resources['filename'] = filename
@@ -246,18 +236,16 @@ class SubmissionHandler(BaseHandler):
             self.write(html)
         else:
             html, _ = self.exporter.from_filename(filename, resources=resources)
-            if server_cookie:
-                self.set_cookie(**server_cookie)
             self.write(html)
 
 
 class SubmissionNavigationHandler(BaseHandler):
 
     def _assignment_notebook_list_url(self, assignment_id, notebook_id):
-        return '{}/assignments/{}/{}'.format(self.auth.base_url, assignment_id, notebook_id)
+        return '{}/formgrader/assignments/{}/{}'.format(self.base_url, assignment_id, notebook_id)
 
     def _submission_url(self, submission_id):
-        url = '{}/submissions/{}'.format(self.auth.base_url, submission_id)
+        url = '{}/formgrader/submissions/{}'.format(self.base_url, submission_id)
         if self.get_argument('index', default=None) is not None:
             return "{}?index={}".format(url, self.get_argument('index'))
         else:
@@ -366,19 +354,19 @@ fonts_path = os.path.join(components_path, 'bootstrap', 'fonts')
 _navigation_regex = r"(?P<action>next_incorrect|prev_incorrect|next|prev)"
 
 default_handlers = [
-    (r"/", AssignmentsHandler),
-    (r"/assignments/?", AssignmentsHandler),
-    (r"/assignments/([^/]+)/?", AssignmentNotebooksHandler),
-    (r"/assignments/([^/]+)/([^/]+)/?", AssignmentNotebookSubmissionsHandler),
+    (r"/formgrader/?", AssignmentsHandler),
+    (r"/formgrader/assignments/?", AssignmentsHandler),
+    (r"/formgrader/assignments/([^/]+)/?", AssignmentNotebooksHandler),
+    (r"/formgrader/assignments/([^/]+)/([^/]+)/?", AssignmentNotebookSubmissionsHandler),
 
-    (r"/students/?", StudentsHandler),
-    (r"/students/([^/]+)/?", StudentAssignmentsHandler),
-    (r"/students/([^/]+)/([^/]+)/?", StudentAssignmentNotebooksHandler),
+    (r"/formgrader/students/?", StudentsHandler),
+    (r"/formgrader/students/([^/]+)/?", StudentAssignmentsHandler),
+    (r"/formgrader/students/([^/]+)/([^/]+)/?", StudentAssignmentNotebooksHandler),
 
-    (r"/submissions/components/(.*)", web.StaticFileHandler, {'path': components_path}),
-    (r"/submissions/([^/]+)/?", SubmissionHandler),
-    (r"/submissions/(?P<submission_id>[^/]+)/%s/?" % _navigation_regex, SubmissionNavigationHandler),
-    (r"/submissions/(.*)", SubmissionFilesHandler),
+    (r"/formgrader/submissions/components/(.*)", web.StaticFileHandler, {'path': components_path}),
+    (r"/formgrader/submissions/([^/]+)/?", SubmissionHandler),
+    (r"/formgrader/submissions/(?P<submission_id>[^/]+)/%s/?" % _navigation_regex, SubmissionNavigationHandler),
+    (r"/formgrader/submissions/(.*)", SubmissionFilesHandler),
 
-    (r"/fonts/(.*)", web.StaticFileHandler, {'path': fonts_path})
+    (r"/formgrader/fonts/(.*)", web.StaticFileHandler, {'path': fonts_path})
 ]

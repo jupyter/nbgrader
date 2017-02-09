@@ -20,9 +20,16 @@ def _jupyter_nbextension_paths():
             dest="create_assignment",
             require="create_assignment/main"
         ),
+        dict(
+            section="tree",
+            src=os.path.join('nbextensions', 'formgrader'),
+            dest="formgrader",
+            require="formgrader/main"
+        ),
     ]
 
 def _jupyter_server_extension_paths():
     return [
-        dict(module="nbgrader.server_extensions.assignment_list")
+        dict(module="nbgrader.server_extensions.assignment_list"),
+        dict(module="nbgrader.server_extensions.formgrader")
     ]

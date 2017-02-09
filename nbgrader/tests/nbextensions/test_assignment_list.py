@@ -1,15 +1,46 @@
 import pytest
 import os
-import time
+import shutil
 
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException, NoSuchElementException
 
+from nbformat import write as write_nb
+from nbformat.v4 import new_notebook
+from textwrap import dedent
+
 from .. import run_nbgrader
 from .conftest import notwindows
 from ...utils import rmtree
+
+
+@pytest.fixture(scope="module")
+def class_files(coursedir):
+    # copy files from the user guide
+    source_path = os.path.join(os.path.dirname(__file__), "..", "..", "docs", "source", "user_guide", "source")
+    shutil.copytree(os.path.join(os.path.dirname(__file__), source_path), os.path.join(coursedir, "source"))
+
+    # rename to old names -- we do this rather than changing all the tests
+    # because I want the tests to operate on files with spaces in the names
+    os.rename(os.path.join(coursedir, "source", "ps1"), os.path.join(coursedir, "source", "Problem Set 1"))
+    os.rename(os.path.join(coursedir, "source", "Problem Set 1", "problem1.ipynb"), os.path.join(coursedir, "source", "Problem Set 1", "Problem 1.ipynb"))
+    os.rename(os.path.join(coursedir, "source", "Problem Set 1", "problem2.ipynb"), os.path.join(coursedir, "source", "Problem Set 1", "Problem 2.ipynb"))
+
+    # create a fake ps1
+    os.mkdir(os.path.join(coursedir, "source", "ps.01"))
+    with open(os.path.join(coursedir, "source", "ps.01", "problem 1.ipynb"), "w") as fh:
+        write_nb(new_notebook(), fh, 4)
+
+    with open("nbgrader_config.py", "a") as fh:
+        fh.write(dedent(
+            """
+            c.NbGrader.course_directory = '{}'
+            """.format(coursedir)
+        ))
+
+    return coursedir
 
 
 def _wait(browser):

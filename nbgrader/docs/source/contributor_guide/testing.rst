@@ -25,9 +25,6 @@ commands:
 +=======================================+====================================+
 | ``invoke tests --group=python``       | Run tests only for the Python code |
 +---------------------------------------+------------------------------------+
-| ``invoke tests --group=formgrader``   | Run tests only for the formgrader  |
-|                                       | app                                |
-+---------------------------------------+------------------------------------+
 | ``invoke tests --group=nbextensions`` | Run tests only for the notebook    |
 |                                       | extensions                         |
 +---------------------------------------+------------------------------------+
@@ -35,13 +32,6 @@ commands:
 +---------------------------------------+------------------------------------+
 | ``invoke tests --group=all``          | Same as ``invoke tests``           |
 +---------------------------------------+------------------------------------+
-
-Note that any tests that involve `JupyterHub
-<https://github.com/jupyter/jupyterhub>`_ will be skipped if it is not
-installed. If, however, you are using Python 3 and have `JupyterHub
-<https://github.com/jupyter/jupyterhub>`_ installed and you don't want or need
-to run the JupyterHub tests, you can run the invoke command with
-``--skip=jupyterhub``.
 
 Using py.test to run a single test module
 -----------------------------------------

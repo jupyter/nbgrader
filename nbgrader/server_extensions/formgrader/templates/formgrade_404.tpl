@@ -4,7 +4,7 @@
 <html>
 <head>
 {{ header(resources) }}
-<link rel="stylesheet" href="{{resources.base_url}}/static/css/formgrade.css" />
+<link rel="stylesheet" href="{{ resources.base_url }}/formgrader/static/css/formgrade.css" />
 </head>
 
 <body>

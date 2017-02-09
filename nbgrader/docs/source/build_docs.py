@@ -39,7 +39,6 @@ def autogen_command_line(root):
         'ExtensionApp',
         'FeedbackApp',
         'FetchApp',
-        'FormgradeApp',
         'ListApp',
         'NbGraderApp',
         'QuickStartApp',

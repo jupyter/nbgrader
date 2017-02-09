@@ -8,7 +8,6 @@ Basic commands
     :maxdepth: 1
 
     nbgrader
-    nbgrader-extension
 
 Instructor commands
 -------------------
@@ -21,7 +20,6 @@ Instructor commands
     nbgrader-validate
     nbgrader-update
     nbgrader-autograde
-    nbgrader-formgrade
     nbgrader-feedback
     nbgrader-export
 

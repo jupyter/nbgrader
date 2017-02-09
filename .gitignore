@@ -77,15 +77,15 @@ nbgrader/docs/source/user_guide/managing_assignment_files.rst
 
 # components stuff
 node_modules
-nbgrader/formgrader/static/components/bootstrap/less
-nbgrader/formgrader/static/components/bootstrap/js/*
-!nbgrader/formgrader/static/components/bootstrap/js/bootstrap.js
-!nbgrader/formgrader/static/components/bootstrap/js/bootstrap.min.js
-nbgrader/formgrader/static/components/jquery/jquery-migrate.min.js
-nbgrader/formgrader/static/components/jquery/jquery-migrate.js
-nbgrader/formgrader/static/components/jquery-color/test
-nbgrader/formgrader/static/components/autosize/example
-!nbgrader/formgrader/static/components/autosize/dist
+nbgrader/server_extensions/formgrader/static/components/bootstrap/less
+nbgrader/server_extensions/formgrader/static/components/bootstrap/js/*
+!nbgrader/server_extensions/formgrader/static/components/bootstrap/js/bootstrap.js
+!nbgrader/server_extensions/formgrader/static/components/bootstrap/js/bootstrap.min.js
+nbgrader/server_extensions/formgrader/static/components/jquery/jquery-migrate.min.js
+nbgrader/server_extensions/formgrader/static/components/jquery/jquery-migrate.js
+nbgrader/server_extensions/formgrader/static/components/jquery-color/test
+nbgrader/server_extensions/formgrader/static/components/autosize/example
+!nbgrader/server_extensions/formgrader/static/components/autosize/dist
 
 conda-bld
 gh_api.sqlite
