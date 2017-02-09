@@ -221,7 +221,7 @@ def unzip(src, dest, zip_ext=None, create_own_folder=False, tree=False):
     Keyword Arguments
     -----------------
     zip_ext: list
-        Valid zip file extensions. Default: ['.zip', '.gz', 'tar.gz']
+        Valid zip file extensions. Default: ['.zip', '.gz']
     create_own_folder: bool
         Create a sub-folder in 'dest' with the archive file name if True
         ('/path/to/extract/archive_filename/'). Default: False
@@ -229,7 +229,7 @@ def unzip(src, dest, zip_ext=None, create_own_folder=False, tree=False):
         Extract archive files within archive files (into their own
         sub-directory) if True. Default: False
     """
-    zip_ext = list(zip_ext or ['.zip', '.tar.gz'])
+    zip_ext = list(zip_ext or ['.zip', '.gz'])
     filename, ext = os.path.splitext(os.path.basename(src))
     if ext not in zip_ext:
         raise ValueError("Invalid archive file extension {}: {}".format(ext, src))

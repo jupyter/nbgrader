@@ -21,7 +21,7 @@ class ExtractorPlugin(BasePlugin):
     ).tag(config=True)
 
     zip_ext = List(
-        ['.zip', '.gz', '.tar.gz'],
+        ['.zip', '.gz'],
         help=dedent(
             """
             List of valid archive (zip) filename extensions to extract. Any
