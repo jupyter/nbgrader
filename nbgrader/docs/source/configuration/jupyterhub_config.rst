@@ -90,7 +90,7 @@ Configuring SSL
 
 For a minimal working example of using JupyterHub with SSL, please see the
 ``nbgrader.tests.formgrader.manager.HubAuthSSLManager`` in the `nbgrader tests
-<https://github.com/jupyter/nbgrader/blob/master/nbgrader/tests/formgrader/manager.py>`__.
+<https://github.com/jupyter/nbgrader/blob/0.4.x/nbgrader/tests/formgrader/manager.py>`__.
 
 Running JupyterHub and formgrader
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
