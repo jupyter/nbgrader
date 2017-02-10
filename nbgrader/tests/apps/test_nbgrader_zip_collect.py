@@ -327,3 +327,62 @@ class TestNbGraderZipCollect(BaseTestApp):
         assert os.path.isfile(join(submitted_dir, "hacker", "ps1", 'problem1.ipynb'))
         assert os.path.isfile(join(submitted_dir, "hacker", "ps1", 'timestamp.txt'))
         assert len(os.listdir(join(submitted_dir, "hacker", "ps1"))) == 2
+    def test_collect_preserve_sub_dir(self, course_dir, archive_dir):
+        extracted_dir = join(archive_dir, "..", "extracted")
+        submitted_dir = join(course_dir, "submitted")
+
+        os.makedirs(join(archive_dir, 'ps1_hacker', 'files'))
+        with open(join(archive_dir, 'ps1_hacker', 'files', 'problem1.ipynb'), 'w') as fh:
+            fh.write('')
+        with open(join(archive_dir, 'ps1_hacker', 'timestamp.txt'), 'w') as fh:
+            fh.write('foo')
+
+        with open("nbgrader_config.py", "a") as fh:
+            fh.write(dedent(
+                """
+                c.FileNameCollectorPlugin.valid_ext = ['.ipynb', '.txt']
+                c.FileNameCollectorPlugin.named_regexp = (
+                    r".+ps1_(?P<student_id>\w+)/(?P<file_id>.+)"
+                )
+                """
+            ))
+
+        run_nbgrader(["zip_collect", "ps1"])
+        assert os.path.isdir(extracted_dir)
+        assert os.path.isdir(submitted_dir)
+        assert len(os.listdir(submitted_dir)) == 1
+
+        assert os.path.isfile(join(submitted_dir, "hacker", "ps1", 'files', 'problem1.ipynb'))
+        assert os.path.isfile(join(submitted_dir, "hacker", "ps1", 'timestamp.txt'))
+        assert len(os.listdir(join(submitted_dir, "hacker", "ps1"))) == 2
+
+        with open(join(submitted_dir, "hacker", "ps1", 'timestamp.txt'), 'r') as fh:
+            ts = fh.read()
+        assert ts == 'foo'
+
+    def test_collect_duplicate_fail(self, course_dir, archive_dir):
+        extracted_dir = join(archive_dir, "..", "extracted")
+        submitted_dir = join(course_dir, "submitted")
+
+        os.makedirs(join(archive_dir, 'ps1_hacker_01', 'files'))
+        with open(join(archive_dir, 'ps1_hacker_01', 'files', 'problem1.ipynb'), 'w') as fh:
+            fh.write('')
+
+        os.makedirs(join(archive_dir, 'ps1_hacker_02', 'files'))
+        with open(join(archive_dir, 'ps1_hacker_02', 'files', 'problem1.ipynb'), 'w') as fh:
+            fh.write('')
+
+        with open("nbgrader_config.py", "a") as fh:
+            fh.write(dedent(
+                """
+                c.FileNameCollectorPlugin.valid_ext = ['.ipynb', '.txt']
+                c.FileNameCollectorPlugin.named_regexp = (
+                    r".+ps1_(?P<student_id>\w+)_[0-9]+/(?P<file_id>.+)"
+                )
+                """
+            ))
+
+        run_nbgrader(["zip_collect", "ps1"], retcode=1)
+        assert os.path.isdir(extracted_dir)
+        assert len(os.listdir(extracted_dir)) == 2
+        assert not os.path.isdir(submitted_dir)

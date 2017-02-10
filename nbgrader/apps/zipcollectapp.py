@@ -333,15 +333,20 @@ class ZipCollectApp(NbGrader):
                         "".format(self.collector_plugin.__name__, key)
                     )
 
-            root, ext = os.path.splitext(_file)
-            file_id = os.path.splitext(os.path.basename(info['file_id']))[0]
-            submission = '{}{}'.format(file_id, ext)
+            _, ext = os.path.splitext(_file)
+            submission = os.path.splitext(info['file_id'])[0] + ext
             if ext in ['.ipynb'] and submission not in released_notebooks:
+                self.log.debug(
+                    "Valid notebook names are: {}".format(released_notebooks))
+                self.log.debug(
+                    "Notebook name given was: {}".format(submission))
                 if self.strict:
-                    self.log.warn("Skipped. Invalid notebook name.")
+                    self.log.warn(
+                        "Skipped notebook with invalid name '{}'".format(submission))
                     invalid_files += 1
                     continue
-                self.log.warn("Invalid notebook name.")
+                self.log.warn(
+                    "Invalid submission notebook name '{}'".format(submission))
 
             submitted_path = self._format_path(
                 self.submitted_directory, info['student_id'], self.assignment_id)
@@ -425,6 +430,11 @@ class ZipCollectApp(NbGrader):
             for i in range(len(data['file_ids'])):
                 src = data['src_files'][i]
                 dest = data['dest_files'][i]
+                self._mkdirs_if_missing(os.path.split(dest)[0])
+                if os.path.exists(dest):
+                    # should never get here, but just in case
+                    self.fail(
+                        "Trying to overwrite existing file: {}".format(dest))
                 self.log.info('Copying from: {}'.format(src))
                 self.log.info('  Copying to: {}'.format(dest))
                 shutil.copy(src, dest)

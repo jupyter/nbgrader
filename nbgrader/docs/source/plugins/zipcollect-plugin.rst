@@ -5,6 +5,7 @@ ZipCollect plugins
 
 Extractor plugin
 ----------------
+
 Extract archive (zip) files in the `archive_directory`. Archive files are
 extracted to the `extracted_directory`. Non-archive (zip) files found in the
 `archive_directory` are copied to the `extracted_directory`. Archive files will
@@ -40,8 +41,8 @@ API
 FileNameCollector plugin
 ------------------------
 
-Apply a named group regular expression to each filename, received from the
-:class:`~nbgrader.apps.zipcollectapp.ZipCollectApp`, and return ``None`` if the
+Apply a named group regular expression to each filename received from the
+:class:`~nbgrader.apps.zipcollectapp.ZipCollectApp` and return ``None`` if the
 file should be skipped or a dictionary that, at the very least, contains the
 ``student_id`` and ``file_id`` key value pairs; and optionally contains the
 ``timestamp`` key value pair, for example:
@@ -49,13 +50,25 @@ file should be skipped or a dictionary that, at the very least, contains the
 .. code:: python
 
     dict(
-        file_id='problem1',
+        file_id='problem1.ipynb',
         student_id='hacker',
         timestamp='2017-01-30 15:30:10 UCT'
     )
 
 For more information about named group regular expressions see
 `<https://docs.python.org/howto/regex.html>`_
+
+Note: ``file_id`` must contain the relative path to the assignment when
+collecting submission files in assignment subdirectories, for example:
+
+.. code:: python
+
+    dict(
+        file_id='data/sample.txt',
+        student_id='hacker',
+        timestamp='2017-01-30 15:30:10 UCT'
+    )
+
 
 Creating a plugin
 ^^^^^^^^^^^^^^^^^

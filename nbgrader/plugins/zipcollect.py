@@ -176,6 +176,9 @@ class FileNameCollectorPlugin(BasePlugin):
                     timestamp: timestamp  # Can optional be provided
                 }
 
+            Note: ``file_id`` MUST include the the relative path to the
+            assignment if you are collecting files in assignment
+            subdirectories.
         """
         root, ext = os.path.splitext(submitted_file)
 
