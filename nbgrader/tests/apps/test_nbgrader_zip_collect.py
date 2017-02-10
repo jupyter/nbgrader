@@ -104,30 +104,6 @@ class TestNbGraderZipCollect(BaseTestApp):
             cnt += len(files)
         assert cnt == nfiles
 
-    def test_collect_single_notebook(self, course_dir, archive_dir):
-        extracted_dir = join(archive_dir, "..", "extracted")
-        submitted_dir = join(course_dir, "submitted")
-        self._make_notebook(archive_dir,
-            'ps1', 'hacker', '2016-01-30-15-30-10', 'problem1')
-
-        with open("nbgrader_config.py", "a") as fh:
-            fh.write(dedent(
-                """
-                c.FileNameCollectorPlugin.named_regexp = (
-                    r".+_(?P<student_id>\w+)_attempt_(?P<timestamp>[0-9\-]+)_(?P<file_id>\w+)"
-                )
-                """
-            ))
-
-        run_nbgrader(["zip_collect", "ps1"])
-        assert os.path.isdir(extracted_dir)
-        assert len(os.listdir(extracted_dir)) == 1
-
-        assert os.path.isdir(submitted_dir)
-        assert os.path.isfile(join(submitted_dir, "hacker", "ps1", 'problem1.ipynb'))
-        assert os.path.isfile(join(submitted_dir, "hacker", "ps1", 'timestamp.txt'))
-        assert len(os.listdir(join(submitted_dir, "hacker", "ps1"))) == 2
-
     def test_collect_no_regexp(self, course_dir, archive_dir):
         extracted_dir = join(archive_dir, "..", "extracted")
         submitted_dir = join(course_dir, "submitted")
@@ -177,6 +153,66 @@ class TestNbGraderZipCollect(BaseTestApp):
         run_nbgrader(["zip_collect", "ps1"], retcode=1)
         assert os.path.isdir(extracted_dir)
         assert len(os.listdir(extracted_dir)) == 1
+        assert not os.path.isdir(submitted_dir)
+
+    def test_collect_regexp_bad_student_id_type(self, course_dir, archive_dir):
+        extracted_dir = join(archive_dir, "..", "extracted")
+        submitted_dir = join(course_dir, "submitted")
+        self._make_notebook(archive_dir,
+            'ps1', 'hacker', '2016-01-30-15-30-10', 'problem1')
+
+        with open('plugin_one.py', 'w') as fh:
+            fh.write(dedent(
+                """
+                from nbgrader.plugins import FileNameCollectorPlugin
+
+                class CustomPlugin(FileNameCollectorPlugin):
+                    def collect(self, submitted_file):
+                        info = super(CustomPlugin, self).collect(submitted_file)
+                        if info is not None:
+                            info['student_id'] = 111
+                        return info
+                """
+            ))
+
+        with open("nbgrader_config.py", "a") as fh:
+            fh.write(dedent(
+                """
+                c.ZipCollectApp.collector_plugin = 'plugin_one.CustomPlugin'
+                c.FileNameCollectorPlugin.named_regexp = (
+                    r".+_(?P<student_id>\w+)_attempt_(?P<timestamp>[0-9\-]+)_(?P<file_id>\w+)"
+                )
+                """
+            ))
+
+        run_nbgrader(["zip_collect", "ps1"], retcode=1)
+        assert os.path.isdir(extracted_dir)
+        assert len(os.listdir(extracted_dir)) == 1
+        assert not os.path.isdir(submitted_dir)
+
+    def test_collect_single_notebook(self, course_dir, archive_dir):
+        extracted_dir = join(archive_dir, "..", "extracted")
+        submitted_dir = join(course_dir, "submitted")
+        self._make_notebook(archive_dir,
+            'ps1', 'hacker', '2016-01-30-15-30-10', 'problem1')
+
+        with open("nbgrader_config.py", "a") as fh:
+            fh.write(dedent(
+                """
+                c.FileNameCollectorPlugin.named_regexp = (
+                    r".+_(?P<student_id>\w+)_attempt_(?P<timestamp>[0-9\-]+)_(?P<file_id>\w+)"
+                )
+                """
+            ))
+
+        run_nbgrader(["zip_collect", "ps1"])
+        assert os.path.isdir(extracted_dir)
+        assert len(os.listdir(extracted_dir)) == 1
+
+        assert os.path.isdir(submitted_dir)
+        assert os.path.isfile(join(submitted_dir, "hacker", "ps1", 'problem1.ipynb'))
+        assert os.path.isfile(join(submitted_dir, "hacker", "ps1", 'timestamp.txt'))
+        assert len(os.listdir(join(submitted_dir, "hacker", "ps1"))) == 2
 
     def test_collect_single_notebook_attempts(self, course_dir, archive_dir):
         extracted_dir = join(archive_dir, "..", "extracted")
@@ -189,7 +225,7 @@ class TestNbGraderZipCollect(BaseTestApp):
         self._make_notebook(archive_dir,
             'ps1', 'hacker', '2016-01-30-15-50-10', 'problem1')
 
-        with open('plugin.py', 'w') as fh:
+        with open('plugin_two.py', 'w') as fh:
             fh.write(dedent(
                 """
                 from nbgrader.plugins import FileNameCollectorPlugin
@@ -208,7 +244,7 @@ class TestNbGraderZipCollect(BaseTestApp):
         with open("nbgrader_config.py", "a") as fh:
             fh.write(dedent(
                 """
-                c.ZipCollectApp.collector_plugin = 'plugin.CustomPlugin'
+                c.ZipCollectApp.collector_plugin = 'plugin_two.CustomPlugin'
                 c.FileNameCollectorPlugin.named_regexp = (
                     r".+_(?P<student_id>\w+)_attempt_(?P<timestamp>[0-9\-]+)_(?P<file_id>\w+)"
                 )
@@ -228,7 +264,7 @@ class TestNbGraderZipCollect(BaseTestApp):
             timestamp = ts.read()
         assert timestamp == '2016-01-30 15:50:10'
 
-    def test_collect_single_multiple_notebooks(self, course_dir, archive_dir):
+    def test_collect_multiple_notebooks(self, course_dir, archive_dir):
         extracted_dir = join(archive_dir, "..", "extracted")
         submitted_dir = join(course_dir, "submitted")
         self._make_notebook(archive_dir,
@@ -327,6 +363,208 @@ class TestNbGraderZipCollect(BaseTestApp):
         assert os.path.isfile(join(submitted_dir, "hacker", "ps1", 'problem1.ipynb'))
         assert os.path.isfile(join(submitted_dir, "hacker", "ps1", 'timestamp.txt'))
         assert len(os.listdir(join(submitted_dir, "hacker", "ps1"))) == 2
+
+    def test_collect_timestamp_none(self, course_dir, archive_dir):
+        extracted_dir = join(archive_dir, "..", "extracted")
+        submitted_dir = join(course_dir, "submitted")
+        self._make_notebook(archive_dir,
+            'ps1', 'hacker', '2016-01-30-15-30-10', 'problem1')
+
+        with open("nbgrader_config.py", "a") as fh:
+            fh.write(dedent(
+                """
+                c.FileNameCollectorPlugin.named_regexp = (
+                    r".+_(?P<student_id>\w+)_attempt_(?P<blarg>[0-9\-]+)_(?P<file_id>\w+)"
+                )
+                """
+            ))
+
+        run_nbgrader(["zip_collect", "ps1"])
+        assert os.path.isdir(extracted_dir)
+        assert len(os.listdir(extracted_dir)) == 1
+
+        assert os.path.isdir(submitted_dir)
+        assert os.path.isfile(join(submitted_dir, "hacker", "ps1", 'problem1.ipynb'))
+        assert not os.path.isfile(join(submitted_dir, "hacker", "ps1", 'timestamp.txt'))
+        assert len(os.listdir(join(submitted_dir, "hacker", "ps1"))) == 1
+
+    def test_collect_timestamp_empty_str(self, course_dir, archive_dir):
+        extracted_dir = join(archive_dir, "..", "extracted")
+        submitted_dir = join(course_dir, "submitted")
+        self._make_notebook(archive_dir,
+            'ps1', 'hacker', '2016-01-30-15-30-10', 'problem1')
+
+        with open('plugin_three.py', 'w') as fh:
+            fh.write(dedent(
+                """
+                from nbgrader.plugins import FileNameCollectorPlugin
+
+                class CustomPlugin(FileNameCollectorPlugin):
+                    def collect(self, submitted_file):
+                        info = super(CustomPlugin, self).collect(submitted_file)
+                        if info is not None:
+                            info['timestamp'] = ""
+                        return info
+                """
+            ))
+
+        with open("nbgrader_config.py", "a") as fh:
+            fh.write(dedent(
+                """
+                c.ZipCollectApp.collector_plugin = 'plugin_three.CustomPlugin'
+                c.FileNameCollectorPlugin.named_regexp = (
+                    r".+_(?P<student_id>\w+)_attempt_(?P<timestamp>[0-9\-]+)_(?P<file_id>\w+)"
+                )
+                """
+            ))
+
+        run_nbgrader(["zip_collect", "ps1"])
+        assert os.path.isdir(extracted_dir)
+        assert len(os.listdir(extracted_dir)) == 1
+
+        assert os.path.isdir(submitted_dir)
+        assert os.path.isfile(join(submitted_dir, "hacker", "ps1", 'problem1.ipynb'))
+        assert not os.path.isfile(join(submitted_dir, "hacker", "ps1", 'timestamp.txt'))
+        assert len(os.listdir(join(submitted_dir, "hacker", "ps1"))) == 1
+
+    def test_collect_timestamp_bad_str(self, course_dir, archive_dir):
+        extracted_dir = join(archive_dir, "..", "extracted")
+        submitted_dir = join(course_dir, "submitted")
+        self._make_notebook(archive_dir,
+            'ps1', 'hacker', '2016-01-30-15-30-10', 'problem1')
+
+        with open('plugin_four.py', 'w') as fh:
+            fh.write(dedent(
+                """
+                from nbgrader.plugins import FileNameCollectorPlugin
+
+                class CustomPlugin(FileNameCollectorPlugin):
+                    def collect(self, submitted_file):
+                        info = super(CustomPlugin, self).collect(submitted_file)
+                        if info is not None:
+                            info['timestamp'] = "I'm still trying to be a timestamp str"
+                        return info
+                """
+            ))
+
+        with open("nbgrader_config.py", "a") as fh:
+            fh.write(dedent(
+                """
+                c.ZipCollectApp.collector_plugin = 'plugin_four.CustomPlugin'
+                c.FileNameCollectorPlugin.named_regexp = (
+                    r".+_(?P<student_id>\w+)_attempt_(?P<timestamp>[0-9\-]+)_(?P<file_id>\w+)"
+                )
+                """
+            ))
+
+        run_nbgrader(["zip_collect", "ps1"], retcode=1)
+        assert os.path.isdir(extracted_dir)
+        assert len(os.listdir(extracted_dir)) == 1
+        assert not os.path.isdir(submitted_dir)
+
+    def test_collect_timestamp_skip_older(self, course_dir, archive_dir):
+        extracted_dir = join(archive_dir, "..", "extracted")
+        submitted_dir = join(course_dir, "submitted")
+
+        # submissions are sorted so a before b
+        os.makedirs(join(archive_dir, 'ps1_hacker_a_2017-01-30 15:30:10'))
+        with open(join(archive_dir, 'ps1_hacker_a_2017-01-30 15:30:10', 'problem1.ipynb'), 'w') as fh:
+            fh.write('')
+        os.makedirs(join(archive_dir, 'ps1_hacker_b_2016-01-30 15:30:10'))
+        with open(join(archive_dir, 'ps1_hacker_b_2016-01-30 15:30:10', 'problem1.ipynb'), 'w') as fh:
+            fh.write('')
+
+        with open("nbgrader_config.py", "a") as fh:
+            fh.write(dedent(
+                """
+                c.FileNameCollectorPlugin.valid_ext = ['.ipynb', '.txt']
+                c.FileNameCollectorPlugin.named_regexp = (
+                    r".+ps1_(?P<student_id>\w+)_[a|b]_(?P<timestamp>.+)/(?P<file_id>.+)"
+                )
+                """
+            ))
+
+        run_nbgrader(["zip_collect", "ps1"])
+        assert os.path.isdir(extracted_dir)
+        assert os.path.isdir(submitted_dir)
+        assert len(os.listdir(submitted_dir)) == 1
+
+        assert os.path.isfile(join(submitted_dir, "hacker", "ps1", 'problem1.ipynb'))
+        assert os.path.isfile(join(submitted_dir, "hacker", "ps1", 'timestamp.txt'))
+        assert len(os.listdir(join(submitted_dir, "hacker", "ps1"))) == 2
+
+        with open(join(submitted_dir, "hacker", "ps1", 'timestamp.txt'), 'r') as fh:
+            ts = fh.read()
+        assert ts == '2017-01-30 15:30:10'
+
+    def test_collect_timestamp_replace_newer(self, course_dir, archive_dir):
+        extracted_dir = join(archive_dir, "..", "extracted")
+        submitted_dir = join(course_dir, "submitted")
+
+        # submissions are sorted so a before b
+        os.makedirs(join(archive_dir, 'ps1_hacker_a_2016-01-30 15:30:10'))
+        with open(join(archive_dir, 'ps1_hacker_a_2016-01-30 15:30:10', 'problem1.ipynb'), 'w') as fh:
+            fh.write('')
+        os.makedirs(join(archive_dir, 'ps1_hacker_b_2017-01-30 15:30:10'))
+        with open(join(archive_dir, 'ps1_hacker_b_2017-01-30 15:30:10', 'problem1.ipynb'), 'w') as fh:
+            fh.write('')
+
+        with open("nbgrader_config.py", "a") as fh:
+            fh.write(dedent(
+                """
+                c.FileNameCollectorPlugin.valid_ext = ['.ipynb', '.txt']
+                c.FileNameCollectorPlugin.named_regexp = (
+                    r".+ps1_(?P<student_id>\w+)_[a|b]_(?P<timestamp>.+)/(?P<file_id>.+)"
+                )
+                """
+            ))
+
+        run_nbgrader(["zip_collect", "ps1"])
+        assert os.path.isdir(extracted_dir)
+        assert os.path.isdir(submitted_dir)
+        assert len(os.listdir(submitted_dir)) == 1
+
+        assert os.path.isfile(join(submitted_dir, "hacker", "ps1", 'problem1.ipynb'))
+        assert os.path.isfile(join(submitted_dir, "hacker", "ps1", 'timestamp.txt'))
+        assert len(os.listdir(join(submitted_dir, "hacker", "ps1"))) == 2
+
+        with open(join(submitted_dir, "hacker", "ps1", 'timestamp.txt'), 'r') as fh:
+            ts = fh.read()
+        assert ts == '2017-01-30 15:30:10'
+
+    def test_collect_timestamp_file(self, course_dir, archive_dir):
+        extracted_dir = join(archive_dir, "..", "extracted")
+        submitted_dir = join(course_dir, "submitted")
+
+        os.makedirs(join(archive_dir, 'ps1_hacker'))
+        with open(join(archive_dir, 'ps1_hacker', 'problem1.ipynb'), 'w') as fh:
+            fh.write('')
+        with open(join(archive_dir, 'ps1_hacker', 'timestamp.txt'), 'w') as fh:
+            fh.write('foo')
+
+        with open("nbgrader_config.py", "a") as fh:
+            fh.write(dedent(
+                """
+                c.FileNameCollectorPlugin.valid_ext = ['.ipynb', '.txt']
+                c.FileNameCollectorPlugin.named_regexp = (
+                    r".+ps1_(?P<student_id>\w+)/(?P<file_id>.+)"
+                )
+                """
+            ))
+
+        run_nbgrader(["zip_collect", "ps1"])
+        assert os.path.isdir(extracted_dir)
+        assert os.path.isdir(submitted_dir)
+        assert len(os.listdir(submitted_dir)) == 1
+
+        assert os.path.isfile(join(submitted_dir, "hacker", "ps1", 'problem1.ipynb'))
+        assert os.path.isfile(join(submitted_dir, "hacker", "ps1", 'timestamp.txt'))
+        assert len(os.listdir(join(submitted_dir, "hacker", "ps1"))) == 2
+
+        with open(join(submitted_dir, "hacker", "ps1", 'timestamp.txt'), 'r') as fh:
+            ts = fh.read()
+        assert ts == 'foo'
+
     def test_collect_preserve_sub_dir(self, course_dir, archive_dir):
         extracted_dir = join(archive_dir, "..", "extracted")
         submitted_dir = join(course_dir, "submitted")

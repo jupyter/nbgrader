@@ -155,16 +155,6 @@ class ZipCollectApp(NbGrader):
         )
     ).tag(config=True)
 
-    timezone = Unicode(
-        "UTC",
-        help="Timezone for recording timestamps"
-    ).tag(config=True)
-
-    timestamp_format = Unicode(
-        "%Y-%m-%d %H:%M:%S %Z",
-        help="Format string for timestamps"
-    ).tag(config=True)
-
     extractor_plugin = Type(
         ExtractorPlugin,
         klass=BasePlugin,
@@ -231,13 +221,6 @@ class ZipCollectApp(NbGrader):
                 "previously existing files".format(path)
             )
 
-    def get_timestamp(self):
-        """Return the timestamp using the configured timezone."""
-        tz = gettz(self.timezone)
-        if tz is None:
-            self.fail("Invalid timezone: {}".format(self.timezone))
-        return datetime.datetime.now(tz).strftime(self.timestamp_format)
-
     def extract_archive_files(self):
         """Extract archive (zip) files and submission files in the
         `archive_directory`. Files are extracted to the `extracted_directory`.
@@ -294,7 +277,7 @@ class ZipCollectApp(NbGrader):
                     src_files: [src_file1, ...],
                     dest_files: [dest_file1, ...],
                     file_ids: [file_id1, ...],
-                    timestamps: [timestamp1, ...],
+                    timestamp: timestamp,
                 }, ...
             }
         """
@@ -304,18 +287,19 @@ class ZipCollectApp(NbGrader):
         released_notebooks = find_all_notebooks(released_path)
         if not released_notebooks:
             self.log.warn(
-                "No release notebooks found for assignment {}, did you forget "
-                "to run 'nbgrader assign'?".format(self.assignment_id)
+                "No release notebooks found for assignment {}"
+                "".format(self.assignment_id)
             )
 
         data = dict()
         invalid_files = 0
         processed_files = 0
         for _file in src_files:
-            self.log.info("Processing file: {}".format(_file))
+            self.log.info("Parsing file: {}".format(_file))
             info = self.collector_plugin_inst.collect(_file)
             if not info or info is None:
-                self.log.warn("Skipped. No match information provided.")
+                self.log.warn(
+                    "Skipped submission with no match information provided.")
                 invalid_files += 1
                 continue
 
@@ -352,42 +336,68 @@ class ZipCollectApp(NbGrader):
                 self.submitted_directory, info['student_id'], self.assignment_id)
             dest_path = os.path.join(submitted_path, submission)
 
-            timestamp = self.get_timestamp()
+            timestamp = None
             if 'timestamp' in info.keys():
-                timestamp = info['timestamp'] or timestamp
-                if isinstance(timestamp, six.string_types):
-                    try:
-                        timestamp = parse_utc(timestamp)
-                    except ValueError:
-                        self.log.warn(
-                            "Could not parse the timestamp string. "
-                            "Setting timestamp to the current time."
-                        )
+                timestamp = info['timestamp']
+
+            if isinstance(timestamp, six.string_types):
+                if not timestamp:
+                    self.log.warning("Empty timestamp string provided.")
+                    timestamp = None
+                try:
+                    timestamp = parse_utc(timestamp)
+                except ValueError:
+                    self.fail(
+                        "Invalid timestamp string: {}".format(timestamp))
 
             student_id = info['student_id']
-            if student_id in data.keys():
-                if submission not in data[student_id]['file_ids']:
-                    data[student_id]['file_ids'].append(submission)
-                    data[student_id]['timestamps'].append(timestamp)
-                    data[student_id]['src_files'].append(_file)
-                    data[student_id]['dest_files'].append(dest_path)
-                else:
-                    ind = data[student_id]['file_ids'].index(submission)
-                    old_timestamp = data[student_id]['timestamps'][ind]
-                    if timestamp >= old_timestamp:
-                        data[student_id]['timestamps'][ind] = timestamp
-                        data[student_id]['src_files'][ind] = _file
-                        data[student_id]['dest_files'][ind] = dest_path
-                    else:
-                        self.log.warn("Skipped. Older timestamp found.")
-                        invalid_files += 1
-            else:
+
+            # new student id record
+            if student_id not in data.keys():
                 data[student_id] = dict(
-                    file_ids=[submission],
-                    timestamps=[timestamp],
                     src_files=[_file],
                     dest_files=[dest_path],
+                    file_ids=[submission],
+                    timestamp=timestamp,
                 )
+
+            # existing student id record, new submission file
+            elif submission not in data[student_id]['file_ids']:
+                data[student_id]['src_files'].append(_file)
+                data[student_id]['dest_files'].append(dest_path)
+                data[student_id]['file_ids'].append(submission)
+                # update timestamp with a newer one if given
+                if timestamp is not None:
+                    old_timestamp = data[student_id]['timestamp']
+                    if old_timestamp is None:
+                        data[student_id]['timestamp'] = timestamp
+                    elif timestamp > old_timestamp:
+                        data[student_id]['timestamp'] = timestamp
+
+            # existing student id record, duplicate submission file
+            else:
+                ind = data[student_id]['file_ids'].index(submission)
+                old_timestamp = data[student_id]['timestamp']
+                if timestamp is not None and old_timestamp is not None:
+                    # keep if duplicate submission file has a newer timestamp
+                    if timestamp > old_timestamp:
+                        data[student_id]['src_files'][ind] = _file
+                        data[student_id]['dest_files'][ind] = dest_path
+                        data[student_id]['file_ids'][ind] = submission
+                        data[student_id]['timestamp'] = timestamp
+                        self.log.warn(
+                            "Replacing previously collected submission file "
+                            "with one that has a newer timestamp"
+                        )
+                    else:
+                        self.log.warn(
+                            "Skipped submission file with older timestamp")
+                    invalid_files += 1
+
+                else:
+                    # no way to compare so fail
+                    self.fail(
+                        "Duplicate submission file. No timestamps for comparison")
 
             processed_files += 1
 
@@ -412,7 +422,7 @@ class ZipCollectApp(NbGrader):
                         src_files: [src_file1, ...],
                         dest_files: [dest_file1, ...],
                         file_ids: [file_id1, ...],
-                        timestamps: [timestamp1, ...],
+                        timestamp: timestamp,
                     }, ...
                 }
         """
@@ -426,7 +436,6 @@ class ZipCollectApp(NbGrader):
             self._mkdirs_if_missing(dest_path)
             self._clear_existing_files(dest_path)
 
-            timestamp = max(data['timestamps'])
             for i in range(len(data['file_ids'])):
                 src = data['src_files'][i]
                 dest = data['dest_files'][i]
@@ -440,9 +449,12 @@ class ZipCollectApp(NbGrader):
                 shutil.copy(src, dest)
 
             dest = os.path.join(dest_path, 'timestamp.txt')
-            self.log.info('Creating timestamp: {}'.format(dest))
-            with open(dest, 'w') as fh:
-                fh.write("{}".format(timestamp))
+            if os.path.exists(dest):
+                self.log.info('Found collected timestamp file: {}'.format(dest))
+            elif data['timestamp'] is not None:
+                self.log.info('Creating timestamp: {}'.format(dest))
+                with open(dest, 'w') as fh:
+                    fh.write("{}".format(data['timestamp'].isoformat(' ')))
 
     def init_plugins(self):
         self.log.info(
