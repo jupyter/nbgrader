@@ -181,8 +181,7 @@ class FileNameCollectorPlugin(BasePlugin):
                 }
 
             Note: ``file_id`` MUST include the the relative path to the
-            assignment if you are collecting files in assignment
-            subdirectories.
+            assignment if you are collecting files in assignment sub-folders.
         """
         root, ext = os.path.splitext(submitted_file)
 
