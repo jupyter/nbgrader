@@ -38,7 +38,7 @@ class TestNbGraderZipCollect(BaseTestApp):
         run_nbgrader(["zip_collect", "--help-all"])
 
     def test_args(self):
-        # Should not fail with no assignment id
+        # Should fail with no assignment id
         run_nbgrader(["zip_collect"], retcode=1)
 
     def test_no_archive_dir(self, course_dir):

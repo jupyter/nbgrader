@@ -214,7 +214,7 @@ def unzip(src, dest, zip_ext=None, create_own_folder=False, tree=False):
     Arguments
     ---------
     src: str
-        Absolute path to the archive file ('/path/to/archive.zip')
+        Absolute path to the archive file ('/path/to/archive_filename.zip')
     dest: str
         Asolute path to extract all content to ('/path/to/extract/')
 
@@ -237,6 +237,7 @@ def unzip(src, dest, zip_ext=None, create_own_folder=False, tree=False):
         raise OSError("Directory not found or unwritable: {}".format(dest))
 
     if create_own_folder:
+        # double splitext for .tar.gz
         fname, ext = os.path.splitext(os.path.basename(filename))
         if ext == '.tar':
             filename = fname
@@ -246,11 +247,13 @@ def unzip(src, dest, zip_ext=None, create_own_folder=False, tree=False):
 
     unpack_archive(src, dest, drivers=(unpack_zipfile, unpack_tarfile))
 
+    # extract flat, don't extract archive files within archive files
     if not tree:
         return
 
-    def find_new_files(skip):
+    def find_archive_files(skip):
         found = []
+        # find archive files in dest that are not in skip
         for root, _, filenames in os.walk(dest):
             for basename in filenames:
                 src_file = os.path.join(root, basename)
@@ -260,8 +263,10 @@ def unzip(src, dest, zip_ext=None, create_own_folder=False, tree=False):
         return found
 
     skip = []
-    new_files = find_new_files(skip)
+    new_files = find_archive_files(skip)
+    # keep walking dest until no new archive files are found
     while new_files:
+        # unzip (flat) new archive files found in dest
         for src_file in new_files:
             dest_path = os.path.split(src_file)[0]
             unzip(
@@ -272,4 +277,4 @@ def unzip(src, dest, zip_ext=None, create_own_folder=False, tree=False):
                 tree=False
             )
             skip.append(src_file)
-        new_files = find_new_files(skip)
+        new_files = find_archive_files(skip)

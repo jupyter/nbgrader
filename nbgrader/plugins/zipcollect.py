@@ -50,6 +50,7 @@ class ExtractorPlugin(BasePlugin):
         if not os.listdir(archive_path):
             self.log.warning(
                 "No files found in directory: {}".format(archive_path))
+            return
 
         for root, _, archive_files in os.walk(archive_path):
             if not archive_files:
@@ -65,7 +66,9 @@ class ExtractorPlugin(BasePlugin):
             for zfile in archive_files:
                 zfile = os.path.join(root, zfile)
                 filename, ext = os.path.splitext(os.path.basename(zfile))
+                # unzip (tree) each archive file in archive_path
                 if ext in self.zip_ext:
+                    # double splitext for .tar.gz
                     fname, ext = os.path.splitext(os.path.basename(filename))
                     if ext == '.tar':
                         filename = fname
@@ -80,6 +83,7 @@ class ExtractorPlugin(BasePlugin):
                         tree=True
                     )
 
+                # move each non-archive file in archive_path
                 else:
                     dest = os.path.join(extract_to, os.path.basename(zfile))
                     self.log.info("Copying from: {}".format(zfile))
