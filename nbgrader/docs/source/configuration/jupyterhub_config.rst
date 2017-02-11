@@ -48,7 +48,7 @@ directory is properly set in ``~/.jupyter/nbgrader_config.py``:
 .. code:: python
 
     c = get_config()
-    c.NbGrader.course_directory = 'path/to/course/files'
+    c.CourseDirectory.root = 'path/to/course/files'
 
 If you have multiple graders, then you can set up a `shared notebook server
 <https://github.com/jupyterhub/jupyterhub/tree/master/examples/service-notebook>`_
