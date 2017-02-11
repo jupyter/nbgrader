@@ -92,7 +92,7 @@ class ExtractorPlugin(BasePlugin):
 
 
 class FileNameCollectorPlugin(BasePlugin):
-    """Submission filename processor plugin for the
+    """Submission filename collector plugin for the
     :class:`~nbgrader.apps.zipcollectapp.ZipCollectApp`.
     Collect plugin subclasses MUST inherit from this class.
     """

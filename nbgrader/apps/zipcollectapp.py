@@ -91,11 +91,11 @@ class ZipCollectApp(NbGrader):
             nbgrader zip_collect --help-all
 
         To change the default plugin, you will need a class that inherits from
-        :class:`~nbgrader.plugins.zipcollect.FileNameProcessor`. If your
-        exporter is named `MyCustomProcessor` and is saved in the file
-        `myprocessor.py`, then:
+        :class:`~nbgrader.plugins.zipcollect.FileNameCollectorPlugin`. If your
+        collector is named `MyCustomCollector` and is saved in the file
+        `mycollector.py`, then:
 
-            nbgrader zip_collect --processor=myprocessor.MyCustomProcessor
+            nbgrader zip_collect --collector=mycollector.MyCustomCollector
 
         """
 
@@ -306,13 +306,13 @@ class ZipCollectApp(NbGrader):
             for key in ['student_id', 'file_id']:
                 if key not in info.keys():
                     self.fail(
-                        "Expected processor {} to provide the {} from the "
+                        "Expected collector {} to provide the {} from the "
                         "submission file name."
                         "".format(self.collector_plugin.__name__, key)
                     )
                 if not isinstance(info[key], six.string_types):
                     self.fail(
-                        "Expected processor {} to provide a string for {} from "
+                        "Expected collector {} to provide a string for {} from "
                         "the submission file name."
                         "".format(self.collector_plugin.__name__, key)
                     )

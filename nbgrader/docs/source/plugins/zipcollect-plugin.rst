@@ -73,7 +73,7 @@ collecting submission files in assignment sub-folders, for example:
 Creating a plugin
 ^^^^^^^^^^^^^^^^^
 
-To add your own processor you can create a plugin class that inherits from
+To add your own collector you can create a plugin class that inherits from
 :class:`~nbgrader.plugins.zipcollect.FileNameCollectorPlugin`. This class needs
 to only implement one method, which is the
 :func:`~nbgrader.plugins..zipcollect.FileNameCollectorPlugin.collect` method
@@ -83,7 +83,7 @@ would run::
 
     nbgrader zip_collect --collector=mycollector.MyCollector
 
-which will use your custom processor rather than the built-in one.
+which will use your custom collector rather than the built-in one.
 
 API
 ^^^
