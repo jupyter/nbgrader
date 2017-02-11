@@ -99,8 +99,8 @@ class ListApp(TransferApp):
 
     def init_dest(self):
         course_id = self.course_id if self.course_id else '*'
-        assignment_id = self.assignment_id if self.assignment_id else '*'
-        student_id = self.student_id if self.student_id else '*'
+        assignment_id = self.coursedir.assignment_id if self.coursedir.assignment_id else '*'
+        student_id = self.coursedir.student_id if self.coursedir.student_id else '*'
 
         if self.inbound:
             pattern = os.path.join(self.exchange_directory, course_id, 'inbound', '{}+{}+*'.format(student_id, assignment_id))

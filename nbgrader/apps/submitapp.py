@@ -67,11 +67,11 @@ class SubmitApp(TransferApp):
 
     def init_src(self):
         if self.path_includes_course:
-            root = os.path.join(self.course_id, self.assignment_id)
+            root = os.path.join(self.course_id, self.coursedir.assignment_id)
         else:
-            root = self.assignment_id
+            root = self.coursedir.assignment_id
         self.src_path = os.path.abspath(root)
-        self.assignment_id = os.path.split(self.src_path)[-1]
+        self.coursedir.assignment_id = os.path.split(self.src_path)[-1]
         if not os.path.isdir(self.src_path):
             self.fail("Assignment not found: {}".format(self.src_path))
 
@@ -86,7 +86,7 @@ class SubmitApp(TransferApp):
             self.fail("You don't have write permissions to the directory: {}".format(self.inbound_path))
 
         self.cache_path = os.path.join(self.cache_directory, self.course_id)
-        self.assignment_filename = '{}+{}+{}'.format(get_username(), self.assignment_id, self.timestamp)
+        self.assignment_filename = '{}+{}+{}'.format(get_username(), self.coursedir.assignment_id, self.timestamp)
 
     def init_release(self):
         if self.course_id == '':
@@ -94,7 +94,7 @@ class SubmitApp(TransferApp):
 
         course_path = os.path.join(self.exchange_directory, self.course_id)
         outbound_path = os.path.join(course_path, 'outbound')
-        self.release_path = os.path.join(outbound_path, self.assignment_id)
+        self.release_path = os.path.join(outbound_path, self.coursedir.assignment_id)
         if not os.path.isdir(self.release_path):
             self.fail("Assignment not found: {}".format(self.release_path))
         if not check_mode(self.release_path, read=True, execute=True):
@@ -135,13 +135,13 @@ class SubmitApp(TransferApp):
                 self.fail(
                     "Assignment {} not submitted. "
                     "There are missing notebooks for the submission:\n{}"
-                    "".format(self.assignment_id, diff_msg)
+                    "".format(self.coursedir.assignment_id, diff_msg)
                 )
             else:
                 self.log.warning(
                     "Possible missing notebooks and/or extra notebooks "
                     "submitted for assignment {}:\n{}"
-                    "".format(self.assignment_id, diff_msg)
+                    "".format(self.coursedir.assignment_id, diff_msg)
                 )
 
     def copy_files(self):
@@ -174,5 +174,5 @@ class SubmitApp(TransferApp):
             fh.write(self.timestamp)
 
         self.log.info("Submitted as: {} {} {}".format(
-            self.course_id, self.assignment_id, str(self.timestamp)
+            self.course_id, self.coursedir.assignment_id, str(self.timestamp)
         ))

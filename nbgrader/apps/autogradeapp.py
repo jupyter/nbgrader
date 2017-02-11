@@ -103,13 +103,13 @@ class AutogradeApp(BaseNbConvertApp):
     @property
     def _input_directory(self):
         if self._sanitizing:
-            return self.submitted_directory
+            return self.coursedir.submitted_directory
         else:
-            return self.autograded_directory
+            return self.coursedir.autograded_directory
 
     @property
     def _output_directory(self):
-        return self.autograded_directory
+        return self.coursedir.autograded_directory
 
     export_format = 'notebook'
 
@@ -144,18 +144,18 @@ class AutogradeApp(BaseNbConvertApp):
             if 'id' in student:
                 del student['id']
             self.log.info("Creating/updating student with ID '%s': %s", student_id, student)
-            with Gradebook(self.db_url) as gb:
+            with Gradebook(self.coursedir.db_url) as gb:
                 gb.update_or_create_student(student_id, **student)
 
         else:
-            with Gradebook(self.db_url) as gb:
+            with Gradebook(self.coursedir.db_url) as gb:
                 try:
                     gb.find_student(student_id)
                 except MissingEntry:
                     self.fail("No student with ID '%s' exists in the database", student_id)
 
         # make sure the assignment exists
-        with Gradebook(self.db_url) as gb:
+        with Gradebook(self.coursedir.db_url) as gb:
             try:
                 gb.find_assignment(assignment_id)
             except MissingEntry:
@@ -164,7 +164,7 @@ class AutogradeApp(BaseNbConvertApp):
         # try to read in a timestamp from file
         src_path = self._format_source(assignment_id, student_id)
         timestamp = self._get_existing_timestamp(src_path)
-        with Gradebook(self.db_url) as gb:
+        with Gradebook(self.coursedir.db_url) as gb:
             if timestamp:
                 submission = gb.update_or_create_submission(
                     assignment_id, student_id, timestamp=timestamp)
@@ -179,8 +179,8 @@ class AutogradeApp(BaseNbConvertApp):
         # copy files over from the source directory
         self.log.info("Overwriting files with master versions from the source directory")
         dest_path = self._format_dest(assignment_id, student_id)
-        source_path = self._format_path(self.source_directory, '.', assignment_id)
-        source_files = utils.find_all_files(source_path, self.ignore + ["*.ipynb"])
+        source_path = self.coursedir.format_path(self.coursedir.source_directory, '.', assignment_id)
+        source_files = utils.find_all_files(source_path, self.coursedir.ignore + ["*.ipynb"])
 
         # copy them to the build directory
         for filename in source_files:
@@ -194,7 +194,7 @@ class AutogradeApp(BaseNbConvertApp):
 
         # ignore notebooks that aren't in the database
         notebooks = []
-        with Gradebook(self.db_url) as gb:
+        with Gradebook(self.coursedir.db_url) as gb:
             for notebook in self.notebooks:
                 notebook_id = os.path.splitext(os.path.basename(notebook))[0]
                 try:

@@ -90,7 +90,7 @@ class AssignApp(BaseNbConvertApp):
 
         `nbgrader assign` takes one argument (the name of the assignment), and
         looks for notebooks in the 'source' directory by default, according to
-        the directory structure specified in `NbGrader.directory_structure`.
+        the directory structure specified in `CourseDirectory.directory_structure`.
         The student version is then saved into the 'release' directory.
 
         Note that the directory structure requires the `student_id` to be given;
@@ -131,11 +131,11 @@ class AssignApp(BaseNbConvertApp):
 
     @property
     def _input_directory(self):
-        return self.source_directory
+        return self.coursedir.source_directory
 
     @property
     def _output_directory(self):
-        return self.release_directory
+        return self.coursedir.release_directory
 
     export_format = 'notebook'
 
@@ -156,12 +156,12 @@ class AssignApp(BaseNbConvertApp):
 
     def build_extra_config(self):
         extra_config = super(AssignApp, self).build_extra_config()
-        extra_config.NbGrader.student_id = '.'
-        extra_config.NbGrader.notebook_id = '*'
+        extra_config.CourseDirectory.student_id = '.'
+        extra_config.CourseDirectory.notebook_id = '*'
         return extra_config
 
     def _clean_old_notebooks(self, assignment_id, student_id):
-        with Gradebook(self.db_url) as gb:
+        with Gradebook(self.coursedir.db_url) as gb:
             assignment = gb.find_assignment(assignment_id)
             regexp = re.escape(os.path.sep).join([
                 self._format_source("(?P<assignment_id>.*)", "(?P<student_id>.*)", escape=True),
@@ -211,11 +211,11 @@ class AssignApp(BaseNbConvertApp):
                 if 'name' in assignment:
                     del assignment['name']
                 self.log.info("Updating/creating assignment '%s': %s", assignment_id, assignment)
-                with Gradebook(self.db_url) as gb:
+                with Gradebook(self.coursedir.db_url) as gb:
                     gb.update_or_create_assignment(assignment_id, **assignment)
 
             else:
-                with Gradebook(self.db_url) as gb:
+                with Gradebook(self.coursedir.db_url) as gb:
                     try:
                         gb.find_assignment(assignment_id)
                     except MissingEntry:
@@ -223,5 +223,5 @@ class AssignApp(BaseNbConvertApp):
 
             # check if there are any extra notebooks in the db that are no longer
             # part of the assignment, and if so, remove them
-            if self.notebook_id == "*":
+            if self.coursedir.notebook_id == "*":
                 self._clean_old_notebooks(assignment_id, student_id)

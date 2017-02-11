@@ -53,11 +53,11 @@ class FeedbackApp(BaseNbConvertApp):
 
     @property
     def _input_directory(self):
-        return self.autograded_directory
+        return self.coursedir.autograded_directory
 
     @property
     def _output_directory(self):
-        return self.feedback_directory
+        return self.coursedir.feedback_directory
 
     preprocessors = List([
         GetGrades,

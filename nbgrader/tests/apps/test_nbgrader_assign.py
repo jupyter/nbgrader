@@ -34,7 +34,7 @@ class TestNbGraderAssign(BaseTestApp):
         self._empty_notebook(join(course_dir, 'source', 'ps1', 'foo.ipynb'))
         run_nbgrader(["assign", "ps1"], retcode=1)
         # check that the --create flag works
-        run_nbgrader(["assign", "ps1", "--create"])
+        run_nbgrader(["assign", "ps1", "--create", "--debug"])
 
     def test_single_file(self, course_dir, temp_cwd):
         """Can a single file be assigned?"""

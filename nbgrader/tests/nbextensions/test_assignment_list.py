@@ -36,7 +36,7 @@ def class_files(coursedir):
     with open("nbgrader_config.py", "a") as fh:
         fh.write(dedent(
             """
-            c.NbGrader.course_directory = '{}'
+            c.CourseDirectory.root = '{}'
             """.format(coursedir)
         ))
 

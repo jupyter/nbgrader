@@ -59,7 +59,7 @@ class FetchApp(TransferApp):
 
         self.course_path = os.path.join(self.exchange_directory, self.course_id)
         self.outbound_path = os.path.join(self.course_path, 'outbound')
-        self.src_path = os.path.join(self.outbound_path, self.assignment_id)
+        self.src_path = os.path.join(self.outbound_path, self.coursedir.assignment_id)
         if not os.path.isdir(self.src_path):
             self.fail("Assignment not found: {}".format(self.src_path))
         if not check_mode(self.src_path, read=True, execute=True):
@@ -67,9 +67,9 @@ class FetchApp(TransferApp):
 
     def init_dest(self):
         if self.path_includes_course:
-            root = os.path.join(self.course_id, self.assignment_id)
+            root = os.path.join(self.course_id, self.coursedir.assignment_id)
         else:
-            root = self.assignment_id
+            root = self.coursedir.assignment_id
         self.dest_path = os.path.abspath(os.path.join('.', root))
         if os.path.isdir(self.dest_path) and not self.replace_missing_files:
             self.fail("You already have a copy of the assignment in this directory: {}".format(root))
@@ -98,11 +98,11 @@ class FetchApp(TransferApp):
 
 
     def do_copy(self, src, dest, perms=None):
-        """Copy the src dir to the dest dir omitting the self.ignore globs."""
+        """Copy the src dir to the dest dir omitting the self.coursedir.ignore globs."""
         if os.path.isdir(self.dest_path):
-            self.copy_if_missing(src, dest, ignore=shutil.ignore_patterns(*self.ignore))
+            self.copy_if_missing(src, dest, ignore=shutil.ignore_patterns(*self.coursedir.ignore))
         else:
-            shutil.copytree(src, dest, ignore=shutil.ignore_patterns(*self.ignore))
+            shutil.copytree(src, dest, ignore=shutil.ignore_patterns(*self.coursedir.ignore))
 
         if perms:
             for dirname, dirnames, filenames in os.walk(dest):
@@ -113,4 +113,4 @@ class FetchApp(TransferApp):
         self.log.info("Source: {}".format(self.src_path))
         self.log.info("Destination: {}".format(self.dest_path))
         self.do_copy(self.src_path, self.dest_path)
-        self.log.info("Fetched as: {} {}".format(self.course_id, self.assignment_id))
+        self.log.info("Fetched as: {} {}".format(self.course_id, self.coursedir.assignment_id))
