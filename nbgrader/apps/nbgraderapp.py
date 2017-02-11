@@ -13,6 +13,8 @@ from jupyter_core.application import NoStart
 import nbgrader
 from .. import preprocessors
 from .. import plugins
+from ..coursedir import CourseDirectory
+from ..exchange import Exchange
 from .baseapp import nbgrader_aliases, nbgrader_flags
 from . import (
     NbGrader,
@@ -237,6 +239,9 @@ class NbGraderApp(NbGrader):
     @default("classes")
     def _classes_default(self):
         classes = super(NbGraderApp, self)._classes_default()
+
+        # include the coursedirectory and exchange
+        classes.extend([CourseDirectory, Exchange])
 
         # include all the apps that have configurable options
         for appname, (app, help) in self.subcommands.items():

@@ -66,8 +66,8 @@ class SubmitApp(TransferApp):
     ).tag(config=True)
 
     def init_src(self):
-        if self.path_includes_course:
-            root = os.path.join(self.course_id, self.coursedir.assignment_id)
+        if self.exchange.path_includes_course:
+            root = os.path.join(self.exchange.course_id, self.coursedir.assignment_id)
         else:
             root = self.coursedir.assignment_id
         self.src_path = os.path.abspath(root)
@@ -76,23 +76,23 @@ class SubmitApp(TransferApp):
             self.fail("Assignment not found: {}".format(self.src_path))
 
     def init_dest(self):
-        if self.course_id == '':
+        if self.exchange.course_id == '':
             self.fail("No course id specified. Re-run with --course flag.")
 
-        self.inbound_path = os.path.join(self.exchange_directory, self.course_id, 'inbound')
+        self.inbound_path = os.path.join(self.exchange.root, self.exchange.course_id, 'inbound')
         if not os.path.isdir(self.inbound_path):
             self.fail("Inbound directory doesn't exist: {}".format(self.inbound_path))
         if not check_mode(self.inbound_path, write=True, execute=True):
             self.fail("You don't have write permissions to the directory: {}".format(self.inbound_path))
 
-        self.cache_path = os.path.join(self.cache_directory, self.course_id)
-        self.assignment_filename = '{}+{}+{}'.format(get_username(), self.coursedir.assignment_id, self.timestamp)
+        self.cache_path = os.path.join(self.exchange.cache, self.exchange.course_id)
+        self.assignment_filename = '{}+{}+{}'.format(get_username(), self.coursedir.assignment_id, self.exchange.timestamp)
 
     def init_release(self):
-        if self.course_id == '':
+        if self.exchange.course_id == '':
             self.fail("No course id specified. Re-run with --course flag.")
 
-        course_path = os.path.join(self.exchange_directory, self.course_id)
+        course_path = os.path.join(self.exchange.root, self.exchange.course_id)
         outbound_path = os.path.join(course_path, 'outbound')
         self.release_path = os.path.join(outbound_path, self.coursedir.assignment_id)
         if not os.path.isdir(self.release_path):
@@ -157,8 +157,8 @@ class SubmitApp(TransferApp):
         self.check_filename_diff()
         self.do_copy(self.src_path, dest_path)
         with open(os.path.join(dest_path, "timestamp.txt"), "w") as fh:
-            fh.write(self.timestamp)
-        self.set_perms(dest_path, perms=(S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH))
+            fh.write(self.exchange.timestamp)
+        self.exchange.set_perms(dest_path, perms=(S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH))
 
         # Make this 0777=ugo=rwx so the instructor can delete later. Hidden from other users by the timestamp.
         os.chmod(
@@ -171,8 +171,8 @@ class SubmitApp(TransferApp):
             os.makedirs(self.cache_path)
         self.do_copy(self.src_path, cache_path)
         with open(os.path.join(cache_path, "timestamp.txt"), "w") as fh:
-            fh.write(self.timestamp)
+            fh.write(self.exchange.timestamp)
 
         self.log.info("Submitted as: {} {} {}".format(
-            self.course_id, self.coursedir.assignment_id, str(self.timestamp)
+            self.exchange.course_id, self.coursedir.assignment_id, str(self.exchange.timestamp)
         ))

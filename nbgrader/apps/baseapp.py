@@ -9,23 +9,21 @@ import re
 import os
 import traceback
 import logging
-import datetime
 import shutil
 
-from dateutil.tz import gettz
 from jupyter_core.application import JupyterApp
-from jupyter_core.paths import jupyter_data_dir
 from nbconvert.exporters.export import exporter_map
 from nbconvert.nbconvertapp import NbConvertApp, DottedOrNone
 from textwrap import dedent
 from tornado.log import LogFormatter
-from traitlets import Unicode, List, Bool, Dict, Integer, Instance, default, link
+from traitlets import Unicode, List, Bool, Dict, Integer, Instance, default
 from traitlets.config.application import catch_config_error
 from traitlets.config.loader import Config
 
-from ..utils import check_directory, parse_utc, find_all_files, rmtree, remove
+from ..utils import parse_utc, find_all_files, rmtree, remove
 from ..preprocessors.execute import UnresponsiveKernelError
 from ..coursedir import CourseDirectory
+from ..exchange import Exchange
 
 
 nbgrader_aliases = {
@@ -34,7 +32,6 @@ nbgrader_aliases = {
     'assignment': 'CourseDirectory.assignment_id',
     'notebook': 'CourseDirectory.notebook_id',
     'db': 'CourseDirectory.db_url',
-    'course': 'NbGrader.course_id',
     'course-dir': 'CourseDirectory.root'
 }
 nbgrader_flags = {
@@ -110,17 +107,6 @@ class NbGrader(JupyterApp):
             for handler in self.log.handlers[1:]:
                 handler.close()
                 self.log.removeHandler(handler)
-
-    course_id = Unicode(
-        '',
-        help=dedent(
-            """
-            A key that is unique per instructor and course. This MUST be
-            specified, either by setting the config option, or using the
-            --course option on the command line.
-            """
-        )
-    ).tag(config=True)
 
     db_assignments = List(
         help=dedent(
@@ -254,6 +240,11 @@ class NbGrader(JupyterApp):
                 setattr(cfg.CourseDirectory, new_opt, cfg.NbGrader[old_opt])
                 delattr(cfg.NbGrader, old_opt)
 
+        if "course_id" in cfg.NbGrader:
+            self.log.warn("Outdated config: use Exchange.course_id rather than NbGrader.course_id")
+            cfg.Exchange.course_id = cfg.NbGrader.course_id
+            del cfg.NbGrader.course_id
+
         super(NbGrader, self)._load_config(cfg, **kwargs)
         if self.coursedir:
             self.coursedir._load_config(cfg)
@@ -315,7 +306,8 @@ class NbGrader(JupyterApp):
 transfer_aliases = {}
 transfer_aliases.update(nbgrader_aliases)
 transfer_aliases.update({
-    "timezone": "TransferApp.timezone",
+    "timezone": "Exchange.timezone",
+    "course": "Exchange.course_id",
 })
 transfer_flags = {}
 transfer_flags.update(nbgrader_flags)
@@ -329,62 +321,41 @@ class TransferApp(NbGrader):
     files and the nbgrader exchange.
     """
 
-    timezone = Unicode(
-        "UTC",
-        help="Timezone for recording timestamps"
-    ).tag(config=True)
+    exchange = Instance(Exchange, allow_none=True)
 
-    timestamp_format = Unicode(
-        "%Y-%m-%d %H:%M:%S %Z",
-        help="Format string for timestamps"
-    ).tag(config=True)
+    def _load_config(self, cfg, **kwargs):
+        exchange_options = [
+            ("timezone", "timezone"),
+            ("timestamp_format", "timestamp_format"),
+            ("exchange_directory", "root"),
+            ("cache_directory", "cache")
+        ]
 
-    exchange_directory = Unicode(
-        "/srv/nbgrader/exchange",
-        help="The nbgrader exchange directory writable to everyone. MUST be preexisting."
-    ).tag(config=True)
+        for old_opt, new_opt in exchange_options:
+            if old_opt in cfg.TransferApp:
+                self.log.warn("Outdated config: use Exchange.{} rather than TransferApp.{}".format(new_opt, old_opt))
+                setattr(cfg.Exchange, new_opt, cfg.TransferApp[old_opt])
+                delattr(cfg.TransferApp, old_opt)
 
-    cache_directory = Unicode(
-        "",
-        help="Local cache directory for nbgrader submit and nbgrader list. Defaults to $JUPYTER_DATA_DIR/nbgrader_cache"
-    ).tag(config=True)
+        super(TransferApp, self)._load_config(cfg, **kwargs)
+        if self.exchange:
+            self.exchange._load_config(cfg)
 
-    path_includes_course = Bool(
-        False,
-        help=dedent(
-            """
-            Whether the path for fetching/submitting  assignments should be
-            prefixed with the course name. If this is `False`, then the path
-            will be something like `./ps1`. If this is `True`, then the path
-            will be something like `./course123/ps1`.
-            """
-        )
-    ).tag(config=True)
-
-    @default("cache_directory")
-    def _cache_directory_default(self):
-        return os.path.join(jupyter_data_dir(), 'nbgrader_cache')
-
-    def set_timestamp(self):
-        """Set the timestap using the configured timezone."""
-        tz = gettz(self.timezone)
-        if tz is None:
-            self.fail("Invalid timezone: {}".format(self.timezone))
-        self.timestamp = datetime.datetime.now(tz).strftime(self.timestamp_format)
-
-    def ensure_exchange_directory(self):
-        """See if the exchange directory exists and is writable, fail if not."""
-        if not check_directory(self.exchange_directory, write=True, execute=True):
-            self.fail("Unwritable directory, please contact your instructor: {}".format(self.exchange_directory))
+    @default("classes")
+    def _classes_default(self):
+        classes = super(TransferApp, self)._classes_default()
+        classes.extend([TransferApp, Exchange])
+        return classes
 
     @catch_config_error
     def initialize(self, argv=None):
         if sys.platform == 'win32':
             self.fail("Sorry, %s is not available on Windows.", self.name.replace("-", " "))
 
+        self.exchange = Exchange(parent=self)
         super(TransferApp, self).initialize(argv)
-        self.ensure_exchange_directory()
-        self.set_timestamp()
+        self.exchange.ensure_root()
+        self.exchange.set_timestamp()
 
     def init_src(self):
         """Compute and check the source paths for the transfer."""
@@ -398,21 +369,11 @@ class TransferApp(NbGrader):
         """Actually do the file transfer."""
         raise NotImplementedError
 
-    def set_perms(self, dest, perms):
-        all_dirs = []
-        for dirname, dirnames, filenames in os.walk(dest):
-            for filename in filenames:
-                os.chmod(os.path.join(dirname, filename), perms)
-            all_dirs.append(dirname)
-
-        for dirname in all_dirs[::-1]:
-            os.chmod(dirname, perms)
-
     def do_copy(self, src, dest, perms=None):
         """Copy the src dir to the dest dir omitting the self.coursedir.ignore globs."""
         shutil.copytree(src, dest, ignore=shutil.ignore_patterns(*self.coursedir.ignore))
         if perms:
-            self.set_perms(dest, perms=perms)
+            self.exchange.set_perms(dest, perms=perms)
 
     def start(self):
         super(TransferApp, self).start()

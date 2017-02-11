@@ -13,7 +13,7 @@ class TestNbGraderRelease(BaseTestApp):
         cmd = [
             "release", assignment,
             "--course", "abc101",
-            "--TransferApp.exchange_directory={}".format(exchange)
+            "--Exchange.root={}".format(exchange)
         ]
 
         if flags is not None:
@@ -29,7 +29,7 @@ class TestNbGraderRelease(BaseTestApp):
         """Does releasing without a course id thrown an error?"""
         cmd = [
             "release", "ps1",
-            "--TransferApp.exchange_directory={}".format(exchange)
+            "--Exchange.root={}".format(exchange)
         ]
         run_nbgrader(cmd, retcode=1)
 

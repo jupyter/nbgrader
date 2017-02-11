@@ -98,16 +98,16 @@ class ListApp(TransferApp):
         pass
 
     def init_dest(self):
-        course_id = self.course_id if self.course_id else '*'
+        course_id = self.exchange.course_id if self.exchange.course_id else '*'
         assignment_id = self.coursedir.assignment_id if self.coursedir.assignment_id else '*'
         student_id = self.coursedir.student_id if self.coursedir.student_id else '*'
 
         if self.inbound:
-            pattern = os.path.join(self.exchange_directory, course_id, 'inbound', '{}+{}+*'.format(student_id, assignment_id))
+            pattern = os.path.join(self.exchange.root, course_id, 'inbound', '{}+{}+*'.format(student_id, assignment_id))
         elif self.cached:
-            pattern = os.path.join(self.cache_directory, course_id, '{}+{}+*'.format(student_id, assignment_id))
+            pattern = os.path.join(self.exchange.cache, course_id, '{}+{}+*'.format(student_id, assignment_id))
         else:
-            pattern = os.path.join(self.exchange_directory, course_id, 'outbound', '{}'.format(assignment_id))
+            pattern = os.path.join(self.exchange.root, course_id, 'outbound', '{}'.format(assignment_id))
 
         self.assignments = sorted(glob.glob(pattern))
 
@@ -140,7 +140,7 @@ class ListApp(TransferApp):
         assignments = []
         for path in self.assignments:
             info = self.parse_assignment(path)
-            if self.path_includes_course:
+            if self.exchange.path_includes_course:
                 root = os.path.join(info['course_id'], info['assignment_id'])
             else:
                 root = info['assignment_id']

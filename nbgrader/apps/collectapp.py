@@ -45,7 +45,7 @@ class CollectApp(TransferApp):
         It must be unique for each instructor/course combination. To set it in
         the config file add a line to the `nbgrader_config.py` file:
 
-            c.NbGrader.course_id = 'phys101'
+            c.Exchange.course_id = 'phys101'
 
         To pass the `course_id` at the command line, add `--course=phys101` to any
         of the below commands.
@@ -87,10 +87,10 @@ class CollectApp(TransferApp):
         return sorted(records, key=lambda item: item['timestamp'], reverse=True)
 
     def init_src(self):
-        if self.course_id == '':
+        if self.exchange.course_id == '':
             self.fail("No course id specified. Re-run with --course flag.")
 
-        self.course_path = os.path.join(self.exchange_directory, self.course_id)
+        self.course_path = os.path.join(self.exchange.root, self.exchange.course_id)
         self.inbound_path = os.path.join(self.course_path, 'inbound')
         if not os.path.isdir(self.inbound_path):
             self.fail("Course not found: {}".format(self.inbound_path))

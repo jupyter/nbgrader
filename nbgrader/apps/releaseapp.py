@@ -45,7 +45,7 @@ class ReleaseApp(TransferApp):
         unique for each instructor/course combination. To set it in the config
         file add a line to the `nbgrader_config.py` file:
 
-            c.NbGrader.course_id = 'phys101'
+            c.Exchange.course_id = 'phys101'
 
         To pass the `course_id` at the command line, add `--course=phys101` to any
         of the below commands.
@@ -88,10 +88,10 @@ class ReleaseApp(TransferApp):
                 self.fail("Assignment not found: {}".format(self.src_path))
 
     def init_dest(self):
-        if self.course_id == '':
+        if self.exchange.course_id == '':
             self.fail("No course id specified. Re-run with --course flag.")
 
-        self.course_path = os.path.join(self.exchange_directory, self.course_id)
+        self.course_path = os.path.join(self.exchange.root, self.exchange.course_id)
         self.outbound_path = os.path.join(self.course_path, 'outbound')
         self.inbound_path = os.path.join(self.course_path, 'inbound')
         self.dest_path = os.path.join(self.outbound_path, self.coursedir.assignment_id)
@@ -126,15 +126,15 @@ class ReleaseApp(TransferApp):
         if os.path.isdir(self.dest_path):
             if self.force:
                 self.log.info("Overwriting files: {} {}".format(
-                    self.course_id, self.coursedir.assignment_id
+                    self.exchange.course_id, self.coursedir.assignment_id
                 ))
                 shutil.rmtree(self.dest_path)
             else:
                 self.fail("Destination already exists, add --force to overwrite: {} {}".format(
-                    self.course_id, self.coursedir.assignment_id
+                    self.exchange.course_id, self.coursedir.assignment_id
                 ))
         self.log.info("Source: {}".format(self.src_path))
         self.log.info("Destination: {}".format(self.dest_path))
         perms = S_IRUSR|S_IWUSR|S_IXUSR|S_IRGRP|S_IXGRP|S_IROTH|S_IXOTH
         self.do_copy(self.src_path, self.dest_path, perms=perms)
-        self.log.info("Released as: {} {}".format(self.course_id, self.coursedir.assignment_id))
+        self.log.info("Released as: {} {}".format(self.exchange.course_id, self.coursedir.assignment_id))
