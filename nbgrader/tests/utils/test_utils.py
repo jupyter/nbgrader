@@ -2,9 +2,12 @@ import os
 import pytest
 import tempfile
 import shutil
+import zipfile
 
 from nbformat.v4 import new_output
 from os.path import join
+from setuptools.archive_util import UnrecognizedFormat
+
 
 from ... import utils
 from .. import (
@@ -50,7 +53,6 @@ def test_is_solution():
 
 
 def test_is_locked():
-
     cell = create_code_cell()
     assert not utils.is_locked(cell)
     cell.metadata['nbgrader'] = dict(solution=True, grade=False, locked=False)
@@ -91,7 +93,6 @@ def test_is_locked():
     assert not utils.is_locked(cell)
     cell.metadata['nbgrader'] = dict(solution=False, grade=False, locked=False)
     assert not utils.is_locked(cell)
-
 
 
 def test_determine_grade_code_grade():
@@ -281,3 +282,60 @@ def test_find_all_files(temp_cwd):
     assert utils.find_all_files(join("foo", "bar"), ["*.txt"]) == []
     assert utils.find_all_files(".") == [join(".", "foo", "baz.txt"), join(".", "foo", "bar", "baz.txt")]
     assert utils.find_all_files(".", ["bar"]) == [join(".", "foo", "baz.txt")]
+
+
+def test_unzip_invalid_ext(temp_cwd):
+    with open(join("baz.txt"), "w") as fh:
+        pass
+    with pytest.raises(ValueError):
+        utils.unzip("baz.txt", os.getcwd())
+
+
+def test_unzip_bad_zip(temp_cwd):
+    with open(join("baz.zip"), "wb") as fh:
+        pass
+    with pytest.raises(UnrecognizedFormat):
+        utils.unzip("baz.zip", os.getcwd())
+
+
+def test_unzip_no_output_path(temp_cwd):
+    with open(join("baz.zip"), "wb") as fh:
+        pass
+    out = os.path.join(os.getcwd(), "blarg")
+    with pytest.raises(OSError):
+        utils.unzip("baz.zip", out)
+
+
+def test_unzip_create_own_folder(temp_cwd):
+    with open(join("foo.txt"), "w") as fh:
+        fh.write("foo")
+    with zipfile.ZipFile("baz.zip", "w") as fh:
+        fh.write("foo.txt")
+
+    utils.unzip("baz.zip", os.getcwd())
+    assert not os.path.isdir("baz")
+
+    utils.unzip("baz.zip", os.getcwd(), create_own_folder=True)
+    assert os.path.isdir("baz")
+    assert os.path.isfile(os.path.join("baz", "foo.txt"))
+
+
+def test_unzip_tree(temp_cwd):
+    with open(join("foo.txt"), "w") as fh:
+        fh.write("foo")
+
+    with zipfile.ZipFile("baz.zip", "w") as fh:
+        fh.write("foo.txt", os.path.join("bar", "foo.txt"))
+        fh.write("foo.txt")
+
+    with zipfile.ZipFile("data.zip", "w") as fh:
+        fh.write("foo.txt", os.path.join("bar", "foo.txt"))
+        fh.write("foo.txt")
+        fh.write("baz.zip")  # must also get unzipped
+
+    utils.unzip("data.zip", os.getcwd(), create_own_folder=True, tree=True)
+    assert os.path.isdir("data")
+    assert os.path.isdir(os.path.join("data", "baz"))
+    assert os.path.isdir(os.path.join("data", "bar"))
+    assert os.path.isdir(os.path.join("data", "baz", "bar"))
+    assert os.path.isfile(os.path.join("data", "baz", "bar", "foo.txt"))

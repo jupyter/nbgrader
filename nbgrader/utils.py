@@ -7,6 +7,10 @@ import sys
 import shutil
 import stat
 
+from setuptools.archive_util import unpack_archive
+from setuptools.archive_util import unpack_tarfile
+from setuptools.archive_util import unpack_zipfile
+
 # pwd is for unix passwords only, so we shouldn't import it on
 # windows machines
 if sys.platform != 'win32':
@@ -203,3 +207,74 @@ def remove(path):
 
     # now we can remove the path
     os.remove(path)
+
+def unzip(src, dest, zip_ext=None, create_own_folder=False, tree=False):
+    """Extract all content from an archive file to a destination folder.
+
+    Arguments
+    ---------
+    src: str
+        Absolute path to the archive file ('/path/to/archive_filename.zip')
+    dest: str
+        Asolute path to extract all content to ('/path/to/extract/')
+
+    Keyword Arguments
+    -----------------
+    zip_ext: list
+        Valid zip file extensions. Default: ['.zip', '.gz']
+    create_own_folder: bool
+        Create a sub-folder in 'dest' with the archive file name if True
+        ('/path/to/extract/archive_filename/'). Default: False
+    tree: bool
+        Extract archive files within archive files (into their own
+        sub-directory) if True. Default: False
+    """
+    zip_ext = list(zip_ext or ['.zip', '.gz'])
+    filename, ext = os.path.splitext(os.path.basename(src))
+    if ext not in zip_ext:
+        raise ValueError("Invalid archive file extension {}: {}".format(ext, src))
+    if not check_directory(dest, write=True, execute=True):
+        raise OSError("Directory not found or unwritable: {}".format(dest))
+
+    if create_own_folder:
+        # double splitext for .tar.gz
+        fname, ext = os.path.splitext(os.path.basename(filename))
+        if ext == '.tar':
+            filename = fname
+        dest = os.path.join(dest, filename)
+        if not os.path.isdir(dest):
+            os.makedirs(dest)
+
+    unpack_archive(src, dest, drivers=(unpack_zipfile, unpack_tarfile))
+
+    # extract flat, don't extract archive files within archive files
+    if not tree:
+        return
+
+    def find_archive_files(skip):
+        found = []
+        # find archive files in dest that are not in skip
+        for root, _, filenames in os.walk(dest):
+            for basename in filenames:
+                src_file = os.path.join(root, basename)
+                _, ext = os.path.splitext(basename)
+                if ext in zip_ext and src_file not in skip:
+                    found.append(src_file)
+        return found
+
+    skip = []
+    new_files = find_archive_files(skip)
+    # keep walking dest until no new archive files are found
+    while new_files:
+        # unzip (flat) new archive files found in dest
+        for src_file in new_files:
+            dest_path = os.path.split(src_file)[0]
+            unzip(
+                src_file,
+                dest_path,
+                zip_ext=zip_ext,
+                create_own_folder=True,
+                tree=False
+            )
+            skip.append(src_file)
+        new_files = find_archive_files(skip)

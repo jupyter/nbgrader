@@ -92,7 +92,7 @@ setup_args = dict(
         "tornado",
         "six>=1.9",
         "requests",
-        "jsonschema"
+        "jsonschema",
     ]
 )
 

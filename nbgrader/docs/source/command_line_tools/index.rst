@@ -45,6 +45,7 @@ The following commands are meant for instructors, but are only relevant when usi
     nbgrader-release
     nbgrader-list
     nbgrader-collect
+    nbgrader-zip-collect
 
 Student commands
 ----------------

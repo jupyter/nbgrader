@@ -30,7 +30,8 @@ from . import (
     QuickStartApp,
     ExportApp,
     DbApp,
-    UpdateApp
+    UpdateApp,
+    ZipCollectApp,
 )
 
 aliases = {}
@@ -148,6 +149,16 @@ class NbGraderApp(NbGrader):
             dedent(
                 """
                 Collect an assignment from students through the nbgrader exchange.
+                Intended for use by instructors only.
+                """
+            ).strip()
+        ),
+        zip_collect=(
+            ZipCollectApp,
+            dedent(
+                """
+                Collect assignment submissions from files and/or archives (zip
+                files) manually downloaded from a LMS.
                 Intended for use by instructors only.
                 """
             ).strip()

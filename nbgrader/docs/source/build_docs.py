@@ -45,7 +45,8 @@ def autogen_command_line(root):
         'ReleaseApp',
         'SubmitApp',
         'UpdateApp',
-        'ValidateApp'
+        'ValidateApp',
+        'ZipCollectApp',
     ]
 
     print('Generating command line documentation')
@@ -95,7 +96,6 @@ def autogen_config(root):
     with open(destination, 'w') as f:
         f.write(header)
         f.write(config)
-
 
 
 def execute_notebooks(root):
