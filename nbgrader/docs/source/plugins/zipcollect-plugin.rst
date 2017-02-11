@@ -59,7 +59,7 @@ For more information about named group regular expressions see
 `<https://docs.python.org/howto/regex.html>`_
 
 Note: ``file_id`` must contain the relative path to the assignment when
-collecting submission files in assignment subdirectories, for example:
+collecting submission files in assignment sub-folders, for example:
 
 .. code:: python
 

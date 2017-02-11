@@ -83,7 +83,7 @@ class ZipCollectApp(NbGrader):
             {submitted_directory}/{student_id}/{assignment_id}/{notebook_id}.ipynb
 
         By default the collection of files in the `extracted_directory` is
-        managed via the :class:`~nbgrader.plugins.zipcollect.FileNameProcessor`
+        managed via the :class:`~nbgrader.plugins.zipcollect.FileNameCollectorPlugin`
         plugin. Each filename is sent to the plugin, which in turn returns an
         object containing the `student_id`, `file_id`, `first_name`,
         `last_name`, `email`, and `timestamp` data. For more information run:
