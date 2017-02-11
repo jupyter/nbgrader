@@ -233,6 +233,27 @@ class NbGrader(JupyterApp):
             cfg.NbGrader.merge(cfg.BaseApp)
             del cfg.BaseApp
 
+        coursedir_options = [
+            ("student_id", "student_id"),
+            ("assignment_id", "assignment_id"),
+            ("notebook_id", "notebook_id"),
+            ("directory_structure", "directory_structure"),
+            ("source_directory", "source_directory"),
+            ("release_directory", "release_directory"),
+            ("submitted_directory", "submitted_directory"),
+            ("autograded_directory", "autograded_directory"),
+            ("feedback_directory", "feedback_directory"),
+            ("db_url", "db_url"),
+            ("course_directory", "root"),
+            ("ignore", "ignore")
+        ]
+
+        for old_opt, new_opt in coursedir_options:
+            if old_opt in cfg.NbGrader:
+                self.log.warn("Outdated config: use CourseDirectory.{} rather than NbGrader.{}".format(new_opt, old_opt))
+                setattr(cfg.CourseDirectory, new_opt, cfg.NbGrader[old_opt])
+                delattr(cfg.NbGrader, old_opt)
+
         super(NbGrader, self)._load_config(cfg, **kwargs)
         if self.coursedir:
             self.coursedir._load_config(cfg)
