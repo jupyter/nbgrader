@@ -467,16 +467,33 @@ class TestNbGraderZipCollect(BaseTestApp):
         submitted_dir = join(course_dir, "submitted")
 
         # submissions are sorted so a before b
-        os.makedirs(join(archive_dir, 'ps1_hacker_a_2017-01-30 15:30:10'))
-        with open(join(archive_dir, 'ps1_hacker_a_2017-01-30 15:30:10', 'problem1.ipynb'), 'w') as fh:
+        os.makedirs(join(archive_dir, 'ps1_hacker_a_2017-01-30-15-30-10'))
+        with open(join(archive_dir, 'ps1_hacker_a_2017-01-30-15-30-10', 'problem1.ipynb'), 'w') as fh:
             fh.write('')
-        os.makedirs(join(archive_dir, 'ps1_hacker_b_2016-01-30 15:30:10'))
-        with open(join(archive_dir, 'ps1_hacker_b_2016-01-30 15:30:10', 'problem1.ipynb'), 'w') as fh:
+        os.makedirs(join(archive_dir, 'ps1_hacker_b_2016-01-30-15-30-10'))
+        with open(join(archive_dir, 'ps1_hacker_b_2016-01-30-15-30-10', 'problem1.ipynb'), 'w') as fh:
             fh.write('')
+
+        with open('plugin_five.py', 'w') as fh:
+            fh.write(dedent(
+                """
+                from nbgrader.plugins import FileNameCollectorPlugin
+
+                class CustomPlugin(FileNameCollectorPlugin):
+                    def collect(self, submitted_file):
+                        info = super(CustomPlugin, self).collect(submitted_file)
+                        if info is not None:
+                            info['timestamp'] = '{}-{}-{} {}:{}:{}'.format(
+                                *tuple(info['timestamp'].split('-'))
+                            )
+                        return info
+                """
+            ))
 
         with open("nbgrader_config.py", "a") as fh:
             fh.write(dedent(
                 """
+                c.ZipCollectApp.collector_plugin = 'plugin_five.CustomPlugin'
                 c.FileNameCollectorPlugin.valid_ext = ['.ipynb', '.txt']
                 c.FileNameCollectorPlugin.named_regexp = (
                     r".+ps1_(?P<student_id>\w+)_[a|b]_(?P<timestamp>.+)/(?P<file_id>.+)"
@@ -502,16 +519,33 @@ class TestNbGraderZipCollect(BaseTestApp):
         submitted_dir = join(course_dir, "submitted")
 
         # submissions are sorted so a before b
-        os.makedirs(join(archive_dir, 'ps1_hacker_a_2016-01-30 15:30:10'))
-        with open(join(archive_dir, 'ps1_hacker_a_2016-01-30 15:30:10', 'problem1.ipynb'), 'w') as fh:
+        os.makedirs(join(archive_dir, 'ps1_hacker_a_2016-01-30-15-30-10'))
+        with open(join(archive_dir, 'ps1_hacker_a_2016-01-30-15-30-10', 'problem1.ipynb'), 'w') as fh:
             fh.write('')
-        os.makedirs(join(archive_dir, 'ps1_hacker_b_2017-01-30 15:30:10'))
-        with open(join(archive_dir, 'ps1_hacker_b_2017-01-30 15:30:10', 'problem1.ipynb'), 'w') as fh:
+        os.makedirs(join(archive_dir, 'ps1_hacker_b_2017-01-30-15-30-10'))
+        with open(join(archive_dir, 'ps1_hacker_b_2017-01-30-15-30-10', 'problem1.ipynb'), 'w') as fh:
             fh.write('')
+
+        with open('plugin_six.py', 'w') as fh:
+            fh.write(dedent(
+                """
+                from nbgrader.plugins import FileNameCollectorPlugin
+
+                class CustomPlugin(FileNameCollectorPlugin):
+                    def collect(self, submitted_file):
+                        info = super(CustomPlugin, self).collect(submitted_file)
+                        if info is not None:
+                            info['timestamp'] = '{}-{}-{} {}:{}:{}'.format(
+                                *tuple(info['timestamp'].split('-'))
+                            )
+                        return info
+                """
+            ))
 
         with open("nbgrader_config.py", "a") as fh:
             fh.write(dedent(
                 """
+                c.ZipCollectApp.collector_plugin = 'plugin_six.CustomPlugin'
                 c.FileNameCollectorPlugin.valid_ext = ['.ipynb', '.txt']
                 c.FileNameCollectorPlugin.named_regexp = (
                     r".+ps1_(?P<student_id>\w+)_[a|b]_(?P<timestamp>.+)/(?P<file_id>.+)"
