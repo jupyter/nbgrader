@@ -34,13 +34,13 @@ class FormgradeExtension(NbGrader):
 
         # Configure the formgrader settings
         tornado_settings = dict(
-            nbgrader_notebook_dir=self.course_directory,
-            nbgrader_notebook_dir_format=self.directory_structure,
-            nbgrader_step=self.autograded_directory,
+            nbgrader_notebook_dir=self.coursedir.root,
+            nbgrader_notebook_dir_format=self.coursedir.directory_structure,
+            nbgrader_step=self.coursedir.autograded_directory,
             nbgrader_exporter=HTMLExporter(config=self.config),
-            nbgrader_gradebook=Gradebook(self.db_url),
+            nbgrader_gradebook=Gradebook(self.coursedir.db_url),
             nbgrader_jinja2_env=jinja_env,
-            nbgrader_notebook_url_prefix=os.path.relpath(self.course_directory)
+            nbgrader_notebook_url_prefix=os.path.relpath(self.coursedir.root)
         )
 
         webapp.settings.update(tornado_settings)
