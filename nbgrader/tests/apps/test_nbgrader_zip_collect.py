@@ -496,7 +496,7 @@ class TestNbGraderZipCollect(BaseTestApp):
                 c.ZipCollectApp.collector_plugin = 'plugin_five.CustomPlugin'
                 c.FileNameCollectorPlugin.valid_ext = ['.ipynb', '.txt']
                 c.FileNameCollectorPlugin.named_regexp = (
-                    r".+ps1_(?P<student_id>\w+)_[a|b]_(?P<timestamp>.+)/(?P<file_id>.+)"
+                    r".+ps1_(?P<student_id>\w+)_[a|b]_(?P<timestamp>[0-9\-]+)\W+(?P<file_id>.+)"
                 )
                 """
             ))
@@ -548,7 +548,7 @@ class TestNbGraderZipCollect(BaseTestApp):
                 c.ZipCollectApp.collector_plugin = 'plugin_six.CustomPlugin'
                 c.FileNameCollectorPlugin.valid_ext = ['.ipynb', '.txt']
                 c.FileNameCollectorPlugin.named_regexp = (
-                    r".+ps1_(?P<student_id>\w+)_[a|b]_(?P<timestamp>.+)/(?P<file_id>.+)"
+                    r".+ps1_(?P<student_id>\w+)_[a|b]_(?P<timestamp>[0-9\-]+)\W+(?P<file_id>.+)"
                 )
                 """
             ))
@@ -581,7 +581,7 @@ class TestNbGraderZipCollect(BaseTestApp):
                 """
                 c.FileNameCollectorPlugin.valid_ext = ['.ipynb', '.txt']
                 c.FileNameCollectorPlugin.named_regexp = (
-                    r".+ps1_(?P<student_id>\w+)/(?P<file_id>.+)"
+                    r".+ps1_(?P<student_id>\w+)\W+(?P<file_id>.+)"
                 )
                 """
             ))
@@ -614,7 +614,7 @@ class TestNbGraderZipCollect(BaseTestApp):
                 """
                 c.FileNameCollectorPlugin.valid_ext = ['.ipynb', '.txt']
                 c.FileNameCollectorPlugin.named_regexp = (
-                    r".+ps1_(?P<student_id>\w+)/(?P<file_id>.+)"
+                    r".+ps1_(?P<student_id>\w+)\W+(?P<file_id>.+)"
                 )
                 """
             ))
@@ -649,7 +649,7 @@ class TestNbGraderZipCollect(BaseTestApp):
                 """
                 c.FileNameCollectorPlugin.valid_ext = ['.ipynb', '.txt']
                 c.FileNameCollectorPlugin.named_regexp = (
-                    r".+ps1_(?P<student_id>\w+)_[0-9]+/(?P<file_id>.+)"
+                    r".+ps1_(?P<student_id>\w+)_[0-9]+\W+(?P<file_id>.+)"
                 )
                 """
             ))
