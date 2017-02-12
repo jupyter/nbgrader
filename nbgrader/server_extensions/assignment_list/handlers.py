@@ -4,15 +4,42 @@ import os
 import json
 import subprocess as sp
 import sys
+import contextlib
+import traceback
 
 from tornado import web
 
 from notebook.utils import url_path_join as ujoin
 from notebook.base.handlers import IPythonHandler
 from traitlets import Unicode, default
-from traitlets.config import LoggingConfigurable
+from traitlets.config import LoggingConfigurable, Config
+from jupyter_core.paths import jupyter_config_path
+
+from ...apps import NbGrader
+from ...coursedir import CourseDirectory
+from ...exchange import ExchangeList, ExchangeFetch, ExchangeSubmit
+
 
 static = os.path.join(os.path.dirname(__file__), 'static')
+
+def load_config():
+    paths = jupyter_config_path()
+    paths.insert(0, os.getcwd())
+
+    full_config = Config()
+    for config in NbGrader._load_config_files("nbgrader_config", path=paths):
+        full_config.merge(config)
+
+    return full_config
+
+
+@contextlib.contextmanager
+def chdir(dirname):
+    currdir = os.getcwd()
+    os.chdir(dirname)
+    yield
+    os.chdir(currdir)
+
 
 class AssignmentList(LoggingConfigurable):
 
@@ -23,55 +50,60 @@ class AssignmentList(LoggingConfigurable):
         return self.parent.notebook_dir
 
     def list_released_assignments(self, course_id=None):
-        cmd = [sys.executable, "-m", "nbgrader", "list", "--json"]
-        if course_id:
-            cmd.extend(["--course", course_id])
-        p = sp.Popen(cmd, stdout=sp.PIPE, stderr=sp.PIPE, cwd=self.assignment_dir)
-        stdout, stderr = p.communicate()
-        retcode = p.poll()
+        with chdir(self.assignment_dir):
+            try:
+                config = load_config()
+                if course_id:
+                    config.Exchange.course_id = course_id
 
-        if retcode != 0:
-            retvalue = {
-                "success": False,
-                "value": stdout.decode() + stderr.decode(),
-                "command": " ".join(cmd)
-            }
+                coursedir = CourseDirectory(config=config)
+                lister = ExchangeList(coursedir=coursedir, config=config)
+                assignments = lister.start()
 
-        else:
-            assignments = json.loads(stdout.decode())
-            for assignment in assignments:
-                if assignment['status'] == 'fetched':
-                    assignment['path'] = os.path.relpath(assignment['path'], self.assignment_dir)
-                    for notebook in assignment['notebooks']:
-                        notebook['path'] = os.path.relpath(notebook['path'], self.assignment_dir)
-            retvalue = {
-                "success": True,
-                "value": sorted(assignments, key=lambda x: (x['course_id'], x['assignment_id']))
-            }
+            except:
+                self.log.error(traceback.format_exc())
+                retvalue = {
+                    "success": False,
+                    "value": traceback.format_exc()
+                }
+
+            else:
+                for assignment in assignments:
+                    if assignment['status'] == 'fetched':
+                        assignment['path'] = os.path.relpath(assignment['path'], self.assignment_dir)
+                        for notebook in assignment['notebooks']:
+                            notebook['path'] = os.path.relpath(notebook['path'], self.assignment_dir)
+                retvalue = {
+                    "success": True,
+                    "value": sorted(assignments, key=lambda x: (x['course_id'], x['assignment_id']))
+                }
 
         return retvalue
 
     def list_submitted_assignments(self, course_id=None):
-        cmd = [sys.executable, "-m", "nbgrader", "list", "--json", "--cached"]
-        if course_id:
-            cmd.extend(["--course", course_id])
-        p = sp.Popen(cmd, stdout=sp.PIPE, stderr=sp.PIPE, cwd=self.assignment_dir)
-        stdout, stderr = p.communicate()
-        retcode = p.poll()
+        with chdir(self.assignment_dir):
+            try:
+                config = load_config()
+                config.ExchangeList.cached = True
+                if course_id:
+                    config.Exchange.course_id = course_id
 
-        if retcode != 0:
-            retvalue = {
-                "success": False,
-                "value": stdout.decode() + stderr.decode(),
-                "command": " ".join(cmd)
-            }
+                coursedir = CourseDirectory(config=config)
+                lister = ExchangeList(coursedir=coursedir, config=config)
+                assignments = lister.start()
 
-        else:
-            assignments = json.loads(stdout.decode())
-            retvalue = {
-                "success": True,
-                "value": sorted(assignments, key=lambda x: x['timestamp'], reverse=True)
-            }
+            except:
+                self.log.error(traceback.format_exc())
+                retvalue = {
+                    "success": False,
+                    "value": traceback.format_exc()
+                }
+
+            else:
+                retvalue = {
+                    "success": True,
+                    "value": sorted(assignments, key=lambda x: x['timestamp'], reverse=True)
+                }
 
         return retvalue
 
@@ -104,52 +136,52 @@ class AssignmentList(LoggingConfigurable):
         return retvalue
 
     def fetch_assignment(self, course_id, assignment_id):
-        cmd = [
-            sys.executable, "-m", "nbgrader", "fetch",
-            "--course", course_id,
-            assignment_id
-        ]
-        p = sp.Popen(
-            cmd, stdout=sp.PIPE, stderr=sp.STDOUT, cwd=self.assignment_dir)
-        output, _ = p.communicate()
-        retcode = p.poll()
+        with chdir(self.assignment_dir):
+            try:
+                config = load_config()
+                config.Exchange.course_id = course_id
+                config.CourseDirectory.assignment_id = assignment_id
 
-        if retcode != 0:
-            retvalue = {
-                "success": False,
-                "value": output.decode(),
-                "command": " ".join(cmd)
-            }
+                coursedir = CourseDirectory(config=config)
+                fetch = ExchangeFetch(coursedir=coursedir, config=config)
+                fetch.start()
 
-        else:
-            retvalue = {
-                "success": True
-            }
+            except:
+                self.log.error(traceback.format_exc())
+                retvalue = {
+                    "success": False,
+                    "value": traceback.format_exc()
+                }
+
+            else:
+                retvalue = {
+                    "success": True
+                }
 
         return retvalue
 
     def submit_assignment(self, course_id, assignment_id):
-        cmd = [
-            sys.executable, "-m", "nbgrader", "submit",
-            "--course", course_id,
-            assignment_id
-        ]
-        p = sp.Popen(
-            cmd, stdout=sp.PIPE, stderr=sp.STDOUT, cwd=self.assignment_dir)
-        output, _ = p.communicate()
-        retcode = p.poll()
+        with chdir(self.assignment_dir):
+            try:
+                config = load_config()
+                config.Exchange.course_id = course_id
+                config.CourseDirectory.assignment_id = assignment_id
 
-        if retcode != 0:
-            retvalue = {
-                "success": False,
-                "value": output.decode(),
-                "command": " ".join(cmd)
-            }
+                coursedir = CourseDirectory(config=config)
+                submit = ExchangeSubmit(coursedir=coursedir, config=config)
+                submit.start()
 
-        else:
-            retvalue = {
-                "success": True
-            }
+            except:
+                self.log.error(traceback.format_exc())
+                retvalue = {
+                    "success": False,
+                    "value": traceback.format_exc()
+                }
+
+            else:
+                retvalue = {
+                    "success": True
+                }
 
         return retvalue
 

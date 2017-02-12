@@ -108,6 +108,8 @@ class ExchangeList(Exchange):
                 for info in assignments:
                     self.log.info(self.format_outbound_assignment(info))
 
+        return assignments
+
     def remove_files(self):
         """List and remove files."""
         assignments = self.parse_assignments()
@@ -128,6 +130,8 @@ class ExchangeList(Exchange):
         for assignment in self.assignments:
             shutil.rmtree(assignment)
 
+        return assignments
+
     def start(self):
         if self.inbound and self.cached:
             self.fail("Options --inbound and --cached are incompatible.")
@@ -135,6 +139,6 @@ class ExchangeList(Exchange):
         super(ExchangeList, self).start()
 
         if self.remove:
-            self.remove_files()
+            return self.remove_files()
         else:
-            self.list_files()
+            return self.list_files()
