@@ -6,7 +6,7 @@ from textwrap import dedent
 from traitlets.config import LoggingConfigurable
 from traitlets import Unicode, List, default
 
-from .utils import full_split
+from .utils import full_split, parse_utc
 
 
 class CourseDirectory(LoggingConfigurable):
@@ -171,3 +171,21 @@ class CourseDirectory(LoggingConfigurable):
             path = os.path.join(self.root, self.directory_structure).format(**kwargs)
 
         return path
+
+    def get_existing_timestamp(self, dest_path):
+        """Get the timestamp, as a datetime object, of an existing submission."""
+        timestamp_path = os.path.join(dest_path, 'timestamp.txt')
+        if os.path.exists(timestamp_path):
+            with open(timestamp_path, 'r') as fh:
+                timestamp = fh.read().strip()
+            if not timestamp:
+                self.log.warning(
+                    "Empty timestamp file: {}".format(timestamp_path))
+                return None
+            try:
+                return parse_utc(timestamp)
+            except ValueError:
+                self.fail(
+                    "Invalid timestamp string: {}".format(timestamp_path))
+        else:
+            return None

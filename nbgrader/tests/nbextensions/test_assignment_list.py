@@ -299,7 +299,7 @@ def test_submit_assignment_missing_notebooks(browser, port, class_files, tempdir
 
     # set strict flag
     with open('nbgrader_config.py', 'a') as config:
-        config.write('c.SubmitApp.strict = True')
+        config.write('c.ExchangeSubmit.strict = True')
 
     # submit it again
     rows = browser.find_elements_by_css_selector("#fetched_assignments_list > .list_item")

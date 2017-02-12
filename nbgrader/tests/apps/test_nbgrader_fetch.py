@@ -14,14 +14,14 @@ class TestNbGraderFetch(BaseTestApp):
         run_nbgrader([
             "release", assignment,
             "--course", course,
-            "--TransferApp.exchange_directory={}".format(exchange)
+            "--Exchange.root={}".format(exchange)
         ])
 
     def _fetch(self, assignment, exchange, flags=None, retcode=0, course="abc101"):
         cmd = [
             "fetch", assignment,
             "--course", course,
-            "--TransferApp.exchange_directory={}".format(exchange)
+            "--Exchange.root={}".format(exchange)
         ]
 
         if flags is not None:
@@ -38,7 +38,7 @@ class TestNbGraderFetch(BaseTestApp):
         self._release("ps1", exchange, course_dir)
         cmd = [
             "fetch", "ps1",
-            "--TransferApp.exchange_directory={}".format(exchange)
+            "--Exchange.root={}".format(exchange)
         ]
         run_nbgrader(cmd, retcode=1)
 
@@ -74,9 +74,9 @@ class TestNbGraderFetch(BaseTestApp):
 
     def test_fetch_multiple_courses(self, exchange, course_dir):
         self._release("ps1", exchange, course_dir, course="abc101")
-        self._fetch("ps1", exchange, course="abc101", flags=["--TransferApp.path_includes_course=True"])
+        self._fetch("ps1", exchange, course="abc101", flags=["--Exchange.path_includes_course=True"])
         assert os.path.isfile(join("abc101", "ps1", "p1.ipynb"))
 
         self._release("ps1", exchange, course_dir, course="abc102")
-        self._fetch("ps1", exchange, course="abc102", flags=["--TransferApp.path_includes_course=True"])
+        self._fetch("ps1", exchange, course="abc102", flags=["--Exchange.path_includes_course=True"])
         assert os.path.isfile(join("abc102", "ps1", "p1.ipynb"))

@@ -17,16 +17,16 @@ class TestNbGraderList(BaseTestApp):
         run_nbgrader([
             "release", assignment,
             "--course", course,
-            "--TransferApp.cache_directory={}".format(cache),
-            "--TransferApp.exchange_directory={}".format(exchange)
+            "--Exchange.cache={}".format(cache),
+            "--Exchange.root={}".format(exchange)
         ])
 
     def _fetch(self, assignment, exchange, cache, course="abc101", flags=None):
         cmd = [
             "fetch", assignment,
             "--course", course,
-            "--TransferApp.cache_directory={}".format(cache),
-            "--TransferApp.exchange_directory={}".format(exchange)
+            "--Exchange.cache={}".format(cache),
+            "--Exchange.root={}".format(exchange)
         ]
 
         if flags is not None:
@@ -38,8 +38,8 @@ class TestNbGraderList(BaseTestApp):
         cmd = [
             "submit", assignment,
             "--course", course,
-            "--TransferApp.cache_directory={}".format(cache),
-            "--TransferApp.exchange_directory={}".format(exchange)
+            "--Exchange.cache={}".format(cache),
+            "--Exchange.root={}".format(exchange)
         ]
 
         if flags is not None:
@@ -50,8 +50,8 @@ class TestNbGraderList(BaseTestApp):
     def _list(self, exchange, cache, assignment=None, flags=None, retcode=0):
         cmd = [
             "list",
-            "--TransferApp.cache_directory={}".format(cache),
-            "--TransferApp.exchange_directory={}".format(exchange),
+            "--Exchange.cache={}".format(cache),
+            "--Exchange.root={}".format(exchange),
         ]
 
         if flags is not None:
@@ -402,7 +402,7 @@ class TestNbGraderList(BaseTestApp):
     def test_list_json_multiple_courses(self, exchange, cache, course_dir):
         self._release("ps1", exchange, cache, course_dir, course="abc101")
         self._release("ps1", exchange, cache, course_dir, course="abc102")
-        assert json.loads(self._list(exchange, cache, flags=["--json", "--TransferApp.path_includes_course=True"])) == [
+        assert json.loads(self._list(exchange, cache, flags=["--json", "--Exchange.path_includes_course=True"])) == [
             {
                 "assignment_id": "ps1",
                 "status": "released",
@@ -429,9 +429,9 @@ class TestNbGraderList(BaseTestApp):
             }
         ]
 
-        self._fetch("ps1", exchange, cache, course="abc101", flags=["--TransferApp.path_includes_course=True"])
-        self._fetch("ps1", exchange, cache, course="abc102", flags=["--TransferApp.path_includes_course=True"])
-        assert json.loads(self._list(exchange, cache, flags=["--json", "--TransferApp.path_includes_course=True"])) == [
+        self._fetch("ps1", exchange, cache, course="abc101", flags=["--Exchange.path_includes_course=True"])
+        self._fetch("ps1", exchange, cache, course="abc102", flags=["--Exchange.path_includes_course=True"])
+        assert json.loads(self._list(exchange, cache, flags=["--json", "--Exchange.path_includes_course=True"])) == [
             {
                 "assignment_id": "ps1",
                 "status": "fetched",

@@ -15,27 +15,27 @@ class TestNbGraderCollect(BaseTestApp):
         run_nbgrader([
             "release", assignment,
             "--course", "abc101",
-            "--TransferApp.exchange_directory={}".format(exchange)
+            "--Exchange.root={}".format(exchange)
         ])
         run_nbgrader([
             "fetch", assignment,
             "--course", "abc101",
-            "--TransferApp.exchange_directory={}".format(exchange)
+            "--Exchange.root={}".format(exchange)
         ])
 
     def _submit(self, assignment, exchange, cache):
         run_nbgrader([
             "submit", assignment,
             "--course", "abc101",
-            "--TransferApp.cache_directory={}".format(cache),
-            "--TransferApp.exchange_directory={}".format(exchange)
+            "--Exchange.cache={}".format(cache),
+            "--Exchange.root={}".format(exchange)
         ])
 
     def _collect(self, assignment, exchange, flags=None, retcode=0):
         cmd = [
             "collect", assignment,
             "--course", "abc101",
-            "--TransferApp.exchange_directory={}".format(exchange)
+            "--Exchange.root={}".format(exchange)
         ]
 
         if flags is not None:
@@ -58,7 +58,7 @@ class TestNbGraderCollect(BaseTestApp):
         self._submit("ps1", exchange, cache)
         cmd = [
             "collect", "ps1",
-            "--TransferApp.exchange_directory={}".format(exchange)
+            "--Exchange.root={}".format(exchange)
         ]
         run_nbgrader(cmd, retcode=1)
 

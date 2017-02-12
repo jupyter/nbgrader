@@ -113,7 +113,7 @@ in your students' ``nbgrader_config.py`` files:
 .. code:: python
 
     c = get_config()
-    c.TransferApp.path_includes_course = True
+    c.Exchange.path_includes_course = True
 
 This will tell the transfer apps (i.e. ``nbgrader fetch``, ``nbgrader submit``,
 and ``nbgrader list``) to assume that the paths for assignments include the

@@ -1,33 +1,26 @@
-import os
-import shutil
-from stat import (
-    S_IRUSR, S_IWUSR, S_IXUSR,
-    S_IRGRP, S_IWGRP, S_IXGRP,
-    S_IROTH, S_IWOTH, S_IXOTH,
-    S_ISVTX, S_ISGID
-)
+from traitlets import default
 
-from traitlets import Bool
-
-from .baseapp import TransferApp, transfer_aliases, transfer_flags
-from ..utils import self_owned
+from .baseapp import NbGrader, nbgrader_aliases, nbgrader_flags
+from ..exchange import Exchange, ExchangeRelease, ExchangeError
 
 
 aliases = {}
-aliases.update(transfer_aliases)
+aliases.update(nbgrader_aliases)
 aliases.update({
+    "timezone": "Exchange.timezone",
+    "course": "Exchange.course_id",
 })
 
 flags = {}
-flags.update(transfer_flags)
+flags.update(nbgrader_flags)
 flags.update({
     'force': (
-        {'ReleaseApp' : {'force' : True}},
+        {'ExchangeRelease' : {'force' : True}},
         "Force overwrite of existing files in the exchange."
     ),
 })
 
-class ReleaseApp(TransferApp):
+class ReleaseApp(NbGrader):
 
     name = u'nbgrader-release'
     description = u'Release an assignment to the nbgrader exchange'
@@ -45,7 +38,7 @@ class ReleaseApp(TransferApp):
         unique for each instructor/course combination. To set it in the config
         file add a line to the `nbgrader_config.py` file:
 
-            c.NbGrader.course_id = 'phys101'
+            c.Exchange.course_id = 'phys101'
 
         To pass the `course_id` at the command line, add `--course=phys101` to any
         of the below commands.
@@ -68,73 +61,39 @@ class ReleaseApp(TransferApp):
             nbgrader list
         """
 
-    force = Bool(False, help="Force overwrite existing files in the exchange.").tag(config=True)
+    @default("classes")
+    def _classes_default(self):
+        classes = super(ReleaseApp, self)._classes_default()
+        classes.extend([Exchange, ExchangeRelease])
+        return classes
 
-    def build_extra_config(self):
-        extra_config = super(ReleaseApp, self).build_extra_config()
-        extra_config.CourseDirectory.student_id = '.'
-        extra_config.CourseDirectory.notebook_id = '*'
-        return extra_config
+    def _load_config(self, cfg, **kwargs):
+        if 'ReleaseApp' in cfg:
+            self.log.warn(
+                "Use ExchangeRelease in config, not ReleaseApp. Outdated config:\n%s",
+                '\n'.join(
+                    'ReleaseApp.{key} = {value!r}'.format(key=key, value=value)
+                    for key, value in cfg.ReleaseApp.items()
+                )
+            )
+            cfg.ExchangeRelease.merge(cfg.ReleaseApp)
+            del cfg.ReleaseApp
 
-    def init_src(self):
-        self.src_path = self.coursedir.format_path(self.coursedir.release_directory, self.coursedir.student_id, self.coursedir.assignment_id)
-        if not os.path.isdir(self.src_path):
-            source = self.coursedir.format_path(self.coursedir.source_directory, self.coursedir.student_id, self.coursedir.assignment_id)
-            if os.path.isdir(source):
-                # Looks like the instructor forgot to assign
-                self.fail("Assignment found in '{}' but not '{}', run `nbgrader assign` first.".format(
-                    source, self.src_path))
-            else:
-                self.fail("Assignment not found: {}".format(self.src_path))
+        super(ReleaseApp, self)._load_config(cfg, **kwargs)
 
-    def init_dest(self):
-        if self.course_id == '':
-            self.fail("No course id specified. Re-run with --course flag.")
+    def start(self):
+        super(ReleaseApp, self).start()
 
-        self.course_path = os.path.join(self.exchange_directory, self.course_id)
-        self.outbound_path = os.path.join(self.course_path, 'outbound')
-        self.inbound_path = os.path.join(self.course_path, 'inbound')
-        self.dest_path = os.path.join(self.outbound_path, self.coursedir.assignment_id)
-        # 0755
-        self.ensure_directory(
-            self.course_path,
-            S_IRUSR|S_IWUSR|S_IXUSR|S_IRGRP|S_IXGRP|S_IROTH|S_IXOTH
-        )
-        # 0755
-        self.ensure_directory(
-            self.outbound_path,
-            S_IRUSR|S_IWUSR|S_IXUSR|S_IRGRP|S_IXGRP|S_IROTH|S_IXOTH
-        )
-        # 0733 with set GID so student submission will have the instructors group
-        self.ensure_directory(
-            self.inbound_path,
-            S_ISGID|S_IRUSR|S_IWUSR|S_IXUSR|S_IWGRP|S_IXGRP|S_IWOTH|S_IXOTH
-        )
+        # set assignemnt and course
+        if len(self.extra_args) == 1:
+            self.coursedir.assignment_id = self.extra_args[0]
+        elif len(self.extra_args) > 2:
+            self.fail("Too many arguments")
+        elif self.coursedir.assignment_id == "":
+            self.fail("Must provide assignment name:\nnbgrader <command> ASSIGNMENT [ --course COURSE ]")
 
-    def ensure_directory(self, path, mode):
-        """Ensure that the path exists, has the right mode and is self owned."""
-        if not os.path.isdir(path):
-            os.mkdir(path)
-            # For some reason, Python won't create a directory with a mode of 0o733
-            # so we have to create and then chmod.
-            os.chmod(path, mode)
-        else:
-            if not self_owned(path):
-                self.fail("You don't own the directory: {}".format(path))
-
-    def copy_files(self):
-        if os.path.isdir(self.dest_path):
-            if self.force:
-                self.log.info("Overwriting files: {} {}".format(
-                    self.course_id, self.coursedir.assignment_id
-                ))
-                shutil.rmtree(self.dest_path)
-            else:
-                self.fail("Destination already exists, add --force to overwrite: {} {}".format(
-                    self.course_id, self.coursedir.assignment_id
-                ))
-        self.log.info("Source: {}".format(self.src_path))
-        self.log.info("Destination: {}".format(self.dest_path))
-        perms = S_IRUSR|S_IWUSR|S_IXUSR|S_IRGRP|S_IXGRP|S_IROTH|S_IXOTH
-        self.do_copy(self.src_path, self.dest_path, perms=perms)
-        self.log.info("Released as: {} {}".format(self.course_id, self.coursedir.assignment_id))
+        release = ExchangeRelease(coursedir=self.coursedir, parent=self)
+        try:
+            release.start()
+        except ExchangeError:
+            self.fail("nbgrader release failed")

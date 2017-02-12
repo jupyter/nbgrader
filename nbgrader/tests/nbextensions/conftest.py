@@ -120,8 +120,8 @@ def nbserver(request, port, tempdir, jupyter_config_dir, jupyter_data_dir, excha
         if sys.platform != 'win32':
             fh.write(dedent(
                 """
-                c.TransferApp.exchange_directory = "{}"
-                c.TransferApp.cache_directory = "{}"
+                c.Exchange.root = "{}"
+                c.Exchange.cache = "{}"
                 """.format(exchange, cache)
             ))
 

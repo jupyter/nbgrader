@@ -19,16 +19,16 @@ class TestNbGraderSubmit(BaseTestApp):
         run_nbgrader([
             "release", assignment,
             "--course", course,
-            "--TransferApp.cache_directory={}".format(cache),
-            "--TransferApp.exchange_directory={}".format(exchange)
+            "--Exchange.cache={}".format(cache),
+            "--Exchange.root={}".format(exchange)
         ])
 
     def _fetch(self, assignment, exchange, cache, course="abc101", flags=None):
         cmd = [
             "fetch", assignment,
             "--course", course,
-            "--TransferApp.cache_directory={}".format(cache),
-            "--TransferApp.exchange_directory={}".format(exchange)
+            "--Exchange.cache={}".format(cache),
+            "--Exchange.root={}".format(exchange)
         ]
 
         if flags is not None:
@@ -44,8 +44,8 @@ class TestNbGraderSubmit(BaseTestApp):
         cmd = [
             "submit", assignment,
             "--course", course,
-            "--TransferApp.cache_directory={}".format(cache),
-            "--TransferApp.exchange_directory={}".format(exchange)
+            "--Exchange.cache={}".format(cache),
+            "--Exchange.root={}".format(exchange)
         ]
 
         if flags is not None:
@@ -62,8 +62,8 @@ class TestNbGraderSubmit(BaseTestApp):
         self._release_and_fetch("ps1", exchange, cache, course_dir)
         cmd = [
             "submit", "ps1",
-            "--TransferApp.cache_directory={}".format(cache),
-            "--TransferApp.exchange_directory={}".format(exchange)
+            "--Exchange.cache={}".format(cache),
+            "--Exchange.root={}".format(exchange)
         ]
         run_nbgrader(cmd, retcode=1)
 
@@ -164,14 +164,14 @@ class TestNbGraderSubmit(BaseTestApp):
         self._release("ps1", exchange, cache, course_dir, course="abc102")
         self._fetch(
             "ps1", exchange, cache, course="abc101",
-            flags=["--TransferApp.path_includes_course=True"])
+            flags=["--Exchange.path_includes_course=True"])
         self._fetch(
             "ps1", exchange, cache, course="abc102",
-            flags=["--TransferApp.path_includes_course=True"])
+            flags=["--Exchange.path_includes_course=True"])
 
         self._submit(
             "ps1", exchange, cache, course="abc101",
-            flags=["--TransferApp.path_includes_course=True"])
+            flags=["--Exchange.path_includes_course=True"])
 
         filename, = os.listdir(join(exchange, "abc101", "inbound"))
         username, assignment, _ = filename.split("+")
@@ -189,7 +189,7 @@ class TestNbGraderSubmit(BaseTestApp):
 
         self._submit(
             "ps1", exchange, cache, course="abc102",
-            flags=["--TransferApp.path_includes_course=True"])
+            flags=["--Exchange.path_includes_course=True"])
 
         filename, = os.listdir(join(exchange, "abc102", "inbound"))
         username, assignment, _ = filename.split("+")
