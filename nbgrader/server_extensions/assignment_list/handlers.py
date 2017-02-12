@@ -22,16 +22,6 @@ from ...exchange import ExchangeList, ExchangeFetch, ExchangeSubmit
 
 static = os.path.join(os.path.dirname(__file__), 'static')
 
-def load_config():
-    paths = jupyter_config_path()
-    paths.insert(0, os.getcwd())
-
-    full_config = Config()
-    for config in NbGrader._load_config_files("nbgrader_config", path=paths):
-        full_config.merge(config)
-
-    return full_config
-
 
 @contextlib.contextmanager
 def chdir(dirname):
@@ -49,10 +39,25 @@ class AssignmentList(LoggingConfigurable):
     def _assignment_dir_default(self):
         return self.parent.notebook_dir
 
+    def load_config(self):
+        paths = jupyter_config_path()
+        paths.insert(0, os.getcwd())
+
+        config_found = False
+        full_config = Config()
+        for config in NbGrader._load_config_files("nbgrader_config", path=paths, log=self.log):
+            full_config.merge(config)
+            config_found = True
+
+        if not config_found:
+            self.log.warn("No nbgrader_config.py file found. Rerun with DEBUG log level to see where nbgrader is looking.")
+
+        return full_config
+
     def list_released_assignments(self, course_id=None):
         with chdir(self.assignment_dir):
             try:
-                config = load_config()
+                config = self.load_config()
                 if course_id:
                     config.Exchange.course_id = course_id
 
@@ -83,7 +88,7 @@ class AssignmentList(LoggingConfigurable):
     def list_submitted_assignments(self, course_id=None):
         with chdir(self.assignment_dir):
             try:
-                config = load_config()
+                config = self.load_config()
                 config.ExchangeList.cached = True
                 if course_id:
                     config.Exchange.course_id = course_id
@@ -138,7 +143,7 @@ class AssignmentList(LoggingConfigurable):
     def fetch_assignment(self, course_id, assignment_id):
         with chdir(self.assignment_dir):
             try:
-                config = load_config()
+                config = self.load_config()
                 config.Exchange.course_id = course_id
                 config.CourseDirectory.assignment_id = assignment_id
 
@@ -163,7 +168,7 @@ class AssignmentList(LoggingConfigurable):
     def submit_assignment(self, course_id, assignment_id):
         with chdir(self.assignment_dir):
             try:
-                config = load_config()
+                config = self.load_config()
                 config.Exchange.course_id = course_id
                 config.CourseDirectory.assignment_id = assignment_id
 
