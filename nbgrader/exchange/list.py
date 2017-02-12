@@ -2,7 +2,6 @@ import os
 import glob
 import shutil
 import re
-import json
 
 from traitlets import Bool
 
@@ -14,7 +13,6 @@ class ExchangeList(Exchange):
     inbound = Bool(False, help="List inbound files rather than outbound.").tag(config=True)
     cached = Bool(False, help="List assignments in submission cache.").tag(config=True)
     remove = Bool(False, help="Remove, rather than list files.").tag(config=True)
-    as_json = Bool(False, help="Print out assignments as json").tag(config=True)
 
     def init_src(self):
         pass
@@ -95,18 +93,14 @@ class ExchangeList(Exchange):
         """List files."""
         assignments = self.parse_assignments()
 
-        if self.as_json:
-            print(json.dumps(assignments))
-
+        if self.inbound or self.cached:
+            self.log.info("Submitted assignments:")
+            for info in assignments:
+                self.log.info(self.format_inbound_assignment(info))
         else:
-            if self.inbound or self.cached:
-                self.log.info("Submitted assignments:")
-                for info in assignments:
-                    self.log.info(self.format_inbound_assignment(info))
-            else:
-                self.log.info("Released assignments:")
-                for info in assignments:
-                    self.log.info(self.format_outbound_assignment(info))
+            self.log.info("Released assignments:")
+            for info in assignments:
+                self.log.info(self.format_outbound_assignment(info))
 
         return assignments
 
@@ -114,18 +108,14 @@ class ExchangeList(Exchange):
         """List and remove files."""
         assignments = self.parse_assignments()
 
-        if self.as_json:
-            print(json.dumps(assignments))
-
+        if self.inbound or self.cached:
+            self.log.info("Removing submitted assignments:")
+            for info in assignments:
+                self.log.info(self.format_inbound_assignment(info))
         else:
-            if self.inbound or self.cached:
-                self.log.info("Removing submitted assignments:")
-                for info in assignments:
-                    self.log.info(self.format_inbound_assignment(info))
-            else:
-                self.log.info("Removing released assignments:")
-                for info in assignments:
-                    self.log.info(self.format_outbound_assignment(info))
+            self.log.info("Removing released assignments:")
+            for info in assignments:
+                self.log.info(self.format_outbound_assignment(info))
 
         for assignment in self.assignments:
             shutil.rmtree(assignment)
