@@ -5,7 +5,7 @@ from ..api import Gradebook
 
 aliases = {
     'log-level' : 'Application.log_level',
-    'db': 'NbGrader.db_url',
+    'db': 'CourseDirectory.db_url',
     'to' : 'ExportPlugin.to',
     'exporter': 'ExportApp.plugin_class'
 }
@@ -60,5 +60,5 @@ class ExportApp(NbGrader):
     def start(self):
         super(ExportApp, self).start()
         self.init_plugin()
-        with Gradebook(self.db_url) as gb:
+        with Gradebook(self.coursedir.db_url) as gb:
             self.plugin_inst.export(gb)

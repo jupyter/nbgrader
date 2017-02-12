@@ -72,14 +72,14 @@ class ReleaseApp(TransferApp):
 
     def build_extra_config(self):
         extra_config = super(ReleaseApp, self).build_extra_config()
-        extra_config.NbGrader.student_id = '.'
-        extra_config.NbGrader.notebook_id = '*'
+        extra_config.CourseDirectory.student_id = '.'
+        extra_config.CourseDirectory.notebook_id = '*'
         return extra_config
 
     def init_src(self):
-        self.src_path = self._format_path(self.release_directory, self.student_id, self.assignment_id)
+        self.src_path = self.coursedir.format_path(self.coursedir.release_directory, self.coursedir.student_id, self.coursedir.assignment_id)
         if not os.path.isdir(self.src_path):
-            source = self._format_path(self.source_directory, self.student_id, self.assignment_id)
+            source = self.coursedir.format_path(self.coursedir.source_directory, self.coursedir.student_id, self.coursedir.assignment_id)
             if os.path.isdir(source):
                 # Looks like the instructor forgot to assign
                 self.fail("Assignment found in '{}' but not '{}', run `nbgrader assign` first.".format(
@@ -94,7 +94,7 @@ class ReleaseApp(TransferApp):
         self.course_path = os.path.join(self.exchange_directory, self.course_id)
         self.outbound_path = os.path.join(self.course_path, 'outbound')
         self.inbound_path = os.path.join(self.course_path, 'inbound')
-        self.dest_path = os.path.join(self.outbound_path, self.assignment_id)
+        self.dest_path = os.path.join(self.outbound_path, self.coursedir.assignment_id)
         # 0755
         self.ensure_directory(
             self.course_path,
@@ -126,15 +126,15 @@ class ReleaseApp(TransferApp):
         if os.path.isdir(self.dest_path):
             if self.force:
                 self.log.info("Overwriting files: {} {}".format(
-                    self.course_id, self.assignment_id
+                    self.course_id, self.coursedir.assignment_id
                 ))
                 shutil.rmtree(self.dest_path)
             else:
                 self.fail("Destination already exists, add --force to overwrite: {} {}".format(
-                    self.course_id, self.assignment_id
+                    self.course_id, self.coursedir.assignment_id
                 ))
         self.log.info("Source: {}".format(self.src_path))
         self.log.info("Destination: {}".format(self.dest_path))
         perms = S_IRUSR|S_IWUSR|S_IXUSR|S_IRGRP|S_IXGRP|S_IROTH|S_IXOTH
         self.do_copy(self.src_path, self.dest_path, perms=perms)
-        self.log.info("Released as: {} {}".format(self.course_id, self.assignment_id))
+        self.log.info("Released as: {} {}".format(self.course_id, self.coursedir.assignment_id))

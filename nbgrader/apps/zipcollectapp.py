@@ -191,12 +191,12 @@ class ZipCollectApp(NbGrader):
     def _format_collect_path(self, collect_step):
         kwargs = dict(
             downloaded=self.downloaded_directory,
-            assignment_id=self.assignment_id,
+            assignment_id=self.coursedir.assignment_id,
             collect_step=collect_step,
         )
 
         path = os.path.join(
-            self.course_directory,
+            self.coursedir.root,
             self.collect_directory_structure,
         ).format(**kwargs)
 
@@ -282,13 +282,13 @@ class ZipCollectApp(NbGrader):
             }
         """
         self.log.info("Start collecting files...")
-        released_path = self._format_path(
-            self.release_directory, '.', self.assignment_id)
+        released_path = self.coursedir.format_path(
+            self.coursedir.release_directory, '.', self.coursedir.assignment_id)
         released_notebooks = find_all_notebooks(released_path)
         if not released_notebooks:
             self.log.warn(
                 "No release notebooks found for assignment {}"
-                "".format(self.assignment_id)
+                "".format(self.coursedir.assignment_id)
             )
 
         data = dict()
@@ -332,8 +332,8 @@ class ZipCollectApp(NbGrader):
                 self.log.warn(
                     "Invalid submission notebook name '{}'".format(submission))
 
-            submitted_path = self._format_path(
-                self.submitted_directory, info['student_id'], self.assignment_id)
+            submitted_path = self.coursedir.format_path(
+                self.coursedir.submitted_directory, info['student_id'], self.coursedir.assignment_id)
             dest_path = os.path.join(submitted_path, submission)
 
             timestamp = None
@@ -431,8 +431,8 @@ class ZipCollectApp(NbGrader):
 
         self.log.info("Start transfering files...")
         for student_id, data in collected_data.items():
-            dest_path = self._format_path(
-                self.submitted_directory, student_id, self.assignment_id)
+            dest_path = self.coursedir.format_path(
+                self.coursedir.submitted_directory, student_id, self.coursedir.assignment_id)
             self._mkdirs_if_missing(dest_path)
             self._clear_existing_files(dest_path)
 
@@ -476,10 +476,10 @@ class ZipCollectApp(NbGrader):
 
         # set assignemnt and course
         if len(self.extra_args) == 1:
-            self.assignment_id = self.extra_args[0]
+            self.coursedir.assignment_id = self.extra_args[0]
         elif len(self.extra_args) > 2:
             self.fail("Too many arguments")
-        elif self.assignment_id == "":
+        elif self.coursedir.assignment_id == "":
             self.fail(
                 "Must provide assignment name:\n"
                 "nbgrader zip_collect ASSIGNMENT"

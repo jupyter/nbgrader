@@ -43,7 +43,7 @@ def temp_cwd(request, course_dir):
         fh.write(dedent(
             """
             c = get_config()
-            c.NbGrader.course_directory = r"{}"
+            c.CourseDirectory.root = r"{}"
             """.format(course_dir)
         ))
 
