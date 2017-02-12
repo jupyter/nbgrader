@@ -20,10 +20,9 @@ from traitlets import Unicode, List, Bool, Dict, Integer, Instance, default
 from traitlets.config.application import catch_config_error
 from traitlets.config.loader import Config
 
-from ..utils import parse_utc, find_all_files, rmtree, remove
+from ..utils import find_all_files, rmtree, remove
 from ..preprocessors.execute import UnresponsiveKernelError
 from ..coursedir import CourseDirectory
-from ..exchange import Exchange
 
 
 nbgrader_aliases = {
@@ -156,24 +155,6 @@ class NbGrader(JupyterApp):
     def _config_file_name_default(self):
         return u'nbgrader_config'
 
-    def _get_existing_timestamp(self, dest_path):
-        """Get the timestamp, as a datetime object, of an existing submission."""
-        timestamp_path = os.path.join(dest_path, 'timestamp.txt')
-        if os.path.exists(timestamp_path):
-            with open(timestamp_path, 'r') as fh:
-                timestamp = fh.read().strip()
-            if not timestamp:
-                self.log.warning(
-                    "Empty timestamp file: {}".format(timestamp_path))
-                return None
-            try:
-                return parse_utc(timestamp)
-            except ValueError:
-                self.fail(
-                    "Invalid timestamp string: {}".format(timestamp_path))
-        else:
-            return None
-
     def _load_config(self, cfg, **kwargs):
         if 'NbGraderConfig' in cfg:
             self.log.warn(
@@ -245,6 +226,30 @@ class NbGrader(JupyterApp):
             cfg.Exchange.course_id = cfg.NbGrader.course_id
             del cfg.NbGrader.course_id
 
+        exchange_options = [
+            ("timezone", "timezone"),
+            ("timestamp_format", "timestamp_format"),
+            ("exchange_directory", "root"),
+            ("cache_directory", "cache")
+        ]
+
+        for old_opt, new_opt in exchange_options:
+            if old_opt in cfg.TransferApp:
+                self.log.warn("Outdated config: use Exchange.{} rather than TransferApp.{}".format(new_opt, old_opt))
+                setattr(cfg.Exchange, new_opt, cfg.TransferApp[old_opt])
+                delattr(cfg.TransferApp, old_opt)
+
+        if 'TransferApp' in cfg and cfg.TransferApp:
+            self.log.warn(
+                "Use Exchange in config, not TransferApp. Outdated config:\n%s",
+                '\n'.join(
+                    'TransferApp.{key} = {value!r}'.format(key=key, value=value)
+                    for key, value in cfg.TransferApp.items()
+                )
+            )
+            cfg.Exchange.merge(cfg.TransferApp)
+            del cfg.TransferApp
+
         super(NbGrader, self)._load_config(cfg, **kwargs)
         if self.coursedir:
             self.coursedir._load_config(cfg)
@@ -299,96 +304,6 @@ class NbGrader(JupyterApp):
             self.log.warn("No nbgrader_config.py file found (rerun with --debug to see where nbgrader is looking)")
 
         super(NbGrader, self).load_config_file(**kwargs)
-
-
-# These are the aliases and flags for nbgrader apps that inherit only from
-# TransferApp
-transfer_aliases = {}
-transfer_aliases.update(nbgrader_aliases)
-transfer_aliases.update({
-    "timezone": "Exchange.timezone",
-    "course": "Exchange.course_id",
-})
-transfer_flags = {}
-transfer_flags.update(nbgrader_flags)
-transfer_flags.update({
-})
-
-class TransferApp(NbGrader):
-    """A base class for the list, release, collect, fetch, and submit apps.
-
-    All of these apps involve transfering files between an instructor or students
-    files and the nbgrader exchange.
-    """
-
-    exchange = Instance(Exchange, allow_none=True)
-
-    def _load_config(self, cfg, **kwargs):
-        exchange_options = [
-            ("timezone", "timezone"),
-            ("timestamp_format", "timestamp_format"),
-            ("exchange_directory", "root"),
-            ("cache_directory", "cache")
-        ]
-
-        for old_opt, new_opt in exchange_options:
-            if old_opt in cfg.TransferApp:
-                self.log.warn("Outdated config: use Exchange.{} rather than TransferApp.{}".format(new_opt, old_opt))
-                setattr(cfg.Exchange, new_opt, cfg.TransferApp[old_opt])
-                delattr(cfg.TransferApp, old_opt)
-
-        super(TransferApp, self)._load_config(cfg, **kwargs)
-        if self.exchange:
-            self.exchange._load_config(cfg)
-
-    @default("classes")
-    def _classes_default(self):
-        classes = super(TransferApp, self)._classes_default()
-        classes.extend([TransferApp, Exchange])
-        return classes
-
-    @catch_config_error
-    def initialize(self, argv=None):
-        if sys.platform == 'win32':
-            self.fail("Sorry, %s is not available on Windows.", self.name.replace("-", " "))
-
-        self.exchange = Exchange(parent=self)
-        super(TransferApp, self).initialize(argv)
-        self.exchange.ensure_root()
-        self.exchange.set_timestamp()
-
-    def init_src(self):
-        """Compute and check the source paths for the transfer."""
-        raise NotImplementedError
-
-    def init_dest(self):
-        """Compute and check the destination paths for the transfer."""
-        raise NotImplementedError
-
-    def copy_files(self):
-        """Actually do the file transfer."""
-        raise NotImplementedError
-
-    def do_copy(self, src, dest, perms=None):
-        """Copy the src dir to the dest dir omitting the self.coursedir.ignore globs."""
-        shutil.copytree(src, dest, ignore=shutil.ignore_patterns(*self.coursedir.ignore))
-        if perms:
-            self.exchange.set_perms(dest, perms=perms)
-
-    def start(self):
-        super(TransferApp, self).start()
-
-        # set assignemnt and course
-        if len(self.extra_args) == 1:
-            self.coursedir.assignment_id = self.extra_args[0]
-        elif len(self.extra_args) > 2:
-            self.fail("Too many arguments")
-        elif self.coursedir.assignment_id == "":
-            self.fail("Must provide assignment name:\nnbgrader <command> ASSIGNMENT [ --course COURSE ]")
-
-        self.init_src()
-        self.init_dest()
-        self.copy_files()
 
 
 # These are the aliases and flags for nbgrade apps that inherit from BaseNbConvertApp
@@ -561,8 +476,8 @@ class BaseNbConvertApp(NbGrader, NbConvertApp):
             return True
 
         src = self._format_source(assignment_id, student_id)
-        new_timestamp = self._get_existing_timestamp(src)
-        old_timestamp = self._get_existing_timestamp(dest)
+        new_timestamp = self.coursedir.get_existing_timestamp(src)
+        old_timestamp = self.coursedir.get_existing_timestamp(dest)
 
         # if --force hasn't been specified, but the source assignment is newer,
         # then we want to overwrite it

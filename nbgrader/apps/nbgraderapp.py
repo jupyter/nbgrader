@@ -14,7 +14,7 @@ import nbgrader
 from .. import preprocessors
 from .. import plugins
 from ..coursedir import CourseDirectory
-from ..exchange import Exchange
+from .. import exchange
 from .baseapp import nbgrader_aliases, nbgrader_flags
 from . import (
     NbGrader,
@@ -240,11 +240,11 @@ class NbGraderApp(NbGrader):
     def _classes_default(self):
         classes = super(NbGraderApp, self)._classes_default()
 
-        # include the coursedirectory and exchange
-        classes.extend([CourseDirectory, Exchange])
+        # include the coursedirectory
+        classes.append(CourseDirectory)
 
         # include all the apps that have configurable options
-        for appname, (app, help) in self.subcommands.items():
+        for _, (app, _) in self.subcommands.items():
             if len(app.class_traits(config=True)) > 0:
                 classes.append(app)
 
@@ -259,6 +259,12 @@ class NbGraderApp(NbGrader):
             pp = getattr(preprocessors, pp_name)
             if len(pp.class_traits(config=True)) > 0:
                 classes.append(pp)
+
+        # include all the exchange actions
+        for ex_name in exchange.__all__:
+            ex = getattr(exchange, ex_name)
+            if hasattr(ex, "class_traits") and ex.class_traits(config=True):
+                classes.append(ex)
 
         return classes
 

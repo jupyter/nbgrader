@@ -163,7 +163,7 @@ class AutogradeApp(BaseNbConvertApp):
 
         # try to read in a timestamp from file
         src_path = self._format_source(assignment_id, student_id)
-        timestamp = self._get_existing_timestamp(src_path)
+        timestamp = self.coursedir.get_existing_timestamp(src_path)
         with Gradebook(self.coursedir.db_url) as gb:
             if timestamp:
                 submission = gb.update_or_create_submission(
