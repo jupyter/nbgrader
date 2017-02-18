@@ -111,6 +111,10 @@ class Notebook(Base):
     #: Unique id of :attr:`~nbgrader.api.Notebook.assignment`
     assignment_id = Column(String(32), ForeignKey('assignment.id'))
 
+    #: The kernelspec metadata of the notebook, represented
+    #: by :class:`~nbgrader.api.Kernelspec` objects
+    kernelspec = relationship("Kernelspec", uselist=False, backref="notebook")
+
     #: A collection of grade cells contained within this notebook, represented
     #: by :class:`~nbgrader.api.GradeCell` objects
     grade_cells = relationship("GradeCell", backref="notebook")
@@ -167,6 +171,55 @@ class Notebook(Base):
 
     def __repr__(self):
         return "Notebook<{}/{}>".format(self.assignment.name, self.name)
+
+
+class Kernelspec(Base):
+    """Database representation of the master/source version of the notebook
+    kernelspec metadata."""
+
+    __tablename__ = "kernelspec"
+    __table_args__ = (UniqueConstraint('name', 'notebook_id'),)
+
+    #: Unique id of the kernelspec metadata (automatically generated)
+    id = Column(String(32), primary_key=True, default=new_uuid)
+
+    #: The :class:`~nbgrader.api.Notebook` that this kernelspec is contained in
+    notebook = None
+
+    #: Unique id of the :attr:`~nbgrader.api.Kernelspec.notebook`
+    notebook_id = Column(String(32), ForeignKey('notebook.id'))
+
+    #: The assignment that this cell is contained within, represented by a
+    #: :class:`~nbgrader.api.Assignment` object
+    assignment = association_proxy("notebook", "assignment")
+
+    #: The notebook kernel name
+    name = Column(String(128), nullable=True)
+
+    #: The notebook kernel language
+    language = Column(String(128), nullable=True)
+
+    #: The notebook kernel display name
+    display_name = Column(String(128), nullable=True)
+
+    def to_dict(self):
+        """Convert the kernelspec object to a JSON-friendly dictionary
+        representation. Note that this includes keys for ``notebook`` and
+        ``assignment`` which correspond to the names of the notebook and
+        assignment, not the objects themselves.
+
+        """
+        return {
+            "name": self.name,
+            "language": self.language,
+            "display_name": self.display_name,
+            "notebook": self.notebook.name,
+            "assignment": self.assignment.name,
+        }
+
+    def __repr__(self):
+        return "Kernelspec<{}/{}/{}>".format(
+            self.language, self.name, self.display_name)
 
 
 class GradeCell(Base):
@@ -1378,6 +1431,8 @@ class Gradebook(object):
         """
         notebook = self.find_notebook(name, assignment)
 
+        self.db.delete(notebook.kernelspec)
+
         for submission in notebook.submissions:
             self.remove_submission_notebook(name, assignment, submission.student.id)
 
@@ -1394,6 +1449,95 @@ class Gradebook(object):
         except (IntegrityError, FlushError) as e:
             self.db.rollback()
             raise InvalidEntry(*e.args)
+
+    #### Kernelspec
+
+    def add_kernelspec(self, notebook, assignment, **kwargs):
+        """Add new kernelspec to an existing notebook of an existing assignment.
+
+        Parameters
+        ----------
+        notebook : string
+            the name of the new notebook
+        assignment : string
+            the name of an existing assignment
+        `**kwargs`
+            additional keyword arguments for the
+            :class:`~nbgrader.api.Kernelspec` object
+
+        Returns
+        -------
+        kernelspec : :class:`~nbgrader.api.Kernelspec`
+        """
+        notebook = self.find_notebook(notebook, assignment)
+        kernelspec = Kernelspec(notebook=notebook, **kwargs)
+        self.db.add(kernelspec)
+        try:
+            self.db.commit()
+        except (IntegrityError, FlushError) as e:
+            self.db.rollback()
+            raise InvalidEntry(*e.args)
+        return kernelspec
+
+    def find_kernelspec(self, notebook, assignment):
+        """Find the kernelspec from a particular notebook in an assignment.
+
+        Parameters
+        ----------
+        notebook : string
+            the name of the notebook
+        assignment : string
+            the name of the assignment
+
+        Returns
+        -------
+        kernelspec : :class:`~nbgrader.api.Kernelspec`
+        """
+        try:
+            kernelspec = self.db.query(Kernelspec)\
+                .join(Notebook, Notebook.id == Kernelspec.notebook_id)\
+                .join(Assignment, Assignment.id == Notebook.assignment_id)\
+                .filter(
+                    Notebook.name == notebook,
+                    Assignment.name == assignment)\
+                .one()
+        except NoResultFound:
+            raise MissingEntry("No such notebook: {}/{}".format(assignment, notebook))
+
+        return kernelspec
+
+    def update_or_create_kernelspec(self, notebook, assignment, **kwargs):
+        """Update an existing notebook kernelspec, or create it if it doesn't
+        exist.
+
+        Parameters
+        ----------
+        notebook : string
+            the name of the notebook
+        assignment : string
+            the name of the assignment
+        `**kwargs`
+            additional keyword arguments for the
+            :class:`~nbgrader.api.Kernelspec` object
+
+        Returns
+        -------
+        kernelspec : :class:`~nbgrader.api.Kernelspec`
+        """
+        try:
+            kernelspec = self.find_kernelspec(notebook, assignment)
+        except MissingEntry:
+            kernelspec = self.add_kernelspec(notebook, assignment, **kwargs)
+        else:
+            for attr in kwargs:
+                setattr(kernelspec, attr, kwargs[attr])
+            try:
+                self.db.commit()
+            except (IntegrityError, FlushError) as e:
+                self.db.rollback()
+                raise InvalidEntry(*e.args)
+
+        return kernelspec
 
     #### Grade cells
 
