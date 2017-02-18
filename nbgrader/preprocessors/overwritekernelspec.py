@@ -12,12 +12,9 @@ class OverwriteKernelspec(NbGraderPreprocessor):
         db_url = resources['nbgrader']['db_url']
 
         with Gradebook(db_url) as gb:
-            kernelspec = gb.find_kernelspec(notebook_id, assignment_id)
-            self.log.debug(
-                "Overwriting notebook kernelspec with: {}".format(kernelspec))
-            nb.metadata['kernelspec'] = dict(
-                name=kernelspec.name,
-                language=kernelspec.language,
-                display_name=kernelspec.display_name,
-            )
+            kernelspec = gb.find_notebook(notebook_id, assignment_id).kernelspec
+            if kernelspec is not None:
+                self.log.debug(
+                    "Overwriting notebook kernelspec with: {}".format(kernelspec))
+                nb.metadata['kernelspec'] = kernelspec.to_dict()
         return nb, resources

@@ -111,9 +111,11 @@ class Notebook(Base):
     #: Unique id of :attr:`~nbgrader.api.Notebook.assignment`
     assignment_id = Column(String(32), ForeignKey('assignment.id'))
 
-    #: The kernelspec metadata of the notebook, represented
-    #: by :class:`~nbgrader.api.Kernelspec` objects
-    kernelspec = relationship("Kernelspec", uselist=False, backref="notebook")
+    #: The :class:`~nbgrader.api.Kernelspec` object for this notebook
+    kernelspec = None
+
+    #: Unique id of :attr:`~nbgrader.api.Notebook.kernelspec`
+    kernelspec_id = Column(String(32), ForeignKey('kernelspec.id'))
 
     #: A collection of grade cells contained within this notebook, represented
     #: by :class:`~nbgrader.api.GradeCell` objects
@@ -178,20 +180,13 @@ class Kernelspec(Base):
     kernelspec metadata."""
 
     __tablename__ = "kernelspec"
-    __table_args__ = (UniqueConstraint('name', 'notebook_id'),)
 
     #: Unique id of the kernelspec metadata (automatically generated)
     id = Column(String(32), primary_key=True, default=new_uuid)
 
-    #: The :class:`~nbgrader.api.Notebook` that this kernelspec is contained in
-    notebook = None
-
-    #: Unique id of the :attr:`~nbgrader.api.Kernelspec.notebook`
-    notebook_id = Column(String(32), ForeignKey('notebook.id'))
-
-    #: The assignment that this cell is contained within, represented by a
-    #: :class:`~nbgrader.api.Assignment` object
-    assignment = association_proxy("notebook", "assignment")
+    #: A collection of notebooks, represented
+    #: by :class:`~nbgrader.api.Notebook` objects, that use this kernelspec
+    notebooks = relationship("Notebook", backref="kernelspec", order_by="Notebook.name")
 
     #: The notebook kernel name
     name = Column(String(128), nullable=True)
@@ -204,22 +199,17 @@ class Kernelspec(Base):
 
     def to_dict(self):
         """Convert the kernelspec object to a JSON-friendly dictionary
-        representation. Note that this includes keys for ``notebook`` and
-        ``assignment`` which correspond to the names of the notebook and
-        assignment, not the objects themselves.
-
+        representation.
         """
         return {
             "name": self.name,
             "language": self.language,
             "display_name": self.display_name,
-            "notebook": self.notebook.name,
-            "assignment": self.assignment.name,
         }
 
     def __repr__(self):
         return "Kernelspec<{}/{}/{}>".format(
-            self.language, self.name, self.display_name)
+            self.display_name, self.name, self.language)
 
 
 class GradeCell(Base):
@@ -1431,8 +1421,6 @@ class Gradebook(object):
         """
         notebook = self.find_notebook(name, assignment)
 
-        self.db.delete(notebook.kernelspec)
-
         for submission in notebook.submissions:
             self.remove_submission_notebook(name, assignment, submission.student.id)
 
@@ -1452,25 +1440,34 @@ class Gradebook(object):
 
     #### Kernelspec
 
-    def add_kernelspec(self, notebook, assignment, **kwargs):
-        """Add new kernelspec to an existing notebook of an existing assignment.
+    @property
+    def kernelspecs(self):
+        """A list of all kernelspecs in the gradebook."""
+        return self.db.query(Kernelspec)\
+            .order_by(
+                Kernelspec.language,
+                Kernelspec.name,
+                Kernelspec.display_name)\
+            .all()
+
+    def add_kernelspec(self, display_name, name, language):
+        """Add new kernelspec to the gradebook.
 
         Parameters
         ----------
-        notebook : string
-            the name of the new notebook
-        assignment : string
-            the name of an existing assignment
-        `**kwargs`
-            additional keyword arguments for the
-            :class:`~nbgrader.api.Kernelspec` object
+        display_name : string
+            the kernel display name
+        name : string
+            the kernel name
+        language : string
+            the kernel language
 
         Returns
         -------
         kernelspec : :class:`~nbgrader.api.Kernelspec`
         """
-        notebook = self.find_notebook(notebook, assignment)
-        kernelspec = Kernelspec(notebook=notebook, **kwargs)
+        kernelspec = Kernelspec(
+            display_name=display_name, name=name, language=language)
         self.db.add(kernelspec)
         try:
             self.db.commit()
@@ -1479,15 +1476,17 @@ class Gradebook(object):
             raise InvalidEntry(*e.args)
         return kernelspec
 
-    def find_kernelspec(self, notebook, assignment):
-        """Find the kernelspec from a particular notebook in an assignment.
+    def find_kernelspec(self, display_name, name, language):
+        """Find a kernelspec in the gradebook.
 
         Parameters
         ----------
-        notebook : string
-            the name of the notebook
-        assignment : string
-            the name of the assignment
+        display_name : string
+            the kernel display name
+        name : string
+            the kernel name
+        language : string
+            the kernel language
 
         Returns
         -------
@@ -1495,49 +1494,54 @@ class Gradebook(object):
         """
         try:
             kernelspec = self.db.query(Kernelspec)\
-                .join(Notebook, Notebook.id == Kernelspec.notebook_id)\
-                .join(Assignment, Assignment.id == Notebook.assignment_id)\
                 .filter(
-                    Notebook.name == notebook,
-                    Assignment.name == assignment)\
+                    Kernelspec.display_name == display_name,
+                    Kernelspec.name == name,
+                    Kernelspec.language == language)\
                 .one()
         except NoResultFound:
-            raise MissingEntry("No such notebook: {}/{}".format(assignment, notebook))
+            raise MissingEntry(
+                "No such kernelspec <{}/{}/{}>".format(display_name, name, language))
 
         return kernelspec
 
-    def update_or_create_kernelspec(self, notebook, assignment, **kwargs):
-        """Update an existing notebook kernelspec, or create it if it doesn't
-        exist.
+    def update_or_create_kernelspec(self, display_name, name, language):
+        """Update an existing kernelspec, or create it if it doesn't exist.
 
         Parameters
         ----------
-        notebook : string
-            the name of the notebook
-        assignment : string
-            the name of the assignment
-        `**kwargs`
-            additional keyword arguments for the
-            :class:`~nbgrader.api.Kernelspec` object
+        display_name : string
+            the kernel display name
+        name : string
+            the kernel name
+        language : string
+            the kernel language
 
         Returns
         -------
         kernelspec : :class:`~nbgrader.api.Kernelspec`
         """
         try:
-            kernelspec = self.find_kernelspec(notebook, assignment)
+            kernelspec = self.find_kernelspec(display_name, name, language)
         except MissingEntry:
-            kernelspec = self.add_kernelspec(notebook, assignment, **kwargs)
-        else:
-            for attr in kwargs:
-                setattr(kernelspec, attr, kwargs[attr])
-            try:
-                self.db.commit()
-            except (IntegrityError, FlushError) as e:
-                self.db.rollback()
-                raise InvalidEntry(*e.args)
-
+            kernelspec = self.add_kernelspec(display_name, name, language)
         return kernelspec
+
+    def remove_kernelspec(self, display_name, name, language):
+        """Deletes an existing kernelspec from the gradebook.
+
+        Parameters
+        ----------
+        display_name : string
+            the kernel display name
+        """
+        kernelspec = self.find_kernelspec(display_name, name, language)
+        self.db.delete(kernelspec)
+        try:
+            self.db.commit()
+        except (IntegrityError, FlushError) as e:
+            self.db.rollback()
+            raise InvalidEntry(*e.args)
 
     #### Grade cells
 

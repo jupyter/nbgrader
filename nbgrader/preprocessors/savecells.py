@@ -36,17 +36,22 @@ class SaveCells(NbGraderPreprocessor):
                 del notebook_info['name']
                 self.gradebook.remove_notebook(self.notebook_id, self.assignment_id)
 
-        # create the notebook
-        if notebook_info is not None:
-            self.log.debug("Creating notebook '%s' in the database", self.notebook_id)
-            self.gradebook.add_notebook(self.notebook_id, self.assignment_id, **notebook_info)
-
         # Get the kernelspec metadata from the notebook and save it
         kernelspec = nb.metadata.get("kernelspec", None)
         if kernelspec is not None:
             kernelspec = self.gradebook.update_or_create_kernelspec(
-                self.notebook_id, self.assignment_id, **kernelspec)
-            self.log.debug("Recorded kernelspec into the gradebook: {}".format(kernelspec))
+                kernelspec.get('display_name', None),
+                kernelspec.get('name', None),
+                kernelspec.get('language', None)
+            )
+            self.log.debug(
+                "Recorded kernelspec into the gradebook: {}".format(kernelspec))
+
+        # create the notebook
+        if notebook_info is not None:
+            notebook_info['kernelspec'] = kernelspec
+            self.log.debug("Creating notebook '%s' in the database", self.notebook_id)
+            self.gradebook.add_notebook(self.notebook_id, self.assignment_id, **notebook_info)
 
         # save grade cells
         for name, info in self.new_grade_cells.items():
