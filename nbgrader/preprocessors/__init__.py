@@ -15,6 +15,7 @@ from .limitoutput import LimitOutput
 from .deduplicateids import DeduplicateIds
 from .latesubmissions import AssignLatePenalties
 from .clearhiddentests import ClearHiddenTests
+from .overwritekernelspec import OverwriteKernelspec
 
 __all__ = [
     "AssignLatePenalties",
@@ -32,5 +33,6 @@ __all__ = [
     "ClearOutput",
     "LimitOutput",
     "DeduplicateIds",
-    "ClearHiddenTests"
+    "ClearHiddenTests",
+    "OverwriteKernelspec",
 ]
