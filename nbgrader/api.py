@@ -112,7 +112,7 @@ class Notebook(Base):
     assignment_id = Column(String(32), ForeignKey('assignment.id'))
 
     #: The json string representation of the kernelspec for this notebook
-    kernelspec = Column(String(128), nullable=True)
+    kernelspec = Column(String(1024), nullable=True)
 
     #: A collection of grade cells contained within this notebook, represented
     #: by :class:`~nbgrader.api.GradeCell` objects
