@@ -111,11 +111,8 @@ class Notebook(Base):
     #: Unique id of :attr:`~nbgrader.api.Notebook.assignment`
     assignment_id = Column(String(32), ForeignKey('assignment.id'))
 
-    #: The :class:`~nbgrader.api.Kernelspec` object for this notebook
-    kernelspec = None
-
-    #: Unique id of :attr:`~nbgrader.api.Notebook.kernelspec`
-    kernelspec_id = Column(String(32), ForeignKey('kernelspec.id'))
+    #: The json string representation of the kernelspec for this notebook
+    kernelspec = Column(String(128), nullable=True)
 
     #: A collection of grade cells contained within this notebook, represented
     #: by :class:`~nbgrader.api.GradeCell` objects
@@ -173,43 +170,6 @@ class Notebook(Base):
 
     def __repr__(self):
         return "Notebook<{}/{}>".format(self.assignment.name, self.name)
-
-
-class Kernelspec(Base):
-    """Database representation of the master/source version of the notebook
-    kernelspec metadata."""
-
-    __tablename__ = "kernelspec"
-
-    #: Unique id of the kernelspec metadata (automatically generated)
-    id = Column(String(32), primary_key=True, default=new_uuid)
-
-    #: A collection of notebooks, represented
-    #: by :class:`~nbgrader.api.Notebook` objects, that use this kernelspec
-    notebooks = relationship("Notebook", backref="kernelspec", order_by="Notebook.name")
-
-    #: The notebook kernel name
-    name = Column(String(128), nullable=True)
-
-    #: The notebook kernel language
-    language = Column(String(128), nullable=True)
-
-    #: The notebook kernel display name
-    display_name = Column(String(128), nullable=True)
-
-    def to_dict(self):
-        """Convert the kernelspec object to a JSON-friendly dictionary
-        representation.
-        """
-        return {
-            "name": self.name,
-            "language": self.language,
-            "display_name": self.display_name,
-        }
-
-    def __repr__(self):
-        return "Kernelspec<{}/{}/{}>".format(
-            self.display_name, self.name, self.language)
 
 
 class GradeCell(Base):
@@ -1432,111 +1392,6 @@ class Gradebook(object):
             self.db.delete(source_cell)
         self.db.delete(notebook)
 
-        try:
-            self.db.commit()
-        except (IntegrityError, FlushError) as e:
-            self.db.rollback()
-            raise InvalidEntry(*e.args)
-
-    #### Kernelspec
-
-    @property
-    def kernelspecs(self):
-        """A list of all kernelspecs in the gradebook."""
-        return self.db.query(Kernelspec)\
-            .order_by(
-                Kernelspec.language,
-                Kernelspec.name,
-                Kernelspec.display_name)\
-            .all()
-
-    def add_kernelspec(self, display_name, name, language):
-        """Add new kernelspec to the gradebook.
-
-        Parameters
-        ----------
-        display_name : string
-            the kernel display name
-        name : string
-            the kernel name
-        language : string
-            the kernel language
-
-        Returns
-        -------
-        kernelspec : :class:`~nbgrader.api.Kernelspec`
-        """
-        kernelspec = Kernelspec(
-            display_name=display_name, name=name, language=language)
-        self.db.add(kernelspec)
-        try:
-            self.db.commit()
-        except (IntegrityError, FlushError) as e:
-            self.db.rollback()
-            raise InvalidEntry(*e.args)
-        return kernelspec
-
-    def find_kernelspec(self, display_name, name, language):
-        """Find a kernelspec in the gradebook.
-
-        Parameters
-        ----------
-        display_name : string
-            the kernel display name
-        name : string
-            the kernel name
-        language : string
-            the kernel language
-
-        Returns
-        -------
-        kernelspec : :class:`~nbgrader.api.Kernelspec`
-        """
-        try:
-            kernelspec = self.db.query(Kernelspec)\
-                .filter(
-                    Kernelspec.display_name == display_name,
-                    Kernelspec.name == name,
-                    Kernelspec.language == language)\
-                .one()
-        except NoResultFound:
-            raise MissingEntry(
-                "No such kernelspec <{}/{}/{}>".format(display_name, name, language))
-
-        return kernelspec
-
-    def update_or_create_kernelspec(self, display_name, name, language):
-        """Update an existing kernelspec, or create it if it doesn't exist.
-
-        Parameters
-        ----------
-        display_name : string
-            the kernel display name
-        name : string
-            the kernel name
-        language : string
-            the kernel language
-
-        Returns
-        -------
-        kernelspec : :class:`~nbgrader.api.Kernelspec`
-        """
-        try:
-            kernelspec = self.find_kernelspec(display_name, name, language)
-        except MissingEntry:
-            kernelspec = self.add_kernelspec(display_name, name, language)
-        return kernelspec
-
-    def remove_kernelspec(self, display_name, name, language):
-        """Deletes an existing kernelspec from the gradebook.
-
-        Parameters
-        ----------
-        display_name : string
-            the kernel display name
-        """
-        kernelspec = self.find_kernelspec(display_name, name, language)
-        self.db.delete(kernelspec)
         try:
             self.db.commit()
         except (IntegrityError, FlushError) as e:

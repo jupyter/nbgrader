@@ -1,3 +1,5 @@
+import json
+
 from .. import utils
 from ..api import Gradebook, MissingEntry
 from . import NbGraderPreprocessor
@@ -36,21 +38,12 @@ class SaveCells(NbGraderPreprocessor):
                 del notebook_info['name']
                 self.gradebook.remove_notebook(self.notebook_id, self.assignment_id)
 
-        # Get the kernelspec metadata from the notebook and save it
-        kernelspec = nb.metadata.get("kernelspec", None)
-        if kernelspec is not None:
-            kernelspec = self.gradebook.update_or_create_kernelspec(
-                kernelspec.get('display_name', None),
-                kernelspec.get('name', None),
-                kernelspec.get('language', None)
-            )
-            self.log.debug(
-                "Recorded kernelspec into the gradebook: {}".format(kernelspec))
-
         # create the notebook
         if notebook_info is not None:
-            notebook_info['kernelspec'] = kernelspec
+            kernelspec = nb.metadata.get('kernelspec', {})
+            notebook_info['kernelspec'] = json.dumps(kernelspec)
             self.log.debug("Creating notebook '%s' in the database", self.notebook_id)
+            self.log.debug("Notebook kernelspec: {}".format(kernelspec))
             self.gradebook.add_notebook(self.notebook_id, self.assignment_id, **notebook_info)
 
         # save grade cells

@@ -1,3 +1,5 @@
+import json
+
 from . import NbGraderPreprocessor
 from ..api import Gradebook
 
@@ -13,8 +15,8 @@ class OverwriteKernelspec(NbGraderPreprocessor):
 
         with Gradebook(db_url) as gb:
             kernelspec = gb.find_notebook(notebook_id, assignment_id).kernelspec
-            if kernelspec is not None:
+            if kernelspec:
                 self.log.debug(
                     "Overwriting notebook kernelspec with: {}".format(kernelspec))
-                nb.metadata['kernelspec'] = kernelspec.to_dict()
+                nb.metadata['kernelspec'] = json.loads(kernelspec)
         return nb, resources
