@@ -55,4 +55,5 @@ class TestOverwriteKernelSpec(BaseTestPreprocessor):
 
         validate(nb)
         notebook = gradebook.find_notebook("test", "ps0")
+        assert nb.metadata['kernelspec'] == kernelspec
         assert json.loads(notebook.kernelspec) == kernelspec
