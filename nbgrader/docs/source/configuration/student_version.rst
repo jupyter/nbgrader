@@ -19,7 +19,7 @@ Default behavior
 ^^^^^^^^^^^^^^^^
 
 By default, ``nbgrader assign`` will replace regions beginning with
-``### BEGIN SOLUTION`` and ``### END SOLUTION`` with:
+``BEGIN SOLUTION`` and ``END SOLUTION`` comment delimeters with:
 
 .. code:: python
 
@@ -46,7 +46,29 @@ then the solution region will become:
         # YOUR CODE HERE
         raise NotImplementedError
 
-Similarly, if the solution delimeters aren't present, nbgrader will replace the
+These solution comment delimeters are independent of the programming language
+used and the number of comment characters used in the source notebook. For
+example, this default will work for both ``Python``:
+
+.. code:: python
+
+    def foo(bar):
+        """Prints `bar`."""
+        ### BEGIN SOLUTION
+        print(bar)
+        ### END SOLUTION
+
+and ``JavaScript``:
+
+.. code-block:: javascript
+
+    function foo (bar){
+        // BEGIN SOLUTION
+        console.log(bar);
+        // END SOLUTION
+    }
+
+If the solution delimeters aren't present, nbgrader will replace the
 entire contents of all :ref:`manually graded cells <manually-graded-cells>` and
 :ref:`autograded cells <autograded-answer-cells>` with the above code stub (if
 it is a code cell) or a text stub (if it is a Markdown cell), the default of
@@ -58,12 +80,13 @@ Changing the defaults
 
 If you need to change these defaults (e.g., if your class doesn't use Python,
 or isn't taught in English), the values can be configured in the
-:doc:`nbgrader_config.py <config_options>` file. Most relevant are the options
-to the ``ClearSolutions`` preprocessor, which is the part of nbgrader that
-actually clears the solutions when producing the student version of the
-notebook.
+:doc:`nbgrader_config.py <config_options>` file. Most relevant is the
+``code_stub`` option to the ``ClearSolutions`` preprocessor, which is the part
+of nbgrader that actually clears the solutions when producing the student
+version of the notebook.
 
-The solution delimeters and code stub depend on the language of the notebook,
+The solution delimeters are independent of the programming language used,
+however the code stub depends on the language of the notebook,
 the default of which is Python. You can specify solution delimeters for any
 languages you want by setting the ``ClearSolutions.begin_solution_delimeter``,
 ``ClearSolutions.end_solution_delimeter``, and ``ClearSolutions.code_stub``
@@ -73,14 +96,8 @@ within the same assignment:
 .. code:: python
 
     c = get_config()
-    c.ClearSolutions.begin_solution_delimeter = {
-        "python": "### BEGIN SOLUTION",
-        "javascript": "// BEGIN SOLUTION"
-    }
-    c.ClearSolutions.end_solution_delimeter = {
-        "python": "### END SOLUTION",
-        "javascript": "// END SOLUTION"
-    }
+    c.ClearSolutions.begin_solution_delimeter = "BEGIN MY SOLUTION"
+    c.ClearSolutions.end_solution_delimeter = "END MY SOLUTION"
     c.ClearSolutions.code_stub = {
         "python": "# your code here\nraise NotImplementedError",
         "javascript": "// your code here\nthrow new Error();"
