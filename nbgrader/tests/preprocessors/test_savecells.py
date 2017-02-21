@@ -1,5 +1,7 @@
+import json
 import pytest
 
+from nbformat import validate
 from nbformat.v4 import new_notebook
 
 from ...preprocessors import SaveCells
@@ -292,3 +294,18 @@ class TestSaveCells(BaseTestPreprocessor):
         assert len(notebook.submissions) == 1
         assert grade_cell.max_score == 1
         assert source_cell.source == "goodbye"
+
+    def test_save_kernelspec(self, preprocessor, gradebook, resources):
+        kernelspec = dict(
+            display_name='blarg',
+            name='python3',
+            language='python',
+        )
+
+        nb = new_notebook()
+        nb.metadata['kernelspec'] = kernelspec
+        nb, resources = preprocessor.preprocess(nb, resources)
+
+        validate(nb)
+        notebook = gradebook.find_notebook("test", "ps0")
+        assert json.loads(notebook.kernelspec) == kernelspec

@@ -1,3 +1,5 @@
+import json
+
 from .. import utils
 from ..api import Gradebook, MissingEntry
 from . import NbGraderPreprocessor
@@ -5,7 +7,7 @@ from . import NbGraderPreprocessor
 class SaveCells(NbGraderPreprocessor):
     """A preprocessor to save information about grade and solution cells."""
 
-    def _create_notebook(self):
+    def _create_notebook(self, nb):
         notebook_info = None
 
         try:
@@ -38,7 +40,10 @@ class SaveCells(NbGraderPreprocessor):
 
         # create the notebook
         if notebook_info is not None:
+            kernelspec = nb.metadata.get('kernelspec', {})
+            notebook_info['kernelspec'] = json.dumps(kernelspec)
             self.log.debug("Creating notebook '%s' in the database", self.notebook_id)
+            self.log.debug("Notebook kernelspec: {}".format(kernelspec))
             self.gradebook.add_notebook(self.notebook_id, self.assignment_id, **notebook_info)
 
         # save grade cells
@@ -79,7 +84,7 @@ class SaveCells(NbGraderPreprocessor):
             nb, resources = super(SaveCells, self).preprocess(nb, resources)
 
             # create the notebook and save it to the database
-            self._create_notebook()
+            self._create_notebook(nb)
 
         return nb, resources
 
