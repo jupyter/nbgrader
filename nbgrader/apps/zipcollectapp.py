@@ -371,7 +371,7 @@ class ZipCollectApp(NbGrader):
                     old_timestamp = data[student_id]['timestamp']
                     if old_timestamp is None:
                         data[student_id]['timestamp'] = timestamp
-                    elif timestamp > old_timestamp:
+                    elif timestamp >= old_timestamp:
                         data[student_id]['timestamp'] = timestamp
 
             # existing student id record, duplicate submission file
@@ -380,7 +380,7 @@ class ZipCollectApp(NbGrader):
                 old_timestamp = data[student_id]['timestamp']
                 if timestamp is not None and old_timestamp is not None:
                     # keep if duplicate submission file has a newer timestamp
-                    if timestamp > old_timestamp:
+                    if timestamp >= old_timestamp:
                         data[student_id]['src_files'][ind] = _file
                         data[student_id]['dest_files'][ind] = dest_path
                         data[student_id]['file_ids'][ind] = submission
