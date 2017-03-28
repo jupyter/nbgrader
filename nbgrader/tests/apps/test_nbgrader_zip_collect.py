@@ -271,6 +271,10 @@ class TestNbGraderZipCollect(BaseTestApp):
             'ps1', 'hacker', '2016-01-30-15-30-10', 'problem1')
         self._make_notebook(archive_dir,
             'ps1', 'hacker', '2016-01-30-15-30-10', 'problem2')
+        self._make_notebook(archive_dir,
+            'ps1', 'hacker', '2016-02-10-15-30-10', 'problem1')
+        self._make_notebook(archive_dir,
+            'ps1', 'hacker', '2016-02-10-15-30-10', 'problem2')
 
         with open("nbgrader_config.py", "a") as fh:
             fh.write(dedent(
@@ -281,15 +285,20 @@ class TestNbGraderZipCollect(BaseTestApp):
                 """
             ))
 
-        run_nbgrader(["zip_collect", "ps1"])
+        output = run_nbgrader(["zip_collect", "ps1"])
         assert os.path.isdir(extracted_dir)
-        assert len(os.listdir(extracted_dir)) == 2
+        assert len(os.listdir(extracted_dir)) == 4
 
         assert os.path.isdir(submitted_dir)
         assert os.path.isfile(join(submitted_dir, "hacker", "ps1", 'problem1.ipynb'))
         assert os.path.isfile(join(submitted_dir, "hacker", "ps1", 'problem2.ipynb'))
         assert os.path.isfile(join(submitted_dir, "hacker", "ps1", 'timestamp.txt'))
         assert len(os.listdir(join(submitted_dir, "hacker", "ps1"))) == 3
+
+        # Issue #724 - check multiple attempts are collected properly
+        assert "Skipped submission file" not in output
+        msg = "Replacing previously collected submission file"
+        assert sum([msg in line for line in output.splitlines()]) == 2
 
     def test_collect_sub_dir_single_notebook(self, course_dir, archive_dir):
         extracted_dir = join(archive_dir, "..", "extracted")
