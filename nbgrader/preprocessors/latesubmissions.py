@@ -47,18 +47,21 @@ class AssignLatePenalties(NbGraderPreprocessor):
         # connect to the database
         self.gradebook = Gradebook(self.db_url)
 
+
         with self.gradebook:
             # process the late submissions
             nb, resources = super(AssignLatePenalties, self).preprocess(nb, resources)
             assignment = self.gradebook.find_submission(
                 self.assignment_id, self.student_id)
+            notebook = self.gradebook.find_submission_notebook(
+                self.notebook_id, self.assignment_id, self.student_id)
+
+            # reset to None (zero)
+            notebook.late_submission_penalty = None
 
             if assignment.total_seconds_late > 0:
                 self.log.warning("{} is {} seconds late".format(
                     assignment, assignment.total_seconds_late))
-
-                notebook = self.gradebook.find_submission_notebook(
-                    self.notebook_id, self.assignment_id, self.student_id)
 
                 late_penalty = self.plugin_inst.late_submission_penalty(
                     self.student_id, notebook.score, assignment.total_seconds_late)
@@ -67,7 +70,8 @@ class AssignLatePenalties(NbGraderPreprocessor):
                 if late_penalty is not None:
                     late_penalty = self._check_late_penalty(notebook, late_penalty)
                     notebook.late_submission_penalty = late_penalty
-                    self.gradebook.db.commit()
+
+            self.gradebook.db.commit()
 
         return nb, resources
 
