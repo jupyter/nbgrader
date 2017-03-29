@@ -170,8 +170,8 @@ class TestNbGraderAutograde(BaseTestApp):
         assert os.path.isfile(join(course_dir, "autograded", "bar", "ps1", "p1.ipynb"))
         assert os.path.isfile(join(course_dir, "autograded", "bar", "ps1", "timestamp.txt"))
 
-        # not late
         with Gradebook(db) as gb:
+            # not late
             submission = gb.find_submission("ps1", "foo")
             nb = submission.notebooks[0]
             assert nb.score == 1
@@ -210,8 +210,8 @@ class TestNbGraderAutograde(BaseTestApp):
         assert os.path.isfile(join(course_dir, "autograded", "bar", "ps1", "p1.ipynb"))
         assert os.path.isfile(join(course_dir, "autograded", "bar", "ps1", "timestamp.txt"))
 
-        # not late
         with Gradebook(db) as gb:
+            # not late
             submission = gb.find_submission("ps1", "foo")
             nb = submission.notebooks[0]
             assert nb.score == 1
@@ -224,6 +224,18 @@ class TestNbGraderAutograde(BaseTestApp):
             assert nb.score == 2
             assert submission.total_seconds_late > 0
             assert nb.late_submission_penalty == nb.score
+
+        # Issue 723 - check penalty is reset if timestamp changed
+        self._make_file(join(course_dir, "submitted", "bar", "ps1", "timestamp.txt"), "2015-02-02 14:58:23.948203 PST")
+        run_nbgrader(["autograde", "--force", "ps1", "--db", db])
+
+        with Gradebook(db) as gb:
+            # no longer late
+            submission = gb.find_submission("ps1", "bar")
+            nb = submission.notebooks[0]
+            assert nb.score == 2
+            assert submission.total_seconds_late == 0
+            assert nb.late_submission_penalty == None
 
     def test_late_submission_penalty_plugin(self, db, course_dir):
         """Does plugin set 1 point per hour late penalty?"""
@@ -265,8 +277,8 @@ class TestNbGraderAutograde(BaseTestApp):
         assert os.path.isfile(join(course_dir, "autograded", "bar", "ps1", "p1.ipynb"))
         assert os.path.isfile(join(course_dir, "autograded", "bar", "ps1", "timestamp.txt"))
 
-        # 4h late
         with Gradebook(db) as gb:
+            # 4h late
             submission = gb.find_submission("ps1", "foo")
             nb = submission.notebooks[0]
             assert nb.score == 1
