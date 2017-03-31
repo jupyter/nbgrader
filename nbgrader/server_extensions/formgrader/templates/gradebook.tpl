@@ -6,8 +6,10 @@
   <script src="{{ base_url }}/formgrader/static/components/underscore/underscore-min.js"></script>
   <script src="{{ base_url }}/formgrader/static/components/backbone/backbone-min.js"></script>
   <script src="{{ base_url }}/formgrader/static/components/bootstrap/js/bootstrap.min.js"></script>
+  <script src="{{ base_url }}/formgrader/static/components/datatables/js/datatables.min.js"></script>
 
   <link rel="stylesheet" href="{{ base_url }}/formgrader/static/components/bootstrap/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="{{ base_url }}/formgrader/static/components/datatables/css/datatables.min.css">
   <link rel="stylesheet" href="{{ base_url }}/formgrader/static/css/formgrade.css">
 
   {%- block head -%}
@@ -44,11 +46,20 @@
       {%- block body -%}
       <div class="panel-body"></div>
       {%- endblock -%}
-      <table class="table table-hover">
+      <table id="formgrade-table" class="table table-hover">
         {%- block table -%}
         {%- endblock -%}
       </table>
     </div>
   </div>
+  <script type="text/javascript">
+    $(document).ready(function(){
+      $('#formgrade-table').DataTable({
+        info: false,
+        paging: false,
+        saveState: true,
+      });
+    });
+  </script>
 </body>
 
