@@ -83,13 +83,17 @@ nbgrader/docs/source/user_guide/managing_assignment_files_manually.rst
 node_modules
 nbgrader/server_extensions/formgrader/static/components/bootstrap/less
 nbgrader/server_extensions/formgrader/static/components/bootstrap/js/*
-!nbgrader/server_extensions/formgrader/static/components/bootstrap/js/bootstrap.js
-!nbgrader/server_extensions/formgrader/static/components/bootstrap/js/bootstrap.min.js
+nbgrader/server_extensions/formgrader/static/components/datatables.net/js/jquery.dataTables.js
+nbgrader/server_extensions/formgrader/static/components/datatables.net-bs/js/dataTables.bootstrap.js
+nbgrader/server_extensions/formgrader/static/components/datatables.net-bs/css/dataTables.bootstrap.css
 nbgrader/server_extensions/formgrader/static/components/jquery/jquery-migrate.min.js
 nbgrader/server_extensions/formgrader/static/components/jquery/jquery-migrate.js
 nbgrader/server_extensions/formgrader/static/components/jquery-color/test
 nbgrader/server_extensions/formgrader/static/components/autosize/example
+
 !nbgrader/server_extensions/formgrader/static/components/autosize/dist
+!nbgrader/server_extensions/formgrader/static/components/bootstrap/js/bootstrap.js
+!nbgrader/server_extensions/formgrader/static/components/bootstrap/js/bootstrap.min.js
 
 conda-bld
 gh_api.sqlite
