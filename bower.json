@@ -7,7 +7,9 @@
     "jquery": "components/jquery#~2.1.1",
     "underscore": "components/underscore#~1.7",
     "jquery-color": "jquery/jquery-color#~2.1.2",
-    "autosize": "jackmoore/autosize#~3.0.8"
+    "autosize": "jackmoore/autosize#~3.0.8",
+    "datatables.net": "~2.1.1",
+    "datatables.net-bs": "~2.1.1"
   },
   "resolutions": {
     "underscore": "~1.7",
