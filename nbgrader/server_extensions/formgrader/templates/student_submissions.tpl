@@ -33,23 +33,47 @@
         {{ submission.name }}
       </a>
     </td>
-    <td class="center">{{ submission.score | float | round(2) }} / {{ submission.max_score | float | round(2) }}</td>
-    <td class="center">{{ submission.code_score | float | round(2) }} / {{ submission.max_code_score | float | round(2) }}</td>
-    <td class="center">{{ submission.written_score | float | round(2) }} / {{ submission.max_written_score | float | round(2) }}</td>
-    <td class="center">
-      {%- if submission.needs_manual_grade -%}
-      <span class="glyphicon glyphicon-ok"></span>
-      {%- endif -%}
+    {%- if submission.max_score is greaterthan 0 -%}
+    <td data-order="{{ submission.score / submission.max_score | float | round(2) }}" class="center">
+    {%- else -%}
+    <td data-order="0.00" class="center">
+    {%- endif -%}
+        {{ submission.score | float | round(2) }} / {{ submission.max_score | float | round(2) }}
     </td>
-    <td class="center">
-      {%- if submission.failed_tests -%}
-      <span class="glyphicon glyphicon-ok"></span>
-      {%- endif -%}
+    {%- if submission.max_code_score is greaterthan 0 -%}
+    <td data-order="{{ submission.code_score / submission.max_code_score | float | round(2) }}" class="center">
+    {%- else -%}
+    <td data-order="0.00" class="center">
+    {%- endif -%}
+        {{ submission.code_score | float | round(2) }} / {{ submission.max_code_score | float | round(2) }}
     </td>
-    <td class="center">
-      {%- if submission.flagged -%}
+    {%- if submission.max_written_score is greaterthan 0 -%}
+    <td data-order="{{ submission.written_score / submission.max_written_score | float | round(2) }}" class="center">
+    {%- else -%}
+    <td data-order="0.00" class="center">
+    {%- endif -%}
+        {{ submission.written_score | float | round(2) }} / {{ submission.max_written_score | float | round(2) }}
+    </td>
+    {%- if submission.needs_manual_grade -%}
+    <td data-search="needs manual grade" class="center">
+      <span class="glyphicon glyphicon-ok"></span>
+    {%- else -%}
+    <td data-search="" class="center">
+    {%- endif -%}
+    </td>
+    {%- if submission.failed_tests -%}
+    <td data-search="tests failed" class="center">
+      <span class="glyphicon glyphicon-ok"></span>
+    {%- else -%}
+    <td data-search="" class="center">
+    {%- endif -%}
+    </td>
+    {%- if submission.flagged -%}
+    <td data-search="flagged" class="center">
       <span class="glyphicon glyphicon-flag"></span>
-      {%- endif -%}
+    {%- else -%}
+    <td data-search="" class="center">
+    {%- endif -%}
     </td>
   </tr>
   {%- endfor -%}
