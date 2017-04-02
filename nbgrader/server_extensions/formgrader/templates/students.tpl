@@ -24,7 +24,13 @@
   <tr>
     <td><a href="{{ base_url }}/formgrader/students/{{ student.id }}">{{ student.last_name }}, {{ student.first_name }}</a></td>
     <td class="center">{{ student.id }}
-    <td class="center">{{ student.score | float | round(2) }} / {{ student.max_score | float | round(2) }}</td>
+    {%- if student.max_score is greaterthan 0 -%}
+    <td data-order="{{ student.score / student.max_score | float | round(2) }}" class="center">
+    {%- else -%}
+    <td data-order="0.00" class="center">
+    {%- endif -%}
+        {{ student.score | float | round(2) }} / {{ student.max_score | float | round(2) }}
+    </td>
   </tr>
   {%- endfor -%}
 </tbody>

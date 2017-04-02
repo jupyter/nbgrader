@@ -46,38 +46,47 @@ function toggle_name(on, index) {
 <tbody>
   {%- for submission in submissions -%}
   <tr id="submission-{{ submission.index + 1 }}">
-    <td>
+    <td data-order="{{ submission.index + 1 }}">
       <span class="glyphicon glyphicon-eye-open name-hidden" aria-hidden="true" onclick="toggle_name(true, {{ submission.index + 1 }});"></span>
       <span class="glyphicon glyphicon-eye-close name-shown" aria-hidden="true" onclick="toggle_name(false, {{ submission.index + 1 }});"></span>
     </td>
-    <td>
+    <td data-order="{{ submission.index + 1 }}">
       <a href="{{ base_url }}/formgrader/submissions/{{ submission.id }}" class="name-hidden">Submission #{{ submission.index + 1 }}</a>
       <a href="{{ base_url }}/formgrader/submissions/{{ submission.id }}" class="name-shown">{{ submission.last_name }}, {{ submission.first_name }}</a>
     </td>
-    <td class="center">
+    <td data-order="{{ submission.score }}" class="center">
       {{ submission.score | float | round(2) }} / {{ submission.max_score | float | round(2) }}
     </td>
-    <td class="center">
+    <td data-order="{{ submission.code_score }}" class="center">
       {{ submission.code_score | float | round(2) }} / {{ submission.max_code_score | float | round(2) }}
     </td>
-    <td class="center">
+    <td data-order="{{ submission.written_score }}" class="center">
       {{ submission.written_score | float | round(2) }} / {{ submission.max_written_score | float | round(2) }}
     </td>
-    <td class="center">
-      {%- if submission.needs_manual_grade -%}
+    {%- if submission.needs_manual_grade -%}
+    <td data-search="needs manual grade" class="center">
       <span class="glyphicon glyphicon-ok"></span>
-      {%- endif -%}
     </td>
-    <td class="center">
-      {%- if submission.failed_tests -%}
+    {%- else -%}
+    <td data-search="" class="center">
+    </td>
+    {%- endif -%}
+    {%- if submission.failed_tests -%}
+    <td data-search="tests failed" class="center">
       <span class="glyphicon glyphicon-ok"></span>
-      {%- endif -%}
     </td>
-    <td class="center">
-      {%- if submission.flagged -%}
-      <span class="glyphicon glyphicon-flag"></span>
-      {%- endif -%}
+    {%- else -%}
+    <td data-search="" class="center">
     </td>
+    {%- endif -%}
+    {%- if submission.flagged -%}
+    <td data-search="flagged" class="center">
+      <span data-search="flagged" class="glyphicon glyphicon-flag"></span>
+    </td>
+    {%- else -%}
+    <td data-search="" class="center">
+    </td>
+    {%- endif -%}
   </tr>
   {%- endfor -%}
 </tbody>

@@ -60,14 +60,14 @@ div#notebook-container {
   div.cell {
     display: block;
     page-break-inside: avoid;
-  } 
-  div.output_wrapper { 
-    display: block;
-    page-break-inside: avoid; 
   }
-  div.output { 
+  div.output_wrapper {
     display: block;
-    page-break-inside: avoid; 
+    page-break-inside: avoid;
+  }
+  div.output {
+    display: block;
+    page-break-inside: avoid;
   }
 }
 
@@ -133,7 +133,6 @@ div.nbgrader_cell .input_area {
     overflow: hidden;
 }
 
-<<<<<<< HEAD
 .scoring-buttons button {
   background-color: #337ab7;
 }

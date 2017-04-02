@@ -30,19 +30,33 @@
     {%- else -%}
     <td><a href="{{ base_url }}/formgrader/students/{{ student.id }}/{{ assignment.name }}">{{ assignment.name }}</a></td>
     {%- endif -%}
-    <td class="center">
+    {%- if assignment.max_score is greaterthan 0 -%}
+    <td data-order="{{ assignment.score / assignment.max_score | float | round(2) }}" class="center">
+    {%- else -%}
+    <td data-order="0.00" class="center">
+    {%- endif -%}
       {{ assignment.score | float | round(2) }} / {{ assignment.max_score | float | round(2) }}
     </td>
-    <td class="center">
+    {%- if assignment.max_code_score is greaterthan 0 -%}
+    <td data-order="{{ assignment.code_score / assignment.max_code_score | float | round(2) }}" class="center">
+    {%- else -%}
+    <td data-order="0.00" class="center">
+    {%- endif -%}
       {{ assignment.code_score | float | round(2) }} / {{ assignment.max_code_score | float | round(2) }}
     </td>
-    <td class="center">
+    {%- if assignment.max_written_score is greaterthan 0 -%}
+    <td data-order="{{ assignment.written_score / assignment.max_written_score | float | round(2) }}" class="center">
+    {%- else -%}
+    <td data-order="0.00" class="center">
+    {%- endif -%}
       {{ assignment.written_score | float | round(2) }} / {{ assignment.max_written_score | float | round(2) }}
     </td>
-    <td class="center">
-      {%- if assignment.needs_manual_grade -%}
+    {%- if assignment.needs_manual_grade -%}
+    <td data-search="needs manual grade" class="center">
       <span class="glyphicon glyphicon-ok"></span>
-      {%- endif -%}
+    {%- else -%}
+    <td data-search="" class="center">
+    {%- endif -%}
     </td>
   </tr>
   {%- endfor -%}
