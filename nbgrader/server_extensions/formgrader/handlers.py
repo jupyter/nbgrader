@@ -10,98 +10,37 @@ from ...api import MissingEntry
 class AssignmentsHandler(BaseHandler):
     @web.authenticated
     def get(self):
-        assignments = []
-        for assignment in self.gradebook.assignments:
-            x = assignment.to_dict()
-            x["average_score"] = self.gradebook.average_assignment_score(assignment.name)
-            x["average_code_score"] = self.gradebook.average_assignment_code_score(assignment.name)
-            x["average_written_score"] = self.gradebook.average_assignment_written_score(assignment.name)
-            assignments.append(x)
-
-        html = self.render(
-            "assignments.tpl",
-            assignments=assignments,
-            base_url=self.base_url)
-
+        html = self.render("assignments.tpl")
         self.write(html)
 
 
 class AssignmentNotebooksHandler(BaseHandler):
     @web.authenticated
     def get(self, assignment_id):
-        try:
-            assignment = self.gradebook.find_assignment(assignment_id)
-        except MissingEntry:
-            raise web.HTTPError(404, "Invalid assignment: {}".format(assignment_id))
-
-        notebooks = []
-        for notebook in assignment.notebooks:
-            x = notebook.to_dict()
-            x["average_score"] = self.gradebook.average_notebook_score(notebook.name, assignment.name)
-            x["average_code_score"] = self.gradebook.average_notebook_code_score(notebook.name, assignment.name)
-            x["average_written_score"] = self.gradebook.average_notebook_written_score(notebook.name, assignment.name)
-            notebooks.append(x)
-        assignment = assignment.to_dict()
-
         html = self.render(
             "assignment_notebooks.tpl",
-            assignment=assignment,
-            notebooks=notebooks,
-            base_url=self.base_url)
-
+            assignment_id=assignment_id,
+            base_url=self.base_url,
+        )
         self.write(html)
 
 
 class AssignmentNotebookSubmissionsHandler(BaseHandler):
     @web.authenticated
     def get(self, assignment_id, notebook_id):
-        try:
-            self.gradebook.find_notebook(notebook_id, assignment_id)
-        except MissingEntry:
-            raise web.HTTPError(404, "Invalid notebook: {}/{}".format(assignment_id, notebook_id))
-
-        notebook_dir_format = os.path.join(self.notebook_dir_format, "{notebook_id}.ipynb")
-        notebook_dicts = self.gradebook.notebook_submission_dicts(notebook_id, assignment_id)
-
-        submissions = list()
-        for nb_dict in notebook_dicts:
-            filename = os.path.join(
-                self.notebook_dir,
-                notebook_dir_format.format(
-                    nbgrader_step=self.nbgrader_step,
-                    assignment_id=assignment_id,
-                    notebook_id=notebook_id,
-                    student_id=nb_dict['student']
-                )
-            )
-            if os.path.exists(filename):
-                submissions.append(nb_dict)
-
-        submissions.sort(key=lambda x: x["id"])
-        for i, submission in enumerate(submissions):
-            submission["index"] = i
-
         html = self.render(
             "notebook_submissions.tpl",
             notebook_id=notebook_id,
             assignment_id=assignment_id,
-            submissions=submissions,
-            base_url=self.base_url)
-
+            base_url=self.base_url
+        )
         self.write(html)
 
 
 class StudentsHandler(BaseHandler):
     @web.authenticated
     def get(self):
-        students = self.gradebook.student_dicts()
-        students.sort(key=lambda x: x.get("last_name") or "no last name")
-
-        html = self.render(
-            "students.tpl",
-            students=students,
-            base_url=self.base_url)
-
+        html = self.render("students.tpl", base_url=self.base_url)
         self.write(html)
 
 
@@ -113,38 +52,11 @@ class StudentAssignmentsHandler(BaseHandler):
         except MissingEntry:
             raise web.HTTPError(404, "Invalid student: {}".format(student_id))
 
-        submissions = []
-        for assignment in self.gradebook.assignments:
-            try:
-                submission = self.gradebook.find_submission(assignment.name, student.id).to_dict()
-            except MissingEntry:
-                submission = {
-                    "id": None,
-                    "name": assignment.name,
-                    "student": student.id,
-                    "duedate": None,
-                    "timestamp": None,
-                    "extension": None,
-                    "total_seconds_late": 0,
-                    "score": 0,
-                    "max_score": assignment.max_score,
-                    "code_score": 0,
-                    "max_code_score": assignment.max_code_score,
-                    "written_score": 0,
-                    "max_written_score": assignment.max_written_score,
-                    "needs_manual_grade": False
-                }
-            submissions.append(submission)
-
-        submissions.sort(key=lambda x: x.get("duedate") or "no due date")
-        student = student.to_dict()
-
         html = self.render(
             "student_assignments.tpl",
-            assignments=submissions,
-            student=student,
-            base_url=self.base_url)
-
+            student=student.to_dict(),
+            base_url=self.base_url
+        )
         self.write(html)
 
 
@@ -152,36 +64,16 @@ class StudentAssignmentNotebooksHandler(BaseHandler):
     @web.authenticated
     def get(self, student_id, assignment_id):
         try:
-            assignment = self.gradebook.find_submission(assignment_id, student_id)
+            student = self.gradebook.find_student(student_id)
         except MissingEntry:
-            raise web.HTTPError(404, "Invalid assignment: {} for {}".format(assignment_id, student_id))
-
-
-        notebook_dir_format = os.path.join(self.notebook_dir_format, "{notebook_id}.ipynb")
-
-        submissions = list()
-        for notebook in assignment.notebooks:
-            filename = os.path.join(
-                self.notebook_dir,
-                notebook_dir_format.format(
-                    nbgrader_step=self.nbgrader_step,
-                    assignment_id=assignment_id,
-                    notebook_id=notebook.name,
-                    student_id=student_id
-                )
-            )
-            if os.path.exists(filename):
-                submissions.append(notebook.to_dict())
-
-        submissions.sort(key=lambda x: x['name'])
+            raise web.HTTPError(404, "Invalid student: {}".format(student_id))
 
         html = self.render(
             "student_submissions.tpl",
             assignment_id=assignment_id,
-            student=assignment.student.to_dict(),
-            submissions=submissions,
-            base_url=self.base_url)
-
+            student=student.to_dict(),
+            base_url=self.base_url
+        )
         self.write(html)
 
 

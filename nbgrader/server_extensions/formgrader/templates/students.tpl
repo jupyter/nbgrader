@@ -6,32 +6,69 @@
 
 {%- block body -%}
 <div class="panel-body">
-  The following table lists all of the students in the class. Click on the name of a student
-  to see their grades on individual assignments.
+  The following table lists all of the students in the class. Click on the name
+  of a student to see their grades on individual assignments.
 </div>
 {%- endblock -%}
 
 {%- block table -%}
+<table id="students" class="table table-hover">
 <thead>
   <tr>
-    <th>Name</th>
+    <th>Surname, Name</th>
     <th class="center">Student ID</th>
     <th class="center">Overall score</th>
   </tr>
 </thead>
-<tbody>
-  {%- for student in students -%}
-  <tr>
-    <td><a href="{{ base_url }}/formgrader/students/{{ student.id }}">{{ student.last_name }}, {{ student.first_name }}</a></td>
-    <td class="center">{{ student.id }}
-    {%- if student.max_score is greaterthan 0 -%}
-    <td data-order="{{ student.score / student.max_score | float | round(2) }}" class="center">
-    {%- else -%}
-    <td data-order="0.00" class="center">
-    {%- endif -%}
-        {{ student.score | float | round(2) }} / {{ student.max_score | float | round(2) }}
-    </td>
-  </tr>
-  {%- endfor -%}
-</tbody>
+<tbody></tbody>
+</table>
+{%- endblock -%}
+
+{%- block script -%}
+<script type="text/javascript">
+  var assignments_link = function (student_id, first_name, last_name) {
+    return ''+
+      '<a href="{{ base_url }}/formgrader/students/'+student_id+'">'+
+        last_name+', '+first_name+
+      '</a>';
+  };
+
+  $(document).ready(function(){
+    $('#students').DataTable({
+      info: false,
+      ajax: "/formgrader/api/students",
+      columns: [
+        { data: {
+            _: "last_name",
+            display: function (data) {
+              return assignments_link(data.id, data.first_name, data.last_name);
+            },
+            filter: function (data) {
+              return data.last_name+' '+data.first_name;
+            },
+        } },
+        { data: "id" },
+        { data: {
+            _: "score.display",
+            sort: "score.sort",
+        } },
+      ],
+      columnDefs: [
+        { targets: [0],
+          createdCell: function (td, cellData, rowData, row, col) {
+            $(td).addClass('left')
+        } },
+        { targets: ['_all'],
+          createdCell: function (td, cellData, rowData, row, col) {
+            $(td).addClass('center')
+        } },
+      ],
+      scrollY: 600,
+      scroller: true,
+      scrollCollapse: true,
+      deferRender: true,
+      saveState: true,
+    });
+  });
+</script>
 {%- endblock -%}

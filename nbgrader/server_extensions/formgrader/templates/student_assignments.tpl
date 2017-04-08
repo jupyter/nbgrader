@@ -7,12 +7,14 @@
 
 {%- block body -%}
 <div class="panel-body">
-  The following table lists the assignments turned in by {{ student.last_name }}, {{ student.first_name }}. Click on a notebook
-  name to see the scores for individual notebooks.
+  The following table lists the assignments turned in by
+  {{ student.last_name }}, {{ student.first_name }}. Click on a notebook name
+  to see the scores for individual notebooks.
 </div>
 {%- endblock -%}
 
 {%- block table -%}
+<table id="student-assignments" class="table table-hover">
 <thead>
   <tr>
     <th>Assignment ID</th>
@@ -22,43 +24,66 @@
     <th class="center">Needs manual grade?</th>
   </tr>
 </thead>
-<tbody>
-  {%- for assignment in assignments -%}
-  <tr>
-    {%- if assignment.id is none -%}
-    <td>{{ assignment.name }} (no submission)</td>
-    {%- else -%}
-    <td><a href="{{ base_url }}/formgrader/students/{{ student.id }}/{{ assignment.name }}">{{ assignment.name }}</a></td>
-    {%- endif -%}
-    {%- if assignment.max_score is greaterthan 0 -%}
-    <td data-order="{{ assignment.score / assignment.max_score | float | round(2) }}" class="center">
-    {%- else -%}
-    <td data-order="0.00" class="center">
-    {%- endif -%}
-      {{ assignment.score | float | round(2) }} / {{ assignment.max_score | float | round(2) }}
-    </td>
-    {%- if assignment.max_code_score is greaterthan 0 -%}
-    <td data-order="{{ assignment.code_score / assignment.max_code_score | float | round(2) }}" class="center">
-    {%- else -%}
-    <td data-order="0.00" class="center">
-    {%- endif -%}
-      {{ assignment.code_score | float | round(2) }} / {{ assignment.max_code_score | float | round(2) }}
-    </td>
-    {%- if assignment.max_written_score is greaterthan 0 -%}
-    <td data-order="{{ assignment.written_score / assignment.max_written_score | float | round(2) }}" class="center">
-    {%- else -%}
-    <td data-order="0.00" class="center">
-    {%- endif -%}
-      {{ assignment.written_score | float | round(2) }} / {{ assignment.max_written_score | float | round(2) }}
-    </td>
-    {%- if assignment.needs_manual_grade -%}
-    <td data-search="needs manual grade" class="center">
-      <span class="glyphicon glyphicon-ok"></span>
-    {%- else -%}
-    <td data-search="" class="center">
-    {%- endif -%}
-    </td>
-  </tr>
-  {%- endfor -%}
-</tbody>
+<tbody></tbody>
+</table>
+{%- endblock -%}
+
+{%- block script -%}
+<script type="text/javascript">
+  var assignment_link = function (name) {
+    return ''+
+      '<a href="{{ base_url }}/formgrader/students/{{ student.id }}/'+name+'">'+
+        name+
+      '</a>';
+  };
+
+  $(document).ready(function(){
+    $('#student-assignments').DataTable({
+      info: false,
+      paging: false,
+      ajax: "/formgrader/api/students/{{ student.id }}",
+      columns: [
+        { data: {
+            _: "name",
+            display: function (data) {
+              if (data.id) {
+                return assignment_link(data.name);
+              } else {
+                return data.name+' (no submission)';
+              };
+            },
+        } },
+        { data: {
+            _: "score.display",
+            sort: "score.sort",
+        } },
+        { data: {
+            _: "code_score.display",
+            sort: "code_score.sort",
+        } },
+        { data: {
+            _: "written_score.display",
+            sort: "written_score.sort",
+        } },
+        { data: {
+            _: "needs_manual_grade.display",
+            sort: "needs_manual_grade.sort",
+            filter: "needs_manual_grade.search",
+        } },
+      ],
+      columnDefs: [
+        { targets: [0],
+          createdCell: function (td, cellData, rowData, row, col) {
+            $(td).addClass('left')
+        } },
+        { targets: ['_all'],
+          createdCell: function (td, cellData, rowData, row, col) {
+            $(td).addClass('center')
+        } },
+      ],
+      deferRender: true,
+      saveState: true,
+    });
+  });
+</script>
 {%- endblock -%}

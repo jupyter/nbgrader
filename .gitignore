@@ -86,6 +86,8 @@ nbgrader/server_extensions/formgrader/static/components/bootstrap/js/*
 nbgrader/server_extensions/formgrader/static/components/datatables.net/js/jquery.dataTables.js
 nbgrader/server_extensions/formgrader/static/components/datatables.net-bs/js/dataTables.bootstrap.js
 nbgrader/server_extensions/formgrader/static/components/datatables.net-bs/css/dataTables.bootstrap.css
+nbgrader/server_extensions/formgrader/static/components/datatables.net-scroller/js/dataTables.scroller.js
+nbgrader/server_extensions/formgrader/static/components/datatables.net-scroller-bs/css/scroller.bootstrap.css
 nbgrader/server_extensions/formgrader/static/components/jquery/jquery-migrate.min.js
 nbgrader/server_extensions/formgrader/static/components/jquery/jquery-migrate.js
 nbgrader/server_extensions/formgrader/static/components/jquery-color/test
