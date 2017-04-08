@@ -9,7 +9,9 @@
     "jquery-color": "jquery/jquery-color#~2.1.2",
     "autosize": "jackmoore/autosize#~3.0.8",
     "datatables.net": "~2.1.1",
-    "datatables.net-bs": "~2.1.1"
+    "datatables.net-bs": "~2.1.1",
+    "datatables.net-scroller": "~1.4.2",
+    "datatables.net-scroller-bs": "~1.4.2"
   },
   "resolutions": {
     "underscore": "~1.7",
