@@ -31,6 +31,7 @@ function toggle_name(on, index) {
 {%- endblock -%}
 
 {%- block table -%}
+<table id="notebook-submissions" class="table table-hover">
 <thead>
   <tr>
     <th></th>
@@ -90,8 +91,19 @@ function toggle_name(on, index) {
   </tr>
   {%- endfor -%}
 </tbody>
+</table>
+{%- endblock -%}
+
+{%- block script -%}
 <script type="text/javascript">
-$('span.glyphicon.name-hidden').tooltip({title: "Show student name"});
-$('span.glyphicon.name-shown').tooltip({title: "Hide student name"});
+    $('span.glyphicon.name-hidden').tooltip({title: "Show student name"});
+    $('span.glyphicon.name-shown').tooltip({title: "Hide student name"});
+    $(document).ready(function(){
+        $('#notebook-submissions').DataTable({
+            info: false,
+            paging: false,
+            saveState: true,
+        });
+    });
 </script>
 {%- endblock -%}

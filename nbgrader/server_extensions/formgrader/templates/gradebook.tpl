@@ -45,22 +45,12 @@
   <div class="container" id="gradebook">
     <div class="panel panel-default">
       {%- block body -%}
-      <div class="panel-body"></div>
       {%- endblock -%}
-      <table id="formgrade-table" class="table table-hover">
-        {%- block table -%}
-        {%- endblock -%}
-      </table>
+      {%- block table -%}
+      {%- endblock -%}
     </div>
   </div>
-  <script type="text/javascript">
-    $(document).ready(function(){
-      $('#formgrade-table').DataTable({
-        info: false,
-        paging: false,
-        saveState: true,
-      });
-    });
-  </script>
+  {%- block script -%}
+  {%- endblock -%}
 </body>
 

@@ -13,6 +13,7 @@
 {%- endblock -%}
 
 {%- block table -%}
+<table id="student-assignments" class="table table-hover">
 <thead>
   <tr>
     <th>Assignment ID</th>
@@ -61,4 +62,17 @@
   </tr>
   {%- endfor -%}
 </tbody>
+</table>
+{%- endblock -%}
+
+{%- block script -%}
+<script type="text/javascript">
+    $(document).ready(function(){
+        $('#student-assignments').DataTable({
+            info: false,
+            paging: false,
+            saveState: true,
+        });
+    });
+</script>
 {%- endblock -%}

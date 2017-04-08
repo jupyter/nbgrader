@@ -14,6 +14,7 @@
 {%- endblock -%}
 
 {%- block table -%}
+<table id="assignment-notebooks" class="table table-hover">
 <thead>
   <tr>
     <th>Notebook ID</th>
@@ -58,4 +59,17 @@
   </tr>
   {%- endfor -%}
 </tbody>
+</table>
+{%- endblock -%}
+
+{%- block script -%}
+<script type="text/javascript">
+    $(document).ready(function(){
+        $('#assignment-notebooks').DataTable({
+            info: false,
+            paging: false,
+            saveState: true,
+        });
+    });
+</script>
 {%- endblock -%}
