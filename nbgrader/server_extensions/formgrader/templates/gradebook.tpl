@@ -23,7 +23,7 @@
   <nav class="navbar navbar-default navbar-fixed-top" role="navigation">
     <div class="container">
       <div class="navbar-header">
-        <a class="navbar-brand" href="#">nbgrader formgrade</a>
+        <a class="navbar-brand" href="{{ base_url }}/formgrader">nbgrader formgrade</a>
       </div>
       <div>
         <ul class="nav navbar-nav navbar-left">
