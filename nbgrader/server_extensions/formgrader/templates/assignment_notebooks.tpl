@@ -2,14 +2,14 @@
 
 {%- block breadcrumb -%}
 <li><a href="{{ base_url }}/formgrader/assignments">Assignments</a></li>
-<li class="active">{{ assignment.name }}</li>
+<li class="active">{{ assignment_id }}</li>
 {%- endblock -%}
 
 {%- block body -%}
 <div class="panel-body">
   The following table lists the notebooks that are associated with the
-  assignment "{{ assignment.name }}". Click on a notebook
-  name to see the list of student submissions for that notebook.
+  assignment "{{ assignment_id }}". Click on a notebook name to see the list
+  of student submissions for that notebook.
 </div>
 {%- endblock -%}
 
@@ -24,52 +24,60 @@
     <th class="center">Needs manual grade?</th>
   </tr>
 </thead>
-<tbody>
-  {%- for notebook in notebooks -%}
-  <tr>
-    <td><a href="{{ base_url }}/formgrader/assignments/{{ assignment.name }}/{{ notebook.name }}">{{ notebook.name }}</a></td>
-    {%- if notebook.max_score is greaterthan 0 -%}
-    <td data-order="{{ notebook.average_score / notebook.max_score | float | round(2) }}" class="center">
-    {%- else -%}
-    <td data-order="0.00" class="center">
-    {%- endif -%}
-        {{ notebook.average_score | float | round(2) }} / {{ notebook.max_score | float | round(2) }}
-    </td>
-    {%- if notebook.max_code_score is greaterthan 0 -%}
-    <td data-order="{{ notebook.average_code_score / notebook.max_code_score | float | round(2) }}" class="center">
-    {%- else -%}
-    <td data-order="0.00" class="center">
-    {%- endif -%}
-        {{ notebook.average_code_score | float | round(2) }} / {{ notebook.max_code_score | float | round(2) }}
-    </td>
-    {%- if notebook.max_written_score is greaterthan 0 -%}
-    <td data-order="{{ notebook.average_written_score / notebook.max_written_score | float | round(2) }}" class="center">
-    {%- else -%}
-    <td data-order="0.00" class="center">
-    {%- endif -%}
-        {{ notebook.average_written_score | float | round(2) }} / {{ notebook.max_written_score | float | round(2) }}
-    </td>
-    {%- if notebook.needs_manual_grade -%}
-    <td data-search="needs manual grade" class="center">
-      <span class="glyphicon glyphicon-ok"></span>
-    {%- else -%}
-    <td data-search="" class="center">
-    {%- endif -%}
-    </td>
-  </tr>
-  {%- endfor -%}
-</tbody>
+<tbody></tbody>
 </table>
 {%- endblock -%}
 
 {%- block script -%}
 <script type="text/javascript">
-    $(document).ready(function(){
-        $('#assignment-notebooks').DataTable({
-            info: false,
-            paging: false,
-            saveState: true,
-        });
+  var notebook_link = function (notebook_id) {
+    return ''+
+      '<a href="{{ base_url }}/formgrader/assignments/{{ assignment_id }}/'+notebook_id+'">'+
+        notebook_id+
+      '</a>';
+  };
+
+  $(document).ready(function(){
+    $('#assignment-notebooks').DataTable({
+      info: false,
+      paging: false,
+      ajax: "/formgrader/api/assignments/{{ assignment_id }}",
+      columns: [
+        { data: {
+            _: "name",
+            sort: "name",
+            display: function (data) { return notebook_link(data.name); }
+        } },
+        { data: {
+            _: "ave_score.display",
+            sort: "ave_score.sort",
+        } },
+        { data: {
+            _: "ave_code_score.display",
+            sort: "ave_code_score.sort",
+        } },
+        { data: {
+            _: "ave_written_score.display",
+            sort: "ave_written_score.sort",
+        } },
+        { data: {
+            _: "needs_manual_grade.display",
+            sort: "needs_manual_grade.sort",
+            filter: "needs_manual_grade.search",
+        } },
+      ],
+      columnDefs: [
+        { targets: [0],
+          createdCell: function (td, cellData, rowData, row, col) {
+            $(td).addClass('left')
+        } },
+        { targets: ['_all'],
+          createdCell: function (td, cellData, rowData, row, col) {
+            $(td).addClass('center')
+        } },
+      ],
+      saveState: true,
     });
+  });
 </script>
 {%- endblock -%}

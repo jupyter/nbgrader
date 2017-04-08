@@ -8,7 +8,8 @@
 
 {%- block body -%}
 <div class="panel-body">
-  The following table lists all the notebooks for the assignment "{{ assignment_id }}" by {{ student.last_name }}, {{ student.first_name }}.
+  The following table lists all the notebooks for the assignment
+  "{{ assignment_id }}" by {{ student.last_name }}, {{ student.first_name }}.
   You can grade a notebook by clicking on its ID.
 </div>
 {%- endblock -%}
@@ -26,70 +27,73 @@
     <th class="center">Flagged?</th>
   </tr>
 </thead>
-<tbody>
-  {%- for submission in submissions -%}
-  <tr>
-    <td>
-      <a href="{{ base_url }}/formgrader/submissions/{{ submission.id }}">
-        {{ submission.name }}
-      </a>
-    </td>
-    {%- if submission.max_score is greaterthan 0 -%}
-    <td data-order="{{ submission.score / submission.max_score | float | round(2) }}" class="center">
-    {%- else -%}
-    <td data-order="0.00" class="center">
-    {%- endif -%}
-        {{ submission.score | float | round(2) }} / {{ submission.max_score | float | round(2) }}
-    </td>
-    {%- if submission.max_code_score is greaterthan 0 -%}
-    <td data-order="{{ submission.code_score / submission.max_code_score | float | round(2) }}" class="center">
-    {%- else -%}
-    <td data-order="0.00" class="center">
-    {%- endif -%}
-        {{ submission.code_score | float | round(2) }} / {{ submission.max_code_score | float | round(2) }}
-    </td>
-    {%- if submission.max_written_score is greaterthan 0 -%}
-    <td data-order="{{ submission.written_score / submission.max_written_score | float | round(2) }}" class="center">
-    {%- else -%}
-    <td data-order="0.00" class="center">
-    {%- endif -%}
-        {{ submission.written_score | float | round(2) }} / {{ submission.max_written_score | float | round(2) }}
-    </td>
-    {%- if submission.needs_manual_grade -%}
-    <td data-search="needs manual grade" class="center">
-      <span class="glyphicon glyphicon-ok"></span>
-    {%- else -%}
-    <td data-search="" class="center">
-    {%- endif -%}
-    </td>
-    {%- if submission.failed_tests -%}
-    <td data-search="tests failed" class="center">
-      <span class="glyphicon glyphicon-ok"></span>
-    {%- else -%}
-    <td data-search="" class="center">
-    {%- endif -%}
-    </td>
-    {%- if submission.flagged -%}
-    <td data-search="flagged" class="center">
-      <span class="glyphicon glyphicon-flag"></span>
-    {%- else -%}
-    <td data-search="" class="center">
-    {%- endif -%}
-    </td>
-  </tr>
-  {%- endfor -%}
-</tbody>
+<tbody></tbody>
 </table>
 {%- endblock -%}
 
 {%- block script -%}
 <script type="text/javascript">
-    $(document).ready(function(){
-        $('#student-submissions').DataTable({
-            info: false,
-            paging: false,
-            saveState: true,
-        });
+  var notebook_link = function (id, name) {
+    return ''+
+      '<a href="{{ base_url }}/formgrader/submissions/'+id+'">'+
+          name+
+      '</a>';
+  };
+
+  $(document).ready(function(){
+    $('#student-submissions').DataTable({
+      info: false,
+      paging: false,
+      ajax: "/formgrader/api/students/{{ student.id }}/{{ assignment_id }}",
+      columns: [
+        { data: {
+            _: "name",
+            sort: "name",
+            display: function (data) {
+                return notebook_link(data.id, data.name);
+            },
+        } },
+        { data: {
+            _: "score.display",
+            sort: "score.sort",
+        } },
+        { data: {
+            _: "code_score.display",
+            sort: "code_score.sort",
+        } },
+        { data: {
+            _: "written_score.display",
+            sort: "written_score.sort",
+        } },
+        { data: {
+            _: "needs_manual_grade.display",
+            sort: "needs_manual_grade.sort",
+            filter: "needs_manual_grade.search",
+        } },
+        { data: {
+            _: "failed_tests.display",
+            sort: "failed_tests.sort",
+            filter: "failed_tests.search",
+        } },
+        { data: {
+            _: "flagged.display",
+            sort: "flagged.sort",
+            filter: "flagged.search",
+        } },
+      ],
+      columnDefs: [
+        { targets: [0],
+          createdCell: function (td, cellData, rowData, row, col) {
+            $(td).addClass('left')
+        } },
+        { targets: ['_all'],
+          createdCell: function (td, cellData, rowData, row, col) {
+            $(td).addClass('center')
+        } },
+      ],
+      deferRender: true,
+      saveState: true,
     });
+  });
 </script>
 {%- endblock -%}
