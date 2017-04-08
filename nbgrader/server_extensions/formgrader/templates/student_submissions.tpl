@@ -48,7 +48,6 @@
       columns: [
         { data: {
             _: "name",
-            sort: "name",
             display: function (data) {
                 return notebook_link(data.id, data.name);
             },

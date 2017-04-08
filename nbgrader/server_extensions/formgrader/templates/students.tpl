@@ -40,10 +40,12 @@
       columns: [
         { data: {
             _: "last_name",
-            sort: "last_name",
             display: function (data) {
               return assignments_link(data.id, data.first_name, data.last_name);
-            }
+            },
+            filter: function (data) {
+              return data.last_name+' '+data.first_name;
+            },
         } },
         { data: "id" },
         { data: {

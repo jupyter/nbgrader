@@ -45,7 +45,6 @@
       columns: [
         { data: {
             _: "name",
-            sort: "name",
             display: function (data) {
               if (data.id) {
                 return assignment_link(data.name);

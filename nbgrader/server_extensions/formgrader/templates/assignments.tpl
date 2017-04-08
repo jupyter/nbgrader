@@ -44,7 +44,6 @@
       columns: [
         { data: {
             _: "name",
-            sort: "name",
             display: function (data) { return assignment_link(data.name); }
         } },
         { data: "duedate" },

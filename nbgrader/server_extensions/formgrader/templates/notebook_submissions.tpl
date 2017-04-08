@@ -77,12 +77,10 @@
         { orderable: false,
           data: {
             _: "index",
-            sort: "index",
             display: function (data) { return eye_icon(data.index); },
         } },
         { data: {
             _: "index",
-            sort: "index",
             display: function (data) {
               return submission_link(
                   data.index, data.id, data.first_name, data.last_name);
