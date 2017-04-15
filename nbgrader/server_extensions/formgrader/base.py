@@ -1,3 +1,4 @@
+import os
 import json
 
 from tornado import web
@@ -37,6 +38,31 @@ class BaseHandler(IPythonHandler):
     @property
     def notebook_url_prefix(self):
         return self.settings['nbgrader_notebook_url_prefix']
+
+    def _filter_existing_notebooks(self, assignment_id, notebooks):
+        path = os.path.join(
+            self.notebook_dir,
+            self.notebook_dir_format,
+            "{notebook_id}.ipynb"
+        )
+
+        submissions = list()
+        for nb in notebooks:
+            filename = path.format(
+                nbgrader_step=self.nbgrader_step,
+                assignment_id=assignment_id,
+                notebook_id=nb.name,
+                student_id=nb.student.id
+            )
+            if os.path.exists(filename):
+                submissions.append(nb)
+
+        return sorted(submissions, key=lambda x: x.id)
+
+    def _notebook_submission_indexes(self, assignment_id, notebook_id):
+        notebooks = self.gradebook.notebook_submissions(notebook_id, assignment_id)
+        submissions = self._filter_existing_notebooks(assignment_id, notebooks)
+        return dict([(x.id, i) for i, x in enumerate(submissions)])
 
     def render(self, name, **ns):
         template = self.settings['nbgrader_jinja2_env'].get_template(name)
