@@ -60,34 +60,21 @@ class AssignmentNotebookSubmissionsHandler(BaseHandler):
         except MissingEntry:
             raise web.HTTPError(404, "Invalid notebook: {}/{}".format(assignment_id, notebook_id))
 
-        notebook_dir_format = os.path.join(self.notebook_dir_format, "{notebook_id}.ipynb")
-        notebook_dicts = self.gradebook.notebook_submission_dicts(notebook_id, assignment_id)
+        submissions = self.gradebook.notebook_submission_dicts(notebook_id, assignment_id)
+        indexes = self._notebook_submission_indexes(assignment_id, notebook_id)
+        for nb in submissions:
+            nb['index'] = indexes.get(nb['id'], None)
 
-        submissions = list()
-        for nb_dict in notebook_dicts:
-            filename = os.path.join(
-                self.notebook_dir,
-                notebook_dir_format.format(
-                    nbgrader_step=self.nbgrader_step,
-                    assignment_id=assignment_id,
-                    notebook_id=notebook_id,
-                    student_id=nb_dict['student']
-                )
-            )
-            if os.path.exists(filename):
-                submissions.append(nb_dict)
-
+        submissions = [x for x in submissions if x['index'] is not None]
         submissions.sort(key=lambda x: x["id"])
-        for i, submission in enumerate(submissions):
-            submission["index"] = i
 
         html = self.render(
             "notebook_submissions.tpl",
             notebook_id=notebook_id,
             assignment_id=assignment_id,
             submissions=submissions,
-            base_url=self.base_url)
-
+            base_url=self.base_url
+        )
         self.write(html)
 
 
@@ -156,32 +143,19 @@ class StudentAssignmentNotebooksHandler(BaseHandler):
         except MissingEntry:
             raise web.HTTPError(404, "Invalid assignment: {} for {}".format(assignment_id, student_id))
 
-
-        notebook_dir_format = os.path.join(self.notebook_dir_format, "{notebook_id}.ipynb")
-
-        submissions = list()
-        for notebook in assignment.notebooks:
-            filename = os.path.join(
-                self.notebook_dir,
-                notebook_dir_format.format(
-                    nbgrader_step=self.nbgrader_step,
-                    assignment_id=assignment_id,
-                    notebook_id=notebook.name,
-                    student_id=student_id
-                )
-            )
-            if os.path.exists(filename):
-                submissions.append(notebook.to_dict())
-
-        submissions.sort(key=lambda x: x['name'])
+        notebooks = assignment.notebooks
+        submissions = self._filter_existing_notebooks(assignment_id, notebooks)
+        submissions = [x.to_dict() for x in assignment.notebooks]
+        for i, nb in enumerate(submissions):
+            nb['index'] = i
 
         html = self.render(
             "student_submissions.tpl",
             assignment_id=assignment_id,
             student=assignment.student.to_dict(),
             submissions=submissions,
-            base_url=self.base_url)
-
+            base_url=self.base_url
+        )
         self.write(html)
 
 
@@ -208,19 +182,18 @@ class SubmissionHandler(BaseHandler):
             nbgrader_step=self.nbgrader_step,
             assignment_id=assignment_id,
             notebook_id=notebook_id,
-            student_id=student_id))
-
-        submissions = self.gradebook.notebook_submissions(notebook_id, assignment_id)
-        submission_ids = sorted([x.id for x in submissions])
-        ix = submission_ids.index(submission.id)
-
+            student_id=student_id)
+        )
         relative_path = os.path.relpath(filename, self.notebook_dir)
+        indexes = self._notebook_submission_indexes(assignment_id, notebook_id)
+        ix = indexes.get(submission.id, -2)
+
         resources = {
             'assignment_id': assignment_id,
             'notebook_id': notebook_id,
             'submission_id': submission.id,
             'index': ix,
-            'total': len(submissions),
+            'total': len(indexes),
             'base_url': self.base_url,
             'mathjax_url': self.mathjax_url,
             'last_name': submission.student.last_name,
@@ -234,6 +207,7 @@ class SubmissionHandler(BaseHandler):
             self.clear()
             self.set_status(404)
             self.write(html)
+
         else:
             html, _ = self.exporter.from_filename(filename, resources=resources)
             self.write(html)
@@ -252,11 +226,13 @@ class SubmissionNavigationHandler(BaseHandler):
             return url
 
     def _get_submission_ids(self, assignment_id, notebook_id):
-        submissions = self.gradebook.notebook_submissions(notebook_id, assignment_id)
+        notebooks = self.gradebook.notebook_submissions(notebook_id, assignment_id)
+        submissions = self._filter_existing_notebooks(assignment_id, notebooks)
         return sorted([x.id for x in submissions])
 
     def _get_incorrect_submission_ids(self, assignment_id, notebook_id, submission):
-        submissions = self.gradebook.notebook_submissions(notebook_id, assignment_id)
+        notebooks = self.gradebook.notebook_submissions(notebook_id, assignment_id)
+        submissions = self._filter_existing_notebooks(assignment_id, notebooks)
         incorrect_ids = set([x.id for x in submissions if x.failed_tests])
         incorrect_ids.add(submission.id)
         incorrect_ids = sorted(incorrect_ids)
