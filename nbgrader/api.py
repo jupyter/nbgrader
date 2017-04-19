@@ -346,6 +346,9 @@ class Student(Base):
     #: does not correspond to an email address
     email = Column(String(128))
 
+    #: (Optional) The student's enrolled section
+    section = Column(String(128))
+
     #: A collection of assignments submitted by the student, represented as
     #: :class:`~nbgrader.api.SubmittedAssignment` objects
     submissions = relationship("SubmittedAssignment", backref="student")
@@ -370,6 +373,7 @@ class Student(Base):
             "first_name": self.first_name,
             "last_name": self.last_name,
             "email": self.email,
+            "section": self.section,
             "score": self.score,
             "max_score": self.max_score
         }
