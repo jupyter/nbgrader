@@ -787,3 +787,20 @@ class TestNbGraderAutograde(BaseTestApp):
         assert os.path.isfile(join(course_dir, "autograded", "foo", "ps1", "p1.ipynb"))
         assert os.path.exists(join(course_dir, "autograded", "bar", "ps1"))
         assert os.path.isfile(join(course_dir, "autograded", "bar", "ps1", "p1.ipynb"))
+
+    def test_missing_files(self, db, course_dir):
+        with open("nbgrader_config.py", "a") as fh:
+            fh.write("""c.NbGrader.db_assignments = [dict(name='ps1', duedate='2015-02-02 14:58:23.948203 PST')]\n""")
+            fh.write("""c.NbGrader.db_students = [dict(id="foo"), dict(id="bar")]""")
+
+        self._empty_notebook(join(course_dir, "source", "ps1", "p1.ipynb"))
+        run_nbgrader(["assign", "ps1"])
+
+        self._empty_notebook(join(course_dir, "submitted", "foo", "ps1", "p1.ipynb"))
+        os.makedirs(join(course_dir, "submitted", "bar", "ps1"))
+        run_nbgrader(["autograde", "ps1"])
+
+        assert os.path.exists(join(course_dir, "autograded", "foo", "ps1"))
+        assert os.path.isfile(join(course_dir, "autograded", "foo", "ps1", "p1.ipynb"))
+        assert not os.path.exists(join(course_dir, "autograded", "bar"))
+
