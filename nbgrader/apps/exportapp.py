@@ -54,7 +54,7 @@ class ExportApp(NbGrader):
     def _classes_default(self):
         classes = super(ExportApp, self)._classes_default()
         classes.append(ExportApp)
-        classes.append(self.plugin_class)
+        classes.append(ExportPlugin)
         return classes
 
     def start(self):

@@ -41,3 +41,6 @@ class TestNbGraderExport(BaseTestApp):
         remove("grades.csv")
         run_nbgrader(["export", "--db", db, "--exporter", "nbgrader.plugins.CsvExportPlugin"])
         assert os.path.isfile("grades.csv")
+
+        run_nbgrader(["export", "--db", db, "--exporter=nbgrader.tests.apps.files.myexporter.MyExporter", "--to", "foo.txt"])
+        assert os.path.isfile("foo.txt")
