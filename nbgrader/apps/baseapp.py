@@ -401,9 +401,11 @@ class BaseNbConvertApp(NbGrader, NbConvertApp):
         self.notebooks = []
         fullglob = self._format_source(self.coursedir.assignment_id, self.coursedir.student_id)
         for assignment in glob.glob(fullglob):
-            self.assignments[assignment] = glob.glob(os.path.join(assignment, self.coursedir.notebook_id + ".ipynb"))
-            if len(self.assignments[assignment]) == 0:
-                self.fail("No notebooks were matched in '%s'", assignment)
+            found = glob.glob(os.path.join(assignment, self.coursedir.notebook_id + ".ipynb"))
+            if len(found) == 0:
+                self.log.warn("No notebooks were matched in '%s'", assignment)
+                continue
+            self.assignments[assignment] = found
 
         if len(self.assignments) == 0:
             self.fail("No notebooks were matched by '%s'", fullglob)
