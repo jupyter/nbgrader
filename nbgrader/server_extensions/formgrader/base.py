@@ -3,6 +3,7 @@ import json
 
 from tornado import web
 from notebook.base.handlers import IPythonHandler
+from ...api import Gradebook
 
 
 class BaseHandler(IPythonHandler):
@@ -12,8 +13,17 @@ class BaseHandler(IPythonHandler):
         return super(BaseHandler, self).base_url.rstrip("/")
 
     @property
+    def db_url(self):
+        return self.settings['nbgrader_db_url']
+
+    @property
     def gradebook(self):
-        return self.settings['nbgrader_gradebook']
+        self.log.debug("getting gradebook")
+        gb = self.settings['nbgrader_gradebook']
+        if gb is None:
+            gb = Gradebook(self.db_url)
+            self.settings['nbgrader_gradebook'] = gb
+        return gb
 
     @property
     def mathjax_url(self):
