@@ -19,6 +19,14 @@ class CourseDirectory(LoggingConfigurable):
             student. Note: this is always changed to '.' when running `nbgrader
             assign`, as the assign step doesn't have any student ID associated
             with it.
+
+            If the ID is purely numeric and you are passing it as a flag on the
+            command line, you will need to escape the quotes in order to have
+            it detected as a string, for example `--student="\"12345\"". See:
+
+                https://github.com/jupyter/nbgrader/issues/743
+
+            for more details.
             """
         )
     ).tag(config=True)
