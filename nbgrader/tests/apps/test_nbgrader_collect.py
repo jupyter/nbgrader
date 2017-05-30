@@ -104,3 +104,16 @@ class TestNbGraderCollect(BaseTestApp):
         root = os.path.os.path.join(os.path.join(course_dir, "submitted", os.environ["USER"], "ps1"))
         assert os.path.isfile(os.path.os.path.join(root, "p1.ipynb"))
         assert os.path.isfile(os.path.os.path.join(root, "timestamp.txt"))
+
+    def test_collect_subdirectories(self, exchange, course_dir, cache):
+        self._release_and_fetch("ps1", exchange, course_dir)
+
+        # create a subdirectory with an empty file
+        os.makedirs(os.path.join('ps1', 'foo'))
+        with open(os.path.join('ps1', 'foo', 'temp.txt'), 'w') as fh:
+            fh.write("")
+
+        self._submit("ps1", exchange, cache)
+
+        # make sure collect succeeds
+        self._collect("ps1", exchange)

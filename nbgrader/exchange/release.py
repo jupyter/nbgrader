@@ -76,6 +76,9 @@ class ExchangeRelease(Exchange):
                 ))
         self.log.info("Source: {}".format(self.src_path))
         self.log.info("Destination: {}".format(self.dest_path))
-        perms = S_IRUSR|S_IWUSR|S_IXUSR|S_IRGRP|S_IXGRP|S_IROTH|S_IXOTH
-        self.do_copy(self.src_path, self.dest_path, perms=perms)
+        self.do_copy(self.src_path, self.dest_path)
+        self.set_perms(
+            self.dest_path,
+            fileperms=(S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH),
+            dirperms=(S_IRUSR|S_IWUSR|S_IXUSR|S_IRGRP|S_IXGRP|S_IROTH|S_IXOTH))
         self.log.info("Released as: {} {}".format(self.course_id, self.coursedir.assignment_id))

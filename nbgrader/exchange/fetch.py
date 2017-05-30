@@ -54,18 +54,12 @@ class ExchangeFetch(Exchange):
             if os.path.isdir(srcpath):
                 self.copy_if_missing(srcpath, destpath, ignore=ignore)
 
-
-    def do_copy(self, src, dest, perms=None):
+    def do_copy(self, src, dest):
         """Copy the src dir to the dest dir omitting the self.coursedir.ignore globs."""
         if os.path.isdir(self.dest_path):
             self.copy_if_missing(src, dest, ignore=shutil.ignore_patterns(*self.coursedir.ignore))
         else:
             shutil.copytree(src, dest, ignore=shutil.ignore_patterns(*self.coursedir.ignore))
-
-        if perms:
-            for dirname, _, filenames in os.walk(dest):
-                for filename in filenames:
-                    os.chmod(os.path.join(dirname, filename), perms)
 
     def copy_files(self):
         self.log.info("Source: {}".format(self.src_path))
