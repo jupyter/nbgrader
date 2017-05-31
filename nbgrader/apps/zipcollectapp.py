@@ -184,8 +184,8 @@ class ZipCollectApp(NbGrader):
     def _classes_default(self):
         classes = super(ZipCollectApp, self)._classes_default()
         classes.append(ExtractorPlugin)
+        classes.append(FileNameCollectorPlugin)
         classes.append(ZipCollectApp)
-        classes.append(self.collector_plugin)
         return classes
 
     def _format_collect_path(self, collect_step):
