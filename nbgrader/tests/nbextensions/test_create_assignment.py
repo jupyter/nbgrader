@@ -498,6 +498,7 @@ def test_cell_ids(browser, port):
 
     # turn it into a cell with an id
     _select_solution(browser)
+    _set_id(browser, cell_id="")
 
     # save and check for an error (blank id)
     _save(browser)
