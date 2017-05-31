@@ -1,6 +1,3 @@
-import json
-import sys
-
 from os.path import join
 
 from .. import run_nbgrader
@@ -48,7 +45,7 @@ class TestNbGraderValidate(BaseTestApp):
         self._copy_file(join("files", "submitted-grade-cell-changed.ipynb"), "submitted-grade-cell-changed.ipynb")
         output = run_nbgrader([
             "validate", "submitted-grade-cell-changed.ipynb",
-            "--DisplayAutoGrades.ignore_checksums=True"
+            "--Validator.ignore_checksums=True"
         ], stdout=True)
         assert output.splitlines()[0] == "Success! Your notebook passes all the tests."
 
@@ -64,7 +61,7 @@ class TestNbGraderValidate(BaseTestApp):
         output = run_nbgrader([
             "validate", "submitted-grade-cell-changed.ipynb",
             "--invert",
-            "--DisplayAutoGrades.ignore_checksums=True"
+            "--Validator.ignore_checksums=True"
         ], stdout=True)
         assert output.splitlines()[0] == "NOTEBOOK PASSED ON 2 CELL(S)!"
 
@@ -73,7 +70,7 @@ class TestNbGraderValidate(BaseTestApp):
         self._copy_file(join("files", "submitted-unchanged.ipynb"), "submitted-unchanged.ipynb")
         output = run_nbgrader([
             "validate", "submitted-unchanged.ipynb",
-            "--DisplayAutoGrades.ignore_checksums=True"
+            "--Validator.ignore_checksums=True"
         ], stdout=True)
         assert output.splitlines()[0] == "VALIDATION FAILED ON 1 CELL(S)! If you submit your assignment as it is, you WILL NOT"
 
@@ -88,7 +85,7 @@ class TestNbGraderValidate(BaseTestApp):
         self._copy_file(join("files", "submitted-locked-cell-changed.ipynb"), "submitted-locked-cell-changed.ipynb")
         output = run_nbgrader([
             "validate", "submitted-locked-cell-changed.ipynb",
-            "--DisplayAutoGrades.ignore_checksums=True"
+            "--Validator.ignore_checksums=True"
         ], stdout=True)
         assert output.splitlines()[0] == "VALIDATION FAILED ON 1 CELL(S)! If you submit your assignment as it is, you WILL NOT"
 
@@ -104,23 +101,6 @@ class TestNbGraderValidate(BaseTestApp):
         output = run_nbgrader([
             "validate", "submitted-locked-cell-changed.ipynb",
             "--invert",
-            "--DisplayAutoGrades.ignore_checksums=True"
+            "--Validator.ignore_checksums=True"
         ], stdout=True)
         assert output.splitlines()[0] == "NOTEBOOK PASSED ON 1 CELL(S)!"
-
-    def test_invert_locked_cell_changed_ignore_checksums_json(self):
-        """Does the validate fail if a locked cell has changed with --invert and ignoring checksums?"""
-        self._copy_file(join("files", "submitted-locked-cell-changed.ipynb"), "submitted-locked-cell-changed.ipynb")
-        output = run_nbgrader([
-            "validate", "submitted-locked-cell-changed.ipynb",
-            "--invert",
-            "--json",
-            "--DisplayAutoGrades.ignore_checksums=True"
-        ], stdout=True)
-        assert json.loads(output) == {
-            "passed": [
-                {
-                    "source": 'print("Success!")'
-                }
-            ]
-        }

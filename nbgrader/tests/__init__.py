@@ -14,7 +14,7 @@ from nbconvert.filters import strip_ansi
 
 from ..utils import compute_checksum
 from ..apps.nbgraderapp import NbGraderApp
-from ..preprocessors import DisplayAutoGrades
+from ..validator import Validator
 
 
 def create_code_cell():
@@ -155,7 +155,7 @@ def run_nbgrader(args, retcode=0, env=None, stdout=False):
         stdout_buff = StringIO()
         orig_stdout = sys.stdout
         sys.stdout = stdout_buff
-        DisplayAutoGrades.stream = stdout_buff
+        Validator.stream = stdout_buff
 
     try:
         app.initialize(args)
@@ -177,7 +177,7 @@ def run_nbgrader(args, retcode=0, env=None, stdout=False):
             out = stdout_buff.getvalue()
             stdout_buff.close()
             sys.stdout = orig_stdout
-            DisplayAutoGrades.stream = orig_stdout
+            Validator.stream = orig_stdout
 
         # reset application state
         app.reset()

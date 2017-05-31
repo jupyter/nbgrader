@@ -1,23 +1,19 @@
 import traceback
 
-from traitlets import Unicode, List, Bool, default
-from nbconvert.nbconvertapp import NbConvertApp, DottedOrNone
-from ..preprocessors import DisplayAutoGrades, Execute, ClearOutput, CheckCellMetadata
+from traitlets import default
+
 from .baseapp import NbGrader
+from ..validator import Validator
 
 aliases = {}
 flags = {
     'invert': (
-        {'DisplayAutoGrades': {'invert': True}},
+        {'Validator': {'invert': True}},
         "Complain when cells pass, rather than vice versa."
-    ),
-    'json': (
-        {'DisplayAutoGrades' : {'as_json': True}},
-        "Print out validation results as json."
     )
 }
 
-class ValidateApp(NbGrader, NbConvertApp):
+class ValidateApp(NbGrader):
 
     name = u'nbgrader-validate'
     description = u'Validate a notebook by running it'
@@ -37,48 +33,37 @@ class ValidateApp(NbGrader, NbConvertApp):
             nbgrader validate --invert "Problem 1.ipynb"
         """
 
-    preprocessors = List([
-        CheckCellMetadata,
-        ClearOutput,
-        Execute,
-        DisplayAutoGrades
-    ])
-
-    export_format = Unicode('notebook')
-    use_output_suffix = Bool(False)
-    postprocessor_class = DottedOrNone('')
-    notebooks = List([])
-    writer_class = DottedOrNone('FilesWriter')
-    output_base = Unicode('')
-
-    @default("log_level")
-    def _log_level_default(self):
-        return 'ERROR'
-
     @default("classes")
     def _classes_default(self):
         classes = super(ValidateApp, self)._classes_default()
-        for pp in self.preprocessors:
-            if len(pp.class_traits(config=True)) > 0:
-                classes.append(pp)
+        classes.append(Validator)
         return classes
 
-    def build_extra_config(self):
-        extra_config = super(ValidateApp, self).build_extra_config()
-        extra_config.Exporter.default_preprocessors = self.preprocessors
-        return extra_config
+    def _load_config(self, cfg, **kwargs):
+        if 'DisplayAutoGrades' in cfg:
+            self.log.warn(
+                "Use Validator in config, not DisplayAutoGrades. Outdated config:\n%s",
+                '\n'.join(
+                    'DisplayAutoGrades.{key} = {value!r}'.format(key=key, value=value)
+                    for key, value in cfg.DisplayAutoGrades.items()
+                )
+            )
+            cfg.Validator.merge(cfg.DisplayAutoGrades)
+            del cfg.DisplayAutoGrades
 
-    def init_single_notebook_resources(self, notebook_filename):
-        resources = super(ValidateApp, self).init_single_notebook_resources(notebook_filename)
-        resources['nbgrader'] = {}
-        return resources
+        super(ValidateApp, self)._load_config(cfg, **kwargs)
 
-    def write_single_notebook(self, output, resources):
-        return
+    def start(self):
+        if len(self.extra_args) == 1:
+            notebook_filename = self.extra_args[0]
+        elif len(self.extra_args) > 2:
+            self.fail("Too many arguments")
+        elif self.coursedir.assignment_id == "":
+            self.fail("Must provide path to notebook:\nnbgrader validate NOTEBOOK")
 
-    def convert_single_notebook(self, notebook_filename):
+        validator = Validator(parent=self)
         try:
-            super(ValidateApp, self).convert_single_notebook(notebook_filename)
+            validator.validate_and_print(notebook_filename)
         except Exception:
             self.log.error(traceback.format_exc())
             self.fail("nbgrader encountered a fatal error while trying to validate '{}'".format(notebook_filename))
