@@ -37,7 +37,7 @@ class Exchange(LoggingConfigurable):
     ).tag(config=True)
 
     timestamp_format = Unicode(
-        "%Y-%m-%d %H:%M:%S %Z",
+        "%Y-%m-%d %H:%M:%S.%f %Z",
         help="Format string for timestamps"
     ).tag(config=True)
 
