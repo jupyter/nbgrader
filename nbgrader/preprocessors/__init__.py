@@ -3,7 +3,6 @@ from .headerfooter import IncludeHeaderFooter
 from .lockcells import LockCells
 from .clearsolutions import ClearSolutions
 from .saveautogrades import SaveAutoGrades
-from .displayautogrades import DisplayAutoGrades
 from .computechecksums import ComputeChecksums
 from .savecells import SaveCells
 from .overwritecells import OverwriteCells
@@ -23,7 +22,6 @@ __all__ = [
     "LockCells",
     "ClearSolutions",
     "SaveAutoGrades",
-    "DisplayAutoGrades",
     "ComputeChecksums",
     "SaveCells",
     "OverwriteCells",

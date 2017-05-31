@@ -2,8 +2,6 @@
 
 import os
 import json
-import subprocess as sp
-import sys
 import contextlib
 import traceback
 
@@ -18,6 +16,7 @@ from jupyter_core.paths import jupyter_config_path
 from ...apps import NbGrader
 from ...coursedir import CourseDirectory
 from ...exchange import ExchangeList, ExchangeFetch, ExchangeSubmit
+from ...validator import Validator
 
 
 static = os.path.join(os.path.dirname(__file__), 'static')
@@ -191,24 +190,24 @@ class AssignmentList(LoggingConfigurable):
         return retvalue
 
     def validate_notebook(self, path):
-        cmd = [sys.executable, "-m", "nbgrader", "validate", "--json", path]
-        p = sp.Popen(
-            cmd, stdout=sp.PIPE, stderr=sp.PIPE, cwd=self.assignment_dir)
-        stdout, stderr = p.communicate()
-        retcode = p.poll()
+        with chdir(self.assignment_dir):
+            try:
+                config = self.load_config()
+                validator = Validator(config=config)
+                result = validator.validate(path)
 
-        if retcode != 0:
-            retvalue = {
-                "success": False,
-                "value": stdout.decode() + stderr.decode(),
-                "command": " ".join(cmd)
-            }
+            except:
+                self.log.error(traceback.format_exc())
+                retvalue = {
+                    "success": False,
+                    "value": traceback.format_exc()
+                }
 
-        else:
-            retvalue = {
-                "success": True,
-                "value": stdout.decode()
-            }
+            else:
+                retvalue = {
+                    "success": True,
+                    "value": result
+                }
 
         return retvalue
 
