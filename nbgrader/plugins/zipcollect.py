@@ -145,15 +145,15 @@ class FileNameCollectorPlugin(BasePlugin):
         match = re.match(self.named_regexp, filename)
         if not match or not match.groups():
             self.log.warning(
-                "Regular expression '{}' did not match anything in filename."
-                "".format(self.named_regexp)
+                "Regular expression '{}' did not match anything in: {}"
+                "".format(self.named_regexp, filename)
             )
             return None
 
         gd = match.groupdict()
         self.log.debug(
-            "Regular expression '{}' matched\n'{}' in filename."
-            "".format(self.named_regexp, gd)
+            "Regular expression '{}' matched\n'{}' in: {}"
+            "".format(self.named_regexp, gd, filename)
         )
         return gd
 
@@ -183,11 +183,11 @@ class FileNameCollectorPlugin(BasePlugin):
             Note: ``file_id`` MUST include the the relative path to the
             assignment if you are collecting files in assignment sub-folders.
         """
-        root, ext = os.path.splitext(submitted_file)
+        _, ext = os.path.splitext(submitted_file)
 
         # Skip any files without the correct extension
         if ext not in self.valid_ext:
-            self.log.debug("Invalid file extension {}".format(ext))
+            self.log.debug("Invalid file extension {}: {}".format(ext, submitted_file))
             return None
 
         groupdict = self._match(submitted_file)

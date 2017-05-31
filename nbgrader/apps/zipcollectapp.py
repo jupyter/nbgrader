@@ -299,7 +299,7 @@ class ZipCollectApp(NbGrader):
             info = self.collector_plugin_inst.collect(_file)
             if not info or info is None:
                 self.log.warning(
-                    "Skipped submission with no match information provided.")
+                    "Skipped submission with no match information provided: {}".format(_file))
                 invalid_files += 1
                 continue
 
