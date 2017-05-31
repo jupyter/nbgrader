@@ -136,7 +136,7 @@ class FileNameCollectorPlugin(BasePlugin):
         filename and return the match groupdict or None if no match.
         """
         if not self.named_regexp:
-            self.log.warn(
+            self.log.warning(
                 "Regular expression not provided for plugin. Run with "
                 "`--help-all` flag for more information."
             )
@@ -144,7 +144,7 @@ class FileNameCollectorPlugin(BasePlugin):
 
         match = re.match(self.named_regexp, filename)
         if not match or not match.groups():
-            self.log.warn(
+            self.log.warning(
                 "Regular expression '{}' did not match anything in filename."
                 "".format(self.named_regexp)
             )

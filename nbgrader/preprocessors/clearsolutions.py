@@ -45,7 +45,7 @@ class ClearSolutions(NbGraderPreprocessor):
     def _load_config(self, cfg, **kwargs):
         if 'code_stub' in cfg.ClearSolutions:
             if not isinstance(cfg.ClearSolutions.code_stub, dict):
-                self.log.warn(
+                self.log.warning(
                     "The ClearSolutions.code_stub option must now be given as a "
                     "dictionary with keys for the language of the notebook. I will "
                     "automatically convert ClearSolutions.code_stub to a dictionary "
@@ -54,7 +54,7 @@ class ClearSolutions(NbGraderPreprocessor):
                 cfg.ClearSolutions.code_stub = dict(python=cfg.ClearSolutions.code_stub)
 
         if 'comment_mark' in cfg.ClearSolutions:
-            self.log.warn(
+            self.log.warning(
                 "The ClearSolutions.comment_mark config option is deprecated. "
                 "Please include the comment mark in ClearSolutions.begin_solution_delimeter "
                 "and ClearSolutions.end_solution_delimeter instead.")

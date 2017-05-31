@@ -204,7 +204,7 @@ class ZipCollectApp(NbGrader):
 
     def _mkdirs_if_missing(self, path):
         if not check_directory(path, write=True, execute=True):
-            self.log.warn("Directory not found. Creating: {}".format(path))
+            self.log.warning("Directory not found. Creating: {}".format(path))
             os.makedirs(path)
 
     def _clear_existing_files(self, path):
@@ -212,7 +212,7 @@ class ZipCollectApp(NbGrader):
             return
 
         if self.force:
-            self.log.warn("Clearing existing files in {}".format(path))
+            self.log.warning("Clearing existing files in {}".format(path))
             rmtree(path)
             os.makedirs(path)
         else:
@@ -229,7 +229,7 @@ class ZipCollectApp(NbGrader):
         """
         archive_path = self._format_collect_path(self.archive_directory)
         if not check_directory(archive_path, write=False, execute=True):
-            self.log.warn("Directory not found: {}".format(archive_path))
+            self.log.warning("Directory not found: {}".format(archive_path))
             return
 
         extracted_path = self._format_collect_path(self.extracted_directory)
@@ -244,7 +244,7 @@ class ZipCollectApp(NbGrader):
         """
         extracted_path = self._format_collect_path(self.extracted_directory)
         if not check_directory(extracted_path, write=False, execute=True):
-            self.log.warn("Directory not found: {}".format(extracted_path))
+            self.log.warning("Directory not found: {}".format(extracted_path))
 
         src_files = []
         for root, _, extracted_files in os.walk(extracted_path):
@@ -286,7 +286,7 @@ class ZipCollectApp(NbGrader):
             self.coursedir.release_directory, '.', self.coursedir.assignment_id)
         released_notebooks = find_all_notebooks(released_path)
         if not released_notebooks:
-            self.log.warn(
+            self.log.warning(
                 "No release notebooks found for assignment {}"
                 "".format(self.coursedir.assignment_id)
             )
@@ -298,7 +298,7 @@ class ZipCollectApp(NbGrader):
             self.log.info("Parsing file: {}".format(_file))
             info = self.collector_plugin_inst.collect(_file)
             if not info or info is None:
-                self.log.warn(
+                self.log.warning(
                     "Skipped submission with no match information provided.")
                 invalid_files += 1
                 continue
@@ -325,11 +325,11 @@ class ZipCollectApp(NbGrader):
                 self.log.debug(
                     "Notebook name given was: {}".format(submission))
                 if self.strict:
-                    self.log.warn(
+                    self.log.warning(
                         "Skipped notebook with invalid name '{}'".format(submission))
                     invalid_files += 1
                     continue
-                self.log.warn(
+                self.log.warning(
                     "Invalid submission notebook name '{}'".format(submission))
 
             submitted_path = self.coursedir.format_path(
@@ -385,12 +385,12 @@ class ZipCollectApp(NbGrader):
                         data[student_id]['dest_files'][ind] = dest_path
                         data[student_id]['file_ids'][ind] = submission
                         data[student_id]['timestamp'] = timestamp
-                        self.log.warn(
+                        self.log.warning(
                             "Replacing previously collected submission file "
                             "with one that has a newer timestamp"
                         )
                     else:
-                        self.log.warn(
+                        self.log.warning(
                             "Skipped submission file with older timestamp")
                     invalid_files += 1
 
@@ -402,7 +402,7 @@ class ZipCollectApp(NbGrader):
             processed_files += 1
 
         if invalid_files > 0:
-            self.log.warn(
+            self.log.warning(
                 "{} files collected, {} files skipped"
                 "".format(processed_files, invalid_files)
             )

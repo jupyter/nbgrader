@@ -157,7 +157,7 @@ class NbGrader(JupyterApp):
 
     def _load_config(self, cfg, **kwargs):
         if 'NbGraderConfig' in cfg:
-            self.log.warn(
+            self.log.warning(
                 "Use NbGrader in config, not NbGraderConfig. Outdated config:\n%s",
                 '\n'.join(
                     'NbGraderConfig.{key} = {value!r}'.format(key=key, value=value)
@@ -168,7 +168,7 @@ class NbGrader(JupyterApp):
             del cfg.NbGraderConfig
 
         if 'BasicConfig' in cfg:
-            self.log.warn(
+            self.log.warning(
                 "Use NbGrader in config, not BasicConfig. Outdated config:\n%s",
                 '\n'.join(
                     'BasicConfig.{key} = {value!r}'.format(key=key, value=value)
@@ -179,7 +179,7 @@ class NbGrader(JupyterApp):
             del cfg.BasicConfig
 
         if 'BaseNbGraderApp' in cfg:
-            self.log.warn(
+            self.log.warning(
                 "Use NbGrader in config, not BaseNbGraderApp. Outdated config:\n%s",
                 '\n'.join(
                     'BaseNbGraderApp.{key} = {value!r}'.format(key=key, value=value)
@@ -190,7 +190,7 @@ class NbGrader(JupyterApp):
             del cfg.BaseNbGraderApp
 
         if 'BaseApp' in cfg:
-            self.log.warn(
+            self.log.warning(
                 "Use NbGrader in config, not BaseApp. Outdated config:\n%s",
                 '\n'.join(
                     'BaseApp.{key} = {value!r}'.format(key=key, value=value)
@@ -217,12 +217,12 @@ class NbGrader(JupyterApp):
 
         for old_opt, new_opt in coursedir_options:
             if old_opt in cfg.NbGrader:
-                self.log.warn("Outdated config: use CourseDirectory.{} rather than NbGrader.{}".format(new_opt, old_opt))
+                self.log.warning("Outdated config: use CourseDirectory.{} rather than NbGrader.{}".format(new_opt, old_opt))
                 setattr(cfg.CourseDirectory, new_opt, cfg.NbGrader[old_opt])
                 delattr(cfg.NbGrader, old_opt)
 
         if "course_id" in cfg.NbGrader:
-            self.log.warn("Outdated config: use Exchange.course_id rather than NbGrader.course_id")
+            self.log.warning("Outdated config: use Exchange.course_id rather than NbGrader.course_id")
             cfg.Exchange.course_id = cfg.NbGrader.course_id
             del cfg.NbGrader.course_id
 
@@ -235,12 +235,12 @@ class NbGrader(JupyterApp):
 
         for old_opt, new_opt in exchange_options:
             if old_opt in cfg.TransferApp:
-                self.log.warn("Outdated config: use Exchange.{} rather than TransferApp.{}".format(new_opt, old_opt))
+                self.log.warning("Outdated config: use Exchange.{} rather than TransferApp.{}".format(new_opt, old_opt))
                 setattr(cfg.Exchange, new_opt, cfg.TransferApp[old_opt])
                 delattr(cfg.TransferApp, old_opt)
 
         if 'TransferApp' in cfg and cfg.TransferApp:
-            self.log.warn(
+            self.log.warning(
                 "Use Exchange in config, not TransferApp. Outdated config:\n%s",
                 '\n'.join(
                     'TransferApp.{key} = {value!r}'.format(key=key, value=value)
@@ -301,7 +301,7 @@ class NbGrader(JupyterApp):
             paths = [os.path.join(x, "{}.py".format(self.config_file_name)) for x in self.config_file_paths]
 
         if not any(os.path.exists(x) for x in paths):
-            self.log.warn("No nbgrader_config.py file found (rerun with --debug to see where nbgrader is looking)")
+            self.log.warning("No nbgrader_config.py file found (rerun with --debug to see where nbgrader is looking)")
 
         super(NbGrader, self).load_config_file(**kwargs)
 
@@ -403,7 +403,7 @@ class BaseNbConvertApp(NbGrader, NbConvertApp):
         for assignment in glob.glob(fullglob):
             found = glob.glob(os.path.join(assignment, self.coursedir.notebook_id + ".ipynb"))
             if len(found) == 0:
-                self.log.warn("No notebooks were matched in '%s'", assignment)
+                self.log.warning("No notebooks were matched in '%s'", assignment)
                 continue
             self.assignments[assignment] = found
 

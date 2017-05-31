@@ -67,7 +67,7 @@ class CollectApp(NbGrader):
 
     def _load_config(self, cfg, **kwargs):
         if 'CollectApp' in cfg:
-            self.log.warn(
+            self.log.warning(
                 "Use ExchangeCollect in config, not CollectApp. Outdated config:\n%s",
                 '\n'.join(
                     'CollectApp.{key} = {value!r}'.format(key=key, value=value)

@@ -103,10 +103,10 @@ class DbStudentRemoveApp(NbGrader):
 
             if len(student.submissions) > 0:
                 if self.force:
-                    self.log.warn("Removing associated grades")
+                    self.log.warning("Removing associated grades")
                 else:
-                    self.log.warn("!!! There are grades in the database for student '%s'.", student_id)
-                    self.log.warn("!!! Removing this student will also remove these grades.")
+                    self.log.warning("!!! There are grades in the database for student '%s'.", student_id)
+                    self.log.warning("!!! Removing this student will also remove these grades.")
                     self.fail("!!! If you are SURE this is what you want to do, rerun with --force.")
 
             self.log.info("Removing student with ID '%s'", student_id)
@@ -245,10 +245,10 @@ class DbAssignmentRemoveApp(NbGrader):
 
             if len(assignment.submissions) > 0:
                 if self.force:
-                    self.log.warn("Removing associated grades")
+                    self.log.warning("Removing associated grades")
                 else:
-                    self.log.warn("!!! There are grades in the database for assignment '%s'.", assignment_id)
-                    self.log.warn("!!! Removing this assignment will also remove these grades.")
+                    self.log.warning("!!! There are grades in the database for assignment '%s'.", assignment_id)
+                    self.log.warning("!!! Removing this assignment will also remove these grades.")
                     self.fail("!!! If you are SURE this is what you want to do, rerun with --force.")
 
             self.log.info("Removing assignment with ID '%s'", assignment_id)
