@@ -153,6 +153,7 @@ smeylan
 spellcheck
 SQL
 sqlite
+startup
 stdin
 stdout
 stoppped
