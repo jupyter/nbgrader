@@ -7,6 +7,7 @@ alikasamanli
 alope
 app
 apps
+aren
 asctime
 auth
 authenticator
@@ -43,6 +44,7 @@ ddbourgin
 delimeters
 dev
 dlsun
+doesn
 dropdown
 dsblank
 duedate
@@ -63,6 +65,8 @@ Gradebook
 gradebook
 Granger
 hardcoded
+hasn
+HeLLo
 hetland
 hOlle
 Homebrew
@@ -78,6 +82,7 @@ iopub
 ipynb
 IPython
 ischurov
+isn
 ivanslapnicar
 jdfreder
 jhamrick
@@ -143,6 +148,7 @@ runtime
 sansary
 serverextension
 sha
+shouldn
 smeylan
 spellcheck
 SQL
@@ -172,7 +178,9 @@ url
 username
 usernames
 utcnow
+ve
 vinaykola
+weren
 whitead
 whitespace
 whositwhatnow
