@@ -69,7 +69,7 @@ class ReleaseApp(NbGrader):
 
     def _load_config(self, cfg, **kwargs):
         if 'ReleaseApp' in cfg:
-            self.log.warn(
+            self.log.warning(
                 "Use ExchangeRelease in config, not ReleaseApp. Outdated config:\n%s",
                 '\n'.join(
                     'ReleaseApp.{key} = {value!r}'.format(key=key, value=value)

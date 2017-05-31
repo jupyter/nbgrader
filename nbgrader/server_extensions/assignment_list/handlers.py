@@ -50,7 +50,7 @@ class AssignmentList(LoggingConfigurable):
             config_found = True
 
         if not config_found:
-            self.log.warn("No nbgrader_config.py file found. Rerun with DEBUG log level to see where nbgrader is looking.")
+            self.log.warning("No nbgrader_config.py file found. Rerun with DEBUG log level to see where nbgrader is looking.")
 
         return full_config
 

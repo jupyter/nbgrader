@@ -62,7 +62,7 @@ class UpdateApp(NbGrader):
             elif os.path.isdir(name):
                 notebooks.update([os.path.join(name, x) for x in find_all_notebooks(name)])
             elif not name.endswith(".ipynb"):
-                self.log.warn("{} is not a notebook, ignoring".format(name))
+                self.log.warning("{} is not a notebook, ignoring".format(name))
             else:
                 notebooks.add(name)
 

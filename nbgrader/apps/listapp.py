@@ -94,7 +94,7 @@ class ListApp(NbGrader):
 
     def _load_config(self, cfg, **kwargs):
         if 'ListApp' in cfg:
-            self.log.warn(
+            self.log.warning(
                 "Use ExchangeList in config, not ListApp. Outdated config:\n%s",
                 '\n'.join(
                     'ListApp.{key} = {value!r}'.format(key=key, value=value)

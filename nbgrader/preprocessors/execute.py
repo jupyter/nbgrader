@@ -43,7 +43,7 @@ class Execute(NbGraderPreprocessor, ExecutePreprocessor):
             if retries == 0:
                 raise UnresponsiveKernelError()
             else:
-                self.log.warn("Failed to execute notebook, trying again...")
+                self.log.warning("Failed to execute notebook, trying again...")
                 return self.preprocess(nb, resources, retries=retries - 1)
 
         return output

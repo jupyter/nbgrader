@@ -58,7 +58,7 @@ class FetchApp(NbGrader):
 
     def _load_config(self, cfg, **kwargs):
         if 'FetchApp' in cfg:
-            self.log.warn(
+            self.log.warning(
                 "Use ExchangeFetch in config, not FetchApp. Outdated config:\n%s",
                 '\n'.join(
                     'FetchApp.{key} = {value!r}'.format(key=key, value=value)

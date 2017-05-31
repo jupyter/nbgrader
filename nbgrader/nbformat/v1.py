@@ -39,7 +39,7 @@ class ValidatorV1(BaseValidator):
         allowed = set(self.schema["properties"].keys())
         keys = set(meta.keys()) - allowed
         if len(keys) > 0:
-            self.log.warn("extra keys detected in metadata, these will be removed: {}".format(keys))
+            self.log.warning("extra keys detected in metadata, these will be removed: {}".format(keys))
             for key in keys:
                 del meta[key]
 

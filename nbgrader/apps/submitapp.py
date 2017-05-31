@@ -58,7 +58,7 @@ class SubmitApp(NbGrader):
 
     def _load_config(self, cfg, **kwargs):
         if 'SubmitApp' in cfg:
-            self.log.warn(
+            self.log.warning(
                 "Use ExchangeSubmit in config, not SubmitApp. Outdated config:\n%s",
                 '\n'.join(
                     'SubmitApp.{key} = {value!r}'.format(key=key, value=value)

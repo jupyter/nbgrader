@@ -78,6 +78,7 @@ nbgrader/docs/source/configuration/config_options.rst
 nbgrader/docs/source/user_guide/creating_and_grading_assignments.rst
 nbgrader/docs/source/user_guide/managing_assignment_files.rst
 nbgrader/docs/source/user_guide/managing_assignment_files_manually.rst
+nbgrader/docs/source/user_guide/managing_the_database.rst
 
 # components stuff
 node_modules
