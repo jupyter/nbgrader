@@ -75,6 +75,16 @@ define([
         validate_ids();
     });
 
+    var randomString = function(length) {
+        var result = '';
+        var chars = 'abcdef0123456789';
+        var i;
+        for (i=0; i < length; i++) {
+            result += chars[Math.floor(Math.random() * chars.length)];
+        }
+        return result;
+    };
+
     var to_float = function(val) {
         if (val === undefined || val === "") {
             return 0;
@@ -219,9 +229,9 @@ define([
 
     var get_grade_id = function (cell) {
         if (cell.metadata.nbgrader === undefined) {
-            return '';
+            return "cell-" + randomString(16);
         } else if (cell.metadata.nbgrader.grade_id === undefined) {
-            return '';
+            return "cell-" + randomString(16);
         } else {
             return cell.metadata.nbgrader.grade_id;
         }
@@ -376,6 +386,7 @@ define([
         var lbl = $('<label/>').append($('<span/>').text('ID: '));
         lbl.append(text);
 
+        set_grade_id(cell, get_grade_id(cell));
         text.addClass('nbgrader-id-input');
         text.attr("value", get_grade_id(cell));
         text.change(function () {
