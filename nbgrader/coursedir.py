@@ -22,7 +22,7 @@ class CourseDirectory(LoggingConfigurable):
 
             If the ID is purely numeric and you are passing it as a flag on the
             command line, you will need to escape the quotes in order to have
-            it detected as a string, for example `--student="\"12345\"". See:
+            it detected as a string, for example `--student="\"12345\""`. See:
 
                 https://github.com/jupyter/nbgrader/issues/743
 
