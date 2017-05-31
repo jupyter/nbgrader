@@ -12,8 +12,8 @@
 *
 */
 /*!
- * Bootstrap v3.3.6 (http://getbootstrap.com)
- * Copyright 2011-2015 Twitter, Inc.
+ * Bootstrap v3.3.7 (http://getbootstrap.com)
+ * Copyright 2011-2016 Twitter, Inc.
  * Licensed under MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE)
  */
 /*! normalize.css v3.0.3 | MIT License | github.com/necolas/normalize.css */
@@ -1108,7 +1108,6 @@ a:focus {
   text-decoration: underline;
 }
 a:focus {
-  outline: thin dotted;
   outline: 5px auto -webkit-focus-ring-color;
   outline-offset: -2px;
 }
@@ -2537,7 +2536,6 @@ select[size] {
 input[type="file"]:focus,
 input[type="radio"]:focus,
 input[type="checkbox"]:focus {
-  outline: thin dotted;
   outline: 5px auto -webkit-focus-ring-color;
   outline-offset: -2px;
 }
@@ -3028,7 +3026,6 @@ select[multiple].input-lg {
 .btn.focus,
 .btn:active.focus,
 .btn.active.focus {
-  outline: thin dotted;
   outline: 5px auto -webkit-focus-ring-color;
   outline-offset: -2px;
 }
@@ -8759,6 +8756,9 @@ body > #header .header-bar {
     margin-left: 10px;
   }
 }
+[dir="rtl"] #ipython_notebook {
+  float: right !important;
+}
 #noscript {
   width: auto;
   padding-top: 16px;
@@ -8961,8 +8961,14 @@ span#login_widget > .button .badge,
  *
  * Author: Jupyter Development Team
  */
+[dir="rtl"] #tabs li {
+  float: right;
+}
 ul#tabs {
   margin-bottom: 4px;
+}
+[dir="rtl"] ul#tabs {
+  margin-right: 0px;
 }
 ul#tabs a {
   padding-top: 6px;
@@ -8985,6 +8991,16 @@ ul.breadcrumb span {
 }
 .list_toolbar .tree-buttons {
   padding-top: 1px;
+}
+[dir="rtl"] .list_toolbar .tree-buttons {
+  float: left !important;
+}
+[dir="rtl"] .list_toolbar .pull-right {
+  padding-top: 1px;
+  float: left !important;
+}
+[dir="rtl"] .list_toolbar .pull-left {
+  float: right !important;
 }
 .dynamic-buttons {
   padding-top: 3px;
@@ -9121,6 +9137,9 @@ ul.breadcrumb span {
 #tree-selector {
   padding-right: 0px;
 }
+[dir="rtl"] #tree-selector a {
+  float: right;
+}
 #button-select-all {
   min-width: 50px;
 }
@@ -9210,6 +9229,9 @@ ul#new-menu {
   left: auto;
   right: 0;
 }
+[dir="rtl"] #new-menu {
+  text-align: right;
+}
 .kernel-menu-icon {
   padding-right: 12px;
   width: 24px;
@@ -9254,6 +9276,9 @@ ul#new-menu {
 }
 #running .panel-group .panel .panel-body .list_container .list_item:last-child {
   border-bottom: 0px;
+}
+[dir="rtl"] #running .col-sm-8 {
+  float: right !important;
 }
 .delete-button {
   display: none;
@@ -9550,6 +9575,7 @@ div.cell.selected.jupyter-soft-selected {
   }
 }
 div.inner_cell {
+  min-width: 0;
   /* Old browsers */
   display: -webkit-box;
   -webkit-box-orient: vertical;
@@ -9570,11 +9596,6 @@ div.inner_cell {
   box-flex: 1;
   /* Modern browsers */
   flex: 1;
-}
-@-moz-document url-prefix() {
-  div.inner_cell {
-    overflow-x: hidden;
-  }
 }
 /* input_area and input_prompt must match in top border and margin for alignment */
 div.input_area {
@@ -11245,7 +11266,7 @@ div#pager .ui-resizable-handle::after {
 }
 .shortcut_key {
   display: inline-block;
-  width: 20ex;
+  width: 21ex;
   text-align: right;
   font-family: monospace;
 }
@@ -11557,6 +11578,7 @@ ul.typeahead-list > li > a {
   box-shadow: 0px 0px 12px 1px rgba(87, 87, 87, 0.2);
 }
 .terminal-app .terminal {
+  width: 100%;
   float: left;
   font-family: monospace;
   color: white;
@@ -11570,6 +11592,9 @@ ul.typeahead-list > li > a {
 .terminal-app .terminal dummy-screen {
   line-height: 1em;
   font-size: 14px;
+}
+.terminal-app .terminal .xterm-rows {
+  padding: 10px;
 }
 .terminal-app .terminal-cursor {
   color: black;
@@ -11630,8 +11655,10 @@ ul.typeahead-list > li > a {
 .highlight .mh { color: #666666 } /* Literal.Number.Hex */
 .highlight .mi { color: #666666 } /* Literal.Number.Integer */
 .highlight .mo { color: #666666 } /* Literal.Number.Oct */
+.highlight .sa { color: #BA2121 } /* Literal.String.Affix */
 .highlight .sb { color: #BA2121 } /* Literal.String.Backtick */
 .highlight .sc { color: #BA2121 } /* Literal.String.Char */
+.highlight .dl { color: #BA2121 } /* Literal.String.Delimiter */
 .highlight .sd { color: #BA2121; font-style: italic } /* Literal.String.Doc */
 .highlight .s2 { color: #BA2121 } /* Literal.String.Double */
 .highlight .se { color: #BB6622; font-weight: bold } /* Literal.String.Escape */
@@ -11642,9 +11669,11 @@ ul.typeahead-list > li > a {
 .highlight .s1 { color: #BA2121 } /* Literal.String.Single */
 .highlight .ss { color: #19177C } /* Literal.String.Symbol */
 .highlight .bp { color: #008000 } /* Name.Builtin.Pseudo */
+.highlight .fm { color: #0000FF } /* Name.Function.Magic */
 .highlight .vc { color: #19177C } /* Name.Variable.Class */
 .highlight .vg { color: #19177C } /* Name.Variable.Global */
 .highlight .vi { color: #19177C } /* Name.Variable.Instance */
+.highlight .vm { color: #19177C } /* Name.Variable.Magic */
 .highlight .il { color: #666666 } /* Literal.Number.Integer.Long */
     </style>
 <style type="text/css">
@@ -11690,7 +11719,7 @@ ul.typeahead-list > li > a {
 
 <!-- Loading mathjax macro -->
 <!-- Load mathjax -->
-    <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS_HTML"></script>
     <!-- MathJax configuration -->
     <script type="text/x-mathjax-config">
     MathJax.Hub.Config({
@@ -11897,7 +11926,8 @@ span.nbgrader-label {
             
 <div class="cell border-box-sizing text_cell rendered">
   <div class="prompt input_prompt">
-</div><div class="inner_cell">
+</div>
+<div class="inner_cell">
     <div class="text_cell_render border-box-sizing rendered_html">
       <p>Before you turn this problem in, make sure everything runs as expected. First, <strong>restart the kernel</strong> (in the menubar, select Kernel$\rightarrow$Restart) and then <strong>run all cells</strong> (in the menubar, select Cell$\rightarrow$Run All).</p>
 <p>Make sure you fill in any place that says <code>YOUR CODE HERE</code> or "YOUR ANSWER HERE", as well as your name and collaborators below:</p>
@@ -11920,7 +11950,8 @@ span.nbgrader-label {
 </div>
 <div class="cell border-box-sizing text_cell rendered">
   <div class="prompt input_prompt">
-</div><div class="inner_cell">
+</div>
+<div class="inner_cell">
     <div class="text_cell_render border-box-sizing rendered_html">
       <hr>
 
@@ -11929,7 +11960,8 @@ span.nbgrader-label {
 
 <div class="cell border-box-sizing text_cell rendered">
   <div class="prompt input_prompt">
-</div><div class="inner_cell">
+</div>
+<div class="inner_cell">
     <div class="text_cell_render border-box-sizing rendered_html">
       <p>For this problem set, we'll be using the Jupyter notebook:</p>
 <p><img src="jupyter.png" alt=""></p>
@@ -11939,10 +11971,11 @@ span.nbgrader-label {
 
 <div class="cell border-box-sizing text_cell rendered">
   <div class="prompt input_prompt">
-</div><div class="inner_cell">
+</div>
+<div class="inner_cell">
     <div class="text_cell_render border-box-sizing rendered_html">
       <hr>
-<h2 id="Part-A-(2-points)">Part A (2 points)<a class="anchor-link" href="#Part-A-(2-points)">&#182;</a></h2><p>Write a function that returns a list of numbers, such that $x_i=i^2$, for $1\leq i \leq n$. Make sure it handles the case where $n<1$ by raising a <code>ValueError</code>.</p>
+<h2 id="Part-A-(2-points)">Part A (2 points)<a class="anchor-link" href="#Part-A-(2-points)">&#182;</a></h2><p>Write a function that returns a list of numbers, such that $x_i=i^2$, for $1\leq i \leq n$. Make sure it handles the case where $n&lt;1$ by raising a <code>ValueError</code>.</p>
 
     </div>
   </div></div>
@@ -11972,7 +12005,8 @@ span.nbgrader-label {
 </div>
 <div class="cell border-box-sizing text_cell rendered">
   <div class="prompt input_prompt">
-</div><div class="inner_cell">
+</div>
+<div class="inner_cell">
     <div class="text_cell_render border-box-sizing rendered_html">
       <p>Your function should print <code>[1, 4, 9, 16, 25, 36, 49, 64, 81, 100]</code> for $n=10$. Check that it does:</p>
 
@@ -11994,7 +12028,11 @@ span.nbgrader-label {
 <div class="output">
 
 
-<div class="output_area"><div class="prompt output_prompt">Out[3]:</div>
+<div class="output_area">
+
+<div class="prompt output_prompt">Out[3]:</div>
+
+
 
 
 <div class="output_text output_subarea output_execute_result">
@@ -12064,7 +12102,8 @@ span.nbgrader-label {
 </div>
 <div class="cell border-box-sizing text_cell rendered">
   <div class="prompt input_prompt">
-</div><div class="inner_cell">
+</div>
+<div class="inner_cell">
     <div class="text_cell_render border-box-sizing rendered_html">
       <hr>
 <h2 id="Part-B-(1-point)">Part B (1 point)<a class="anchor-link" href="#Part-B-(1-point)">&#182;</a></h2><p>Using your <code>squares</code> function, write a function that computes the sum of the squares of the numbers from 1 to $n$. Your function should call the <code>squares</code> function -- it should NOT reimplement its functionality.</p>
@@ -12092,7 +12131,8 @@ span.nbgrader-label {
 </div>
 <div class="cell border-box-sizing text_cell rendered">
   <div class="prompt input_prompt">
-</div><div class="inner_cell">
+</div>
+<div class="inner_cell">
     <div class="text_cell_render border-box-sizing rendered_html">
       <p>The sum of squares from 1 to 10 should be 385. Verify that this is the answer you get:</p>
 
@@ -12114,7 +12154,11 @@ span.nbgrader-label {
 <div class="output">
 
 
-<div class="output_area"><div class="prompt output_prompt">Out[7]:</div>
+<div class="output_area">
+
+<div class="prompt output_prompt">Out[7]:</div>
+
+
 
 
 <div class="output_text output_subarea output_execute_result">
@@ -12181,7 +12225,8 @@ span.nbgrader-label {
 </div>
 <div class="cell border-box-sizing text_cell rendered">
   <div class="prompt input_prompt">
-</div><div class="inner_cell">
+</div>
+<div class="inner_cell">
     <div class="text_cell_render border-box-sizing rendered_html">
       <hr>
 <h2 id="Part-C-(1-point)">Part C (1 point)<a class="anchor-link" href="#Part-C-(1-point)">&#182;</a></h2><p>Using LaTeX math notation, write out the equation that is implemented by your <code>sum_of_squares</code> function.</p>
@@ -12191,7 +12236,8 @@ span.nbgrader-label {
 
 <div class="cell border-box-sizing text_cell rendered">
   <div class="prompt input_prompt">
-</div><div class="panel panel-primary nbgrader_cell">
+</div>
+<div class="panel panel-primary nbgrader_cell">
     <a name="comment-sum_of_squares_equation"></a><a name="sum_of_squares_equation"></a><div class="panel-heading"><span class="nbgrader-label">Student's answer</span><span class="pull-right">
       Score: 0.0 / 1.0 <a href="#top">(Top)</a>
   </span></div>
@@ -12206,7 +12252,8 @@ span.nbgrader-label {
 
 <div class="cell border-box-sizing text_cell rendered">
   <div class="prompt input_prompt">
-</div><div class="inner_cell">
+</div>
+<div class="inner_cell">
     <div class="text_cell_render border-box-sizing rendered_html">
       <hr>
 <h2 id="Part-D-(2-points)">Part D (2 points)<a class="anchor-link" href="#Part-D-(2-points)">&#182;</a></h2><p>Find a usecase for your <code>sum_of_squares</code> function and implement that usecase in the cell below.</p>
@@ -12262,7 +12309,11 @@ span.nbgrader-label {
 <div class="output">
 
 
-<div class="output_area"><div class="prompt"></div>
+<div class="output_area">
+
+<div class="prompt"></div>
+
+
 <div class="output_subarea output_stream output_stdout output_text">
 <pre>2.23606797749979
 2.23606797749979
@@ -12290,7 +12341,11 @@ span.nbgrader-label {
 <div class="output">
 
 
-<div class="output_area"><div class="prompt"></div>
+<div class="output_area">
+
+<div class="prompt"></div>
+
+
 <div class="output_subarea output_stream output_stdout output_text">
 <pre>13.45362404707371
 13.45362404707371
