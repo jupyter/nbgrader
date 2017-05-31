@@ -66,7 +66,13 @@ def clear_notebooks(root):
                     new_nb = preprocessor.preprocess(new_nb, {})[0]
 
                 # clear metadata
-                new_nb.metadata = {}
+                new_nb.metadata = {
+                    "kernelspec": {
+                        "display_name": "Python",
+                        "language": "python",
+                        "name": "python"
+                    }
+                }
 
                 # write the notebook back to disk
                 with open(pth, 'w') as fh:
