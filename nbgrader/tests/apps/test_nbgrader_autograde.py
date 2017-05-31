@@ -9,7 +9,7 @@ from nbformat import current_nbformat
 
 from ...api import Gradebook
 from ...utils import remove
-from ...nbformat import reads
+from ...nbgraderformat import reads
 from .. import run_nbgrader
 from .base import BaseTestApp
 

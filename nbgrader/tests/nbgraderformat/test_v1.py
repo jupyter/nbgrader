@@ -1,4 +1,4 @@
-from ...nbformat.v1 import ValidatorV1
+from ...nbgraderformat.v1 import ValidatorV1
 from .. import (
     create_grade_cell,
     create_solution_cell)

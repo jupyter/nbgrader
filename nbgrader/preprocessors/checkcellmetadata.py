@@ -1,6 +1,6 @@
 import traceback
 
-from ..nbformat import Validator, ValidationError
+from ..nbgraderformat import Validator, ValidationError
 from . import NbGraderPreprocessor
 
 class CheckCellMetadata(NbGraderPreprocessor):

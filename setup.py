@@ -68,7 +68,7 @@ setup_args = dict(
     packages=find_packages(),
     package_data={
         'nbgrader': extension_files + docs_files,
-        'nbgrader.nbformat': ["*.json"],
+        'nbgrader.nbgraderformat': ["*.json"],
         'nbgrader.server_extensions.formgrader': static_files,
         'nbgrader.tests': [
             'apps/files/*',

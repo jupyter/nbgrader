@@ -7,7 +7,7 @@ from textwrap import fill, dedent
 from nbconvert.filters import ansi2html, strip_ansi
 
 from .preprocessors import Execute, ClearOutput, CheckCellMetadata
-from .nbformat import read as read_nb
+from .nbgraderformat import read as read_nb
 from . import utils
 
 

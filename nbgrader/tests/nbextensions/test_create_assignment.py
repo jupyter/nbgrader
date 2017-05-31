@@ -7,7 +7,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.keys import Keys
 from selenium.common.exceptions import TimeoutException, NoSuchElementException
 
-from ...nbformat import read, ValidationError
+from ...nbgraderformat import read, ValidationError
 from nbformat import current_nbformat
 
 

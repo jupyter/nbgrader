@@ -1,7 +1,7 @@
 import os
 
 from nbformat import current_nbformat, read
-from ...nbformat import read as read_nb
+from ...nbgraderformat import read as read_nb
 
 
 class BaseTestPreprocessor(object):

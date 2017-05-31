@@ -5,7 +5,7 @@ from ...preprocessors import CheckCellMetadata
 from .base import BaseTestPreprocessor
 from .. import create_grade_cell, create_solution_cell
 from nbformat.v4 import new_notebook
-from ...nbformat import ValidationError
+from ...nbgraderformat import ValidationError
 
 @pytest.fixture
 def preprocessor():
