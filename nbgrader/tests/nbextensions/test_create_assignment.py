@@ -167,6 +167,7 @@ def test_manual_cell(browser, port):
     assert 2 == _get_metadata(browser)['points']
 
     # set the id
+    assert _get_metadata(browser)['grade_id'].startswith("cell-")
     _set_id(browser)
     assert "foo" == _get_metadata(browser)['grade_id']
 
@@ -198,6 +199,7 @@ def test_solution_cell(browser, port):
         EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".nbgrader-id")))
 
     # set the id
+    assert _get_metadata(browser)['grade_id'].startswith("cell-")
     _set_id(browser)
     assert "foo" == _get_metadata(browser)['grade_id']
 
@@ -237,6 +239,7 @@ def test_tests_cell(browser, port):
     assert 2 == _get_metadata(browser)['points']
 
     # set the id
+    assert _get_metadata(browser)['grade_id'].startswith("cell-")
     _set_id(browser)
     assert "foo" == _get_metadata(browser)['grade_id']
 
@@ -276,6 +279,7 @@ def test_tests_to_solution_cell(browser, port):
     assert 2 == _get_metadata(browser)['points']
 
     # set the id
+    assert _get_metadata(browser)['grade_id'].startswith("cell-")
     _set_id(browser)
     assert "foo" == _get_metadata(browser)['grade_id']
 
@@ -317,6 +321,7 @@ def test_locked_cell(browser, port):
         EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".lock-button")))
 
     # set the id
+    assert _get_metadata(browser)['grade_id'].startswith("cell-")
     _set_id(browser)
     assert "foo" == _get_metadata(browser)['grade_id']
 
@@ -493,6 +498,7 @@ def test_cell_ids(browser, port):
 
     # turn it into a cell with an id
     _select_solution(browser)
+    _set_id(browser, cell_id="")
 
     # save and check for an error (blank id)
     _save(browser)
