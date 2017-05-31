@@ -1,6 +1,7 @@
 import pytest
 import os
 import shutil
+import time
 
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
@@ -252,6 +253,7 @@ def test_submit_assignment(browser, port, class_files, tempdir):
     assert rows[0].find_element_by_class_name("item_course").text == "xyz 200"
 
     # submit it again
+    time.sleep(1)
     rows = browser.find_elements_by_css_selector("#fetched_assignments_list > .list_item")
     rows[0].find_element_by_css_selector(".item_status button").click()
 
