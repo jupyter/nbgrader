@@ -86,15 +86,15 @@ class Exchange(LoggingConfigurable):
             self.fail("Invalid timezone: {}".format(self.timezone))
         self.timestamp = datetime.datetime.now(tz).strftime(self.timestamp_format)
 
-    def set_perms(self, dest, perms):
+    def set_perms(self, dest, fileperms, dirperms):
         all_dirs = []
         for dirname, _, filenames in os.walk(dest):
             for filename in filenames:
-                os.chmod(os.path.join(dirname, filename), perms)
+                os.chmod(os.path.join(dirname, filename), fileperms)
             all_dirs.append(dirname)
 
         for dirname in all_dirs[::-1]:
-            os.chmod(dirname, perms)
+            os.chmod(dirname, dirperms)
 
     def ensure_root(self):
         """See if the exchange directory exists and is writable, fail if not."""
@@ -113,11 +113,9 @@ class Exchange(LoggingConfigurable):
         """Actually do the file transfer."""
         raise NotImplementedError
 
-    def do_copy(self, src, dest, perms=None):
+    def do_copy(self, src, dest):
         """Copy the src dir to the dest dir omitting the self.coursedir.ignore globs."""
         shutil.copytree(src, dest, ignore=shutil.ignore_patterns(*self.coursedir.ignore))
-        if perms:
-            self.set_perms(dest, perms=perms)
 
     def start(self):
         if sys.platform == 'win32':

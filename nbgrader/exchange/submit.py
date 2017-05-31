@@ -115,7 +115,10 @@ class ExchangeSubmit(Exchange):
         self.do_copy(self.src_path, dest_path)
         with open(os.path.join(dest_path, "timestamp.txt"), "w") as fh:
             fh.write(self.timestamp)
-        self.set_perms(dest_path, perms=(S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH))
+        self.set_perms(
+            dest_path,
+            fileperms=(S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH),
+            dirperms=(S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH))
 
         # Make this 0777=ugo=rwx so the instructor can delete later. Hidden from other users by the timestamp.
         os.chmod(
