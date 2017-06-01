@@ -14,7 +14,7 @@ define([
     var add_button = function () {
         var maintoolbar = $("#maintoolbar-container");
         var btn_group = $("<div />").attr("class", "btn-group")
-        var btn = $("<button />").attr("class", "btn btn-default").text("Validate");
+        var btn = $("<button />").attr("class", "btn btn-default validate").text("Validate");
         btn_group.append(btn)
         maintoolbar.append(btn_group);
 
@@ -49,8 +49,12 @@ define([
 
     var validate = function (data, button) {
         var body = $('<div/>').attr("id", "validation-message");
-        if (data.success) {
-            data = data.value;
+        if (data.success === true) {
+            if (typeof(data.value) === "string") {
+                data = JSON.parse(data.value);
+            } else {
+                data = data.value;
+            }
             if (data.changed !== undefined) {
                 for (var i=0; i<data.changed.length; i++) {
                     body.append($('<div/>').append($('<p/>').text('The source of the following cell has changed, but it should not have!')));
