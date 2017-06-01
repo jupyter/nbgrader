@@ -3,12 +3,15 @@
 
 import csv
 import os
+import shutil
 
 from textwrap import dedent
 from traitlets import default, Unicode, Bool
+from datetime import datetime
 
 from . import NbGrader
 from ..api import Gradebook, MissingEntry
+from .. import dbutil
 
 aliases = {
     'log-level': 'Application.log_level',
@@ -382,6 +385,38 @@ class DbAssignmentApp(NbGrader):
         super(DbAssignmentApp, self).start()
 
 
+class DbUpgradeApp(NbGrader):
+    """Based on the `jupyterhub upgrade-db` command found in jupyterhub.app.UpgradeDB"""
+
+    name = 'nbgrader-db-upgrade'
+    description = u'Upgrade the database schema to the latest version'
+
+    def _backup_db_file(self, db_file):
+        """Backup a database file"""
+        if not os.path.exists(db_file):
+            return
+
+        timestamp = datetime.now().strftime('.%Y-%m-%d-%H%M%S')
+        backup_db_file = db_file + timestamp
+        for i in range(1, 10):
+            if not os.path.exists(backup_db_file):
+                break
+            backup_db_file = '{}.{}.{}'.format(db_file, timestamp, i)
+        if os.path.exists(backup_db_file):
+            self.fail("backup db file already exists: %s" % backup_db_file)
+
+        self.log.info("Backing up %s => %s", db_file, backup_db_file)
+        shutil.copy(db_file, backup_db_file)
+
+    def start(self):
+        super(DbUpgradeApp, self).start()
+        if (self.coursedir.db_url.startswith('sqlite:///')):
+            db_file = self.coursedir.db_url.split(':///', 1)[1]
+            self._backup_db_file(db_file)
+        self.log.info("Upgrading %s", self.coursedir.db_url)
+        dbutil.upgrade(self.coursedir.db_url)
+
+
 class DbApp(NbGrader):
 
     name = 'nbgrader-db'
@@ -401,6 +436,14 @@ class DbApp(NbGrader):
             dedent(
                 """
                 Add, remove, or list assignments in the nbgrader database.
+                """
+            ).strip()
+        ),
+        upgrade=(
+            DbUpgradeApp,
+            dedent(
+                """
+                Upgrade database schema to latest version.
                 """
             ).strip()
         ),
