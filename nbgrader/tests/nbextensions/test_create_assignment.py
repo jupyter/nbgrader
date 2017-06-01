@@ -6,8 +6,9 @@ from selenium.webdriver.support.ui import Select
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.keys import Keys
 from selenium.common.exceptions import TimeoutException, NoSuchElementException
+from textwrap import dedent
 
-from ...nbgraderformat import read, ValidationError
+from ...nbgraderformat import read
 from nbformat import current_nbformat
 
 
@@ -21,7 +22,7 @@ def _load_notebook(browser, port, retries=5):
 
     def page_loaded(browser):
         return browser.execute_script(
-            'return typeof Jupyter !== "undefined" && Jupyter.page !== undefined;')
+            'return typeof Jupyter !== "undefined" && Jupyter.page !== undefined && Jupyter.notebook !== undefined;')
 
     # wait for the page to load
     try:
@@ -112,15 +113,32 @@ def _get_total_points(browser):
 
 
 def _save(browser):
-    browser.execute_script("Jupyter.notebook.save_notebook();")
+    browser.execute_script(dedent(
+        """
+        Jupyter._notebook_saved = false;
+        Jupyter.notebook.save_notebook().then(function () {
+            Jupyter._notebook_saved = true;
+        });
+        """
+    ))
+
+    def is_saved(browser):
+        return browser.execute_script(dedent(
+            """
+            if (Jupyter._notebook_saved === true) {
+                Jupyter._notebook_saved = false;
+                return true;
+            } else {
+                return false;
+            }
+            """
+        ))
+
+    return is_saved
 
 
 def _save_and_validate(browser):
-    _save(browser)
-    _wait(browser).until(EC.text_to_be_present_in_element(
-        (By.ID, "notification_notebook"),
-        "Notebook saved"
-    ))
+    _wait(browser).until(_save(browser))
     read("blank.ipynb", current_nbformat)
 
 
