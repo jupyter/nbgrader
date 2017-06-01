@@ -541,7 +541,11 @@ define([
     Notebook.prototype.validate = function (data, button) {
         var body = $('<div/>').attr("id", "validation-message");
         if (data.success) {
-            data = data.value;
+            if (typeof(data.value) === "string") {
+                data = JSON.parse(data.value);
+            } else {
+                data = data.value;
+            }
             if (data.changed !== undefined) {
                 for (var i=0; i<data.changed.length; i++) {
                     body.append($('<div/>').append($('<p/>').text('The source of the following cell has changed, but it should not have!')));

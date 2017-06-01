@@ -16,7 +16,6 @@ from jupyter_core.paths import jupyter_config_path
 from ...apps import NbGrader
 from ...coursedir import CourseDirectory
 from ...exchange import ExchangeList, ExchangeFetch, ExchangeSubmit
-from ...validator import Validator
 
 
 static = os.path.join(os.path.dirname(__file__), 'static')
@@ -32,8 +31,7 @@ def chdir(dirname):
 
 class AssignmentList(LoggingConfigurable):
 
-    assignment_dir = Unicode('', help='Directory where the nbgrader commands should be run, relative to NotebookApp.notebook_dir').tag(config=True)
-
+    assignment_dir = Unicode('', help='Directory where the nbgrader commands should be run')
     @default("assignment_dir")
     def _assignment_dir_default(self):
         return self.parent.notebook_dir
@@ -189,28 +187,6 @@ class AssignmentList(LoggingConfigurable):
 
         return retvalue
 
-    def validate_notebook(self, path):
-        with chdir(self.assignment_dir):
-            try:
-                config = self.load_config()
-                validator = Validator(config=config)
-                result = validator.validate(path)
-
-            except:
-                self.log.error(traceback.format_exc())
-                retvalue = {
-                    "success": False,
-                    "value": traceback.format_exc()
-                }
-
-            else:
-                retvalue = {
-                    "success": True,
-                    "value": result
-                }
-
-        return retvalue
-
 
 class BaseAssignmentHandler(IPythonHandler):
 
@@ -244,9 +220,6 @@ class AssignmentActionHandler(BaseAssignmentHandler):
                 self.finish(json.dumps(self.manager.list_assignments(course_id=course_id)))
             else:
                 self.finish(json.dumps(output))
-        elif action == 'validate':
-            output = self.manager.validate_notebook(self.get_argument('path'))
-            self.finish(json.dumps(output))
 
 
 class CourseListHandler(BaseAssignmentHandler):
@@ -261,7 +234,7 @@ class CourseListHandler(BaseAssignmentHandler):
 #-----------------------------------------------------------------------------
 
 
-_assignment_action_regex = r"(?P<action>fetch|submit|validate)"
+_assignment_action_regex = r"(?P<action>fetch|submit)"
 
 default_handlers = [
     (r"/assignments", AssignmentListHandler),

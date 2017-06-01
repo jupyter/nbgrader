@@ -7,6 +7,7 @@ import logging
 import time
 import sys
 import signal
+import glob
 
 from selenium import webdriver
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
@@ -168,7 +169,8 @@ def nbserver(request, port, tempdir, jupyter_config_dir, jupyter_data_dir, excha
 
 @pytest.fixture
 def browser(request, tempdir, nbserver):
-    shutil.copy(os.path.join(os.path.dirname(__file__), "files", "blank.ipynb"), os.path.join(tempdir, "blank.ipynb"))
+    for filename in glob.glob(os.path.join(os.path.dirname(__file__), "files", "*.ipynb")):
+        shutil.copy(filename, os.path.join(tempdir, os.path.basename(filename)))
 
     selenium_logger = logging.getLogger('selenium.webdriver.remote.remote_connection')
     selenium_logger.setLevel(logging.WARNING)

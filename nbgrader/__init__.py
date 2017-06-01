@@ -26,10 +26,17 @@ def _jupyter_nbextension_paths():
             dest="formgrader",
             require="formgrader/main"
         ),
+        dict(
+            section="notebook",
+            src=os.path.join('nbextensions', 'validate_assignment'),
+            dest="validate_assignment",
+            require="validate_assignment/main"
+        ),
     ]
 
 def _jupyter_server_extension_paths():
     return [
         dict(module="nbgrader.server_extensions.assignment_list"),
-        dict(module="nbgrader.server_extensions.formgrader")
+        dict(module="nbgrader.server_extensions.formgrader"),
+        dict(module="nbgrader.server_extensions.validate_assignment")
     ]
