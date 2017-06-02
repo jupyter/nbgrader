@@ -441,45 +441,75 @@ def test_tabbing(browser, port, gradebook):
     assert utils._get_active_element(browser) == utils._get_score_box(browser, 0)
     assert utils._get_index(browser) == 2
 
+    # tab to the next and check that the first extra credit is selected
+    utils._send_keys_to_body(browser, Keys.TAB)
+    assert utils._get_active_element(browser) == utils._get_extra_credit_box(browser, 0)
+    assert utils._get_index(browser) == 3
+
     # tab to the next and check that the second points is selected
     utils._send_keys_to_body(browser, Keys.TAB)
     assert utils._get_active_element(browser) == utils._get_score_box(browser, 1)
-    assert utils._get_index(browser) == 3
+    assert utils._get_index(browser) == 4
+
+    # tab to the next and check that the second extra credit is selected
+    utils._send_keys_to_body(browser, Keys.TAB)
+    assert utils._get_active_element(browser) == utils._get_extra_credit_box(browser, 1)
+    assert utils._get_index(browser) == 5
 
     # tab to the next and check that the second comment is selected
     utils._send_keys_to_body(browser, Keys.TAB)
     assert utils._get_active_element(browser) == utils._get_comment_box(browser, 1)
-    assert utils._get_index(browser) == 4
+    assert utils._get_index(browser) == 6
 
     # tab to the next and check that the third points is selected
     utils._send_keys_to_body(browser, Keys.TAB)
     assert utils._get_active_element(browser) == utils._get_score_box(browser, 2)
-    assert utils._get_index(browser) == 5
+    assert utils._get_index(browser) == 7
+
+    # tab to the next and check that the third extra credit is selected
+    utils._send_keys_to_body(browser, Keys.TAB)
+    assert utils._get_active_element(browser) == utils._get_extra_credit_box(browser, 2)
+    assert utils._get_index(browser) == 8
 
     # tab to the next and check that the fourth points is selected
     utils._send_keys_to_body(browser, Keys.TAB)
     assert utils._get_active_element(browser) == utils._get_score_box(browser, 3)
-    assert utils._get_index(browser) == 6
+    assert utils._get_index(browser) == 9
+
+    # tab to the next and check that the fourth extra credit is selected
+    utils._send_keys_to_body(browser, Keys.TAB)
+    assert utils._get_active_element(browser) == utils._get_extra_credit_box(browser, 3)
+    assert utils._get_index(browser) == 10
 
     # tab to the next and check that the fifth points is selected
     utils._send_keys_to_body(browser, Keys.TAB)
     assert utils._get_active_element(browser) == utils._get_score_box(browser, 4)
-    assert utils._get_index(browser) == 7
+    assert utils._get_index(browser) == 11
+
+    # tab to the next and check that the fifth extra credit is selected
+    utils._send_keys_to_body(browser, Keys.TAB)
+    assert utils._get_active_element(browser) == utils._get_extra_credit_box(browser, 4)
+    assert utils._get_index(browser) == 12
 
     # tab to the next and check that the third comment is selected
     utils._send_keys_to_body(browser, Keys.TAB)
     assert utils._get_active_element(browser) == utils._get_comment_box(browser, 2)
-    assert utils._get_index(browser) == 8
+    assert utils._get_index(browser) == 13
 
     # tab to the next and check that the sixth points is selected
     utils._send_keys_to_body(browser, Keys.TAB)
     assert utils._get_active_element(browser) == utils._get_score_box(browser, 5)
-    assert utils._get_index(browser) == 9
+    assert utils._get_index(browser) == 14
+
+    # tab to the next and check that the sixth extra credit is selected
+    utils._send_keys_to_body(browser, Keys.TAB)
+    assert utils._get_active_element(browser) == utils._get_extra_credit_box(browser, 5)
+    assert utils._get_index(browser) == 15
 
     # tab to the next and check that the fourth comment is selected
     utils._send_keys_to_body(browser, Keys.TAB)
     assert utils._get_active_element(browser) == utils._get_comment_box(browser, 3)
-    assert utils._get_index(browser) == 10
+    assert utils._get_index(browser) == 16
 
     # tab to the next and check that the next arrow is selected
     utils._send_keys_to_body(browser, Keys.TAB)
@@ -566,6 +596,37 @@ def test_save_score(browser, port, gradebook, index):
 
 
 @pytest.mark.nbextensions
+@pytest.mark.parametrize("index", range(6))
+def test_save_extra_credit(browser, port, gradebook, index):
+    utils._load_formgrade(browser, port, gradebook)
+    elem = utils._get_extra_credit_box(browser, index)
+
+    if elem.get_attribute("value") != "":
+        elem.click()
+        elem.clear()
+        utils._save_score(browser, index)
+        utils._load_formgrade(browser, port, gradebook)
+        elem = utils._get_extra_credit_box(browser, index)
+        assert elem.get_attribute("value") == ""
+
+    # set the grade
+    elem.click()
+    elem.send_keys("{}".format((index + 1) / 10.0))
+    utils._save_score(browser, index)
+    utils._load_formgrade(browser, port, gradebook)
+    elem = utils._get_extra_credit_box(browser, index)
+    assert elem.get_attribute("value") == "{}".format((index + 1) / 10.0)
+
+    # clear the grade
+    elem.click()
+    elem.clear()
+    utils._save_score(browser, index)
+    utils._load_formgrade(browser, port, gradebook)
+    elem = utils._get_extra_credit_box(browser, index)
+    assert elem.get_attribute("value") == ""
+
+
+@pytest.mark.nbextensions
 def test_same_part_navigation(browser, port, gradebook):
     problem = gradebook.find_notebook("Problem 1", "Problem Set 1")
     submissions = problem.submissions
@@ -578,24 +639,24 @@ def test_same_part_navigation(browser, port, gradebook):
     # Click the second comment box and navigate to the next submission
     utils._get_comment_box(browser, 1).click()
     utils._send_keys_to_body(browser, Keys.CONTROL, ".")
-    utils._wait_for_formgrader(browser, port, "submissions/{}/?index=4".format(submissions[1].id))
+    utils._wait_for_formgrader(browser, port, "submissions/{}/?index=6".format(submissions[1].id))
     assert utils._get_active_element(browser) == utils._get_comment_box(browser, 1)
 
     # Click the third score box and navigate to the previous submission
     utils._get_score_box(browser, 2).click()
     utils._send_keys_to_body(browser, Keys.CONTROL, ",")
-    utils._wait_for_formgrader(browser, port, "submissions/{}/?index=5".format(submissions[0].id))
+    utils._wait_for_formgrader(browser, port, "submissions/{}/?index=7".format(submissions[0].id))
     assert utils._get_active_element(browser) == utils._get_score_box(browser, 2)
 
     # Click the third comment box and navigate to the next submission
     utils._get_comment_box(browser, 2).click()
     utils._send_keys_to_body(browser, Keys.CONTROL, ".")
-    utils._wait_for_formgrader(browser, port, "submissions/{}/?index=7".format(submissions[1].id))
+    utils._wait_for_formgrader(browser, port, "submissions/{}/?index=11".format(submissions[1].id))
     assert utils._get_active_element(browser) == utils._get_score_box(browser, 4)
 
     # Navigate to the previous submission
     utils._send_keys_to_body(browser, Keys.CONTROL, ",")
-    utils._wait_for_formgrader(browser, port, "submissions/{}/?index=7".format(submissions[0].id))
+    utils._wait_for_formgrader(browser, port, "submissions/{}/?index=11".format(submissions[0].id))
     assert utils._get_active_element(browser) == utils._get_score_box(browser, 4)
 
 
