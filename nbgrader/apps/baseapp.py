@@ -55,6 +55,10 @@ def format_excepthook(etype, evalue, tb):
     ), file=sys.stderr)
 
 
+class NbGraderException(Exception):
+    pass
+
+
 class NbGrader(JupyterApp):
     """A base class for all the nbgrader apps."""
 
@@ -350,8 +354,8 @@ class BaseNbConvertApp(NbGrader, NbConvertApp):
         help=dedent(
             """
             Permissions to set on files output by nbgrader. The default is generally
-            read-only (444), with the exception of nbgrader assign, in which case the
-            user also has write permission.
+            read-only (444), with the exception of nbgrader assign and nbgrader feedback,
+            in which case the user also has write permission.
             """
         )
     ).tag(config=True)
@@ -590,6 +594,10 @@ class BaseNbConvertApp(NbGrader, NbConvertApp):
                     "the issue, first BACK UP your database and then run the "
                     "command `nbgrader db upgrade`."
                 )
+
+            except KeyboardInterrupt:
+                _handle_failure(gd)
+                self.fail("Canceled")
 
             except Exception:
                 self.log.error("There was an error processing assignment: %s", assignment)

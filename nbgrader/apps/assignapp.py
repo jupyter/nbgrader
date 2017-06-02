@@ -6,7 +6,7 @@ from traitlets import List, Bool, observe, default
 
 from ..api import Gradebook, MissingEntry
 from .baseapp import (
-    BaseNbConvertApp, nbconvert_aliases, nbconvert_flags)
+    BaseNbConvertApp, NbGraderException, nbconvert_aliases, nbconvert_flags)
 from ..preprocessors import (
     IncludeHeaderFooter,
     ClearSolutions,
@@ -173,7 +173,7 @@ class AssignApp(BaseNbConvertApp):
             for notebook in self.notebooks:
                 m = re.match(regexp, notebook)
                 if m is None:
-                    raise RuntimeError("Could not match '%s' with regexp '%s'", notebook, regexp)
+                    raise NbGraderException("Could not match '%s' with regexp '%s'", notebook, regexp)
                 gd = m.groupdict()
                 if gd['assignment_id'] == assignment_id and gd['student_id'] == student_id:
                     new_notebook_ids.add(gd['notebook_id'])
@@ -188,7 +188,9 @@ class AssignApp(BaseNbConvertApp):
             # some notebooks have been removed, but there are submissions associated
             # with the assignment, so we don't want to overwrite stuff
             if len(assignment.submissions) > 0:
-                self.fail("Cannot modify existing assignment '%s' because there are submissions associated with it", assignment)
+                msg = "Cannot modify existing assignment '%s' because there are submissions associated with it" % assignment
+                self.error(msg)
+                raise NbGraderException(msg)
 
             # remove the old notebooks
             for notebook_id in (old_notebook_ids - new_notebook_ids):
@@ -219,7 +221,9 @@ class AssignApp(BaseNbConvertApp):
                     try:
                         gb.find_assignment(assignment_id)
                     except MissingEntry:
-                        self.fail("No assignment called '%s' exists in the database", assignment_id)
+                        msg = "No assignment called '%s' exists in the database" % assignment_id
+                        self.error(msg)
+                        raise NbGraderException(msg)
 
             # check if there are any extra notebooks in the db that are no longer
             # part of the assignment, and if so, remove them

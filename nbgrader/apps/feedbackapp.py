@@ -74,6 +74,10 @@ class FeedbackApp(BaseNbConvertApp):
     def _export_format_default(self):
         return 'html'
 
+    @default("permissions")
+    def _permissions_default(self):
+        return 644
+
     def build_extra_config(self):
         extra_config = super(FeedbackApp, self).build_extra_config()
 
