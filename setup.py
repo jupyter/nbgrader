@@ -40,6 +40,15 @@ for (dirname, dirnames, filenames) in os.walk("nbgrader/server_extensions/formgr
     for filename in filenames:
         static_files.append(os.path.join(root, filename))
 
+# get paths to all the alembic files
+alembic_files = ["alembic.ini"]
+for (dirname, dirnames, filenames) in os.walk("nbgrader/alembic"):
+    root = os.path.relpath(dirname, "nbgrader")
+    for filename in filenames:
+        if filename.endswith(".pyc"):
+            continue
+        alembic_files.append(os.path.join(root, filename))
+
 
 name = 'nbgrader'
 here = os.path.abspath(os.path.dirname(__file__))
@@ -67,7 +76,7 @@ setup_args = dict(
     ],
     packages=find_packages(),
     package_data={
-        'nbgrader': extension_files + docs_files,
+        'nbgrader': extension_files + docs_files + alembic_files,
         'nbgrader.nbgraderformat': ["*.json"],
         'nbgrader.server_extensions.formgrader': static_files,
         'nbgrader.tests': [
@@ -93,6 +102,7 @@ setup_args = dict(
         "six>=1.9",
         "requests",
         "jsonschema",
+        "alembic"
     ]
 )
 

@@ -3,6 +3,7 @@ from __future__ import division
 from . import utils
 
 import contextlib
+import subprocess as sp
 
 from sqlalchemy import (create_engine, ForeignKey, Column, String, Text,
     DateTime, Interval, Float, Enum, UniqueConstraint, Boolean)
@@ -15,12 +16,20 @@ from sqlalchemy.sql import and_
 from sqlalchemy import select, func, exists, case, literal_column
 
 from uuid import uuid4
+from .dbutil import _temp_alembic_ini
 
 Base = declarative_base()
 
 
 def new_uuid():
     return uuid4().hex
+
+
+def get_alembic_version():
+    with _temp_alembic_ini('sqlite:////tmp/gradebook.db') as alembic_ini:
+        output = sp.check_output(['alembic', '-c', alembic_ini, 'heads'])
+        head = output.decode().split("\n")[0].split(" ")[0]
+        return head
 
 
 class InvalidEntry(ValueError):
@@ -1029,7 +1038,15 @@ class Gradebook(object):
         self.db = scoped_session(sessionmaker(autoflush=True, bind=self.engine))
 
         # this creates all the tables in the database if they don't already exist
+        db_exists = len(self.engine.table_names()) > 0
         Base.metadata.create_all(bind=self.engine)
+
+        # set the alembic version if it doesn't exist
+        if not db_exists:
+            alembic_version = get_alembic_version()
+            self.db.execute("CREATE TABLE alembic_version (version_num VARCHAR(32) NOT NULL);")
+            self.db.execute("INSERT INTO alembic_version (version_num) VALUES ('{}');".format(alembic_version))
+            self.db.commit()
 
     def __enter__(self):
         return self
