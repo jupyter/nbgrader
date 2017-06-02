@@ -41,6 +41,7 @@ nbgrader
     contributor_guide/testing
     contributor_guide/documentation
     contributor_guide/js_dependencies
+    contributor_guide/database
     contributor_guide/releasing
 
 .. toctree::
