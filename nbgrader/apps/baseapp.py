@@ -10,6 +10,7 @@ import os
 import traceback
 import logging
 import shutil
+import sqlalchemy
 
 from jupyter_core.application import JupyterApp
 from nbconvert.exporters.export import exporter_map
@@ -579,6 +580,16 @@ class BaseNbConvertApp(NbGrader, NbConvertApp):
                     assignment)
                 errors.append((gd['assignment_id'], gd['student_id']))
                 _handle_failure(gd)
+
+            except sqlalchemy.exc.OperationalError:
+                _handle_failure(gd)
+                self.log.error(traceback.format_exc())
+                self.fail(
+                    "There was an error accessing the nbgrader database. This "
+                    "may occur if you recently upgraded nbgrader. To resolve "
+                    "the issue, first BACK UP your database and then run the "
+                    "command `nbgrader db upgrade`."
+                )
 
             except Exception:
                 self.log.error("There was an error processing assignment: %s", assignment)
