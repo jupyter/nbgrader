@@ -1239,7 +1239,7 @@ def test_grade_to_dict(submissions):
         assert gd['student'] == g.student.id
         assert gd['auto_score'] is None
         assert gd['manual_score'] is None
-        assert gd['extra_credit'] == 0
+        assert gd['extra_credit'] is None
         assert gd['needs_manual_grade']
         assert not gd['failed_tests']
         assert gd['cell_type'] == g.cell_type

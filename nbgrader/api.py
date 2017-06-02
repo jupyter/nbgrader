@@ -673,7 +673,7 @@ class Grade(Base):
     manual_score = Column(Float())
 
     #: Extra credit assigned by a human grader
-    extra_credit = Column(Float, default=0.0)
+    extra_credit = Column(Float())
 
     #: Whether a score needs to be assigned manually. This is True by default.
     needs_manual_grade = Column(Boolean, default=True, nullable=False)
@@ -685,8 +685,8 @@ class Grade(Base):
     #: for the score.
     score = column_property(case(
         [
-            (manual_score != None, manual_score + extra_credit),
-            (auto_score != None, auto_score + extra_credit)
+            (manual_score != None, manual_score + case([(extra_credit != None, extra_credit)], else_=literal_column("0.0"))),
+            (auto_score != None, auto_score + case([(extra_credit != None, extra_credit)], else_=literal_column("0.0")))
         ],
         else_=literal_column("0.0")
     ))
