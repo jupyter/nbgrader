@@ -19,7 +19,7 @@ depends_on = None
 def upgrade():
     op.add_column('notebook', sa.Column(
         'kernelspec', sa.String(1024), nullable=False,
-        server_default='{"display_name": "Python", "name": "python", "language": "python"}'))
+        server_default='{}'))
 
 
 def downgrade():
