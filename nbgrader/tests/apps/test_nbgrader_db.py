@@ -1,5 +1,7 @@
 import pytest
 import datetime
+import shutil
+import os
 
 from textwrap import dedent
 from os.path import join
@@ -282,3 +284,20 @@ class TestNbGraderDb(BaseTestApp):
             assert assignment.duedate == datetime.datetime(2017, 1, 8, 16, 31, 22)
             assignment = gb.find_assignment("bar")
             assert assignment.duedate is None
+
+    def test_upgrade_db(self, course_dir):
+        # add assignment files
+        self._copy_file(join("files", "test.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
+        self._copy_file(join("files", "test.ipynb"), join(course_dir, "source", "ps1", "p2.ipynb"))
+
+        # replace the gradebook with an old version
+        self._copy_file(join("files", "gradebook.db"), join(course_dir, "gradebook.db"))
+
+        # check that nbgrader assign fails
+        run_nbgrader(["assign", "ps1", "--create"], retcode=1)
+
+        # upgrade the database
+        run_nbgrader(["db", "upgrade"])
+
+        # check that nbgrader assign passes
+        run_nbgrader(["assign", "ps1", "--create"])
