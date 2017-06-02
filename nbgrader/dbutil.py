@@ -3,10 +3,11 @@
 
 import os
 import sys
+import tempfile
+import shutil
 
 from contextlib import contextmanager
 from subprocess import check_call
-from tempfile import TemporaryDirectory
 
 _here = os.path.abspath(os.path.dirname(__file__))
 
@@ -50,10 +51,13 @@ def _temp_alembic_ini(db_url):
         The path to the temporary alembic.ini that we have created.
         This file will be cleaned up on exit from the context manager.
     """
-    with TemporaryDirectory() as td:
+    td = tempfile.mkdtemp()
+    try:
         alembic_ini = os.path.join(td, 'alembic.ini')
         write_alembic_ini(alembic_ini, db_url)
         yield alembic_ini
+    finally:
+        shutil.rmtree(td)
 
 
 def upgrade(db_url, revision='head'):
