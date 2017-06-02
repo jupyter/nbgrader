@@ -46,6 +46,7 @@ class GradeHandler(BaseApiHandler):
 
         data = self.get_json_body()
         grade.manual_score = data.get("manual_score", None)
+        grade.extra_credit = data.get("extra_credit", None)
         if grade.manual_score is None and grade.auto_score is None:
             grade.needs_manual_grade = True
         else:

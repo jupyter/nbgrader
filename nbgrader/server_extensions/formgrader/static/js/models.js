@@ -2,6 +2,7 @@ var GradeUI = Backbone.View.extend({
 
     events: {
         "change .score": "save",
+        "change .extra-credit": "save",
         "click .full-credit": "assignFullCredit",
         "click .no-credit": "assignNoCredit",
         "click .mark-graded": "save"
@@ -10,6 +11,7 @@ var GradeUI = Backbone.View.extend({
     initialize: function () {
         this.$glyph = this.$el.find(".score-saved");
         this.$score = this.$el.find(".score");
+        this.$extra_credit = this.$el.find(".extra-credit");
         this.$mark_graded = this.$el.find(".mark-graded");
 
         this.listenTo(this.model, "change", this.render);
@@ -17,11 +19,13 @@ var GradeUI = Backbone.View.extend({
         this.listenTo(this.model, "sync", this.animateSaved);
 
         this.$score.attr("placeholder", this.model.get("auto_score"));
+        this.$extra_credit.attr("placeholder", 0.0);
         this.render();
     },
 
     render: function () {
         this.$score.val(this.model.get("manual_score"));
+        this.$extra_credit.val(this.model.get("extra_credit"));
         if (this.model.get("needs_manual_grade")) {
             this.$score.addClass("needs_manual_grade");
             if (this.model.get("manual_score") !== null) {
@@ -34,22 +38,36 @@ var GradeUI = Backbone.View.extend({
     },
 
     save: function () {
+        var score, extra_credit;
         if (this.$score.val() === "") {
-            this.model.save({"manual_score": null});
+            score = null;
         } else {
             var val = this.$score.val();
             var max_score = this.model.get("max_score");
             if (val > max_score) {
-                this.animateInvalidValue();
-                this.model.save({"manual_score": max_score});
+                this.animateInvalidValue(this.$score);
+                score = max_score;
             } else if (val < 0) {
-                this.animateInvalidValue();
-                this.model.save({"manual_score": 0});
+                this.animateInvalidValue(this.$score);
+                score = 0;
             } else {
-                this.model.save({"manual_score": val});
+                score = val;
             }
         }
 
+        if (this.$extra_credit.val() == "") {
+            extra_credit = null;
+        } else {
+            var val = this.$extra_credit.val();
+            if (val < 0) {
+                this.animateInvalidValue(this.$extra_credit);
+                extra_credit = 0;
+            } else {
+                extra_credit = val;
+            }
+        }
+
+        this.model.save({"manual_score": score, "extra_credit": extra_credit});
         this.render();
     },
 
@@ -69,14 +87,14 @@ var GradeUI = Backbone.View.extend({
         $(document).trigger("finished_saving");
     },
 
-    animateInvalidValue: function () {
+    animateInvalidValue: function (elem) {
         var that = this;
-        this.$score.animate({
+        elem.animate({
             "background-color": "#FF8888",
             "border-color": "red"
         }, 100, undefined, function () {
             setTimeout(function () {
-                that.$score.animate({
+                elem.animate({
                     "background-color": "white",
                     "border-color": "white"
                 }, 100);
@@ -91,7 +109,7 @@ var GradeUI = Backbone.View.extend({
     },
 
     assignNoCredit: function () {
-        this.model.save({"manual_score": 0});
+        this.model.save({"manual_score": 0, "extra_credit": 0});
         this.$score.select();
         this.$score.focus();
     }

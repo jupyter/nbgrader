@@ -102,7 +102,7 @@ div.nbgrader_cell .input_area {
     border: none;
 }
 
-.score {
+.score, .extra-credit {
     color: black;
     height: 29px;
     margin-left: 1em;
