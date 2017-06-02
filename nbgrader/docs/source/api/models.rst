@@ -82,6 +82,8 @@ Master version of an assignment
 
     .. autoattribute:: needs_manual_grade
 
+    .. autoattribute:: kernelspec
+
     .. automethod:: to_dict
 
 .. autoclass:: GradeCell
@@ -256,6 +258,8 @@ Submitted assignments
     .. autoattribute:: auto_score
 
     .. autoattribute:: manual_score
+
+    .. autoattribute:: extra_credit
 
     .. autoattribute:: score
 

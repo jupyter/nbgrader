@@ -93,6 +93,7 @@ JUPYTER
 Jupyter
 jupyter
 jupyterhub
+kernelspec
 lgpage
 linkcheck
 linux

@@ -137,6 +137,10 @@ def _get_score_box(browser, index):
     return browser.find_elements_by_css_selector(".score")[index]
 
 
+def _get_extra_credit_box(browser, index):
+    return browser.find_elements_by_css_selector(".extra-credit")[index]
+
+
 def _save_comment(browser, index):
     _send_keys_to_body(browser, Keys.ESCAPE)
     glyph = browser.find_elements_by_css_selector(".comment-saved")[index]

@@ -79,6 +79,9 @@ window.MathJax = {
     <span>
       <input class="score tabbable" id="{{ cell.metadata.nbgrader.grade_id }}" style="width: 4em;" type="number" /> / {{ cell.metadata.nbgrader.points | float | round(2) }}
     </span>
+    <span style="margin-left: 1em;">
+      + <input class="extra-credit tabbable" id="{{ cell.metadata.nbgrader.grade_id }}_extra_credit" style="width: 3em;" type="number" /> (extra credit)
+    </span>
   </div>
 {%- endmacro %}
 
