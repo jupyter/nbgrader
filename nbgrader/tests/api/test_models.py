@@ -851,6 +851,49 @@ def test_query_code_score_manualgraded(submissions):
     assert [1.5, 3] == sorted(x[1] for x in db.query(api.SubmittedNotebook.id, api.SubmittedNotebook.code_score).all())
     assert [1.5, 3] == sorted(x[1] for x in db.query(api.SubmittedAssignment.id, api.SubmittedAssignment.code_score).all())
 
+def test_query_auto_score_extra_credit(submissions):
+    db, grades, _ = submissions
+
+    grades[0].auto_score = 10
+    grades[1].auto_score = 0
+    grades[2].auto_score = 5
+    grades[3].auto_score = 2.5
+
+    grades[0].extra_credit = 0.5
+    grades[1].extra_credit = 0
+    grades[2].extra_credit = 2.3
+    grades[3].extra_credit = 1.1
+    db.commit()
+
+    assert sorted(x[0] for x in db.query(api.Grade.score).all()) == [0, 3.6, 7.3, 10.5]
+    assert sorted(x[1] for x in db.query(api.SubmittedNotebook.id, api.SubmittedNotebook.score).all()) == [10.5, 10.9]
+    assert sorted(x[1] for x in db.query(api.SubmittedAssignment.id, api.SubmittedAssignment.score).all()) == [10.5, 10.9]
+    assert sorted(x[1] for x in db.query(api.Student.id, api.Student.score).all()) == [10.5, 10.9]
+
+def test_query_manual_score_extra_credit(submissions):
+    db, grades, _ = submissions
+
+    grades[0].auto_score = 10
+    grades[1].auto_score = 0
+    grades[2].auto_score = 5
+    grades[3].auto_score = 2.5
+
+    grades[0].manual_score = 4
+    grades[1].manual_score = 1.5
+    grades[2].manual_score = 9
+    grades[3].manual_score = 3
+
+    grades[0].extra_credit = 0.5
+    grades[1].extra_credit = 0
+    grades[2].extra_credit = 2.3
+    grades[3].extra_credit = 1.1
+    db.commit()
+
+    assert sorted(x[0] for x in db.query(api.Grade.score).all()) == [1.5, 4.1, 4.5, 11.3]
+    assert sorted(x[1] for x in db.query(api.SubmittedNotebook.id, api.SubmittedNotebook.score).all()) == [6, 15.4]
+    assert sorted(x[1] for x in db.query(api.SubmittedAssignment.id, api.SubmittedAssignment.score).all()) == [6, 15.4]
+    assert sorted(x[1] for x in db.query(api.Student.id, api.Student.score).all()) == [6, 15.4]
+
 def test_query_num_submissions(submissions):
     db = submissions[0]
 
@@ -1187,7 +1230,7 @@ def test_grade_to_dict(submissions):
         assert set(gd.keys()) == {
             'id', 'name', 'notebook', 'assignment', 'student', 'auto_score',
             'manual_score', 'max_score', 'needs_manual_grade', 'failed_tests',
-            'cell_type'}
+            'cell_type', 'extra_credit'}
 
         assert gd['id'] == g.id
         assert gd['name'] == g.name
@@ -1196,6 +1239,7 @@ def test_grade_to_dict(submissions):
         assert gd['student'] == g.student.id
         assert gd['auto_score'] is None
         assert gd['manual_score'] is None
+        assert gd['extra_credit'] == 0
         assert gd['needs_manual_grade']
         assert not gd['failed_tests']
         assert gd['cell_type'] == g.cell_type
