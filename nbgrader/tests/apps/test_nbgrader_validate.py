@@ -104,3 +104,9 @@ class TestNbGraderValidate(BaseTestApp):
             "--Validator.ignore_checksums=True"
         ], stdout=True)
         assert output.splitlines()[0] == "NOTEBOOK PASSED ON 1 CELL(S)!"
+
+    def test_validate_glob(self):
+        """Does the validation work when we glob filenames?"""
+        self._copy_file(join("files", "submitted-unchanged.ipynb"), "nb1.ipynb")
+        self._copy_file(join("files", "submitted-changed.ipynb"), "nb2.ipynb")
+        run_nbgrader(["validate", "*.ipynb"])
