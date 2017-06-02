@@ -1,4 +1,5 @@
 import sys
+import os
 
 from traitlets.config import LoggingConfigurable
 from traitlets import List, Unicode, Integer, Bool
@@ -220,6 +221,7 @@ class Validator(LoggingConfigurable):
         return nb
 
     def validate(self, filename):
+        self.log.info("Validating '{}'".format(os.path.abspath(filename)))
         nb = self._preprocess(filename)
         changed = self._get_changed_cells(nb)
         passed = self._get_passed_cells(nb)

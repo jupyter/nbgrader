@@ -1,4 +1,5 @@
 import traceback
+import glob
 
 from traitlets import default
 
@@ -55,15 +56,16 @@ class ValidateApp(NbGrader):
 
     def start(self):
         if len(self.extra_args) == 1:
-            notebook_filename = self.extra_args[0]
+            notebook_filenames = glob.glob(self.extra_args[0])
         elif len(self.extra_args) > 2:
             self.fail("Too many arguments")
         elif self.coursedir.assignment_id == "":
             self.fail("Must provide path to notebook:\nnbgrader validate NOTEBOOK")
 
         validator = Validator(parent=self)
-        try:
-            validator.validate_and_print(notebook_filename)
-        except Exception:
-            self.log.error(traceback.format_exc())
-            self.fail("nbgrader encountered a fatal error while trying to validate '{}'".format(notebook_filename))
+        for filename in notebook_filenames:
+            try:
+                validator.validate_and_print(filename)
+            except Exception:
+                self.log.error(traceback.format_exc())
+                self.fail("nbgrader encountered a fatal error while trying to validate '{}'".format(filename))
