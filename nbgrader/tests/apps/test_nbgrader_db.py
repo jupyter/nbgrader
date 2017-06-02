@@ -285,7 +285,22 @@ class TestNbGraderDb(BaseTestApp):
             assignment = gb.find_assignment("bar")
             assert assignment.duedate is None
 
-    def test_upgrade_db(self, course_dir):
+    def test_upgrade_nodb(self, temp_cwd):
+        # test upgrading without a database
+        run_nbgrader(["db", "upgrade"])
+
+    def test_upgrade_current_db(self, course_dir):
+        # add assignment files
+        self._copy_file(join("files", "test.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
+        self._copy_file(join("files", "test.ipynb"), join(course_dir, "source", "ps1", "p2.ipynb"))
+
+        # check that nbgrader assign fails
+        run_nbgrader(["assign", "ps1", "--create"])
+
+        # test upgrading with a current database
+        run_nbgrader(["db", "upgrade"])
+
+    def test_upgrade_old_db(self, course_dir):
         # add assignment files
         self._copy_file(join("files", "test.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
         self._copy_file(join("files", "test.ipynb"), join(course_dir, "source", "ps1", "p2.ipynb"))

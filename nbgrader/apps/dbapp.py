@@ -394,14 +394,11 @@ class DbUpgradeApp(NbGrader):
     def _backup_db_file(self, db_file):
         """Backup a database file"""
         if not os.path.exists(db_file):
-            return
+            with Gradebook("sqlite:///{}".format(db_file)):
+                pass
 
-        timestamp = datetime.now().strftime('.%Y-%m-%d-%H%M%S')
+        timestamp = datetime.now().strftime('.%Y-%m-%d-%H%M%S.%f')
         backup_db_file = db_file + timestamp
-        for i in range(1, 10):
-            if not os.path.exists(backup_db_file):
-                break
-            backup_db_file = '{}.{}.{}'.format(db_file, timestamp, i)
         if os.path.exists(backup_db_file):
             self.fail("backup db file already exists: %s" % backup_db_file)
 
