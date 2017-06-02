@@ -109,4 +109,8 @@ class TestNbGraderValidate(BaseTestApp):
         """Does the validation work when we glob filenames?"""
         self._copy_file(join("files", "submitted-unchanged.ipynb"), "nb1.ipynb")
         self._copy_file(join("files", "submitted-changed.ipynb"), "nb2.ipynb")
+        self._copy_file(join("files", "submitted-changed.ipynb"), "nb3.ipynb")
         run_nbgrader(["validate", "*.ipynb"])
+        run_nbgrader(["validate", "nb1.ipynb", "nb2.ipynb"])
+        run_nbgrader(["validate", "nb1.ipynb", "nb2.ipynb", "nb3.ipynb"])
+        run_nbgrader(["validate"], retcode=1)

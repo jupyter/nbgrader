@@ -55,12 +55,12 @@ class ValidateApp(NbGrader):
         super(ValidateApp, self)._load_config(cfg, **kwargs)
 
     def start(self):
-        if len(self.extra_args) == 1:
-            notebook_filenames = glob.glob(self.extra_args[0])
-        elif len(self.extra_args) > 2:
-            self.fail("Too many arguments")
-        elif self.coursedir.assignment_id == "":
+        if not len(self.extra_args):
             self.fail("Must provide path to notebook:\nnbgrader validate NOTEBOOK")
+        else:
+            notebook_filenames = []
+            for x in self.extra_args:
+                notebook_filenames.extend(glob.glob(x))
 
         validator = Validator(parent=self)
         for filename in notebook_filenames:
