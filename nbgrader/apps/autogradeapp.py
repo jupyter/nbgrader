@@ -4,7 +4,7 @@ import shutil
 from textwrap import dedent
 from traitlets import List, Bool, observe
 
-from .baseapp import BaseNbConvertApp, nbconvert_aliases, nbconvert_flags
+from .baseapp import NbGraderException, BaseNbConvertApp, nbconvert_aliases, nbconvert_flags
 from ..preprocessors import (
     AssignLatePenalties, ClearOutput, DeduplicateIds, OverwriteCells, SaveAutoGrades,
     Execute, LimitOutput, OverwriteKernelspec, CheckCellMetadata)
@@ -153,14 +153,18 @@ class AutogradeApp(BaseNbConvertApp):
                 try:
                     gb.find_student(student_id)
                 except MissingEntry:
-                    self.fail("No student with ID '%s' exists in the database", student_id)
+                    msg = "No student with ID '%s' exists in the database" % student_id
+                    self.log.error(msg)
+                    raise NbGraderException(msg)
 
         # make sure the assignment exists
         with Gradebook(self.coursedir.db_url) as gb:
             try:
                 gb.find_assignment(assignment_id)
             except MissingEntry:
-                self.fail("No assignment with ID '%s' exists in the database", assignment_id)
+                msg = "No assignment with ID '%s' exists in the database" % assignment_id
+                self.log.error(msg)
+                raise NbGraderException(msg)
 
         # try to read in a timestamp from file
         src_path = self._format_source(assignment_id, student_id)
@@ -207,7 +211,9 @@ class AutogradeApp(BaseNbConvertApp):
                     notebooks.append(notebook)
         self.notebooks = notebooks
         if len(self.notebooks) == 0:
-            self.fail("No notebooks found, did you forget to run 'nbgrader assign'?")
+            msg = "No notebooks found, did you forget to run 'nbgrader assign'?"
+            self.error(msg)
+            raise NbGraderException(msg)
 
     def _init_preprocessors(self):
         self.exporter._preprocessors = []

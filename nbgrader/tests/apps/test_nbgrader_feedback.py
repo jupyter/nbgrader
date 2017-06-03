@@ -129,8 +129,13 @@ class TestNbGraderFeedback(BaseTestApp):
         run_nbgrader(["autograde", "ps1"])
         run_nbgrader(["feedback", "ps1"])
 
+        if sys.platform == 'win32':
+            perms = '666'
+        else:
+            perms = '644'
+
         assert isfile(join(course_dir, "feedback", "foo", "ps1", "foo.html"))
-        assert self._get_permissions(join(course_dir, "feedback", "foo", "ps1", "foo.html")) == "444"
+        assert self._get_permissions(join(course_dir, "feedback", "foo", "ps1", "foo.html")) == perms
 
     def test_custom_permissions(self, course_dir):
         """Are custom permissions properly set?"""
@@ -142,15 +147,10 @@ class TestNbGraderFeedback(BaseTestApp):
 
         self._empty_notebook(join(course_dir, "submitted", "foo", "ps1", "foo.ipynb"))
         run_nbgrader(["autograde", "ps1"])
-        run_nbgrader(["feedback", "ps1", "--FeedbackApp.permissions=644"])
-
-        if sys.platform == 'win32':
-            perms = '666'
-        else:
-            perms = '644'
+        run_nbgrader(["feedback", "ps1", "--FeedbackApp.permissions=444"])
 
         assert isfile(join(course_dir, "feedback", "foo", "ps1", "foo.html"))
-        assert self._get_permissions(join(course_dir, "feedback", "foo", "ps1", "foo.html")) == perms
+        assert self._get_permissions(join(course_dir, "feedback", "foo", "ps1", "foo.html")) == '444'
 
     def test_force_single_notebook(self, course_dir):
         with open("nbgrader_config.py", "a") as fh:
