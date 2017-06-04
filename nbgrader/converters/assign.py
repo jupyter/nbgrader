@@ -69,7 +69,6 @@ class Assign(BaseConverter):
     def __init__(self, coursedir=None, **kwargs):
         super(Assign, self).__init__(coursedir=coursedir, **kwargs)
         self.coursedir.student_id = '.'
-        self.coursedir.notebook_id = '*'
 
     def _clean_old_notebooks(self, assignment_id, student_id):
         with Gradebook(self.coursedir.db_url) as gb:

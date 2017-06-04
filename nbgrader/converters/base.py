@@ -53,6 +53,9 @@ class BaseConverter(LoggingConfigurable):
         super(BaseConverter, self).__init__(**kwargs)
         if self.parent:
             self.log = self.parent.log
+            self.logfile = self.parent.logfile
+        else:
+            self.logfile = None
 
         c = Config()
         c.Exporter.default_preprocessors = []
@@ -330,9 +333,9 @@ class BaseConverter(LoggingConfigurable):
                     "There was an error processing assignment '{}' for student '{}'".format(
                         assignment_id, student_id))
 
-            if self.parent.logfile:
+            if self.logfile:
                 msg = (
                     "Please see the error log ({}) for details on the specific "
-                    "errors on the above failures.".format(self.parent.logfile))
+                    "errors on the above failures.".format(self.logfile))
                 self.log.error(msg)
                 raise NbGraderException(msg)
