@@ -113,11 +113,11 @@ class QuickStartApp(NbGrader):
                 c.Exchange.course_id = "{}"
 
                 # Update this list with other assignments you want
-                c.NbGrader.db_assignments = [dict(name="ps1")]
+                c.CourseDirectory.db_assignments = [dict(name="ps1")]
 
                 # Change the students in this list with that actual students in
                 # your course
-                c.NbGrader.db_students = [
+                c.CourseDirectory.db_students = [
                     dict(id="bitdiddle", first_name="Ben", last_name="Bitdiddle"),
                     dict(id="hacker", first_name="Alyssa", last_name="Hacker"),
                     dict(id="reasoner", first_name="Louis", last_name="Reasoner")

@@ -1,23 +1,25 @@
-import os
+import sys
 
-from traitlets import List, default
-from nbconvert.exporters import HTMLExporter
-from nbconvert.preprocessors import CSSHTMLHeaderPreprocessor
+from traitlets import default
 
-from .baseapp import BaseNbConvertApp, nbconvert_aliases, nbconvert_flags
-from ..preprocessors import GetGrades
+from .baseapp import NbGrader, nbgrader_aliases, nbgrader_flags
+from ..converters import BaseConverter, Feedback, NbGraderException
 
 aliases = {}
-aliases.update(nbconvert_aliases)
+aliases.update(nbgrader_aliases)
 aliases.update({
 })
 
 flags = {}
-flags.update(nbconvert_flags)
+flags.update(nbgrader_flags)
 flags.update({
+    'force': (
+        {'BaseConverter': {'force': True}},
+        "Overwrite an assignment/submission if it already exists."
+    ),
 })
 
-class FeedbackApp(BaseNbConvertApp):
+class FeedbackApp(NbGrader):
 
     name = u'nbgrader-feedback'
     description = u'Generate feedback from a graded notebook'
@@ -51,40 +53,40 @@ class FeedbackApp(BaseNbConvertApp):
             nbgrader feedback "Problem Set 1" --notebook "1*"
         """
 
-    @property
-    def _input_directory(self):
-        return self.coursedir.autograded_directory
-
-    @property
-    def _output_directory(self):
-        return self.coursedir.feedback_directory
-
-    preprocessors = List([
-        GetGrades,
-        CSSHTMLHeaderPreprocessor
-    ])
-
     @default("classes")
     def _classes_default(self):
         classes = super(FeedbackApp, self)._classes_default()
-        classes.append(HTMLExporter)
+        classes.extend([BaseConverter, Feedback])
         return classes
 
-    @default("export_format")
-    def _export_format_default(self):
-        return 'html'
+    def _load_config(self, cfg, **kwargs):
+        if 'FeedbackApp' in cfg:
+            self.log.warning(
+                "Use Feedback in config, not FeedbackApp. Outdated config:\n%s",
+                '\n'.join(
+                    'FeedbackApp.{key} = {value!r}'.format(key=key, value=value)
+                    for key, value in cfg.FeedbackApp.items()
+                )
+            )
+            cfg.Feedback.merge(cfg.FeedbackApp)
+            del cfg.FeedbackApp
 
-    @default("permissions")
-    def _permissions_default(self):
-        return 644
+        super(FeedbackApp, self)._load_config(cfg, **kwargs)
 
-    def build_extra_config(self):
-        extra_config = super(FeedbackApp, self).build_extra_config()
+    def start(self):
+        super(FeedbackApp, self).start()
 
-        if 'template_file' not in self.config.HTMLExporter:
-            extra_config.HTMLExporter.template_file = 'feedback'
-        if 'template_path' not in self.config.HTMLExporter:
-            template_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'server_extensions', 'formgrader', 'templates'))
-            extra_config.HTMLExporter.template_path = ['.', template_path]
+        if len(self.extra_args) > 1:
+            self.fail("Only one argument (the assignment id) may be specified")
+        elif len(self.extra_args) == 1 and self.coursedir.assignment_id != "":
+            self.fail("The assignment cannot both be specified in config and as an argument")
+        elif len(self.extra_args) == 0 and self.coursedir.assignment_id == "":
+            self.fail("An assignment id must be specified, either as an argument or with --assignment")
+        elif len(self.extra_args) == 1:
+            self.coursedir.assignment_id = self.extra_args[0]
 
-        return extra_config
+        converter = Feedback(coursedir=self.coursedir, parent=self)
+        try:
+            converter.start()
+        except NbGraderException:
+            sys.exit(1)

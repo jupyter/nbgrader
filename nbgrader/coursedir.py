@@ -136,6 +136,40 @@ class CourseDirectory(LoggingConfigurable):
         return "sqlite:///{}".format(
             os.path.abspath(os.path.join(self.root, "gradebook.db")))
 
+    db_assignments = List(
+        help=dedent(
+            """
+            A list of assignments that will be created in the database. Each
+            item in the list should be a dictionary with the following keys:
+
+                - name
+                - duedate (optional)
+
+            The values will be stored in the database. Please see the API
+            documentation on the `Assignment` database model for details on
+            these fields.
+            """
+        )
+    ).tag(config=True)
+
+    db_students = List(
+        help=dedent(
+            """
+            A list of student that will be created in the database. Each
+            item in the list should be a dictionary with the following keys:
+
+                - id
+                - first_name (optional)
+                - last_name (optional)
+                - email (optional)
+
+            The values will be stored in the database. Please see the API
+            documentation on the `Student` database model for details on
+            these fields.
+            """
+        )
+    ).tag(config=True)
+
     root = Unicode(
         '',
         help=dedent(
