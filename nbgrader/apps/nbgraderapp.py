@@ -15,6 +15,7 @@ from .. import preprocessors
 from .. import plugins
 from ..coursedir import CourseDirectory
 from .. import exchange
+from .. import converters
 from .baseapp import nbgrader_aliases, nbgrader_flags
 from . import (
     NbGrader,
@@ -263,6 +264,12 @@ class NbGraderApp(NbGrader):
         # include all the exchange actions
         for ex_name in exchange.__all__:
             ex = getattr(exchange, ex_name)
+            if hasattr(ex, "class_traits") and ex.class_traits(config=True):
+                classes.append(ex)
+
+        # include all the converters
+        for ex_name in converters.__all__:
+            ex = getattr(converters, ex_name)
             if hasattr(ex, "class_traits") and ex.class_traits(config=True):
                 classes.append(ex)
 

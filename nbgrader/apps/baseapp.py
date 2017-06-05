@@ -211,6 +211,17 @@ class NbGrader(JupyterApp):
             cfg.Exchange.merge(cfg.TransferApp)
             del cfg.TransferApp
 
+        if 'BaseNbConvertApp' in cfg:
+            self.log.warning(
+                "Use BaseConverter in config, not BaseNbConvertApp. Outdated config:\n%s",
+                '\n'.join(
+                    'BaseNbConvertApp.{key} = {value!r}'.format(key=key, value=value)
+                    for key, value in cfg.BaseNbConvertApp.items()
+                )
+            )
+            cfg.BaseConverter.merge(cfg.BaseNbConvertApp)
+            del cfg.BaseNbConvertApp
+
         super(NbGrader, self)._load_config(cfg, **kwargs)
         if self.coursedir:
             self.coursedir._load_config(cfg)
