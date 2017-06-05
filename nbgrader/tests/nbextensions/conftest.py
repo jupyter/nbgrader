@@ -109,8 +109,8 @@ def nbserver(request, port, tempdir, jupyter_config_dir, jupyter_data_dir, excha
             """
             c = get_config()
             c.Execute.execute_retries = 4
-            c.NbGrader.db_assignments = [dict(name="Problem Set 1"), dict(name="ps.01")]
-            c.NbGrader.db_students = [
+            c.CourseDirectory.db_assignments = [dict(name="Problem Set 1"), dict(name="ps.01")]
+            c.CourseDirectory.db_students = [
                 dict(id="Bitdiddle", first_name="Ben", last_name="B"),
                 dict(id="Hacker", first_name="Alyssa", last_name="H"),
                 dict(id="Reasoner", first_name="Louis", last_name="R")

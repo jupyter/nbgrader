@@ -16,8 +16,8 @@ class TestNbGraderFeedback(BaseTestApp):
     def test_single_file(self, db, course_dir):
         """Can feedback be generated for an unchanged assignment?"""
         with open("nbgrader_config.py", "a") as fh:
-            fh.write("""c.NbGrader.db_assignments = [dict(name="ps1")]\n""")
-            fh.write("""c.NbGrader.db_students = [dict(id="foo")]\n""")
+            fh.write("""c.CourseDirectory.db_assignments = [dict(name="ps1")]\n""")
+            fh.write("""c.CourseDirectory.db_students = [dict(id="foo")]\n""")
         self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
         run_nbgrader(["assign", "ps1", "--db", db])
 
@@ -30,8 +30,8 @@ class TestNbGraderFeedback(BaseTestApp):
     def test_force(self, db, course_dir):
         """Ensure the force option works properly"""
         with open("nbgrader_config.py", "a") as fh:
-            fh.write("""c.NbGrader.db_assignments = [dict(name="ps1")]\n""")
-            fh.write("""c.NbGrader.db_students = [dict(id="foo")]\n""")
+            fh.write("""c.CourseDirectory.db_assignments = [dict(name="ps1")]\n""")
+            fh.write("""c.CourseDirectory.db_students = [dict(id="foo")]\n""")
         self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
         self._make_file(join(course_dir, "source", "ps1", "foo.txt"), "foo")
         self._make_file(join(course_dir, "source", "ps1", "data", "bar.txt"), "bar")
@@ -70,8 +70,8 @@ class TestNbGraderFeedback(BaseTestApp):
     def test_filter_notebook(self, db, course_dir):
         """Does feedback filter by notebook properly?"""
         with open("nbgrader_config.py", "a") as fh:
-            fh.write("""c.NbGrader.db_assignments = [dict(name="ps1")]\n""")
-            fh.write("""c.NbGrader.db_students = [dict(id="foo")]\n""")
+            fh.write("""c.CourseDirectory.db_assignments = [dict(name="ps1")]\n""")
+            fh.write("""c.CourseDirectory.db_students = [dict(id="foo")]\n""")
         self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
         self._make_file(join(course_dir, "source", "ps1", "foo.txt"), "foo")
         self._make_file(join(course_dir, "source", "ps1", "data", "bar.txt"), "bar")
@@ -120,8 +120,8 @@ class TestNbGraderFeedback(BaseTestApp):
     def test_permissions(self, course_dir):
         """Are permissions properly set?"""
         with open("nbgrader_config.py", "a") as fh:
-            fh.write("""c.NbGrader.db_assignments = [dict(name="ps1")]\n""")
-            fh.write("""c.NbGrader.db_students = [dict(id="foo")]\n""")
+            fh.write("""c.CourseDirectory.db_assignments = [dict(name="ps1")]\n""")
+            fh.write("""c.CourseDirectory.db_students = [dict(id="foo")]\n""")
         self._empty_notebook(join(course_dir, "source", "ps1", "foo.ipynb"))
         run_nbgrader(["assign", "ps1"])
 
@@ -140,8 +140,8 @@ class TestNbGraderFeedback(BaseTestApp):
     def test_custom_permissions(self, course_dir):
         """Are custom permissions properly set?"""
         with open("nbgrader_config.py", "a") as fh:
-            fh.write("""c.NbGrader.db_assignments = [dict(name="ps1")]\n""")
-            fh.write("""c.NbGrader.db_students = [dict(id="foo")]\n""")
+            fh.write("""c.CourseDirectory.db_assignments = [dict(name="ps1")]\n""")
+            fh.write("""c.CourseDirectory.db_students = [dict(id="foo")]\n""")
         self._empty_notebook(join(course_dir, "source", "ps1", "foo.ipynb"))
         run_nbgrader(["assign", "ps1"])
 
@@ -154,8 +154,8 @@ class TestNbGraderFeedback(BaseTestApp):
 
     def test_force_single_notebook(self, course_dir):
         with open("nbgrader_config.py", "a") as fh:
-            fh.write("""c.NbGrader.db_assignments = [dict(name="ps1")]\n""")
-            fh.write("""c.NbGrader.db_students = [dict(id="foo")]\n""")
+            fh.write("""c.CourseDirectory.db_assignments = [dict(name="ps1")]\n""")
+            fh.write("""c.CourseDirectory.db_students = [dict(id="foo")]\n""")
         self._copy_file(join("files", "test.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
         self._copy_file(join("files", "test.ipynb"), join(course_dir, "source", "ps1", "p2.ipynb"))
         run_nbgrader(["assign", "ps1"])
@@ -181,8 +181,8 @@ class TestNbGraderFeedback(BaseTestApp):
 
     def test_update_newer(self, course_dir):
         with open("nbgrader_config.py", "a") as fh:
-            fh.write("""c.NbGrader.db_assignments = [dict(name="ps1")]\n""")
-            fh.write("""c.NbGrader.db_students = [dict(id="foo")]\n""")
+            fh.write("""c.CourseDirectory.db_assignments = [dict(name="ps1")]\n""")
+            fh.write("""c.CourseDirectory.db_students = [dict(id="foo")]\n""")
         self._copy_file(join("files", "test.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
         run_nbgrader(["assign", "ps1"])
 
@@ -207,8 +207,8 @@ class TestNbGraderFeedback(BaseTestApp):
 
     def test_update_newer_single_notebook(self, course_dir):
         with open("nbgrader_config.py", "a") as fh:
-            fh.write("""c.NbGrader.db_assignments = [dict(name="ps1")]\n""")
-            fh.write("""c.NbGrader.db_students = [dict(id="foo")]\n""")
+            fh.write("""c.CourseDirectory.db_assignments = [dict(name="ps1")]\n""")
+            fh.write("""c.CourseDirectory.db_students = [dict(id="foo")]\n""")
         self._copy_file(join("files", "test.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
         self._copy_file(join("files", "test.ipynb"), join(course_dir, "source", "ps1", "p2.ipynb"))
         run_nbgrader(["assign", "ps1"])

@@ -339,7 +339,7 @@ class TestNbGraderZipCollect(BaseTestApp):
         with open("nbgrader_config.py", "a") as fh:
             fh.write(dedent(
                 """
-                c.NbGrader.db_assignments = [dict(name="ps1")]
+                c.CourseDirectory.db_assignments = [dict(name="ps1")]
                 c.FileNameCollectorPlugin.named_regexp = (
                     r".+_(?P<student_id>\w+)_attempt_(?P<timestamp>[0-9\-]+)_(?P<file_id>\w+)"
                 )

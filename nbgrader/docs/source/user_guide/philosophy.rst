@@ -90,8 +90,8 @@ You will almost always need a configuration file as you are using nbgrader. At a
 ::
 
     c = get_config()
-    c.NbGrader.db_assignments = [dict(name="ps1", duedate="2015-02-02 17:00:00 UTC")]
-    c.NbGrader.db_students = [
+    c.CourseDirectory.db_assignments = [dict(name="ps1", duedate="2015-02-02 17:00:00 UTC")]
+    c.CourseDirectory.db_students = [
         dict(id="bitdiddle", first_name="Ben", last_name="Bitdiddle"),
         dict(id="hacker", first_name="Alyssa", last_name="Hacker"),
         dict(id="reasoner", first_name="Louis", last_name="Reasoner")

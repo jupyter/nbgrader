@@ -40,7 +40,7 @@ class TestNbGraderAssign(BaseTestApp):
         """Can a single file be assigned?"""
         self._empty_notebook(join(course_dir, 'source', 'ps1', 'foo.ipynb'))
         with open("nbgrader_config.py", "a") as fh:
-            fh.write("""c.NbGrader.db_assignments = [dict(name="ps1")]\n""")
+            fh.write("""c.CourseDirectory.db_assignments = [dict(name="ps1")]\n""")
         run_nbgrader(["assign", "ps1"])
         assert os.path.isfile(join(course_dir, "release", "ps1", "foo.ipynb"))
 
@@ -49,7 +49,7 @@ class TestNbGraderAssign(BaseTestApp):
         self._empty_notebook(join(course_dir, 'source', 'ps1', 'foo.ipynb'))
         self._empty_notebook(join(course_dir, 'source', 'ps1', 'bar.ipynb'))
         with open("nbgrader_config.py", "a") as fh:
-            fh.write("""c.NbGrader.db_assignments = [dict(name="ps1")]\n""")
+            fh.write("""c.CourseDirectory.db_assignments = [dict(name="ps1")]\n""")
         run_nbgrader(["assign", "ps1"])
         assert os.path.isfile(join(course_dir, 'release', 'ps1', 'foo.ipynb'))
         assert os.path.isfile(join(course_dir, 'release', 'ps1', 'bar.ipynb'))
@@ -61,7 +61,7 @@ class TestNbGraderAssign(BaseTestApp):
         self._empty_notebook(join(course_dir, 'source', 'ps1', 'foo.ipynb'))
         self._empty_notebook(join(course_dir, 'source', 'ps1', 'bar.ipynb'))
         with open("nbgrader_config.py", "a") as fh:
-            fh.write("""c.NbGrader.db_assignments = [dict(name="ps1")]\n""")
+            fh.write("""c.CourseDirectory.db_assignments = [dict(name="ps1")]\n""")
         run_nbgrader(["assign", "ps1"])
 
         assert os.path.isfile(join(course_dir, 'release', 'ps1', 'foo.ipynb'))
@@ -78,7 +78,7 @@ class TestNbGraderAssign(BaseTestApp):
         """Ensure cells are saved into the database"""
         self._copy_file(join('files', 'test.ipynb'), join(course_dir, 'source', 'ps1', 'test.ipynb'))
         with open("nbgrader_config.py", "a") as fh:
-            fh.write("""c.NbGrader.db_assignments = [dict(name="ps1")]\n""")
+            fh.write("""c.CourseDirectory.db_assignments = [dict(name="ps1")]\n""")
 
         run_nbgrader(["assign", "ps1", "--db", db])
 
@@ -93,7 +93,7 @@ class TestNbGraderAssign(BaseTestApp):
         self._make_file(join(course_dir, 'source', 'ps1', 'data', 'bar.txt'), "bar")
         self._make_file(join(course_dir, 'source', 'ps1', 'blah.pyc'), "asdf")
         with open("nbgrader_config.py", "a") as fh:
-            fh.write("""c.NbGrader.db_assignments = [dict(name="ps1")]\n""")
+            fh.write("""c.CourseDirectory.db_assignments = [dict(name="ps1")]\n""")
 
         run_nbgrader(["assign", "ps1"])
         assert os.path.isfile(join(course_dir, 'release', 'ps1', 'test.ipynb'))
@@ -123,7 +123,7 @@ class TestNbGraderAssign(BaseTestApp):
         self._empty_notebook(join(course_dir, 'source', 'ps1', 'foo.ipynb'))
         self._make_file(join(course_dir, 'source', 'ps1', 'foo.txt'), 'foo')
         with open("nbgrader_config.py", "a") as fh:
-            fh.write("""c.NbGrader.db_assignments = [dict(name="ps1")]\n""")
+            fh.write("""c.CourseDirectory.db_assignments = [dict(name="ps1")]\n""")
         run_nbgrader(["assign", "ps1"])
 
         if sys.platform == 'win32':
@@ -141,7 +141,7 @@ class TestNbGraderAssign(BaseTestApp):
         self._empty_notebook(join(course_dir, 'source', 'ps1', 'foo.ipynb'))
         self._make_file(join(course_dir, 'source', 'ps1', 'foo.txt'), 'foo')
         with open("nbgrader_config.py", "a") as fh:
-            fh.write("""c.NbGrader.db_assignments = [dict(name="ps1")]\n""")
+            fh.write("""c.CourseDirectory.db_assignments = [dict(name="ps1")]\n""")
         run_nbgrader(["assign", "ps1", "--AssignApp.permissions=444"])
 
         assert os.path.isfile(join(course_dir, "release", "ps1", "foo.ipynb"))
@@ -153,7 +153,7 @@ class TestNbGraderAssign(BaseTestApp):
         """Are extra notebooks added and removed?"""
         self._copy_file(join("files", "test.ipynb"), join(course_dir, "source", "ps1", "test.ipynb"))
         with open("nbgrader_config.py", "a") as fh:
-            fh.write("""c.NbGrader.db_assignments = [dict(name="ps1")]\n""")
+            fh.write("""c.CourseDirectory.db_assignments = [dict(name="ps1")]\n""")
         run_nbgrader(["assign", "ps1", "--db", db])
 
         with Gradebook(db) as gb:
@@ -183,7 +183,7 @@ class TestNbGraderAssign(BaseTestApp):
 
         self._copy_file(join("files", "test.ipynb"), join(course_dir, "source", "ps1", "test.ipynb"))
         with open("nbgrader_config.py", "a") as fh:
-            fh.write("""c.NbGrader.db_assignments = [dict(name="ps1")]\n""")
+            fh.write("""c.CourseDirectory.db_assignments = [dict(name="ps1")]\n""")
         run_nbgrader(["assign", "ps1", "--db", db])
 
         with Gradebook(db) as gb:
@@ -202,7 +202,7 @@ class TestNbGraderAssign(BaseTestApp):
         self._copy_file(join("files", "test.ipynb"), join(course_dir, "source", "ps1", "test.ipynb"))
         self._copy_file(join("files", "test.ipynb"), join(course_dir, "source", "ps1", "test2.ipynb"))
         with open("nbgrader_config.py", "a") as fh:
-            fh.write("""c.NbGrader.db_assignments = [dict(name="ps1")]\n""")
+            fh.write("""c.CourseDirectory.db_assignments = [dict(name="ps1")]\n""")
         run_nbgrader(["assign", "ps1", "--db", db])
 
         with Gradebook(db) as gb:
@@ -220,7 +220,7 @@ class TestNbGraderAssign(BaseTestApp):
 
         self._copy_file(join("files", "test.ipynb"), join(course_dir, "source", "ps1", "test.ipynb"))
         with open("nbgrader_config.py", "a") as fh:
-            fh.write("""c.NbGrader.db_assignments = [dict(name="ps1")]\n""")
+            fh.write("""c.CourseDirectory.db_assignments = [dict(name="ps1")]\n""")
         run_nbgrader(["assign", "ps1", "--db", db])
 
         with Gradebook(db) as gb:
@@ -244,7 +244,7 @@ class TestNbGraderAssign(BaseTestApp):
         self._copy_file(join("files", "test.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
         self._copy_file(join("files", "test.ipynb"), join(course_dir, "source", "ps1", "p2.ipynb"))
         with open("nbgrader_config.py", "a") as fh:
-            fh.write("""c.NbGrader.db_assignments = [dict(name="ps1")]\n""")
+            fh.write("""c.CourseDirectory.db_assignments = [dict(name="ps1")]\n""")
         run_nbgrader(["assign", "ps1"])
 
         assert os.path.exists(join(course_dir, "release", "ps1", "p1.ipynb"))
@@ -264,7 +264,7 @@ class TestNbGraderAssign(BaseTestApp):
 
     def test_fail_no_notebooks(self):
         with open("nbgrader_config.py", "a") as fh:
-            fh.write("""c.NbGrader.db_assignments = [dict(name="ps1")]\n""")
+            fh.write("""c.CourseDirectory.db_assignments = [dict(name="ps1")]\n""")
         run_nbgrader(["assign", "ps1"], retcode=1)
 
     def test_no_metadata(self, course_dir):
