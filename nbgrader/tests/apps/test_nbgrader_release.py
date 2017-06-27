@@ -1,4 +1,6 @@
 import os
+import shutil
+import stat
 from os.path import join
 
 from .. import run_nbgrader
@@ -52,6 +54,19 @@ class TestNbGraderRelease(BaseTestApp):
         assert os.path.isfile(join(exchange, "abc101", "outbound", "ps1", "p1.ipynb"))
 
     def test_release_with_assignment_flag(self, exchange, course_dir):
+        self._copy_file(join("files", "test.ipynb"), join(course_dir, "release", "ps1", "p1.ipynb"))
+        self._release("--assignment=ps1", exchange)
+        assert os.path.isfile(join(exchange, "abc101", "outbound", "ps1", "p1.ipynb"))
+
+    def test_no_exchange(self, exchange, course_dir):
+        shutil.rmtree(exchange)
+        self._copy_file(join("files", "test.ipynb"), join(course_dir, "release", "ps1", "p1.ipynb"))
+        self._release("--assignment=ps1", exchange)
+        assert os.path.isfile(join(exchange, "abc101", "outbound", "ps1", "p1.ipynb"))
+
+    def test_exchange_bad_perms(self, exchange, course_dir):
+        perms = stat.S_IRUSR|stat.S_IWUSR|stat.S_IXUSR|stat.S_IRGRP
+        os.chmod(exchange, perms)
         self._copy_file(join("files", "test.ipynb"), join(course_dir, "release", "ps1", "p1.ipynb"))
         self._release("--assignment=ps1", exchange)
         assert os.path.isfile(join(exchange, "abc101", "outbound", "ps1", "p1.ipynb"))
