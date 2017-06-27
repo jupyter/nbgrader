@@ -4,7 +4,7 @@ from stat import (
     S_IRUSR, S_IWUSR, S_IXUSR,
     S_IRGRP, S_IWGRP, S_IXGRP,
     S_IROTH, S_IWOTH, S_IXOTH,
-    S_ISGID
+    S_ISGID, ST_MODE
 )
 
 from traitlets import Bool
@@ -16,6 +16,30 @@ from ..utils import self_owned
 class ExchangeRelease(Exchange):
 
     force = Bool(False, help="Force overwrite existing files in the exchange.").tag(config=True)
+
+    def ensure_root(self):
+        perms = S_IRUSR|S_IWUSR|S_IXUSR|S_IRGRP|S_IWGRP|S_IXGRP|S_IROTH|S_IWOTH|S_IXOTH
+
+        # if root doesn't exist, create it and set permissions
+        if not os.path.exists(self.root):
+            self.log.warning("Creating exchange directory: {}".format(self.root))
+            try:
+                os.makedirs(self.root)
+                os.chmod(self.root, perms)
+            except PermissionError:
+                self.fail("Could not create {}, permission denied.".format(self.root))
+
+        else:
+            old_perms = oct(os.stat(self.root)[ST_MODE] & 0o777)
+            new_perms = oct(perms & 0o777)
+            if old_perms != new_perms:
+                self.log.warning(
+                    "Permissions for exchange directory ({}) are invalid, changing them from {} to {}".format(
+                        self.root, old_perms, new_perms))
+                try:
+                    os.chmod(self.root, perms)
+                except PermissionError:
+                    self.fail("Could not change permissions of {}, permission denied.".format(self.root))
 
     def init_src(self):
         self.src_path = self.coursedir.format_path(self.coursedir.release_directory, '.', self.coursedir.assignment_id)
