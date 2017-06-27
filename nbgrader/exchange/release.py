@@ -10,7 +10,7 @@ from stat import (
 from traitlets import Bool
 
 from .exchange import Exchange
-from ..utils import self_owned, check_directory
+from ..utils import self_owned, check_directory, self_owned
 
 
 class ExchangeRelease(Exchange):
@@ -23,8 +23,11 @@ class ExchangeRelease(Exchange):
         # if root doesn't exist, create it and set permissions
         if not os.path.exists(self.root):
             self.log.warning("Creating exchange directory: {}".format(self.root))
-            os.makedirs(self.root)
-            os.chmod(self.root, perms)
+            try:
+                os.makedirs(self.root)
+                os.chmod(self.root, perms)
+            except PermissionError:
+                self.fail("Could not create {}, permission denied.".format(self.root))
 
         else:
             old_perms = oct(os.stat(self.root)[ST_MODE] & 0o777)
@@ -33,7 +36,10 @@ class ExchangeRelease(Exchange):
                 self.log.warning(
                     "Permissions for exchange directory ({}) are invalid, changing them from {} to {}".format(
                         self.root, old_perms, new_perms))
-                os.chmod(self.root, perms)
+                try:
+                    os.chmod(self.root, perms)
+                except PermissionError:
+                    self.fail("Could not change permissions of {}, permission denied.".format(self.root))
 
     def init_src(self):
         self.src_path = self.coursedir.format_path(self.coursedir.release_directory, '.', self.coursedir.assignment_id)
