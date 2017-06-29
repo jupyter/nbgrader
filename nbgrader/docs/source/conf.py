@@ -55,7 +55,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'nbgrader'
-copyright = '2015, Jupyter Development Team'
+copyright = '2015–2017, Jupyter Development Team'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
