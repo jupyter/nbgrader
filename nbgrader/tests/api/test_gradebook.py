@@ -752,3 +752,27 @@ def test_notebook_submission_dicts(assignment):
     a = sorted(submissions, key=lambda x: x["id"])
     b = sorted([x.to_dict() for x in notebook.submissions], key=lambda x: x["id"])
     assert a == b
+
+
+def test_submission_dicts(assignment):
+    assignment.add_student('hacker123')
+    assignment.add_student('bitdiddle')
+    s1 = assignment.add_submission('foo', 'hacker123')
+    s2 = assignment.add_submission('foo', 'bitdiddle')
+    s1.flagged = True
+    s2.flagged = False
+
+    g1 = assignment.find_grade("test1", "p1", "foo", "hacker123")
+    g2 = assignment.find_grade("test2", "p1", "foo", "hacker123")
+    g3 = assignment.find_grade("test1", "p1", "foo", "bitdiddle")
+    g4 = assignment.find_grade("test2", "p1", "foo", "bitdiddle")
+
+    g1.manual_score = 0.5
+    g2.manual_score = 2
+    g3.manual_score = 1
+    g4.manual_score = 1
+    assignment.db.commit()
+
+    a = sorted(assignment.submission_dicts("foo"), key=lambda x: x["id"])
+    b = sorted([x.to_dict() for x in assignment.find_assignment("foo").submissions], key=lambda x: x["id"])
+    assert a == b

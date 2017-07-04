@@ -218,10 +218,7 @@ def test_create_submitted_assignment(db):
     assert d['id'] == sa.id
     assert d['name'] == 'foo'
     assert d['student'] == '12345'
-    assert d['duedate'] == None
     assert d['timestamp'] == None
-    assert d['extension'] == None
-    assert d['total_seconds_late'] == 0
     assert d['score'] == 0
     assert d['max_score'] == 0
     assert d['code_score'] == 0
@@ -248,12 +245,6 @@ def test_submission_timestamp_ontime(db):
     assert sa.extension == None
     assert sa.total_seconds_late == 0
 
-    d = sa.to_dict()
-    assert d['duedate'] == duedate.isoformat()
-    assert d['timestamp'] == timestamp.isoformat()
-    assert d['extension'] == None
-    assert d['total_seconds_late'] == 0
-
 
 def test_submission_timestamp_late(db):
     duedate = datetime.datetime.utcnow()
@@ -269,12 +260,6 @@ def test_submission_timestamp_late(db):
     assert sa.timestamp == timestamp
     assert sa.extension == None
     assert sa.total_seconds_late == 172800
-
-    d = sa.to_dict()
-    assert d['duedate'] == duedate.isoformat()
-    assert d['timestamp'] == timestamp.isoformat()
-    assert d['extension'] == None
-    assert d['total_seconds_late'] == 172800
 
 
 def test_submission_timestamp_with_extension(db):
@@ -293,12 +278,6 @@ def test_submission_timestamp_with_extension(db):
     assert sa.extension == extension
     assert sa.total_seconds_late == 0
 
-    d = sa.to_dict()
-    assert d['duedate'] == (duedate + extension).isoformat()
-    assert d['timestamp'] == timestamp.isoformat()
-    assert d['extension'] == extension.total_seconds()
-    assert d['total_seconds_late'] == 0
-
 
 def test_submission_timestamp_late_with_extension(db):
     duedate = datetime.datetime.utcnow()
@@ -315,12 +294,6 @@ def test_submission_timestamp_late_with_extension(db):
     assert sa.timestamp == timestamp
     assert sa.extension == extension
     assert sa.total_seconds_late == 172800
-
-    d = sa.to_dict()
-    assert d['duedate'] == (duedate + extension).isoformat()
-    assert d['timestamp'] == timestamp.isoformat()
-    assert d['extension'] == extension.total_seconds()
-    assert d['total_seconds_late'] == 172800
 
 
 def test_create_submitted_notebook(db):
@@ -1161,18 +1134,16 @@ def test_submittedassignment_to_dict(submissions):
     sad = sa.to_dict()
 
     assert set(sad.keys()) == {
-        'id', 'name', 'student', 'timestamp', 'extension', 'duedate',
-        'total_seconds_late', 'score', 'max_score', 'code_score',
+        'id', 'name', 'student', 'timestamp', 'score', 'max_score', 'code_score',
         'max_code_score', 'written_score', 'max_written_score',
-        'needs_manual_grade'}
+        'needs_manual_grade', 'last_name', 'first_name'}
 
     assert sad['id'] == sa.id
     assert sad['name'] == 'foo'
     assert sad['student'] == '12345'
+    assert sad['last_name'] == 'Doe'
+    assert sad['first_name'] == 'Jane'
     assert sad['timestamp'] is None
-    assert sad['extension'] is None
-    assert sad['duedate'] == sa.assignment.duedate.isoformat()
-    assert sad['total_seconds_late'] == 0
     assert sad['score'] == 0
     assert sad['max_score'] == 15
     assert sad['code_score'] == 0
