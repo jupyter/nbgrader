@@ -720,7 +720,7 @@ class NbGraderAPI(LoggingConfigurable):
         """
         with self.gradebook as gb:
             try:
-                assignment = self.gradebook.find_submission(assignment_id, student_id)
+                assignment = gb.find_submission(assignment_id, student_id)
                 student = assignment.student
             except MissingEntry:
                 return []
