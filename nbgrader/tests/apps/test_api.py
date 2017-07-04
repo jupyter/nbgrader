@@ -492,85 +492,65 @@ class TestNbGraderAPI(BaseTestApp):
         }
 
     def test_assign(self, api, course_dir, db):
-        config = Config()
-        config.CourseDirectory.db_url = db
-        config.CourseDirectory.root = course_dir
-
         self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
-        result = api.assign("ps1", config=config)
+        result = api.assign("ps1")
         assert result["success"]
         assert os.path.exists(join(course_dir, "release", "ps1", "p1.ipynb"))
 
         os.makedirs(join(course_dir, "source", "ps2"))
-        result = api.assign("ps2", config=config)
+        result = api.assign("ps2")
         assert not result["success"]
 
     @notwindows
     def test_release_and_unrelease(self, api, course_dir, db, exchange):
-        config = Config()
-        config.CourseDirectory.db_url = db
-        config.CourseDirectory.root = course_dir
-        config.Exchange.root = exchange
-        config.Exchange.course_id = "abc101"
-
         self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
-        result = api.assign("ps1", config=config)
-        result = api.release("ps1", config=config)
+        result = api.assign("ps1")
+        result = api.release("ps1")
         assert result["success"]
         assert os.path.exists(join(exchange, "abc101", "outbound", "ps1", "p1.ipynb"))
 
-        result = api.release("ps1", config=config)
+        result = api.release("ps1")
         assert not result["success"]
 
-        result = api.unrelease("ps1", config=config)
+        result = api.unrelease("ps1")
         assert result["success"]
         assert not os.path.exists(join(exchange, "abc101", "outbound", "ps1", "p1.ipynb"))
 
     @notwindows
     def test_collect(self, api, course_dir, db, exchange):
-        config = Config()
-        config.CourseDirectory.db_url = db
-        config.CourseDirectory.root = course_dir
-        config.Exchange.root = exchange
-        config.Exchange.course_id = "abc101"
-
         self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
-        result = api.assign("ps1", config=config)
-        result = api.release("ps1", config=config)
-        result = api.collect("ps1", config=config)
+        result = api.assign("ps1")
+        result = api.release("ps1")
+        result = api.collect("ps1")
         assert result["success"]
         assert "No submissions" in result["log"]
 
         run_nbgrader(["fetch", "ps1", "--course", "abc101", "--Exchange.root={}".format(exchange)])
         run_nbgrader(["submit", "ps1", "--course", "abc101", "--Exchange.root={}".format(exchange)])
         username = get_username()
-        result = api.collect("ps1", config=config)
+        result = api.collect("ps1")
         assert result["success"]
         assert "Collecting submission" in result["log"]
         assert os.path.exists(join(course_dir, "submitted", username, "ps1", "p1.ipynb"))
 
         run_nbgrader(["submit", "ps1", "--course", "abc101", "--Exchange.root={}".format(exchange)])
-        result = api.collect("ps1", config=config)
+        result = api.collect("ps1")
         assert result["success"]
         assert "Updating submission" in result["log"]
         assert os.path.exists(join(course_dir, "submitted", username, "ps1", "p1.ipynb"))
 
     def test_autograde(self, api, course_dir, db):
-        config = Config()
-        config.CourseDirectory.db_url = db
-        config.CourseDirectory.root = course_dir
-
         self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
-        api.assign("ps1", config=config)
+        api.assign("ps1")
 
-        result = api.autograde("ps1", "foo", config=config)
+        result = api.autograde("ps1", "foo")
         assert not result["success"]
         assert "No notebooks were matched" in result["log"]
 
         self._copy_file(join("files", "submitted-changed.ipynb"), join(course_dir, "submitted", "foo", "ps1", "p1.ipynb"))
-        result = api.autograde("ps1", "foo", config=config)
+        result = api.autograde("ps1", "foo")
         assert result["success"]
         assert os.path.exists(join(course_dir, "autograded", "foo", "ps1", "p1.ipynb"))
 
-        result = api.autograde("ps1", "foo", config=config)
+        result = api.autograde("ps1", "foo")
         assert result["success"]

@@ -19,6 +19,7 @@ from .dbapp import (
 from .updateapp import UpdateApp
 from .zipcollectapp import ZipCollectApp
 from .nbgraderapp import NbGraderApp
+from .api import NbGraderAPI
 
 
 __all__ = [
@@ -49,4 +50,5 @@ __all__ = [
     'DbAssignmentListApp',
     'UpdateApp',
     'ZipCollectApp',
+    'NbGraderAPI'
 ]

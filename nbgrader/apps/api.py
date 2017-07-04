@@ -36,10 +36,24 @@ class NbGraderAPI(LoggingConfigurable):
             self.log_level = new
         self.log.setLevel(new)
 
-    def __init__(self, coursedir, **kwargs):
+    def __init__(self, coursedir=None, **kwargs):
+        """Initialize the API.
+
+        Arguments
+        ---------
+        coursedir: :class:`nbgrader.coursedir.CourseDirectory`
+            (Optional) A course directory object.
+        kwargs:
+            Additional keyword arguments (e.g. ``parent``, ``config``)
+
+        """
         self.log.setLevel(self.log_level)
-        self.coursedir = coursedir
         super(NbGraderAPI, self).__init__(**kwargs)
+
+        if coursedir is None:
+            self.coursedir = CourseDirectory(parent=self)
+        else:
+            self.coursedir = coursedir
 
         if sys.platform != 'win32':
             lister = ExchangeList(coursedir=self.coursedir, parent=self)
@@ -49,6 +63,13 @@ class NbGraderAPI(LoggingConfigurable):
 
     @property
     def gradebook(self):
+        """An instance of :class:`nbgrader.api.Gradebook`.
+
+        Note that each time this property is accessed, a new gradebook is
+        created. The user is responsible for destroying the gradebook through
+        :func:`~nbgrader.api.Gradebook.close`.
+
+        """
         return Gradebook(self.coursedir.db_url)
 
     def get_source_assignments(self):
@@ -107,8 +128,8 @@ class NbGraderAPI(LoggingConfigurable):
         (determined by whether or not a submission exists in the `submitted`
         directory).
 
-        Argument
-        --------
+        Arguments
+        ---------
         assignment_id: string
             The name of the assignment. May be * to select for all assignments.
 
@@ -235,8 +256,8 @@ class NbGraderAPI(LoggingConfigurable):
         ---------
         assignment_id: string
             The name of the assignment
-        released: list (optional)
-            A set of names of released assignments, obtained via
+        released: list
+            (Optional) A set of names of released assignments, obtained via
             self.get_released_assignments().
 
         Returns
@@ -259,10 +280,11 @@ class NbGraderAPI(LoggingConfigurable):
 
         # see if there is information about the assignment in the database
         try:
-            assignment = self.gradebook.find_assignment(assignment_id).to_dict()
-            assignment["average_score"] = self.gradebook.average_assignment_score(assignment_id)
-            assignment["average_code_score"] = self.gradebook.average_assignment_code_score(assignment_id)
-            assignment["average_written_score"] = self.gradebook.average_assignment_written_score(assignment_id)
+            with self.gradebook as gb:
+                assignment = gb.find_assignment(assignment_id).to_dict()
+                assignment["average_score"] = gb.average_assignment_score(assignment_id)
+                assignment["average_code_score"] = gb.average_assignment_code_score(assignment_id)
+                assignment["average_written_score"] = gb.average_assignment_written_score(assignment_id)
 
         except MissingEntry:
             assignment = {
@@ -338,45 +360,46 @@ class NbGraderAPI(LoggingConfigurable):
             A list of dictionaries containing information about each notebook
 
         """
-        try:
-            assignment = self.gradebook.find_assignment(assignment_id)
-        except MissingEntry:
-            assignment = None
+        with self.gradebook as gb:
+            try:
+                assignment = gb.find_assignment(assignment_id)
+            except MissingEntry:
+                assignment = None
 
-        # if the assignment exists in the database
-        if assignment:
-            notebooks = []
-            for notebook in assignment.notebooks:
-                x = notebook.to_dict()
-                x["average_score"] = self.gradebook.average_notebook_score(notebook.name, assignment.name)
-                x["average_code_score"] = self.gradebook.average_notebook_code_score(notebook.name, assignment.name)
-                x["average_written_score"] = self.gradebook.average_notebook_written_score(notebook.name, assignment.name)
-                notebooks.append(x)
+            # if the assignment exists in the database
+            if assignment:
+                notebooks = []
+                for notebook in assignment.notebooks:
+                    x = notebook.to_dict()
+                    x["average_score"] = gb.average_notebook_score(notebook.name, assignment.name)
+                    x["average_code_score"] = gb.average_notebook_code_score(notebook.name, assignment.name)
+                    x["average_written_score"] = gb.average_notebook_written_score(notebook.name, assignment.name)
+                    notebooks.append(x)
 
-        # if it doesn't exist in the database
-        else:
-            sourcedir = os.path.abspath(self.coursedir.format_path(
-                self.coursedir.source_directory,
-                student_id='.',
-                assignment_id=assignment_id))
+            # if it doesn't exist in the database
+            else:
+                sourcedir = os.path.abspath(self.coursedir.format_path(
+                    self.coursedir.source_directory,
+                    student_id='.',
+                    assignment_id=assignment_id))
 
-            notebooks = []
-            for filename in glob.glob(os.path.join(sourcedir, "*.ipynb")):
-                regex = os.path.join(sourcedir, "(?P<notebook_id>.*).ipynb")
-                matches = re.match(regex, filename)
-                notebook_id = matches.groupdict()['notebook_id']
-                notebooks.append({
-                    "name": notebook_id,
-                    "id": None,
-                    "average_score": 0,
-                    "average_code_score": 0,
-                    "average_written_score": 0,
-                    "max_score": 0,
-                    "max_code_score": 0,
-                    "max_written_score": 0,
-                    "needs_manual_grade": False,
-                    "num_submissions": 0
-                })
+                notebooks = []
+                for filename in glob.glob(os.path.join(sourcedir, "*.ipynb")):
+                    regex = os.path.join(sourcedir, "(?P<notebook_id>.*).ipynb")
+                    matches = re.match(regex, filename)
+                    notebook_id = matches.groupdict()['notebook_id']
+                    notebooks.append({
+                        "name": notebook_id,
+                        "id": None,
+                        "average_score": 0,
+                        "average_code_score": 0,
+                        "average_written_score": 0,
+                        "max_score": 0,
+                        "max_code_score": 0,
+                        "max_written_score": 0,
+                        "needs_manual_grade": False,
+                        "num_submissions": 0
+                    })
 
         return notebooks
 
@@ -389,9 +412,9 @@ class NbGraderAPI(LoggingConfigurable):
             The name of the assignment
         student_id: string
             The student's id
-        ungraded (optional): set
-            A set of student ids corresponding to students whose submissions
-            have not yet been autograded.
+        ungraded: set
+            (Optional) A set of student ids corresponding to students whose
+            submissions have not yet been autograded.
 
         Returns
         -------
@@ -421,20 +444,22 @@ class NbGraderAPI(LoggingConfigurable):
                 "student": student_id,
             }
 
-            try:
-                student = self.gradebook.find_student(student_id)
-            except MissingEntry:
-                submission["last_name"] = None
-                submission["first_name"] = None
-            else:
-                submission["last_name"] = student.last_name
-                submission["first_name"] = student.first_name
+            with self.gradebook as gb:
+                try:
+                    student = gb.find_student(student_id)
+                except MissingEntry:
+                    submission["last_name"] = None
+                    submission["first_name"] = None
+                else:
+                    submission["last_name"] = student.last_name
+                    submission["first_name"] = student.first_name
 
         elif student_id in autograded:
-            try:
-                submission = self.gradebook.find_submission(assignment_id, student_id).to_dict()
-            except MissingEntry:
-                return None
+            with self.gradebook as gb:
+                try:
+                    submission = gb.find_submission(assignment_id, student_id).to_dict()
+                except MissingEntry:
+                    return None
 
             submission["autograded"] = True
             submission["submitted"] = True
@@ -456,14 +481,15 @@ class NbGraderAPI(LoggingConfigurable):
                 "student": student_id,
             }
 
-            try:
-                student = self.gradebook.find_student(student_id)
-            except MissingEntry:
-                submission["last_name"] = None
-                submission["first_name"] = None
-            else:
-                submission["last_name"] = student.last_name
-                submission["first_name"] = student.first_name
+            with self.gradebook as gb:
+                try:
+                    student = gb.find_student(student_id)
+                except MissingEntry:
+                    submission["last_name"] = None
+                    submission["first_name"] = None
+                else:
+                    submission["last_name"] = student.last_name
+                    submission["first_name"] = student.first_name
 
         return submission
 
@@ -482,7 +508,8 @@ class NbGraderAPI(LoggingConfigurable):
             A list of dictionaries containing information about each submission
 
         """
-        db_submissions = self.gradebook.submission_dicts(assignment_id)
+        with self.gradebook as gb:
+            db_submissions = gb.submission_dicts(assignment_id)
         ungraded = self.get_submitted_students(assignment_id) - self.get_autograded_students(assignment_id)
         submissions = []
         for submission in db_submissions:
@@ -551,8 +578,9 @@ class NbGraderAPI(LoggingConfigurable):
             A dictionary mapping submission ids to the index of each submission
 
         """
-        notebooks = self.gradebook.notebook_submissions(notebook_id, assignment_id)
-        submissions = self._filter_existing_notebooks(assignment_id, notebooks)
+        with self.gradebook as gb:
+            notebooks = gb.notebook_submissions(notebook_id, assignment_id)
+            submissions = self._filter_existing_notebooks(assignment_id, notebooks)
         return dict([(x.id, i) for i, x in enumerate(submissions)])
 
     def get_notebook_submissions(self, assignment_id, notebook_id):
@@ -571,8 +599,9 @@ class NbGraderAPI(LoggingConfigurable):
             A list of dictionaries containing information about each submission.
 
         """
-        self.gradebook.find_notebook(notebook_id, assignment_id)
-        submissions = self.gradebook.notebook_submission_dicts(notebook_id, assignment_id)
+        with self.gradebook as gb:
+            gb.find_notebook(notebook_id, assignment_id)
+            submissions = gb.notebook_submission_dicts(notebook_id, assignment_id)
         indices = self.get_notebook_submission_indices(assignment_id, notebook_id)
         for nb in submissions:
             nb['index'] = indices.get(nb['id'], None)
@@ -588,8 +617,8 @@ class NbGraderAPI(LoggingConfigurable):
         ---------
         student_id: string
             The unique id of the student
-        submitted (optional): set
-            A set of unique ids of students who have submitted an assignment
+        submitted: set
+            (Optional) A set of unique ids of students who have submitted an assignment
 
         Returns
         -------
@@ -602,7 +631,8 @@ class NbGraderAPI(LoggingConfigurable):
             submitted = self.get_submitted_students("*")
 
         try:
-            student = self.gradebook.find_student(student_id).to_dict()
+            with self.gradebook as gb:
+                student = gb.find_student(student_id).to_dict()
 
         except MissingEntry:
             if student_id in submitted:
@@ -629,11 +659,14 @@ class NbGraderAPI(LoggingConfigurable):
             A list of dictionaries containing information about all the students
 
         """
+        with self.gradebook as gb:
+            in_db = set([x.id for x in gb.students])
+            students = gb.student_dicts()
+
         submitted = self.get_submitted_students("*")
-        in_db = set([x.id for x in self.gradebook.students])
-        students = self.gradebook.student_dicts()
         for student in (submitted - in_db):
             students.append(self.get_student(student, submitted=submitted))
+
         students.sort(key=lambda x: (x["last_name"] or "None", x["first_name"] or "None", x["id"]))
         return students
 
@@ -677,53 +710,58 @@ class NbGraderAPI(LoggingConfigurable):
             A list of dictionaries containing information about the submissions
 
         """
-        try:
-            assignment = self.gradebook.find_submission(assignment_id, student_id)
-            student = assignment.student
-        except MissingEntry:
-            return []
+        with self.gradebook as gb:
+            try:
+                assignment = self.gradebook.find_submission(assignment_id, student_id)
+                student = assignment.student
+            except MissingEntry:
+                return []
 
-        submissions = []
-        for notebook in assignment.notebooks:
-            filename = os.path.join(
-                os.path.abspath(self.coursedir.format_path(
-                    self.coursedir.autograded_directory,
-                    student_id=student_id,
-                    assignment_id=assignment_id)),
-                "{}.ipynb".format(notebook.name))
+            submissions = []
+            for notebook in assignment.notebooks:
+                filename = os.path.join(
+                    os.path.abspath(self.coursedir.format_path(
+                        self.coursedir.autograded_directory,
+                        student_id=student_id,
+                        assignment_id=assignment_id)),
+                    "{}.ipynb".format(notebook.name))
 
-            if os.path.exists(filename):
-                submissions.append(notebook.to_dict())
-            else:
-                submissions.append({
-                    "id": None,
-                    "name": notebook.name,
-                    "student": student_id,
-                    "last_name": student.last_name,
-                    "first_name": student.first_name,
-                    "score": 0,
-                    "max_score": notebook.max_score,
-                    "code_score": 0,
-                    "max_code_score": notebook.max_code_score,
-                    "written_score": 0,
-                    "max_written_score": notebook.max_written_score,
-                    "needs_manual_grade": False,
-                    "failed_tests": False,
-                    "flagged": False
-                })
+                if os.path.exists(filename):
+                    submissions.append(notebook.to_dict())
+                else:
+                    submissions.append({
+                        "id": None,
+                        "name": notebook.name,
+                        "student": student_id,
+                        "last_name": student.last_name,
+                        "first_name": student.first_name,
+                        "score": 0,
+                        "max_score": notebook.max_score,
+                        "code_score": 0,
+                        "max_code_score": notebook.max_code_score,
+                        "written_score": 0,
+                        "max_written_score": notebook.max_written_score,
+                        "needs_manual_grade": False,
+                        "failed_tests": False,
+                        "flagged": False
+                    })
 
         submissions.sort(key=lambda x: x["name"])
         return submissions
 
-    def assign(self, assignment_id, config=None):
-        """Run `nbgrader assign` for a particular assignment.
+    def assign(self, assignment_id, force=True, create=True):
+        """Run ``nbgrader assign`` for a particular assignment.
 
         Arguments
         ---------
         assignment_id: string
             The name of the assignment
-        config (optional): :class:`traitlets.config.Config` object
-            Additional config to be passed to nbgrader
+        force: bool
+            Whether to force creating the student version, even if it already
+            exists.
+        create: bool
+            Whether to create the assignment in the database, if it doesn't
+            already exist.
 
         Returns
         -------
@@ -736,20 +774,18 @@ class NbGraderAPI(LoggingConfigurable):
 
         """
         with temp_attrs(self.coursedir, assignment_id=assignment_id):
-            app = Assign(coursedir=self.coursedir, parent=self, config=config)
-            app.force = True
-            app.create_assignment = True
+            app = Assign(coursedir=self.coursedir, parent=self)
+            app.force = force
+            app.create_assignment = create
             return capture_log(app)
 
-    def unrelease(self, assignment_id, config=None):
-        """Run `nbgrader list --remove` for a particular assignment.
+    def unrelease(self, assignment_id):
+        """Run ``nbgrader list --remove`` for a particular assignment.
 
         Arguments
         ---------
         assignment_id: string
             The name of the assignment
-        config (optional): :class:`traitlets.config.Config` object
-            Additional config to be passed to nbgrader
 
         Returns
         -------
@@ -763,19 +799,17 @@ class NbGraderAPI(LoggingConfigurable):
         """
         if sys.platform != 'win32':
             with temp_attrs(self.coursedir, assignment_id=assignment_id):
-                app = ExchangeList(coursedir=self.coursedir, parent=self, config=config)
+                app = ExchangeList(coursedir=self.coursedir, parent=self)
                 app.remove = True
                 return capture_log(app)
 
-    def release(self, assignment_id, config=None):
-        """Run `nbgrader release` for a particular assignment.
+    def release(self, assignment_id):
+        """Run ``nbgrader release`` for a particular assignment.
 
         Arguments
         ---------
         assignment_id: string
             The name of the assignment
-        config (optional): :class:`traitlets.config.Config` object
-            Additional config to be passed to nbgrader
 
         Returns
         -------
@@ -789,18 +823,19 @@ class NbGraderAPI(LoggingConfigurable):
         """
         if sys.platform != 'win32':
             with temp_attrs(self.coursedir, assignment_id=assignment_id):
-                app = ExchangeRelease(coursedir=self.coursedir, parent=self, config=config)
+                app = ExchangeRelease(coursedir=self.coursedir, parent=self)
                 return capture_log(app)
 
-    def collect(self, assignment_id, config=None):
-        """Run `nbgrader collect` for a particular assignment.
+    def collect(self, assignment_id, update=True):
+        """Run ``nbgrader collect`` for a particular assignment.
 
         Arguments
         ---------
         assignment_id: string
             The name of the assignment
-        config (optional): :class:`traitlets.config.Config` object
-            Additional config to be passed to nbgrader
+        update: bool
+            Whether to update already-collected assignments with newer
+            submissions, if they exist
 
         Returns
         -------
@@ -814,12 +849,12 @@ class NbGraderAPI(LoggingConfigurable):
         """
         if sys.platform != 'win32':
             with temp_attrs(self.coursedir, assignment_id=assignment_id):
-                app = ExchangeCollect(coursedir=self.coursedir, parent=self, config=config)
-                app.update = True
+                app = ExchangeCollect(coursedir=self.coursedir, parent=self)
+                app.update = update
                 return capture_log(app)
 
-    def autograde(self, assignment_id, student_id, config=None):
-        """Run `nbgrader autograde` for a particular assignment and student.
+    def autograde(self, assignment_id, student_id, force=True, create=True):
+        """Run ``nbgrader autograde`` for a particular assignment and student.
 
         Arguments
         ---------
@@ -827,8 +862,12 @@ class NbGraderAPI(LoggingConfigurable):
             The name of the assignment
         student_id: string
             The unique id of the student
-        config (optional): :class:`traitlets.config.Config` object
-            Additional config to be passed to nbgrader
+        force: bool
+            Whether to autograde the submission, even if it's already been
+            autograded
+        create: bool
+            Whether to create students in the database if they don't already
+            exist
 
         Returns
         -------
@@ -841,7 +880,7 @@ class NbGraderAPI(LoggingConfigurable):
 
         """
         with temp_attrs(self.coursedir, assignment_id=assignment_id, student_id=student_id):
-            app = Autograde(coursedir=self.coursedir, parent=self, config=config)
-            app.force = True
-            app.create_student = True
+            app = Autograde(coursedir=self.coursedir, parent=self)
+            app.force = force
+            app.create_student = create
             return capture_log(app)

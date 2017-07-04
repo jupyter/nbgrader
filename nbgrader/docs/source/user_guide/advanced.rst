@@ -118,36 +118,6 @@ See also the nbconvert docs on `custom preprocessors <https://nbconvert.readthed
 Calling nbgrader apps from Python
 ---------------------------------
 
-nbgrader apps themselves can be called directly from Python (rather than
-through a subprocess), though **this use case is discouraged** as it is a bit
-fragile. In general, if you want to use pieces of nbgrader programmatically we
-recommend you use one of the preprocessors (see the previous sections). If this
-really won't work for you, read on.
-
-To run nbgrader from Python you need to create an instance of the application.
-All the applications have camelcase names without the "nbgrader" part, e.g.
-``nbgrader assign`` becomes ``AssignApp``:
-
-.. code:: python
-
-    from nbgrader.apps import AssignApp
-    app = AssignApp.instance()
-
-Next, you need to initialize and start the application using arguments, just
-like you'd use on the command line:
-
-.. code:: python
-
-    command_line_args = ["ps1", "--force"]
-    app.initialize(command_line_args)
-    app.start()
-
-Finally, if you want to be able to run the app again, you will need to reset
-the application state:
-
-.. code:: python
-
-    app.reset()
-
-Note that some of the apps (such as ``nbgrader validate``) may not work
-correctly when used this way. Use at your own risk!
+.. versionadded:: 0.5.0
+    Much of nbgrader's high level functionality can now be accessed through
+    an official :doc:`Python API </api/high_level_api>`.
