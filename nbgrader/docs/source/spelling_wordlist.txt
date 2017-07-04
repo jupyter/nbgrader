@@ -5,6 +5,7 @@ ajax
 alchemyst
 alikasamanli
 alope
+api
 app
 apps
 aren
@@ -75,6 +76,7 @@ https
 hubapi
 huwf
 Indices
+indices
 init
 inline
 io

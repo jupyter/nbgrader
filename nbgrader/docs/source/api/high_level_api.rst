@@ -6,7 +6,7 @@ High-Level API
 .. versionadded:: 0.5.0
 
 This API is a high-level api that provides access to nbgrader's core
-functionality, for example assigning, releasing, collecting, and autograading
+functionality, for example assigning, releasing, collecting, and autograding
 assignments. For example:
 
 .. code:: python
