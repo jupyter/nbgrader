@@ -51,8 +51,7 @@ class BaseConverter(LoggingConfigurable):
     def __init__(self, coursedir=None, **kwargs):
         self.coursedir = coursedir
         super(BaseConverter, self).__init__(**kwargs)
-        if self.parent:
-            self.log = self.parent.log
+        if self.parent and hasattr(self.parent, "logfile"):
             self.logfile = self.parent.logfile
         else:
             self.logfile = None

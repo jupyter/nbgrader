@@ -72,8 +72,6 @@ class Exchange(LoggingConfigurable):
     def __init__(self, coursedir=None, **kwargs):
         self.coursedir = coursedir
         super(Exchange, self).__init__(**kwargs)
-        if self.parent:
-            self.log = self.parent.log
 
     def fail(self, msg):
         self.log.fatal(msg)

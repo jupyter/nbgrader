@@ -6,10 +6,15 @@ import six
 import sys
 import shutil
 import stat
+import logging
+import traceback
 
 from setuptools.archive_util import unpack_archive
 from setuptools.archive_util import unpack_tarfile
 from setuptools.archive_util import unpack_zipfile
+from contextlib import contextmanager
+from tornado.log import LogFormatter
+
 
 # pwd is for unix passwords only, so we shouldn't import it on
 # windows machines
@@ -25,11 +30,13 @@ def is_grade(cell):
         return False
     return cell.metadata['nbgrader'].get('grade', False)
 
+
 def is_solution(cell):
     """Returns True if the cell is a solution cell."""
     if 'nbgrader' not in cell.metadata:
         return False
     return cell.metadata['nbgrader'].get('solution', False)
+
 
 def is_locked(cell):
     """Returns True if the cell source is locked (will be overwritten)."""
@@ -41,6 +48,7 @@ def is_locked(cell):
         return True
     else:
         return cell.metadata['nbgrader'].get('locked', False)
+
 
 def determine_grade(cell):
     if not is_grade(cell):
@@ -65,6 +73,7 @@ def determine_grade(cell):
     else:
         return None, max_points
 
+
 def to_bytes(string):
     """A python 2/3 compatible function for converting a string to bytes.
     In Python 2, this just returns the 8-bit string. In Python 3, this first
@@ -75,6 +84,7 @@ def to_bytes(string):
         return bytes(string.encode('utf-8'))
     else:
         return bytes(string)
+
 
 def compute_checksum(cell):
     m = hashlib.md5()
@@ -96,6 +106,7 @@ def compute_checksum(cell):
 
     return m.hexdigest()
 
+
 def parse_utc(ts):
     """Parses a timestamp into datetime format, converting it to UTC if necessary."""
     if ts is None:
@@ -105,6 +116,7 @@ def parse_utc(ts):
     if ts.tzinfo is not None:
         ts = (ts - ts.utcoffset()).replace(tzinfo=None)
     return ts
+
 
 def check_mode(path, read=False, write=False, execute=False):
     """Can the current user can rwx the path."""
@@ -117,6 +129,7 @@ def check_mode(path, read=False, write=False, execute=False):
         mode |= os.X_OK
     return os.access(path, mode)
 
+
 def check_directory(path, read=False, write=False, execute=False):
     """Does that path exist and can the current user rwx."""
     if os.path.isdir(path) and check_mode(path, read=read, write=write, execute=execute):
@@ -124,11 +137,13 @@ def check_directory(path, read=False, write=False, execute=False):
     else:
         return False
 
+
 def get_username():
     """Get the username of the current process."""
     if pwd is None:
         raise OSError("get_username cannot be called on Windows")
     return pwd.getpwuid(os.getuid())[0]
+
 
 def find_owner(path):
     """Get the username of the owner of path."""
@@ -136,9 +151,11 @@ def find_owner(path):
         raise OSError("find_owner cannot be called on Windows")
     return pwd.getpwuid(os.stat(os.path.abspath(path)).st_uid).pw_name
 
+
 def self_owned(path):
     """Is the path owned by the current user of this process?"""
     return get_username() == find_owner(os.path.abspath(path))
+
 
 def is_ignored(filename, ignore_globs=None):
     """Determines whether a filename should be ignored, based on whether it
@@ -152,6 +169,7 @@ def is_ignored(filename, ignore_globs=None):
         if filename in globs:
             return True
     return False
+
 
 def find_all_files(path, exclude=None):
     """Recursively finds all filenames rooted at `path`, optionally excluding
@@ -168,6 +186,7 @@ def find_all_files(path, exclude=None):
                 files.append(fullpath)
     return files
 
+
 def find_all_notebooks(path):
     """Return a sorted list of notebooks recursively found rooted at `path`."""
     notebooks = list()
@@ -178,6 +197,7 @@ def find_all_notebooks(path):
     notebooks.sort()
     return notebooks
 
+
 def full_split(path):
     rest, last = os.path.split(path)
     if last == path:
@@ -186,6 +206,7 @@ def full_split(path):
         return (rest,)
     else:
         return full_split(rest) + (last,)
+
 
 def rmtree(path):
     # for windows, we need to go through and make sure everything
@@ -199,6 +220,7 @@ def rmtree(path):
     # now we can remove the path
     shutil.rmtree(path)
 
+
 def remove(path):
     # for windows, we need to make sure that the file is writeable,
     # otherwise remove will fail
@@ -207,6 +229,7 @@ def remove(path):
 
     # now we can remove the path
     os.remove(path)
+
 
 def unzip(src, dest, zip_ext=None, create_own_folder=False, tree=False):
     """Extract all content from an archive file to a destination folder.
@@ -278,3 +301,68 @@ def unzip(src, dest, zip_ext=None, create_own_folder=False, tree=False):
             )
             skip.append(src_file)
         new_files = find_archive_files(skip)
+
+
+@contextmanager
+def temp_attrs(app, **newvals):
+    oldvals = {}
+    for k, v in newvals.items():
+        oldvals[k] = getattr(app, k)
+        setattr(app, k, v)
+
+    yield app
+
+    for k, v in oldvals.items():
+        setattr(app, k, v)
+
+
+def capture_log(app, fmt="[%(levelname)s] %(message)s"):
+    """Adds an extra handler to the given application the logs to a string
+    buffer, calls ``app.start()``, and returns the log output. The extra
+    handler is removed from the application before returning.
+
+    Arguments
+    ---------
+    app: LoggingConfigurable
+        An application, withh the `.start()` method implemented
+    fmt: string
+        A format string for formatting log messages
+
+    Returns
+    -------
+    A dictionary with the following keys (error and log may or may not be present):
+
+        - success (bool): whether or not the operation completed successfully
+        - error (string): formatted traceback
+        - log (string): captured log output
+
+    """
+    log_buff = six.StringIO()
+    handler = logging.StreamHandler(log_buff)
+    formatter = LogFormatter(fmt="[%(levelname)s] %(message)s")
+    handler.setFormatter(formatter)
+    app.log.addHandler(handler)
+
+    try:
+        app.start()
+
+    except:
+        log_buff.flush()
+        val = log_buff.getvalue()
+        result = {"success": False}
+        result["error"] = traceback.format_exc()
+        if val:
+            result["log"] = val
+
+    else:
+        log_buff.flush()
+        val = log_buff.getvalue()
+        result = {"success": True}
+        if val:
+            result["log"] = val
+
+    finally:
+        log_buff.close()
+        app.log.removeHandler(handler)
+
+    return result

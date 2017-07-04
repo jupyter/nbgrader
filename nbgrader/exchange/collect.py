@@ -56,6 +56,16 @@ class ExchangeCollect(Exchange):
         pass
 
     def copy_files(self):
+        if len(self.src_records) == 0:
+            self.log.warning("No submissions of '{}' for course '{}' to collect".format(
+                self.coursedir.assignment_id,
+                self.course_id))
+        else:
+            self.log.info("Processing {} submissions of '{}' for course '{}'".format(
+                len(self.src_records),
+                self.coursedir.assignment_id,
+                self.course_id))
+
         for rec in self.src_records:
             student_id = rec['username']
             src_path = os.path.join(self.inbound_path, rec['filename'])
