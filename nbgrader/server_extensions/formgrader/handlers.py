@@ -7,153 +7,52 @@ from .base import BaseHandler
 from ...api import MissingEntry
 
 
-class AssignmentsHandler(BaseHandler):
+class ManageAssignmentsHandler(BaseHandler):
     @web.authenticated
     def get(self):
-        assignments = []
-        for assignment in self.gradebook.assignments:
-            x = assignment.to_dict()
-            x["average_score"] = self.gradebook.average_assignment_score(assignment.name)
-            x["average_code_score"] = self.gradebook.average_assignment_code_score(assignment.name)
-            x["average_written_score"] = self.gradebook.average_assignment_written_score(assignment.name)
-            assignments.append(x)
-
         html = self.render(
-            "assignments.tpl",
-            assignments=assignments,
+            "manage_assignments.tpl",
             base_url=self.base_url)
-
         self.write(html)
 
 
-class AssignmentNotebooksHandler(BaseHandler):
+class ManageSubmissionsHandler(BaseHandler):
     @web.authenticated
     def get(self, assignment_id):
-        try:
-            assignment = self.gradebook.find_assignment(assignment_id)
-        except MissingEntry:
-            raise web.HTTPError(404, "Invalid assignment: {}".format(assignment_id))
-
-        notebooks = []
-        for notebook in assignment.notebooks:
-            x = notebook.to_dict()
-            x["average_score"] = self.gradebook.average_notebook_score(notebook.name, assignment.name)
-            x["average_code_score"] = self.gradebook.average_notebook_code_score(notebook.name, assignment.name)
-            x["average_written_score"] = self.gradebook.average_notebook_written_score(notebook.name, assignment.name)
-            notebooks.append(x)
-        assignment = assignment.to_dict()
-
         html = self.render(
-            "assignment_notebooks.tpl",
-            assignment=assignment,
-            notebooks=notebooks,
-            base_url=self.base_url)
-
-        self.write(html)
-
-
-class AssignmentNotebookSubmissionsHandler(BaseHandler):
-    @web.authenticated
-    def get(self, assignment_id, notebook_id):
-        try:
-            self.gradebook.find_notebook(notebook_id, assignment_id)
-        except MissingEntry:
-            raise web.HTTPError(404, "Invalid notebook: {}/{}".format(assignment_id, notebook_id))
-
-        submissions = self.gradebook.notebook_submission_dicts(notebook_id, assignment_id)
-        indexes = self._notebook_submission_indexes(assignment_id, notebook_id)
-        for nb in submissions:
-            nb['index'] = indexes.get(nb['id'], None)
-
-        submissions = [x for x in submissions if x['index'] is not None]
-        submissions.sort(key=lambda x: x["id"])
-
-        html = self.render(
-            "notebook_submissions.tpl",
-            notebook_id=notebook_id,
+            "manage_submissions.tpl",
+            course_dir=self.coursedir.root,
             assignment_id=assignment_id,
-            submissions=submissions,
-            base_url=self.base_url
-        )
+            base_url=self.base_url)
         self.write(html)
 
 
-class StudentsHandler(BaseHandler):
+class Gradebook1Handler(BaseHandler):
     @web.authenticated
     def get(self):
-        students = self.gradebook.student_dicts()
-        students.sort(key=lambda x: x.get("last_name") or "no last name")
-
         html = self.render(
-            "students.tpl",
-            students=students,
+            "gradebook1.tpl",
             base_url=self.base_url)
-
         self.write(html)
 
 
-class StudentAssignmentsHandler(BaseHandler):
+class Gradebook2Handler(BaseHandler):
     @web.authenticated
-    def get(self, student_id):
-        try:
-            student = self.gradebook.find_student(student_id)
-        except MissingEntry:
-            raise web.HTTPError(404, "Invalid student: {}".format(student_id))
-
-        submissions = []
-        for assignment in self.gradebook.assignments:
-            try:
-                submission = self.gradebook.find_submission(assignment.name, student.id).to_dict()
-            except MissingEntry:
-                submission = {
-                    "id": None,
-                    "name": assignment.name,
-                    "student": student.id,
-                    "duedate": None,
-                    "timestamp": None,
-                    "extension": None,
-                    "total_seconds_late": 0,
-                    "score": 0,
-                    "max_score": assignment.max_score,
-                    "code_score": 0,
-                    "max_code_score": assignment.max_code_score,
-                    "written_score": 0,
-                    "max_written_score": assignment.max_written_score,
-                    "needs_manual_grade": False
-                }
-            submissions.append(submission)
-
-        submissions.sort(key=lambda x: x.get("duedate") or "no due date")
-        student = student.to_dict()
-
+    def get(self, assignment_id):
         html = self.render(
-            "student_assignments.tpl",
-            assignments=submissions,
-            student=student,
-            base_url=self.base_url)
-
-        self.write(html)
-
-
-class StudentAssignmentNotebooksHandler(BaseHandler):
-    @web.authenticated
-    def get(self, student_id, assignment_id):
-        try:
-            assignment = self.gradebook.find_submission(assignment_id, student_id)
-        except MissingEntry:
-            raise web.HTTPError(404, "Invalid assignment: {} for {}".format(assignment_id, student_id))
-
-        notebooks = assignment.notebooks
-        submissions = self._filter_existing_notebooks(assignment_id, notebooks)
-        submissions = [x.to_dict() for x in assignment.notebooks]
-        for i, nb in enumerate(submissions):
-            nb['index'] = i
-
-        html = self.render(
-            "student_submissions.tpl",
+            "gradebook2.tpl",
             assignment_id=assignment_id,
-            student=assignment.student.to_dict(),
-            submissions=submissions,
+            base_url=self.base_url)
+        self.write(html)
+
+
+class Gradebook3Handler(BaseHandler):
+    @web.authenticated
+    def get(self, assignment_id, notebook_id):
+        html = self.render(
+            "gradebook3.tpl",
+            assignment_id=assignment_id,
+            notebook_id=notebook_id,
             base_url=self.base_url
         )
         self.write(html)
@@ -177,28 +76,24 @@ class SubmissionHandler(BaseHandler):
                 url += '?' + self.request.query
             return self.redirect(url, permanent=True)
 
-        notebook_dir_format = os.path.join(self.notebook_dir_format, "{notebook_id}.ipynb")
-        filename = os.path.join(self.notebook_dir, notebook_dir_format.format(
-            nbgrader_step=self.nbgrader_step,
-            assignment_id=assignment_id,
-            notebook_id=notebook_id,
-            student_id=student_id)
-        )
-        relative_path = os.path.relpath(filename, self.notebook_dir)
-        indexes = self._notebook_submission_indexes(assignment_id, notebook_id)
-        ix = indexes.get(submission.id, -2)
+        filename = os.path.join(os.path.abspath(self.coursedir.format_path(
+            self.coursedir.autograded_directory, student_id, assignment_id)), '{}.ipynb'.format(notebook_id))
+        relative_path = os.path.relpath(filename, self.coursedir.root)
+        indices = self.api.get_notebook_submission_indices(assignment_id, notebook_id)
+        ix = indices.get(submission.id, -2)
 
+        url_prefix = os.path.relpath(self.coursedir.root)
         resources = {
             'assignment_id': assignment_id,
             'notebook_id': notebook_id,
             'submission_id': submission.id,
             'index': ix,
-            'total': len(indexes),
+            'total': len(indices),
             'base_url': self.base_url,
             'mathjax_url': self.mathjax_url,
             'last_name': submission.student.last_name,
             'first_name': submission.student.first_name,
-            'notebook_path': self.notebook_url_prefix + '/' + relative_path
+            'notebook_path': url_prefix + '/' + relative_path
         }
 
         if not os.path.exists(filename):
@@ -216,7 +111,7 @@ class SubmissionHandler(BaseHandler):
 class SubmissionNavigationHandler(BaseHandler):
 
     def _assignment_notebook_list_url(self, assignment_id, notebook_id):
-        return '{}/formgrader/assignments/{}/{}'.format(self.base_url, assignment_id, notebook_id)
+        return '{}/formgrader/gradebook/{}/{}'.format(self.base_url, assignment_id, notebook_id)
 
     def _submission_url(self, submission_id):
         url = '{}/formgrader/submissions/{}'.format(self.base_url, submission_id)
@@ -227,12 +122,12 @@ class SubmissionNavigationHandler(BaseHandler):
 
     def _get_submission_ids(self, assignment_id, notebook_id):
         notebooks = self.gradebook.notebook_submissions(notebook_id, assignment_id)
-        submissions = self._filter_existing_notebooks(assignment_id, notebooks)
+        submissions = self.api._filter_existing_notebooks(assignment_id, notebooks)
         return sorted([x.id for x in submissions])
 
     def _get_incorrect_submission_ids(self, assignment_id, notebook_id, submission):
         notebooks = self.gradebook.notebook_submissions(notebook_id, assignment_id)
-        submissions = self._filter_existing_notebooks(assignment_id, notebooks)
+        submissions = self.api._filter_existing_notebooks(assignment_id, notebooks)
         incorrect_ids = set([x.id for x in submissions if x.failed_tests])
         incorrect_ids.add(submission.id)
         incorrect_ids = sorted(incorrect_ids)
@@ -290,7 +185,7 @@ class SubmissionNavigationHandler(BaseHandler):
 class SubmissionFilesHandler(web.StaticFileHandler, BaseHandler):
     def initialize(self, default_filename=None):
         super(SubmissionFilesHandler, self).initialize(
-            self.notebook_dir, default_filename=default_filename)
+            self.coursedir.root, default_filename=default_filename)
 
     def parse_url_path(self, url_path):
         submission_id, path = re.match(r"([^/]+)/(.*)", url_path.lstrip("/")).groups()
@@ -302,17 +197,46 @@ class SubmissionFilesHandler(web.StaticFileHandler, BaseHandler):
         except MissingEntry:
             raise web.HTTPError(404, "Invalid submission: {}".format(submission_id))
 
-        dirname = os.path.join(self.notebook_dir, self.notebook_dir_format.format(
-            nbgrader_step=self.nbgrader_step,
-            assignment_id=assignment_id,
-            student_id=student_id))
-
+        dirname = os.path.abspath(self.coursedir.format_path(
+            self.coursedir.autograded_directory, student_id, assignment_id))
         full_path = os.path.join(dirname, path)
         return super(SubmissionFilesHandler, self).parse_url_path(full_path)
 
     @web.authenticated
     def get(self, *args, **kwargs):
         return super(SubmissionFilesHandler, self).get(*args, **kwargs)
+
+
+class ManageStudents1Handler(BaseHandler):
+    @web.authenticated
+    def get(self):
+        html = self.render(
+            "manage_students1.tpl",
+            base_url=self.base_url)
+        self.write(html)
+
+
+class ManageStudents2Handler(BaseHandler):
+    @web.authenticated
+    def get(self, student_id):
+        html = self.render(
+            "manage_students2.tpl",
+            student_id=student_id,
+            base_url=self.base_url)
+
+        self.write(html)
+
+
+class ManageStudents3Handler(BaseHandler):
+    @web.authenticated
+    def get(self, student_id, assignment_id):
+        html = self.render(
+            "manage_students3.tpl",
+            assignment_id=assignment_id,
+            student_id=student_id,
+            base_url=self.base_url
+        )
+        self.write(html)
 
 
 class Template404(BaseHandler):
@@ -330,19 +254,22 @@ fonts_path = os.path.join(components_path, 'bootstrap', 'fonts')
 _navigation_regex = r"(?P<action>next_incorrect|prev_incorrect|next|prev)"
 
 default_handlers = [
-    (r"/formgrader/?", AssignmentsHandler),
-    (r"/formgrader/assignments/?", AssignmentsHandler),
-    (r"/formgrader/assignments/([^/]+)/?", AssignmentNotebooksHandler),
-    (r"/formgrader/assignments/([^/]+)/([^/]+)/?", AssignmentNotebookSubmissionsHandler),
+    (r"/formgrader/?", ManageAssignmentsHandler),
+    (r"/formgrader/manage_assignments/?", ManageAssignmentsHandler),
+    (r"/formgrader/manage_submissions/([^/]+)/?", ManageSubmissionsHandler),
 
-    (r"/formgrader/students/?", StudentsHandler),
-    (r"/formgrader/students/([^/]+)/?", StudentAssignmentsHandler),
-    (r"/formgrader/students/([^/]+)/([^/]+)/?", StudentAssignmentNotebooksHandler),
+    (r"/formgrader/gradebook/?", Gradebook1Handler),
+    (r"/formgrader/gradebook/([^/]+)/?", Gradebook2Handler),
+    (r"/formgrader/gradebook/([^/]+)/([^/]+)/?", Gradebook3Handler),
+
+    (r"/formgrader/manage_students/?", ManageStudents1Handler),
+    (r"/formgrader/manage_students/([^/]+)/?", ManageStudents2Handler),
+    (r"/formgrader/manage_students/([^/]+)/([^/]+)/?", ManageStudents3Handler),
 
     (r"/formgrader/submissions/components/(.*)", web.StaticFileHandler, {'path': components_path}),
     (r"/formgrader/submissions/([^/]+)/?", SubmissionHandler),
     (r"/formgrader/submissions/(?P<submission_id>[^/]+)/%s/?" % _navigation_regex, SubmissionNavigationHandler),
     (r"/formgrader/submissions/(.*)", SubmissionFilesHandler),
 
-    (r"/formgrader/fonts/(.*)", web.StaticFileHandler, {'path': fonts_path})
+    (r"/formgrader/fonts/(.*)", web.StaticFileHandler, {'path': fonts_path}),
 ]

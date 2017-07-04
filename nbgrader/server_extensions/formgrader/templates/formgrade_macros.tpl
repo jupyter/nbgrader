@@ -16,8 +16,9 @@ var assignment_id = "{{ resources.assignment_id }}";
 var base_url = "{{ resources.base_url }}/formgrader";
 </script>
 
-<script src="{{ resources.base_url }}/formgrader/static/js/keyboardmanager.js"></script>
-<script src="{{ resources.base_url }}/formgrader/static/js/models.js"></script>
+<script src="{{ resources.base_url }}/formgrader/static/js/backbone_xsrf.js"></script>
+<script src="{{ resources.base_url }}/formgrader/static/js/formgrade_keyboardmanager.js"></script>
+<script src="{{ resources.base_url }}/formgrader/static/js/formgrade_models.js"></script>
 <script src="{{ resources.base_url }}/formgrader/static/js/formgrade.js"></script>
 <script type="text/javascript">
 function toggle_name(on) {
@@ -51,9 +52,9 @@ function toggle_name(on) {
       <div class="col-md-8">
         <ul class="nav text-center">
           <ul class="breadcrumb">
-            <li><a href="{{ resources.base_url }}/formgrader/assignments">Assignments</a></li>
-            <li><a href="{{ resources.base_url }}/formgrader/assignments/{{ resources.assignment_id }}">{{ resources.assignment_id }}</a></li>
-            <li><a href="{{ resources.base_url }}/formgrader/assignments/{{ resources.assignment_id }}/{{ resources.notebook_id }}">{{ resources.notebook_id }}</a></li>
+            <li><a href="{{ resources.base_url }}/formgrader/gradebook">Gradebook</a></li>
+            <li><a href="{{ resources.base_url }}/formgrader/gradebook/{{ resources.assignment_id }}">{{ resources.assignment_id }}</a></li>
+            <li><a href="{{ resources.base_url }}/formgrader/gradebook/{{ resources.assignment_id }}/{{ resources.notebook_id }}">{{ resources.notebook_id }}</a></li>
             <li class="active live-notebook">
               <a class="name-hidden" data-toggle="tooltip" data-placement="bottom" title="Open live notebook" target="_blank" href="{{ resources.base_url }}/notebooks/{{ resources.notebook_path }}">
                 Submission #{{ resources.index + 1 }}

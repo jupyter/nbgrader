@@ -1,4 +1,8 @@
-{%- extends 'gradebook.tpl' -%}
+{%- extends 'base.tpl' -%}
+
+{%- block title -%}
+Error
+{%- endblock -%}
 
 {%- block body -%}
 <div class="panel-body">

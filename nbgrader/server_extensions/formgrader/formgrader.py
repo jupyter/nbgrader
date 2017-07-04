@@ -33,14 +33,11 @@ class FormgradeExtension(NbGrader):
 
         # Configure the formgrader settings
         tornado_settings = dict(
-            nbgrader_notebook_dir=self.coursedir.root,
-            nbgrader_notebook_dir_format=self.coursedir.directory_structure,
-            nbgrader_step=self.coursedir.autograded_directory,
+            nbgrader_coursedir=self.coursedir,
             nbgrader_exporter=HTMLExporter(config=self.config),
             nbgrader_gradebook=None,
             nbgrader_db_url=self.coursedir.db_url,
             nbgrader_jinja2_env=jinja_env,
-            nbgrader_notebook_url_prefix=os.path.relpath(self.coursedir.root)
         )
 
         webapp.settings.update(tornado_settings)
@@ -66,7 +63,7 @@ class FormgradeExtension(NbGrader):
 
 def load_jupyter_server_extension(nbapp):
     """Load the formgrader extension"""
-
+    nbapp.log.info("Loading the formgrader nbgrader serverextension")
     webapp = nbapp.web_app
     formgrader = FormgradeExtension(parent=nbapp)
     formgrader.initialize([])

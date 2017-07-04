@@ -4,6 +4,7 @@ import json
 from tornado import web
 from notebook.base.handlers import IPythonHandler
 from ...api import Gradebook
+from ...apps.api import NbGraderAPI
 
 
 class BaseHandler(IPythonHandler):
@@ -17,10 +18,14 @@ class BaseHandler(IPythonHandler):
         return self.settings['nbgrader_db_url']
 
     @property
+    def coursedir(self):
+        return self.settings['nbgrader_coursedir']
+
+    @property
     def gradebook(self):
-        self.log.debug("getting gradebook")
         gb = self.settings['nbgrader_gradebook']
         if gb is None:
+            self.log.debug("creating gradebook")
             gb = Gradebook(self.db_url)
             self.settings['nbgrader_gradebook'] = gb
         return gb
@@ -30,49 +35,15 @@ class BaseHandler(IPythonHandler):
         return self.settings['mathjax_url']
 
     @property
-    def notebook_dir(self):
-        return self.settings['nbgrader_notebook_dir']
-
-    @property
-    def notebook_dir_format(self):
-        return self.settings['nbgrader_notebook_dir_format']
-
-    @property
-    def nbgrader_step(self):
-        return self.settings['nbgrader_step']
-
-    @property
     def exporter(self):
         return self.settings['nbgrader_exporter']
 
     @property
-    def notebook_url_prefix(self):
-        return self.settings['nbgrader_notebook_url_prefix']
-
-    def _filter_existing_notebooks(self, assignment_id, notebooks):
-        path = os.path.join(
-            self.notebook_dir,
-            self.notebook_dir_format,
-            "{notebook_id}.ipynb"
-        )
-
-        submissions = list()
-        for nb in notebooks:
-            filename = path.format(
-                nbgrader_step=self.nbgrader_step,
-                assignment_id=assignment_id,
-                notebook_id=nb.name,
-                student_id=nb.student.id
-            )
-            if os.path.exists(filename):
-                submissions.append(nb)
-
-        return sorted(submissions, key=lambda x: x.id)
-
-    def _notebook_submission_indexes(self, assignment_id, notebook_id):
-        notebooks = self.gradebook.notebook_submissions(notebook_id, assignment_id)
-        submissions = self._filter_existing_notebooks(assignment_id, notebooks)
-        return dict([(x.id, i) for i, x in enumerate(submissions)])
+    def api(self):
+        level = self.log.level
+        api = NbGraderAPI(self.coursedir, parent=self.coursedir.parent)
+        api.log_level = level
+        return api
 
     def render(self, name, **ns):
         template = self.settings['nbgrader_jinja2_env'].get_template(name)
@@ -81,19 +52,19 @@ class BaseHandler(IPythonHandler):
     def write_error(self, status_code, **kwargs):
         if status_code == 500:
             html = self.render(
-                'gradebook_500.tpl',
+                'base_500.tpl',
                 base_url=self.base_url,
                 error_code=500)
 
         elif status_code == 502:
             html = self.render(
-                'gradebook_500.tpl',
+                'base_500.tpl',
                 base_url=self.base_url,
                 error_code=502)
 
         elif status_code == 403:
             html = self.render(
-                'gradebook_403.tpl',
+                'base_403.tpl',
                 base_url=self.base_url,
                 error_code=403)
 
