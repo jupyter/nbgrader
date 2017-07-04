@@ -108,3 +108,7 @@ def cache(request):
 notwindows = pytest.mark.skipif(
     sys.platform == 'win32',
     reason='This functionality of nbgrader is unsupported on Windows')
+
+windows = pytest.mark.skipif(
+    sys.platform != 'win32',
+    reason='This test is only to be run on Windows')

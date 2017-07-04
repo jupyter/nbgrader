@@ -96,7 +96,8 @@ class NbGraderAPI(LoggingConfigurable):
             regex = self.coursedir.format_path(
                 self.coursedir.source_directory,
                 student_id='.',
-                assignment_id='(?P<assignment_id>.*)')
+                assignment_id='(?P<assignment_id>.*)',
+                escape=True)
 
             matches = re.match(regex, filename)
             if matches:
@@ -115,7 +116,7 @@ class NbGraderAPI(LoggingConfigurable):
             A set of assignment names
 
         """
-        if self.course_id:
+        if self.course_id and sys.platform != 'win32':
             lister = ExchangeList(coursedir=self.coursedir, parent=self)
             released = set([x['assignment_id'] for x in lister.start()])
         else:
@@ -157,7 +158,8 @@ class NbGraderAPI(LoggingConfigurable):
             regex = self.coursedir.format_path(
                 self.coursedir.submitted_directory,
                 student_id='(?P<student_id>.*)',
-                assignment_id=assignment_id)
+                assignment_id=assignment_id,
+                escape=True)
 
             matches = re.match(regex, filename)
             if matches:
@@ -224,7 +226,8 @@ class NbGraderAPI(LoggingConfigurable):
             regex = self.coursedir.format_path(
                 self.coursedir.autograded_directory,
                 student_id='(?P<student_id>.*)',
-                assignment_id=assignment_id)
+                assignment_id=assignment_id,
+                escape=True)
             matches = re.match(regex, filename)
             if matches:
                 student_id = matches.groupdict()['student_id']
@@ -300,7 +303,7 @@ class NbGraderAPI(LoggingConfigurable):
             }
 
         # get released status
-        if not self.course_id:
+        if not self.course_id or sys.platform == 'win32':
             assignment["releaseable"] = False
             assignment["status"] = "draft"
         else:
@@ -378,14 +381,19 @@ class NbGraderAPI(LoggingConfigurable):
 
             # if it doesn't exist in the database
             else:
-                sourcedir = os.path.abspath(self.coursedir.format_path(
+                sourcedir = self.coursedir.format_path(
                     self.coursedir.source_directory,
                     student_id='.',
-                    assignment_id=assignment_id))
+                    assignment_id=assignment_id)
+                escaped_sourcedir = self.coursedir.format_path(
+                    self.coursedir.source_directory,
+                    student_id='.',
+                    assignment_id=assignment_id,
+                    escape=True)
 
                 notebooks = []
                 for filename in glob.glob(os.path.join(sourcedir, "*.ipynb")):
-                    regex = os.path.join(sourcedir, "(?P<notebook_id>.*).ipynb")
+                    regex = re.escape(os.path.sep).join([escaped_sourcedir, "(?P<notebook_id>.*).ipynb"])
                     matches = re.match(regex, filename)
                     notebook_id = matches.groupdict()['notebook_id']
                     notebooks.append({

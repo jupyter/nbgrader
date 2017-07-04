@@ -11,7 +11,7 @@ from ...coursedir import CourseDirectory
 from ...utils import rmtree, get_username
 from .. import run_nbgrader
 from .base import BaseTestApp
-from .conftest import notwindows
+from .conftest import notwindows, windows
 
 
 @pytest.fixture
@@ -47,6 +47,13 @@ class TestNbGraderAPI(BaseTestApp):
         assert api.get_released_assignments() == {"ps1"}
 
         api.course_id = None
+        assert api.get_released_assignments() == set([])
+
+    @windows
+    def test_get_released_assignments_windows(self, api, exchange, course_dir):
+        assert api.get_released_assignments() == set([])
+
+        api.course_id = 'abc101'
         assert api.get_released_assignments() == set([])
 
     def test_get_submitted_students(self, api, course_dir):
@@ -336,13 +343,14 @@ class TestNbGraderAPI(BaseTestApp):
         self._copy_file(join("files", "submitted-changed.ipynb"), join(course_dir, "submitted", "foo", "ps1", "p1.ipynb"))
         run_nbgrader(["autograde", "ps1", "--create", "--no-execute", "--force", "--db", db])
 
-        notebooks = api.gradebook.notebook_submissions("p1", "ps1")
-        s = api._filter_existing_notebooks("ps1", notebooks)
-        assert s == notebooks
+        with api.gradebook as gb:
+            notebooks = gb.notebook_submissions("p1", "ps1")
+            s = api._filter_existing_notebooks("ps1", notebooks)
+            assert s == notebooks
 
-        notebooks = api.gradebook.notebook_submissions("p2", "ps1")
-        s = api._filter_existing_notebooks("ps1", notebooks)
-        assert s == []
+            notebooks = gb.notebook_submissions("p2", "ps1")
+            s = api._filter_existing_notebooks("ps1", notebooks)
+            assert s == []
 
     def test_get_notebook_submission_indices(self, api, course_dir, db):
         self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
@@ -352,11 +360,12 @@ class TestNbGraderAPI(BaseTestApp):
         self._copy_file(join("files", "submitted-changed.ipynb"), join(course_dir, "submitted", "bar", "ps1", "p1.ipynb"))
         run_nbgrader(["autograde", "ps1", "--create", "--no-execute", "--force", "--db", db])
 
-        notebooks = api.gradebook.notebook_submissions("p1", "ps1")
-        notebooks.sort(key=lambda x: x.id)
-        idx = api.get_notebook_submission_indices("ps1", "p1")
-        assert idx[notebooks[0].id] == 0
-        assert idx[notebooks[1].id] == 1
+        with api.gradebook as gb:
+            notebooks = gb.notebook_submissions("p1", "ps1")
+            notebooks.sort(key=lambda x: x.id)
+            idx = api.get_notebook_submission_indices("ps1", "p1")
+            assert idx[notebooks[0].id] == 0
+            assert idx[notebooks[1].id] == 1
 
     def test_get_notebook_submissions(self, api, course_dir, db):
         self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
@@ -369,12 +378,13 @@ class TestNbGraderAPI(BaseTestApp):
 
         s = api.get_notebook_submissions("ps1", "p1")
         assert len(s) == 2
-        notebooks = api.gradebook.notebook_submissions("p1", "ps1")
-        notebooks.sort(key=lambda x: x.id)
-        notebooks = [x.to_dict() for x in notebooks]
-        for i in range(2):
-            notebooks[i]["index"] = i
-            assert s[i] == notebooks[i]
+        with api.gradebook as gb:
+            notebooks = gb.notebook_submissions("p1", "ps1")
+            notebooks.sort(key=lambda x: x.id)
+            notebooks = [x.to_dict() for x in notebooks]
+            for i in range(2):
+                notebooks[i]["index"] = i
+                assert s[i] == notebooks[i]
 
     def test_get_student(self, api, course_dir, db):
         assert api.get_student("foo") is None
@@ -390,25 +400,26 @@ class TestNbGraderAPI(BaseTestApp):
         }
         rmtree(join(course_dir, "submitted", "foo"))
 
-        api.gradebook.add_student("foo")
-        assert api.get_student("foo") == {
-            "id": "foo",
-            "last_name": None,
-            "first_name": None,
-            "email": None,
-            "max_score": 0,
-            "score": 0
-        }
+        with api.gradebook as gb:
+            gb.add_student("foo")
+            assert api.get_student("foo") == {
+                "id": "foo",
+                "last_name": None,
+                "first_name": None,
+                "email": None,
+                "max_score": 0,
+                "score": 0
+            }
 
-        api.gradebook.update_or_create_student("foo", last_name="Foo", first_name="A", email="a.foo@email.com")
-        assert api.get_student("foo") == {
-            "id": "foo",
-            "last_name": "Foo",
-            "first_name": "A",
-            "email": "a.foo@email.com",
-            "max_score": 0,
-            "score": 0
-        }
+            gb.update_or_create_student("foo", last_name="Foo", first_name="A", email="a.foo@email.com")
+            assert api.get_student("foo") == {
+                "id": "foo",
+                "last_name": "Foo",
+                "first_name": "A",
+                "email": "a.foo@email.com",
+                "max_score": 0,
+                "score": 0
+            }
 
         self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
         run_nbgrader(["assign", "ps1", "--create", "--db", db])
@@ -426,16 +437,17 @@ class TestNbGraderAPI(BaseTestApp):
     def test_get_students(self, api, course_dir):
         assert api.get_students() == []
 
-        api.gradebook.update_or_create_student("foo", last_name="Foo", first_name="A", email="a.foo@email.com")
-        s1 = {
-            "id": "foo",
-            "last_name": "Foo",
-            "first_name": "A",
-            "email": "a.foo@email.com",
-            "max_score": 0,
-            "score": 0
-        }
-        assert api.get_students() == [s1]
+        with api.gradebook as gb:
+            gb.update_or_create_student("foo", last_name="Foo", first_name="A", email="a.foo@email.com")
+            s1 = {
+                "id": "foo",
+                "last_name": "Foo",
+                "first_name": "A",
+                "email": "a.foo@email.com",
+                "max_score": 0,
+                "score": 0
+            }
+            assert api.get_students() == [s1]
 
         self._copy_file(join("files", "submitted-changed.ipynb"), join(course_dir, "submitted", "bar", "ps1", "p1.ipynb"))
         s2 = {
