@@ -7,6 +7,7 @@ import sys
 import os
 import traceback
 import logging
+import traitlets.log
 
 from jupyter_core.application import JupyterApp
 from textwrap import dedent
@@ -260,6 +261,8 @@ class NbGrader(JupyterApp):
 
         # clear the instance
         self.clear_instance()
+        traitlets.log._logger = None
+
 
     def load_config_file(self, **kwargs):
         """Load the config file.

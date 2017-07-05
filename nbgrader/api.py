@@ -498,10 +498,9 @@ class SubmittedAssignment(Base):
             "id": self.id,
             "name": self.name,
             "student": self.student.id,
+            "first_name": self.student.first_name,
+            "last_name": self.student.last_name,
             "timestamp": self.timestamp.isoformat() if self.timestamp is not None else None,
-            "extension": self.extension.total_seconds() if self.extension is not None else None,
-            "duedate": self.duedate.isoformat() if self.duedate is not None else None,
-            "total_seconds_late": self.total_seconds_late,
             "score": self.score,
             "max_score": self.max_score,
             "code_score": self.code_score,
@@ -2319,28 +2318,116 @@ class Gradebook(object):
             A list of dictionaries, one per student
 
         """
-        # subquery the scores
-        scores = self.db.query(
-            Student.id,
-            func.sum(Grade.score).label("score")
-        ).join(SubmittedAssignment, SubmittedNotebook, Grade)\
-         .group_by(Student.id)\
+        if len(self.assignments) > 0:
+            # subquery the scores
+            scores = self.db.query(
+                Student.id,
+                func.sum(Grade.score).label("score")
+            ).join(SubmittedAssignment, SubmittedNotebook, Grade)\
+             .group_by(Student.id)\
+             .subquery()
+
+            # full query
+            _scores = func.coalesce(scores.c.score, 0.0)
+            students = self.db.query(
+                Student.id, Student.first_name, Student.last_name,
+                Student.email, _scores,
+                func.sum(GradeCell.max_score)
+            ).outerjoin(scores, Student.id == scores.c.id)\
+             .group_by(
+                 Student.id, Student.first_name, Student.last_name,
+                 Student.email, _scores)\
+             .all()
+
+            keys = ["id", "first_name", "last_name", "email", "score", "max_score"]
+            return [dict(zip(keys, x)) for x in students]
+
+        else:
+            students = [s.to_dict() for s in self.students]
+            return students
+
+    def submission_dicts(self, assignment_id):
+        """Returns a list of dictionaries containing submission data. Equivalent
+        to calling :func:`~nbgrader.api.SubmittedAssignment.to_dict` for each
+        submission, except that this method is implemented using proper SQL
+        joins and is much faster.
+
+        Parameters
+        ----------
+        assignment_id : string
+            the name of the assignment
+
+        Returns
+        -------
+        submissions : list
+            A list of dictionaries, one per submitted assignment
+
+        """
+        # subquery the code scores
+        code_scores = self.db.query(
+            SubmittedAssignment.id,
+            func.sum(Grade.score).label("code_score"),
+            func.sum(GradeCell.max_score).label("max_code_score"),
+        ).join(SubmittedNotebook, Notebook, Assignment, Student, Grade, GradeCell)\
+         .filter(GradeCell.cell_type == "code")\
+         .group_by(SubmittedAssignment.id)\
+         .subquery()
+
+        # subquery for the written scores
+        written_scores = self.db.query(
+            SubmittedAssignment.id,
+            func.sum(Grade.score).label("written_score"),
+            func.sum(GradeCell.max_score).label("max_written_score"),
+        ).join(SubmittedNotebook, Notebook, Assignment, Student, Grade, GradeCell)\
+         .filter(GradeCell.cell_type == "markdown")\
+         .group_by(SubmittedAssignment.id)\
+         .subquery()
+
+        # subquery for needing manual grading
+        manual_grade = self.db.query(
+            SubmittedAssignment.id,
+            exists().where(Grade.needs_manual_grade).label("needs_manual_grade")
+        ).join(SubmittedNotebook, Assignment, Notebook)\
+         .filter(
+             SubmittedNotebook.assignment_id == SubmittedAssignment.id,
+             Grade.notebook_id == SubmittedNotebook.id,
+             Grade.needs_manual_grade)\
+         .group_by(SubmittedAssignment.id)\
          .subquery()
 
         # full query
-        _scores = func.coalesce(scores.c.score, 0.0)
-        students = self.db.query(
-            Student.id, Student.first_name, Student.last_name,
-            Student.email, _scores,
-            func.sum(GradeCell.max_score)
-        ).outerjoin(scores, Student.id == scores.c.id)\
+        _manual_grade = func.coalesce(manual_grade.c.needs_manual_grade, False)
+        assignments = self.db.query(
+            SubmittedAssignment.id, Assignment.name,
+            SubmittedAssignment.timestamp, Student.first_name, Student.last_name,
+            Student.id, func.sum(Grade.score), func.sum(GradeCell.max_score),
+            code_scores.c.code_score, code_scores.c.max_code_score,
+            written_scores.c.written_score, written_scores.c.max_written_score,
+            _manual_grade
+        ).join(SubmittedNotebook, Assignment, Student, Grade, GradeCell)\
+         .outerjoin(code_scores, SubmittedAssignment.id == code_scores.c.id)\
+         .outerjoin(written_scores, SubmittedAssignment.id == written_scores.c.id)\
+         .outerjoin(manual_grade, SubmittedAssignment.id == manual_grade.c.id)\
+         .filter(and_(
+             Assignment.name == assignment_id,
+             Student.id == SubmittedAssignment.student_id,
+             SubmittedAssignment.id == SubmittedNotebook.assignment_id,
+             SubmittedNotebook.id == Grade.notebook_id,
+             GradeCell.id == Grade.cell_id))\
          .group_by(
-             Student.id, Student.first_name, Student.last_name,
-             Student.email, _scores)\
+             SubmittedAssignment.id, Assignment.name,
+             SubmittedAssignment.timestamp, Student.first_name, Student.last_name,
+             Student.id, code_scores.c.code_score, code_scores.c.max_code_score,
+             written_scores.c.written_score, written_scores.c.max_written_score,
+             _manual_grade)\
          .all()
 
-        keys = ["id", "first_name", "last_name", "email", "score", "max_score"]
-        return [dict(zip(keys, x)) for x in students]
+        keys = [
+            "id", "name", "timestamp", "first_name", "last_name", "student",
+            "score", "max_score", "code_score", "max_code_score",
+            "written_score", "max_written_score", "needs_manual_grade"
+        ]
+        return [dict(zip(keys, x)) for x in assignments]
 
     def notebook_submission_dicts(self, notebook_id, assignment_id):
         """Returns a list of dictionaries containing submission data. Equivalent
