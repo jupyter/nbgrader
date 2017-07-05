@@ -302,7 +302,7 @@ class NbGraderAPI(LoggingConfigurable):
                     assignment["duedate_notimezone"] = ts.replace(tzinfo=None).isoformat()
                 else:
                     assignment["display_duedate"] = None
-                    assignment["displaye_notimezone"] = None
+                    assignment["duedate_notimezone"] = None
                 assignment["duedate_timezone"] = self.timezone
                 assignment["average_score"] = gb.average_assignment_score(assignment_id)
                 assignment["average_code_score"] = gb.average_assignment_code_score(assignment_id)
@@ -314,7 +314,8 @@ class NbGraderAPI(LoggingConfigurable):
                 "name": assignment_id,
                 "duedate": None,
                 "display_duedate": None,
-                "timezone": self.timezone,
+                "duedate_notimezone": None,
+                "duedate_timezone": self.timezone,
                 "average_score": 0,
                 "average_code_score": 0,
                 "average_written_score": 0,
