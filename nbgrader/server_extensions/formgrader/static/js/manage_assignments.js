@@ -66,7 +66,7 @@ var AssignmentUI = Backbone.View.extend({
             .attr("data-dismiss", "modal")
             .text("Cancel"));
 
-        this.$modal = createModal("Editing " + this.model.get("name"), body, footer);
+        this.$modal = createModal("edit-assignment-modal", "Editing " + this.model.get("name"), body, footer);
         this.$modal.find("input.modal-name").val(this.model.get("name"));
         this.$modal_duedate = this.$modal.find("input.modal-duedate");
         this.$modal_duedate.val(this.model.get("duedate_notimezone"));
@@ -203,12 +203,14 @@ var AssignmentUI = Backbone.View.extend({
         response = JSON.parse(response);
         if (response["success"]) {
             createLogModal(
+                "success-modal",
                 "Success",
                 "Successfully created the student version of '" + this.model.get("name") + "':",
                 response["log"]);
 
         } else {
             createLogModal(
+                "error-modal",
                 "Error",
                 "There was an error creating the student version of '" + this.model.get("name") + "':",
                 response["log"],
@@ -219,6 +221,7 @@ var AssignmentUI = Backbone.View.extend({
     assign_failure: function (response) {
         this.model.fetch();
         createModal(
+            "error-modal",
             "Error",
             "There was an error creating the student version of '" + this.model.get("name") + "'.");
     },
@@ -236,12 +239,14 @@ var AssignmentUI = Backbone.View.extend({
         response = JSON.parse(response);
         if (response["success"]) {
             createLogModal(
+                "success-modal",
                 "Success",
                 "Successfully unreleased '" + this.model.get("name") + "'.",
                 response["log"]);
 
         } else {
             createLogModal(
+                "error-modal",
                 "Error",
                 "There was an error unreleasing '" + this.model.get("name") + "':",
                 response["log"],
@@ -252,6 +257,7 @@ var AssignmentUI = Backbone.View.extend({
     unrelease_failure: function () {
         this.model.fetch();
         createModal(
+            "error-modal",
             "Error",
             "There was an error unreleasing '" + this.model.get("name") + "'.");
     },
@@ -269,12 +275,14 @@ var AssignmentUI = Backbone.View.extend({
         response = JSON.parse(response);
         if (response["success"]) {
             createLogModal(
+                "success-modal",
                 "Success",
                 "Successfully released '" + this.model.get("name") + "'.",
                 response["log"]);
 
         } else {
             createLogModal(
+                "error-modal",
                 "Error",
                 "There was an error releasing '" + this.model.get("name") + "':",
                 response["log"],
@@ -285,6 +293,7 @@ var AssignmentUI = Backbone.View.extend({
     release_failure: function () {
         this.model.fetch();
         createModal(
+            "error-modal",
             "Error",
             "There was an error releasing '" + this.model.get("name") + "'.");
     },
@@ -302,12 +311,14 @@ var AssignmentUI = Backbone.View.extend({
         response = JSON.parse(response);
         if (response["success"]) {
             createLogModal(
+                "success-modal",
                 "Success",
                 "Successfully collected submissions of '" + this.model.get("name") + "'.",
                 response["log"]);
 
         } else {
             createLogModal(
+                "error-modal",
                 "Error",
                 "There was an error collecting '" + this.model.get("name") + "':",
                 response["log"],
@@ -318,6 +329,7 @@ var AssignmentUI = Backbone.View.extend({
     collect_failure: function () {
         this.model.fetch();
         createModal(
+            "error-modal",
             "Error",
             "There was an error collecting submissions of '" + this.model.get("name") + "'.");
     },
@@ -371,8 +383,13 @@ var createAssignmentModal = function () {
     var createAssignment = function () {
         var name = modal.find(".name").val();
         var duedate = modal.find(".duedate").val();
+        var timezone = modal.find(".timezone").val();
         if (duedate === "") {
             duedate = null;
+            timezone = null;
+        }
+        if (timezone == "") {
+            timezone = null;
         }
         if (name === "") {
             modal.modal('hide');
@@ -381,7 +398,8 @@ var createAssignmentModal = function () {
 
         var model = new Assignment({
             "name": name,
-            "duedate": duedate
+            "duedate_notimezone": duedate,
+            "duedate_timezone": timezone,
         }, {
             "collection": models
         });
@@ -410,6 +428,11 @@ var createAssignmentModal = function () {
     duedate.append($("<td/>").addClass("align-middle").text("Due date (optional)"));
     duedate.append($("<td/>").append($("<input/>").addClass("duedate").attr("type", "datetime-local")));
 
+    var timezone = $("<tr/>");
+    body.append(timezone);
+    timezone.append($("<td/>").addClass("align-middle").text("Timezone (optional)"));
+    timezone.append($("<td/>").append($("<input/>").addClass("modal-timezone").attr("type", "text")));
+
     var footer = $("<div/>");
     footer.append($("<button/>")
         .addClass("btn btn-primary save")
@@ -422,7 +445,7 @@ var createAssignmentModal = function () {
         .attr("data-dismiss", "modal")
         .text("Cancel"));
 
-    modal = createModal("Add New Assignment", body, footer);
+    modal = createModal("add-assignment-modal", "Add New Assignment", body, footer);
 };
 
 var loadAssignments = function () {

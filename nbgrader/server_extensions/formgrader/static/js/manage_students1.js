@@ -67,7 +67,7 @@ var StudentUI = Backbone.View.extend({
             .attr("data-dismiss", "modal")
             .text("Cancel"));
 
-        this.$modal = createModal("Editing " + this.model.get("id"), body, footer);
+        this.$modal = createModal("edit-student-modal", "Editing " + this.model.get("id"), body, footer);
         this.$modal.find("input.modal-id").val(this.model.get("id"));
         this.$modal_first_name = this.$modal.find("input.modal-first-name");
         this.$modal_first_name.val(this.model.get("first_name"));
@@ -252,7 +252,7 @@ var createStudentModal = function () {
         .attr("data-dismiss", "modal")
         .text("Cancel"));
 
-    modal = createModal("Add New Student", body, footer);
+    modal = createModal("add-student-modal", "Add New Student", body, footer);
 };
 
 var loadStudents = function () {

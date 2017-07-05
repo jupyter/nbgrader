@@ -127,12 +127,14 @@ var SubmissionUI = Backbone.View.extend({
         var assignment = this.model.get("name");
         if (response["success"]) {
             createLogModal(
+                "success-modal",
                 "Success",
                 "Successfully autograded '" + assignment + "' for student '" + student + "'.",
                 response["log"]);
 
         } else {
             createLogModal(
+                "error-modal",
                 "Error",
                 "There was an error autograding '" + assignment + "' for student '" + student + "':",
                 response["log"],
@@ -145,6 +147,7 @@ var SubmissionUI = Backbone.View.extend({
         var student = this.model.get("student");
         var assignment = this.model.get("name");
         createModal(
+            "error-modal",
             "Error",
             "There was an error autograding '" + assignment + "' for student '" + student + "'.");
     },

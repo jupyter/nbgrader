@@ -1,8 +1,8 @@
-var createModal = function (title, body, footer) {
+var createModal = function (id, title, body, footer) {
     var modal = $("<div/>")
         .addClass("modal")
         .addClass("fade")
-        .attr("id", "help-dialog")
+        .attr("id", id)
         .attr("role", "dialog")
 
     var dialog = $("<div/>").addClass("modal-dialog");
@@ -46,7 +46,7 @@ var createModal = function (title, body, footer) {
     return modal;
 };
 
-var createLogModal = function (title, message, log, error) {
+var createLogModal = function (id, title, message, log, error) {
     var body = $("<div>");
     body.append($("<p/>").text(message));
 
@@ -68,7 +68,7 @@ var createLogModal = function (title, message, log, error) {
         body.append(err_panel);
     }
 
-    return createModal(title, body);
+    return createModal(id, title, body);
 };
 
 var roundToPrecision = function (num, precision) {
