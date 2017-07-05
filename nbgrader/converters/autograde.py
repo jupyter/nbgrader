@@ -139,6 +139,24 @@ class Autograde(BaseConverter):
             self.log.error(msg)
             raise NbGraderException(msg)
 
+        # check for missing notebooks and give them a score of zero if they
+        # do not exist
+        with Gradebook(self.coursedir.db_url) as gb:
+            assignment = gb.find_assignment(assignment_id)
+            for notebook in assignment.notebooks:
+                path = os.path.join(self.coursedir.format_path(
+                    self.coursedir.submitted_directory,
+                    student_id,
+                    assignment_id), "{}.ipynb".format(notebook.name))
+                if not os.path.exists(path):
+                    self.log.warning("No submitted file: {}".format(path))
+                    submission = gb.find_submission_notebook(
+                        notebook.name, assignment_id, student_id)
+                    for grade in submission.grades:
+                        grade.auto_score = 0
+                        grade.needs_manual_grade = False
+                    gb.db.commit()
+
     def _init_preprocessors(self):
         self.exporter._preprocessors = []
         if self._sanitizing:
