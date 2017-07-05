@@ -54,52 +54,47 @@ def gradebook(request, tempdir, nbserver):
 
 
 @pytest.mark.nbextensions
-def test_load_assignment_list(browser, port, gradebook):
-    # load the main page and make sure it is the Assignments page
-    utils._get(browser, utils._formgrade_url(port))
-    utils._wait_for_gradebook_page(browser, port, "")
-    utils._check_breadcrumbs(browser, "Assignments")
-
+def test_load_gradebook1(browser, port, gradebook):
     # load the assignments page
-    utils._load_gradebook_page(browser, port, "assignments")
-    utils._check_breadcrumbs(browser, "Assignments")
+    utils._load_gradebook_page(browser, port, "gradebook")
+    utils._check_breadcrumbs(browser, "Gradebook")
 
     # click on the "Problem Set 1" link
     utils._click_link(browser, "Problem Set 1")
-    utils._wait_for_gradebook_page(browser, port, "assignments/Problem Set 1")
+    utils._wait_for_gradebook_page(browser, port, "gradebook/Problem Set 1")
 
 
 @pytest.mark.nbextensions
-def test_load_assignment_notebook_list(browser, port, gradebook):
-    utils._load_gradebook_page(browser, port, "assignments/Problem Set 1")
-    utils._check_breadcrumbs(browser, "Assignments", "Problem Set 1")
+def test_load_gradebook2(browser, port, gradebook):
+    utils._load_gradebook_page(browser, port, "gradebook/Problem Set 1")
+    utils._check_breadcrumbs(browser, "Gradebook", "Problem Set 1")
 
-    # click the "Assignments" link
-    utils._click_link(browser, "Assignments")
-    utils._wait_for_gradebook_page(browser, port, "assignments")
+    # click the "Gradebook" link
+    utils._click_link(browser, "Gradebook")
+    utils._wait_for_gradebook_page(browser, port, "gradebook")
     browser.back()
 
     # click on the problem link
     for problem in gradebook.find_assignment("Problem Set 1").notebooks:
         utils._click_link(browser, problem.name)
-        utils._wait_for_gradebook_page(browser, port, "assignments/Problem Set 1/{}".format(problem.name))
+        utils._wait_for_gradebook_page(browser, port, "gradebook/Problem Set 1/{}".format(problem.name))
         browser.back()
 
 
 @pytest.mark.nbextensions
-def test_load_assignment_notebook_submissions_list(browser, port, gradebook):
+def test_load_gradebook3(browser, port, gradebook):
     for problem in gradebook.find_assignment("Problem Set 1").notebooks:
-        utils._load_gradebook_page(browser, port, "assignments/Problem Set 1/{}".format(problem.name))
-        utils._check_breadcrumbs(browser, "Assignments", "Problem Set 1", problem.name)
+        utils._load_gradebook_page(browser, port, "gradebook/Problem Set 1/{}".format(problem.name))
+        utils._check_breadcrumbs(browser, "Gradebook", "Problem Set 1", problem.name)
 
-        # click the "Assignments" link
-        utils._click_link(browser, "Assignments")
-        utils._wait_for_gradebook_page(browser, port, "assignments")
+        # click the "Gradebook" link
+        utils._click_link(browser, "Gradebook")
+        utils._wait_for_gradebook_page(browser, port, "gradebook")
         browser.back()
 
         # click the "Problem Set 1" link
         utils._click_link(browser, "Problem Set 1")
-        utils._wait_for_gradebook_page(browser, port, "assignments/Problem Set 1")
+        utils._wait_for_gradebook_page(browser, port, "gradebook/Problem Set 1")
         browser.back()
 
         submissions = problem.submissions
@@ -112,14 +107,14 @@ def test_load_assignment_notebook_submissions_list(browser, port, gradebook):
 
 
 @pytest.mark.nbextensions
-def test_assignment_notebook_submissions_show_hide_names(browser, port, gradebook):
+def test_gradebook3_show_hide_names(browser, port, gradebook):
     problem = gradebook.find_assignment("Problem Set 1").notebooks[0]
-    utils._load_gradebook_page(browser, port, "assignments/Problem Set 1/{}".format(problem.name))
+    utils._load_gradebook_page(browser, port, "gradebook/Problem Set 1/{}".format(problem.name))
     submissions = problem.submissions
     submissions.sort(key=lambda x: x.id)
     submission = submissions[0]
 
-    top_elem = browser.find_element_by_css_selector("#submission-1")
+    top_elem = browser.find_elements_by_css_selector("tbody tr")[0]
     col1, col2 = top_elem.find_elements_by_css_selector("td")[:2]
     hidden = col1.find_element_by_css_selector(".glyphicon.name-hidden")
     shown = col1.find_element_by_css_selector(".glyphicon.name-shown")
@@ -147,47 +142,36 @@ def test_assignment_notebook_submissions_show_hide_names(browser, port, gradeboo
 
 
 @pytest.mark.nbextensions
-def test_load_student_list(browser, port, gradebook):
+def test_load_student1(browser, port, gradebook):
     # load the student view
-    utils._load_gradebook_page(browser, port, "students")
+    utils._load_gradebook_page(browser, port, "manage_students")
     utils._check_breadcrumbs(browser, "Students")
 
     # click on student
     for student in gradebook.students:
-        ## TODO: they should have a link here, even if they haven't submitted anything!
-        if len(student.submissions) == 0:
-            continue
         utils._click_link(browser, "{}, {}".format(student.last_name, student.first_name))
-        utils._wait_for_gradebook_page(browser, port, "students/{}".format(student.id))
+        utils._wait_for_gradebook_page(browser, port, "manage_students/{}".format(student.id))
         browser.back()
 
 
 @pytest.mark.nbextensions
-def test_load_student_assignment_list(browser, port, gradebook):
+def test_load_student2(browser, port, gradebook):
     for student in gradebook.students:
-        utils._load_gradebook_page(browser, port, "students/{}".format(student.id))
+        utils._load_gradebook_page(browser, port, "manage_students/{}".format(student.id))
         utils._check_breadcrumbs(browser, "Students", student.id)
-
-        try:
-            gradebook.find_submission("Problem Set 1", student.id)
-        except MissingEntry:
-            ## TODO: make sure link doesn't exist
-            continue
-
         utils._click_link(browser, "Problem Set 1")
-        utils._wait_for_gradebook_page(browser, port, "students/{}/Problem Set 1".format(student.id))
+        utils._wait_for_gradebook_page(browser, port, "manage_students/{}/Problem Set 1".format(student.id))
 
 
 @pytest.mark.nbextensions
-def test_load_student_assignment_submissions_list(browser, port, gradebook):
+def test_load_student3(browser, port, gradebook):
     for student in gradebook.students:
         try:
             submission = gradebook.find_submission("Problem Set 1", student.id)
         except MissingEntry:
-            ## TODO: make sure link doesn't exist
             continue
 
-        utils._load_gradebook_page(browser, port, "students/{}/Problem Set 1".format(student.id))
+        utils._load_gradebook_page(browser, port, "manage_students/{}/Problem Set 1".format(student.id))
         utils._check_breadcrumbs(browser, "Students", student.id, "Problem Set 1")
 
         for problem in gradebook.find_assignment("Problem Set 1").notebooks:
@@ -195,27 +179,24 @@ def test_load_student_assignment_submissions_list(browser, port, gradebook):
             utils._click_link(browser, problem.name)
             utils._wait_for_formgrader(browser, port, "submissions/{}/?index=0".format(submission.id))
             browser.back()
-            utils._wait_for_gradebook_page(browser, port, "students/{}/Problem Set 1".format(student.id))
+            utils._wait_for_gradebook_page(browser, port, "manage_students/{}/Problem Set 1".format(student.id))
 
 
 @pytest.mark.nbextensions
 def test_switch_views(browser, port, gradebook):
-    # load the main page
-    utils._load_gradebook_page(browser, port, "assignments")
+    pages = ["", "manage_assignments", "gradebook", "manage_students"]
+    links = [
+        ("Manage Assignments", "manage_assignments"),
+        ("Gradebook", "gradebook"),
+        ("Manage Students", "manage_students")
+    ]
 
-    # click the "Change View" button
-    utils._click_link(browser, "Change View", partial=True)
-
-    # click the "Students" option
-    utils._click_link(browser, "Students")
-    utils._wait_for_gradebook_page(browser, port, "students")
-
-    # click the "Change View" button
-    utils._click_link(browser, "Change View", partial=True)
-
-    # click the "Assignments" option
-    utils._click_link(browser, "Assignments")
-    utils._wait_for_gradebook_page(browser, port, "assignments")
+    for page in pages:
+        utils._load_gradebook_page(browser, port, page)
+        for link, target in links:
+            utils._click_link(browser, link)
+            utils._wait_for_gradebook_page(browser, port, target)
+            browser.back()
 
 
 @pytest.mark.nbextensions
@@ -228,9 +209,9 @@ def test_formgrade_view_breadcrumbs(browser, port, gradebook):
             utils._get(browser, utils._formgrade_url(port, "submissions/{}".format(submission.id)))
             utils._wait_for_formgrader(browser, port, "submissions/{}/?index=0".format(submission.id))
 
-            # click on the "Assignments" link
-            utils._click_link(browser, "Assignments")
-            utils._wait_for_gradebook_page(browser, port, "assignments")
+            # click on the "Gradebook" link
+            utils._click_link(browser, "Gradebook")
+            utils._wait_for_gradebook_page(browser, port, "gradebook")
 
             # go back
             browser.back()
@@ -238,7 +219,7 @@ def test_formgrade_view_breadcrumbs(browser, port, gradebook):
 
             # click on the "Problem Set 1" link
             utils._click_link(browser, "Problem Set 1")
-            utils._wait_for_gradebook_page(browser, port, "assignments/Problem Set 1")
+            utils._wait_for_gradebook_page(browser, port, "gradebook/Problem Set 1")
 
             # go back
             browser.back()
@@ -246,7 +227,7 @@ def test_formgrade_view_breadcrumbs(browser, port, gradebook):
 
             # click on the problem link
             utils._click_link(browser, problem.name)
-            utils._wait_for_gradebook_page(browser, port, "assignments/Problem Set 1/{}".format(problem.name))
+            utils._wait_for_gradebook_page(browser, port, "gradebook/Problem Set 1/{}".format(problem.name))
 
             # go back
             browser.back()
@@ -323,7 +304,7 @@ def test_next_prev_assignments(browser, port, gradebook):
 
         # Move to the next submission (should return to notebook list)
         next_function()
-        utils._wait_for_gradebook_page(browser, port, "assignments/Problem Set 1/Problem 1")
+        utils._wait_for_gradebook_page(browser, port, "gradebook/Problem Set 1/Problem 1")
 
         # Go back
         browser.back()
@@ -335,7 +316,7 @@ def test_next_prev_assignments(browser, port, gradebook):
 
         # Move to the previous submission (should return to the notebook list)
         prev_function()
-        utils._wait_for_gradebook_page(browser, port, "assignments/Problem Set 1/Problem 1")
+        utils._wait_for_gradebook_page(browser, port, "gradebook/Problem Set 1/Problem 1")
 
 
 @pytest.mark.nbextensions
@@ -359,7 +340,7 @@ def test_next_prev_failed_assignments(browser, port, gradebook):
     if submissions[0].failed_tests:
         # Go to the next failed submission (should return to the notebook list)
         utils._send_keys_to_body(browser, Keys.CONTROL, Keys.SHIFT, ".")
-        utils._wait_for_gradebook_page(browser, port, "assignments/Problem Set 1/Problem 1")
+        utils._wait_for_gradebook_page(browser, port, "gradebook/Problem Set 1/Problem 1")
 
         # Go back
         browser.back()
@@ -367,7 +348,7 @@ def test_next_prev_failed_assignments(browser, port, gradebook):
 
         # Go to the previous failed submission (should return to the notebook list)
         utils._send_keys_to_body(browser, Keys.CONTROL, Keys.SHIFT, ",")
-        utils._wait_for_gradebook_page(browser, port, "assignments/Problem Set 1/Problem 1")
+        utils._wait_for_gradebook_page(browser, port, "gradebook/Problem Set 1/Problem 1")
 
         # Go back
         browser.back()
@@ -379,7 +360,7 @@ def test_next_prev_failed_assignments(browser, port, gradebook):
 
         # Go to the next failed submission (should return to the notebook list)
         utils._send_keys_to_body(browser, Keys.CONTROL, Keys.SHIFT, ".")
-        utils._wait_for_gradebook_page(browser, port, "assignments/Problem Set 1/Problem 1")
+        utils._wait_for_gradebook_page(browser, port, "gradebook/Problem Set 1/Problem 1")
 
         # Go back
         browser.back()
@@ -400,7 +381,7 @@ def test_next_prev_failed_assignments(browser, port, gradebook):
 
         # Go to the previous failed submission (should return to the notebook list)
         utils._send_keys_to_body(browser, Keys.CONTROL, Keys.SHIFT, ",")
-        utils._wait_for_gradebook_page(browser, port, "assignments/Problem Set 1/Problem 1")
+        utils._wait_for_gradebook_page(browser, port, "gradebook/Problem Set 1/Problem 1")
 
         # Go back
         browser.back()
@@ -412,7 +393,7 @@ def test_next_prev_failed_assignments(browser, port, gradebook):
 
         # Go to the next failed submission (should return to the notebook list)
         utils._send_keys_to_body(browser, Keys.CONTROL, Keys.SHIFT, ".")
-        utils._wait_for_gradebook_page(browser, port, "assignments/Problem Set 1/Problem 1")
+        utils._wait_for_gradebook_page(browser, port, "gradebook/Problem Set 1/Problem 1")
 
         # Go back
         browser.back()
@@ -420,7 +401,7 @@ def test_next_prev_failed_assignments(browser, port, gradebook):
 
         # Go to the previous failed submission (should return to the notebook list)
         utils._send_keys_to_body(browser, Keys.CONTROL, Keys.SHIFT, ",")
-        utils._wait_for_gradebook_page(browser, port, "assignments/Problem Set 1/Problem 1")
+        utils._wait_for_gradebook_page(browser, port, "gradebook/Problem Set 1/Problem 1")
 
 
 @pytest.mark.nbextensions

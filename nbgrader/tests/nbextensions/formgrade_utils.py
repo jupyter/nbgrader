@@ -23,11 +23,11 @@ def _check_url(browser, port, url):
 
 def _check_breadcrumbs(browser, *breadcrumbs):
     # check that breadcrumbs are correct
-    elements = browser.find_elements_by_css_selector("ul.breadcrumb li")
+    elements = browser.find_elements_by_css_selector(".breadcrumb li")
     assert tuple([e.text for e in elements]) == breadcrumbs
 
     # check that the active breadcrumb is correct
-    element = browser.find_element_by_css_selector("ul.breadcrumb li.active")
+    element = browser.find_element_by_css_selector(".breadcrumb li.active")
     assert element.text == breadcrumbs[-1]
 
 
@@ -52,7 +52,9 @@ def _wait_for_visibility_of_element(browser, element_id, time=10):
 
 
 def _wait_for_gradebook_page(browser, port, url):
-    _wait_for_element(browser, "gradebook")
+    page_loaded = lambda browser: browser.execute_script(
+        """return typeof models !== "undefined" && models !== undefined && models.loaded === true;""")
+    WebDriverWait(browser, 10).until(page_loaded)
     _check_url(browser, port, url)
 
 
@@ -181,6 +183,6 @@ def _load_formgrade(browser, port, gradebook):
     submissions = problem.submissions
     submissions.sort(key=lambda x: x.id)
 
-    _load_gradebook_page(browser, port, "assignments/Problem Set 1/Problem 1")
+    _load_gradebook_page(browser, port, "gradebook/Problem Set 1/Problem 1")
     _click_link(browser, "Submission #1")
     _wait_for_formgrader(browser, port, "submissions/{}/?index=0".format(submissions[0].id))
