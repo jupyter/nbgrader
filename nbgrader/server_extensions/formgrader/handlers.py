@@ -3,12 +3,13 @@ import re
 
 from tornado import web
 
-from .base import BaseHandler
+from .base import BaseHandler, check_xsrf
 from ...api import MissingEntry
 
 
 class ManageAssignmentsHandler(BaseHandler):
     @web.authenticated
+    @check_xsrf
     def get(self):
         html = self.render(
             "manage_assignments.tpl",
@@ -18,6 +19,7 @@ class ManageAssignmentsHandler(BaseHandler):
 
 class ManageSubmissionsHandler(BaseHandler):
     @web.authenticated
+    @check_xsrf
     def get(self, assignment_id):
         html = self.render(
             "manage_submissions.tpl",
@@ -29,6 +31,7 @@ class ManageSubmissionsHandler(BaseHandler):
 
 class Gradebook1Handler(BaseHandler):
     @web.authenticated
+    @check_xsrf
     def get(self):
         html = self.render(
             "gradebook1.tpl",
@@ -38,6 +41,7 @@ class Gradebook1Handler(BaseHandler):
 
 class Gradebook2Handler(BaseHandler):
     @web.authenticated
+    @check_xsrf
     def get(self, assignment_id):
         html = self.render(
             "gradebook2.tpl",
@@ -48,6 +52,7 @@ class Gradebook2Handler(BaseHandler):
 
 class Gradebook3Handler(BaseHandler):
     @web.authenticated
+    @check_xsrf
     def get(self, assignment_id, notebook_id):
         html = self.render(
             "gradebook3.tpl",
@@ -60,6 +65,7 @@ class Gradebook3Handler(BaseHandler):
 
 class SubmissionHandler(BaseHandler):
     @web.authenticated
+    @check_xsrf
     def get(self, submission_id):
         try:
             submission = self.gradebook.find_submission_notebook_by_id(submission_id)
@@ -170,6 +176,7 @@ class SubmissionNavigationHandler(BaseHandler):
             return self._submission_url(submission_ids[ix_incorrect - 1])
 
     @web.authenticated
+    @check_xsrf
     def get(self, submission_id, action):
         try:
             submission = self.gradebook.find_submission_notebook_by_id(submission_id)
@@ -203,12 +210,14 @@ class SubmissionFilesHandler(web.StaticFileHandler, BaseHandler):
         return super(SubmissionFilesHandler, self).parse_url_path(full_path)
 
     @web.authenticated
+    @check_xsrf
     def get(self, *args, **kwargs):
         return super(SubmissionFilesHandler, self).get(*args, **kwargs)
 
 
 class ManageStudents1Handler(BaseHandler):
     @web.authenticated
+    @check_xsrf
     def get(self):
         html = self.render(
             "manage_students1.tpl",
@@ -218,6 +227,7 @@ class ManageStudents1Handler(BaseHandler):
 
 class ManageStudents2Handler(BaseHandler):
     @web.authenticated
+    @check_xsrf
     def get(self, student_id):
         html = self.render(
             "manage_students2.tpl",
@@ -229,6 +239,7 @@ class ManageStudents2Handler(BaseHandler):
 
 class ManageStudents3Handler(BaseHandler):
     @web.authenticated
+    @check_xsrf
     def get(self, student_id, assignment_id):
         html = self.render(
             "manage_students3.tpl",

@@ -1,5 +1,6 @@
 import os
 import json
+import functools
 
 from tornado import web
 from notebook.base.handlers import IPythonHandler
@@ -89,3 +90,11 @@ class BaseApiHandler(BaseHandler):
             self.log.error("Couldn't parse JSON", exc_info=True)
             raise web.HTTPError(400, 'Invalid JSON in body of request')
         return model
+
+
+def check_xsrf(f):
+    @functools.wraps(f)
+    def wrapper(self, *args, **kwargs):
+        _ = self.xsrf_token
+        return f(self, *args, **kwargs)
+    return wrapper

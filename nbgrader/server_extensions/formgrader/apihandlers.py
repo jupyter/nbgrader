@@ -4,12 +4,13 @@ import traceback
 
 from tornado import web
 
-from .base import BaseApiHandler
+from .base import BaseApiHandler, check_xsrf
 from ...api import MissingEntry
 
 
 class GradeCollectionHandler(BaseApiHandler):
     @web.authenticated
+    @check_xsrf
     def get(self):
         submission_id = self.get_argument("submission_id")
         try:
@@ -21,6 +22,7 @@ class GradeCollectionHandler(BaseApiHandler):
 
 class CommentCollectionHandler(BaseApiHandler):
     @web.authenticated
+    @check_xsrf
     def get(self):
         submission_id = self.get_argument("submission_id")
         try:
@@ -32,6 +34,7 @@ class CommentCollectionHandler(BaseApiHandler):
 
 class GradeHandler(BaseApiHandler):
     @web.authenticated
+    @check_xsrf
     def get(self, grade_id):
         try:
             grade = self.gradebook.find_grade_by_id(grade_id)
@@ -40,6 +43,7 @@ class GradeHandler(BaseApiHandler):
         self.write(json.dumps(grade.to_dict()))
 
     @web.authenticated
+    @check_xsrf
     def put(self, grade_id):
         try:
             grade = self.gradebook.find_grade_by_id(grade_id)
@@ -59,6 +63,7 @@ class GradeHandler(BaseApiHandler):
 
 class CommentHandler(BaseApiHandler):
     @web.authenticated
+    @check_xsrf
     def get(self, grade_id):
         try:
             comment = self.gradebook.find_comment_by_id(grade_id)
@@ -67,6 +72,7 @@ class CommentHandler(BaseApiHandler):
         self.write(json.dumps(comment.to_dict()))
 
     @web.authenticated
+    @check_xsrf
     def put(self, grade_id):
         try:
             comment = self.gradebook.find_comment_by_id(grade_id)
@@ -81,6 +87,7 @@ class CommentHandler(BaseApiHandler):
 
 class FlagSubmissionHandler(BaseApiHandler):
     @web.authenticated
+    @check_xsrf
     def post(self, submission_id):
         try:
             submission = self.gradebook.find_submission_notebook_by_id(submission_id)
@@ -94,6 +101,7 @@ class FlagSubmissionHandler(BaseApiHandler):
 
 class AssignmentCollectionHandler(BaseApiHandler):
     @web.authenticated
+    @check_xsrf
     def get(self):
         assignments = self.api.get_assignments()
         self.write(json.dumps(assignments))
@@ -101,6 +109,7 @@ class AssignmentCollectionHandler(BaseApiHandler):
 
 class AssignmentHandler(BaseApiHandler):
     @web.authenticated
+    @check_xsrf
     def get(self, assignment_id):
         assignment = self.api.get_assignment(assignment_id)
         if assignment is None:
@@ -108,6 +117,7 @@ class AssignmentHandler(BaseApiHandler):
         self.write(json.dumps(assignment))
 
     @web.authenticated
+    @check_xsrf
     def put(self, assignment_id):
         data = self.get_json_body()
         duedate = data.get("duedate_notimezone", None)
@@ -124,6 +134,7 @@ class AssignmentHandler(BaseApiHandler):
 
 class NotebookCollectionHandler(BaseApiHandler):
     @web.authenticated
+    @check_xsrf
     def get(self, assignment_id):
         notebooks = self.api.get_notebooks(assignment_id)
         self.write(json.dumps(notebooks))
@@ -131,6 +142,7 @@ class NotebookCollectionHandler(BaseApiHandler):
 
 class SubmissionCollectionHandler(BaseApiHandler):
     @web.authenticated
+    @check_xsrf
     def get(self, assignment_id):
         submissions = self.api.get_submissions(assignment_id)
         self.write(json.dumps(submissions))
@@ -138,6 +150,7 @@ class SubmissionCollectionHandler(BaseApiHandler):
 
 class SubmissionHandler(BaseApiHandler):
     @web.authenticated
+    @check_xsrf
     def get(self, assignment_id, student_id):
         submission = self.api.get_submission(assignment_id, student_id)
         if submission is None:
@@ -147,6 +160,7 @@ class SubmissionHandler(BaseApiHandler):
 
 class SubmittedNotebookCollectionHandler(BaseApiHandler):
     @web.authenticated
+    @check_xsrf
     def get(self, assignment_id, notebook_id):
         submissions = self.api.get_notebook_submissions(assignment_id, notebook_id)
         self.write(json.dumps(submissions))
@@ -154,6 +168,7 @@ class SubmittedNotebookCollectionHandler(BaseApiHandler):
 
 class StudentCollectionHandler(BaseApiHandler):
     @web.authenticated
+    @check_xsrf
     def get(self):
         students = self.api.get_students()
         self.write(json.dumps(students))
@@ -161,6 +176,7 @@ class StudentCollectionHandler(BaseApiHandler):
 
 class StudentHandler(BaseApiHandler):
     @web.authenticated
+    @check_xsrf
     def get(self, student_id):
         student = self.api.get_student(student_id)
         if student is None:
@@ -168,6 +184,7 @@ class StudentHandler(BaseApiHandler):
         self.write(json.dumps(student))
 
     @web.authenticated
+    @check_xsrf
     def put(self, student_id):
         data = self.get_json_body()
         student = {
@@ -181,6 +198,7 @@ class StudentHandler(BaseApiHandler):
 
 class StudentSubmissionCollectionHandler(BaseApiHandler):
     @web.authenticated
+    @check_xsrf
     def get(self, student_id):
         submissions = self.api.get_student_submissions(student_id)
         self.write(json.dumps(submissions))
@@ -188,6 +206,7 @@ class StudentSubmissionCollectionHandler(BaseApiHandler):
 
 class StudentNotebookSubmissionCollectionHandler(BaseApiHandler):
     @web.authenticated
+    @check_xsrf
     def get(self, student_id, assignment_id):
         submissions = self.api.get_student_notebook_submissions(student_id, assignment_id)
         self.write(json.dumps(submissions))
@@ -195,30 +214,35 @@ class StudentNotebookSubmissionCollectionHandler(BaseApiHandler):
 
 class AssignHandler(BaseApiHandler):
     @web.authenticated
+    @check_xsrf
     def post(self, assignment_id):
         self.write(json.dumps(self.api.assign(assignment_id)))
 
 
 class UnReleaseHandler(BaseApiHandler):
     @web.authenticated
+    @check_xsrf
     def post(self, assignment_id):
         self.write(json.dumps(self.api.unrelease(assignment_id)))
 
 
 class ReleaseHandler(BaseApiHandler):
     @web.authenticated
+    @check_xsrf
     def post(self, assignment_id):
         self.write(json.dumps(self.api.release(assignment_id)))
 
 
 class CollectHandler(BaseApiHandler):
     @web.authenticated
+    @check_xsrf
     def post(self, assignment_id):
         self.write(json.dumps(self.api.collect(assignment_id)))
 
 
 class AutogradeHandler(BaseApiHandler):
     @web.authenticated
+    @check_xsrf
     def post(self, assignment_id, student_id):
         self.write(json.dumps(self.api.autograde(assignment_id, student_id)))
 
