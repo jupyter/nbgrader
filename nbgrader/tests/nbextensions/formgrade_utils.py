@@ -15,6 +15,10 @@ def _notebook_url(port, url=""):
     return urljoin("http://localhost:{}/notebooks/".format(port), url).rstrip("/")
 
 
+def _tree_url(port, url=""):
+    return urljoin("http://localhost:{}/tree/".format(port), url).rstrip("/")
+
+
 def _check_url(browser, port, url):
     if not url.startswith("http"):
         url = _formgrade_url(port, url)
@@ -72,6 +76,11 @@ def _get(browser, url, retries=5):
 def _load_gradebook_page(browser, port, url):
     _get(browser, _formgrade_url(port, url))
     _wait_for_gradebook_page(browser, port, url)
+
+
+def _wait_for_tree_page(browser, port, url):
+    _wait_for_element(browser, "ipython-main-app")
+    _check_url(browser, port, url)
 
 
 def _wait_for_notebook_page(browser, port, url):

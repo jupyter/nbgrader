@@ -54,6 +54,59 @@ def gradebook(request, tempdir, nbserver):
 
 
 @pytest.mark.nbextensions
+def test_load_manage_assignments(browser, port, gradebook):
+    # load the main page and make sure it is the Assignments page
+    utils._get(browser, utils._formgrade_url(port))
+    utils._wait_for_gradebook_page(browser, port, "")
+    utils._check_breadcrumbs(browser, "Assignments")
+
+    # click on the "Problem Set 1" link
+    utils._click_link(browser, "Problem Set 1")
+    browser.switch_to_window(browser.window_handles[1])
+    utils._wait_for_tree_page(
+        browser, port,
+        utils._tree_url(port, "source/Problem Set 1"))
+    browser.close()
+    browser.switch_to_window(browser.window_handles[0])
+
+    # click on the preview link
+    browser.find_element_by_css_selector("td.preview .glyphicon").click()
+    browser.switch_to_window(browser.window_handles[1])
+    utils._wait_for_tree_page(
+        browser, port,
+        utils._tree_url(port, "release/Problem Set 1"))
+    browser.close()
+    browser.switch_to_window(browser.window_handles[0])
+
+    # click on the number of submissions
+    browser.find_element_by_css_selector("td.num-submissions a").click()
+    utils._wait_for_gradebook_page(browser, port, "manage_submissions/Problem Set 1")
+
+
+@pytest.mark.nbextensions
+def test_load_manage_submissions(browser, port, gradebook):
+    # load the submissions page
+    utils._load_gradebook_page(browser, port, "manage_submissions/Problem Set 1")
+    utils._check_breadcrumbs(browser, "Assignments", "Problem Set 1")
+
+    # click on the "Assignments" link
+    utils._click_link(browser, "Assignments")
+    utils._wait_for_gradebook_page(browser, port, "manage_assignments")
+    browser.back()
+
+    # click on students
+    for student in gradebook.students:
+        try:
+            gradebook.find_submission("Problem Set 1", student.id)
+        except MissingEntry:
+            continue
+
+        utils._click_link(browser, "{}, {}".format(student.last_name, student.first_name))
+        utils._wait_for_gradebook_page(browser, port, "manage_students/{}/Problem Set 1".format(student.id))
+        browser.back()
+
+
+@pytest.mark.nbextensions
 def test_load_gradebook1(browser, port, gradebook):
     # load the assignments page
     utils._load_gradebook_page(browser, port, "gradebook")
