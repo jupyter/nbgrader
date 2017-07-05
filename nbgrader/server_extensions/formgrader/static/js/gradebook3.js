@@ -148,29 +148,29 @@ var insertRow = function (table) {
 var loadSubmittedNotebooks = function () {
     var tbl = $("#main-table");
 
-    notebooks = new SubmittedNotebooks();
-    notebook_uis = [];
-    notebooks.loaded = false;
-    notebooks.fetch({
+    models = new SubmittedNotebooks();
+    views = [];
+    models.loaded = false;
+    models.fetch({
         success: function () {
             tbl.empty();
-            notebooks.each(function (model) {
-                var notebook_ui = new SubmittedNotebookUI({
+            models.each(function (model) {
+                var view = new SubmittedNotebookUI({
                     "model": model,
                     "el": insertRow(tbl)
                 });
-                notebook_uis.push(notebook_ui);
+                views.push(view);
             });
             insertDataTable(tbl.parent());
             $('span.glyphicon.name-hidden').tooltip({title: "Show student name"});
             $('span.glyphicon.name-shown').tooltip({title: "Hide student name"});
-            notebooks.loaded = true;
+            models.loaded = true;
         }
     });
 };
 
-var notebooks = undefined;
-var notebook_uis = [];
+var models = undefined;
+var views = [];
 $(window).load(function () {
     loadSubmittedNotebooks();
 });

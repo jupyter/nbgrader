@@ -379,21 +379,21 @@ var createAssignmentModal = function () {
             return;
         }
 
-        var assignment = new Assignment({
+        var model = new Assignment({
             "name": name,
             "duedate": duedate
         }, {
-            "collection": assignments
+            "collection": models
         });
 
         var tbl = $("#main-table");
         var row = insertRow(tbl);
-        var assignment_ui = new AssignmentUI({
-            "model": assignment,
+        var view = new AssignmentUI({
+            "model": model,
             "el": row
         });
-        assignment_uis.push(assignment_ui);
-        assignment.save();
+        views.push(view);
+        model.save();
         tbl.parent().DataTable().row.add(row).draw();
 
         modal.modal('hide');
@@ -428,27 +428,27 @@ var createAssignmentModal = function () {
 var loadAssignments = function () {
     var tbl = $("#main-table");
 
-    assignments = new Assignments();
-    assignment_uis = [];
-    assignments.loaded = false;
-    assignments.fetch({
+    models = new Assignments();
+    views = [];
+    models.loaded = false;
+    models.fetch({
         success: function () {
             tbl.empty();
-            assignments.each(function (model) {
-                var assignment_ui = new AssignmentUI({
+            models.each(function (model) {
+                var view = new AssignmentUI({
                     "model": model,
                     "el": insertRow(tbl)
                 });
-                assignment_uis.push(assignment_ui);
+                views.push(view);
             });
             insertDataTable(tbl.parent());
-            assignments.loaded = true;
+            models.loaded = true;
         }
     });
 };
 
-var assignments = undefined;
-var assignment_uis = [];
+var models = undefined;
+var views = [];
 $(window).load(function () {
     loadAssignments();
 });

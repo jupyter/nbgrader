@@ -75,27 +75,27 @@ var insertRow = function (table) {
 var loadAssignments = function () {
     var tbl = $("#main-table");
 
-    assignments = new Assignments();
-    assignment_uis = [];
-    assignments.loaded = false;
-    assignments.fetch({
+    models = new Assignments();
+    views = [];
+    models.loaded = false;
+    models.fetch({
         success: function () {
             tbl.empty();
-            assignments.each(function (model) {
-                var assignment_ui = new AssignmentUI({
+            models.each(function (model) {
+                var view = new AssignmentUI({
                     "model": model,
                     "el": insertRow(tbl)
                 });
-                assignment_uis.push(assignment_ui);
+                views.push(view);
             });
             insertDataTable(tbl.parent());
-            assignments.loaded = true;
+            models.loaded = true;
         }
     });
 };
 
-var assignments = undefined;
-var assignment_uis = [];
+var models = undefined;
+var views = [];
 $(window).load(function () {
     loadAssignments();
 });

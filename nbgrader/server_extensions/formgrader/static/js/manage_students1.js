@@ -197,23 +197,23 @@ var createStudentModal = function () {
         var email = modal.find(".email").val();
         if (email === "") email = null;
 
-        var student = new Student({
+        var model = new Student({
             "id": id,
             "first_name": first_name,
             "last_name": last_name,
             "email": email
         }, {
-            "collection": students
+            "collection": models
         });
 
         var tbl = $("#main-table");
         var row = insertRow(tbl);
-        var student_ui = new StudentUI({
-            "model": student,
+        var view = new StudentUI({
+            "model": model,
             "el": row
         });
-        student_uis.push(student_ui);
-        student.save();
+        views.push(view);
+        model.save();
         tbl.parent().DataTable().row.add(row).draw();
 
         modal.modal('hide');
@@ -258,27 +258,27 @@ var createStudentModal = function () {
 var loadStudents = function () {
     var tbl = $("#main-table");
 
-    students = new Students();
-    student_uis = [];
-    students.loaded = false;
-    students.fetch({
+    models = new Students();
+    views = [];
+    models.loaded = false;
+    models.fetch({
         success: function () {
             tbl.empty();
-            students.each(function (model) {
-                var student_ui = new StudentUI({
+            models.each(function (model) {
+                var view = new StudentUI({
                     "model": model,
                     "el": insertRow(tbl)
                 });
-                student_uis.push(student_ui);
+                views.push(view);
             });
             insertDataTable(tbl.parent());
-            students.loaded = true;
+            models.loaded = true;
         }
     });
 };
 
-var students = undefined;
-var student_uis = [];
+var models = undefined;
+var views = [];
 $(window).load(function () {
     loadStudents();
 });

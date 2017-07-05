@@ -93,27 +93,27 @@ var insertRow = function (table) {
 var loadNotebooks = function () {
     var tbl = $("#main-table");
 
-    notebooks = new Notebooks();
-    notebook_uis = [];
-    notebooks.loaded = false;
-    notebooks.fetch({
+    models = new Notebooks();
+    views = [];
+    models.loaded = false;
+    models.fetch({
         success: function () {
             tbl.empty();
-            notebooks.each(function (model) {
-                var notebook_ui = new NotebookUI({
+            models.each(function (model) {
+                var view = new NotebookUI({
                     "model": model,
                     "el": insertRow(tbl)
                 });
-                notebook_uis.push(notebook_ui);
+                views.push(view);
             });
             insertDataTable(tbl.parent());
-            notebooks.loaded = true;
+            models.loaded = true;
         }
     });
 };
 
-var notebooks = undefined;
-var notebook_uis = [];
+var models = undefined;
+var views = [];
 $(window).load(function () {
     loadNotebooks();
 });

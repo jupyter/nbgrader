@@ -165,27 +165,27 @@ var insertRow = function (table) {
 var loadSubmissions = function () {
     var tbl = $("#main-table");
 
-    submissions = new Submissions();
-    submission_uis = [];
-    submissions.loaded = false;
-    submissions.fetch({
+    models = new Submissions();
+    views = [];
+    models.loaded = false;
+    models.fetch({
         success: function () {
             tbl.empty();
-            submissions.each(function (model) {
-                var submission_ui = new SubmissionUI({
+            models.each(function (model) {
+                var view = new SubmissionUI({
                     "model": model,
                     "el": insertRow(tbl)
                 });
-                submission_uis.push(submission_ui);
+                views.push(view);
             });
             insertDataTable(tbl.parent());
-            submissions.loaded = true;
+            models.loaded = true;
         }
     });
 };
 
-var submissions = undefined;
-var submission_uis = [];
+var models = undefined;
+var views = [];
 $(window).load(function () {
     loadSubmissions();
 });
