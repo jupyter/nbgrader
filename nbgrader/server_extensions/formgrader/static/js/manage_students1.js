@@ -32,39 +32,29 @@ var StudentUI = Backbone.View.extend({
     },
 
     openModal: function () {
-        var body = $("<div/>");
-        var first_name = $("<div/>").addClass("input-group");
+        var body = $("<table/>").addClass("table table-striped form-table");
+        var id = $("<tr/>");
+        body.append(id);
+        id.append($("<td/>").addClass("align-middle").text("Student ID"));
+        id.append($("<td/>").append($("<input/>")
+            .addClass("modal-id")
+            .attr("type", "text")
+            .attr("disabled", "disabled")));
+
+        var first_name = $("<tr/>");
         body.append(first_name);
-        first_name.append($("<span/>")
-            .addClass("input-group-addon")
-            .attr("id", "basic-addon1")
-            .text("First Name"));
-        first_name.append($("<input/>")
-            .addClass("form-control modal-first-name")
-            .attr("type", "text")
-            .attr("aria-describedby", "basic-addon1"));
+        first_name.append($("<td/>").addClass("align-middle").text("First name (optional)"));
+        first_name.append($("<td/>").append($("<input/>").addClass("modal-first-name").attr("type", "text")));
 
-        var last_name = $("<div/>").addClass("input-group");
+        var last_name = $("<tr/>");
         body.append(last_name);
-        last_name.append($("<span/>")
-            .addClass("input-group-addon")
-            .attr("id", "basic-addon2")
-            .text("Last Name"));
-        last_name.append($("<input/>")
-            .addClass("form-control modal-last-name")
-            .attr("type", "text")
-            .attr("aria-describedby", "basic-addon2"));
+        last_name.append($("<td/>").addClass("align-middle").text("Last name (optional)"));
+        last_name.append($("<td/>").append($("<input/>").addClass("modal-last-name").attr("type", "text")));
 
-        var email = $("<div/>").addClass("input-group");
+        var email = $("<tr/>");
         body.append(email);
-        email.append($("<span/>")
-            .addClass("input-group-addon")
-            .attr("id", "basic-addon3")
-            .text("Email"));
-        email.append($("<input/>")
-            .addClass("form-control modal-email")
-            .attr("type", "text")
-            .attr("aria-describedby", "basic-addon3"));
+        email.append($("<td/>").addClass("align-middle").text("Email (optional)"));
+        email.append($("<td/>").append($("<input/>").addClass("modal-email").attr("type", "text")));
 
         var footer = $("<div/>");
         footer.append($("<button/>")
@@ -78,6 +68,7 @@ var StudentUI = Backbone.View.extend({
             .text("Cancel"));
 
         this.$modal = createModal("Editing " + this.model.get("id"), body, footer);
+        this.$modal.find("input.modal-id").val(this.model.get("id"));
         this.$modal_first_name = this.$modal.find("input.modal-first-name");
         this.$modal_first_name.val(this.model.get("first_name"));
         this.$modal_last_name = this.$modal.find("input.modal-last-name");
