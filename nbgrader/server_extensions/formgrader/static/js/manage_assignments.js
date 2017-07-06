@@ -431,7 +431,7 @@ var createAssignmentModal = function () {
     var timezone = $("<tr/>");
     body.append(timezone);
     timezone.append($("<td/>").addClass("align-middle").text("Timezone (optional)"));
-    timezone.append($("<td/>").append($("<input/>").addClass("modal-timezone").attr("type", "text")));
+    timezone.append($("<td/>").append($("<input/>").addClass("timezone").attr("type", "text")));
 
     var footer = $("<div/>");
     footer.append($("<button/>")

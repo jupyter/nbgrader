@@ -29,7 +29,7 @@ var createModal = function (id, title, body, footer) {
     if (!footer) {
         footer = $("<div/>");
         footer.append($("<button/>")
-            .addClass("btn btn-primary")
+            .addClass("btn btn-primary close")
             .attr("type", "button")
             .attr("data-dismiss", "modal")
             .text("OK"));

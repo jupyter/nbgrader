@@ -1,6 +1,8 @@
 import pytest
 import os
 import shutil
+import sys
+import glob
 
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
@@ -10,6 +12,8 @@ from selenium.webdriver.common.by import By
 from .. import run_nbgrader
 from ...api import Gradebook, MissingEntry
 from . import formgrade_utils as utils
+from .conftest import notwindows
+from ...utils import rmtree
 
 
 @pytest.fixture(scope="module")
@@ -18,8 +22,8 @@ def gradebook(request, tempdir, nbserver):
     source_path = os.path.join(os.path.dirname(__file__), "..", "..", "docs", "source", "user_guide", "source")
     submitted_path = os.path.join(os.path.dirname(__file__), "..", "..", "docs", "source", "user_guide", "submitted")
 
-    shutil.copytree(os.path.join(os.path.dirname(__file__), source_path), os.path.join("source"))
-    shutil.copytree(os.path.join(os.path.dirname(__file__), submitted_path), os.path.join("submitted"))
+    shutil.copytree(source_path, "source")
+    shutil.copytree(submitted_path, "submitted")
 
     # rename to old names -- we do this rather than changing all the tests
     # because I want the tests to operate on files with spaces in the names
@@ -761,3 +765,481 @@ def test_formgrade_show_hide_names(browser, port, gradebook):
     assert name.text == "Submission #1"
     assert not shown.is_displayed()
     assert hidden.is_displayed()
+
+
+@pytest.mark.nbextensions
+def test_add_new_assignment(browser, port, gradebook):
+    utils._load_gradebook_page(browser, port, "")
+
+    # click the "add new assignment" button
+    utils._click_link(browser, "Add new assignment...")
+    utils._wait_for_element(browser, "add-assignment-modal")
+    WebDriverWait(browser, 10).until(EC.visibility_of_element_located((By.CSS_SELECTOR, "#add-assignment-modal button.btn-primary")))
+
+    # set the name and dudedate
+    elem = browser.find_element_by_css_selector("#add-assignment-modal .name")
+    elem.click()
+    elem.send_keys("ps2")
+    elem = browser.find_element_by_css_selector("#add-assignment-modal .duedate")
+    elem.click()
+    elem.send_keys("2017-07-05T17:00")
+    elem = browser.find_element_by_css_selector("#add-assignment-modal .timezone")
+    elem.click()
+    elem.send_keys("UTC")
+
+    # click save and wait for the modal to close
+    utils._click_element(browser, "#add-assignment-modal .save")
+    modal_not_present = lambda browser: browser.execute_script("""return $("#add-assignment-modal").length === 0;""")
+    WebDriverWait(browser, 10).until(modal_not_present)
+
+    # wait until both rows are present
+    rows_present = lambda browser: len(browser.find_elements_by_css_selector("tbody tr")) == 2
+    WebDriverWait(browser, 10).until(rows_present)
+
+    # check that the new row is correct
+    row = browser.find_elements_by_css_selector("tbody tr")[1]
+    assert row.find_element_by_css_selector(".name").text == "ps2"
+    assert row.find_element_by_css_selector(".duedate").text == "2017-07-05 17:00:00 UTC"
+    assert row.find_element_by_css_selector(".status").text == "draft"
+    assert utils._child_exists(row, ".edit a")
+    assert utils._child_exists(row, ".assign a")
+    assert not utils._child_exists(row, ".preview a")
+    assert not utils._child_exists(row, ".release a")
+    assert not utils._child_exists(row, ".collect a")
+    assert row.find_element_by_css_selector(".num-submissions").text == "0"
+
+    # reload the page and make sure everything is still correct
+    utils._load_gradebook_page(browser, port, "")
+    row = browser.find_elements_by_css_selector("tbody tr")[1]
+    assert row.find_element_by_css_selector(".name").text == "ps2"
+    assert row.find_element_by_css_selector(".duedate").text == "2017-07-05 17:00:00 UTC"
+    assert row.find_element_by_css_selector(".status").text == "draft"
+    assert utils._child_exists(row, ".edit a")
+    assert utils._child_exists(row, ".assign a")
+    assert not utils._child_exists(row, ".preview a")
+    assert not utils._child_exists(row, ".release a")
+    assert not utils._child_exists(row, ".collect a")
+    assert row.find_element_by_css_selector(".num-submissions").text == "0"
+
+
+@pytest.mark.nbextensions
+def test_edit_assignment(browser, port, gradebook):
+    utils._load_gradebook_page(browser, port, "")
+
+    # click on the edit button
+    row = browser.find_elements_by_css_selector("tbody tr")[1]
+    row.find_element_by_css_selector(".edit a").click()
+    utils._wait_for_element(browser, "edit-assignment-modal")
+    WebDriverWait(browser, 10).until(EC.visibility_of_element_located((By.CSS_SELECTOR, "#edit-assignment-modal button.btn-primary")))
+
+    # modify the duedate
+    elem = browser.find_element_by_css_selector("#edit-assignment-modal .modal-duedate")
+    elem.clear()
+    elem.click()
+    elem.send_keys("2017-07-05T18:00")
+
+    # click save and wait for the modal to close
+    utils._click_element(browser, "#edit-assignment-modal .save")
+    modal_not_present = lambda browser: browser.execute_script("""return $("#edit-assignment-modal").length === 0;""")
+    WebDriverWait(browser, 10).until(modal_not_present)
+
+    # check that the modified row is correct
+    row = browser.find_elements_by_css_selector("tbody tr")[1]
+    assert row.find_element_by_css_selector(".name").text == "ps2"
+    assert row.find_element_by_css_selector(".duedate").text == "2017-07-05 18:00:00 UTC"
+    assert row.find_element_by_css_selector(".status").text == "draft"
+    assert utils._child_exists(row, ".edit a")
+    assert utils._child_exists(row, ".assign a")
+    assert not utils._child_exists(row, ".preview a")
+    assert not utils._child_exists(row, ".release a")
+    assert not utils._child_exists(row, ".collect a")
+    assert row.find_element_by_css_selector(".num-submissions").text == "0"
+
+    # reload the page and make sure everything is still correct
+    utils._load_gradebook_page(browser, port, "")
+    row = browser.find_elements_by_css_selector("tbody tr")[1]
+    assert row.find_element_by_css_selector(".name").text == "ps2"
+    assert row.find_element_by_css_selector(".duedate").text == "2017-07-05 18:00:00 UTC"
+    assert row.find_element_by_css_selector(".status").text == "draft"
+    assert utils._child_exists(row, ".edit a")
+    assert utils._child_exists(row, ".assign a")
+    assert not utils._child_exists(row, ".preview a")
+    assert not utils._child_exists(row, ".release a")
+    assert not utils._child_exists(row, ".collect a")
+    assert row.find_element_by_css_selector(".num-submissions").text == "0"
+
+
+@pytest.mark.nbextensions
+def test_generate_assignment(browser, port, gradebook):
+    utils._load_gradebook_page(browser, port, "")
+
+    # click on the generate button -- should produce an error because there
+    # are no notebooks for ps2 yet
+    row = browser.find_elements_by_css_selector("tbody tr")[1]
+    row.find_element_by_css_selector(".assign a").click()
+    utils._wait_for_element(browser, "error-modal")
+    WebDriverWait(browser, 10).until(EC.visibility_of_element_located((By.CSS_SELECTOR, "#error-modal button.btn-primary")))
+    utils._click_element(browser, "#error-modal .close")
+    modal_not_present = lambda browser: browser.execute_script("""return $("#error-modal").length === 0;""")
+    WebDriverWait(browser, 10).until(modal_not_present)
+
+    # add a notebook for ps2
+    source_path = os.path.join(os.path.dirname(__file__), "..", "..", "docs", "source", "user_guide", "source", "ps1", "problem1.ipynb")
+    shutil.copy(source_path, os.path.join("source", "ps2", "Problem 1.ipynb"))
+
+    # click on the generate button -- should now succeed
+    row = browser.find_elements_by_css_selector("tbody tr")[1]
+    row.find_element_by_css_selector(".assign a").click()
+    utils._wait_for_element(browser, "success-modal")
+    WebDriverWait(browser, 10).until(EC.visibility_of_element_located((By.CSS_SELECTOR, "#success-modal button.btn-primary")))
+    utils._click_element(browser, "#success-modal .close")
+    modal_not_present = lambda browser: browser.execute_script("""return $("#success-modal").length === 0;""")
+    WebDriverWait(browser, 10).until(modal_not_present)
+
+    # check that the modified row is correct
+    row = browser.find_elements_by_css_selector("tbody tr")[1]
+    assert row.find_element_by_css_selector(".name").text == "ps2"
+    assert row.find_element_by_css_selector(".duedate").text == "2017-07-05 18:00:00 UTC"
+    assert row.find_element_by_css_selector(".status").text == "draft"
+    assert utils._child_exists(row, ".edit a")
+    assert utils._child_exists(row, ".assign a")
+    assert utils._child_exists(row, ".preview a")
+    if sys.platform == 'win32':
+        assert not utils._child_exists(row, ".release a")
+    else:
+        assert utils._child_exists(row, ".release a")
+    assert not utils._child_exists(row, ".collect a")
+    assert row.find_element_by_css_selector(".num-submissions").text == "0"
+
+    # reload the page and make sure everything is still correct
+    utils._load_gradebook_page(browser, port, "")
+    row = browser.find_elements_by_css_selector("tbody tr")[1]
+    assert row.find_element_by_css_selector(".name").text == "ps2"
+    assert row.find_element_by_css_selector(".duedate").text == "2017-07-05 18:00:00 UTC"
+    assert row.find_element_by_css_selector(".status").text == "draft"
+    assert utils._child_exists(row, ".edit a")
+    assert utils._child_exists(row, ".assign a")
+    assert utils._child_exists(row, ".preview a")
+    if sys.platform == 'win32':
+        assert not utils._child_exists(row, ".release a")
+    else:
+        assert utils._child_exists(row, ".release a")
+    assert not utils._child_exists(row, ".collect a")
+    assert row.find_element_by_css_selector(".num-submissions").text == "0"
+
+
+@notwindows
+@pytest.mark.nbextensions
+def test_release_assignment(browser, port, gradebook):
+    utils._load_gradebook_page(browser, port, "")
+
+    # click on the release button
+    row = browser.find_elements_by_css_selector("tbody tr")[1]
+    row.find_element_by_css_selector(".release a").click()
+    utils._wait_for_element(browser, "success-modal")
+    WebDriverWait(browser, 10).until(EC.visibility_of_element_located((By.CSS_SELECTOR, "#success-modal button.btn-primary")))
+    utils._click_element(browser, "#success-modal .close")
+    modal_not_present = lambda browser: browser.execute_script("""return $("#success-modal").length === 0;""")
+    WebDriverWait(browser, 10).until(modal_not_present)
+
+    # check that the modified row is correct
+    row = browser.find_elements_by_css_selector("tbody tr")[1]
+    assert row.find_element_by_css_selector(".name").text == "ps2"
+    assert row.find_element_by_css_selector(".duedate").text == "2017-07-05 18:00:00 UTC"
+    assert row.find_element_by_css_selector(".status").text == "released"
+    assert utils._child_exists(row, ".edit a")
+    assert utils._child_exists(row, ".assign a")
+    assert utils._child_exists(row, ".preview a")
+    assert utils._child_exists(row, ".release a")
+    assert utils._child_exists(row, ".collect a")
+    assert row.find_element_by_css_selector(".num-submissions").text == "0"
+
+    # reload the page and make sure everything is still correct
+    utils._load_gradebook_page(browser, port, "")
+    row = browser.find_elements_by_css_selector("tbody tr")[1]
+    assert row.find_element_by_css_selector(".name").text == "ps2"
+    assert row.find_element_by_css_selector(".duedate").text == "2017-07-05 18:00:00 UTC"
+    assert row.find_element_by_css_selector(".status").text == "released"
+    assert utils._child_exists(row, ".edit a")
+    assert utils._child_exists(row, ".assign a")
+    assert utils._child_exists(row, ".preview a")
+    assert utils._child_exists(row, ".release a")
+    assert utils._child_exists(row, ".collect a")
+    assert row.find_element_by_css_selector(".num-submissions").text == "0"
+
+
+@notwindows
+@pytest.mark.nbextensions
+def test_collect_assignment(browser, port, gradebook):
+    run_nbgrader(["fetch", "ps2"])
+    run_nbgrader(["submit", "ps2"])
+    rmtree("ps2")
+
+    utils._load_gradebook_page(browser, port, "")
+
+    # click on the collect button
+    row = browser.find_elements_by_css_selector("tbody tr")[1]
+    row.find_element_by_css_selector(".collect a").click()
+    utils._wait_for_element(browser, "success-modal")
+    WebDriverWait(browser, 10).until(EC.visibility_of_element_located((By.CSS_SELECTOR, "#success-modal button.btn-primary")))
+    utils._click_element(browser, "#success-modal .close")
+    modal_not_present = lambda browser: browser.execute_script("""return $("#success-modal").length === 0;""")
+    WebDriverWait(browser, 10).until(modal_not_present)
+
+    # check that the modified row is correct
+    row = browser.find_elements_by_css_selector("tbody tr")[1]
+    assert row.find_element_by_css_selector(".name").text == "ps2"
+    assert row.find_element_by_css_selector(".duedate").text == "2017-07-05 18:00:00 UTC"
+    assert row.find_element_by_css_selector(".status").text == "released"
+    assert utils._child_exists(row, ".edit a")
+    assert utils._child_exists(row, ".assign a")
+    assert utils._child_exists(row, ".preview a")
+    assert utils._child_exists(row, ".release a")
+    assert utils._child_exists(row, ".collect a")
+    assert row.find_element_by_css_selector(".num-submissions").text == "1"
+
+    # reload the page and make sure everything is still correct
+    utils._load_gradebook_page(browser, port, "")
+    row = browser.find_elements_by_css_selector("tbody tr")[1]
+    assert row.find_element_by_css_selector(".name").text == "ps2"
+    assert row.find_element_by_css_selector(".duedate").text == "2017-07-05 18:00:00 UTC"
+    assert row.find_element_by_css_selector(".status").text == "released"
+    assert utils._child_exists(row, ".edit a")
+    assert utils._child_exists(row, ".assign a")
+    assert utils._child_exists(row, ".preview a")
+    assert utils._child_exists(row, ".release a")
+    assert utils._child_exists(row, ".collect a")
+    assert row.find_element_by_css_selector(".num-submissions").text == "1"
+
+
+@notwindows
+@pytest.mark.nbextensions
+def test_unrelease_assignment(browser, port, gradebook):
+    utils._load_gradebook_page(browser, port, "")
+
+    # click on the unrelease button
+    row = browser.find_elements_by_css_selector("tbody tr")[1]
+    row.find_element_by_css_selector(".release a").click()
+    utils._wait_for_element(browser, "success-modal")
+    WebDriverWait(browser, 10).until(EC.visibility_of_element_located((By.CSS_SELECTOR, "#success-modal button.btn-primary")))
+    utils._click_element(browser, "#success-modal .close")
+    modal_not_present = lambda browser: browser.execute_script("""return $("#success-modal").length === 0;""")
+    WebDriverWait(browser, 10).until(modal_not_present)
+
+    # check that the modified row is correct
+    row = browser.find_elements_by_css_selector("tbody tr")[1]
+    assert row.find_element_by_css_selector(".name").text == "ps2"
+    assert row.find_element_by_css_selector(".duedate").text == "2017-07-05 18:00:00 UTC"
+    assert row.find_element_by_css_selector(".status").text == "draft"
+    assert utils._child_exists(row, ".edit a")
+    assert utils._child_exists(row, ".assign a")
+    assert utils._child_exists(row, ".preview a")
+    assert utils._child_exists(row, ".release a")
+    assert not utils._child_exists(row, ".collect a")
+    assert row.find_element_by_css_selector(".num-submissions").text == "1"
+
+    # reload the page and make sure everything is still correct
+    utils._load_gradebook_page(browser, port, "")
+    row = browser.find_elements_by_css_selector("tbody tr")[1]
+    assert row.find_element_by_css_selector(".name").text == "ps2"
+    assert row.find_element_by_css_selector(".duedate").text == "2017-07-05 18:00:00 UTC"
+    assert row.find_element_by_css_selector(".status").text == "draft"
+    assert utils._child_exists(row, ".edit a")
+    assert utils._child_exists(row, ".assign a")
+    assert utils._child_exists(row, ".preview a")
+    assert utils._child_exists(row, ".release a")
+    assert not utils._child_exists(row, ".collect a")
+    assert row.find_element_by_css_selector(".num-submissions").text == "1"
+
+
+@pytest.mark.nbextensions
+def test_manually_collect_assignment(browser, port, gradebook):
+    existing_submissions = glob.glob(os.path.join("submitted", "*", "ps2"))
+    for dirname in existing_submissions:
+        rmtree(dirname)
+    dest = os.path.join("submitted", "bitdiddle", "ps2")
+    if not os.path.exists(os.path.dirname(dest)):
+        os.makedirs(os.path.dirname(dest))
+    shutil.copytree(os.path.join("release", "ps2"), dest)
+    with open(os.path.join(dest, "timestamp.txt"), "w") as fh:
+        fh.write("2017-07-05 18:05:21 UTC")
+
+    utils._load_gradebook_page(browser, port, "")
+
+    # check that the row is correct
+    row = browser.find_elements_by_css_selector("tbody tr")[1]
+    assert row.find_element_by_css_selector(".name").text == "ps2"
+    assert row.find_element_by_css_selector(".duedate").text == "2017-07-05 18:00:00 UTC"
+    assert row.find_element_by_css_selector(".status").text == "draft"
+    assert utils._child_exists(row, ".edit a")
+    assert utils._child_exists(row, ".assign a")
+    assert utils._child_exists(row, ".preview a")
+    if sys.platform == 'win32':
+        assert not utils._child_exists(row, ".release a")
+    else:
+        assert utils._child_exists(row, ".release a")
+    assert not utils._child_exists(row, ".collect a")
+    assert row.find_element_by_css_selector(".num-submissions").text == "1"
+
+
+@pytest.mark.nbextensions
+def test_autograde_assignment(browser, port, gradebook):
+    utils._load_gradebook_page(browser, port, "manage_submissions/ps2")
+
+    # check the contents of the row before grading
+    row = browser.find_elements_by_css_selector("tbody tr")[0]
+    assert row.find_element_by_css_selector(".student-name").text == "B, Ben"
+    assert row.find_element_by_css_selector(".student-id").text == "Bitdiddle"
+    assert row.find_element_by_css_selector(".timestamp").text == "2017-07-05 18:05:21 UTC"
+    assert row.find_element_by_css_selector(".status").text == "needs autograding"
+    assert row.find_element_by_css_selector(".score").text == ""
+    assert utils._child_exists(row, ".autograde a")
+
+    # click on the autograde button
+    row = browser.find_elements_by_css_selector("tbody tr")[0]
+    row.find_element_by_css_selector(".autograde a").click()
+    utils._wait_for_element(browser, "success-modal")
+    WebDriverWait(browser, 10).until(EC.visibility_of_element_located((By.CSS_SELECTOR, "#success-modal button.btn-primary")))
+    utils._click_element(browser, "#success-modal .close")
+    modal_not_present = lambda browser: browser.execute_script("""return $("#success-modal").length === 0;""")
+    WebDriverWait(browser, 10).until(modal_not_present)
+
+    # check that the modified row is correct
+    row = browser.find_elements_by_css_selector("tbody tr")[0]
+    assert row.find_element_by_css_selector(".student-name").text == "B, Ben"
+    assert row.find_element_by_css_selector(".student-id").text == "Bitdiddle"
+    assert row.find_element_by_css_selector(".timestamp").text == "2017-07-05 18:05:21 UTC"
+    assert row.find_element_by_css_selector(".status").text == "graded"
+    assert row.find_element_by_css_selector(".score").text == "0 / 6"
+    assert utils._child_exists(row, ".autograde a")
+
+    # refresh and check again
+    utils._load_gradebook_page(browser, port, "manage_submissions/ps2")
+    row = browser.find_elements_by_css_selector("tbody tr")[0]
+    assert row.find_element_by_css_selector(".student-name").text == "B, Ben"
+    assert row.find_element_by_css_selector(".student-id").text == "Bitdiddle"
+    assert row.find_element_by_css_selector(".timestamp").text == "2017-07-05 18:05:21 UTC"
+    assert row.find_element_by_css_selector(".status").text == "graded"
+    assert row.find_element_by_css_selector(".score").text == "0 / 6"
+    assert utils._child_exists(row, ".autograde a")
+
+    # overwrite the file
+    source_path = os.path.join(os.path.dirname(__file__), "..", "..", "docs", "source", "user_guide", "source", "ps1", "problem1.ipynb")
+    shutil.copy(source_path, os.path.join("submitted", "bitdiddle", "ps2", "Problem 1.ipynb"))
+
+    # click on the autograde button
+    row = browser.find_elements_by_css_selector("tbody tr")[0]
+    row.find_element_by_css_selector(".autograde a").click()
+    utils._wait_for_element(browser, "success-modal")
+    WebDriverWait(browser, 10).until(EC.visibility_of_element_located((By.CSS_SELECTOR, "#success-modal button.btn-primary")))
+    utils._click_element(browser, "#success-modal .close")
+    modal_not_present = lambda browser: browser.execute_script("""return $("#success-modal").length === 0;""")
+    WebDriverWait(browser, 10).until(modal_not_present)
+
+    # check that the modified row is correct
+    row = browser.find_elements_by_css_selector("tbody tr")[0]
+    assert row.find_element_by_css_selector(".student-name").text == "B, Ben"
+    assert row.find_element_by_css_selector(".student-id").text == "Bitdiddle"
+    assert row.find_element_by_css_selector(".timestamp").text == "2017-07-05 18:05:21 UTC"
+    assert row.find_element_by_css_selector(".status").text == "needs manual grading"
+    assert row.find_element_by_css_selector(".score").text == "3 / 6"
+    assert utils._child_exists(row, ".autograde a")
+
+    # refresh and check again
+    utils._load_gradebook_page(browser, port, "manage_submissions/ps2")
+    row = browser.find_elements_by_css_selector("tbody tr")[0]
+    assert row.find_element_by_css_selector(".student-name").text == "B, Ben"
+    assert row.find_element_by_css_selector(".student-id").text == "Bitdiddle"
+    assert row.find_element_by_css_selector(".timestamp").text == "2017-07-05 18:05:21 UTC"
+    assert row.find_element_by_css_selector(".status").text == "needs manual grading"
+    assert row.find_element_by_css_selector(".score").text == "3 / 6"
+    assert utils._child_exists(row, ".autograde a")
+
+
+@pytest.mark.nbextensions
+def test_add_new_student(browser, port, gradebook):
+    utils._load_gradebook_page(browser, port, "manage_students")
+
+    # click the "add new assignment" button
+    utils._click_link(browser, "Add new student...")
+    utils._wait_for_element(browser, "add-student-modal")
+    WebDriverWait(browser, 10).until(EC.visibility_of_element_located((By.CSS_SELECTOR, "#add-student-modal button.btn-primary")))
+
+    # set the name and dudedate
+    elem = browser.find_element_by_css_selector("#add-student-modal .id")
+    elem.click()
+    elem.send_keys("ator")
+    elem = browser.find_element_by_css_selector("#add-student-modal .first-name")
+    elem.click()
+    elem.send_keys("Eva Lou")
+    elem = browser.find_element_by_css_selector("#add-student-modal .last-name")
+    elem.click()
+    elem.send_keys("Ator")
+    elem = browser.find_element_by_css_selector("#add-student-modal .email")
+    elem.click()
+    elem.send_keys("ela@email.com")
+
+    # click save and wait for the modal to close
+    utils._click_element(browser, "#add-student-modal .save")
+    modal_not_present = lambda browser: browser.execute_script("""return $("#add-student-modal").length === 0;""")
+    WebDriverWait(browser, 10).until(modal_not_present)
+
+    # wait until both rows are present
+    rows_present = lambda browser: len(browser.find_elements_by_css_selector("tbody tr")) == 4
+    WebDriverWait(browser, 10).until(rows_present)
+
+    # check that the new row is correct
+    row = browser.find_elements_by_css_selector("tbody tr")[0]
+    assert row.find_element_by_css_selector(".name").text == "Ator, Eva Lou"
+    assert row.find_element_by_css_selector(".id").text == "ator"
+    assert row.find_element_by_css_selector(".email").text == "ela@email.com"
+    assert row.find_element_by_css_selector(".score").text == "0 / 9"
+    assert utils._child_exists(row, ".edit a")
+
+    # reload the page and make sure everything is still correct
+    utils._load_gradebook_page(browser, port, "manage_students")
+    row = browser.find_elements_by_css_selector("tbody tr")[0]
+    assert row.find_element_by_css_selector(".name").text == "Ator, Eva Lou"
+    assert row.find_element_by_css_selector(".id").text == "ator"
+    assert row.find_element_by_css_selector(".email").text == "ela@email.com"
+    assert row.find_element_by_css_selector(".score").text == "0 / 9"
+    assert utils._child_exists(row, ".edit a")
+
+
+@pytest.mark.nbextensions
+def test_edit_student(browser, port, gradebook):
+    utils._load_gradebook_page(browser, port, "manage_students")
+
+    # click on the edit button
+    row = browser.find_elements_by_css_selector("tbody tr")[0]
+    row.find_element_by_css_selector(".edit a").click()
+    utils._wait_for_element(browser, "edit-student-modal")
+    WebDriverWait(browser, 10).until(EC.visibility_of_element_located((By.CSS_SELECTOR, "#edit-student-modal button.btn-primary")))
+
+    # modify the duedate
+    elem = browser.find_element_by_css_selector("#edit-student-modal .modal-email")
+    elem.clear()
+    elem.click()
+    elem.send_keys("ela@email.net")
+
+    # click save and wait for the modal to close
+    utils._click_element(browser, "#edit-student-modal .save")
+    modal_not_present = lambda browser: browser.execute_script("""return $("#edit-student-modal").length === 0;""")
+    WebDriverWait(browser, 10).until(modal_not_present)
+
+    # check that the modified row is correct
+    row = browser.find_elements_by_css_selector("tbody tr")[0]
+    assert row.find_element_by_css_selector(".name").text == "Ator, Eva Lou"
+    assert row.find_element_by_css_selector(".id").text == "ator"
+    assert row.find_element_by_css_selector(".email").text == "ela@email.net"
+    assert row.find_element_by_css_selector(".score").text == "0 / 9"
+    assert utils._child_exists(row, ".edit a")
+
+    # reload the page and make sure everything is still correct
+    utils._load_gradebook_page(browser, port, "manage_students")
+    row = browser.find_elements_by_css_selector("tbody tr")[0]
+    assert row.find_element_by_css_selector(".name").text == "Ator, Eva Lou"
+    assert row.find_element_by_css_selector(".id").text == "ator"
+    assert row.find_element_by_css_selector(".email").text == "ela@email.net"
+    assert row.find_element_by_css_selector(".score").text == "0 / 9"
+    assert utils._child_exists(row, ".edit a")

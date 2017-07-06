@@ -121,6 +121,7 @@ def nbserver(request, port, tempdir, jupyter_config_dir, jupyter_data_dir, excha
         if sys.platform != 'win32':
             fh.write(dedent(
                 """
+                c.Exchange.course_id = "course101"
                 c.Exchange.root = "{}"
                 c.Exchange.cache = "{}"
                 """.format(exchange, cache)

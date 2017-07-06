@@ -3,7 +3,7 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
-from selenium.common.exceptions import TimeoutException
+from selenium.common.exceptions import TimeoutException, NoSuchElementException
 
 
 
@@ -65,6 +65,7 @@ def _wait_for_gradebook_page(browser, port, url):
 def _get(browser, url, retries=5):
     try:
         browser.get(url)
+        assert browser.get_cookies()
     except TimeoutException:
         if retries == 0:
             raise
@@ -195,3 +196,12 @@ def _load_formgrade(browser, port, gradebook):
     _load_gradebook_page(browser, port, "gradebook/Problem Set 1/Problem 1")
     _click_link(browser, "Submission #1")
     _wait_for_formgrader(browser, port, "submissions/{}/?index=0".format(submissions[0].id))
+
+
+def _child_exists(elem, selector):
+    try:
+        elem.find_element_by_css_selector(selector)
+    except NoSuchElementException:
+        return False
+    else:
+        return True
