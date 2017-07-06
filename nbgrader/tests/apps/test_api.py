@@ -275,8 +275,15 @@ class TestNbGraderAPI(BaseTestApp):
         assert set(n1.keys()) == keys
         assert n1 == default.copy()
 
+        # add it to the database (but don't assign yet)
+        with api.gradebook as gb:
+            gb.update_or_create_assignment("ps1")
+        n1, = api.get_notebooks("ps1")
+        assert set(n1.keys()) == keys
+        assert n1 == default.copy()
+
         # check values after nbgrader assign is run
-        run_nbgrader(["assign", "ps1", "--create", "--db", db])
+        run_nbgrader(["assign", "ps1", "--create", "--db", db, "--force"])
         n1, = api.get_notebooks("ps1")
         assert set(n1.keys()) == keys
         target = default.copy()
@@ -394,6 +401,8 @@ class TestNbGraderAPI(BaseTestApp):
             assert idx[notebooks[1].id] == 1
 
     def test_get_notebook_submissions(self, api, course_dir, db):
+        assert api.get_notebook_submissions("ps1", "p1") == []
+
         self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
         run_nbgrader(["assign", "ps1", "--create", "--db", db])
 

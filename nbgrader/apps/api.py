@@ -392,7 +392,7 @@ class NbGraderAPI(LoggingConfigurable):
                 assignment = None
 
             # if the assignment exists in the database
-            if assignment:
+            if assignment and assignment.notebooks:
                 notebooks = []
                 for notebook in assignment.notebooks:
                     x = notebook.to_dict()
@@ -649,8 +649,13 @@ class NbGraderAPI(LoggingConfigurable):
 
         """
         with self.gradebook as gb:
-            gb.find_notebook(notebook_id, assignment_id)
+            try:
+                gb.find_notebook(notebook_id, assignment_id)
+            except MissingEntry:
+                return []
+
             submissions = gb.notebook_submission_dicts(notebook_id, assignment_id)
+
         indices = self.get_notebook_submission_indices(assignment_id, notebook_id)
         for nb in submissions:
             nb['index'] = indices.get(nb['id'], None)
