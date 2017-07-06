@@ -16,6 +16,12 @@ from .conftest import notwindows
 from ...utils import rmtree
 
 
+if sys.platform == 'win32':
+    tz = "Coordinated Universal Time"
+else:
+    tz = "UTC"
+
+
 @pytest.fixture(scope="module")
 def gradebook(request, tempdir, nbserver):
     # copy files from the user guide
@@ -47,6 +53,9 @@ def gradebook(request, tempdir, nbserver):
 
     # run the autograder
     run_nbgrader(["autograde", "Problem Set 1"])
+
+    # make sure louis is in the database (won't get added because he hasn't submitted anything!)
+    run_nbgrader(["db", "student", "add", "reasoner", "--first-name", "Louis", "--last-name", "R"])
 
     gb = Gradebook("sqlite:///gradebook.db")
 
@@ -216,6 +225,11 @@ def test_load_student2(browser, port, gradebook):
     for student in gradebook.students:
         utils._load_gradebook_page(browser, port, "manage_students/{}".format(student.id))
         utils._check_breadcrumbs(browser, "Students", student.id)
+        try:
+            submission = gradebook.find_submission("Problem Set 1", student.id)
+        except MissingEntry:
+            continue
+
         utils._click_link(browser, "Problem Set 1")
         utils._wait_for_gradebook_page(browser, port, "manage_students/{}/Problem Set 1".format(student.id))
 
@@ -799,7 +813,7 @@ def test_add_new_assignment(browser, port, gradebook):
     # check that the new row is correct
     row = browser.find_elements_by_css_selector("tbody tr")[1]
     assert row.find_element_by_css_selector(".name").text == "ps2"
-    assert row.find_element_by_css_selector(".duedate").text == "2017-07-05 17:00:00 UTC"
+    assert row.find_element_by_css_selector(".duedate").text == "2017-07-05 17:00:00 {}".format(tz)
     assert row.find_element_by_css_selector(".status").text == "draft"
     assert utils._child_exists(row, ".edit a")
     assert utils._child_exists(row, ".assign a")
@@ -812,7 +826,7 @@ def test_add_new_assignment(browser, port, gradebook):
     utils._load_gradebook_page(browser, port, "")
     row = browser.find_elements_by_css_selector("tbody tr")[1]
     assert row.find_element_by_css_selector(".name").text == "ps2"
-    assert row.find_element_by_css_selector(".duedate").text == "2017-07-05 17:00:00 UTC"
+    assert row.find_element_by_css_selector(".duedate").text == "2017-07-05 17:00:00 {}".format(tz)
     assert row.find_element_by_css_selector(".status").text == "draft"
     assert utils._child_exists(row, ".edit a")
     assert utils._child_exists(row, ".assign a")
@@ -846,7 +860,7 @@ def test_edit_assignment(browser, port, gradebook):
     # check that the modified row is correct
     row = browser.find_elements_by_css_selector("tbody tr")[1]
     assert row.find_element_by_css_selector(".name").text == "ps2"
-    assert row.find_element_by_css_selector(".duedate").text == "2017-07-05 18:00:00 UTC"
+    assert row.find_element_by_css_selector(".duedate").text == "2017-07-05 18:00:00 {}".format(tz)
     assert row.find_element_by_css_selector(".status").text == "draft"
     assert utils._child_exists(row, ".edit a")
     assert utils._child_exists(row, ".assign a")
@@ -859,7 +873,7 @@ def test_edit_assignment(browser, port, gradebook):
     utils._load_gradebook_page(browser, port, "")
     row = browser.find_elements_by_css_selector("tbody tr")[1]
     assert row.find_element_by_css_selector(".name").text == "ps2"
-    assert row.find_element_by_css_selector(".duedate").text == "2017-07-05 18:00:00 UTC"
+    assert row.find_element_by_css_selector(".duedate").text == "2017-07-05 18:00:00 {}".format(tz)
     assert row.find_element_by_css_selector(".status").text == "draft"
     assert utils._child_exists(row, ".edit a")
     assert utils._child_exists(row, ".assign a")
@@ -899,7 +913,7 @@ def test_generate_assignment(browser, port, gradebook):
     # check that the modified row is correct
     row = browser.find_elements_by_css_selector("tbody tr")[1]
     assert row.find_element_by_css_selector(".name").text == "ps2"
-    assert row.find_element_by_css_selector(".duedate").text == "2017-07-05 18:00:00 UTC"
+    assert row.find_element_by_css_selector(".duedate").text == "2017-07-05 18:00:00 {}".format(tz)
     assert row.find_element_by_css_selector(".status").text == "draft"
     assert utils._child_exists(row, ".edit a")
     assert utils._child_exists(row, ".assign a")
@@ -915,7 +929,7 @@ def test_generate_assignment(browser, port, gradebook):
     utils._load_gradebook_page(browser, port, "")
     row = browser.find_elements_by_css_selector("tbody tr")[1]
     assert row.find_element_by_css_selector(".name").text == "ps2"
-    assert row.find_element_by_css_selector(".duedate").text == "2017-07-05 18:00:00 UTC"
+    assert row.find_element_by_css_selector(".duedate").text == "2017-07-05 18:00:00 {}".format(tz)
     assert row.find_element_by_css_selector(".status").text == "draft"
     assert utils._child_exists(row, ".edit a")
     assert utils._child_exists(row, ".assign a")
@@ -945,7 +959,7 @@ def test_release_assignment(browser, port, gradebook):
     # check that the modified row is correct
     row = browser.find_elements_by_css_selector("tbody tr")[1]
     assert row.find_element_by_css_selector(".name").text == "ps2"
-    assert row.find_element_by_css_selector(".duedate").text == "2017-07-05 18:00:00 UTC"
+    assert row.find_element_by_css_selector(".duedate").text == "2017-07-05 18:00:00 {}".format(tz)
     assert row.find_element_by_css_selector(".status").text == "released"
     assert utils._child_exists(row, ".edit a")
     assert utils._child_exists(row, ".assign a")
@@ -958,7 +972,7 @@ def test_release_assignment(browser, port, gradebook):
     utils._load_gradebook_page(browser, port, "")
     row = browser.find_elements_by_css_selector("tbody tr")[1]
     assert row.find_element_by_css_selector(".name").text == "ps2"
-    assert row.find_element_by_css_selector(".duedate").text == "2017-07-05 18:00:00 UTC"
+    assert row.find_element_by_css_selector(".duedate").text == "2017-07-05 18:00:00 {}".format(tz)
     assert row.find_element_by_css_selector(".status").text == "released"
     assert utils._child_exists(row, ".edit a")
     assert utils._child_exists(row, ".assign a")
@@ -989,7 +1003,7 @@ def test_collect_assignment(browser, port, gradebook):
     # check that the modified row is correct
     row = browser.find_elements_by_css_selector("tbody tr")[1]
     assert row.find_element_by_css_selector(".name").text == "ps2"
-    assert row.find_element_by_css_selector(".duedate").text == "2017-07-05 18:00:00 UTC"
+    assert row.find_element_by_css_selector(".duedate").text == "2017-07-05 18:00:00 {}".format(tz)
     assert row.find_element_by_css_selector(".status").text == "released"
     assert utils._child_exists(row, ".edit a")
     assert utils._child_exists(row, ".assign a")
@@ -1002,7 +1016,7 @@ def test_collect_assignment(browser, port, gradebook):
     utils._load_gradebook_page(browser, port, "")
     row = browser.find_elements_by_css_selector("tbody tr")[1]
     assert row.find_element_by_css_selector(".name").text == "ps2"
-    assert row.find_element_by_css_selector(".duedate").text == "2017-07-05 18:00:00 UTC"
+    assert row.find_element_by_css_selector(".duedate").text == "2017-07-05 18:00:00 {}".format(tz)
     assert row.find_element_by_css_selector(".status").text == "released"
     assert utils._child_exists(row, ".edit a")
     assert utils._child_exists(row, ".assign a")
@@ -1029,7 +1043,7 @@ def test_unrelease_assignment(browser, port, gradebook):
     # check that the modified row is correct
     row = browser.find_elements_by_css_selector("tbody tr")[1]
     assert row.find_element_by_css_selector(".name").text == "ps2"
-    assert row.find_element_by_css_selector(".duedate").text == "2017-07-05 18:00:00 UTC"
+    assert row.find_element_by_css_selector(".duedate").text == "2017-07-05 18:00:00 {}".format(tz)
     assert row.find_element_by_css_selector(".status").text == "draft"
     assert utils._child_exists(row, ".edit a")
     assert utils._child_exists(row, ".assign a")
@@ -1042,7 +1056,7 @@ def test_unrelease_assignment(browser, port, gradebook):
     utils._load_gradebook_page(browser, port, "")
     row = browser.find_elements_by_css_selector("tbody tr")[1]
     assert row.find_element_by_css_selector(".name").text == "ps2"
-    assert row.find_element_by_css_selector(".duedate").text == "2017-07-05 18:00:00 UTC"
+    assert row.find_element_by_css_selector(".duedate").text == "2017-07-05 18:00:00 {}".format(tz)
     assert row.find_element_by_css_selector(".status").text == "draft"
     assert utils._child_exists(row, ".edit a")
     assert utils._child_exists(row, ".assign a")
@@ -1069,7 +1083,7 @@ def test_manually_collect_assignment(browser, port, gradebook):
     # check that the row is correct
     row = browser.find_elements_by_css_selector("tbody tr")[1]
     assert row.find_element_by_css_selector(".name").text == "ps2"
-    assert row.find_element_by_css_selector(".duedate").text == "2017-07-05 18:00:00 UTC"
+    assert row.find_element_by_css_selector(".duedate").text == "2017-07-05 18:00:00 {}".format(tz)
     assert row.find_element_by_css_selector(".status").text == "draft"
     assert utils._child_exists(row, ".edit a")
     assert utils._child_exists(row, ".assign a")
@@ -1090,7 +1104,7 @@ def test_autograde_assignment(browser, port, gradebook):
     row = browser.find_elements_by_css_selector("tbody tr")[0]
     assert row.find_element_by_css_selector(".student-name").text == "B, Ben"
     assert row.find_element_by_css_selector(".student-id").text == "Bitdiddle"
-    assert row.find_element_by_css_selector(".timestamp").text == "2017-07-05 18:05:21 UTC"
+    assert row.find_element_by_css_selector(".timestamp").text == "2017-07-05 18:05:21 {}".format(tz)
     assert row.find_element_by_css_selector(".status").text == "needs autograding"
     assert row.find_element_by_css_selector(".score").text == ""
     assert utils._child_exists(row, ".autograde a")
@@ -1108,7 +1122,7 @@ def test_autograde_assignment(browser, port, gradebook):
     row = browser.find_elements_by_css_selector("tbody tr")[0]
     assert row.find_element_by_css_selector(".student-name").text == "B, Ben"
     assert row.find_element_by_css_selector(".student-id").text == "Bitdiddle"
-    assert row.find_element_by_css_selector(".timestamp").text == "2017-07-05 18:05:21 UTC"
+    assert row.find_element_by_css_selector(".timestamp").text == "2017-07-05 18:05:21 {}".format(tz)
     assert row.find_element_by_css_selector(".status").text == "graded"
     assert row.find_element_by_css_selector(".score").text == "0 / 6"
     assert utils._child_exists(row, ".autograde a")
@@ -1118,7 +1132,7 @@ def test_autograde_assignment(browser, port, gradebook):
     row = browser.find_elements_by_css_selector("tbody tr")[0]
     assert row.find_element_by_css_selector(".student-name").text == "B, Ben"
     assert row.find_element_by_css_selector(".student-id").text == "Bitdiddle"
-    assert row.find_element_by_css_selector(".timestamp").text == "2017-07-05 18:05:21 UTC"
+    assert row.find_element_by_css_selector(".timestamp").text == "2017-07-05 18:05:21 {}".format(tz)
     assert row.find_element_by_css_selector(".status").text == "graded"
     assert row.find_element_by_css_selector(".score").text == "0 / 6"
     assert utils._child_exists(row, ".autograde a")
@@ -1140,7 +1154,7 @@ def test_autograde_assignment(browser, port, gradebook):
     row = browser.find_elements_by_css_selector("tbody tr")[0]
     assert row.find_element_by_css_selector(".student-name").text == "B, Ben"
     assert row.find_element_by_css_selector(".student-id").text == "Bitdiddle"
-    assert row.find_element_by_css_selector(".timestamp").text == "2017-07-05 18:05:21 UTC"
+    assert row.find_element_by_css_selector(".timestamp").text == "2017-07-05 18:05:21 {}".format(tz)
     assert row.find_element_by_css_selector(".status").text == "needs manual grading"
     assert row.find_element_by_css_selector(".score").text == "3 / 6"
     assert utils._child_exists(row, ".autograde a")
@@ -1150,7 +1164,7 @@ def test_autograde_assignment(browser, port, gradebook):
     row = browser.find_elements_by_css_selector("tbody tr")[0]
     assert row.find_element_by_css_selector(".student-name").text == "B, Ben"
     assert row.find_element_by_css_selector(".student-id").text == "Bitdiddle"
-    assert row.find_element_by_css_selector(".timestamp").text == "2017-07-05 18:05:21 UTC"
+    assert row.find_element_by_css_selector(".timestamp").text == "2017-07-05 18:05:21 {}".format(tz)
     assert row.find_element_by_css_selector(".status").text == "needs manual grading"
     assert row.find_element_by_css_selector(".score").text == "3 / 6"
     assert utils._child_exists(row, ".autograde a")
@@ -1159,6 +1173,7 @@ def test_autograde_assignment(browser, port, gradebook):
 @pytest.mark.nbextensions
 def test_add_new_student(browser, port, gradebook):
     utils._load_gradebook_page(browser, port, "manage_students")
+    assert len(browser.find_elements_by_css_selector("tbody tr")) == 3
 
     # click the "add new assignment" button
     utils._click_link(browser, "Add new student...")
