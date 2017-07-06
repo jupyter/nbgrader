@@ -1,11 +1,11 @@
-{%- extends 'gradebook.tpl' -%}
+{%- extends 'gradebook_base.tpl' -%}
 
 {%- block head -%}
 <script>
 var assignment_id = "{{ assignment_id }}";
 </script>
 
-<script src="{{ base_url }}/formgrader/static/js/gradebook2.js"></script>
+<script src="{{ base_url }}/formgrader/static/js/gradebook_notebooks.js"></script>
 {%- endblock head -%}
 
 {%- block breadcrumbs -%}

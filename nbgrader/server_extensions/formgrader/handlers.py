@@ -29,33 +29,33 @@ class ManageSubmissionsHandler(BaseHandler):
         self.write(html)
 
 
-class Gradebook1Handler(BaseHandler):
+class GradebookAssignmentsHandler(BaseHandler):
     @web.authenticated
     @check_xsrf
     def get(self):
         html = self.render(
-            "gradebook1.tpl",
+            "gradebook_assignments.tpl",
             base_url=self.base_url)
         self.write(html)
 
 
-class Gradebook2Handler(BaseHandler):
+class GradebookNotebooksHandler(BaseHandler):
     @web.authenticated
     @check_xsrf
     def get(self, assignment_id):
         html = self.render(
-            "gradebook2.tpl",
+            "gradebook_notebooks.tpl",
             assignment_id=assignment_id,
             base_url=self.base_url)
         self.write(html)
 
 
-class Gradebook3Handler(BaseHandler):
+class GradebookNotebookSubmissionsHandler(BaseHandler):
     @web.authenticated
     @check_xsrf
     def get(self, assignment_id, notebook_id):
         html = self.render(
-            "gradebook3.tpl",
+            "gradebook_notebook_submissions.tpl",
             assignment_id=assignment_id,
             notebook_id=notebook_id,
             base_url=self.base_url
@@ -215,34 +215,34 @@ class SubmissionFilesHandler(web.StaticFileHandler, BaseHandler):
         return super(SubmissionFilesHandler, self).get(*args, **kwargs)
 
 
-class ManageStudents1Handler(BaseHandler):
+class ManageStudentsHandler(BaseHandler):
     @web.authenticated
     @check_xsrf
     def get(self):
         html = self.render(
-            "manage_students1.tpl",
+            "manage_students.tpl",
             base_url=self.base_url)
         self.write(html)
 
 
-class ManageStudents2Handler(BaseHandler):
+class ManageStudentsAssignmentsHandler(BaseHandler):
     @web.authenticated
     @check_xsrf
     def get(self, student_id):
         html = self.render(
-            "manage_students2.tpl",
+            "manage_students_assignments.tpl",
             student_id=student_id,
             base_url=self.base_url)
 
         self.write(html)
 
 
-class ManageStudents3Handler(BaseHandler):
+class ManageStudentNotebookSubmissionsHandler(BaseHandler):
     @web.authenticated
     @check_xsrf
     def get(self, student_id, assignment_id):
         html = self.render(
-            "manage_students3.tpl",
+            "manage_students_notebook_submissions.tpl",
             assignment_id=assignment_id,
             student_id=student_id,
             base_url=self.base_url
@@ -269,13 +269,13 @@ default_handlers = [
     (r"/formgrader/manage_assignments/?", ManageAssignmentsHandler),
     (r"/formgrader/manage_submissions/([^/]+)/?", ManageSubmissionsHandler),
 
-    (r"/formgrader/gradebook/?", Gradebook1Handler),
-    (r"/formgrader/gradebook/([^/]+)/?", Gradebook2Handler),
-    (r"/formgrader/gradebook/([^/]+)/([^/]+)/?", Gradebook3Handler),
+    (r"/formgrader/gradebook/?", GradebookAssignmentsHandler),
+    (r"/formgrader/gradebook/([^/]+)/?", GradebookNotebooksHandler),
+    (r"/formgrader/gradebook/([^/]+)/([^/]+)/?", GradebookNotebookSubmissionsHandler),
 
-    (r"/formgrader/manage_students/?", ManageStudents1Handler),
-    (r"/formgrader/manage_students/([^/]+)/?", ManageStudents2Handler),
-    (r"/formgrader/manage_students/([^/]+)/([^/]+)/?", ManageStudents3Handler),
+    (r"/formgrader/manage_students/?", ManageStudentsHandler),
+    (r"/formgrader/manage_students/([^/]+)/?", ManageStudentsAssignmentsHandler),
+    (r"/formgrader/manage_students/([^/]+)/([^/]+)/?", ManageStudentNotebookSubmissionsHandler),
 
     (r"/formgrader/submissions/components/(.*)", web.StaticFileHandler, {'path': components_path}),
     (r"/formgrader/submissions/([^/]+)/?", SubmissionHandler),

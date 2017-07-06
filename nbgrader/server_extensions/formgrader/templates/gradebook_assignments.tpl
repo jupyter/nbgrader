@@ -1,7 +1,7 @@
-{%- extends 'gradebook.tpl' -%}
+{%- extends 'gradebook_base.tpl' -%}
 
 {%- block head -%}
-<script src="{{ base_url }}/formgrader/static/js/gradebook1.js"></script>
+<script src="{{ base_url }}/formgrader/static/js/gradebook_assignments.js"></script>
 {%- endblock -%}
 
 {%- block breadcrumbs -%}

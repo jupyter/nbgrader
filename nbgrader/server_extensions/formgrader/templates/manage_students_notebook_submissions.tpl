@@ -1,4 +1,4 @@
-{%- extends 'manage_students.tpl' -%}
+{%- extends 'manage_students_base.tpl' -%}
 
 {%- block head -%}
 <script>
@@ -6,7 +6,7 @@ var student_id = "{{ student_id }}";
 var assignment_id = "{{ assignment_id }}";
 </script>
 
-<script src="{{ base_url }}/formgrader/static/js/manage_students3.js"></script>
+<script src="{{ base_url }}/formgrader/static/js/manage_students_notebook_submissions.js"></script>
 {%- endblock head -%}
 
 {%- block breadcrumbs -%}
