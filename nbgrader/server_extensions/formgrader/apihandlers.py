@@ -274,5 +274,5 @@ default_handlers = [
     (r"/formgrader/api/student/([^/]+)", StudentHandler),
 
     (r"/formgrader/api/student_submissions/([^/]+)", StudentSubmissionCollectionHandler),
-    (r"/formgrader/api/student_submissions/([^/]+)/([^/]+)", StudentNotebookSubmissionCollectionHandler),
+    (r"/formgrader/api/student_notebook_submissions/([^/]+)/([^/]+)", StudentNotebookSubmissionCollectionHandler),
 ]

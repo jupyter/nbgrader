@@ -1,7 +1,7 @@
 var StudentSubmittedNotebook = Backbone.Model.extend({});
 var StudentSubmittedNotebooks = Backbone.Collection.extend({
     model: StudentSubmittedNotebook,
-    url: base_url + "/formgrader/api/student_submissions/" + student_id + "/" + assignment_id
+    url: base_url + "/formgrader/api/student_notebook_submissions/" + student_id + "/" + assignment_id
 });
 
 var StudentSubmittedNotebookUI = Backbone.View.extend({
