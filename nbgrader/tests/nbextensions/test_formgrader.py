@@ -53,7 +53,7 @@ def gradebook(request, tempdir):
     submitted_path = join(os.path.dirname(__file__), "..", "..", "docs", "source", "user_guide", "submitted")
 
     shutil.copytree(source_path, "source")
-    for student in ["Bitdiddle", "Hacker"]:
+    for student in ["bitdiddle", "hacker"]:
         shutil.copytree(join(submitted_path, student), join("submitted", student))
 
     # rename to old names -- we do this rather than changing all the tests
