@@ -80,10 +80,7 @@ def gradebook(request, tempdir, nbserver):
     run_nbgrader(["autograde", "Problem Set 1"])
 
     # make sure louis is in the database (won't get added because he hasn't submitted anything!)
-    run_nbgrader(["db", "student", "add", "reasoner", "--first-name", "Louis", "--last-name", "R"])
-
-    with open("nbgrader_config.py", "a") as fh:
-        fh.write("""c.Exchange.course_id = "course101"\n""")
+    run_nbgrader(["db", "student", "add", "Reasoner", "--first-name", "Louis", "--last-name", "R"])
 
     gb = Gradebook("sqlite:///gradebook.db")
 
@@ -1104,7 +1101,7 @@ def test_manually_collect_assignment(browser, port, gradebook):
     existing_submissions = glob.glob(join("submitted", "*", "ps2"))
     for dirname in existing_submissions:
         rmtree(dirname)
-    dest = join("submitted", "bitdiddle", "ps2")
+    dest = join("submitted", "Bitdiddle", "ps2")
     if not os.path.exists(os.path.dirname(dest)):
         os.makedirs(os.path.dirname(dest))
     shutil.copytree(join("release", "ps2"), dest)
@@ -1172,7 +1169,7 @@ def test_autograde_assignment(browser, port, gradebook):
 
     # overwrite the file
     source_path = join(os.path.dirname(__file__), "..", "..", "docs", "source", "user_guide", "source", "ps1", "problem1.ipynb")
-    shutil.copy(source_path, join("submitted", "bitdiddle", "ps2", "Problem 1.ipynb"))
+    shutil.copy(source_path, join("submitted", "Bitdiddle", "ps2", "Problem 1.ipynb"))
 
     # click on the autograde button
     row = browser.find_elements_by_css_selector("tbody tr")[0]
