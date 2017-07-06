@@ -124,7 +124,10 @@ def as_timezone(ts, timezone):
     if not timezone:
         return ts
     tz = gettz(timezone)
-    return (ts + tz.utcoffset(ts)).replace(tzinfo=tz)
+    if tz:
+        return (ts + tz.utcoffset(ts)).replace(tzinfo=tz)
+    else:
+        return ts
 
 
 def check_mode(path, read=False, write=False, execute=False):
