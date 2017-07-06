@@ -57,6 +57,9 @@ def gradebook(request, tempdir, nbserver):
     # make sure louis is in the database (won't get added because he hasn't submitted anything!)
     run_nbgrader(["db", "student", "add", "reasoner", "--first-name", "Louis", "--last-name", "R"])
 
+    with open("nbgrader_config.py", "a") as fh:
+        fh.write("""c.Exchange.course_id = "course101"\n""")
+
     gb = Gradebook("sqlite:///gradebook.db")
 
     def fin():
