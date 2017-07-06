@@ -6,13 +6,13 @@ import six
 import logging
 
 from traitlets.config import LoggingConfigurable
-from traitlets import Instance, Enum, observe
+from traitlets import Instance, Enum, Unicode, observe
 
 from ..coursedir import CourseDirectory
 from ..converters import Assign, Autograde
 from ..exchange import ExchangeList, ExchangeRelease, ExchangeCollect
 from ..api import MissingEntry, Gradebook
-from ..utils import parse_utc, temp_attrs, capture_log
+from ..utils import parse_utc, temp_attrs, capture_log, as_timezone
 
 
 class NbGraderAPI(LoggingConfigurable):
@@ -25,6 +25,16 @@ class NbGraderAPI(LoggingConfigurable):
         (0, 10, 20, 30, 40, 50, 'DEBUG', 'INFO', 'WARN', 'ERROR', 'CRITICAL'),
         default_value=logging.INFO,
         help="Set the log level by value or name."
+    ).tag(config=True)
+
+    timezone = Unicode(
+        "UTC",
+        help="Timezone for displaying timestamps"
+    ).tag(config=True)
+
+    timestamp_format = Unicode(
+        "%Y-%m-%d %H:%M:%S %Z",
+        help="Format string for displaying timestamps"
     ).tag(config=True)
 
     @observe('log_level')
@@ -284,7 +294,16 @@ class NbGraderAPI(LoggingConfigurable):
         # see if there is information about the assignment in the database
         try:
             with self.gradebook as gb:
-                assignment = gb.find_assignment(assignment_id).to_dict()
+                db_assignment = gb.find_assignment(assignment_id)
+                assignment = db_assignment.to_dict()
+                if db_assignment.duedate:
+                    ts = as_timezone(db_assignment.duedate, self.timezone)
+                    assignment["display_duedate"] = ts.strftime(self.timestamp_format)
+                    assignment["duedate_notimezone"] = ts.replace(tzinfo=None).isoformat()
+                else:
+                    assignment["display_duedate"] = None
+                    assignment["duedate_notimezone"] = None
+                assignment["duedate_timezone"] = self.timezone
                 assignment["average_score"] = gb.average_assignment_score(assignment_id)
                 assignment["average_code_score"] = gb.average_assignment_code_score(assignment_id)
                 assignment["average_written_score"] = gb.average_assignment_written_score(assignment_id)
@@ -294,6 +313,9 @@ class NbGraderAPI(LoggingConfigurable):
                 "id": None,
                 "name": assignment_id,
                 "duedate": None,
+                "display_duedate": None,
+                "duedate_notimezone": None,
+                "duedate_timezone": self.timezone,
                 "average_score": 0,
                 "average_code_score": 0,
                 "average_written_score": 0,
@@ -370,7 +392,7 @@ class NbGraderAPI(LoggingConfigurable):
                 assignment = None
 
             # if the assignment exists in the database
-            if assignment:
+            if assignment and assignment.notebooks:
                 notebooks = []
                 for notebook in assignment.notebooks:
                     x = notebook.to_dict()
@@ -435,11 +457,19 @@ class NbGraderAPI(LoggingConfigurable):
             ungraded = self.get_submitted_students(assignment_id) - autograded
 
         if student_id in ungraded:
-            timestamp = self.get_submitted_timestamp(assignment_id, student_id).isoformat()
+            ts = self.get_submitted_timestamp(assignment_id, student_id)
+            if ts:
+                timestamp = ts.isoformat()
+                display_timestamp = as_timezone(ts, self.timezone).strftime(self.timestamp_format)
+            else:
+                timestamp = None
+                display_timestamp = None
+
             submission = {
                 "id": None,
                 "name": assignment_id,
                 "timestamp": timestamp,
+                "display_timestamp": display_timestamp,
                 "score": 0.0,
                 "max_score": 0.0,
                 "code_score": 0.0,
@@ -465,7 +495,10 @@ class NbGraderAPI(LoggingConfigurable):
         elif student_id in autograded:
             with self.gradebook as gb:
                 try:
-                    submission = gb.find_submission(assignment_id, student_id).to_dict()
+                    db_submission = gb.find_submission(assignment_id, student_id)
+                    submission = db_submission.to_dict()
+                    submission["display_timestamp"] = as_timezone(
+                        db_submission.timestamp, self.timezone).strftime(self.timestamp_format)
                 except MissingEntry:
                     return None
 
@@ -477,6 +510,7 @@ class NbGraderAPI(LoggingConfigurable):
                 "id": None,
                 "name": assignment_id,
                 "timestamp": None,
+                "display_timestamp": None,
                 "score": 0.0,
                 "max_score": 0.0,
                 "code_score": 0.0,
@@ -523,7 +557,14 @@ class NbGraderAPI(LoggingConfigurable):
         for submission in db_submissions:
             if submission["student"] in ungraded:
                 continue
-            submission["timestamp"] = submission["timestamp"].isoformat()
+            ts = submission["timestamp"]
+            if ts:
+                submission["timestamp"] = ts.isoformat()
+                submission["display_timestamp"] = as_timezone(
+                    ts, self.timezone).strftime(self.timestamp_format)
+            else:
+                submission["timestamp"] = None
+                submission["display_timestamp"] = None
             submission["autograded"] = True
             submission["submitted"] = True
             submissions.append(submission)
@@ -608,8 +649,13 @@ class NbGraderAPI(LoggingConfigurable):
 
         """
         with self.gradebook as gb:
-            gb.find_notebook(notebook_id, assignment_id)
+            try:
+                gb.find_notebook(notebook_id, assignment_id)
+            except MissingEntry:
+                return []
+
             submissions = gb.notebook_submission_dicts(notebook_id, assignment_id)
+
         indices = self.get_notebook_submission_indices(assignment_id, notebook_id)
         for nb in submissions:
             nb['index'] = indices.get(nb['id'], None)

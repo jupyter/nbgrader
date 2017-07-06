@@ -1,6 +1,10 @@
 import pytest
 import os
 import shutil
+import sys
+import glob
+
+from os.path import join
 
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
@@ -10,39 +14,73 @@ from selenium.webdriver.common.by import By
 from .. import run_nbgrader
 from ...api import Gradebook, MissingEntry
 from . import formgrade_utils as utils
+from .conftest import notwindows, _make_nbserver, _make_browser, _close_nbserver, _close_browser
+from ...utils import rmtree
+
+
+if sys.platform == 'win32':
+    tz = "Coordinated Universal Time"
+else:
+    tz = "UTC"
+
+
+@pytest.fixture(scope="module")
+def nbserver(request, port, tempdir, jupyter_config_dir, jupyter_data_dir, exchange, cache):
+    server = _make_nbserver("course101", port, tempdir, jupyter_config_dir, jupyter_data_dir, exchange, cache)
+
+    def fin():
+        _close_nbserver(server)
+    request.addfinalizer(fin)
+
+    return server
+
+
+@pytest.fixture
+def browser(request, tempdir, nbserver):
+    browser = _make_browser(tempdir)
+
+    def fin():
+        _close_browser(browser)
+    request.addfinalizer(fin)
+
+    return browser
 
 
 @pytest.fixture(scope="module")
 def gradebook(request, tempdir, nbserver):
     # copy files from the user guide
-    source_path = os.path.join(os.path.dirname(__file__), "..", "..", "docs", "source", "user_guide", "source")
-    submitted_path = os.path.join(os.path.dirname(__file__), "..", "..", "docs", "source", "user_guide", "submitted")
+    source_path = join(os.path.dirname(__file__), "..", "..", "docs", "source", "user_guide", "source")
+    submitted_path = join(os.path.dirname(__file__), "..", "..", "docs", "source", "user_guide", "submitted")
 
-    shutil.copytree(os.path.join(os.path.dirname(__file__), source_path), os.path.join("source"))
-    shutil.copytree(os.path.join(os.path.dirname(__file__), submitted_path), os.path.join("submitted"))
+    shutil.copytree(source_path, "source")
+    for student in ["bitdiddle", "hacker"]:
+        shutil.copytree(join(submitted_path, student), join("submitted", student))
 
     # rename to old names -- we do this rather than changing all the tests
     # because I want the tests to operate on files with spaces in the names
-    os.rename(os.path.join("source", "ps1"), os.path.join("source", "Problem Set 1"))
-    os.rename(os.path.join("source", "Problem Set 1", "problem1.ipynb"), os.path.join("source", "Problem Set 1", "Problem 1.ipynb"))
-    os.rename(os.path.join("source", "Problem Set 1", "problem2.ipynb"), os.path.join("source", "Problem Set 1", "Problem 2.ipynb"))
-    os.rename(os.path.join("submitted", "bitdiddle"), os.path.join("submitted", "Bitdiddle"))
-    os.rename(os.path.join("submitted", "Bitdiddle", "ps1"), os.path.join("submitted", "Bitdiddle", "Problem Set 1"))
-    os.rename(os.path.join("submitted", "Bitdiddle", "Problem Set 1", "problem1.ipynb"), os.path.join("submitted", "Bitdiddle", "Problem Set 1", "Problem 1.ipynb"))
-    os.rename(os.path.join("submitted", "Bitdiddle", "Problem Set 1", "problem2.ipynb"), os.path.join("submitted", "Bitdiddle", "Problem Set 1", "Problem 2.ipynb"))
-    os.rename(os.path.join("submitted", "hacker"), os.path.join("submitted", "Hacker"))
-    os.rename(os.path.join("submitted", "Hacker", "ps1"), os.path.join("submitted", "Hacker", "Problem Set 1"))
-    os.rename(os.path.join("submitted", "Hacker", "Problem Set 1", "problem1.ipynb"), os.path.join("submitted", "Hacker", "Problem Set 1", "Problem 1.ipynb"))
-    os.rename(os.path.join("submitted", "Hacker", "Problem Set 1", "problem2.ipynb"), os.path.join("submitted", "Hacker", "Problem Set 1", "Problem 2.ipynb"))
+    os.rename(join("source", "ps1"), join("source", "Problem Set 1"))
+    os.rename(join("source", "Problem Set 1", "problem1.ipynb"), join("source", "Problem Set 1", "Problem 1.ipynb"))
+    os.rename(join("source", "Problem Set 1", "problem2.ipynb"), join("source", "Problem Set 1", "Problem 2.ipynb"))
+    os.rename(join("submitted", "bitdiddle"), join("submitted", "Bitdiddle"))
+    os.rename(join("submitted", "Bitdiddle", "ps1"), join("submitted", "Bitdiddle", "Problem Set 1"))
+    os.rename(join("submitted", "Bitdiddle", "Problem Set 1", "problem1.ipynb"), join("submitted", "Bitdiddle", "Problem Set 1", "Problem 1.ipynb"))
+    os.rename(join("submitted", "Bitdiddle", "Problem Set 1", "problem2.ipynb"), join("submitted", "Bitdiddle", "Problem Set 1", "Problem 2.ipynb"))
+    os.rename(join("submitted", "hacker"), join("submitted", "Hacker"))
+    os.rename(join("submitted", "Hacker", "ps1"), join("submitted", "Hacker", "Problem Set 1"))
+    os.rename(join("submitted", "Hacker", "Problem Set 1", "problem1.ipynb"), join("submitted", "Hacker", "Problem Set 1", "Problem 1.ipynb"))
+    os.rename(join("submitted", "Hacker", "Problem Set 1", "problem2.ipynb"), join("submitted", "Hacker", "Problem Set 1", "Problem 2.ipynb"))
 
     # run nbgrader assign
     run_nbgrader([
         "assign", "Problem Set 1",
-        "--IncludeHeaderFooter.header={}".format(os.path.join("source", "header.ipynb"))
+        "--IncludeHeaderFooter.header={}".format(join("source", "header.ipynb"))
     ])
 
     # run the autograder
     run_nbgrader(["autograde", "Problem Set 1"])
+
+    # make sure louis is in the database (won't get added because he hasn't submitted anything!)
+    run_nbgrader(["db", "student", "add", "Reasoner", "--first-name", "Louis", "--last-name", "R"])
 
     gb = Gradebook("sqlite:///gradebook.db")
 
@@ -54,52 +92,100 @@ def gradebook(request, tempdir, nbserver):
 
 
 @pytest.mark.nbextensions
-def test_load_assignment_list(browser, port, gradebook):
+def test_load_manage_assignments(browser, port, gradebook):
     # load the main page and make sure it is the Assignments page
     utils._get(browser, utils._formgrade_url(port))
     utils._wait_for_gradebook_page(browser, port, "")
     utils._check_breadcrumbs(browser, "Assignments")
 
-    # load the assignments page
-    utils._load_gradebook_page(browser, port, "assignments")
-    utils._check_breadcrumbs(browser, "Assignments")
-
     # click on the "Problem Set 1" link
     utils._click_link(browser, "Problem Set 1")
-    utils._wait_for_gradebook_page(browser, port, "assignments/Problem Set 1")
+    browser.switch_to_window(browser.window_handles[1])
+    utils._wait_for_tree_page(
+        browser, port,
+        utils._tree_url(port, "source/Problem Set 1"))
+    browser.close()
+    browser.switch_to_window(browser.window_handles[0])
+
+    # click on the preview link
+    browser.find_element_by_css_selector("td.preview .glyphicon").click()
+    browser.switch_to_window(browser.window_handles[1])
+    utils._wait_for_tree_page(
+        browser, port,
+        utils._tree_url(port, "release/Problem Set 1"))
+    browser.close()
+    browser.switch_to_window(browser.window_handles[0])
+
+    # click on the number of submissions
+    browser.find_element_by_css_selector("td.num-submissions a").click()
+    utils._wait_for_gradebook_page(browser, port, "manage_submissions/Problem Set 1")
 
 
 @pytest.mark.nbextensions
-def test_load_assignment_notebook_list(browser, port, gradebook):
-    utils._load_gradebook_page(browser, port, "assignments/Problem Set 1")
+def test_load_manage_submissions(browser, port, gradebook):
+    # load the submissions page
+    utils._load_gradebook_page(browser, port, "manage_submissions/Problem Set 1")
     utils._check_breadcrumbs(browser, "Assignments", "Problem Set 1")
 
-    # click the "Assignments" link
+    # click on the "Assignments" link
     utils._click_link(browser, "Assignments")
-    utils._wait_for_gradebook_page(browser, port, "assignments")
+    utils._wait_for_gradebook_page(browser, port, "manage_assignments")
+    browser.back()
+
+    # click on students
+    for student in gradebook.students:
+        try:
+            gradebook.find_submission("Problem Set 1", student.id)
+        except MissingEntry:
+            continue
+
+        utils._click_link(browser, "{}, {}".format(student.last_name, student.first_name))
+        utils._wait_for_gradebook_page(browser, port, "manage_students/{}/Problem Set 1".format(student.id))
+        browser.back()
+
+
+@pytest.mark.nbextensions
+def test_load_gradebook1(browser, port, gradebook):
+    # load the assignments page
+    utils._load_gradebook_page(browser, port, "gradebook")
+    utils._check_breadcrumbs(browser, "Manual Grading")
+
+    # click on the "Problem Set 1" link
+    utils._click_link(browser, "Problem Set 1")
+    utils._wait_for_gradebook_page(browser, port, "gradebook/Problem Set 1")
+
+
+@pytest.mark.nbextensions
+def test_load_gradebook2(browser, port, gradebook):
+    utils._load_gradebook_page(browser, port, "gradebook/Problem Set 1")
+    utils._check_breadcrumbs(browser, "Manual Grading", "Problem Set 1")
+
+    # click the "Manual Grading" link
+    utils._click_link(browser, "Manual Grading")
+    utils._wait_for_gradebook_page(browser, port, "gradebook")
     browser.back()
 
     # click on the problem link
     for problem in gradebook.find_assignment("Problem Set 1").notebooks:
         utils._click_link(browser, problem.name)
-        utils._wait_for_gradebook_page(browser, port, "assignments/Problem Set 1/{}".format(problem.name))
+        utils._wait_for_gradebook_page(browser, port, "gradebook/Problem Set 1/{}".format(problem.name))
         browser.back()
 
 
 @pytest.mark.nbextensions
-def test_load_assignment_notebook_submissions_list(browser, port, gradebook):
+def test_load_gradebook3(browser, port, gradebook):
     for problem in gradebook.find_assignment("Problem Set 1").notebooks:
-        utils._load_gradebook_page(browser, port, "assignments/Problem Set 1/{}".format(problem.name))
-        utils._check_breadcrumbs(browser, "Assignments", "Problem Set 1", problem.name)
+        utils._load_gradebook_page(browser, port, "gradebook/Problem Set 1/{}".format(problem.name))
+        utils._check_breadcrumbs(browser, "Manual Grading", "Problem Set 1", problem.name)
 
-        # click the "Assignments" link
-        utils._click_link(browser, "Assignments")
-        utils._wait_for_gradebook_page(browser, port, "assignments")
+        # click the "Manual Grading" link
+        utils._click_link(browser, "Manual Grading")
+        utils._wait_for_gradebook_page(browser, port, "gradebook")
         browser.back()
 
         # click the "Problem Set 1" link
         utils._click_link(browser, "Problem Set 1")
-        utils._wait_for_gradebook_page(browser, port, "assignments/Problem Set 1")
+        utils._wait_for_gradebook_page(browser, port, "gradebook/Problem Set 1")
         browser.back()
 
         submissions = problem.submissions
@@ -112,14 +198,14 @@ def test_load_assignment_notebook_submissions_list(browser, port, gradebook):
 
 
 @pytest.mark.nbextensions
-def test_assignment_notebook_submissions_show_hide_names(browser, port, gradebook):
+def test_gradebook3_show_hide_names(browser, port, gradebook):
     problem = gradebook.find_assignment("Problem Set 1").notebooks[0]
-    utils._load_gradebook_page(browser, port, "assignments/Problem Set 1/{}".format(problem.name))
+    utils._load_gradebook_page(browser, port, "gradebook/Problem Set 1/{}".format(problem.name))
     submissions = problem.submissions
     submissions.sort(key=lambda x: x.id)
     submission = submissions[0]
 
-    top_elem = browser.find_element_by_css_selector("#submission-1")
+    top_elem = browser.find_elements_by_css_selector("tbody tr")[0]
     col1, col2 = top_elem.find_elements_by_css_selector("td")[:2]
     hidden = col1.find_element_by_css_selector(".glyphicon.name-hidden")
     shown = col1.find_element_by_css_selector(".glyphicon.name-shown")
@@ -147,47 +233,41 @@ def test_assignment_notebook_submissions_show_hide_names(browser, port, gradeboo
 
 
 @pytest.mark.nbextensions
-def test_load_student_list(browser, port, gradebook):
+def test_load_student1(browser, port, gradebook):
     # load the student view
-    utils._load_gradebook_page(browser, port, "students")
+    utils._load_gradebook_page(browser, port, "manage_students")
     utils._check_breadcrumbs(browser, "Students")
 
     # click on student
     for student in gradebook.students:
-        ## TODO: they should have a link here, even if they haven't submitted anything!
-        if len(student.submissions) == 0:
-            continue
         utils._click_link(browser, "{}, {}".format(student.last_name, student.first_name))
-        utils._wait_for_gradebook_page(browser, port, "students/{}".format(student.id))
+        utils._wait_for_gradebook_page(browser, port, "manage_students/{}".format(student.id))
         browser.back()
 
 
 @pytest.mark.nbextensions
-def test_load_student_assignment_list(browser, port, gradebook):
+def test_load_student2(browser, port, gradebook):
     for student in gradebook.students:
-        utils._load_gradebook_page(browser, port, "students/{}".format(student.id))
+        utils._load_gradebook_page(browser, port, "manage_students/{}".format(student.id))
         utils._check_breadcrumbs(browser, "Students", student.id)
-
         try:
-            gradebook.find_submission("Problem Set 1", student.id)
+            submission = gradebook.find_submission("Problem Set 1", student.id)
         except MissingEntry:
-            ## TODO: make sure link doesn't exist
             continue
 
         utils._click_link(browser, "Problem Set 1")
-        utils._wait_for_gradebook_page(browser, port, "students/{}/Problem Set 1".format(student.id))
+        utils._wait_for_gradebook_page(browser, port, "manage_students/{}/Problem Set 1".format(student.id))
 
 
 @pytest.mark.nbextensions
-def test_load_student_assignment_submissions_list(browser, port, gradebook):
+def test_load_student3(browser, port, gradebook):
     for student in gradebook.students:
         try:
             submission = gradebook.find_submission("Problem Set 1", student.id)
         except MissingEntry:
-            ## TODO: make sure link doesn't exist
             continue
 
-        utils._load_gradebook_page(browser, port, "students/{}/Problem Set 1".format(student.id))
+        utils._load_gradebook_page(browser, port, "manage_students/{}/Problem Set 1".format(student.id))
         utils._check_breadcrumbs(browser, "Students", student.id, "Problem Set 1")
 
         for problem in gradebook.find_assignment("Problem Set 1").notebooks:
@@ -195,27 +275,24 @@ def test_load_student_assignment_submissions_list(browser, port, gradebook):
             utils._click_link(browser, problem.name)
             utils._wait_for_formgrader(browser, port, "submissions/{}/?index=0".format(submission.id))
             browser.back()
-            utils._wait_for_gradebook_page(browser, port, "students/{}/Problem Set 1".format(student.id))
+            utils._wait_for_gradebook_page(browser, port, "manage_students/{}/Problem Set 1".format(student.id))
 
 
 @pytest.mark.nbextensions
 def test_switch_views(browser, port, gradebook):
-    # load the main page
-    utils._load_gradebook_page(browser, port, "assignments")
+    pages = ["", "manage_assignments", "gradebook", "manage_students"]
+    links = [
+        ("Manage Assignments", "manage_assignments"),
+        ("Manual Grading", "gradebook"),
+        ("Manage Students", "manage_students")
+    ]
 
-    # click the "Change View" button
-    utils._click_link(browser, "Change View", partial=True)
-
-    # click the "Students" option
-    utils._click_link(browser, "Students")
-    utils._wait_for_gradebook_page(browser, port, "students")
-
-    # click the "Change View" button
-    utils._click_link(browser, "Change View", partial=True)
-
-    # click the "Assignments" option
-    utils._click_link(browser, "Assignments")
-    utils._wait_for_gradebook_page(browser, port, "assignments")
+    for page in pages:
+        utils._load_gradebook_page(browser, port, page)
+        for link, target in links:
+            utils._click_link(browser, link)
+            utils._wait_for_gradebook_page(browser, port, target)
+            browser.back()
 
 
 @pytest.mark.nbextensions
@@ -228,9 +305,9 @@ def test_formgrade_view_breadcrumbs(browser, port, gradebook):
             utils._get(browser, utils._formgrade_url(port, "submissions/{}".format(submission.id)))
             utils._wait_for_formgrader(browser, port, "submissions/{}/?index=0".format(submission.id))
 
-            # click on the "Assignments" link
-            utils._click_link(browser, "Assignments")
-            utils._wait_for_gradebook_page(browser, port, "assignments")
+            # click on the "Manual Grading" link
+            utils._click_link(browser, "Manual Grading")
+            utils._wait_for_gradebook_page(browser, port, "gradebook")
 
             # go back
             browser.back()
@@ -238,7 +315,7 @@ def test_formgrade_view_breadcrumbs(browser, port, gradebook):
 
             # click on the "Problem Set 1" link
             utils._click_link(browser, "Problem Set 1")
-            utils._wait_for_gradebook_page(browser, port, "assignments/Problem Set 1")
+            utils._wait_for_gradebook_page(browser, port, "gradebook/Problem Set 1")
 
             # go back
             browser.back()
@@ -246,7 +323,7 @@ def test_formgrade_view_breadcrumbs(browser, port, gradebook):
 
             # click on the problem link
             utils._click_link(browser, problem.name)
-            utils._wait_for_gradebook_page(browser, port, "assignments/Problem Set 1/{}".format(problem.name))
+            utils._wait_for_gradebook_page(browser, port, "gradebook/Problem Set 1/{}".format(problem.name))
 
             # go back
             browser.back()
@@ -323,7 +400,7 @@ def test_next_prev_assignments(browser, port, gradebook):
 
         # Move to the next submission (should return to notebook list)
         next_function()
-        utils._wait_for_gradebook_page(browser, port, "assignments/Problem Set 1/Problem 1")
+        utils._wait_for_gradebook_page(browser, port, "gradebook/Problem Set 1/Problem 1")
 
         # Go back
         browser.back()
@@ -335,7 +412,7 @@ def test_next_prev_assignments(browser, port, gradebook):
 
         # Move to the previous submission (should return to the notebook list)
         prev_function()
-        utils._wait_for_gradebook_page(browser, port, "assignments/Problem Set 1/Problem 1")
+        utils._wait_for_gradebook_page(browser, port, "gradebook/Problem Set 1/Problem 1")
 
 
 @pytest.mark.nbextensions
@@ -359,7 +436,7 @@ def test_next_prev_failed_assignments(browser, port, gradebook):
     if submissions[0].failed_tests:
         # Go to the next failed submission (should return to the notebook list)
         utils._send_keys_to_body(browser, Keys.CONTROL, Keys.SHIFT, ".")
-        utils._wait_for_gradebook_page(browser, port, "assignments/Problem Set 1/Problem 1")
+        utils._wait_for_gradebook_page(browser, port, "gradebook/Problem Set 1/Problem 1")
 
         # Go back
         browser.back()
@@ -367,7 +444,7 @@ def test_next_prev_failed_assignments(browser, port, gradebook):
 
         # Go to the previous failed submission (should return to the notebook list)
         utils._send_keys_to_body(browser, Keys.CONTROL, Keys.SHIFT, ",")
-        utils._wait_for_gradebook_page(browser, port, "assignments/Problem Set 1/Problem 1")
+        utils._wait_for_gradebook_page(browser, port, "gradebook/Problem Set 1/Problem 1")
 
         # Go back
         browser.back()
@@ -379,7 +456,7 @@ def test_next_prev_failed_assignments(browser, port, gradebook):
 
         # Go to the next failed submission (should return to the notebook list)
         utils._send_keys_to_body(browser, Keys.CONTROL, Keys.SHIFT, ".")
-        utils._wait_for_gradebook_page(browser, port, "assignments/Problem Set 1/Problem 1")
+        utils._wait_for_gradebook_page(browser, port, "gradebook/Problem Set 1/Problem 1")
 
         # Go back
         browser.back()
@@ -400,7 +477,7 @@ def test_next_prev_failed_assignments(browser, port, gradebook):
 
         # Go to the previous failed submission (should return to the notebook list)
         utils._send_keys_to_body(browser, Keys.CONTROL, Keys.SHIFT, ",")
-        utils._wait_for_gradebook_page(browser, port, "assignments/Problem Set 1/Problem 1")
+        utils._wait_for_gradebook_page(browser, port, "gradebook/Problem Set 1/Problem 1")
 
         # Go back
         browser.back()
@@ -412,7 +489,7 @@ def test_next_prev_failed_assignments(browser, port, gradebook):
 
         # Go to the next failed submission (should return to the notebook list)
         utils._send_keys_to_body(browser, Keys.CONTROL, Keys.SHIFT, ".")
-        utils._wait_for_gradebook_page(browser, port, "assignments/Problem Set 1/Problem 1")
+        utils._wait_for_gradebook_page(browser, port, "gradebook/Problem Set 1/Problem 1")
 
         # Go back
         browser.back()
@@ -420,7 +497,7 @@ def test_next_prev_failed_assignments(browser, port, gradebook):
 
         # Go to the previous failed submission (should return to the notebook list)
         utils._send_keys_to_body(browser, Keys.CONTROL, Keys.SHIFT, ",")
-        utils._wait_for_gradebook_page(browser, port, "assignments/Problem Set 1/Problem 1")
+        utils._wait_for_gradebook_page(browser, port, "gradebook/Problem Set 1/Problem 1")
 
 
 @pytest.mark.nbextensions
@@ -727,3 +804,487 @@ def test_formgrade_show_hide_names(browser, port, gradebook):
     assert name.text == "Submission #1"
     assert not shown.is_displayed()
     assert hidden.is_displayed()
+
+
+@pytest.mark.nbextensions
+def test_add_new_assignment(browser, port, gradebook):
+    utils._load_gradebook_page(browser, port, "")
+
+    # click the "add new assignment" button
+    utils._click_link(browser, "Add new assignment...")
+    utils._wait_for_element(browser, "add-assignment-modal")
+    WebDriverWait(browser, 10).until(EC.visibility_of_element_located((By.CSS_SELECTOR, "#add-assignment-modal button.btn-primary")))
+
+    # set the name and dudedate
+    elem = browser.find_element_by_css_selector("#add-assignment-modal .name")
+    elem.click()
+    elem.send_keys("ps2")
+    elem = browser.find_element_by_css_selector("#add-assignment-modal .duedate")
+    elem.click()
+    elem.send_keys("2017-07-05T17:00")
+    elem = browser.find_element_by_css_selector("#add-assignment-modal .timezone")
+    elem.click()
+    elem.send_keys("UTC")
+
+    # click save and wait for the modal to close
+    utils._click_element(browser, "#add-assignment-modal .save")
+    modal_not_present = lambda browser: browser.execute_script("""return $("#add-assignment-modal").length === 0;""")
+    WebDriverWait(browser, 10).until(modal_not_present)
+
+    # wait until both rows are present
+    rows_present = lambda browser: len(browser.find_elements_by_css_selector("tbody tr")) == 2
+    WebDriverWait(browser, 10).until(rows_present)
+
+    # check that the new row is correct
+    row = browser.find_elements_by_css_selector("tbody tr")[1]
+    assert row.find_element_by_css_selector(".name").text == "ps2"
+    assert row.find_element_by_css_selector(".duedate").text == "2017-07-05 17:00:00 {}".format(tz)
+    assert row.find_element_by_css_selector(".status").text == "draft"
+    assert utils._child_exists(row, ".edit a")
+    assert utils._child_exists(row, ".assign a")
+    assert not utils._child_exists(row, ".preview a")
+    assert not utils._child_exists(row, ".release a")
+    assert not utils._child_exists(row, ".collect a")
+    assert row.find_element_by_css_selector(".num-submissions").text == "0"
+
+    # reload the page and make sure everything is still correct
+    utils._load_gradebook_page(browser, port, "")
+    row = browser.find_elements_by_css_selector("tbody tr")[1]
+    assert row.find_element_by_css_selector(".name").text == "ps2"
+    assert row.find_element_by_css_selector(".duedate").text == "2017-07-05 17:00:00 {}".format(tz)
+    assert row.find_element_by_css_selector(".status").text == "draft"
+    assert utils._child_exists(row, ".edit a")
+    assert utils._child_exists(row, ".assign a")
+    assert not utils._child_exists(row, ".preview a")
+    assert not utils._child_exists(row, ".release a")
+    assert not utils._child_exists(row, ".collect a")
+    assert row.find_element_by_css_selector(".num-submissions").text == "0"
+
+
+@pytest.mark.nbextensions
+def test_edit_assignment(browser, port, gradebook):
+    utils._load_gradebook_page(browser, port, "")
+
+    # click on the edit button
+    row = browser.find_elements_by_css_selector("tbody tr")[1]
+    row.find_element_by_css_selector(".edit a").click()
+    utils._wait_for_element(browser, "edit-assignment-modal")
+    WebDriverWait(browser, 10).until(EC.visibility_of_element_located((By.CSS_SELECTOR, "#edit-assignment-modal button.btn-primary")))
+
+    # modify the duedate
+    elem = browser.find_element_by_css_selector("#edit-assignment-modal .modal-duedate")
+    elem.clear()
+    elem.click()
+    elem.send_keys("2017-07-05T18:00")
+
+    # click save and wait for the modal to close
+    utils._click_element(browser, "#edit-assignment-modal .save")
+    modal_not_present = lambda browser: browser.execute_script("""return $("#edit-assignment-modal").length === 0;""")
+    WebDriverWait(browser, 10).until(modal_not_present)
+
+    # check that the modified row is correct
+    row = browser.find_elements_by_css_selector("tbody tr")[1]
+    assert row.find_element_by_css_selector(".name").text == "ps2"
+    assert row.find_element_by_css_selector(".duedate").text == "2017-07-05 18:00:00 {}".format(tz)
+    assert row.find_element_by_css_selector(".status").text == "draft"
+    assert utils._child_exists(row, ".edit a")
+    assert utils._child_exists(row, ".assign a")
+    assert not utils._child_exists(row, ".preview a")
+    assert not utils._child_exists(row, ".release a")
+    assert not utils._child_exists(row, ".collect a")
+    assert row.find_element_by_css_selector(".num-submissions").text == "0"
+
+    # reload the page and make sure everything is still correct
+    utils._load_gradebook_page(browser, port, "")
+    row = browser.find_elements_by_css_selector("tbody tr")[1]
+    assert row.find_element_by_css_selector(".name").text == "ps2"
+    assert row.find_element_by_css_selector(".duedate").text == "2017-07-05 18:00:00 {}".format(tz)
+    assert row.find_element_by_css_selector(".status").text == "draft"
+    assert utils._child_exists(row, ".edit a")
+    assert utils._child_exists(row, ".assign a")
+    assert not utils._child_exists(row, ".preview a")
+    assert not utils._child_exists(row, ".release a")
+    assert not utils._child_exists(row, ".collect a")
+    assert row.find_element_by_css_selector(".num-submissions").text == "0"
+
+
+@pytest.mark.nbextensions
+def test_generate_assignment_fail(browser, port, gradebook):
+    utils._load_gradebook_page(browser, port, "")
+
+    # click on the generate button -- should produce an error because there
+    # are no notebooks for ps2 yet
+    row = browser.find_elements_by_css_selector("tbody tr")[1]
+    row.find_element_by_css_selector(".assign a").click()
+    utils._wait_for_element(browser, "error-modal")
+    WebDriverWait(browser, 10).until(EC.visibility_of_element_located((By.CSS_SELECTOR, "#error-modal button.btn-primary")))
+    utils._click_element(browser, "#error-modal .close")
+    modal_not_present = lambda browser: browser.execute_script("""return $("#error-modal").length === 0;""")
+    WebDriverWait(browser, 10).until(modal_not_present)
+
+
+@pytest.mark.nbextensions
+def test_generate_assignment_success(browser, port, gradebook):
+    utils._load_gradebook_page(browser, port, "")
+
+    # add a notebook for ps2
+    source_path = join(os.path.dirname(__file__), "..", "..", "docs", "source", "user_guide", "source", "ps1", "problem1.ipynb")
+    shutil.copy(source_path, join("source", "ps2", "Problem 1.ipynb"))
+
+    # click on the generate button -- should now succeed
+    row = browser.find_elements_by_css_selector("tbody tr")[1]
+    row.find_element_by_css_selector(".assign a").click()
+    utils._wait_for_element(browser, "success-modal")
+    WebDriverWait(browser, 10).until(EC.visibility_of_element_located((By.CSS_SELECTOR, "#success-modal button.btn-primary")))
+    utils._click_element(browser, "#success-modal .close")
+    modal_not_present = lambda browser: browser.execute_script("""return $("#success-modal").length === 0;""")
+    WebDriverWait(browser, 10).until(modal_not_present)
+
+    # check that the modified row is correct
+    row = browser.find_elements_by_css_selector("tbody tr")[1]
+    assert row.find_element_by_css_selector(".name").text == "ps2"
+    assert row.find_element_by_css_selector(".duedate").text == "2017-07-05 18:00:00 {}".format(tz)
+    assert row.find_element_by_css_selector(".status").text == "draft"
+    assert utils._child_exists(row, ".edit a")
+    assert utils._child_exists(row, ".assign a")
+    assert utils._child_exists(row, ".preview a")
+    if sys.platform == 'win32':
+        assert not utils._child_exists(row, ".release a")
+    else:
+        assert utils._child_exists(row, ".release a")
+    assert not utils._child_exists(row, ".collect a")
+    assert row.find_element_by_css_selector(".num-submissions").text == "0"
+
+    # reload the page and make sure everything is still correct
+    utils._load_gradebook_page(browser, port, "")
+    row = browser.find_elements_by_css_selector("tbody tr")[1]
+    assert row.find_element_by_css_selector(".name").text == "ps2"
+    assert row.find_element_by_css_selector(".duedate").text == "2017-07-05 18:00:00 {}".format(tz)
+    assert row.find_element_by_css_selector(".status").text == "draft"
+    assert utils._child_exists(row, ".edit a")
+    assert utils._child_exists(row, ".assign a")
+    assert utils._child_exists(row, ".preview a")
+    if sys.platform == 'win32':
+        assert not utils._child_exists(row, ".release a")
+    else:
+        assert utils._child_exists(row, ".release a")
+    assert not utils._child_exists(row, ".collect a")
+    assert row.find_element_by_css_selector(".num-submissions").text == "0"
+
+
+@notwindows
+@pytest.mark.nbextensions
+def test_release_assignment(browser, port, gradebook):
+    utils._load_gradebook_page(browser, port, "")
+
+    # click on the release button
+    row = browser.find_elements_by_css_selector("tbody tr")[1]
+    row.find_element_by_css_selector(".release a").click()
+    utils._wait_for_element(browser, "success-modal")
+    WebDriverWait(browser, 10).until(EC.visibility_of_element_located((By.CSS_SELECTOR, "#success-modal button.btn-primary")))
+    utils._click_element(browser, "#success-modal .close")
+    modal_not_present = lambda browser: browser.execute_script("""return $("#success-modal").length === 0;""")
+    WebDriverWait(browser, 10).until(modal_not_present)
+
+    # check that the modified row is correct
+    row = browser.find_elements_by_css_selector("tbody tr")[1]
+    assert row.find_element_by_css_selector(".name").text == "ps2"
+    assert row.find_element_by_css_selector(".duedate").text == "2017-07-05 18:00:00 {}".format(tz)
+    assert row.find_element_by_css_selector(".status").text == "released"
+    assert utils._child_exists(row, ".edit a")
+    assert utils._child_exists(row, ".assign a")
+    assert utils._child_exists(row, ".preview a")
+    assert utils._child_exists(row, ".release a")
+    assert utils._child_exists(row, ".collect a")
+    assert row.find_element_by_css_selector(".num-submissions").text == "0"
+
+    # reload the page and make sure everything is still correct
+    utils._load_gradebook_page(browser, port, "")
+    row = browser.find_elements_by_css_selector("tbody tr")[1]
+    assert row.find_element_by_css_selector(".name").text == "ps2"
+    assert row.find_element_by_css_selector(".duedate").text == "2017-07-05 18:00:00 {}".format(tz)
+    assert row.find_element_by_css_selector(".status").text == "released"
+    assert utils._child_exists(row, ".edit a")
+    assert utils._child_exists(row, ".assign a")
+    assert utils._child_exists(row, ".preview a")
+    assert utils._child_exists(row, ".release a")
+    assert utils._child_exists(row, ".collect a")
+    assert row.find_element_by_css_selector(".num-submissions").text == "0"
+
+
+@notwindows
+@pytest.mark.nbextensions
+def test_collect_assignment(browser, port, gradebook):
+    run_nbgrader(["fetch", "ps2"])
+    run_nbgrader(["submit", "ps2"])
+    rmtree("ps2")
+
+    utils._load_gradebook_page(browser, port, "")
+
+    # click on the collect button
+    row = browser.find_elements_by_css_selector("tbody tr")[1]
+    row.find_element_by_css_selector(".collect a").click()
+    utils._wait_for_element(browser, "success-modal")
+    WebDriverWait(browser, 10).until(EC.visibility_of_element_located((By.CSS_SELECTOR, "#success-modal button.btn-primary")))
+    utils._click_element(browser, "#success-modal .close")
+    modal_not_present = lambda browser: browser.execute_script("""return $("#success-modal").length === 0;""")
+    WebDriverWait(browser, 10).until(modal_not_present)
+
+    # check that the modified row is correct
+    row = browser.find_elements_by_css_selector("tbody tr")[1]
+    assert row.find_element_by_css_selector(".name").text == "ps2"
+    assert row.find_element_by_css_selector(".duedate").text == "2017-07-05 18:00:00 {}".format(tz)
+    assert row.find_element_by_css_selector(".status").text == "released"
+    assert utils._child_exists(row, ".edit a")
+    assert utils._child_exists(row, ".assign a")
+    assert utils._child_exists(row, ".preview a")
+    assert utils._child_exists(row, ".release a")
+    assert utils._child_exists(row, ".collect a")
+    assert row.find_element_by_css_selector(".num-submissions").text == "1"
+
+    # reload the page and make sure everything is still correct
+    utils._load_gradebook_page(browser, port, "")
+    row = browser.find_elements_by_css_selector("tbody tr")[1]
+    assert row.find_element_by_css_selector(".name").text == "ps2"
+    assert row.find_element_by_css_selector(".duedate").text == "2017-07-05 18:00:00 {}".format(tz)
+    assert row.find_element_by_css_selector(".status").text == "released"
+    assert utils._child_exists(row, ".edit a")
+    assert utils._child_exists(row, ".assign a")
+    assert utils._child_exists(row, ".preview a")
+    assert utils._child_exists(row, ".release a")
+    assert utils._child_exists(row, ".collect a")
+    assert row.find_element_by_css_selector(".num-submissions").text == "1"
+
+
+@notwindows
+@pytest.mark.nbextensions
+def test_unrelease_assignment(browser, port, gradebook):
+    utils._load_gradebook_page(browser, port, "")
+
+    # click on the unrelease button
+    row = browser.find_elements_by_css_selector("tbody tr")[1]
+    row.find_element_by_css_selector(".release a").click()
+    utils._wait_for_element(browser, "success-modal")
+    WebDriverWait(browser, 10).until(EC.visibility_of_element_located((By.CSS_SELECTOR, "#success-modal button.btn-primary")))
+    utils._click_element(browser, "#success-modal .close")
+    modal_not_present = lambda browser: browser.execute_script("""return $("#success-modal").length === 0;""")
+    WebDriverWait(browser, 10).until(modal_not_present)
+
+    # check that the modified row is correct
+    row = browser.find_elements_by_css_selector("tbody tr")[1]
+    assert row.find_element_by_css_selector(".name").text == "ps2"
+    assert row.find_element_by_css_selector(".duedate").text == "2017-07-05 18:00:00 {}".format(tz)
+    assert row.find_element_by_css_selector(".status").text == "draft"
+    assert utils._child_exists(row, ".edit a")
+    assert utils._child_exists(row, ".assign a")
+    assert utils._child_exists(row, ".preview a")
+    assert utils._child_exists(row, ".release a")
+    assert not utils._child_exists(row, ".collect a")
+    assert row.find_element_by_css_selector(".num-submissions").text == "1"
+
+    # reload the page and make sure everything is still correct
+    utils._load_gradebook_page(browser, port, "")
+    row = browser.find_elements_by_css_selector("tbody tr")[1]
+    assert row.find_element_by_css_selector(".name").text == "ps2"
+    assert row.find_element_by_css_selector(".duedate").text == "2017-07-05 18:00:00 {}".format(tz)
+    assert row.find_element_by_css_selector(".status").text == "draft"
+    assert utils._child_exists(row, ".edit a")
+    assert utils._child_exists(row, ".assign a")
+    assert utils._child_exists(row, ".preview a")
+    assert utils._child_exists(row, ".release a")
+    assert not utils._child_exists(row, ".collect a")
+    assert row.find_element_by_css_selector(".num-submissions").text == "1"
+
+
+@pytest.mark.nbextensions
+def test_manually_collect_assignment(browser, port, gradebook):
+    existing_submissions = glob.glob(join("submitted", "*", "ps2"))
+    for dirname in existing_submissions:
+        rmtree(dirname)
+    dest = join("submitted", "Bitdiddle", "ps2")
+    if not os.path.exists(os.path.dirname(dest)):
+        os.makedirs(os.path.dirname(dest))
+    shutil.copytree(join("release", "ps2"), dest)
+    with open(join(dest, "timestamp.txt"), "w") as fh:
+        fh.write("2017-07-05 18:05:21 UTC")
+
+    utils._load_gradebook_page(browser, port, "")
+
+    # check that the row is correct
+    row = browser.find_elements_by_css_selector("tbody tr")[1]
+    assert row.find_element_by_css_selector(".name").text == "ps2"
+    assert row.find_element_by_css_selector(".duedate").text == "2017-07-05 18:00:00 {}".format(tz)
+    assert row.find_element_by_css_selector(".status").text == "draft"
+    assert utils._child_exists(row, ".edit a")
+    assert utils._child_exists(row, ".assign a")
+    assert utils._child_exists(row, ".preview a")
+    if sys.platform == 'win32':
+        assert not utils._child_exists(row, ".release a")
+    else:
+        assert utils._child_exists(row, ".release a")
+    assert not utils._child_exists(row, ".collect a")
+    assert row.find_element_by_css_selector(".num-submissions").text == "1"
+
+
+@pytest.mark.nbextensions
+def test_autograde_assignment(browser, port, gradebook):
+    utils._load_gradebook_page(browser, port, "manage_submissions/ps2")
+
+    # check the contents of the row before grading
+    row = browser.find_elements_by_css_selector("tbody tr")[0]
+    assert row.find_element_by_css_selector(".student-name").text == "B, Ben"
+    assert row.find_element_by_css_selector(".student-id").text == "Bitdiddle"
+    assert row.find_element_by_css_selector(".timestamp").text == "2017-07-05 18:05:21 {}".format(tz)
+    assert row.find_element_by_css_selector(".status").text == "needs autograding"
+    assert row.find_element_by_css_selector(".score").text == ""
+    assert utils._child_exists(row, ".autograde a")
+
+    # click on the autograde button
+    row = browser.find_elements_by_css_selector("tbody tr")[0]
+    row.find_element_by_css_selector(".autograde a").click()
+    utils._wait_for_element(browser, "success-modal")
+    WebDriverWait(browser, 10).until(EC.visibility_of_element_located((By.CSS_SELECTOR, "#success-modal button.btn-primary")))
+    utils._click_element(browser, "#success-modal .close")
+    modal_not_present = lambda browser: browser.execute_script("""return $("#success-modal").length === 0;""")
+    WebDriverWait(browser, 10).until(modal_not_present)
+
+    # check that the modified row is correct
+    row = browser.find_elements_by_css_selector("tbody tr")[0]
+    assert row.find_element_by_css_selector(".student-name").text == "B, Ben"
+    assert row.find_element_by_css_selector(".student-id").text == "Bitdiddle"
+    assert row.find_element_by_css_selector(".timestamp").text == "2017-07-05 18:05:21 {}".format(tz)
+    assert row.find_element_by_css_selector(".status").text == "graded"
+    assert row.find_element_by_css_selector(".score").text == "0 / 6"
+    assert utils._child_exists(row, ".autograde a")
+
+    # refresh and check again
+    utils._load_gradebook_page(browser, port, "manage_submissions/ps2")
+    row = browser.find_elements_by_css_selector("tbody tr")[0]
+    assert row.find_element_by_css_selector(".student-name").text == "B, Ben"
+    assert row.find_element_by_css_selector(".student-id").text == "Bitdiddle"
+    assert row.find_element_by_css_selector(".timestamp").text == "2017-07-05 18:05:21 {}".format(tz)
+    assert row.find_element_by_css_selector(".status").text == "graded"
+    assert row.find_element_by_css_selector(".score").text == "0 / 6"
+    assert utils._child_exists(row, ".autograde a")
+
+    # overwrite the file
+    source_path = join(os.path.dirname(__file__), "..", "..", "docs", "source", "user_guide", "source", "ps1", "problem1.ipynb")
+    shutil.copy(source_path, join("submitted", "Bitdiddle", "ps2", "Problem 1.ipynb"))
+
+    # click on the autograde button
+    row = browser.find_elements_by_css_selector("tbody tr")[0]
+    row.find_element_by_css_selector(".autograde a").click()
+    utils._wait_for_element(browser, "success-modal")
+    WebDriverWait(browser, 10).until(EC.visibility_of_element_located((By.CSS_SELECTOR, "#success-modal button.btn-primary")))
+    utils._click_element(browser, "#success-modal .close")
+    modal_not_present = lambda browser: browser.execute_script("""return $("#success-modal").length === 0;""")
+    WebDriverWait(browser, 10).until(modal_not_present)
+
+    # check that the modified row is correct
+    row = browser.find_elements_by_css_selector("tbody tr")[0]
+    assert row.find_element_by_css_selector(".student-name").text == "B, Ben"
+    assert row.find_element_by_css_selector(".student-id").text == "Bitdiddle"
+    assert row.find_element_by_css_selector(".timestamp").text == "2017-07-05 18:05:21 {}".format(tz)
+    assert row.find_element_by_css_selector(".status").text == "needs manual grading"
+    assert row.find_element_by_css_selector(".score").text == "3 / 6"
+    assert utils._child_exists(row, ".autograde a")
+
+    # refresh and check again
+    utils._load_gradebook_page(browser, port, "manage_submissions/ps2")
+    row = browser.find_elements_by_css_selector("tbody tr")[0]
+    assert row.find_element_by_css_selector(".student-name").text == "B, Ben"
+    assert row.find_element_by_css_selector(".student-id").text == "Bitdiddle"
+    assert row.find_element_by_css_selector(".timestamp").text == "2017-07-05 18:05:21 {}".format(tz)
+    assert row.find_element_by_css_selector(".status").text == "needs manual grading"
+    assert row.find_element_by_css_selector(".score").text == "3 / 6"
+    assert utils._child_exists(row, ".autograde a")
+
+
+@pytest.mark.nbextensions
+def test_add_new_student(browser, port, gradebook):
+    utils._load_gradebook_page(browser, port, "manage_students")
+    assert len(browser.find_elements_by_css_selector("tbody tr")) == 3
+
+    # click the "add new assignment" button
+    utils._click_link(browser, "Add new student...")
+    utils._wait_for_element(browser, "add-student-modal")
+    WebDriverWait(browser, 10).until(EC.visibility_of_element_located((By.CSS_SELECTOR, "#add-student-modal button.btn-primary")))
+
+    # set the name and dudedate
+    elem = browser.find_element_by_css_selector("#add-student-modal .id")
+    elem.click()
+    elem.send_keys("ator")
+    elem = browser.find_element_by_css_selector("#add-student-modal .first-name")
+    elem.click()
+    elem.send_keys("Eva Lou")
+    elem = browser.find_element_by_css_selector("#add-student-modal .last-name")
+    elem.click()
+    elem.send_keys("Ator")
+    elem = browser.find_element_by_css_selector("#add-student-modal .email")
+    elem.click()
+    elem.send_keys("ela@email.com")
+
+    # click save and wait for the modal to close
+    utils._click_element(browser, "#add-student-modal .save")
+    modal_not_present = lambda browser: browser.execute_script("""return $("#add-student-modal").length === 0;""")
+    WebDriverWait(browser, 10).until(modal_not_present)
+
+    # wait until both rows are present
+    rows_present = lambda browser: len(browser.find_elements_by_css_selector("tbody tr")) == 4
+    WebDriverWait(browser, 10).until(rows_present)
+
+    # check that the new row is correct
+    row = browser.find_elements_by_css_selector("tbody tr")[0]
+    assert row.find_element_by_css_selector(".name").text == "Ator, Eva Lou"
+    assert row.find_element_by_css_selector(".id").text == "ator"
+    assert row.find_element_by_css_selector(".email").text == "ela@email.com"
+    assert row.find_element_by_css_selector(".score").text == "0 / 15"
+    assert utils._child_exists(row, ".edit a")
+
+    # reload the page and make sure everything is still correct
+    utils._load_gradebook_page(browser, port, "manage_students")
+    row = browser.find_elements_by_css_selector("tbody tr")[0]
+    assert row.find_element_by_css_selector(".name").text == "Ator, Eva Lou"
+    assert row.find_element_by_css_selector(".id").text == "ator"
+    assert row.find_element_by_css_selector(".email").text == "ela@email.com"
+    assert row.find_element_by_css_selector(".score").text == "0 / 15"
+    assert utils._child_exists(row, ".edit a")
+
+
+@pytest.mark.nbextensions
+def test_edit_student(browser, port, gradebook):
+    utils._load_gradebook_page(browser, port, "manage_students")
+
+    # click on the edit button
+    row = browser.find_elements_by_css_selector("tbody tr")[0]
+    row.find_element_by_css_selector(".edit a").click()
+    utils._wait_for_element(browser, "edit-student-modal")
+    WebDriverWait(browser, 10).until(EC.visibility_of_element_located((By.CSS_SELECTOR, "#edit-student-modal button.btn-primary")))
+
+    # modify the duedate
+    elem = browser.find_element_by_css_selector("#edit-student-modal .modal-email")
+    elem.clear()
+    elem.click()
+    elem.send_keys("ela@email.net")
+
+    # click save and wait for the modal to close
+    utils._click_element(browser, "#edit-student-modal .save")
+    modal_not_present = lambda browser: browser.execute_script("""return $("#edit-student-modal").length === 0;""")
+    WebDriverWait(browser, 10).until(modal_not_present)
+
+    # check that the modified row is correct
+    row = browser.find_elements_by_css_selector("tbody tr")[0]
+    assert row.find_element_by_css_selector(".name").text == "Ator, Eva Lou"
+    assert row.find_element_by_css_selector(".id").text == "ator"
+    assert row.find_element_by_css_selector(".email").text == "ela@email.net"
+    assert row.find_element_by_css_selector(".score").text == "0 / 15"
+    assert utils._child_exists(row, ".edit a")
+
+    # reload the page and make sure everything is still correct
+    utils._load_gradebook_page(browser, port, "manage_students")
+    row = browser.find_elements_by_css_selector("tbody tr")[0]
+    assert row.find_element_by_css_selector(".name").text == "Ator, Eva Lou"
+    assert row.find_element_by_css_selector(".id").text == "ator"
+    assert row.find_element_by_css_selector(".email").text == "ela@email.net"
+    assert row.find_element_by_css_selector(".score").text == "0 / 15"
+    assert utils._child_exists(row, ".edit a")

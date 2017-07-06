@@ -3,7 +3,7 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
-from selenium.common.exceptions import TimeoutException
+from selenium.common.exceptions import TimeoutException, NoSuchElementException
 
 
 
@@ -15,6 +15,10 @@ def _notebook_url(port, url=""):
     return urljoin("http://localhost:{}/notebooks/".format(port), url).rstrip("/")
 
 
+def _tree_url(port, url=""):
+    return urljoin("http://localhost:{}/tree/".format(port), url).rstrip("/")
+
+
 def _check_url(browser, port, url):
     if not url.startswith("http"):
         url = _formgrade_url(port, url)
@@ -23,11 +27,11 @@ def _check_url(browser, port, url):
 
 def _check_breadcrumbs(browser, *breadcrumbs):
     # check that breadcrumbs are correct
-    elements = browser.find_elements_by_css_selector("ul.breadcrumb li")
+    elements = browser.find_elements_by_css_selector(".breadcrumb li")
     assert tuple([e.text for e in elements]) == breadcrumbs
 
     # check that the active breadcrumb is correct
-    element = browser.find_element_by_css_selector("ul.breadcrumb li.active")
+    element = browser.find_element_by_css_selector(".breadcrumb li.active")
     assert element.text == breadcrumbs[-1]
 
 
@@ -52,13 +56,16 @@ def _wait_for_visibility_of_element(browser, element_id, time=10):
 
 
 def _wait_for_gradebook_page(browser, port, url):
-    _wait_for_element(browser, "gradebook")
+    page_loaded = lambda browser: browser.execute_script(
+        """return typeof models !== "undefined" && models !== undefined && models.loaded === true;""")
+    WebDriverWait(browser, 10).until(page_loaded)
     _check_url(browser, port, url)
 
 
 def _get(browser, url, retries=5):
     try:
         browser.get(url)
+        assert browser.get_cookies()
     except TimeoutException:
         if retries == 0:
             raise
@@ -70,6 +77,11 @@ def _get(browser, url, retries=5):
 def _load_gradebook_page(browser, port, url):
     _get(browser, _formgrade_url(port, url))
     _wait_for_gradebook_page(browser, port, url)
+
+
+def _wait_for_tree_page(browser, port, url):
+    _wait_for_element(browser, "ipython-main-app")
+    _check_url(browser, port, url)
 
 
 def _wait_for_notebook_page(browser, port, url):
@@ -181,6 +193,15 @@ def _load_formgrade(browser, port, gradebook):
     submissions = problem.submissions
     submissions.sort(key=lambda x: x.id)
 
-    _load_gradebook_page(browser, port, "assignments/Problem Set 1/Problem 1")
+    _load_gradebook_page(browser, port, "gradebook/Problem Set 1/Problem 1")
     _click_link(browser, "Submission #1")
     _wait_for_formgrader(browser, port, "submissions/{}/?index=0".format(submissions[0].id))
+
+
+def _child_exists(elem, selector):
+    try:
+        elem.find_element_by_css_selector(selector)
+    except NoSuchElementException:
+        return False
+    else:
+        return True

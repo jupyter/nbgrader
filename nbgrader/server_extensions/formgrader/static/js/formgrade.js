@@ -298,7 +298,7 @@ FormGrader.prototype.configureScrolling = function () {
 FormGrader.prototype.flag = function () {
     $.ajax({
         'method': 'POST',
-        'url': base_url + '/api/submission/' + submission_id + '/flag',
+        'url': base_url + '/api/submitted_notebook/' + submission_id + '/flag',
         'headers': {'X-CSRFToken': getCookie("_xsrf")},
         'success': function (data, status, xhr) {
             var elem = $("#statusmessage");
@@ -321,21 +321,6 @@ FormGrader.prototype.flag = function () {
             }, 500);
         }
     });
-};
-
-// Make sure put and post requests are sent with the xsrf cookie
-function getCookie(name) {
-    var r = document.cookie.match("\\b" + name + "=([^;]*)\\b");
-    return r ? r[1] : undefined;
-}
-
-// Backbone requests
-var oldSync = Backbone.sync;
-Backbone.sync = function(method, model, options) {
-    options.beforeSend = function(xhr) {
-        xhr.setRequestHeader('X-CSRFToken', getCookie("_xsrf"));
-    };
-    return oldSync(method, model, options);
 };
 
 var formgrader = new FormGrader(base_url, submission_id);

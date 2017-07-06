@@ -13,8 +13,30 @@ from nbformat.v4 import new_notebook
 from textwrap import dedent
 
 from .. import run_nbgrader
-from .conftest import notwindows
+from .conftest import notwindows, _make_nbserver, _make_browser, _close_nbserver, _close_browser
 from ...utils import rmtree
+
+
+@pytest.fixture(scope="module")
+def nbserver(request, port, tempdir, jupyter_config_dir, jupyter_data_dir, exchange, cache):
+    server = _make_nbserver("", port, tempdir, jupyter_config_dir, jupyter_data_dir, exchange, cache)
+
+    def fin():
+        _close_nbserver(server)
+    request.addfinalizer(fin)
+
+    return server
+
+
+@pytest.fixture
+def browser(request, tempdir, nbserver):
+    browser = _make_browser(tempdir)
+
+    def fin():
+        _close_browser(browser)
+    request.addfinalizer(fin)
+
+    return browser
 
 
 @pytest.fixture(scope="module")

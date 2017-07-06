@@ -92,8 +92,7 @@ def port():
     return nbserver_port
 
 
-@pytest.fixture(scope="module")
-def nbserver(request, port, tempdir, jupyter_config_dir, jupyter_data_dir, exchange, cache):
+def _make_nbserver(course_id, port, tempdir, jupyter_config_dir, jupyter_data_dir, exchange, cache):
     env = os.environ.copy()
     env['JUPYTER_CONFIG_DIR'] = jupyter_config_dir
     env['JUPYTER_DATA_DIR'] = jupyter_data_dir
@@ -123,14 +122,15 @@ def nbserver(request, port, tempdir, jupyter_config_dir, jupyter_data_dir, excha
                 """
                 c.Exchange.root = "{}"
                 c.Exchange.cache = "{}"
-                """.format(exchange, cache)
+                c.Exchange.course_id = "{}"
+                """.format(exchange, cache, course_id)
             ))
 
     kwargs = dict(env=env)
     if sys.platform == 'win32':
         kwargs['creationflags'] = sp.CREATE_NEW_PROCESS_GROUP
 
-    nbserver = sp.Popen([
+    server = sp.Popen([
         sys.executable, "-m", "jupyter", "notebook",
         "--no-browser",
         "--NotebookApp.token=''",  # Notebook >=4.3
@@ -140,35 +140,33 @@ def nbserver(request, port, tempdir, jupyter_config_dir, jupyter_data_dir, excha
     # wait for a few seconds to allow the notebook server to finish starting
     time.sleep(5)
 
-    def fin():
-        if sys.platform == 'win32':
-            nbserver.send_signal(signal.CTRL_BREAK_EVENT)
-        else:
-            nbserver.terminate()
-
-        for i in range(10):
-            retcode = nbserver.poll()
-            if retcode is not None:
-                break
-            time.sleep(0.1)
-
-        if retcode is None:
-            print("couldn't shutdown notebook server, force killing it")
-            nbserver.kill()
-
-        nbserver.wait()
-        copy_coverage_files()
-
-        # wait a short period of time for kernels to finish shutting down
-        time.sleep(1)
-
-    request.addfinalizer(fin)
-
-    return nbserver
+    return server
 
 
-@pytest.fixture
-def browser(request, tempdir, nbserver):
+def _close_nbserver(server):
+    if sys.platform == 'win32':
+        server.send_signal(signal.CTRL_BREAK_EVENT)
+    else:
+        server.terminate()
+
+    for _ in range(10):
+        retcode = server.poll()
+        if retcode is not None:
+            break
+        time.sleep(0.1)
+
+    if retcode is None:
+        print("couldn't shutdown notebook server, force killing it")
+        server.kill()
+
+    server.wait()
+    copy_coverage_files()
+
+    # wait a short period of time for kernels to finish shutting down
+    time.sleep(1)
+
+
+def _make_browser(tempdir):
     for filename in glob.glob(os.path.join(os.path.dirname(__file__), "files", "*.ipynb")):
         shutil.copy(filename, os.path.join(tempdir, os.path.basename(filename)))
 
@@ -184,19 +182,19 @@ def browser(request, tempdir, nbserver):
     browser.set_page_load_timeout(30)
     browser.set_script_timeout(30)
 
-    def fin():
-        console_messages = browser.get_log('browser')
-        if len(console_messages) > 0:
-            print("\n<-- CAPTURED JAVASCRIPT CONSOLE MESSAGES -->")
-            for message in console_messages:
-                print(message)
-            print("<------------------------------------------>")
-        browser.save_screenshot(os.path.join(os.path.dirname(__file__), 'selenium.screenshot.png'))
-        browser.service.process.send_signal(signal.SIGTERM)
-        browser.quit()
-
-    request.addfinalizer(fin)
     return browser
+
+
+def _close_browser(browser):
+    console_messages = browser.get_log('browser')
+    if len(console_messages) > 0:
+        print("\n<-- CAPTURED JAVASCRIPT CONSOLE MESSAGES -->")
+        for message in console_messages:
+            print(message)
+        print("<------------------------------------------>")
+    browser.save_screenshot(os.path.join(os.path.dirname(__file__), 'selenium.screenshot.png'))
+    browser.service.process.send_signal(signal.SIGTERM)
+    browser.quit()
 
 
 notwindows = pytest.mark.skipif(

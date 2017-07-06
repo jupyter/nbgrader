@@ -8,7 +8,7 @@ from datetime import datetime
 
 from ...apps.api import NbGraderAPI
 from ...coursedir import CourseDirectory
-from ...utils import rmtree, get_username
+from ...utils import rmtree, get_username, parse_utc
 from .. import run_nbgrader
 from .base import BaseTestApp
 from .conftest import notwindows, windows
@@ -29,6 +29,11 @@ def api(request, course_dir, db, exchange):
 
 
 class TestNbGraderAPI(BaseTestApp):
+
+    if sys.platform == 'win32':
+        tz = "Coordinated Universal Time"
+    else:
+        tz = "UTC"
 
     def test_get_source_assignments(self, api, course_dir):
         assert api.get_source_assignments() == set([])
@@ -120,13 +125,17 @@ class TestNbGraderAPI(BaseTestApp):
             'average_code_score', 'average_score', 'average_written_score',
             'duedate', 'name', 'num_submissions', 'release_path', 'releaseable',
             'source_path', 'status', 'id', 'max_code_score', 'max_score',
-            'max_written_score'])
+            'max_written_score', 'display_duedate', 'duedate_timezone',
+            'duedate_notimezone'])
 
         default = {
             "average_code_score": 0,
             "average_score": 0,
             "average_written_score": 0,
             "duedate": None,
+            "display_duedate": None,
+            "duedate_timezone": "UTC",
+            "duedate_notimezone": None,
             "name": "ps1",
             "num_submissions": 0,
             "release_path": None,
@@ -171,6 +180,21 @@ class TestNbGraderAPI(BaseTestApp):
         target["max_score"] = 6
         target["max_written_score"] = 1
         assert a == target
+
+        # check that timestamps are handled correctly
+        with api.gradebook as gb:
+            assignment = gb.find_assignment("ps1")
+            assignment.duedate = parse_utc("2017-07-05 12:22:08 UTC")
+            gb.db.commit()
+
+        a = api.get_assignment("ps1")
+        default["duedate"] = "2017-07-05T12:22:08"
+        default["display_duedate"] = "2017-07-05 12:22:08 {}".format(self.tz)
+        default["duedate_notimezone"] = "2017-07-05T12:22:08"
+        assert a["duedate"] == default["duedate"]
+        assert a["display_duedate"] == default["display_duedate"]
+        assert a["duedate_notimezone"] == default["duedate_notimezone"]
+        assert a["duedate_timezone"] == default["duedate_timezone"]
 
         # check the values once the assignment has been released and unreleased
         if sys.platform != "win32":
@@ -251,8 +275,15 @@ class TestNbGraderAPI(BaseTestApp):
         assert set(n1.keys()) == keys
         assert n1 == default.copy()
 
+        # add it to the database (but don't assign yet)
+        with api.gradebook as gb:
+            gb.update_or_create_assignment("ps1")
+        n1, = api.get_notebooks("ps1")
+        assert set(n1.keys()) == keys
+        assert n1 == default.copy()
+
         # check values after nbgrader assign is run
-        run_nbgrader(["assign", "ps1", "--create", "--db", db])
+        run_nbgrader(["assign", "ps1", "--create", "--db", db, "--force"])
         n1, = api.get_notebooks("ps1")
         assert set(n1.keys()) == keys
         target = default.copy()
@@ -267,7 +298,7 @@ class TestNbGraderAPI(BaseTestApp):
             "id", "name", "student", "last_name", "first_name", "score",
             "max_score", "code_score", "max_code_score", "written_score",
             "max_written_score", "needs_manual_grade", "autograded",
-            "timestamp", "submitted"])
+            "timestamp", "submitted", "display_timestamp"])
 
         default = {
             "id": None,
@@ -284,6 +315,7 @@ class TestNbGraderAPI(BaseTestApp):
             "needs_manual_grade": False,
             "autograded": False,
             "timestamp": None,
+            "display_timestamp": None,
             "submitted": False
         }
 
@@ -294,13 +326,13 @@ class TestNbGraderAPI(BaseTestApp):
         run_nbgrader(["assign", "ps1", "--create", "--db", db])
 
         self._copy_file(join("files", "submitted-changed.ipynb"), join(course_dir, "submitted", "foo", "ps1", "p1.ipynb"))
-        timestamp = datetime.now()
-        self._make_file(join(course_dir, "submitted", "foo", "ps1", "timestamp.txt"), contents=timestamp.isoformat())
+        self._make_file(join(course_dir, "submitted", "foo", "ps1", "timestamp.txt"), contents="2017-07-05T12:32:56.123456")
         s = api.get_submission("ps1", "foo")
         assert set(s.keys()) == keys
         target = default.copy()
         target["submitted"] = True
-        target["timestamp"] = timestamp.isoformat()
+        target["timestamp"] = "2017-07-05T12:32:56.123456"
+        target["display_timestamp"] = "2017-07-05 12:32:56 {}".format(self.tz)
         assert s == target
 
         run_nbgrader(["autograde", "ps1", "--create", "--no-execute", "--force", "--db", db])
@@ -309,7 +341,8 @@ class TestNbGraderAPI(BaseTestApp):
         target["id"] = s["id"]
         target["autograded"] = True
         target["submitted"] = True
-        target["timestamp"] = timestamp.isoformat()
+        target["timestamp"] = "2017-07-05T12:32:56.123456"
+        target["display_timestamp"] = "2017-07-05 12:32:56 {}".format(self.tz)
         target["code_score"] = 2
         target["max_code_score"] = 5
         target["score"] = 2
@@ -368,6 +401,8 @@ class TestNbGraderAPI(BaseTestApp):
             assert idx[notebooks[1].id] == 1
 
     def test_get_notebook_submissions(self, api, course_dir, db):
+        assert api.get_notebook_submissions("ps1", "p1") == []
+
         self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
         run_nbgrader(["assign", "ps1", "--create", "--db", db])
 
