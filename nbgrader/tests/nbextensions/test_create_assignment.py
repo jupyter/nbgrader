@@ -9,7 +9,30 @@ from selenium.common.exceptions import TimeoutException, NoSuchElementException
 from textwrap import dedent
 
 from ...nbgraderformat import read
+from .conftest import _make_nbserver, _make_browser, _close_nbserver, _close_browser
 from nbformat import current_nbformat
+
+
+@pytest.fixture(scope="module")
+def nbserver(request, port, tempdir, jupyter_config_dir, jupyter_data_dir, exchange, cache):
+    server = _make_nbserver("", port, tempdir, jupyter_config_dir, jupyter_data_dir, exchange, cache)
+
+    def fin():
+        _close_nbserver(server)
+    request.addfinalizer(fin)
+
+    return server
+
+
+@pytest.fixture
+def browser(request, tempdir, nbserver):
+    browser = _make_browser(tempdir)
+
+    def fin():
+        _close_browser(browser)
+    request.addfinalizer(fin)
+
+    return browser
 
 
 def _wait(browser):

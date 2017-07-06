@@ -4,6 +4,8 @@ import shutil
 import sys
 import glob
 
+from os.path import join
+
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -12,7 +14,7 @@ from selenium.webdriver.common.by import By
 from .. import run_nbgrader
 from ...api import Gradebook, MissingEntry
 from . import formgrade_utils as utils
-from .conftest import notwindows
+from .conftest import notwindows, _make_nbserver, _make_browser, _close_nbserver, _close_browser
 from ...utils import rmtree
 
 
@@ -23,32 +25,55 @@ else:
 
 
 @pytest.fixture(scope="module")
-def gradebook(request, tempdir, nbserver):
+def nbserver(request, port, tempdir, jupyter_config_dir, jupyter_data_dir, exchange, cache):
+    server = _make_nbserver("course101", port, tempdir, jupyter_config_dir, jupyter_data_dir, exchange, cache)
+
+    def fin():
+        _close_nbserver(server)
+    request.addfinalizer(fin)
+
+    return server
+
+
+@pytest.fixture
+def browser(request, tempdir, nbserver):
+    browser = _make_browser(tempdir)
+
+    def fin():
+        _close_browser(browser)
+    request.addfinalizer(fin)
+
+    return browser
+
+
+@pytest.fixture(scope="module")
+def gradebook(request, tempdir):
     # copy files from the user guide
-    source_path = os.path.join(os.path.dirname(__file__), "..", "..", "docs", "source", "user_guide", "source")
-    submitted_path = os.path.join(os.path.dirname(__file__), "..", "..", "docs", "source", "user_guide", "submitted")
+    source_path = join(os.path.dirname(__file__), "..", "..", "docs", "source", "user_guide", "source")
+    submitted_path = join(os.path.dirname(__file__), "..", "..", "docs", "source", "user_guide", "submitted")
 
     shutil.copytree(source_path, "source")
-    shutil.copytree(submitted_path, "submitted")
+    for student in ["Bitdiddle", "Hacker"]:
+        shutil.copytree(join(submitted_path, student), join("submitted", student))
 
     # rename to old names -- we do this rather than changing all the tests
     # because I want the tests to operate on files with spaces in the names
-    os.rename(os.path.join("source", "ps1"), os.path.join("source", "Problem Set 1"))
-    os.rename(os.path.join("source", "Problem Set 1", "problem1.ipynb"), os.path.join("source", "Problem Set 1", "Problem 1.ipynb"))
-    os.rename(os.path.join("source", "Problem Set 1", "problem2.ipynb"), os.path.join("source", "Problem Set 1", "Problem 2.ipynb"))
-    os.rename(os.path.join("submitted", "bitdiddle"), os.path.join("submitted", "Bitdiddle"))
-    os.rename(os.path.join("submitted", "Bitdiddle", "ps1"), os.path.join("submitted", "Bitdiddle", "Problem Set 1"))
-    os.rename(os.path.join("submitted", "Bitdiddle", "Problem Set 1", "problem1.ipynb"), os.path.join("submitted", "Bitdiddle", "Problem Set 1", "Problem 1.ipynb"))
-    os.rename(os.path.join("submitted", "Bitdiddle", "Problem Set 1", "problem2.ipynb"), os.path.join("submitted", "Bitdiddle", "Problem Set 1", "Problem 2.ipynb"))
-    os.rename(os.path.join("submitted", "hacker"), os.path.join("submitted", "Hacker"))
-    os.rename(os.path.join("submitted", "Hacker", "ps1"), os.path.join("submitted", "Hacker", "Problem Set 1"))
-    os.rename(os.path.join("submitted", "Hacker", "Problem Set 1", "problem1.ipynb"), os.path.join("submitted", "Hacker", "Problem Set 1", "Problem 1.ipynb"))
-    os.rename(os.path.join("submitted", "Hacker", "Problem Set 1", "problem2.ipynb"), os.path.join("submitted", "Hacker", "Problem Set 1", "Problem 2.ipynb"))
+    os.rename(join("source", "ps1"), join("source", "Problem Set 1"))
+    os.rename(join("source", "Problem Set 1", "problem1.ipynb"), join("source", "Problem Set 1", "Problem 1.ipynb"))
+    os.rename(join("source", "Problem Set 1", "problem2.ipynb"), join("source", "Problem Set 1", "Problem 2.ipynb"))
+    os.rename(join("submitted", "bitdiddle"), join("submitted", "Bitdiddle"))
+    os.rename(join("submitted", "Bitdiddle", "ps1"), join("submitted", "Bitdiddle", "Problem Set 1"))
+    os.rename(join("submitted", "Bitdiddle", "Problem Set 1", "problem1.ipynb"), join("submitted", "Bitdiddle", "Problem Set 1", "Problem 1.ipynb"))
+    os.rename(join("submitted", "Bitdiddle", "Problem Set 1", "problem2.ipynb"), join("submitted", "Bitdiddle", "Problem Set 1", "Problem 2.ipynb"))
+    os.rename(join("submitted", "hacker"), join("submitted", "Hacker"))
+    os.rename(join("submitted", "Hacker", "ps1"), join("submitted", "Hacker", "Problem Set 1"))
+    os.rename(join("submitted", "Hacker", "Problem Set 1", "problem1.ipynb"), join("submitted", "Hacker", "Problem Set 1", "Problem 1.ipynb"))
+    os.rename(join("submitted", "Hacker", "Problem Set 1", "problem2.ipynb"), join("submitted", "Hacker", "Problem Set 1", "Problem 2.ipynb"))
 
     # run nbgrader assign
     run_nbgrader([
         "assign", "Problem Set 1",
-        "--IncludeHeaderFooter.header={}".format(os.path.join("source", "header.ipynb"))
+        "--IncludeHeaderFooter.header={}".format(join("source", "header.ipynb"))
     ])
 
     # run the autograder
@@ -906,8 +931,8 @@ def test_generate_assignment_success(browser, port, gradebook):
     utils._load_gradebook_page(browser, port, "")
 
     # add a notebook for ps2
-    source_path = os.path.join(os.path.dirname(__file__), "..", "..", "docs", "source", "user_guide", "source", "ps1", "problem1.ipynb")
-    shutil.copy(source_path, os.path.join("source", "ps2", "Problem 1.ipynb"))
+    source_path = join(os.path.dirname(__file__), "..", "..", "docs", "source", "user_guide", "source", "ps1", "problem1.ipynb")
+    shutil.copy(source_path, join("source", "ps2", "Problem 1.ipynb"))
 
     # click on the generate button -- should now succeed
     row = browser.find_elements_by_css_selector("tbody tr")[1]
@@ -1076,14 +1101,14 @@ def test_unrelease_assignment(browser, port, gradebook):
 
 @pytest.mark.nbextensions
 def test_manually_collect_assignment(browser, port, gradebook):
-    existing_submissions = glob.glob(os.path.join("submitted", "*", "ps2"))
+    existing_submissions = glob.glob(join("submitted", "*", "ps2"))
     for dirname in existing_submissions:
         rmtree(dirname)
-    dest = os.path.join("submitted", "bitdiddle", "ps2")
+    dest = join("submitted", "bitdiddle", "ps2")
     if not os.path.exists(os.path.dirname(dest)):
         os.makedirs(os.path.dirname(dest))
-    shutil.copytree(os.path.join("release", "ps2"), dest)
-    with open(os.path.join(dest, "timestamp.txt"), "w") as fh:
+    shutil.copytree(join("release", "ps2"), dest)
+    with open(join(dest, "timestamp.txt"), "w") as fh:
         fh.write("2017-07-05 18:05:21 UTC")
 
     utils._load_gradebook_page(browser, port, "")
@@ -1146,8 +1171,8 @@ def test_autograde_assignment(browser, port, gradebook):
     assert utils._child_exists(row, ".autograde a")
 
     # overwrite the file
-    source_path = os.path.join(os.path.dirname(__file__), "..", "..", "docs", "source", "user_guide", "source", "ps1", "problem1.ipynb")
-    shutil.copy(source_path, os.path.join("submitted", "bitdiddle", "ps2", "Problem 1.ipynb"))
+    source_path = join(os.path.dirname(__file__), "..", "..", "docs", "source", "user_guide", "source", "ps1", "problem1.ipynb")
+    shutil.copy(source_path, join("submitted", "bitdiddle", "ps2", "Problem 1.ipynb"))
 
     # click on the autograde button
     row = browser.find_elements_by_css_selector("tbody tr")[0]
