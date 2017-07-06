@@ -31,6 +31,10 @@ def _load_notebook(browser, port, notebook, retries=5):
             raise
 
 
+def _wait_for_validate_button(browser):
+    _wait(browser).until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, "button.validate")))
+
+
 def _wait_for_modal(browser):
     _wait(browser).until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".modal-dialog")))
 
@@ -51,6 +55,7 @@ def _dismiss_modal(browser):
 @pytest.mark.nbextensions
 def test_validate_ok(browser, port):
     _load_notebook(browser, port, "submitted-changed.ipynb")
+    _wait_for_validate_button(browser)
 
     # click the "validate" button
     browser.find_element_by_css_selector("button.validate").click()
@@ -68,6 +73,7 @@ def test_validate_ok(browser, port):
 @pytest.mark.nbextensions
 def test_validate_failure(browser, port):
     _load_notebook(browser, port, "submitted-unchanged.ipynb")
+    _wait_for_validate_button(browser)
 
     # click the "validate" button
     browser.find_element_by_css_selector("button.validate").click()
@@ -85,6 +91,7 @@ def test_validate_failure(browser, port):
 @pytest.mark.nbextensions
 def test_validate_grade_cell_changed(browser, port):
     _load_notebook(browser, port, "submitted-grade-cell-changed.ipynb")
+    _wait_for_validate_button(browser)
 
     # click the "validate" button
     browser.find_element_by_css_selector("button.validate").click()
@@ -102,6 +109,7 @@ def test_validate_grade_cell_changed(browser, port):
 @pytest.mark.nbextensions
 def test_validate_locked_cell_changed(browser, port):
     _load_notebook(browser, port, "submitted-locked-cell-changed.ipynb")
+    _wait_for_validate_button(browser)
 
     # click the "validate" button
     browser.find_element_by_css_selector("button.validate").click()
