@@ -21,7 +21,6 @@ def api(request, course_dir, db, exchange):
     config.Exchange.root = exchange
     config.CourseDirectory.root = course_dir
     config.CourseDirectory.db_url = db
-    config.NbGraderAPI.timezone = "PDT"
 
     coursedir = CourseDirectory(config=config)
     api = NbGraderAPI(coursedir, config=config)
@@ -30,6 +29,11 @@ def api(request, course_dir, db, exchange):
 
 
 class TestNbGraderAPI(BaseTestApp):
+
+    if sys.platform == 'win32':
+        tz = "Coordinated Universal Time"
+    else:
+        tz = "UTC"
 
     def test_get_source_assignments(self, api, course_dir):
         assert api.get_source_assignments() == set([])
@@ -130,7 +134,7 @@ class TestNbGraderAPI(BaseTestApp):
             "average_written_score": 0,
             "duedate": None,
             "display_duedate": None,
-            "duedate_timezone": "PDT",
+            "duedate_timezone": "UTC",
             "duedate_notimezone": None,
             "name": "ps1",
             "num_submissions": 0,
@@ -180,12 +184,12 @@ class TestNbGraderAPI(BaseTestApp):
         # check that timestamps are handled correctly
         with api.gradebook as gb:
             assignment = gb.find_assignment("ps1")
-            assignment.duedate = parse_utc("2017-07-05 12:22:08 PDT")
+            assignment.duedate = parse_utc("2017-07-05 12:22:08 UTC")
             gb.db.commit()
 
         a = api.get_assignment("ps1")
-        default["duedate"] = "2017-07-05T19:22:08"
-        default["display_duedate"] = "2017-07-05 12:22:08 PDT"
+        default["duedate"] = "2017-07-05T12:22:08"
+        default["display_duedate"] = "2017-07-05 12:22:08 {}".format(self.tz)
         default["duedate_notimezone"] = "2017-07-05T12:22:08"
         assert a["duedate"] == default["duedate"]
         assert a["display_duedate"] == default["display_duedate"]
@@ -321,7 +325,7 @@ class TestNbGraderAPI(BaseTestApp):
         target = default.copy()
         target["submitted"] = True
         target["timestamp"] = "2017-07-05T12:32:56.123456"
-        target["display_timestamp"] = "2017-07-05 05:32:56 PDT"
+        target["display_timestamp"] = "2017-07-05 12:32:56 {}".format(self.tz)
         assert s == target
 
         run_nbgrader(["autograde", "ps1", "--create", "--no-execute", "--force", "--db", db])
@@ -331,7 +335,7 @@ class TestNbGraderAPI(BaseTestApp):
         target["autograded"] = True
         target["submitted"] = True
         target["timestamp"] = "2017-07-05T12:32:56.123456"
-        target["display_timestamp"] = "2017-07-05 05:32:56 PDT"
+        target["display_timestamp"] = "2017-07-05 12:32:56 {}".format(self.tz)
         target["code_score"] = 2
         target["max_code_score"] = 5
         target["score"] = 2
