@@ -1193,7 +1193,7 @@ def test_add_new_student(browser, port, gradebook):
     assert row.find_element_by_css_selector(".name").text == "Ator, Eva Lou"
     assert row.find_element_by_css_selector(".id").text == "ator"
     assert row.find_element_by_css_selector(".email").text == "ela@email.com"
-    assert row.find_element_by_css_selector(".score").text == "0 / 9"
+    assert row.find_element_by_css_selector(".score").text == "0 / 15"
     assert utils._child_exists(row, ".edit a")
 
     # reload the page and make sure everything is still correct
@@ -1202,7 +1202,7 @@ def test_add_new_student(browser, port, gradebook):
     assert row.find_element_by_css_selector(".name").text == "Ator, Eva Lou"
     assert row.find_element_by_css_selector(".id").text == "ator"
     assert row.find_element_by_css_selector(".email").text == "ela@email.com"
-    assert row.find_element_by_css_selector(".score").text == "0 / 9"
+    assert row.find_element_by_css_selector(".score").text == "0 / 15"
     assert utils._child_exists(row, ".edit a")
 
 
@@ -1232,7 +1232,7 @@ def test_edit_student(browser, port, gradebook):
     assert row.find_element_by_css_selector(".name").text == "Ator, Eva Lou"
     assert row.find_element_by_css_selector(".id").text == "ator"
     assert row.find_element_by_css_selector(".email").text == "ela@email.net"
-    assert row.find_element_by_css_selector(".score").text == "0 / 9"
+    assert row.find_element_by_css_selector(".score").text == "0 / 15"
     assert utils._child_exists(row, ".edit a")
 
     # reload the page and make sure everything is still correct
@@ -1241,5 +1241,5 @@ def test_edit_student(browser, port, gradebook):
     assert row.find_element_by_css_selector(".name").text == "Ator, Eva Lou"
     assert row.find_element_by_css_selector(".id").text == "ator"
     assert row.find_element_by_css_selector(".email").text == "ela@email.net"
-    assert row.find_element_by_css_selector(".score").text == "0 / 9"
+    assert row.find_element_by_css_selector(".score").text == "0 / 15"
     assert utils._child_exists(row, ".edit a")
