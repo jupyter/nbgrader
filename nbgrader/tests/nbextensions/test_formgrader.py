@@ -126,7 +126,7 @@ def test_load_manage_submissions(browser, port, gradebook):
 def test_load_gradebook1(browser, port, gradebook):
     # load the assignments page
     utils._load_gradebook_page(browser, port, "gradebook")
-    utils._check_breadcrumbs(browser, "Gradebook")
+    utils._check_breadcrumbs(browser, "Manual Grading")
 
     # click on the "Problem Set 1" link
     utils._click_link(browser, "Problem Set 1")
@@ -136,10 +136,10 @@ def test_load_gradebook1(browser, port, gradebook):
 @pytest.mark.nbextensions
 def test_load_gradebook2(browser, port, gradebook):
     utils._load_gradebook_page(browser, port, "gradebook/Problem Set 1")
-    utils._check_breadcrumbs(browser, "Gradebook", "Problem Set 1")
+    utils._check_breadcrumbs(browser, "Manual Grading", "Problem Set 1")
 
-    # click the "Gradebook" link
-    utils._click_link(browser, "Gradebook")
+    # click the "Manual Grading" link
+    utils._click_link(browser, "Manual Grading")
     utils._wait_for_gradebook_page(browser, port, "gradebook")
     browser.back()
 
@@ -154,10 +154,10 @@ def test_load_gradebook2(browser, port, gradebook):
 def test_load_gradebook3(browser, port, gradebook):
     for problem in gradebook.find_assignment("Problem Set 1").notebooks:
         utils._load_gradebook_page(browser, port, "gradebook/Problem Set 1/{}".format(problem.name))
-        utils._check_breadcrumbs(browser, "Gradebook", "Problem Set 1", problem.name)
+        utils._check_breadcrumbs(browser, "Manual Grading", "Problem Set 1", problem.name)
 
-        # click the "Gradebook" link
-        utils._click_link(browser, "Gradebook")
+        # click the "Manual Grading" link
+        utils._click_link(browser, "Manual Grading")
         utils._wait_for_gradebook_page(browser, port, "gradebook")
         browser.back()
 
@@ -261,7 +261,7 @@ def test_switch_views(browser, port, gradebook):
     pages = ["", "manage_assignments", "gradebook", "manage_students"]
     links = [
         ("Manage Assignments", "manage_assignments"),
-        ("Gradebook", "gradebook"),
+        ("Manual Grading", "gradebook"),
         ("Manage Students", "manage_students")
     ]
 
@@ -283,8 +283,8 @@ def test_formgrade_view_breadcrumbs(browser, port, gradebook):
             utils._get(browser, utils._formgrade_url(port, "submissions/{}".format(submission.id)))
             utils._wait_for_formgrader(browser, port, "submissions/{}/?index=0".format(submission.id))
 
-            # click on the "Gradebook" link
-            utils._click_link(browser, "Gradebook")
+            # click on the "Manual Grading" link
+            utils._click_link(browser, "Manual Grading")
             utils._wait_for_gradebook_page(browser, port, "gradebook")
 
             # go back
@@ -887,7 +887,7 @@ def test_edit_assignment(browser, port, gradebook):
 
 
 @pytest.mark.nbextensions
-def test_generate_assignment(browser, port, gradebook):
+def test_generate_assignment_fail(browser, port, gradebook):
     utils._load_gradebook_page(browser, port, "")
 
     # click on the generate button -- should produce an error because there
@@ -899,6 +899,11 @@ def test_generate_assignment(browser, port, gradebook):
     utils._click_element(browser, "#error-modal .close")
     modal_not_present = lambda browser: browser.execute_script("""return $("#error-modal").length === 0;""")
     WebDriverWait(browser, 10).until(modal_not_present)
+
+
+@pytest.mark.nbextensions
+def test_generate_assignment_success(browser, port, gradebook):
+    utils._load_gradebook_page(browser, port, "")
 
     # add a notebook for ps2
     source_path = os.path.join(os.path.dirname(__file__), "..", "..", "docs", "source", "user_guide", "source", "ps1", "problem1.ipynb")

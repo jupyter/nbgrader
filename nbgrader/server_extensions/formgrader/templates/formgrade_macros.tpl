@@ -52,7 +52,7 @@ function toggle_name(on) {
       <div class="col-md-8">
         <ul class="nav text-center">
           <ul class="breadcrumb">
-            <li><a href="{{ resources.base_url }}/formgrader/gradebook">Gradebook</a></li>
+            <li><a href="{{ resources.base_url }}/formgrader/gradebook">Manual Grading</a></li>
             <li><a href="{{ resources.base_url }}/formgrader/gradebook/{{ resources.assignment_id }}">{{ resources.assignment_id }}</a></li>
             <li><a href="{{ resources.base_url }}/formgrader/gradebook/{{ resources.assignment_id }}/{{ resources.notebook_id }}">{{ resources.notebook_id }}</a></li>
             <li class="active live-notebook">

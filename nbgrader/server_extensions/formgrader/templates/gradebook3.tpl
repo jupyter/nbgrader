@@ -11,7 +11,7 @@ var notebook_id = "{{ notebook_id }}";
 
 {%- block breadcrumbs -%}
 <ol class="breadcrumb">
-  <li><a href="{{ base_url }}/formgrader/gradebook">Gradebook</a></li>
+  <li><a href="{{ base_url }}/formgrader/gradebook">Manual Grading</a></li>
   <li><a href="{{ base_url }}/formgrader/gradebook/{{ assignment_id }}">{{ assignment_id }}</a></li>
   <li class="active">{{ notebook_id }}</li>
 </ol>
