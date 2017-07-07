@@ -31,16 +31,16 @@ this was done using the ``nbgrader extension install`` command. However, moving
 forward this is done using the ``jupyter nbextension`` and ``jupyter
 serverextension`` commands.
 
-To install and enable all nbextensions (*assignment list*, *create assignment*,
-*formgrader*, and *validate*) run::
+To install and enable all nbextensions (**assignment list**, **create
+assignment**, **formgrader**, and **validate**) run::
 
     jupyter nbextension install --sys-prefix --py nbgrader --overwrite
     jupyter nbextension enable --sys-prefix --py nbgrader
     jupyter serverextension enable --sys-prefix --py nbgrader
 
-To work properly, the *assignment list*, *formgrader*, and *validate*
-extensions require both the nbextension and serverextension. The *create
-assignment* extension only has an nbextension part.
+To work properly, the **assignment list**, **formgrader**, and **validate**
+extensions require both the nbextension and serverextension. The **create
+assignment** extension only has an nbextension part.
 
 Installation options
 ~~~~~~~~~~~~~~~~~~~~

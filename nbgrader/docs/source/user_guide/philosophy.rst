@@ -85,11 +85,11 @@ work).
 Configuration files
 ~~~~~~~~~~~~~~~~~~~
 
-You may need a configuration file as you are using nbgrader to customize
-nbgrader's behavior. If you are using nbgrader with :doc:`JupyterHub
-</configuration/jupyterhub_config>`, you will at minimum need to set the course
-id in the configuration file. A basic config file would live at
-``{course_directory}/nbgrader_config.py`` and might look like:
+To customize nbgrader's behavior, you can set configuration options in the
+``nbgrader_config.py`` file. In particular, if you are using nbgrader with
+:doc:`JupyterHub </configuration/jupyterhub_config>`, you must set the
+course id in the nbgrader configuration file. A basic nbgrader config file
+would live at ``{course_directory}/nbgrader_config.py`` and might look like:
 
 ::
 
