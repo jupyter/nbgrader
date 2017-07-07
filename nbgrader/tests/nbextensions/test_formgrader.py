@@ -813,7 +813,7 @@ def test_add_new_assignment(browser, port, gradebook):
     # click the "add new assignment" button
     utils._click_link(browser, "Add new assignment...")
     utils._wait_for_element(browser, "add-assignment-modal")
-    WebDriverWait(browser, 10).until(EC.visibility_of_element_located((By.CSS_SELECTOR, "#add-assignment-modal button.btn-primary")))
+    WebDriverWait(browser, 10).until(EC.visibility_of_element_located((By.CSS_SELECTOR, "#add-assignment-modal .save")))
 
     # set the name and dudedate
     elem = browser.find_element_by_css_selector("#add-assignment-modal .name")
@@ -869,7 +869,7 @@ def test_edit_assignment(browser, port, gradebook):
     row = browser.find_elements_by_css_selector("tbody tr")[1]
     row.find_element_by_css_selector(".edit a").click()
     utils._wait_for_element(browser, "edit-assignment-modal")
-    WebDriverWait(browser, 10).until(EC.visibility_of_element_located((By.CSS_SELECTOR, "#edit-assignment-modal button.btn-primary")))
+    WebDriverWait(browser, 10).until(EC.visibility_of_element_located((By.CSS_SELECTOR, "#edit-assignment-modal .save")))
 
     # modify the duedate
     elem = browser.find_element_by_css_selector("#edit-assignment-modal .modal-duedate")
@@ -917,7 +917,7 @@ def test_generate_assignment_fail(browser, port, gradebook):
     row = browser.find_elements_by_css_selector("tbody tr")[1]
     row.find_element_by_css_selector(".assign a").click()
     utils._wait_for_element(browser, "error-modal")
-    WebDriverWait(browser, 10).until(EC.visibility_of_element_located((By.CSS_SELECTOR, "#error-modal button.btn-primary")))
+    WebDriverWait(browser, 10).until(EC.visibility_of_element_located((By.CSS_SELECTOR, "#error-modal .close")))
     utils._click_element(browser, "#error-modal .close")
     modal_not_present = lambda browser: browser.execute_script("""return $("#error-modal").length === 0;""")
     WebDriverWait(browser, 10).until(modal_not_present)
@@ -935,7 +935,7 @@ def test_generate_assignment_success(browser, port, gradebook):
     row = browser.find_elements_by_css_selector("tbody tr")[1]
     row.find_element_by_css_selector(".assign a").click()
     utils._wait_for_element(browser, "success-modal")
-    WebDriverWait(browser, 10).until(EC.visibility_of_element_located((By.CSS_SELECTOR, "#success-modal button.btn-primary")))
+    WebDriverWait(browser, 10).until(EC.visibility_of_element_located((By.CSS_SELECTOR, "#success-modal .close")))
     utils._click_element(browser, "#success-modal .close")
     modal_not_present = lambda browser: browser.execute_script("""return $("#success-modal").length === 0;""")
     WebDriverWait(browser, 10).until(modal_not_present)
@@ -981,7 +981,7 @@ def test_release_assignment(browser, port, gradebook):
     row = browser.find_elements_by_css_selector("tbody tr")[1]
     row.find_element_by_css_selector(".release a").click()
     utils._wait_for_element(browser, "success-modal")
-    WebDriverWait(browser, 10).until(EC.visibility_of_element_located((By.CSS_SELECTOR, "#success-modal button.btn-primary")))
+    WebDriverWait(browser, 10).until(EC.visibility_of_element_located((By.CSS_SELECTOR, "#success-modal .close")))
     utils._click_element(browser, "#success-modal .close")
     modal_not_present = lambda browser: browser.execute_script("""return $("#success-modal").length === 0;""")
     WebDriverWait(browser, 10).until(modal_not_present)
@@ -1025,7 +1025,7 @@ def test_collect_assignment(browser, port, gradebook):
     row = browser.find_elements_by_css_selector("tbody tr")[1]
     row.find_element_by_css_selector(".collect a").click()
     utils._wait_for_element(browser, "success-modal")
-    WebDriverWait(browser, 10).until(EC.visibility_of_element_located((By.CSS_SELECTOR, "#success-modal button.btn-primary")))
+    WebDriverWait(browser, 10).until(EC.visibility_of_element_located((By.CSS_SELECTOR, "#success-modal .close")))
     utils._click_element(browser, "#success-modal .close")
     modal_not_present = lambda browser: browser.execute_script("""return $("#success-modal").length === 0;""")
     WebDriverWait(browser, 10).until(modal_not_present)
@@ -1065,7 +1065,7 @@ def test_unrelease_assignment(browser, port, gradebook):
     row = browser.find_elements_by_css_selector("tbody tr")[1]
     row.find_element_by_css_selector(".release a").click()
     utils._wait_for_element(browser, "success-modal")
-    WebDriverWait(browser, 10).until(EC.visibility_of_element_located((By.CSS_SELECTOR, "#success-modal button.btn-primary")))
+    WebDriverWait(browser, 10).until(EC.visibility_of_element_located((By.CSS_SELECTOR, "#success-modal .close")))
     utils._click_element(browser, "#success-modal .close")
     modal_not_present = lambda browser: browser.execute_script("""return $("#success-modal").length === 0;""")
     WebDriverWait(browser, 10).until(modal_not_present)
@@ -1148,7 +1148,7 @@ def test_autograde_assignment1(browser, port, gradebook):
     row = browser.find_elements_by_css_selector("tbody tr")[0]
     row.find_element_by_css_selector(".autograde a").click()
     utils._wait_for_element(browser, "success-modal")
-    WebDriverWait(browser, 10).until(EC.visibility_of_element_located((By.CSS_SELECTOR, "#success-modal button.btn-primary")))
+    WebDriverWait(browser, 10).until(EC.visibility_of_element_located((By.CSS_SELECTOR, "#success-modal .close")))
     utils._click_element(browser, "#success-modal .close")
     modal_not_present = lambda browser: browser.execute_script("""return $("#success-modal").length === 0;""")
     WebDriverWait(browser, 10).until(modal_not_present)
@@ -1185,7 +1185,7 @@ def test_autograde_assignment2(browser, port, gradebook):
     row = browser.find_elements_by_css_selector("tbody tr")[0]
     row.find_element_by_css_selector(".autograde a").click()
     utils._wait_for_element(browser, "success-modal")
-    WebDriverWait(browser, 10).until(EC.visibility_of_element_located((By.CSS_SELECTOR, "#success-modal button.btn-primary")))
+    WebDriverWait(browser, 10).until(EC.visibility_of_element_located((By.CSS_SELECTOR, "#success-modal .close")))
     utils._click_element(browser, "#success-modal .close")
     modal_not_present = lambda browser: browser.execute_script("""return $("#success-modal").length === 0;""")
     WebDriverWait(browser, 10).until(modal_not_present)
@@ -1211,14 +1211,20 @@ def test_autograde_assignment2(browser, port, gradebook):
 
 
 @pytest.mark.nbextensions
-def test_add_new_student(browser, port, gradebook):
+def test_before_add_new_student(browser, port, gradebook):
     utils._load_gradebook_page(browser, port, "manage_students")
     assert len(browser.find_elements_by_css_selector("tbody tr")) == 3
+
+
+@pytest.mark.nbextensions
+def test_add_new_student(browser, port, gradebook):
+    utils._load_gradebook_page(browser, port, "manage_students")
+    n = len(browser.find_elements_by_css_selector("tbody tr"))
 
     # click the "add new assignment" button
     utils._click_link(browser, "Add new student...")
     utils._wait_for_element(browser, "add-student-modal")
-    WebDriverWait(browser, 10).until(EC.visibility_of_element_located((By.CSS_SELECTOR, "#add-student-modal button.btn-primary")))
+    WebDriverWait(browser, 10).until(EC.visibility_of_element_located((By.CSS_SELECTOR, "#add-student-modal .save")))
 
     # set the name and dudedate
     elem = browser.find_element_by_css_selector("#add-student-modal .id")
@@ -1240,7 +1246,7 @@ def test_add_new_student(browser, port, gradebook):
     WebDriverWait(browser, 10).until(modal_not_present)
 
     # wait until both rows are present
-    rows_present = lambda browser: len(browser.find_elements_by_css_selector("tbody tr")) == 4
+    rows_present = lambda browser: len(browser.find_elements_by_css_selector("tbody tr")) == (n + 1)
     WebDriverWait(browser, 10).until(rows_present)
 
     # check that the new row is correct
@@ -1269,7 +1275,7 @@ def test_edit_student(browser, port, gradebook):
     row = browser.find_elements_by_css_selector("tbody tr")[0]
     row.find_element_by_css_selector(".edit a").click()
     utils._wait_for_element(browser, "edit-student-modal")
-    WebDriverWait(browser, 10).until(EC.visibility_of_element_located((By.CSS_SELECTOR, "#edit-student-modal button.btn-primary")))
+    WebDriverWait(browser, 10).until(EC.visibility_of_element_located((By.CSS_SELECTOR, "#edit-student-modal .modal-email")))
 
     # modify the duedate
     elem = browser.find_element_by_css_selector("#edit-student-modal .modal-email")
