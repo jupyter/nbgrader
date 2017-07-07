@@ -8,7 +8,6 @@ nbgrader
     :caption: User Documentation
 
     user_guide/highlights
-    Demo <https://github.com/jhamrick/nbgrader-demo>
     user_guide/installation
     user_guide/philosophy
     user_guide/creating_and_grading_assignments

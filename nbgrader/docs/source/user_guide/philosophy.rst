@@ -85,16 +85,15 @@ work).
 Configuration files
 ~~~~~~~~~~~~~~~~~~~
 
-You will almost always need a configuration file as you are using nbgrader. At a minimum, this configuration file will contain information such as the names of the assignments for your class and the names of your students (though you may also add these by hand using the command line, see :doc:`creating_and_grading_assignments`). A basic config file would live at ``{course_directory}/nbgrader_config.py`` and might look like:
+To customize nbgrader's behavior, you can set configuration options in the
+``nbgrader_config.py`` file. In particular, if you are using nbgrader with
+:doc:`JupyterHub </configuration/jupyterhub_config>`, you must set the
+course id in the nbgrader configuration file. A basic nbgrader config file
+would live at ``{course_directory}/nbgrader_config.py`` and might look like:
 
 ::
 
     c = get_config()
-    c.CourseDirectory.db_assignments = [dict(name="ps1", duedate="2015-02-02 17:00:00 UTC")]
-    c.CourseDirectory.db_students = [
-        dict(id="bitdiddle", first_name="Ben", last_name="Bitdiddle"),
-        dict(id="hacker", first_name="Alyssa", last_name="Hacker"),
-        dict(id="reasoner", first_name="Louis", last_name="Reasoner")
-    ]
+    c.Exchange.course_id = "course101"
 
 There are many additional options you can configure. See :doc:`/configuration/config_options` for a full list.

@@ -18,6 +18,15 @@ assignment and grading tasks using the familiar Jupyter notebook interface.
 
 ![Creating assignment](nbgrader/docs/source/user_guide/images/creating_assignment.gif "Creating assignment")
 
+### Instructor "formgrader" extension for Jupyter notebooks
+
+The formgrader extension for the Jupyter notebook allows instructors to use
+the core functionality of nbgrader---generating the student version of an
+assignment, releasing assignments to students, collecting assignments,
+autograding submissions, and manually grading submissions.
+
+![Formgrader extension](nbgrader/docs/source/user_guide/images/formgrader.gif "Formgrader extension")
+
 ### Student assignment list extension for Jupyter notebooks
 Using the assignment list extension, students may conveniently view, fetch,
 submit, and validate their assignments.
@@ -25,19 +34,13 @@ submit, and validate their assignments.
 ![nbgrader assignment list](nbgrader/docs/source/user_guide/images/student_assignment.gif "nbgrader assignment list")
 
 ### The command line tools of nbgrader
+
 [Command line tools](https://nbgrader.readthedocs.io/en/latest/command_line_tools/index.html)
 offer an efficient way for the instructor to generate, assign, release, collect,
 and grade notebooks.
 
+
 ## Installation
-You may install the current version of nbgrader which includes the grading
-system and command line tools using:
-
-    pip install nbgrader
-
-Or, if you use [Anaconda](https://www.continuum.io/downloads):
-
-    conda install -c conda-forge nbgrader
 
 For detailed instructions on installing nbgrader and the nbgrader extensions
 for Jupyter notebook, please see [Installation](https://nbgrader.readthedocs.io/en/latest/user_guide/installation.html)
