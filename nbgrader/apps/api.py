@@ -11,7 +11,7 @@ from traitlets import Instance, Enum, Unicode, observe
 from ..coursedir import CourseDirectory
 from ..converters import Assign, Autograde
 from ..exchange import ExchangeList, ExchangeRelease, ExchangeCollect
-from ..api import MissingEntry, Gradebook
+from ..api import MissingEntry, Gradebook, Student, SubmittedAssignment
 from ..utils import parse_utc, temp_attrs, capture_log, as_timezone
 
 
@@ -220,43 +220,31 @@ class NbGraderAPI(LoggingConfigurable):
             A set of student ids
 
         """
-        # get all the filenames in the autograded directory
-        filenames = glob.glob(self.coursedir.format_path(
-            self.coursedir.autograded_directory,
-            student_id='*',
-            assignment_id=assignment_id))
+        # get all autograded submissions
+        with self.gradebook as gb:
+            ag_timestamps = dict(gb.db\
+                .query(Student.id, SubmittedAssignment.timestamp)\
+                .join(SubmittedAssignment)\
+                .filter(SubmittedAssignment.name == "ps1")\
+                .all())
+            ag_students = set(ag_timestamps.keys())
 
         students = set([])
-        for filename in filenames:
+        for student_id in ag_students:
             # skip files that aren't directories
+            filename = self.coursedir.format_path(
+                self.coursedir.autograded_directory,
+                student_id=student_id,
+                assignment_id=assignment_id)
             if not os.path.isdir(filename):
                 continue
 
-            # parse out the student id
-            regex = self.coursedir.format_path(
-                self.coursedir.autograded_directory,
-                student_id='(?P<student_id>.*)',
-                assignment_id=assignment_id,
-                escape=True)
-            matches = re.match(regex, filename)
-            if matches:
-                student_id = matches.groupdict()['student_id']
-            else:
+            # get the timestamps and check whether the submitted timestamp is
+            # newer than the autograded timestamp
+            submitted_timestamp = self.get_submitted_timestamp(assignment_id, student_id)
+            autograded_timestamp = ag_timestamps[student_id]
+            if submitted_timestamp != autograded_timestamp:
                 continue
-
-            # check whether the assignment is in the database
-            with self.gradebook as gb:
-                try:
-                    submission = gb.find_submission(assignment_id, student_id)
-                except MissingEntry:
-                    continue
-
-                # get the timestamps and check whether the submitted timestamp is
-                # newer than the autograded timestamp
-                submitted_timestamp = self.get_submitted_timestamp(assignment_id, student_id)
-                autograded_timestamp = submission.timestamp
-                if submitted_timestamp != autograded_timestamp:
-                    continue
 
             students.add(student_id)
 
@@ -433,7 +421,7 @@ class NbGraderAPI(LoggingConfigurable):
 
         return notebooks
 
-    def get_submission(self, assignment_id, student_id, ungraded=None):
+    def get_submission(self, assignment_id, student_id, ungraded=None, students=None):
         """Get information about a student's submission of an assignment.
 
         Arguments
@@ -445,6 +433,9 @@ class NbGraderAPI(LoggingConfigurable):
         ungraded: set
             (Optional) A set of student ids corresponding to students whose
             submissions have not yet been autograded.
+        students: dict
+            (Optional) A dictionary of dictionaries, keyed by student id,
+            containing information about students.
 
         Returns
         -------
@@ -455,6 +446,8 @@ class NbGraderAPI(LoggingConfigurable):
         if ungraded is None:
             autograded = self.get_autograded_students(assignment_id)
             ungraded = self.get_submitted_students(assignment_id) - autograded
+        if students is None:
+            students = {x['id']: x for x in self.get_students()}
 
         if student_id in ungraded:
             ts = self.get_submitted_timestamp(assignment_id, student_id)
@@ -482,15 +475,12 @@ class NbGraderAPI(LoggingConfigurable):
                 "student": student_id,
             }
 
-            with self.gradebook as gb:
-                try:
-                    student = gb.find_student(student_id)
-                except MissingEntry:
-                    submission["last_name"] = None
-                    submission["first_name"] = None
-                else:
-                    submission["last_name"] = student.last_name
-                    submission["first_name"] = student.first_name
+            if student_id not in students:
+                submission["last_name"] = None
+                submission["first_name"] = None
+            else:
+                submission["last_name"] = students[student_id]["last_name"]
+                submission["first_name"] = students[student_id]["first_name"]
 
         elif student_id in autograded:
             with self.gradebook as gb:
@@ -523,15 +513,12 @@ class NbGraderAPI(LoggingConfigurable):
                 "student": student_id,
             }
 
-            with self.gradebook as gb:
-                try:
-                    student = gb.find_student(student_id)
-                except MissingEntry:
-                    submission["last_name"] = None
-                    submission["first_name"] = None
-                else:
-                    submission["last_name"] = student.last_name
-                    submission["first_name"] = student.first_name
+            if student_id not in students:
+                submission["last_name"] = None
+                submission["first_name"] = None
+            else:
+                submission["last_name"] = students[student_id]["last_name"]
+                submission["first_name"] = students[student_id]["first_name"]
 
         return submission
 
@@ -553,6 +540,7 @@ class NbGraderAPI(LoggingConfigurable):
         with self.gradebook as gb:
             db_submissions = gb.submission_dicts(assignment_id)
         ungraded = self.get_submitted_students(assignment_id) - self.get_autograded_students(assignment_id)
+        students = {x['id']: x for x in self.get_students()}
         submissions = []
         for submission in db_submissions:
             if submission["student"] in ungraded:
@@ -570,7 +558,8 @@ class NbGraderAPI(LoggingConfigurable):
             submissions.append(submission)
 
         for student_id in ungraded:
-            submission = self.get_submission(assignment_id, student_id, ungraded=ungraded)
+            submission = self.get_submission(
+                assignment_id, student_id, ungraded=ungraded, students=students)
             submissions.append(submission)
 
         submissions.sort(key=lambda x: x["student"])
@@ -718,8 +707,15 @@ class NbGraderAPI(LoggingConfigurable):
             students = gb.student_dicts()
 
         submitted = self.get_submitted_students("*")
-        for student in (submitted - in_db):
-            students.append(self.get_student(student, submitted=submitted))
+        for student_id in (submitted - in_db):
+            students.append({
+                "id": student_id,
+                "last_name": None,
+                "first_name": None,
+                "email": None,
+                "score": 0.0,
+                "max_score": 0.0
+            })
 
         students.sort(key=lambda x: (x["last_name"] or "None", x["first_name"] or "None", x["id"]))
         return students
