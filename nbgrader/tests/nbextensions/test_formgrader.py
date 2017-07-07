@@ -1127,7 +1127,7 @@ def test_manually_collect_assignment(browser, port, gradebook):
 
 
 @pytest.mark.nbextensions
-def test_autograde_assignment(browser, port, gradebook):
+def test_before_autograde_assignment(browser, port, gradebook):
     utils._load_gradebook_page(browser, port, "manage_submissions/ps2")
 
     # check the contents of the row before grading
@@ -1138,6 +1138,11 @@ def test_autograde_assignment(browser, port, gradebook):
     assert row.find_element_by_css_selector(".status").text == "needs autograding"
     assert row.find_element_by_css_selector(".score").text == ""
     assert utils._child_exists(row, ".autograde a")
+
+
+@pytest.mark.nbextensions
+def test_autograde_assignment1(browser, port, gradebook):
+    utils._load_gradebook_page(browser, port, "manage_submissions/ps2")
 
     # click on the autograde button
     row = browser.find_elements_by_css_selector("tbody tr")[0]
@@ -1166,6 +1171,11 @@ def test_autograde_assignment(browser, port, gradebook):
     assert row.find_element_by_css_selector(".status").text == "graded"
     assert row.find_element_by_css_selector(".score").text == "0 / 6"
     assert utils._child_exists(row, ".autograde a")
+
+
+@pytest.mark.nbextensions
+def test_autograde_assignment2(browser, port, gradebook):
+    utils._load_gradebook_page(browser, port, "manage_submissions/ps2")
 
     # overwrite the file
     source_path = join(os.path.dirname(__file__), "..", "..", "docs", "source", "user_guide", "source", "ps1", "problem1.ipynb")
