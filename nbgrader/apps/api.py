@@ -225,7 +225,7 @@ class NbGraderAPI(LoggingConfigurable):
             ag_timestamps = dict(gb.db\
                 .query(Student.id, SubmittedAssignment.timestamp)\
                 .join(SubmittedAssignment)\
-                .filter(SubmittedAssignment.name == "ps1")\
+                .filter(SubmittedAssignment.name == assignment_id)\
                 .all())
             ag_students = set(ag_timestamps.keys())
 
