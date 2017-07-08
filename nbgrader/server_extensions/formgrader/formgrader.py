@@ -33,6 +33,7 @@ class FormgradeExtension(NbGrader):
 
         # Configure the formgrader settings
         tornado_settings = dict(
+            nbgrader_url_prefix=os.path.relpath(self.coursedir.root),
             nbgrader_coursedir=self.coursedir,
             nbgrader_exporter=HTMLExporter(config=self.config),
             nbgrader_gradebook=None,

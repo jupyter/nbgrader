@@ -19,6 +19,10 @@ class BaseHandler(IPythonHandler):
         return self.settings['nbgrader_db_url']
 
     @property
+    def url_prefix(self):
+        return self.settings['nbgrader_url_prefix']
+
+    @property
     def coursedir(self):
         return self.settings['nbgrader_coursedir']
 
