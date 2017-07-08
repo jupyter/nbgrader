@@ -43,6 +43,7 @@ cwd
 datefmt
 ddbourgin
 delimeters
+dementrock
 dev
 dlsun
 doesn
@@ -52,6 +53,7 @@ duedate
 Duedate
 ellachao
 ellisonbg
+embanner
 entrypoint
 filename
 filenames
@@ -62,6 +64,7 @@ formgrade
 formgrader
 frontend
 gif
+globbing
 Gradebook
 gradebook
 Granger
@@ -88,6 +91,7 @@ isn
 ivanslapnicar
 jdfreder
 jhamrick
+jilljenn
 jklymak
 jonathanmorgan
 joschu
@@ -144,6 +148,7 @@ quickstart
 readonly
 readthedocs
 redSlug
+Refactor
 reinstall
 resize
 rst
@@ -166,6 +171,7 @@ suprocesses
 svurens
 sys
 systemwide
+Szepi
 tasilb
 threadsafe
 timestamp
@@ -185,6 +191,7 @@ usernames
 utcnow
 ve
 vinaykola
+webapp
 weren
 whitead
 whitespace
@@ -199,3 +206,4 @@ workflows
 xsrf
 XSRF
 yml
+zpincus
