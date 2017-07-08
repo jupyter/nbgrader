@@ -807,8 +807,15 @@ def test_formgrade_show_hide_names(browser, port, gradebook):
 
 
 @pytest.mark.nbextensions
+def test_before_add_new_assignment(browser, port, gradebook):
+    utils._load_gradebook_page(browser, port, "")
+    assert len(browser.find_elements_by_css_selector("tbody tr")) == 1
+
+
+@pytest.mark.nbextensions
 def test_add_new_assignment(browser, port, gradebook):
     utils._load_gradebook_page(browser, port, "")
+    n = len(browser.find_elements_by_css_selector("tbody tr"))
 
     # click the "add new assignment" button
     utils._click_link(browser, "Add new assignment...")
@@ -832,7 +839,7 @@ def test_add_new_assignment(browser, port, gradebook):
     WebDriverWait(browser, 10).until(modal_not_present)
 
     # wait until both rows are present
-    rows_present = lambda browser: len(browser.find_elements_by_css_selector("tbody tr")) == 2
+    rows_present = lambda browser: len(browser.find_elements_by_css_selector("tbody tr")) == (n + 1)
     WebDriverWait(browser, 10).until(rows_present)
 
     # check that the new row is correct
