@@ -5,6 +5,100 @@ Changelog
 
 A summary of changes to nbgrader.
 
+0.5.x
+-----
+
+0.5.0
+~~~~~
+
+nbgrader version 0.5.0 is another very large release with some very exciting new features! The highlights include:
+
+- The formgrader is now an extension to the notebook, rather than a standalone service.
+- The formgrader also includes functionality for running ``nbgrader assign``, ``nbgrader release``, ``nbgrader collect``, and ``nbgrader autograde`` directly from the browser.
+- A new command ``nbgrader zip_collect``, which helps with collecting assignment files downloaded from a LMS.
+- Hidden test cases are now supported.
+- A lot of functionality has moved into standalone objects that can be called directly from Python, as well as a high-level Python API in ``nbgrader.apps.NbGraderAPI`` (see :doc:`/api/high_level_api`).
+- A new **Validate** notebook extension, which allows students to validate an assignment notebook from the notebook itself (this is equivalent functionality to the "Validate" button in the Assignment List extension, but without requiring students to be using the Assignment List).
+- A new command ``nbgrader db upgrade``, which allows you to migrate your nbgrader database to the latest version without having to manually execute SQL commands.
+- New cells when using the Create Assignment extension will automatically given randomly generated ids, so you don't have to set them yourself.
+- You can assign extra credit when using the formgrader.
+
+**Important**: Users updating from 0.4.x to 0.5.0 should be aware that they
+will need to update their nbgrader database using ``nbgrader db upgrade``
+and will need to reinstall the nbgrader extensions (see
+:doc:`/user_guide/installation`). Additionally, the configuration necessary to
+use the formgrader with JupyterHub has changed, though it is now much more straightforward (see :doc:`/configuration/jupyterhub_config`).
+
+The full list of merged PRs includes:
+
+- PR #789: Fix more inaccurate nbextension test failures after reruns
+- PR #788: Fix inaccurate nbextension test failures after reruns
+- PR #787: Fix slow API calls
+- PR #786: Update documentation for nbgrader as a webapp
+- PR #784: Fix race condition in validate extension tests
+- PR #782: Implement nbgrader as a webapp
+- PR #781: Assign missing notebooks a score of zero and mark as not needing grading
+- PR #780: Create a new high-level python API for nbgrader
+- PR #778: Create and set permissions for exchange directory when using `nbgrader release`
+- PR #774: Add missing config options
+- PR #772: Standalone versions of nbgrader assign, autograde, and feedback
+- PR #771: Fix mathjax rendering
+- PR #770: Better cleanup when nbconvert-based apps crash
+- PR #769: Fix nbgrader validate globbing for real this time
+- PR #768: Extra credit
+- PR #766: Make sure validation works with notebook globs
+- PR #764: Migrate database with alembic
+- PR #762: More robust saving of the notebook in create assignment tests
+- PR #761: Validate assignment extension
+- PR #759: Fix nbextension tests
+- PR #758: Set random cell ids
+- PR #756: Fix deprecations and small bugs
+- PR #755: Fast validate
+- PR #754: Set correct permissions when submitting assignments
+- PR #752: Add some more informative error messages in zip collect
+- PR #751: Don't create the gradebook database until formgrader is accessed
+- PR #750: Add documentation for how to pass numeric ids
+- PR #747: Skip over students with empty submissions
+- PR #746: Fix bug with --to in custom exporters
+- PR #738: Refactor the filtering of existing submission notebooks for formgrader
+- PR #735: Add DataTables functionality to existing formgrade tables
+- PR #732: Fix the collecting of submission files for multiple attempts of multiple notebook assignments
+- PR #731: Reset late submission penalty before checking if submission is late or not
+- PR #717: Update docs regarding solution delimeters
+- PR #714: Preserve kernelspec when autograding
+- PR #713: Use new exchange functionality in assignment list app
+- PR #712: Move exchange functionality into non-application classes
+- PR #711: Move some config options into a CourseDirectory object.
+- PR #709: Fix formgrader tests link for 0.4.x branch (docs)
+- PR #707: Force rerun nbgrader commands
+- PR #704: Fix nbextension tests
+- PR #701: Set proxy-type=none in phantomjs
+- PR #700: use check_call for extension installation in tests
+- PR #698: Force phantomjs service to terminate in Linux
+- PR #696: Turn the gradebook into a context manager
+- PR #695: Use sys.executable when executing nbgrader
+- PR #693: Update changelog from 0.4.0
+- PR #681: Hide tests in "Autograder tests" cells
+- PR #622: Integrate the formgrader into the notebook
+- PR #526: Processing of LMS downloaded submission files
+
+Thanks to the following contributors who submitted PRs or reported issues that were merged/closed for the 0.5.0 release:
+
+- AnotherCodeArtist
+- dementrock
+- dsblank
+- ellisonbg
+- embanner
+- huwf
+- jhamrick
+- lgpage
+- minrk
+- suchow
+- Szepi
+- whitead
+- ZelphirKaltstahl
+- zpincus
+
 0.4.x
 -----
 
