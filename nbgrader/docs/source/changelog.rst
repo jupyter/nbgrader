@@ -39,7 +39,8 @@ The full list of merged PRs includes:
 - PR #782: Implement nbgrader as a webapp
 - PR #781: Assign missing notebooks a score of zero and mark as not needing grading
 - PR #780: Create a new high-level python API for nbgrader
-- PR #778: Create and set permissions for exchange directory when using `nbgrader release`
+- PR #779: Update the year!
+- PR #778: Create and set permissions for exchange directory when using ``nbgrader release``
 - PR #774: Add missing config options
 - PR #772: Standalone versions of nbgrader assign, autograde, and feedback
 - PR #771: Fix mathjax rendering
@@ -91,6 +92,7 @@ Thanks to the following contributors who submitted PRs or reported issues that w
 - embanner
 - huwf
 - jhamrick
+- jilljenn
 - lgpage
 - minrk
 - suchow
@@ -149,7 +151,7 @@ The full list of merged PRs includes:
 - PR #637: Update conda channel to conda-forge
 - PR #635: Remove conda recipe and document nbgrader-feedstock
 - PR #633: Remove extra level of depth in schema per @ellisonbg
-- PR #630: Don't fail `test_check_version` test on `'import sitecustomize' failed error`
+- PR #630: Don't fail ``test_check_version`` test on ``'import sitecustomize' failed error``
 - PR #629: Update changelog for 0.3.1 and 0.3.2
 - PR #628: Make sure to include schema files
 - PR #625: Add "nbgrader db" app for modifying the database
@@ -171,7 +173,7 @@ The full list of merged PRs includes:
 - PR #597: Re-submitting nbextension work from previous PR
 - PR #594: Revert "Use jupyter nbextension/serverextension for installation/activation"
 - PR #591: Test empty and invalid timestamp strings
-- PR #590: Processing of invalid `notebook_id`s
+- PR #590: Processing of invalid ``notebook_id``
 - PR #585: Add catches for empty timestamp files and invalid timestamp strings
 - PR #581: Update docs with invoke test group commands
 - PR #571: Convert readthedocs links for their .org -> .io migration for hosted projects
@@ -229,7 +231,7 @@ Version 0.3.2 of nbgrader includes a few bugfixes pertaining to building nbgrade
 - PR #608: Fix Windows tests
 - PR #601: Add shell config for invoke on windows
 - PR #593: Send xsrf token in the X-XSRF-Token header for ajax
-- PR #588: `basename` to wordslist
+- PR #588: ``basename`` to wordslist
 - PR #584: Changes for Notebook v4.3 tests
 
 Thanks to lgpage, who made all the changes necessary for the 0.3.2 release!
