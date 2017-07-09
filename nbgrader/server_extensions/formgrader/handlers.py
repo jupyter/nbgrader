@@ -13,6 +13,7 @@ class ManageAssignmentsHandler(BaseHandler):
     def get(self):
         html = self.render(
             "manage_assignments.tpl",
+            url_prefix=self.url_prefix,
             base_url=self.base_url)
         self.write(html)
 
@@ -88,7 +89,6 @@ class SubmissionHandler(BaseHandler):
         indices = self.api.get_notebook_submission_indices(assignment_id, notebook_id)
         ix = indices.get(submission.id, -2)
 
-        url_prefix = os.path.relpath(self.coursedir.root)
         resources = {
             'assignment_id': assignment_id,
             'notebook_id': notebook_id,
@@ -99,7 +99,7 @@ class SubmissionHandler(BaseHandler):
             'mathjax_url': self.mathjax_url,
             'last_name': submission.student.last_name,
             'first_name': submission.student.first_name,
-            'notebook_path': url_prefix + '/' + relative_path
+            'notebook_path': self.url_prefix + '/' + relative_path
         }
 
         if not os.path.exists(filename):
