@@ -8,6 +8,12 @@ A summary of changes to nbgrader.
 0.5.x
 -----
 
+nbgrader version 0.5.1 is a bugfix release mainly fixing an issue with the
+formgrader. The following PRs were merged:
+
+- PR #792: Make sure relative paths to source and release dirs are correct
+- PR #791: Use the correct version number in the docs
+
 0.5.0
 ~~~~~
 
