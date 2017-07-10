@@ -45,6 +45,7 @@ ddbourgin
 delimeters
 dementrock
 dev
+dirs
 dlsun
 doesn
 dropdown
