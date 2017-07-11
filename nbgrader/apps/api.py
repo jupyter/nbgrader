@@ -487,8 +487,12 @@ class NbGraderAPI(LoggingConfigurable):
                 try:
                     db_submission = gb.find_submission(assignment_id, student_id)
                     submission = db_submission.to_dict()
-                    submission["display_timestamp"] = as_timezone(
-                        db_submission.timestamp, self.timezone).strftime(self.timestamp_format)
+                    if db_submission.timestamp:
+                        submission["display_timestamp"] = as_timezone(
+                            db_submission.timestamp, self.timezone).strftime(self.timestamp_format)
+                    else:
+                        submission["display_timestamp"] = None
+
                 except MissingEntry:
                     return None
 
