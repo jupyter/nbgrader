@@ -352,6 +352,60 @@ class TestNbGraderAPI(BaseTestApp):
         target["needs_manual_grade"] = True
         assert s == target
 
+    def test_get_submission_no_timestamp(self, api, course_dir, db):
+        keys = set([
+            "id", "name", "student", "last_name", "first_name", "score",
+            "max_score", "code_score", "max_code_score", "written_score",
+            "max_written_score", "needs_manual_grade", "autograded",
+            "timestamp", "submitted", "display_timestamp"])
+
+        default = {
+            "id": None,
+            "name": "ps1",
+            "student": "foo",
+            "last_name": None,
+            "first_name": None,
+            "score": 0,
+            "max_score": 0,
+            "code_score": 0,
+            "max_code_score": 0,
+            "written_score": 0,
+            "max_written_score": 0,
+            "needs_manual_grade": False,
+            "autograded": False,
+            "timestamp": None,
+            "display_timestamp": None,
+            "submitted": False
+        }
+
+        s = api.get_submission("ps1", "foo")
+        assert s == default.copy()
+
+        self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
+        run_nbgrader(["assign", "ps1", "--create", "--db", db])
+
+        self._copy_file(join("files", "submitted-changed.ipynb"), join(course_dir, "submitted", "foo", "ps1", "p1.ipynb"))
+        s = api.get_submission("ps1", "foo")
+        assert set(s.keys()) == keys
+        target = default.copy()
+        target["submitted"] = True
+        assert s == target
+
+        run_nbgrader(["autograde", "ps1", "--create", "--no-execute", "--force", "--db", db])
+        s = api.get_submission("ps1", "foo")
+        target = default.copy()
+        target["id"] = s["id"]
+        target["autograded"] = True
+        target["submitted"] = True
+        target["code_score"] = 2
+        target["max_code_score"] = 5
+        target["score"] = 2
+        target["max_score"] = 7
+        target["written_score"] = 0
+        target["max_written_score"] = 2
+        target["needs_manual_grade"] = True
+        assert s == target
+
     def test_get_submissions(self, api, course_dir, db):
         assert api.get_submissions("ps1") == []
 
