@@ -16,6 +16,7 @@ from jupyter_core.paths import jupyter_config_path
 from ...apps import NbGrader
 from ...coursedir import CourseDirectory
 from ...exchange import ExchangeList, ExchangeFetch, ExchangeSubmit
+from ... import __version__ as nbgrader_version
 
 
 static = os.path.join(os.path.dirname(__file__), 'static')
@@ -229,6 +230,13 @@ class CourseListHandler(BaseAssignmentHandler):
         self.finish(json.dumps(self.manager.list_courses()))
 
 
+class NbGraderVersionHandler(BaseAssignmentHandler):
+
+    @web.authenticated
+    def get(self):
+        self.finish(nbgrader_version)
+
+
 #-----------------------------------------------------------------------------
 # URL to handler mappings
 #-----------------------------------------------------------------------------
@@ -240,6 +248,7 @@ default_handlers = [
     (r"/assignments", AssignmentListHandler),
     (r"/assignments/%s" % _assignment_action_regex, AssignmentActionHandler),
     (r"/courses", CourseListHandler),
+    (r"/nbgrader_version", NbGraderVersionHandler)
 ]
 
 
