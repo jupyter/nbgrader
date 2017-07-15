@@ -47,6 +47,10 @@ def clean_notebook_metadata(root):
                 # copy the original notebook
                 new_nb = clean_notebook(orig_nb)
 
+                # write the notebook back to disk
+                with open(pth, 'w') as fh:
+                    write(new_nb, fh, 4)
+
                 if orig_nb != new_nb:
                     print("Cleaned '{}'".format(pth))
 
@@ -98,6 +102,7 @@ def clear_notebooks(root):
 def clean_notebook(orig_nb):
     new_nb = deepcopy(orig_nb)
     clean_metadata(new_nb)
+    return new_nb
 
 
 def clean_metadata(new_nb):
