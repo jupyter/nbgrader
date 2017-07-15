@@ -66,6 +66,42 @@ the autograded version to:
 where ``student_id`` and ``notebook_id`` were parsed from the input file
 path.
 
+Here is how a sample directory structure for the course named
+``course101`` might look, where the users ``bitdiddle`` and ``hacker``
+have submitted solutions to the assignment ``ps1``:
+
+::
+
+   course101/
+   ├── gradebook.db
+   ├── nbgrader_config.py
+   ├── source
+   │   ├── header.ipynb
+   │   └── ps1
+   │       ├── jupyter.png
+   │       ├── problem1.ipynb
+   │       └── problem2.ipynb
+   ├── release
+   │   └── ps1
+   │       ├── jupyter.png
+   │       ├── problem1.ipynb
+   │       └── problem2.ipynb
+   ├── submitted
+   │   ├── bitdiddle
+   │   │   └── ps1
+   │   │       ├── jupyter.png
+   │   │       ├── problem1.html
+   │   │       ├── problem2.html
+   │   │       └── timestamp.txt
+   │   └── hacker
+   │       └── ps1
+   │           ├── jupyter.png
+   │           ├── problem1.html
+   │           ├── problem2.html
+   │           └── timestamp.txt
+   ├── autograded/
+   └── feedback/
+
 Database of assignments
 ~~~~~~~~~~~~~~~~~~~~~~~
 
