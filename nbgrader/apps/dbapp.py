@@ -347,7 +347,8 @@ class DbStudentApp(NbGrader):
     def start(self):
         # check: is there a subapp given?
         if self.subapp is None:
-            self.fail("No db command given (run with --help for options)")
+            print("No db command given (run with --help for options). List of subcommands:\n")
+            self.print_subcommands()
 
         # This starts subapps
         super(DbStudentApp, self).start()
@@ -379,7 +380,9 @@ class DbAssignmentApp(NbGrader):
     def start(self):
         # check: is there a subapp given?
         if self.subapp is None:
-            self.fail("No assignment command given (run with --help for options)")
+            print("No assignment command given. List of subcommands:\n")
+            for key, (app, desc) in self.subcommands.items():
+                print("    {}\n{}\n".format(key, desc))
 
         # This starts subapps
         super(DbAssignmentApp, self).start()
@@ -460,7 +463,8 @@ class DbApp(NbGrader):
     def start(self):
         # check: is there a subapp given?
         if self.subapp is None:
-            self.fail("No db command given (run with --help for options)")
+            print("No db command given (run with --help for options). List of subcommands:\n")
+            self.print_subcommands()
 
         # This starts subapps
         super(DbApp, self).start()

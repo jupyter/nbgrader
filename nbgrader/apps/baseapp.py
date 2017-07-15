@@ -266,6 +266,10 @@ class NbGrader(JupyterApp):
         self.clear_instance()
         traitlets.log._logger = None
 
+    def print_subcommands(self):
+        for key, (app, desc) in self.subcommands.items():
+            print("    {}\n{}\n".format(key, desc))
+
     def load_config_file(self, **kwargs):
         """Load the config file.
         By default, errors in loading config are handled, and a warning
