@@ -295,7 +295,8 @@ class NbGraderApp(NbGrader):
 
         # check: is there a subapp given?
         if self.subapp is None:
-            self.fail("No command given (run with --help for options)")
+            print("No command given (run with --help for options). List of subcommands:\n")
+            self.print_subcommands()
 
         # This starts subapps
         super(NbGraderApp, self).start()
