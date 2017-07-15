@@ -122,6 +122,8 @@ class QuickStartApp(NbGrader):
                     dict(id="hacker", first_name="Alyssa", last_name="Hacker"),
                     dict(id="reasoner", first_name="Louis", last_name="Reasoner")
                 ]
+
+                c.IncludeHeaderFooter.header = "source/header.ipynb"
                 """
             ).format(course_id))
             fh.write("\n")
