@@ -44,7 +44,9 @@ Manage Assignments
           <li>To <b>preview</b> the student version of an assignment, click on the preview button.</li>
           <li><i>(JupyterHub only)</i> To <b>release</b> the assignment to students, click the release button.
           You can "unrelease" an assignment by clicking again, though note some students may have
-          already accessed the assignment.</li>
+          already accessed the assignment. <b>Note</b> that for the release button to become
+          available, the <code>course_id</code> option must be set in <code>nbgrader_config.py</code>.
+          For details, see <a href="http://nbgrader.readthedocs.io/en/stable/configuration/config_options.html">the documentation</a>.</li>
           <li><i>(JupyterHub only)</i> To <b>collect</b> assignments, click the collect button.</li>
           <li>To <b>autograde</b> submissions, click on the number of collected submissions. You must run
           the autograder on the submissions before you can manually grade them.</li>
