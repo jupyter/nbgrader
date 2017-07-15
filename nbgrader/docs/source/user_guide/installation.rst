@@ -11,6 +11,7 @@ system and command line tools::
 
 Or, if you use `Anaconda <https://www.continuum.io/downloads>`__::
 
+    conda install jupyter
     conda install -c conda-forge nbgrader
 
 nbgrader extensions
