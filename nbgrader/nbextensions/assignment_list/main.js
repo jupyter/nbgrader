@@ -1,9 +1,16 @@
 define([
     'base/js/namespace',
     'jquery',
+    'base/js/utils',
     './assignment_list'
-], function(Jupyter, $, AssignmentList) {
+], function(Jupyter, $, utils, AssignmentList) {
     "use strict";
+
+    var nbgrader_version = "0.6.0.dev";
+
+    var ajax = utils.ajax || $.ajax;
+    // Notebook v4.3.1 enabled xsrf so use notebooks ajax that includes the
+    // xsrf token in the header data
 
     var assignment_html = $([
         '<div id="assignments" class="tab-pane">',
@@ -25,6 +32,8 @@ define([
         '      <button id="refresh_assignments_list" title="Refresh assignments list" class="btn btn-default btn-xs"><i class="fa fa-refresh"></i></button>',
         '      </span>',
         '    </div>',
+        '  </div>',
+        '  <div class="alert alert-danger version_error">',
         '  </div>',
         '  <div class="panel-group">',
         '    <div class="panel panel-default">',
@@ -85,7 +94,28 @@ define([
         '</div>'
     ].join('\n'));
 
-   function load() {
+    function checkNbGraderVersion(base_url) {
+        var settings = {
+            cache : false,
+            type : "GET",
+            dataType : "json",
+            data : {
+                version: nbgrader_version
+            },
+            success : function (response) {
+                if (!response['success']) {
+                    var err = $("#assignments .version_error");
+                    err.text(response['message']);
+                    err.show();
+                }
+            },
+            error : utils.log_ajax_error,
+        };
+        var url = utils.url_path_join(base_url, 'nbgrader_version');
+        ajax(url, settings);
+    }
+
+    function load() {
         if (!Jupyter.notebook_list) return;
         var base_url = Jupyter.notebook_list.base_url;
         $('head').append(
@@ -126,6 +156,7 @@ define([
                 base_url: Jupyter.notebook_list.base_url,
             }
         );
+        checkNbGraderVersion(base_url);
         course_list.load_list();
     }
     return {

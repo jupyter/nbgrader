@@ -2,6 +2,7 @@ import json
 import os
 
 from tornado import web
+from textwrap import dedent
 
 from .base import BaseApiHandler, check_xsrf
 from ...api import MissingEntry
@@ -247,14 +248,6 @@ class AutogradeHandler(BaseApiHandler):
         self.write(json.dumps(self.api.autograde(assignment_id, student_id)))
 
 
-class NbGraderVersionHandler(BaseApiHandler):
-
-    @web.authenticated
-    @check_xsrf
-    def get(self):
-        self.finish(nbgrader_version)
-
-
 default_handlers = [
     (r"/formgrader/api/assignments", AssignmentCollectionHandler),
     (r"/formgrader/api/assignment/([^/]+)", AssignmentHandler),
@@ -283,6 +276,4 @@ default_handlers = [
 
     (r"/formgrader/api/student_submissions/([^/]+)", StudentSubmissionCollectionHandler),
     (r"/formgrader/api/student_notebook_submissions/([^/]+)/([^/]+)", StudentNotebookSubmissionCollectionHandler),
-
-    (r"/formgrader/api/version", NbGraderVersionHandler)
 ]

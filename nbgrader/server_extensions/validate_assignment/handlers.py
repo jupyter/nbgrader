@@ -6,6 +6,7 @@ import contextlib
 import traceback
 
 from tornado import web
+from textwrap import dedent
 
 from notebook.utils import url_path_join as ujoin
 from notebook.base.handlers import IPythonHandler
@@ -76,7 +77,25 @@ class NbGraderVersionHandler(IPythonHandler):
 
     @web.authenticated
     def get(self):
-        self.finish(nbgrader_version)
+        ui_version = self.get_argument('version')
+        if ui_version != nbgrader_version:
+            msg = dedent(
+                """
+                The version of the Validate nbextension does not match
+                the server extension; the nbextension version is {} while the
+                server version is {}. This can happen if you have recently
+                upgraded nbgrader, and may cause this extension to not work
+                correctly. To fix the problem, please see the nbgrader
+                installation instructions:
+                http://nbgrader.readthedocs.io/en/stable/user_guide/installation.html
+                """.format(ui_version, nbgrader_version)
+            ).strip().replace("\n", " ")
+            self.log.error(msg)
+            result = {"success": False, "message": msg}
+        else:
+            result = {"success": True}
+
+        self.finish(json.dumps(result))
 
 
 #-----------------------------------------------------------------------------
