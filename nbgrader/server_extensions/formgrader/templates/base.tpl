@@ -31,12 +31,17 @@
           <h1>nbgrader</h1>
         </div>
       </div>
-      <div class="col-md-10">
+      <div class="col-md-8">
         <div class="page-header">
           <h1>
           {%- block title -%}
           {%- endblock -%}
           </h1>
+        </div>
+      </div>
+      <div class="col-md-2">
+        <div class="jupyter-logo">
+          <img src="http://bollwyvl.github.io/jupyter.github.io/images/jupyter-sq-text.svg">
         </div>
       </div>
     </div>

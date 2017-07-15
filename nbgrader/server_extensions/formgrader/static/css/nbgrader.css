@@ -44,3 +44,9 @@ div.modal div.panel pre {
 div.modal p {
   margin-bottom: 20px;
 }
+
+.jupyter-logo {
+  height: 100px;
+  width: 100px;
+  margin: 0 auto;
+}
