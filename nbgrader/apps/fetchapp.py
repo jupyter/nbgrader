@@ -73,7 +73,6 @@ class FetchApp(NbGrader):
     def start(self):
         super(FetchApp, self).start()
 
-        print("{}".format(self.extra_args))
         # set assignemnt and course
         if len(self.extra_args) == 1:
             self.coursedir.assignment_id = self.extra_args[0]
