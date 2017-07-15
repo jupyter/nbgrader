@@ -13,7 +13,7 @@ class TestNbGrader(BaseTestApp):
 
     def test_no_subapp(self):
         """Is the help displayed when no subapp is given?"""
-        run_nbgrader([], retcode=1)
+        run_nbgrader([], retcode=0)
 
     def test_generate_config(self):
         """Is the config file properly generated?"""
