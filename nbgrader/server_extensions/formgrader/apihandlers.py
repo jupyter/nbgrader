@@ -2,11 +2,9 @@ import json
 import os
 
 from tornado import web
-from textwrap import dedent
 
 from .base import BaseApiHandler, check_xsrf
 from ...api import MissingEntry
-from ... import __version__ as nbgrader_version
 
 
 class GradeCollectionHandler(BaseApiHandler):
