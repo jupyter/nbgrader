@@ -167,3 +167,15 @@ newer version, which you run through the autograder and which attains full
 credit. Since the manual grade always takes precedence over the autograde, the
 student would still receive the low score unless you updated your grade: hence
 the motivation for marking it as needing to be manually graded (again).
+
+Do students have to install anything on their own computers to use nbgrader?
+----------------------------------------------------------------------------
+No, nbgrader only needs to be installed for the instructor. However, students
+may optionally install the Validate extension to verify that their submission
+passes all the test cases.
+
+Can tests be only temporarily hidden, so that students can reveal them?
+-----------------------------------------------------------------------
+No, the tests are either present in the student version of the notebook or they
+are not. However, there exist extensions such as
+https://github.com/kirbs-/hide_code which can assist in hiding code cells.
