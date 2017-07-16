@@ -74,7 +74,7 @@
     display: none;
 }
 
-#assignments .list_error {
+#assignments .list_error, #assignments .version_error {
     display: none;
 }
 
