@@ -134,6 +134,7 @@ define([
                 .text('Assignments')
                 .click(function (e) {
                     window.history.pushState(null, null, '#assignments');
+                    course_list.load_list();
                 })
             )
         );
@@ -157,7 +158,6 @@ define([
             }
         );
         checkNbGraderVersion(base_url);
-        course_list.load_list();
     }
     return {
         load_ipython_extension: load
