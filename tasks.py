@@ -45,6 +45,11 @@ def docs(ctx):
     run(ctx, 'make -C nbgrader/docs spelling')
 
 
+@task
+def clean_docs(ctx):
+    run(ctx, 'python nbgrader/docs/source/clear_docs.py')
+
+
 def _run_tests(ctx, mark=None, skip=None, junitxml=None):
     if not WINDOWS:
         import distutils.sysconfig
@@ -146,6 +151,7 @@ def install(ctx, group):
 
 ns = collection.Collection(
     after_success,
+    clean_docs,
     docs,
     install,
     js,

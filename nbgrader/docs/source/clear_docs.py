@@ -29,6 +29,32 @@ def _check_if_directory_in_path(pth, target):
     return False
 
 
+def clean_notebook_metadata(root):
+    """Cleans the metadata of documentation notebooks."""
+
+    print("Cleaning the metadata of notebooks in '{}'...".format(os.path.abspath(root)))
+
+    for dirpath, dirnames, filenames in os.walk(root):
+        is_submitted = _check_if_directory_in_path(dirpath, 'submitted')
+
+        for filename in sorted(filenames):
+            if os.path.splitext(filename)[1] == '.ipynb':
+                # read in the notebook
+                pth = os.path.join(dirpath, filename)
+                with open(pth, 'r') as fh:
+                    orig_nb = read(fh, 4)
+
+                # copy the original notebook
+                new_nb = clean_notebook(orig_nb)
+
+                # write the notebook back to disk
+                with open(pth, 'w') as fh:
+                    write(new_nb, fh, 4)
+
+                if orig_nb != new_nb:
+                    print("Cleaned '{}'".format(pth))
+
+
 def clear_notebooks(root):
     """Clear the outputs of documentation notebooks."""
 
@@ -59,20 +85,11 @@ def clear_notebooks(root):
                     orig_nb = read(fh, 4)
 
                 # copy the original notebook
-                new_nb = deepcopy(orig_nb)
+                new_nb = clean_notebook(orig_nb)
 
                 # check outputs of all the cells
                 if not is_submitted:
                     new_nb = preprocessor.preprocess(new_nb, {})[0]
-
-                # clear metadata
-                new_nb.metadata = {
-                    "kernelspec": {
-                        "display_name": "Python",
-                        "language": "python",
-                        "name": "python"
-                    }
-                }
 
                 # write the notebook back to disk
                 with open(pth, 'w') as fh:
@@ -80,3 +97,24 @@ def clear_notebooks(root):
 
                 if orig_nb != new_nb:
                     print("Cleared '{}'".format(pth))
+
+
+def clean_notebook(orig_nb):
+    new_nb = deepcopy(orig_nb)
+    clean_metadata(new_nb)
+    return new_nb
+
+
+def clean_metadata(new_nb):
+    new_nb.metadata = {
+        "kernelspec": {
+            "display_name": "Python",
+            "language": "python",
+            "name": "python"
+        }
+    }
+
+
+if __name__ == "__main__":
+    root = os.path.abspath(os.path.dirname(__file__))
+    clean_notebook_metadata(root)
