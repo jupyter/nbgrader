@@ -6,6 +6,7 @@ import contextlib
 import traceback
 
 from tornado import web
+from textwrap import dedent
 
 from notebook.utils import url_path_join as ujoin
 from notebook.base.handlers import IPythonHandler
@@ -16,6 +17,7 @@ from jupyter_core.paths import jupyter_config_path
 from ...apps import NbGrader
 from ...coursedir import CourseDirectory
 from ...exchange import ExchangeList, ExchangeFetch, ExchangeSubmit
+from ... import __version__ as nbgrader_version
 
 
 static = os.path.join(os.path.dirname(__file__), 'static')
@@ -229,6 +231,31 @@ class CourseListHandler(BaseAssignmentHandler):
         self.finish(json.dumps(self.manager.list_courses()))
 
 
+class NbGraderVersionHandler(BaseAssignmentHandler):
+
+    @web.authenticated
+    def get(self):
+        ui_version = self.get_argument('version')
+        if ui_version != nbgrader_version:
+            msg = dedent(
+                """
+                The version of the Assignment List nbextension does not match
+                the server extension; the nbextension version is {} while the
+                server version is {}. This can happen if you have recently
+                upgraded nbgrader, and may cause this extension to not work
+                correctly. To fix the problem, please see the nbgrader
+                installation instructions:
+                http://nbgrader.readthedocs.io/en/stable/user_guide/installation.html
+                """.format(ui_version, nbgrader_version)
+            ).strip().replace("\n", " ")
+            self.log.error(msg)
+            result = {"success": False, "message": msg}
+        else:
+            result = {"success": True}
+
+        self.finish(json.dumps(result))
+
+
 #-----------------------------------------------------------------------------
 # URL to handler mappings
 #-----------------------------------------------------------------------------
@@ -240,6 +267,7 @@ default_handlers = [
     (r"/assignments", AssignmentListHandler),
     (r"/assignments/%s" % _assignment_action_regex, AssignmentActionHandler),
     (r"/courses", CourseListHandler),
+    (r"/nbgrader_version", NbGraderVersionHandler)
 ]
 
 

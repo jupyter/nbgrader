@@ -7,9 +7,37 @@ define([
 ], function ($, Jupyter, dialog, utils) {
     "use strict";
 
+    var nbgrader_version = "0.5.2.dev";
+
     var ajax = utils.ajax || $.ajax;
     // Notebook v4.3.1 enabled xsrf so use notebooks ajax that includes the
     // xsrf token in the header data
+
+    var checkNbGraderVersion = function (callback) {
+        var settings = {
+            cache : false,
+            type : "GET",
+            dataType : "json",
+            data : {
+                version: nbgrader_version
+            },
+            success : function (response) {
+                if (!response['success']) {
+                    var body = $("<div/>").text(response['message']);
+                    dialog.modal({
+                        title: "Version Mismatch",
+                        body: body,
+                        buttons: { OK: { class : "btn-primary" } }
+                    });
+                } else {
+                    callback();
+                }
+            },
+            error : utils.log_ajax_error,
+        };
+        var url = utils.url_path_join(Jupyter.notebook.base_url, 'nbgrader_version');
+        ajax(url, settings);
+    };
 
     var add_button = function () {
         var maintoolbar = $("#maintoolbar-container");
@@ -19,30 +47,32 @@ define([
         maintoolbar.append(btn_group);
 
         btn.click(function (e) {
-            var p = Jupyter.notebook.save_notebook();
-            p.then(function () {
-                var settings = {
-                    cache : false,
-                    data : { path: Jupyter.notebook.notebook_path },
-                    type : "POST",
-                    dataType : "json",
-                    success : function (data, status, xhr) {
-                        btn.text('Validate');
-                        btn.removeAttr('disabled');
-                        validate(data, btn);
-                    },
-                    error : function (xhr, status, error) {
-                        utils.log_ajax_error(xhr, status, error);
-                    }
-                };
-                btn.text('Validating...');
-                btn.attr('disabled', 'disabled');
-                var url = utils.url_path_join(
-                    Jupyter.notebook.base_url,
-                    'assignments',
-                    'validate'
-                );
-                ajax(url, settings);
+            checkNbGraderVersion(function () {
+                var p = Jupyter.notebook.save_notebook();
+                p.then(function () {
+                    var settings = {
+                        cache : false,
+                        data : { path: Jupyter.notebook.notebook_path },
+                        type : "POST",
+                        dataType : "json",
+                        success : function (data, status, xhr) {
+                            btn.text('Validate');
+                            btn.removeAttr('disabled');
+                            validate(data, btn);
+                        },
+                        error : function (xhr, status, error) {
+                            utils.log_ajax_error(xhr, status, error);
+                        }
+                    };
+                    btn.text('Validating...');
+                    btn.attr('disabled', 'disabled');
+                    var url = utils.url_path_join(
+                        Jupyter.notebook.base_url,
+                        'assignments',
+                        'validate'
+                    );
+                    ajax(url, settings);
+                });
             });
         });
     };
