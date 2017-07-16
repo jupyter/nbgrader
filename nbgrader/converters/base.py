@@ -336,5 +336,10 @@ class BaseConverter(LoggingConfigurable):
                 msg = (
                     "Please see the error log ({}) for details on the specific "
                     "errors on the above failures.".format(self.logfile))
-                self.log.error(msg)
-                raise NbGraderException(msg)
+            else:
+                msg = (
+                    "Please see the the above traceback for details on the specific "
+                    "errors on the above failures.")
+
+            self.log.error(msg)
+            raise NbGraderException(msg)
