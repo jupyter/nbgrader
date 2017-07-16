@@ -10,7 +10,7 @@ from traitlets import Instance, Enum, Unicode, observe
 
 from ..coursedir import CourseDirectory
 from ..converters import Assign, Autograde
-from ..exchange import ExchangeList, ExchangeRelease, ExchangeCollect
+from ..exchange import ExchangeList, ExchangeRelease, ExchangeCollect, ExchangeError
 from ..api import MissingEntry, Gradebook, Student, SubmittedAssignment
 from ..utils import parse_utc, temp_attrs, capture_log, as_timezone
 
@@ -66,8 +66,13 @@ class NbGraderAPI(LoggingConfigurable):
             self.coursedir = coursedir
 
         if sys.platform != 'win32':
-            lister = ExchangeList(coursedir=self.coursedir, parent=self)
-            self.course_id = lister.course_id
+            try:
+                lister = ExchangeList(coursedir=self.coursedir, parent=self)
+                lister.start()
+            except ExchangeError:
+                self.course_id = None
+            else:
+                self.course_id = lister.course_id
         else:
             self.course_id = None
 
