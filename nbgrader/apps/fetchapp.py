@@ -74,18 +74,25 @@ class FetchApp(NbGrader):
         super(FetchApp, self).start()
 
         # set assignment and course
-        if len(self.extra_args) == 0:
+        if len(self.extra_args) == 0 and self.coursedir.assignment_id == "":
             self.fail("Must provide assignment name:\nnbgrader <command> ASSIGNMENT [ --course COURSE ]")
 
-        failed = False
-
-        for arg in self.extra_args:
-            self.coursedir.assignment_id = arg
+        if self.coursedir.assignment_id != "":
             fetch = ExchangeFetch(coursedir=self.coursedir, parent=self)
             try:
                 fetch.start()
             except ExchangeError:
-                failed = True
+                self.fail("nbgrader fetch failed")
+        else:
+            failed = False
 
-        if failed:
-            self.fail("nbgrader fetch failed")
+            for arg in self.extra_args:
+                self.coursedir.assignment_id = arg
+                fetch = ExchangeFetch(coursedir=self.coursedir, parent=self)
+                try:
+                    fetch.start()
+                except ExchangeError:
+                    failed = True
+
+            if failed:
+                self.fail("nbgrader fetch failed")
