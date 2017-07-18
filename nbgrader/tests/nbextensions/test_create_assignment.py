@@ -571,3 +571,24 @@ def test_cell_ids(browser, port):
     _save(browser)
     _wait_for_modal(browser)
     _dismiss_modal(browser)
+
+
+@pytest.mark.nbextensions
+def test_negative_points(browser, port):
+    _load_notebook(browser, port)
+    _activate_toolbar(browser)
+
+    # make sure the total points is zero
+    assert _get_total_points(browser) == 0
+
+    # make it autograder tests and set the points to two
+    _select_tests(browser)
+    _set_points(browser, points=2)
+    _set_id(browser)
+    assert _get_total_points(browser) == 2
+    assert 2 == _get_metadata(browser)['points']
+
+    # set the points to negative one
+    _set_points(browser, points=-1)
+    assert _get_total_points(browser) == 0
+    assert 0 == _get_metadata(browser)['points']
