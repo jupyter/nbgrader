@@ -29,12 +29,12 @@ class TestNbGraderDb(BaseTestApp):
 
     def test_no_args(self):
         """Is there an error if no arguments are given?"""
-        run_nbgrader(["db"], retcode=1)
-        run_nbgrader(["db", "student"], retcode=1)
+        run_nbgrader(["db"], retcode=0)
+        run_nbgrader(["db", "student"], retcode=0)
         run_nbgrader(["db", "student", "remove"], retcode=1)
         run_nbgrader(["db", "student", "add"], retcode=1)
         run_nbgrader(["db", "student", "import"], retcode=1)
-        run_nbgrader(["db", "assignment"], retcode=1)
+        run_nbgrader(["db", "assignment"], retcode=0)
         run_nbgrader(["db", "assignment", "remove"], retcode=1)
         run_nbgrader(["db", "assignment", "add"], retcode=1)
         run_nbgrader(["db", "assignment", "import"], retcode=1)
