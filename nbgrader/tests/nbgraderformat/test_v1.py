@@ -52,6 +52,10 @@ def test_set_points():
     ValidatorV1().upgrade_cell_metadata(cell)
     assert cell.metadata.nbgrader["points"] == 0.0
 
+    cell = create_grade_cell("", "code", "foo", -1, 0)
+    ValidatorV1().upgrade_cell_metadata(cell)
+    assert cell.metadata.nbgrader["points"] == 0.0
+
 
 def test_extra_keys():
     cell = create_grade_cell("", "code", "foo", "", 0)
@@ -65,4 +69,3 @@ def test_schema_version():
     del cell.metadata.nbgrader["schema_version"]
     ValidatorV1().upgrade_cell_metadata(cell)
     assert cell.metadata.nbgrader["schema_version"] == 1
-

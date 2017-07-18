@@ -73,7 +73,8 @@ The metadata may contain the following keys:
     Added by the "Create Assignment" extension.
 
     This is the number of points that a cell is worth. It should only be
-    set if ``grade`` is also set to true.
+    set if ``grade`` is also set to true. The number of points must be greater
+    than or equal to zero.
 
 .. data:: checksum
 

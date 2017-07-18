@@ -32,7 +32,11 @@ class ValidatorV1(BaseValidator):
             if meta['points'] == '':
                 meta['points'] = 0.0
             else:
-                meta['points'] = float(meta['points'])
+                points = float(meta['points'])
+                if points < 0:
+                    meta['points'] = 0.0
+                else:
+                    meta['points'] = float(meta['points'])
         else:
             meta['points'] = 0.0
 
