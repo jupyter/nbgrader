@@ -3,6 +3,13 @@ nbgrader
 
 ``nbgrader`` is a tool that facilitates creating and grading assignments in the Jupyter notebook. It allows instructors to easily create notebook-based assignments that include both coding exercises and written free-responses. ``nbgrader`` then also provides a streamlined interface for quickly grading completed assignments.
 
+For an overview and demonstration of nbgrader's core functionality, check out the talk on nbgrader given at SciPy 2017:
+
+.. raw:: html
+
+    <p><iframe width="640" height="360" src="https://www.youtube.com/embed/5WUm0QuJdFw" frameborder="0" allowfullscreen></iframe></p>
+
+
 .. toctree::
     :maxdepth: 1
     :caption: User Documentation

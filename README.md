@@ -9,7 +9,6 @@ A system for assigning and grading Jupyter notebooks.
 
 [Documentation can be found on Read the Docs.](https://nbgrader.readthedocs.io)
 
-
 ## Highlights of nbgrader
 
 ### Instructor toolbar extension for Jupyter notebooks
@@ -39,6 +38,9 @@ submit, and validate their assignments.
 offer an efficient way for the instructor to generate, assign, release, collect,
 and grade notebooks.
 
+### SciPy 2017 overview talk (click to view on YouTube)
+
+[![nbgrader: A Tool for Creating and Grading Assignments in the Jupyter Notebook | SciPy 2017 ](http://img.youtube.com/vi/5WUm0QuJdFw/0.jpg)](http://www.youtube.com/watch?v=5WUm0QuJdFw "nbgrader: A Tool for Creating and Grading Assignments in the Jupyter Notebook | SciPy 2017 ")
 
 ## Installation
 
