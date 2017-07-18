@@ -48,6 +48,7 @@ ddbourgin
 delimeters
 dementrock
 dev
+dirs
 dlsun
 doesn’t
 don’t
