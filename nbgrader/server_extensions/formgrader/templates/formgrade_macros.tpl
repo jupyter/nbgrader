@@ -60,7 +60,11 @@ function toggle_name(on) {
                 Submission #{{ resources.index + 1 }}
               </a>
               <a class="name-shown" data-toggle="tooltip" data-placement="bottom" title="Open live notebook" target="_blank" href="{{ resources.base_url }}/notebooks/{{ resources.notebook_path }}">
+                {%- if resources.last_name and resources.first_name -%}
                 {{ resources.last_name }}, {{ resources.first_name }}
+                {%- else -%}
+                {{ resources.student }}
+                {%- endif -%}
               </a>
               <span class="glyphicon glyphicon-eye-open name-hidden" aria-hidden="true" onclick="toggle_name(true);"></span>
               <span class="glyphicon glyphicon-eye-close name-shown" aria-hidden="true" onclick="toggle_name(false);"></span>
