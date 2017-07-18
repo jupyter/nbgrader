@@ -56,6 +56,12 @@ var SubmittedNotebookUI = Backbone.View.extend({
             .click(_.bind(this.hideName, this)));
 
         // notebook name
+        var last_name = this.model.get("last_name");
+        var first_name = this.model.get("first_name");
+        var name = this.model.get("student");
+        if (last_name !== null && first_name !== null) {
+            name = last_name + ", " + first_name
+        }
         this.$name.attr("data-order", this.model.get("index"));
         this.$name.append($("<a/>")
             .addClass("name-hidden")
@@ -64,7 +70,7 @@ var SubmittedNotebookUI = Backbone.View.extend({
         this.$name.append($("<a/>")
             .addClass("name-shown")
             .attr("href", base_url + "/formgrader/submissions/" + this.model.get("id"))
-            .text(this.model.get("last_name") + ", " + this.model.get("first_name")));
+            .text(name));
 
         // score
         var score = roundToPrecision(this.model.get("score"), 2);
