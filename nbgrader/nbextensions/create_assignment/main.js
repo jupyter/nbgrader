@@ -224,7 +224,9 @@ define([
         if (cell.metadata.nbgrader === undefined) {
             cell.metadata.nbgrader = {};
         }
-        cell.metadata.nbgrader.points = to_float(val);
+        var points = to_float(val);
+        if (points < 0) points = 0;
+        cell.metadata.nbgrader.points = points;
     };
 
     var get_grade_id = function (cell) {
