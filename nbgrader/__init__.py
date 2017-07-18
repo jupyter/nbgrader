@@ -3,17 +3,12 @@ A system for assigning and grading notebooks.
 """
 
 import os
+import sys
 from ._version import version_info, __version__
 
 
 def _jupyter_nbextension_paths():
-    return [
-        dict(
-            section="tree",
-            src=os.path.join('nbextensions', 'assignment_list'),
-            dest="assignment_list",
-            require="assignment_list/main"
-        ),
+    paths = [
         dict(
             section="notebook",
             src=os.path.join('nbextensions', 'create_assignment'),
@@ -34,9 +29,26 @@ def _jupyter_nbextension_paths():
         ),
     ]
 
+    if sys.platform != 'win32':
+        paths.append(
+            dict(
+                section="tree",
+                src=os.path.join('nbextensions', 'assignment_list'),
+                dest="assignment_list",
+                require="assignment_list/main"
+            )
+        )
+
+    return paths
+
+
 def _jupyter_server_extension_paths():
-    return [
-        dict(module="nbgrader.server_extensions.assignment_list"),
+    paths = [
         dict(module="nbgrader.server_extensions.formgrader"),
         dict(module="nbgrader.server_extensions.validate_assignment")
     ]
+
+    if sys.platform != 'win32':
+        paths.append(dict(module="nbgrader.server_extensions.assignment_list"))
+
+    return paths
