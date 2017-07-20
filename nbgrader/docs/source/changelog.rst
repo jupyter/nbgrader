@@ -8,6 +8,47 @@ A summary of changes to nbgrader.
 0.5.x
 -----
 
+0.5.2
+~~~~~
+
+nbgrader version 0.5.2 is a bugfix release, with most of the bugs being discovered and subsequently fixed by the sprinters at SciPy 2017! The following PRs were merged:
+
+- PR #852: Fix spelling wordlist, again
+- PR #850: Include extension with feedback template filename
+- PR #848: Add links to the scipy talk
+- PR #847: Fix html export config options to avoid warnings
+- PR #846: Disallow negative point values
+- PR #845: Don't install assignment list on windows
+- PR #844: Reveal ids if names aren't set
+- PR #843: Update spelling wordlist
+- PR #840: Avoid extension errors when exchange is missing
+- PR #839: Always raise on convert failure
+- PR #837: Report mismatch extension versions
+- PR #836: Add documentation for course_id and release
+- PR #835: DOC: correct Cell Toolbar location
+- PR #833: Include quickstart .ipynb header
+- PR #831: Fix typo on Managing assignment docs
+- PR #830: Print out app subcommands by default
+- PR #825: Add directory structure example
+- PR #824: Add FAQ sections
+- PR #823: Typo fix.
+- PR #819: Update install instructions
+- PR #816: Add jupyter logo
+- PR #802: Fix bug with autograding when there is no timestamp
+
+Thanks to the following users who submitted PRs or reported issues that were fixed for the 0.5.2 release:
+
+- arcticbarra
+- BjornFJohansson
+- hetland
+- ixjlyons
+- jhamrick
+- katyhuff
+- ksunden
+- lgpage
+- ncclementi
+- Ruin0x11
+
 0.5.1
 ~~~~~
 
