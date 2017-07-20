@@ -43,7 +43,7 @@ class Feedback(BaseConverter):
 
         c = Config()
         if 'template_file' not in self.config.HTMLExporter:
-            c.HTMLExporter.template_file = 'feedback'
+            c.HTMLExporter.template_file = 'feedback.tpl'
         if 'template_path' not in self.config.HTMLExporter:
             template_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'server_extensions', 'formgrader', 'templates'))
             c.HTMLExporter.template_path = ['.', template_path]
