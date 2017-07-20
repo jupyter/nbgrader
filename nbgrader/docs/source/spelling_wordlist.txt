@@ -8,6 +8,7 @@ alope
 api
 app
 apps
+aren
 aren’t
 asctime
 auth
@@ -50,6 +51,7 @@ dementrock
 dev
 dirs
 dlsun
+doesn
 doesn’t
 don’t
 Don’t
@@ -75,7 +77,9 @@ Gradebook
 gradebook
 Granger
 hardcoded
+hasn
 hasn’t
+haven
 HeLLo
 hetland
 hOlle
@@ -95,6 +99,7 @@ iopub
 ipynb
 IPython
 ischurov
+isn
 isn’t
 it’s
 ivanslapnicar
@@ -206,8 +211,10 @@ url
 username
 usernames
 utcnow
+ve
 vinaykola
 webapp
+weren
 weren’t
 we’ll
 We’re
