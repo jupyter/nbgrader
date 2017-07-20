@@ -9,6 +9,7 @@ api
 app
 apps
 aren
+arcticbarra
 aren’t
 asctime
 auth
@@ -49,6 +50,7 @@ ddbourgin
 delimeters
 dementrock
 dev
+dirs
 dlsun
 doesn
 doesn’t
@@ -102,6 +104,7 @@ isn
 isn’t
 it’s
 ivanslapnicar
+ixjlyons
 I’m
 I’ve
 jdfreder
@@ -114,7 +117,9 @@ JUPYTER
 Jupyter
 jupyter
 jupyterhub
+katyhuff
 kernelspec
+ksunden
 Let’s
 let’s
 lgpage
@@ -138,6 +143,7 @@ nbextension
 nbextensions
 nbgrader
 nbgrader’s
+ncclementi
 neuroscience
 np
 npm
@@ -172,6 +178,7 @@ resize
 rst
 runtime
 sansary
+scipy
 serverextension
 sha
 shouldn
@@ -186,6 +193,7 @@ stdout
 stoppped
 student’s
 subcommand
+subcommands
 suchow
 suprocesses
 svurens
