@@ -66,15 +66,25 @@ class NbGraderAPI(LoggingConfigurable):
             self.coursedir = coursedir
 
         if sys.platform != 'win32':
+            lister = ExchangeList(coursedir=self.coursedir, parent=self)
+            self.course_id = lister.course_id
+            self.exchange = lister.root
+
             try:
-                lister = ExchangeList(coursedir=self.coursedir, parent=self)
                 lister.start()
             except ExchangeError:
-                self.course_id = None
+                self.exchange_missing = True
             else:
-                self.course_id = lister.course_id
+                self.exchange_missing = False
+
         else:
-            self.course_id = None
+            self.course_id = ''
+            self.exchange = ''
+            self.exchange_missing = True
+
+    @property
+    def exchange_is_functional(self):
+        return self.course_id and not self.exchange_missing and sys.platform != 'win32'
 
     @property
     def gradebook(self):
@@ -131,7 +141,7 @@ class NbGraderAPI(LoggingConfigurable):
             A set of assignment names
 
         """
-        if self.course_id and sys.platform != 'win32':
+        if self.exchange_is_functional:
             lister = ExchangeList(coursedir=self.coursedir, parent=self)
             released = set([x['assignment_id'] for x in lister.start()])
         else:
@@ -318,7 +328,7 @@ class NbGraderAPI(LoggingConfigurable):
             }
 
         # get released status
-        if not self.course_id or sys.platform == 'win32':
+        if not self.exchange_is_functional:
             assignment["releaseable"] = False
             assignment["status"] = "draft"
         else:

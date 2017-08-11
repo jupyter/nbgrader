@@ -55,6 +55,27 @@ Manage Assignments
     </div>
   </div>
 </div>
+{% if windows %}
+<div class="alert alert-warning" id="warning-windows">
+Windows operating system detected. Please note that the "release" and "collect"
+functionality will not be available.
+</div>
+{% elif exchange_missing %}
+<div class="alert alert-warning" id="warning-exchange">
+The exchange directory at <code>{{ exchange }}</code> does not exist and could
+not be created. The "release" and "collect" functionality will not be available.
+Please see the documentation on
+<a href="http://nbgrader.readthedocs.io/en/stable/user_guide/managing_assignment_files.html#setting-up-the-exchange">Setting Up The Exchange</a>
+for instructions.
+</div>
+{% elif not course_id %}
+<div class="alert alert-warning" id="warning-course-id">
+The course id has not been set in <code>nbgrader_config.py</code>. The "release"
+and "collect" functionality will not be available. Please see the documentation on
+<a href="http://nbgrader.readthedocs.io/en/stable/user_guide/managing_assignment_files.html#setting-up-the-exchange">Setting Up The Exchange</a>
+for instructions.
+</div>
+{% endif %}
 {%- endblock -%}
 
 {%- block table_header -%}
