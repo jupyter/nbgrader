@@ -90,14 +90,14 @@ have submitted solutions to the assignment ``ps1``:
    │   ├── bitdiddle
    │   │   └── ps1
    │   │       ├── jupyter.png
-   │   │       ├── problem1.html
-   │   │       ├── problem2.html
+   │   │       ├── problem1.ipynb
+   │   │       ├── problem2.ipynb
    │   │       └── timestamp.txt
    │   └── hacker
    │       └── ps1
    │           ├── jupyter.png
-   │           ├── problem1.html
-   │           ├── problem2.html
+   │           ├── problem1.ipynb
+   │           ├── problem2.ipynb
    │           └── timestamp.txt
    ├── autograded/
    └── feedback/
