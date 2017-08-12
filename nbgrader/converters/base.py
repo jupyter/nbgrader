@@ -66,7 +66,12 @@ class BaseConverter(LoggingConfigurable):
         self.exporter = self.exporter_class(parent=self, config=self.config)
         for pp in self.preprocessors:
             self.exporter.register_preprocessor(pp)
-        self.convert_notebooks()
+        currdir = os.getcwd()
+        os.chdir(self.coursedir.root)
+        try:
+            self.convert_notebooks()
+        finally:
+            os.chdir(currdir)
 
     @default("classes")
     def _classes_default(self):
