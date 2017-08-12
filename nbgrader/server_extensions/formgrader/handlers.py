@@ -1,5 +1,6 @@
 import os
 import re
+import sys
 
 from tornado import web
 
@@ -14,7 +15,11 @@ class ManageAssignmentsHandler(BaseHandler):
         html = self.render(
             "manage_assignments.tpl",
             url_prefix=self.url_prefix,
-            base_url=self.base_url)
+            base_url=self.base_url,
+            windows=(sys.prefix == 'win32'),
+            course_id=self.api.course_id,
+            exchange=self.api.exchange,
+            exchange_missing=self.api.exchange_missing)
         self.write(html)
 
 
