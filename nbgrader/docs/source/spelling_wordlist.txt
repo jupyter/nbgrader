@@ -8,8 +8,8 @@ alope
 api
 app
 apps
-aren
 arcticbarra
+aren
 aren’t
 asctime
 auth
@@ -47,8 +47,10 @@ customizable
 cwd
 datefmt
 ddbourgin
+deletable
 delimeters
 dementrock
+deprecations
 dev
 dirs
 dlsun
@@ -64,6 +66,7 @@ ellachao
 ellisonbg
 embanner
 entrypoint
+feedstock
 filename
 filenames
 Filenames
@@ -93,6 +96,7 @@ Indices
 indices
 init
 inline
+installable
 institution’s
 instructor’s
 io
@@ -192,6 +196,7 @@ stdin
 stdout
 stoppped
 student’s
+subclasses
 subcommand
 subcommands
 suchow
@@ -213,6 +218,7 @@ undeletable
 Undeprecate
 unicode
 uninstall
+unlink
 untracked
 url
 username
