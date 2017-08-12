@@ -277,3 +277,15 @@ class TestNbGraderAssign(BaseTestApp):
         run_nbgrader(["assign", "ps1", "--no-db", "--no-metadata"])
         assert os.path.exists(join(course_dir, "release", "ps1", "p1.ipynb"))
 
+    def test_header(self, course_dir):
+        """Does the relative path to the header work?"""
+        self._empty_notebook(join(course_dir, 'source', 'ps1', 'foo.ipynb'))
+        self._empty_notebook(join(course_dir, 'source', 'header.ipynb'))
+        with open("nbgrader_config.py", "a") as fh:
+            fh.write("""c.CourseDirectory.db_assignments = [dict(name="ps1")]\n""")
+            fh.write("""c.IncludeHeaderFooter.header = "source/header.ipynb"\n""")
+        run_nbgrader(["assign", "ps1"])
+        assert os.path.isfile(join(course_dir, "release", "ps1", "foo.ipynb"))
+
+
+

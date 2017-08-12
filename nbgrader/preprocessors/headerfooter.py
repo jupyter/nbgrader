@@ -8,8 +8,8 @@ from ..nbgraderformat import read as read_nb
 class IncludeHeaderFooter(NbGraderPreprocessor):
     """A preprocessor for adding header and/or footer cells to a notebook."""
 
-    header = Unicode("", help="Path to header notebook").tag(config=True)
-    footer = Unicode("", help="Path to footer notebook").tag(config=True)
+    header = Unicode("", help="Path to header notebook, relative to the root of the course directory").tag(config=True)
+    footer = Unicode("", help="Path to footer notebook, relative to the root of the course directory").tag(config=True)
 
     def preprocess(self, nb, resources):
         """Concatenates the cells from the header and footer notebooks to the
