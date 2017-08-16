@@ -10,7 +10,7 @@ from . import NbGraderPreprocessor
 class ClearSolutions(NbGraderPreprocessor):
 
     code_stub = Dict(
-        dict(python="# YOUR CODE HERE\nraise NotImplementedError()"),
+        dict(python="# YOUR CODE HERE\nraise NotImplementedError()",matlab="%YOUR CODE HERE",octave="%YOUR CODE HERE",java="//YOUR CODE HERE"),
         help="The code snippet that will replace code solutions"
     ).tag(config=True)
 
