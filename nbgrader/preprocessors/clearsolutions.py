@@ -11,8 +11,8 @@ class ClearSolutions(NbGraderPreprocessor):
 
     code_stub = Dict(
         dict(python="# YOUR CODE HERE\nraise NotImplementedError()",
-             matlab="% YOUR CODE HERE\n error('No Answer Given!')",
-             octave="% YOUR CODE HERE\n error('No Answer Given!')",
+             matlab="% YOUR CODE HERE\nerror('No Answer Given!')",
+             octave="% YOUR CODE HERE\nerror('No Answer Given!')",
              java="// YOUR CODE HERE"),
         help="The code snippet that will replace code solutions"
     ).tag(config=True)
