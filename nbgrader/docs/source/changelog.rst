@@ -8,6 +8,25 @@ A summary of changes to nbgrader.
 0.5.x
 -----
 
+0.5.3
+~~~~~
+
+nbgrader version 0.5.3 is a bugfix release, with the following PRs merged:
+
+- PR #868: Fix travis to work with trusty
+- PR #867: Change to the root of the course directory before running nbgrader converters
+- PR #866: Set nbgrader url prefix to be relative to notebook_dir
+- PR #865: Produce warnings if the exchange isn't set up correctly
+- PR #864: Fix link to jupyterhub docs
+- PR #861: fix the html to ipynb in docs
+
+Thanks to the following users who submitted PRs or reported issues that were fixed for the 0.5.3 release:
+
+- jhamrick
+- misolietavec
+- mpacer
+- rdpratti
+
 0.5.2
 ~~~~~
 
