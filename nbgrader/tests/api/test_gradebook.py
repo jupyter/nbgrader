@@ -728,6 +728,12 @@ def test_student_dicts(assignment):
     assert a == b
 
 
+def test_student_dicts_zero_points(gradebook):
+    gradebook.add_assignment("ps1")
+    s = gradebook.add_student("1234")
+    assert gradebook.student_dicts() == [s.to_dict()]
+
+
 def test_notebook_submission_dicts(assignment):
     assignment.add_student('hacker123')
     assignment.add_student('bitdiddle')
