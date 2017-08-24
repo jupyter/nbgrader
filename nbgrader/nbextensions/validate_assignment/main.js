@@ -7,7 +7,7 @@ define([
 ], function ($, Jupyter, dialog, utils) {
     "use strict";
 
-    var nbgrader_version = "0.5.3.dev";
+    var nbgrader_version = "0.5.3";
 
     var ajax = utils.ajax || $.ajax;
     // Notebook v4.3.1 enabled xsrf so use notebooks ajax that includes the

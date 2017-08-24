@@ -52,6 +52,7 @@ delimeters
 dementrock
 deprecations
 dev
+dir
 dirs
 dlsun
 doesn
@@ -140,6 +141,8 @@ matplotlib
 metadata
 mikebolt
 minrk
+misolietavec
+mpacer
 multi
 namespace
 nbconvert
@@ -173,6 +176,7 @@ programmatically
 ps
 py
 quickstart
+rdpratti
 readonly
 readthedocs
 redSlug
