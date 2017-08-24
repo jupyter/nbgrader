@@ -15,6 +15,7 @@ from setuptools.archive_util import unpack_zipfile
 from contextlib import contextmanager
 from tornado.log import LogFormatter
 from dateutil.tz import gettz
+from datetime import datetime
 
 
 # pwd is for unix passwords only, so we shouldn't import it on
@@ -117,6 +118,11 @@ def parse_utc(ts):
     if ts.tzinfo is not None:
         ts = (ts - ts.utcoffset()).replace(tzinfo=None)
     return ts
+
+
+def to_numeric_tz(timezone):
+    """Converts a timezone to a format which can be read by parse_utc."""
+    return as_timezone(datetime.utcnow(), timezone).strftime('%z')
 
 
 def as_timezone(ts, timezone):

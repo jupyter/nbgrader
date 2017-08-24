@@ -134,7 +134,7 @@ class TestNbGraderAPI(BaseTestApp):
             "average_written_score": 0,
             "duedate": None,
             "display_duedate": None,
-            "duedate_timezone": "UTC",
+            "duedate_timezone": "+0000",
             "duedate_notimezone": None,
             "name": "ps1",
             "num_submissions": 0,

@@ -12,7 +12,7 @@ from ..coursedir import CourseDirectory
 from ..converters import Assign, Autograde
 from ..exchange import ExchangeList, ExchangeRelease, ExchangeCollect, ExchangeError
 from ..api import MissingEntry, Gradebook, Student, SubmittedAssignment
-from ..utils import parse_utc, temp_attrs, capture_log, as_timezone
+from ..utils import parse_utc, temp_attrs, capture_log, as_timezone, to_numeric_tz
 
 
 class NbGraderAPI(LoggingConfigurable):
@@ -306,7 +306,7 @@ class NbGraderAPI(LoggingConfigurable):
                 else:
                     assignment["display_duedate"] = None
                     assignment["duedate_notimezone"] = None
-                assignment["duedate_timezone"] = self.timezone
+                assignment["duedate_timezone"] = to_numeric_tz(self.timezone)
                 assignment["average_score"] = gb.average_assignment_score(assignment_id)
                 assignment["average_code_score"] = gb.average_assignment_code_score(assignment_id)
                 assignment["average_written_score"] = gb.average_assignment_written_score(assignment_id)
@@ -318,7 +318,7 @@ class NbGraderAPI(LoggingConfigurable):
                 "duedate": None,
                 "display_duedate": None,
                 "duedate_notimezone": None,
-                "duedate_timezone": self.timezone,
+                "duedate_timezone": to_numeric_tz(self.timezone),
                 "average_score": 0,
                 "average_code_score": 0,
                 "average_written_score": 0,
