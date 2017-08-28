@@ -8,6 +8,7 @@ import shutil
 import stat
 import logging
 import traceback
+import contextlib
 
 from setuptools.archive_util import unpack_archive
 from setuptools.archive_util import unpack_tarfile
@@ -224,6 +225,17 @@ def full_split(path):
         return (rest,)
     else:
         return full_split(rest) + (last,)
+
+
+@contextlib.contextmanager
+def chdir(dirname):
+    currdir = os.getcwd()
+    if dirname:
+        os.chdir(dirname)
+    try:
+        yield
+    finally:
+        os.chdir(currdir)
 
 
 def rmtree(path):
