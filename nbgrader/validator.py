@@ -222,7 +222,10 @@ class Validator(LoggingConfigurable):
 
     def validate(self, filename):
         self.log.info("Validating '{}'".format(os.path.abspath(filename)))
-        nb = self._preprocess(filename)
+        basename = os.path.basename(filename)
+        dirname = os.path.dirname(filename)
+        with utils.chdir(dirname):
+            nb = self._preprocess(basename)
         changed = self._get_changed_cells(nb)
         passed = self._get_passed_cells(nb)
         failed = self._get_failed_cells(nb)
