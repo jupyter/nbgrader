@@ -2,7 +2,6 @@
 
 import os
 import json
-import contextlib
 import traceback
 
 from tornado import web
@@ -19,14 +18,6 @@ from ... import __version__ as nbgrader_version
 
 
 static = os.path.join(os.path.dirname(__file__), 'static')
-
-
-@contextlib.contextmanager
-def chdir(dirname):
-    currdir = os.getcwd()
-    os.chdir(dirname)
-    yield
-    os.chdir(currdir)
 
 
 class ValidateAssignmentHandler(IPythonHandler):

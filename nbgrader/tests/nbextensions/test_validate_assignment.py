@@ -146,3 +146,21 @@ def test_validate_locked_cell_changed(browser, port):
 
     # close the modal dialog
     _dismiss_modal(browser)
+
+
+@pytest.mark.nbextensions
+def test_validate_open_relative_file(browser, port):
+    _load_notebook(browser, port, "open_relative_file.ipynb")
+    _wait_for_validate_button(browser)
+
+    # click the "validate" button
+    browser.find_element_by_css_selector("button.validate").click()
+
+    # wait for the modal dialog to appear
+    _wait_for_modal(browser)
+
+    # check that it succeeded
+    browser.find_element_by_css_selector(".modal-dialog .validation-success")
+
+    # close the modal dialog
+    _dismiss_modal(browser)

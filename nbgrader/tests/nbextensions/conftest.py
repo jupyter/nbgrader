@@ -170,6 +170,9 @@ def _make_browser(tempdir):
     for filename in glob.glob(os.path.join(os.path.dirname(__file__), "files", "*.ipynb")):
         shutil.copy(filename, os.path.join(tempdir, os.path.basename(filename)))
 
+    for filename in glob.glob(os.path.join(os.path.dirname(__file__), "files", "*.txt")):
+        shutil.copy(filename, os.path.join(tempdir, os.path.basename(filename)))
+
     selenium_logger = logging.getLogger('selenium.webdriver.remote.remote_connection')
     selenium_logger.setLevel(logging.WARNING)
 
