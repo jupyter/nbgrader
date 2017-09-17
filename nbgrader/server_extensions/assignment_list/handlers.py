@@ -228,7 +228,10 @@ class CourseListHandler(BaseAssignmentHandler):
 
     @web.authenticated
     def get(self):
-        self.finish(json.dumps(self.manager.list_courses()))
+        courses_list = self.manager.list_courses()
+        if 'value' in courses_list:
+            courses_list['value'] = [course for course in courses_list['value'] if 'nbgrader-{}'.format(course) in self.current_user['groups']]
+        self.finish(json.dumps(courses_list))
 
 
 class NbGraderVersionHandler(BaseAssignmentHandler):
