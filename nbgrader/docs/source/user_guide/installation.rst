@@ -78,7 +78,7 @@ Disabling extensions
 
 You may want to only install one of the nbgrader extensions. To do this, follow
 the above steps to install everything and then disable the extension you don't
-need. For example, to disable the Assignment List extension:
+need. For example, to disable the Assignment List extension::
 
     jupyter nbextension disable --sys-prefix assignment_list/main --section=tree
     jupyter serverextension disable --sys-prefix nbgrader.server_extensions.assignment_list
@@ -130,7 +130,7 @@ quickstart`` command::
     nbgrader quickstart course_id
 
 Where you should replace ``course_id`` with the name of your course. For
-further details on how the quickstart command works, please run:
+further details on how the quickstart command works, please run::
 
     nbgrader quickstart --help
 
