@@ -128,32 +128,23 @@ class Exchange(LoggingConfigurable):
 
     def get_current_user_courses(self):
         """Check if student is enrolled in course"""
-        from jupyterhub.services.auth import HubOAuth
         from tornado.httpclient import HTTPClient, HTTPRequest
 
         if os.getenv('JUPYTERHUB_API_TOKEN'):
             api_token = os.environ['JUPYTERHUB_API_TOKEN']
-        if not api_token:
-            self.exit("JUPYTERHUB_API_TOKEN env is required to run nbgrader. Did you launch it manually?")
+        else:
+            self.exit("JUPYTERHUB_API_TOKEN env is required to run the exchange features of nbgrader.")
         hub_api_url = os.environ.get('JUPYTERHUB_API_URL') or 'http://127.0.0.1:8081/hub/api'
-        base_url = os.environ.get('JUPYTERHUB_SERVICE_PREFIX') or '/'
-        hub_prefix = base_url + "hub/"
-        self.hub_auth = HubOAuth(
-            parent=self,
-            api_token=api_token,
-            api_url=hub_api_url,
-            hub_prefix=hub_prefix,
-            base_url=base_url,
-        )
+        if os.getenv('JUPYTERHUB_USER'):
+            user = os.environ['JUPYTERHUB_USER']
+        else:
+            self.exit("JUPYTERHUB_USER env is required to run the exchange features of nbgrader.")
         import json
-        # smoke check
-        if not self.hub_auth.oauth_client_id:
-            raise ValueError("Missing OAuth client ID")
         auth_header = {
                 'Authorization': 'token %s' % api_token
             }
         client = HTTPClient()
-        req = HTTPRequest(url=hub_api_url + '/users/%s' % self.hub_auth.oauth_client_id.replace('user-', ''),
+        req = HTTPRequest(url=hub_api_url + '/users/%s' % user,
             method='GET',
             headers=auth_header,
         )
