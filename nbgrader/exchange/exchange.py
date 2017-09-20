@@ -176,5 +176,5 @@ class Exchange(LoggingConfigurable):
         courses = set()
         for group in groups:
             if group.startswith('nbgrader-') or group.startswith('formgrade-'):
-                courses.add('-'.join(group.split('-')[1:]))
+                courses.add(group.split('-', 1)[1])
         return list(courses)
