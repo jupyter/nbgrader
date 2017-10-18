@@ -118,7 +118,13 @@ class DbStudentRemoveApp(NbGrader):
 
 class DbGenericImportApp(NbGrader):
 
-    def get_db_update_method(self, gb):
+    def db_update_method_name(self):
+        """
+        Name of the update method used on the Gradebook for this import app.
+        It is expected to have the signature:
+            * instance_id : string, identifies which instance you are updating based on self.primary_key
+            * instance : dictionary, contents for the update from the parsed csv rows; unpacked as kwargs
+        """
         raise NotImplementedError
 
     @property
@@ -136,15 +142,9 @@ class DbGenericImportApp(NbGrader):
     @property
     def primary_key(self):
         """
-        This defaults to the primary key for the table_class. Override this if
-        the get_db_update_method does not expect its instance_id to be the
-        primary key.
+        The key for the instance_id passed to the get_db_update_method.
         """
-        possible_keys = [k.key for k in self.table_class.__mapper__.primary_key]
-        if len(possible_keys)>1:
-            raise TypeError("%s has more than one primary_key" % self.table_class.__name__)
-        else:
-            return possible_keys[0]
+        raise NotImplementedError
 
     def start(self):
         super(DbGenericImportApp, self).start()
@@ -184,7 +184,8 @@ class DbGenericImportApp(NbGrader):
                                   self.primary_key,
                                   instance_primary_key,
                                   instance)
-                    self.get_db_update_method(gb)(instance_primary_key, **instance)
+                    db_update_method = getattr(gb, self.db_update_method_name)
+                    db_update_method(instance_primary_key, **instance)
 
     @property
     def allowed_keys(self):
@@ -213,9 +214,8 @@ class DbStudentImportApp(DbGenericImportApp):
     flags = flags
 
     table_class = Student
-    
-    def get_db_update_method(self, gb):
-        return gb.update_or_create_student
+    primary_key = "id"
+    db_update_method_name = "update_or_create_student"
 
 
 class DbStudentListApp(NbGrader):
@@ -328,9 +328,7 @@ class DbAssignmentImportApp(DbGenericImportApp):
     # The primary key of the Assignment is "id", update_or_create_assignment
     # expects a "name"
     primary_key = "name"
-
-    def get_db_update_method(self, gb):
-        return gb.update_or_create_assignment
+    db_update_method_name = "update_or_create_assignment"
 
 
 class DbAssignmentListApp(NbGrader):
