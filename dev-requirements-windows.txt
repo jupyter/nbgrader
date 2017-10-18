@@ -7,3 +7,4 @@ invoke
 sphinx
 codecov
 cov-core
+nbval
