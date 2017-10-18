@@ -316,7 +316,7 @@ class DbAssignmentRemoveApp(NbGrader):
             gb.remove_assignment(assignment_id)
 
 
-class DbAssignmentImportApp(NbGrader):
+class DbAssignmentImportApp(DbGenericImportApp):
 
     name = 'nbgrader-db-assignment-import'
     description = 'Import assignments into the nbgrader database from a CSV file'
@@ -324,56 +324,14 @@ class DbAssignmentImportApp(NbGrader):
     aliases = aliases
     flags = flags
 
-    def start(self):
-        super(DbAssignmentImportApp, self).start()
+    table_class = Assignment
+    # The primary key of the Assignment is "id", update_or_create_assignment
+    # expects a "name"
+    primary_key = "name"
 
-        if len(self.extra_args) != 1:
-            self.fail("Path to CSV file not provided.")
+    def get_db_update_method(self, gb):
+        return gb.update_or_create_assignment
 
-        path = self.extra_args[0]
-        if not os.path.exists(path):
-            self.fail("No such file: '%s'", path)
-        self.log.info("Importing assignments from: '%s'", path)
-
-        with Gradebook(self.coursedir.db_url) as gb:
-            with open(path, 'r') as fh:
-                reader = csv.DictReader(fh)
-                reader.fieldnames= self._preprocess_keys(reader.fieldnames)
-                for row in reader:
-                    if "name" not in row:
-                        self.fail("Malformatted CSV file: must contain a column for 'name'")
-
-                    # make sure all the keys are actually allowed in the database,
-                    # and that any empty strings are parsed as None
-                    assignment = {}
-                    for key, val in row.items():
-                        if key not in self.allowed_keys:
-                            continue
-                        if val == '':
-                            assignment[key] = None
-                        else:
-                            assignment[key] = val
-                    assignment_id = assignment.pop("name")
-
-                    self.log.info("Creating/updating assignment with name '%s': %s", assignment_id, assignment)
-                    gb.update_or_create_assignment(assignment_id, **assignment)
-
-    @property
-    def allowed_keys(self):
-        return Assignment.__table__.c.keys()
-
-    def _preprocess_keys(self, keys):
-        """
-        Helper function for preprocessing keys
-        """
-        proposed_keys = [key.strip() for key in keys]
-        unknown_keys = [k for k in proposed_keys if k not in self.allowed_keys]
-        if unknown_keys:
-            self.log.info("Unknown keys in csv: '%s'",
-                          (', '.join(unknown_keys[:-1])
-                           + 'and '
-                           + unknown_keys[-1]))
-        return proposed_keys
 
 class DbAssignmentListApp(NbGrader):
 
