@@ -10,7 +10,7 @@ from traitlets import default, Unicode, Bool
 from datetime import datetime
 
 from . import NbGrader
-from ..api import Gradebook, MissingEntry, Student
+from ..api import Gradebook, MissingEntry, Student, Assignment
 from .. import dbutil
 
 aliases = {
@@ -295,8 +295,6 @@ class DbAssignmentImportApp(NbGrader):
             self.fail("No such file: '%s'", path)
         self.log.info("Importing assignments from: '%s'", path)
 
-        allowed_keys = ["duedate", "name"]
-
         with Gradebook(self.coursedir.db_url) as gb:
             with open(path, 'r') as fh:
                 reader = csv.DictReader(fh)
@@ -308,7 +306,7 @@ class DbAssignmentImportApp(NbGrader):
                     # and that any empty strings are parsed as None
                     assignment = {}
                     for key, val in row.items():
-                        if key not in allowed_keys:
+                        if key not in self.allowed_keys:
                             continue
                         if val == '':
                             assignment[key] = None
@@ -318,6 +316,10 @@ class DbAssignmentImportApp(NbGrader):
 
                     self.log.info("Creating/updating assignment with name '%s': %s", assignment_id, assignment)
                     gb.update_or_create_assignment(assignment_id, **assignment)
+
+    @property
+    def allowed_keys(self):
+        return Assignment.__table__.c.keys()
 
 
 class DbAssignmentListApp(NbGrader):
