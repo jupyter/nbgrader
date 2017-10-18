@@ -165,8 +165,17 @@ class DbStudentImportApp(NbGrader):
         return Student.__table__.c.keys()
 
     def _preprocess_keys(self, keys):
-        new_keys = [key.strip() for key in keys]
-        return new_keys
+        """
+        Helper function for preprocessing keys
+        """
+        proposed_keys = [key.strip() for key in keys]
+        unknown_keys = [k for k in proposed_keys if k not in self.allowed_keys]
+        if unknown_keys:
+            self.log.info("Unknown keys in csv: '%s'",
+                          (', '.join(unknown_keys[:-1])
+                           + 'and '
+                           + unknown_keys[-1]))
+        return proposed_keys
 
 
 class DbStudentListApp(NbGrader):
