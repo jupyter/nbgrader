@@ -116,16 +116,29 @@ class DbStudentRemoveApp(NbGrader):
             gb.remove_student(student_id)
 
 
-class DbStudentImportApp(NbGrader):
+class DbGenericImportApp(NbGrader):
 
-    name = 'nbgrader-db-student-import'
-    description = 'Import students into the nbgrader database from a CSV file'
+    def get_db_update_method(self, gb):
+        raise NotImplementedError
 
-    aliases = aliases
-    flags = flags
+    @property
+    def name(self):
+        raise NotImplementedError
+
+    @property
+    def description(self):
+        raise NotImplementedError
+
+    @property
+    def table_class(self):
+        raise NotImplementedError
+
+    @property
+    def primary_key(self):
+        return [k.key for k in self.table_class.__mapper__.primary_key][0]
 
     def start(self):
-        super(DbStudentImportApp, self).start()
+        super(DbGenericImportApp, self).start()
 
         if len(self.extra_args) != 1:
             self.fail("Path to CSV file not provided.")
@@ -141,28 +154,32 @@ class DbStudentImportApp(NbGrader):
                 reader = csv.DictReader(fh)
                 reader.fieldnames = self._preprocess_keys(reader.fieldnames)
                 for row in reader:
-                    if "id" not in row:
+                    if self.primary_key not in row:
                         self.fail("Malformatted CSV file: must contain a column for 'id'")
 
                     # make sure all the keys are actually allowed in the database,
                     # and that any empty strings are parsed as None
-                    student = {}
+                    instance = {}
                     for key, val in row.items():
                         if key not in self.allowed_keys:
                             continue
                         if val == '':
-                            student[key] = None
+                            instance[key] = None
                         else:
-                            student[key] = val
-                    student_id = student.pop("id")
+                            instance[key] = val
+                    instance_primary_key = instance.pop(self.primary_key)
 
 
-                    self.log.info("Creating/updating student with ID '%s': %s", student_id, student)
-                    gb.update_or_create_student(student_id, **student)
+                    self.log.info("Creating/updating %s with %s '%s': %s",
+                                  self.table_class.__name__,
+                                  self.primary_key,
+                                  instance_primary_key,
+                                  instance)
+                    self.get_db_update_method(gb)(instance_primary_key, **instance)
 
     @property
     def allowed_keys(self):
-        return Student.__table__.c.keys()
+        return self.table_class.__table__.c.keys()
 
     def _preprocess_keys(self, keys):
         """
@@ -176,6 +193,19 @@ class DbStudentImportApp(NbGrader):
                            + 'and '
                            + unknown_keys[-1]))
         return proposed_keys
+
+
+class DbStudentImportApp(DbGenericImportApp):
+
+    name = 'nbgrader-db-student-import'
+    description = 'Import students into the nbgrader database from a CSV file'
+    table_class = Student
+
+    aliases = aliases
+    flags = flags
+
+    def get_db_update_method(self, gb):
+        return gb.update_or_create_student
 
 
 class DbStudentListApp(NbGrader):
