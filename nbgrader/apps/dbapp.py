@@ -10,7 +10,7 @@ from traitlets import default, Unicode, Bool
 from datetime import datetime
 
 from . import NbGrader
-from ..api import Gradebook, MissingEntry
+from ..api import Gradebook, MissingEntry, Student
 from .. import dbutil
 
 aliases = {
@@ -135,7 +135,6 @@ class DbStudentImportApp(NbGrader):
             self.fail("No such file: '%s'", path)
         self.log.info("Importing students from: '%s'", path)
 
-        allowed_keys = ["last_name", "first_name", "email", "id"]
 
         with Gradebook(self.coursedir.db_url) as gb:
             with open(path, 'r') as fh:
@@ -149,7 +148,7 @@ class DbStudentImportApp(NbGrader):
                     # and that any empty strings are parsed as None
                     student = {}
                     for key, val in row.items():
-                        if key not in allowed_keys:
+                        if key not in self.allowed_keys:
                             continue
                         if val == '':
                             student[key] = None
@@ -157,8 +156,13 @@ class DbStudentImportApp(NbGrader):
                             student[key] = val
                     student_id = student.pop("id")
 
+
                     self.log.info("Creating/updating student with ID '%s': %s", student_id, student)
                     gb.update_or_create_student(student_id, **student)
+
+    @property
+    def allowed_keys(self):
+        return Student.__table__.c.keys()
 
     def _preprocess_keys(self, keys):
         new_keys = [key.strip() for key in keys]
