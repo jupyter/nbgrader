@@ -135,7 +135,11 @@ class DbGenericImportApp(NbGrader):
 
     @property
     def primary_key(self):
-        return [k.key for k in self.table_class.__mapper__.primary_key][0]
+        possible_keys = [k.key for k in self.table_class.__mapper__.primary_key]
+        if len(possible_keys)>1:
+            raise TypeError("%s has more than one primary_key" % self.table_class.__name__)
+        else:
+            return possible_keys[0]
 
     def start(self):
         super(DbGenericImportApp, self).start()
