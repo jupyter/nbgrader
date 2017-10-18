@@ -298,6 +298,7 @@ class DbAssignmentImportApp(NbGrader):
         with Gradebook(self.coursedir.db_url) as gb:
             with open(path, 'r') as fh:
                 reader = csv.DictReader(fh)
+                reader.fieldnames= self._preprocess_keys(reader.fieldnames)
                 for row in reader:
                     if "name" not in row:
                         self.fail("Malformatted CSV file: must contain a column for 'name'")
@@ -321,6 +322,18 @@ class DbAssignmentImportApp(NbGrader):
     def allowed_keys(self):
         return Assignment.__table__.c.keys()
 
+    def _preprocess_keys(self, keys):
+        """
+        Helper function for preprocessing keys
+        """
+        proposed_keys = [key.strip() for key in keys]
+        unknown_keys = [k for k in proposed_keys if k not in self.allowed_keys]
+        if unknown_keys:
+            self.log.info("Unknown keys in csv: '%s'",
+                          (', '.join(unknown_keys[:-1])
+                           + 'and '
+                           + unknown_keys[-1]))
+        return proposed_keys
 
 class DbAssignmentListApp(NbGrader):
 
