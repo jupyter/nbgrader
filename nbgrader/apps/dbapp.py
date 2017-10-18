@@ -140,6 +140,7 @@ class DbStudentImportApp(NbGrader):
         with Gradebook(self.coursedir.db_url) as gb:
             with open(path, 'r') as fh:
                 reader = csv.DictReader(fh)
+                reader.fieldnames = self._preprocess_keys(reader.fieldnames)
                 for row in reader:
                     if "id" not in row:
                         self.fail("Malformatted CSV file: must contain a column for 'id'")
@@ -158,6 +159,10 @@ class DbStudentImportApp(NbGrader):
 
                     self.log.info("Creating/updating student with ID '%s': %s", student_id, student)
                     gb.update_or_create_student(student_id, **student)
+
+    def _preprocess_keys(self, keys):
+        new_keys = [key.strip() for key in keys]
+        return new_keys
 
 
 class DbStudentListApp(NbGrader):
