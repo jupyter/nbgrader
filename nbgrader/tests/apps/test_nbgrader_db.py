@@ -340,6 +340,51 @@ class TestNbGraderDb(BaseTestApp):
             assignment = gb.find_assignment("bar")
             assert assignment.duedate is None
 
+    def test_assignment_import_csv_spaces(self, db, temp_cwd):
+        with open("assignments.csv", "w") as fh:
+            fh.write(dedent(
+                """
+                name, duedate
+                foo,Sun Jan 8 2017 4:31:22 PM
+                bar,
+                """
+            ).strip())
+
+        run_nbgrader(["db", "assignment", "import", "assignments.csv", "--db", db])
+        with Gradebook(db) as gb:
+            assignment = gb.find_assignment("foo")
+            assert assignment.duedate == datetime.datetime(2017, 1, 8, 16, 31, 22)
+            assignment = gb.find_assignment("bar")
+            assert assignment.duedate is None
+
+        # check that it fails when no id column is given
+        with open("assignments.csv", "w") as fh:
+            fh.write(dedent(
+                """
+                duedate
+                Sun Jan 8 2017 4:31:22 PM
+                ,
+                """
+            ).strip())
+
+        run_nbgrader(["db", "assignment", "import", "assignments.csv", "--db", db], retcode=1)
+
+        # check that it works ok with extra and missing columns
+        with open("assignments.csv", "w") as fh:
+            fh.write(dedent(
+                """
+                name
+                foo
+                bar
+                """
+            ).strip())
+
+        run_nbgrader(["db", "assignment", "import", "assignments.csv", "--db", db])
+        with Gradebook(db) as gb:
+            assignment = gb.find_assignment("foo")
+            assert assignment.duedate == datetime.datetime(2017, 1, 8, 16, 31, 22)
+            assignment = gb.find_assignment("bar")
+            assert assignment.duedate is None
     def test_upgrade_nodb(self, temp_cwd):
         # test upgrading without a database
         run_nbgrader(["db", "upgrade"])
