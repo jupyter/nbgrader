@@ -135,6 +135,11 @@ class DbGenericImportApp(NbGrader):
 
     @property
     def primary_key(self):
+        """
+        This defaults to the primary key for the table_class. Override this if
+        the get_db_update_method does not expect its instance_id to be the
+        primary key.
+        """
         possible_keys = [k.key for k in self.table_class.__mapper__.primary_key]
         if len(possible_keys)>1:
             raise TypeError("%s has more than one primary_key" % self.table_class.__name__)
@@ -150,7 +155,7 @@ class DbGenericImportApp(NbGrader):
         path = self.extra_args[0]
         if not os.path.exists(path):
             self.fail("No such file: '%s'", path)
-        self.log.info("Importing students from: '%s'", path)
+        self.log.info("Importing from: '%s'", path)
 
 
         with Gradebook(self.coursedir.db_url) as gb:
@@ -159,7 +164,7 @@ class DbGenericImportApp(NbGrader):
                 reader.fieldnames = self._preprocess_keys(reader.fieldnames)
                 for row in reader:
                     if self.primary_key not in row:
-                        self.fail("Malformatted CSV file: must contain a column for 'id'")
+                        self.fail("Malformatted CSV file: must contain a column for '%s'" % self.primary_key)
 
                     # make sure all the keys are actually allowed in the database,
                     # and that any empty strings are parsed as None
@@ -203,11 +208,12 @@ class DbStudentImportApp(DbGenericImportApp):
 
     name = 'nbgrader-db-student-import'
     description = 'Import students into the nbgrader database from a CSV file'
-    table_class = Student
 
     aliases = aliases
     flags = flags
 
+    table_class = Student
+    
     def get_db_update_method(self, gb):
         return gb.update_or_create_student
 
