@@ -2318,7 +2318,8 @@ class Gradebook(object):
             A list of dictionaries, one per student
 
         """
-        if len(self.assignments) > 0:
+        total_score, = self.db.query(func.sum(Assignment.max_score)).one()
+        if len(self.assignments) > 0 and total_score > 0:
             # subquery the scores
             scores = self.db.query(
                 Student.id,
@@ -2332,7 +2333,7 @@ class Gradebook(object):
             students = self.db.query(
                 Student.id, Student.first_name, Student.last_name,
                 Student.email, _scores,
-                func.sum(GradeCell.max_score)
+                func.sum(Assignment.max_score)
             ).outerjoin(scores, Student.id == scores.c.id)\
              .group_by(
                  Student.id, Student.first_name, Student.last_name,
