@@ -66,8 +66,10 @@ Example Use Case: One Class, Multiple Graders
 If you have multiple graders, then you can set up a `shared notebook server
 <https://github.com/jupyterhub/jupyterhub/tree/master/examples/service-notebook>`_
 as a JupyterHub service. I recommend creating a separate grader account (such
-as ``grader-course101``) for this server to have access to. Your JupyterHub
-config would then look something like this:
+as ``grader-course101``) for this server to have access to. Then, install and
+enable the formgrader and Create Assignment extensions for this grader account
+(see :doc:`/user_guide/installation`). Your JupyterHub config would then look
+something like this:
 
 .. code:: python
 
@@ -114,7 +116,13 @@ Similarly to the use case with just a single grader, there needs to then be a ``
 Example Use Case: Multiple Classes
 ----------------------------------
 
-As in the case of multiple graders for a single class, if you have multiple classes on the same JupyterHub instance, then you will need to create multiple services (one for each course) and corresponding accounts for each service. For example, you could have users ``grader-course101`` and ``grader-course123``. Your JupyterHub config would then look something like this:
+As in the case of multiple graders for a single class, if you have multiple
+classes on the same JupyterHub instance, then you will need to create multiple
+services (one for each course) and corresponding accounts for each service
+(with the nbgrader extensions enabled, see :doc:`/user_guide/installation`).
+For example, you could have users ``grader-course101`` and
+``grader-course123``. Your JupyterHub config would then look something like
+this:
 
 .. code:: python
 
@@ -164,7 +172,9 @@ As in the case of multiple graders for a single class, if you have multiple clas
         },
     ]
 
-There also needs to be a ``nbgrader_config.py`` file in the root of each grader account, which points to the directory where the class files are, e.g. in ``/home/grader-course101/.jupyter/nbgrader_config.py`` would be:
+There also needs to be a ``nbgrader_config.py`` file in the root of each grader
+account, which points to the directory where the class files are, e.g. in
+``/home/grader-course101/.jupyter/nbgrader_config.py`` would be:
 
 .. code:: python
 
@@ -178,4 +188,10 @@ and ``/home/grader-course123/.jupyter/nbgrader_config.py`` would be:
     c = get_config()
     c.CourseDirectory.root = '/home/grader-course123/course123'
 
-You will also need to do some additional configuration on the student side. If each student is enrolled in exactly one course, then you will need to provide them a custom ``nbgrader_config.py`` which specifies that course. Alternately, if students may be enrolled in multiple courses, you need to provide them a custom ``nbgrader_config.py`` that will cause nbgrader to look for assignments in a subdirectory corresponding to the course name. See :ref:`multiple-classes` for details.
+You will also need to do some additional configuration on the student side. If
+each student is enrolled in exactly one course, then you will need to provide
+them a custom ``nbgrader_config.py`` which specifies that course. Alternately,
+if students may be enrolled in multiple courses, you need to provide them a
+custom ``nbgrader_config.py`` that will cause nbgrader to look for assignments
+in a subdirectory corresponding to the course name. See :ref:`multiple-classes`
+for details.
