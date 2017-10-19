@@ -118,6 +118,9 @@ class DbStudentRemoveApp(NbGrader):
 
 class DbGenericImportApp(NbGrader):
 
+    aliases = aliases
+    flags = flags
+
     def db_update_method_name(self):
         """
         Name of the update method used on the Gradebook for this import app.
@@ -207,15 +210,26 @@ class DbGenericImportApp(NbGrader):
 
 class DbStudentImportApp(DbGenericImportApp):
 
-    name = 'nbgrader-db-student-import'
-    description = 'Import students into the nbgrader database from a CSV file'
 
-    aliases = aliases
-    flags = flags
+    @property
+    def name(self):
+       return 'nbgrader-db-student-import'
 
-    table_class = Student
-    primary_key = "id"
-    db_update_method_name = "update_or_create_student"
+    @property
+    def description(self):
+        return 'Import students into the nbgrader database from a CSV file'
+
+    @property
+    def table_class(self):
+        return Student
+
+    @property
+    def primary_key(self):
+        return "id"
+
+    @property
+    def db_update_method_name(self):
+        return "update_or_create_student"
 
 
 class DbStudentListApp(NbGrader):
@@ -318,18 +332,26 @@ class DbAssignmentRemoveApp(NbGrader):
 
 class DbAssignmentImportApp(DbGenericImportApp):
 
-    name = 'nbgrader-db-assignment-import'
-    description = 'Import assignments into the nbgrader database from a CSV file'
 
-    aliases = aliases
-    flags = flags
+    @property
+    def name(self):
+       return 'nbgrader-db-assignment-import'
 
-    table_class = Assignment
-    # The primary key of the Assignment is "id", update_or_create_assignment
-    # expects a "name"
-    primary_key = "name"
-    db_update_method_name = "update_or_create_assignment"
+    @property
+    def description(self):
+        return 'Import assignments into the nbgrader database from a CSV file'
 
+    @property
+    def table_class(self):
+        return Assignment
+
+    @property
+    def primary_key(self):
+        return "name"
+
+    @property
+    def db_update_method_name(self):
+        return "update_or_create_assignment"
 
 class DbAssignmentListApp(NbGrader):
 
