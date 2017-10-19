@@ -22,6 +22,10 @@ static = os.path.join(os.path.dirname(__file__), 'static')
 
 class ValidateAssignmentHandler(IPythonHandler):
 
+    @property
+    def notebook_dir(self):
+        return self.settings['notebook_dir']
+
     def load_config(self):
         paths = jupyter_config_path()
         paths.insert(0, os.getcwd())
@@ -41,7 +45,7 @@ class ValidateAssignmentHandler(IPythonHandler):
         try:
             config = self.load_config()
             validator = Validator(config=config)
-            result = validator.validate(path)
+            result = validator.validate(os.path.join(self.notebook_dir, path))
 
         except:
             self.log.error(traceback.format_exc())
@@ -104,6 +108,7 @@ def load_jupyter_server_extension(nbapp):
     nbapp.log.info("Loading the validate_assignment nbgrader serverextension")
     webapp = nbapp.web_app
     base_url = webapp.settings['base_url']
+    webapp.settings['notebook_dir'] = nbapp.notebook_dir
     webapp.add_handlers(".*$", [
         (ujoin(base_url, pat), handler)
         for pat, handler in default_handlers
