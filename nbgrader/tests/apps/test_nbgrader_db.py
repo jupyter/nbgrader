@@ -176,6 +176,28 @@ class TestNbGraderDb(BaseTestApp):
             assert student.first_name is None
             assert student.email is None
 
+
+    def test_student_import_csv_spaces(self, db, temp_cwd):
+        with open("students.csv", "w") as fh:
+            fh.write(dedent(
+                """
+                id,first_name,last_name, email
+                foo,abc,xyz,foo@bar.com
+                bar,,,
+                """
+            ).strip())
+
+        run_nbgrader(["db", "student", "import", "students.csv", "--db", db])
+        with Gradebook(db) as gb:
+            student = gb.find_student("foo")
+            assert student.last_name == "xyz"
+            assert student.first_name == "abc"
+            assert student.email == "foo@bar.com"
+            student = gb.find_student("bar")
+            assert student.last_name is None
+            assert student.first_name is None
+            assert student.email is None
+
     def test_assignment_add(self, db):
         run_nbgrader(["db", "assignment", "add", "foo", "--db", db])
         with Gradebook(db) as gb:
@@ -256,6 +278,24 @@ class TestNbGraderDb(BaseTestApp):
             assignment = gb.find_assignment("bar")
             assert assignment.duedate is None
 
+
+    def test_assignment_import_csv_spaces(self, db, temp_cwd):
+        with open("assignments.csv", "w") as fh:
+            fh.write(dedent(
+                """
+                name, duedate
+                foo,Sun Jan 8 2017 4:31:22 PM
+                bar,
+                """
+            ).strip())
+
+        run_nbgrader(["db", "assignment", "import", "assignments.csv", "--db", db])
+        with Gradebook(db) as gb:
+            assignment = gb.find_assignment("foo")
+            assert assignment.duedate == datetime.datetime(2017, 1, 8, 16, 31, 22)
+            assignment = gb.find_assignment("bar")
+            assert assignment.duedate is None
+
         # check that it fails when no id column is given
         with open("assignments.csv", "w") as fh:
             fh.write(dedent(
@@ -284,7 +324,6 @@ class TestNbGraderDb(BaseTestApp):
             assert assignment.duedate == datetime.datetime(2017, 1, 8, 16, 31, 22)
             assignment = gb.find_assignment("bar")
             assert assignment.duedate is None
-
     def test_upgrade_nodb(self, temp_cwd):
         # test upgrading without a database
         run_nbgrader(["db", "upgrade"])
