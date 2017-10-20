@@ -112,6 +112,7 @@ ivanslapnicar
 ixjlyons
 I’m
 I’ve
+jcsutherland
 jdfreder
 jhamrick
 jilljenn
@@ -158,6 +159,7 @@ ok
 olgabot
 org
 osx
+overwritekernelspec
 phantomjs
 Phantomjs
 plugin

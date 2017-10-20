@@ -8,6 +8,27 @@ A summary of changes to nbgrader.
 0.5.x
 -----
 
+0.5.4
+~~~~~
+
+nbgrader version 0.5.3 is a bugfix release, with the following PRs merged:
+
+- PR #898: Make sure validation is run in the correct directory
+- PR #895: Add test and fix for parsing csv key names with spaces
+- PR #888: Fix overwritekernelspec preprocessor and update tests
+- PR #880: change directory when validating notebooks
+- PR #873: Fix issue with student dictionaries when assignments have zero points
+
+Thanks to the following users who submitted PRs or reported issues that were fixed for the 0.5.4 release:
+
+- jcsutherland
+- jhamrick
+- lgpage
+- misolietavec
+- mpacer
+- ncclementi
+- randy3k
+
 0.5.3
 ~~~~~
 
