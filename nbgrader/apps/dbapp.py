@@ -6,7 +6,7 @@ import os
 import shutil
 
 from textwrap import dedent
-from traitlets import default, Unicode, Bool
+from traitlets import default, Unicode, Bool, List
 from datetime import datetime
 
 from . import NbGrader
@@ -121,6 +121,8 @@ class DbGenericImportApp(NbGrader):
     aliases = aliases
     flags = flags
 
+    expected_keys = List(help="These are the keys expected by the database")
+
     def db_update_method_name(self):
         """
         Name of the update method used on the Gradebook for this import app.
@@ -130,13 +132,9 @@ class DbGenericImportApp(NbGrader):
         """
         raise NotImplementedError
 
-    @property
-    def name(self):
-        raise NotImplementedError
+    name = ""
+    description = ""
 
-    @property
-    def description(self):
-        raise NotImplementedError
 
     @property
     def table_class(self):
@@ -148,6 +146,10 @@ class DbGenericImportApp(NbGrader):
         The key for the instance_id passed to the get_db_update_method.
         """
         raise NotImplementedError
+
+    @default("expected_keys")
+    def expected_keys(self):
+        return self.table_class.__table__.c.keys()
 
     def start(self):
         super(DbGenericImportApp, self).start()
@@ -173,7 +175,7 @@ class DbGenericImportApp(NbGrader):
                     # and that any empty strings are parsed as None
                     instance = {}
                     for key, val in row.items():
-                        if key not in self.allowed_keys:
+                        if key not in self.expected_keys:
                             continue
                         if val == '':
                             instance[key] = None
@@ -190,16 +192,13 @@ class DbGenericImportApp(NbGrader):
                     db_update_method = getattr(gb, self.db_update_method_name)
                     db_update_method(instance_primary_key, **instance)
 
-    @property
-    def allowed_keys(self):
-        return self.table_class.__table__.c.keys()
 
     def _preprocess_keys(self, keys):
         """
         Helper function for preprocessing keys
         """
         proposed_keys = [key.strip() for key in keys]
-        unknown_keys = [k for k in proposed_keys if k not in self.allowed_keys]
+        unknown_keys = [k for k in proposed_keys if k not in self.expected_keys]
         if unknown_keys:
             self.log.info("Unknown keys in csv: '%s'",
                           (', '.join(unknown_keys[:-1])
@@ -210,14 +209,8 @@ class DbGenericImportApp(NbGrader):
 
 class DbStudentImportApp(DbGenericImportApp):
 
-
-    @property
-    def name(self):
-       return 'nbgrader-db-student-import'
-
-    @property
-    def description(self):
-        return 'Import students into the nbgrader database from a CSV file'
+    name = 'nbgrader-db-student-import'
+    description = 'Import students into the nbgrader database from a CSV file'
 
     @property
     def table_class(self):
@@ -332,14 +325,8 @@ class DbAssignmentRemoveApp(NbGrader):
 
 class DbAssignmentImportApp(DbGenericImportApp):
 
-
-    @property
-    def name(self):
-       return 'nbgrader-db-assignment-import'
-
-    @property
-    def description(self):
-        return 'Import assignments into the nbgrader database from a CSV file'
+    name = 'nbgrader-db-assignment-import'
+    description = 'Import assignments into the nbgrader database from a CSV file'
 
     @property
     def table_class(self):
