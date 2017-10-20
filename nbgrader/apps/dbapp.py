@@ -141,14 +141,14 @@ class DbGenericImportApp(NbGrader):
         raise NotImplementedError
 
     @property
-    def primary_key(self):
+    def primary_key_default(self):
         """
         The key for the instance_id passed to the get_db_update_method.
         """
         raise NotImplementedError
 
     @default("expected_keys")
-    def expected_keys(self):
+    def expected_keys_default(self):
         return self.table_class.__table__.c.keys()
 
     def start(self):
