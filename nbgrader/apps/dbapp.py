@@ -122,19 +122,48 @@ class DbGenericImportApp(NbGrader):
     flags = flags
 
     expected_keys = List(help="These are the keys expected by the database")
+    excluded_keys = List([], help=dedent(
+        """
+        These are the column names in database table that should not be
+        imported via a csv file.
+        """).strip())
 
     def db_update_method_name(self):
         """
         Name of the update method used on the Gradebook for this import app.
-        It is expected to have the signature:
-            * instance_id : string, identifies which instance you are updating based on self.primary_key
-            * instance : dictionary, contents for the update from the parsed csv rows; unpacked as kwargs
+
+        Arguments
+        ---------
+        instance_id: string
+            Identifies which instance you are updating based on self.primary_key
+        instance: dictionary
+            Contents for the update from the parsed csv rows; unpacked as kwargs
+
         """
         raise NotImplementedError
 
     name = ""
     description = ""
 
+
+    @default('examples')
+    def examples_default(self):
+        keys = [x for x in self.expected_keys if
+                not(x == self.primary_key
+                or x in self.excluded_keys)]
+        example_string = dedent(
+            """
+            This command imports a CSV file into the database. The columns of
+            the CSV file must match the names of the columns in the database.
+            All columns are optional, except the columns corresponding to the
+            unique identifier of the {}. The keys/column names that are
+            expected are the following:
+
+              - {} (required)
+            """.format(self.table_class.__name__, self.primary_key)).strip()
+        for key in keys:
+            example_string += "\n  - {}".format(key)
+        return example_string
 
     @property
     def table_class(self):
@@ -327,6 +356,10 @@ class DbAssignmentImportApp(DbGenericImportApp):
 
     name = 'nbgrader-db-assignment-import'
     description = 'Import assignments into the nbgrader database from a CSV file'
+
+    def __init__(self, *args, **kwargs):
+        super(DbAssignmentImportApp, self).__init__(*args, **kwargs)
+        self.excluded_keys = ["id"]
 
     @property
     def table_class(self):
