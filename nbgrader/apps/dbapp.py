@@ -6,11 +6,11 @@ import os
 import shutil
 
 from textwrap import dedent
-from traitlets import default, Unicode, Bool
+from traitlets import default, Unicode, Bool, List
 from datetime import datetime
 
 from . import NbGrader
-from ..api import Gradebook, MissingEntry
+from ..api import Gradebook, MissingEntry, Student, Assignment
 from .. import dbutil
 
 aliases = {
@@ -116,16 +116,43 @@ class DbStudentRemoveApp(NbGrader):
             gb.remove_student(student_id)
 
 
-class DbStudentImportApp(NbGrader):
-
-    name = 'nbgrader-db-student-import'
-    description = 'Import students into the nbgrader database from a CSV file'
+class DbGenericImportApp(NbGrader):
 
     aliases = aliases
     flags = flags
 
+    expected_keys = List(help="These are the keys expected by the database")
+
+    def db_update_method_name(self):
+        """
+        Name of the update method used on the Gradebook for this import app.
+        It is expected to have the signature:
+            * instance_id : string, identifies which instance you are updating based on self.primary_key
+            * instance : dictionary, contents for the update from the parsed csv rows; unpacked as kwargs
+        """
+        raise NotImplementedError
+
+    name = ""
+    description = ""
+
+
+    @property
+    def table_class(self):
+        raise NotImplementedError
+
+    @property
+    def primary_key_default(self):
+        """
+        The key for the instance_id passed to the get_db_update_method.
+        """
+        raise NotImplementedError
+
+    @default("expected_keys")
+    def expected_keys_default(self):
+        return self.table_class.__table__.c.keys()
+
     def start(self):
-        super(DbStudentImportApp, self).start()
+        super(DbGenericImportApp, self).start()
 
         if len(self.extra_args) != 1:
             self.fail("Path to CSV file not provided.")
@@ -133,31 +160,69 @@ class DbStudentImportApp(NbGrader):
         path = self.extra_args[0]
         if not os.path.exists(path):
             self.fail("No such file: '%s'", path)
-        self.log.info("Importing students from: '%s'", path)
+        self.log.info("Importing from: '%s'", path)
 
-        allowed_keys = ["last_name", "first_name", "email", "id"]
 
         with Gradebook(self.coursedir.db_url) as gb:
             with open(path, 'r') as fh:
                 reader = csv.DictReader(fh)
+                reader.fieldnames = self._preprocess_keys(reader.fieldnames)
                 for row in reader:
-                    if "id" not in row:
-                        self.fail("Malformatted CSV file: must contain a column for 'id'")
+                    if self.primary_key not in row:
+                        self.fail("Malformatted CSV file: must contain a column for '%s'" % self.primary_key)
 
                     # make sure all the keys are actually allowed in the database,
                     # and that any empty strings are parsed as None
-                    student = {}
+                    instance = {}
                     for key, val in row.items():
-                        if key not in allowed_keys:
+                        if key not in self.expected_keys:
                             continue
                         if val == '':
-                            student[key] = None
+                            instance[key] = None
                         else:
-                            student[key] = val
-                    student_id = student.pop("id")
+                            instance[key] = val
+                    instance_primary_key = instance.pop(self.primary_key)
 
-                    self.log.info("Creating/updating student with ID '%s': %s", student_id, student)
-                    gb.update_or_create_student(student_id, **student)
+
+                    self.log.info("Creating/updating %s with %s '%s': %s",
+                                  self.table_class.__name__,
+                                  self.primary_key,
+                                  instance_primary_key,
+                                  instance)
+                    db_update_method = getattr(gb, self.db_update_method_name)
+                    db_update_method(instance_primary_key, **instance)
+
+
+    def _preprocess_keys(self, keys):
+        """
+        Helper function for preprocessing keys
+        """
+        proposed_keys = [key.strip() for key in keys]
+        unknown_keys = [k for k in proposed_keys if k not in self.expected_keys]
+        if unknown_keys:
+            self.log.info("Unknown keys in csv: '%s'",
+                          (', '.join(unknown_keys[:-1])
+                           + 'and '
+                           + unknown_keys[-1]))
+        return proposed_keys
+
+
+class DbStudentImportApp(DbGenericImportApp):
+
+    name = 'nbgrader-db-student-import'
+    description = 'Import students into the nbgrader database from a CSV file'
+
+    @property
+    def table_class(self):
+        return Student
+
+    @property
+    def primary_key(self):
+        return "id"
+
+    @property
+    def db_update_method_name(self):
+        return "update_or_create_student"
 
 
 class DbStudentListApp(NbGrader):
@@ -258,49 +323,22 @@ class DbAssignmentRemoveApp(NbGrader):
             gb.remove_assignment(assignment_id)
 
 
-class DbAssignmentImportApp(NbGrader):
+class DbAssignmentImportApp(DbGenericImportApp):
 
     name = 'nbgrader-db-assignment-import'
     description = 'Import assignments into the nbgrader database from a CSV file'
 
-    aliases = aliases
-    flags = flags
+    @property
+    def table_class(self):
+        return Assignment
 
-    def start(self):
-        super(DbAssignmentImportApp, self).start()
+    @property
+    def primary_key(self):
+        return "name"
 
-        if len(self.extra_args) != 1:
-            self.fail("Path to CSV file not provided.")
-
-        path = self.extra_args[0]
-        if not os.path.exists(path):
-            self.fail("No such file: '%s'", path)
-        self.log.info("Importing assignments from: '%s'", path)
-
-        allowed_keys = ["duedate", "name"]
-
-        with Gradebook(self.coursedir.db_url) as gb:
-            with open(path, 'r') as fh:
-                reader = csv.DictReader(fh)
-                for row in reader:
-                    if "name" not in row:
-                        self.fail("Malformatted CSV file: must contain a column for 'name'")
-
-                    # make sure all the keys are actually allowed in the database,
-                    # and that any empty strings are parsed as None
-                    assignment = {}
-                    for key, val in row.items():
-                        if key not in allowed_keys:
-                            continue
-                        if val == '':
-                            assignment[key] = None
-                        else:
-                            assignment[key] = val
-                    assignment_id = assignment.pop("name")
-
-                    self.log.info("Creating/updating assignment with name '%s': %s", assignment_id, assignment)
-                    gb.update_or_create_assignment(assignment_id, **assignment)
-
+    @property
+    def db_update_method_name(self):
+        return "update_or_create_assignment"
 
 class DbAssignmentListApp(NbGrader):
 
