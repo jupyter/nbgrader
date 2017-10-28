@@ -11,7 +11,7 @@ A summary of changes to nbgrader.
 0.5.4
 ~~~~~
 
-nbgrader version 0.5.3 is a bugfix release, with the following PRs merged:
+nbgrader version 0.5.4 is a bugfix release, with the following PRs merged:
 
 - PR #898: Make sure validation is run in the correct directory
 - PR #895: Add test and fix for parsing csv key names with spaces
