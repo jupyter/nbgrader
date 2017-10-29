@@ -93,3 +93,11 @@ class TestCheckCellMetadata(BaseTestPreprocessor):
         nb = self._read_nb(os.path.join("files", "bad-markdown-cell-2.ipynb"), validate=False)
         with pytest.raises(ValidationError):
             preprocessor.preprocess(nb, {})
+
+    def test_cell_type_changed(self, preprocessor):
+        nb = self._read_nb(os.path.join("files", "cell-type-changed.ipynb"), validate=False)
+        preprocessor.preprocess(nb, {})
+
+    def test_no_cell_type(self, preprocessor):
+        nb = self._read_nb(os.path.join("files", "no-cell-type.ipynb"), validate=False)
+        preprocessor.preprocess(nb, {})

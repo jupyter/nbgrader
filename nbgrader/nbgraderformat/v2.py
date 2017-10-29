@@ -1,53 +1,27 @@
-import warnings
-
 from nbformat import read as _read, reads as _reads
 from nbformat import write as _write, writes as _writes
+from .v1 import MetadataValidatorV1
 from .common import BaseMetadataValidator, ValidationError
+from ..utils import is_grade, is_solution, is_locked
 
-class MetadataValidatorV1(BaseMetadataValidator):
+
+class MetadataValidatorV2(BaseMetadataValidator):
 
     schema = None
 
     def __init__(self):
-        super(MetadataValidatorV1, self).__init__(1)
+        super(MetadataValidatorV2, self).__init__(2)
+        self.v1 = MetadataValidatorV1()
 
-    def _upgrade_v0_to_v1(self, cell):
+    def _upgrade_v1_to_v2(self, cell):
         meta = cell.metadata['nbgrader']
 
-        if 'grade' not in meta:
-            meta['grade'] = False
-        if 'solution' not in meta:
-            meta['solution'] = False
-        if 'locked' not in meta:
-            meta['locked'] = False
+        # only add cell type if the checksum has also already been set
+        if 'checksum' in meta and 'cell_type' not in meta:
+            self.log.warning("Cell does not have a stored cell type! Adding default cell type.")
+            meta['cell_type'] = cell.cell_type
 
-        if not meta['grade'] and not meta['solution'] and not meta['locked']:
-            del cell.metadata['nbgrader']
-            return cell
-
-        if not meta['grade']:
-            if 'points' in meta:
-                del meta['points']
-        elif 'points' in meta:
-            if meta['points'] == '':
-                meta['points'] = 0.0
-            else:
-                points = float(meta['points'])
-                if points < 0:
-                    meta['points'] = 0.0
-                else:
-                    meta['points'] = float(meta['points'])
-        else:
-            meta['points'] = 0.0
-
-        allowed = set(self.schema["properties"].keys())
-        keys = set(meta.keys()) - allowed
-        if len(keys) > 0:
-            self.log.warning("extra keys detected in metadata, these will be removed: {}".format(keys))
-            for key in keys:
-                del meta[key]
-
-        meta['schema_version'] = 1
+        meta['schema_version'] = 2
 
         return cell
 
@@ -55,18 +29,21 @@ class MetadataValidatorV1(BaseMetadataValidator):
         if 'nbgrader' not in cell.metadata:
             return cell
 
-        meta = cell.metadata['nbgrader']
+        if 'schema_version' not in cell.metadata['nbgrader']:
+            cell.metadata['nbgrader']['schema_version'] = 0
 
-        if 'schema_version' not in meta:
-            meta['schema_version'] = 0
+        if cell.metadata['nbgrader']['schema_version'] == 0:
+            cell = self.v1._upgrade_v0_to_v1(cell)
+            if 'nbgrader' not in cell.metadata:
+                return cell
 
-        if meta['schema_version'] == 0:
-            cell = self._upgrade_v0_to_v1(cell)
+        if cell.metadata['nbgrader']['schema_version'] == 1:
+            cell = self._upgrade_v1_to_v2(cell)
 
         return cell
 
     def validate_cell(self, cell):
-        super(MetadataValidatorV1, self).validate_cell(cell)
+        super(MetadataValidatorV2, self).validate_cell(cell)
 
         if 'nbgrader' not in cell.metadata:
             return
@@ -75,6 +52,12 @@ class MetadataValidatorV1(BaseMetadataValidator):
         grade = meta['grade']
         solution = meta['solution']
         locked = meta['locked']
+
+        # check if the cell type has changed
+        if 'cell_type' in meta:
+            if meta['cell_type'] != cell.cell_type:
+                self.log.warning("Cell type has changed from {} to {}!".format(
+                    meta['cell_type'], cell.cell_type), cell)
 
         # check for a valid grade id
         if grade or solution or locked:
@@ -99,7 +82,7 @@ class MetadataValidatorV1(BaseMetadataValidator):
                 "Markdown solution cell is not marked as a grade cell: {}".format(cell.source))
 
     def validate_nb(self, nb):
-        super(MetadataValidatorV1, self).validate_nb(nb)
+        super(MetadataValidatorV2, self).validate_nb(nb)
 
         ids = set([])
         for cell in nb.cells:
@@ -120,23 +103,23 @@ class MetadataValidatorV1(BaseMetadataValidator):
             ids.add(grade_id)
 
 
-def read_v1(source, as_version, **kwargs):
+def read_v2(source, as_version, **kwargs):
     nb = _read(source, as_version, **kwargs)
-    MetadataValidatorV1().validate_nb(nb)
+    MetadataValidatorV2().validate_nb(nb)
     return nb
 
 
-def write_v1(nb, fp, **kwargs):
-    MetadataValidatorV1().validate_nb(nb)
+def write_v2(nb, fp, **kwargs):
+    MetadataValidatorV2().validate_nb(nb)
     return _write(nb, fp, **kwargs)
 
 
-def reads_v1(source, as_version, **kwargs):
+def reads_v2(source, as_version, **kwargs):
     nb = _reads(source, as_version, **kwargs)
-    MetadataValidatorV1().validate_nb(nb)
+    MetadataValidatorV2().validate_nb(nb)
     return nb
 
 
-def writes_v1(nb, **kwargs):
-    MetadataValidatorV1().validate_nb(nb)
+def writes_v2(nb, **kwargs):
+    MetadataValidatorV2().validate_nb(nb)
     return _writes(nb, **kwargs)

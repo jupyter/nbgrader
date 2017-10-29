@@ -3,12 +3,11 @@ import os
 
 from traitlets.config import LoggingConfigurable
 from traitlets import List, Unicode, Integer, Bool
-from nbformat import current_nbformat
+from nbformat import current_nbformat, read as read_nb
 from textwrap import fill, dedent
 from nbconvert.filters import ansi2html, strip_ansi
 
 from .preprocessors import Execute, ClearOutput, CheckCellMetadata
-from .nbgraderformat import read as read_nb
 from . import utils
 
 
@@ -40,9 +39,21 @@ class Validator(LoggingConfigurable):
         help=dedent(
             """
             Don't complain if cell checksums have changed (if they are locked
-            cells) or haven't changed (if they are solution cells)
+            cells) or haven't changed (if they are solution cells). Note that
+            this will NOT ignore changes to cell types.
             """
         )
+    ).tag(config=True)
+
+    type_changed_warning = Unicode(
+        dedent(
+            """
+            THE TYPES OF {num_changed} CELL(S) HAVE CHANGED!
+            This might mean that even though the tests are passing
+            now, they won't pass when your assignment is graded.
+            """
+        ).strip() + "\n",
+        help="Warning to display when a cell's type has changed."
     ).tag(config=True)
 
     changed_warning = Unicode(
@@ -103,6 +114,13 @@ class Validator(LoggingConfigurable):
 
         return "\n".join(errors)
 
+    def _print_type_changed(self, old_type, new_type, source):
+        self.stream.write("\n" + "=" * self.width + "\n")
+        self.stream.write(
+            "The following {} cell has changed to a {} cell:\n\n".format(
+                old_type, new_type))
+        self.stream.write(self._indent(source) + "\n\n")
+
     def _print_changed(self, source):
         self.stream.write("\n" + "=" * self.width + "\n")
         self.stream.write("The following cell has changed:\n\n")
@@ -119,6 +137,18 @@ class Validator(LoggingConfigurable):
         self.stream.write("\n" + "=" * self.width + "\n")
         self.stream.write("The following cell passed:\n\n")
         self.stream.write(self._indent(source) + "\n\n")
+
+    def _print_num_type_changed(self, num_changed):
+        if num_changed == 0:
+            return
+
+        else:
+            self.stream.write(
+                fill(
+                    self.type_changed_warning.format(num_changed=num_changed),
+                    width=self.width
+                )
+            )
 
     def _print_num_changed(self, num_changed):
         if num_changed == 0:
@@ -155,6 +185,22 @@ class Validator(LoggingConfigurable):
                     width=self.width
                 )
             )
+
+    def _get_type_changed_cells(self, nb):
+        changed = []
+
+        for cell in nb.cells:
+            if not (utils.is_grade(cell) or utils.is_solution(cell) or utils.is_locked(cell)):
+                continue
+            if 'cell_type' not in cell.metadata.nbgrader:
+                continue
+
+            new_type = cell.metadata.nbgrader.cell_type
+            old_type = cell.cell_type
+            if new_type and (old_type != new_type):
+                changed.append(cell)
+
+        return changed
 
     def _get_changed_cells(self, nb):
         changed = []
@@ -212,8 +258,7 @@ class Validator(LoggingConfigurable):
 
         return passed
 
-    def _preprocess(self, filename):
-        nb = read_nb(filename, as_version=current_nbformat)
+    def _preprocess(self, nb):
         resources = {}
         for preprocessor in self.preprocessors:
             pp = preprocessor()
@@ -225,7 +270,19 @@ class Validator(LoggingConfigurable):
         basename = os.path.basename(filename)
         dirname = os.path.dirname(filename)
         with utils.chdir(dirname):
-            nb = self._preprocess(basename)
+            nb = read_nb(basename, as_version=current_nbformat)
+
+        type_changed = self._get_type_changed_cells(nb)
+        if len(type_changed) > 0:
+            results = {}
+            results['type_changed'] = [{
+                "source": cell.source.strip(),
+                "old_type": cell.cell_type,
+                "new_type": cell.metadata.nbgrader.cell_type
+            } for cell in type_changed]
+            return results
+
+        nb = self._preprocess(nb)
         changed = self._get_changed_cells(nb)
         passed = self._get_passed_cells(nb)
         failed = self._get_failed_cells(nb)
@@ -255,11 +312,17 @@ class Validator(LoggingConfigurable):
 
     def validate_and_print(self, filename):
         results = self.validate(filename)
+        type_changed = results.get('type_changed', [])
         changed = results.get('changed', [])
         passed = results.get('passed', [])
         failed = results.get('failed', [])
 
-        if not self.ignore_checksums and len(changed) > 0:
+        if len(type_changed) > 0:
+            self._print_num_type_changed(len(type_changed))
+            for cell in type_changed:
+                self._print_type_changed(cell['old_type'], cell['new_type'], cell['source'])
+
+        elif not self.ignore_checksums and len(changed) > 0:
             self._print_num_changed(len(changed))
             for cell in changed:
                 self._print_changed(cell['source'])

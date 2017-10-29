@@ -8,7 +8,8 @@ from traitlets.config import LoggingConfigurable
 
 root = os.path.dirname(__file__)
 
-class BaseValidator(LoggingConfigurable):
+
+class BaseMetadataValidator(LoggingConfigurable):
 
     schema = None
 

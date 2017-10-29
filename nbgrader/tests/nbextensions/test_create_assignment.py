@@ -39,9 +39,9 @@ def _wait(browser):
     return WebDriverWait(browser, 30)
 
 
-def _load_notebook(browser, port, retries=5):
+def _load_notebook(browser, port, retries=5, name="blank.ipynb"):
     # go to the correct page
-    browser.get("http://localhost:{}/notebooks/blank.ipynb".format(port))
+    browser.get("http://localhost:{}/notebooks/{}".format(port, name))
 
     def page_loaded(browser):
         return browser.execute_script(
@@ -592,3 +592,14 @@ def test_negative_points(browser, port):
     _set_points(browser, points=-1)
     assert _get_total_points(browser) == 0
     assert 0 == _get_metadata(browser)['points']
+
+
+@pytest.mark.nbextensions
+def test_schema_version(browser, port):
+    _load_notebook(browser, port, name="old-schema.ipynb")
+
+    # activating the toolbar should cause the dialog warning about the schema
+    # version to appear
+    _activate_toolbar(browser)
+    _wait_for_modal(browser)
+    _dismiss_modal(browser)
