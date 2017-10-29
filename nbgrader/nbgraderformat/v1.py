@@ -2,14 +2,14 @@ import warnings
 
 from nbformat import read as _read, reads as _reads
 from nbformat import write as _write, writes as _writes
-from .common import BaseValidator, ValidationError
+from .common import BaseMetadataValidator, ValidationError
 
-class ValidatorV1(BaseValidator):
+class MetadataValidatorV1(BaseMetadataValidator):
 
     schema = None
 
     def __init__(self):
-        super(ValidatorV1, self).__init__(1)
+        super(MetadataValidatorV1, self).__init__(1)
 
     def _upgrade_v0_to_v1(self, cell):
         meta = cell.metadata['nbgrader']
@@ -66,7 +66,7 @@ class ValidatorV1(BaseValidator):
         return cell
 
     def validate_cell(self, cell):
-        super(ValidatorV1, self).validate_cell(cell)
+        super(MetadataValidatorV1, self).validate_cell(cell)
 
         if 'nbgrader' not in cell.metadata:
             return
@@ -99,7 +99,7 @@ class ValidatorV1(BaseValidator):
                 "Markdown solution cell is not marked as a grade cell: {}".format(cell.source))
 
     def validate_nb(self, nb):
-        super(ValidatorV1, self).validate_nb(nb)
+        super(MetadataValidatorV1, self).validate_nb(nb)
 
         ids = set([])
         for cell in nb.cells:
@@ -122,21 +122,21 @@ class ValidatorV1(BaseValidator):
 
 def read_v1(source, as_version, **kwargs):
     nb = _read(source, as_version, **kwargs)
-    ValidatorV1().validate_nb(nb)
+    MetadataValidatorV1().validate_nb(nb)
     return nb
 
 
 def write_v1(nb, fp, **kwargs):
-    ValidatorV1().validate_nb(nb)
+    MetadataValidatorV1().validate_nb(nb)
     return _write(nb, fp, **kwargs)
 
 
 def reads_v1(source, as_version, **kwargs):
     nb = _reads(source, as_version, **kwargs)
-    ValidatorV1().validate_nb(nb)
+    MetadataValidatorV1().validate_nb(nb)
     return nb
 
 
 def writes_v1(nb, **kwargs):
-    ValidatorV1().validate_nb(nb)
+    MetadataValidatorV1().validate_nb(nb)
     return _writes(nb, **kwargs)

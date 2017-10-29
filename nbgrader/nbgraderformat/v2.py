@@ -1,27 +1,25 @@
 from nbformat import read as _read, reads as _reads
 from nbformat import write as _write, writes as _writes
-from .v1 import ValidatorV1
-from .common import BaseValidator, ValidationError
+from .v1 import MetadataValidatorV1
+from .common import BaseMetadataValidator, ValidationError
+from ..utils import is_grade, is_solution, is_locked
 
 
-class ValidatorV2(BaseValidator):
+class MetadataValidatorV2(BaseMetadataValidator):
 
     schema = None
 
     def __init__(self):
-        super(ValidatorV2, self).__init__(2)
-        self.v1 = ValidatorV1()
+        super(MetadataValidatorV2, self).__init__(2)
+        self.v1 = MetadataValidatorV1()
 
     def _upgrade_v1_to_v2(self, cell):
         meta = cell.metadata['nbgrader']
 
-        if 'cell_type' in meta:
-            if not meta['cell_type']:
-                del meta['cell_type']
-
-        if 'checksum' in meta and 'cell_type' not in meta:
-            self.log.warning("Cell has a checksum, but not a cell type! adding default cell type")
-            meta['cell_type'] = cell.cell_type
+        if is_grade(cell) or is_solution(cell) or is_locked(cell):
+            if 'cell_type' not in meta:
+                self.log.warning("Cell does not have a stored cell type! Adding default cell type.")
+                meta['cell_type'] = cell.cell_type
 
         meta['schema_version'] = 2
 
@@ -45,7 +43,7 @@ class ValidatorV2(BaseValidator):
         return cell
 
     def validate_cell(self, cell):
-        super(ValidatorV2, self).validate_cell(cell)
+        super(MetadataValidatorV2, self).validate_cell(cell)
 
         if 'nbgrader' not in cell.metadata:
             return
@@ -84,7 +82,7 @@ class ValidatorV2(BaseValidator):
                 "Markdown solution cell is not marked as a grade cell: {}".format(cell.source))
 
     def validate_nb(self, nb):
-        super(ValidatorV2, self).validate_nb(nb)
+        super(MetadataValidatorV2, self).validate_nb(nb)
 
         ids = set([])
         for cell in nb.cells:
@@ -107,21 +105,21 @@ class ValidatorV2(BaseValidator):
 
 def read_v2(source, as_version, **kwargs):
     nb = _read(source, as_version, **kwargs)
-    ValidatorV2().validate_nb(nb)
+    MetadataValidatorV2().validate_nb(nb)
     return nb
 
 
 def write_v2(nb, fp, **kwargs):
-    ValidatorV2().validate_nb(nb)
+    MetadataValidatorV2().validate_nb(nb)
     return _write(nb, fp, **kwargs)
 
 
 def reads_v2(source, as_version, **kwargs):
     nb = _reads(source, as_version, **kwargs)
-    ValidatorV2().validate_nb(nb)
+    MetadataValidatorV2().validate_nb(nb)
     return nb
 
 
 def writes_v2(nb, **kwargs):
-    ValidatorV2().validate_nb(nb)
+    MetadataValidatorV2().validate_nb(nb)
     return _writes(nb, **kwargs)
