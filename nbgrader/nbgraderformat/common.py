@@ -8,6 +8,13 @@ from traitlets.config import LoggingConfigurable
 
 root = os.path.dirname(__file__)
 
+
+class CellTypeChangedError(Exception):
+    def __init__(self, message, cell):
+        self.cell = cell
+        super(CellTypeChangedError, self).__init__(message)
+
+
 class BaseValidator(LoggingConfigurable):
 
     schema = None
