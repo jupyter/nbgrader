@@ -175,7 +175,8 @@ define([
                 modal_opts.title = "Outdated schema version";
                 modal_opts.body = $("<p/>").html(
                     "At least one cell has an old version (" + schema + ") of the " +
-                    "nbgrader metadata. Please update the metadata on the command " +
+                    "nbgrader metadata. Please back up this notebook and then " +
+                    "update the metadata on the command " +
                     "line using the following command: <code>nbgrader update " +
                     Jupyter.notebook.notebook_path + "</code>");
                 warning = dialog.modal(modal_opts);
