@@ -481,10 +481,10 @@ class TestNbGraderZipCollect(BaseTestApp):
         # submissions are sorted so a before b
         os.makedirs(join(archive_dir, 'ps1_hacker_a_2017-01-30-15-30-10'))
         with io.open(join(archive_dir, 'ps1_hacker_a_2017-01-30-15-30-10', 'problem1.ipynb'), mode='w', encoding='utf-8') as fh:
-            fh.write('')
+            fh.write(u'')
         os.makedirs(join(archive_dir, 'ps1_hacker_b_2016-01-30-15-30-10'))
         with io.open(join(archive_dir, 'ps1_hacker_b_2016-01-30-15-30-10', 'problem1.ipynb'), mode='w', encoding='utf-8') as fh:
-            fh.write('')
+            fh.write(u'')
 
         with open('plugin_five.py', 'w') as fh:
             fh.write(dedent(
@@ -533,10 +533,10 @@ class TestNbGraderZipCollect(BaseTestApp):
         # submissions are sorted so a before b
         os.makedirs(join(archive_dir, 'ps1_hacker_a_2016-01-30-15-30-10'))
         with io.open(join(archive_dir, 'ps1_hacker_a_2016-01-30-15-30-10', 'problem1.ipynb'), mode='w', encoding='utf-8') as fh:
-            fh.write('')
+            fh.write(u'')
         os.makedirs(join(archive_dir, 'ps1_hacker_b_2017-01-30-15-30-10'))
         with io.open(join(archive_dir, 'ps1_hacker_b_2017-01-30-15-30-10', 'problem1.ipynb'), mode='w', encoding='utf-8') as fh:
-            fh.write('')
+            fh.write(u'')
 
         with open('plugin_six.py', 'w') as fh:
             fh.write(dedent(
@@ -584,7 +584,7 @@ class TestNbGraderZipCollect(BaseTestApp):
 
         os.makedirs(join(archive_dir, 'ps1_hacker'))
         with io.open(join(archive_dir, 'ps1_hacker', 'problem1.ipynb'), mode='w', encoding='utf-8') as fh:
-            fh.write('')
+            fh.write(u'')
         with open(join(archive_dir, 'ps1_hacker', 'timestamp.txt'), 'w') as fh:
             fh.write('foo')
 
@@ -617,7 +617,7 @@ class TestNbGraderZipCollect(BaseTestApp):
 
         os.makedirs(join(archive_dir, 'ps1_hacker', 'files'))
         with io.open(join(archive_dir, 'ps1_hacker', 'files', 'problem1.ipynb'), mode='w', encoding='utf-8') as fh:
-            fh.write('')
+            fh.write(u'')
         with open(join(archive_dir, 'ps1_hacker', 'timestamp.txt'), 'w') as fh:
             fh.write('foo')
 
@@ -650,11 +650,11 @@ class TestNbGraderZipCollect(BaseTestApp):
 
         os.makedirs(join(archive_dir, 'ps1_hacker_01', 'files'))
         with io.open(join(archive_dir, 'ps1_hacker_01', 'files', 'problem1.ipynb'), mode='w', encoding='utf-8') as fh:
-            fh.write('')
+            fh.write(u'')
 
         os.makedirs(join(archive_dir, 'ps1_hacker_02', 'files'))
         with io.open(join(archive_dir, 'ps1_hacker_02', 'files', 'problem1.ipynb'), mode='w', encoding='utf-8') as fh:
-            fh.write('')
+            fh.write(u'')
 
         with open("nbgrader_config.py", "a") as fh:
             fh.write(dedent(
