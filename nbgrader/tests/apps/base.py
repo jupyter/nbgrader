@@ -1,3 +1,4 @@
+import io
 import os
 import shutil
 import pytest
@@ -25,7 +26,7 @@ class BaseTestApp(object):
             os.makedirs(os.path.dirname(full_dest))
         if os.path.exists(full_dest):
             remove(full_dest)
-        with open(full_dest, 'w') as f:
+        with io.open(full_dest, mode='w', encoding='utf-8') as f:
             write_nb(nb, f, 4)
 
     def _copy_file(self, src, dest):

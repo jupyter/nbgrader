@@ -1,3 +1,4 @@
+import io
 import os
 import sys
 import shutil
@@ -41,14 +42,14 @@ def clean_notebook_metadata(root):
             if os.path.splitext(filename)[1] == '.ipynb':
                 # read in the notebook
                 pth = os.path.join(dirpath, filename)
-                with open(pth, 'r') as fh:
+                with io.open(pth, encoding='utf-8') as fh:
                     orig_nb = read(fh, 4)
 
                 # copy the original notebook
                 new_nb = clean_notebook(orig_nb)
 
                 # write the notebook back to disk
-                with open(pth, 'w') as fh:
+                with io.open(pth, mode='w', encoding='utf-8') as fh:
                     write(new_nb, fh, 4)
 
                 if orig_nb != new_nb:
@@ -81,7 +82,7 @@ def clear_notebooks(root):
             if os.path.splitext(filename)[1] == '.ipynb':
                 # read in the notebook
                 pth = os.path.join(dirpath, filename)
-                with open(pth, 'r') as fh:
+                with io.open(pth, encoding='utf-8') as fh:
                     orig_nb = read(fh, 4)
 
                 # copy the original notebook
@@ -92,7 +93,7 @@ def clear_notebooks(root):
                     new_nb = preprocessor.preprocess(new_nb, {})[0]
 
                 # write the notebook back to disk
-                with open(pth, 'w') as fh:
+                with io.open(pth, mode='w', encoding='utf-8') as fh:
                     write(new_nb, fh, 4)
 
                 if orig_nb != new_nb:

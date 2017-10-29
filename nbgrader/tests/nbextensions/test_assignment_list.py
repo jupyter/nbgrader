@@ -53,7 +53,7 @@ def class_files(coursedir):
 
     # create a fake ps1
     os.mkdir(os.path.join(coursedir, "source", "ps.01"))
-    with open(os.path.join(coursedir, "source", "ps.01", "problem 1.ipynb"), "w") as fh:
+    with io.open(os.path.join(coursedir, "source", "ps.01", "problem 1.ipynb"), mode="w", encoding="utf-8") as fh:
         write_nb(new_notebook(), fh, 4)
 
     with open("nbgrader_config.py", "a") as fh:

@@ -1,3 +1,4 @@
+import io
 import os
 from os.path import join
 
@@ -73,10 +74,10 @@ class TestNbGraderFetch(BaseTestApp):
 
         # make sure the --replace flag doesn't overwrite files, though
         self._copy_file(join("files", "submitted-changed.ipynb"), join("ps1", "p1.ipynb"))
-        with open(join("ps1", "p1.ipynb"), "r") as fh:
+        with io.open(join("ps1", "p1.ipynb"), mode="r", encoding='utf-8') as fh:
             contents1 = fh.read()
         self._fetch("ps1", exchange, flags=["--replace"])
-        with open(join("ps1", "p1.ipynb"), "r") as fh:
+        with io.open(join("ps1", "p1.ipynb"), mode="r", encoding='utf-8') as fh:
             contents2 = fh.read()
         assert contents1 == contents2
 
