@@ -1,7 +1,7 @@
 from nbformat import read as _read, reads as _reads
 from nbformat import write as _write, writes as _writes
 from .v1 import ValidatorV1
-from .common import BaseValidator, ValidationError, CellTypeChangedError
+from .common import BaseValidator, ValidationError
 
 
 class ValidatorV2(BaseValidator):
@@ -20,7 +20,7 @@ class ValidatorV2(BaseValidator):
                 del meta['cell_type']
 
         if 'checksum' in meta and 'cell_type' not in meta:
-            self.log.warning("cell has a checksum, but not a cell type! adding default cell type")
+            self.log.warning("Cell has a checksum, but not a cell type! adding default cell type")
             meta['cell_type'] = cell.cell_type
 
         meta['schema_version'] = 2
@@ -58,7 +58,7 @@ class ValidatorV2(BaseValidator):
         # check if the cell type has changed
         if 'cell_type' in meta:
             if meta['cell_type'] != cell.cell_type:
-                raise CellTypeChangedError("cell type has changed from {} to {}!".format(
+                self.log.warning("Cell type has changed from {} to {}!".format(
                     meta['cell_type'], cell.cell_type), cell)
 
         # check for a valid grade id
