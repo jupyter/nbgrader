@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# encoding: utf-8
+# coding: utf-8
 
 import sys
 import os
@@ -54,7 +54,7 @@ flags.update({
 
 class NbGraderApp(NbGrader):
 
-    name = 'nbgrader'
+    name = u'nbgrader'
     description = u'A system for assigning and grading notebooks'
     version = nbgrader.__version__
 

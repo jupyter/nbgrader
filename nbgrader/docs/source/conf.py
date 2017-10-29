@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
+# coding: utf-8
 #
 # nbgrader documentation build configuration file, created by
 # sphinx-quickstart on Wed Jun 10 07:27:22 2015.

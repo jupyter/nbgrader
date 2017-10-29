@@ -1,3 +1,6 @@
+# -*- coding: utf-8 -*-
+
+import io
 import os
 import pytest
 import zipfile
@@ -477,11 +480,11 @@ class TestNbGraderZipCollect(BaseTestApp):
 
         # submissions are sorted so a before b
         os.makedirs(join(archive_dir, 'ps1_hacker_a_2017-01-30-15-30-10'))
-        with open(join(archive_dir, 'ps1_hacker_a_2017-01-30-15-30-10', 'problem1.ipynb'), 'w') as fh:
-            fh.write('')
+        with io.open(join(archive_dir, 'ps1_hacker_a_2017-01-30-15-30-10', 'problem1.ipynb'), mode='w', encoding='utf-8') as fh:
+            fh.write(u'')
         os.makedirs(join(archive_dir, 'ps1_hacker_b_2016-01-30-15-30-10'))
-        with open(join(archive_dir, 'ps1_hacker_b_2016-01-30-15-30-10', 'problem1.ipynb'), 'w') as fh:
-            fh.write('')
+        with io.open(join(archive_dir, 'ps1_hacker_b_2016-01-30-15-30-10', 'problem1.ipynb'), mode='w', encoding='utf-8') as fh:
+            fh.write(u'')
 
         with open('plugin_five.py', 'w') as fh:
             fh.write(dedent(
@@ -529,11 +532,11 @@ class TestNbGraderZipCollect(BaseTestApp):
 
         # submissions are sorted so a before b
         os.makedirs(join(archive_dir, 'ps1_hacker_a_2016-01-30-15-30-10'))
-        with open(join(archive_dir, 'ps1_hacker_a_2016-01-30-15-30-10', 'problem1.ipynb'), 'w') as fh:
-            fh.write('')
+        with io.open(join(archive_dir, 'ps1_hacker_a_2016-01-30-15-30-10', 'problem1.ipynb'), mode='w', encoding='utf-8') as fh:
+            fh.write(u'')
         os.makedirs(join(archive_dir, 'ps1_hacker_b_2017-01-30-15-30-10'))
-        with open(join(archive_dir, 'ps1_hacker_b_2017-01-30-15-30-10', 'problem1.ipynb'), 'w') as fh:
-            fh.write('')
+        with io.open(join(archive_dir, 'ps1_hacker_b_2017-01-30-15-30-10', 'problem1.ipynb'), mode='w', encoding='utf-8') as fh:
+            fh.write(u'')
 
         with open('plugin_six.py', 'w') as fh:
             fh.write(dedent(
@@ -580,8 +583,8 @@ class TestNbGraderZipCollect(BaseTestApp):
         submitted_dir = join(course_dir, "submitted")
 
         os.makedirs(join(archive_dir, 'ps1_hacker'))
-        with open(join(archive_dir, 'ps1_hacker', 'problem1.ipynb'), 'w') as fh:
-            fh.write('')
+        with io.open(join(archive_dir, 'ps1_hacker', 'problem1.ipynb'), mode='w', encoding='utf-8') as fh:
+            fh.write(u'')
         with open(join(archive_dir, 'ps1_hacker', 'timestamp.txt'), 'w') as fh:
             fh.write('foo')
 
@@ -613,8 +616,8 @@ class TestNbGraderZipCollect(BaseTestApp):
         submitted_dir = join(course_dir, "submitted")
 
         os.makedirs(join(archive_dir, 'ps1_hacker', 'files'))
-        with open(join(archive_dir, 'ps1_hacker', 'files', 'problem1.ipynb'), 'w') as fh:
-            fh.write('')
+        with io.open(join(archive_dir, 'ps1_hacker', 'files', 'problem1.ipynb'), mode='w', encoding='utf-8') as fh:
+            fh.write(u'')
         with open(join(archive_dir, 'ps1_hacker', 'timestamp.txt'), 'w') as fh:
             fh.write('foo')
 
@@ -646,12 +649,12 @@ class TestNbGraderZipCollect(BaseTestApp):
         submitted_dir = join(course_dir, "submitted")
 
         os.makedirs(join(archive_dir, 'ps1_hacker_01', 'files'))
-        with open(join(archive_dir, 'ps1_hacker_01', 'files', 'problem1.ipynb'), 'w') as fh:
-            fh.write('')
+        with io.open(join(archive_dir, 'ps1_hacker_01', 'files', 'problem1.ipynb'), mode='w', encoding='utf-8') as fh:
+            fh.write(u'')
 
         os.makedirs(join(archive_dir, 'ps1_hacker_02', 'files'))
-        with open(join(archive_dir, 'ps1_hacker_02', 'files', 'problem1.ipynb'), 'w') as fh:
-            fh.write('')
+        with io.open(join(archive_dir, 'ps1_hacker_02', 'files', 'problem1.ipynb'), mode='w', encoding='utf-8') as fh:
+            fh.write(u'')
 
         with open("nbgrader_config.py", "a") as fh:
             fh.write(dedent(

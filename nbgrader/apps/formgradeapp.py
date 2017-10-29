@@ -1,3 +1,5 @@
+# coding: utf-8
+
 from traitlets.config.application import catch_config_error
 
 from .baseapp import NbGrader, format_excepthook
