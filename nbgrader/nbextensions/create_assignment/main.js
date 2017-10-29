@@ -12,6 +12,7 @@ define([
     var nbgrader_preset_name = "Create Assignment";
     var nbgrader_highlight_cls = "nbgrader-highlight";
     var nbgrader_cls = "nbgrader-cell";
+    var nbgrader_schema_version = 2;
     var warning;
 
     var CellToolbar = celltoolbar.CellToolbar;
@@ -36,6 +37,9 @@ define([
 
     // show the total points when the preset is activated
     events.on('preset_activated.CellToolbar', function(evt, preset) {
+        validate_schema_version();
+        clear_cell_types();
+
         var elem = $("#nbgrader-total-points-group");
         if (preset.name === nbgrader_preset_name) {
             if (elem.length == 0) {
@@ -144,6 +148,52 @@ define([
         }
     };
 
+    var validate_schema_version = function() {
+        var i, cells, schema;
+
+        if (warning !== undefined) {
+            return;
+        }
+
+        var modal_opts = {
+            notebook: Jupyter.notebook,
+            keyboard_manager: Jupyter.keyboard_manager,
+            buttons: {
+                OK: {
+                    class: "btn-primary",
+                    click: function () {
+                        warning = undefined;
+                    }
+                }
+            }
+        };
+
+        cells = Jupyter.notebook.get_cells();
+        for (i = 0; i < cells.length; i++) {
+            schema = get_schema_version(cells[i]);
+            if (schema !== undefined && schema < nbgrader_schema_version) {
+                modal_opts.title = "Outdated schema version";
+                modal_opts.body = $("<p/>").html(
+                    "At least one cell has an old version (" + schema + ") of the " +
+                    "nbgrader metadata. Please update the metadata on the command " +
+                    "line using the following command: <code>nbgrader update " +
+                    Jupyter.notebook.notebook_path + "</code>");
+                warning = dialog.modal(modal_opts);
+                break;
+            }
+        }
+    };
+
+    var clear_cell_types = function() {
+        var cells = Jupyter.notebook.get_cells();
+        var i;
+        for (i = 0; i < cells.length; i++) {
+            if (cells[i].metadata.nbgrader !== undefined && cells[i].metadata.nbgrader.hasOwnProperty("cell_type")) {
+                delete cells[i].metadata.nbgrader.cell_type;
+            }
+        }
+    };
+
     /**
      * Remove all nbgrader metadata
      */
@@ -160,7 +210,20 @@ define([
         if (cell.metadata.nbgrader === undefined) {
             cell.metadata.nbgrader = {};
         }
-        cell.metadata.nbgrader.schema_version = 1;
+        cell.metadata.nbgrader.schema_version = nbgrader_schema_version;
+    };
+
+    /**
+     * Get nbgrader schema version
+     */
+    var get_schema_version = function (cell) {
+        if (cell.metadata.nbgrader === undefined) {
+            return undefined;
+        }
+        if (!cell.metadata.nbgrader.hasOwnProperty("schema_version")) {
+            return 0;
+        }
+        return cell.metadata.nbgrader.schema_version;
     };
 
     /**
