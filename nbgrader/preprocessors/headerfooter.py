@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import io
 
 from nbformat import current_nbformat

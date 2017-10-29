@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import io
 import os
 from os.path import join
