@@ -74,12 +74,21 @@ def test_schema_version():
 def test_cell_type():
     cell = create_grade_cell("", "code", "foo", "", 0)
     MetadataValidatorV2().upgrade_cell_metadata(cell)
-    assert cell.metadata.nbgrader["cell_type"] == "code"
+    assert "cell_type" not in cell.metadata.nbgrader
 
+    cell = create_grade_cell("", "code", "foo", "", 0)
+    cell.metadata.nbgrader["checksum"] = "abcd"
+    MetadataValidatorV2().upgrade_cell_metadata(cell)
+    assert cell.metadata.nbgrader['cell_type'] == "code"
+
+    cell = create_grade_cell("", "code", "foo", "", 0)
+    cell.metadata.nbgrader["checksum"] = "abcd"
     cell.metadata.nbgrader["cell_type"] = "markdown"
     MetadataValidatorV2().upgrade_cell_metadata(cell)
-    assert cell.metadata.nbgrader.cell_type == "markdown"
+    assert cell.metadata.nbgrader['cell_type'] == "code"
 
+    cell = create_grade_cell("", "code", "foo", "", 0)
+    cell.metadata.nbgrader["checksum"] = "abcd"
     cell.metadata.nbgrader["cell_type"] = "code"
     MetadataValidatorV2().upgrade_cell_metadata(cell)
-    assert cell.metadata.nbgrader.cell_type == "code"
+    assert cell.metadata.nbgrader['cell_type'] == "code"

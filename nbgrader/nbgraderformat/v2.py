@@ -16,10 +16,10 @@ class MetadataValidatorV2(BaseMetadataValidator):
     def _upgrade_v1_to_v2(self, cell):
         meta = cell.metadata['nbgrader']
 
-        if is_grade(cell) or is_solution(cell) or is_locked(cell):
-            if 'cell_type' not in meta:
-                self.log.warning("Cell does not have a stored cell type! Adding default cell type.")
-                meta['cell_type'] = cell.cell_type
+        # only add cell type if the checksum has also already been set
+        if 'checksum' in meta and 'cell_type' not in meta:
+            self.log.warning("Cell does not have a stored cell type! Adding default cell type.")
+            meta['cell_type'] = cell.cell_type
 
         meta['schema_version'] = 2
 
