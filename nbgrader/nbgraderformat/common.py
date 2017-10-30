@@ -4,9 +4,18 @@ import jsonschema
 
 from jsonschema import ValidationError
 from traitlets.config import LoggingConfigurable
+from . import SCHEMA_VERSION
 
 
 root = os.path.dirname(__file__)
+
+
+class SchemaMismatchError(Exception):
+
+    def __init__(self, message, actual_version, expected_version):
+        super(SchemaMismatchError, self).__init__(message)
+        self.actual_version = actual_version
+        self.expected_version = expected_version
 
 
 class BaseMetadataValidator(LoggingConfigurable):
@@ -29,6 +38,11 @@ class BaseMetadataValidator(LoggingConfigurable):
     def validate_cell(self, cell):
         if 'nbgrader' not in cell.metadata:
             return
+        schema = cell.metadata['nbgrader'].get('schema_version', 0)
+        if schema != SCHEMA_VERSION:
+            raise SchemaMismatchError(
+                "outdated schema version: {} (expected {})".format(schema, SCHEMA_VERSION),
+                schema, SCHEMA_VERSION)
         jsonschema.validate(cell.metadata['nbgrader'], self.schema)
 
     def validate_nb(self, nb):

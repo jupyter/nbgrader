@@ -55,7 +55,10 @@ class UpdateApp(NbGrader):
         super(UpdateApp, self).start()
 
         if len(self.extra_args) < 1:
-            self.fail("No notebooks given")
+            self.fail(
+                "No notebooks or directories given. Usage:\n\n"
+                "nbgrader update <NOTEBOOK>\n"
+                "nbgrader update <DIRECTORY>\n")
 
         notebooks = set()
         for name in self.extra_args:
