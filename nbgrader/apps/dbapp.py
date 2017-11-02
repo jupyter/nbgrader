@@ -3,6 +3,7 @@
 
 import csv
 import os
+import sys
 import shutil
 
 from textwrap import dedent
@@ -11,6 +12,7 @@ from datetime import datetime
 
 from . import NbGrader
 from ..api import Gradebook, MissingEntry
+from ..exchange import ExchangeList, ExchangeError
 from .. import dbutil
 
 aliases = {
@@ -28,7 +30,27 @@ student_add_aliases.update({
     'email': 'DbStudentAddApp.email'
 })
 
-class DbStudentAddApp(NbGrader):
+class DbBaseApp(NbGrader):
+
+    def start(self):
+        if sys.platform != 'win32':
+            lister = ExchangeList(coursedir=self.coursedir, parent=self)
+            self.course_id = lister.course_id
+            self.exchange = lister.root
+
+            try:
+                lister.start()
+            except ExchangeError:
+                self.exchange_missing = True
+            else:
+                self.exchange_missing = False
+
+        else:
+            self.course_id = ''
+            self.exchange = ''
+            self.exchange_missing = True
+
+class DbStudentAddApp(DbBaseApp):
 
     name = 'nbgrader-db-student-add'
     description = 'Add a student to the nbgrader database'
@@ -68,7 +90,7 @@ class DbStudentAddApp(NbGrader):
         }
 
         self.log.info("Creating/updating student with ID '%s': %s", student_id, student)
-        with Gradebook(self.coursedir.db_url) as gb:
+        with Gradebook(self.coursedir.db_url, self.course_id) as gb:
             gb.update_or_create_student(student_id, **student)
 
 student_remove_flags = {}
@@ -80,7 +102,7 @@ student_remove_flags.update({
     ),
 })
 
-class DbStudentRemoveApp(NbGrader):
+class DbStudentRemoveApp(DbBaseApp):
 
     name = 'nbgrader-db-student-remove'
     description = 'Remove a student from the nbgrader database'
@@ -98,7 +120,7 @@ class DbStudentRemoveApp(NbGrader):
 
         student_id = self.extra_args[0]
 
-        with Gradebook(self.coursedir.db_url) as gb:
+        with Gradebook(self.coursedir.db_url, self.course_id) as gb:
             try:
                 student = gb.find_student(student_id)
             except MissingEntry:
@@ -116,7 +138,7 @@ class DbStudentRemoveApp(NbGrader):
             gb.remove_student(student_id)
 
 
-class DbStudentImportApp(NbGrader):
+class DbStudentImportApp(DbBaseApp):
 
     name = 'nbgrader-db-student-import'
     description = 'Import students into the nbgrader database from a CSV file'
@@ -137,7 +159,7 @@ class DbStudentImportApp(NbGrader):
 
         allowed_keys = ["last_name", "first_name", "email", "id"]
 
-        with Gradebook(self.coursedir.db_url) as gb:
+        with Gradebook(self.coursedir.db_url, self.course_id) as gb:
             with open(path, 'r') as fh:
                 reader = csv.DictReader(fh)
                 for row in reader:
@@ -160,7 +182,7 @@ class DbStudentImportApp(NbGrader):
                     gb.update_or_create_student(student_id, **student)
 
 
-class DbStudentListApp(NbGrader):
+class DbStudentListApp(DbBaseApp):
 
     name = 'nbgrader-db-student-list'
     description = 'List students in the nbgrader database'
@@ -171,7 +193,7 @@ class DbStudentListApp(NbGrader):
     def start(self):
         super(DbStudentListApp, self).start()
 
-        with Gradebook(self.coursedir.db_url) as gb:
+        with Gradebook(self.coursedir.db_url, self.course_id) as gb:
             print("There are %d students in the database:" % len(gb.students))
             for student in gb.students:
                 print("%s (%s, %s) -- %s" % (student.id, student.last_name, student.first_name, student.email))
@@ -183,7 +205,7 @@ assignment_add_aliases.update({
     'duedate': 'DbAssignmentAddApp.duedate',
 })
 
-class DbAssignmentAddApp(NbGrader):
+class DbAssignmentAddApp(DbBaseApp):
 
     name = 'nbgrader-db-assignment-add'
     description = 'Add an assignment to the nbgrader database'
@@ -209,7 +231,7 @@ class DbAssignmentAddApp(NbGrader):
         }
 
         self.log.info("Creating/updating assignment with ID '%s': %s", assignment_id, assignment)
-        with Gradebook(self.coursedir.db_url) as gb:
+        with Gradebook(self.coursedir.db_url, self.course_id) as gb:
             gb.update_or_create_assignment(assignment_id, **assignment)
 
 
@@ -222,7 +244,7 @@ assignment_remove_flags.update({
     ),
 })
 
-class DbAssignmentRemoveApp(NbGrader):
+class DbAssignmentRemoveApp(DbBaseApp):
 
     name = 'nbgrader-db-assignment-remove'
     description = 'Remove an assignment from the nbgrader database'
@@ -240,7 +262,7 @@ class DbAssignmentRemoveApp(NbGrader):
 
         assignment_id = self.extra_args[0]
 
-        with Gradebook(self.coursedir.db_url) as gb:
+        with Gradebook(self.coursedir.db_url, self.course_id) as gb:
             try:
                 assignment = gb.find_assignment(assignment_id)
             except MissingEntry:
@@ -258,7 +280,7 @@ class DbAssignmentRemoveApp(NbGrader):
             gb.remove_assignment(assignment_id)
 
 
-class DbAssignmentImportApp(NbGrader):
+class DbAssignmentImportApp(DbBaseApp):
 
     name = 'nbgrader-db-assignment-import'
     description = 'Import assignments into the nbgrader database from a CSV file'
@@ -279,7 +301,7 @@ class DbAssignmentImportApp(NbGrader):
 
         allowed_keys = ["duedate", "name"]
 
-        with Gradebook(self.coursedir.db_url) as gb:
+        with Gradebook(self.coursedir.db_url, self.course_id) as gb:
             with open(path, 'r') as fh:
                 reader = csv.DictReader(fh)
                 for row in reader:
@@ -302,7 +324,7 @@ class DbAssignmentImportApp(NbGrader):
                     gb.update_or_create_assignment(assignment_id, **assignment)
 
 
-class DbAssignmentListApp(NbGrader):
+class DbAssignmentListApp(DbBaseApp):
 
     name = 'nbgrader-db-assignment-list'
     description = 'List assignments int the nbgrader database'
@@ -313,7 +335,7 @@ class DbAssignmentListApp(NbGrader):
     def start(self):
         super(DbAssignmentListApp, self).start()
 
-        with Gradebook(self.coursedir.db_url) as gb:
+        with Gradebook(self.coursedir.db_url, self.course_id) as gb:
             print("There are %d assignments in the database:" % len(gb.assignments))
             for assignment in gb.assignments:
                 print("%s (due: %s)" % (assignment.name, assignment.duedate))
@@ -321,7 +343,7 @@ class DbAssignmentListApp(NbGrader):
                     print("    - %s" % notebook.name)
 
 
-class DbStudentApp(NbGrader):
+class DbStudentApp(DbBaseApp):
 
     name = 'nbgrader-db-student'
     description = u'Modify or list students in the nbgrader database'
@@ -354,7 +376,7 @@ class DbStudentApp(NbGrader):
         super(DbStudentApp, self).start()
 
 
-class DbAssignmentApp(NbGrader):
+class DbAssignmentApp(DbBaseApp):
 
     name = 'nbgrader-db-assignment'
     description = u'Modify or list assignments in the nbgrader database'
@@ -388,7 +410,7 @@ class DbAssignmentApp(NbGrader):
         super(DbAssignmentApp, self).start()
 
 
-class DbUpgradeApp(NbGrader):
+class DbUpgradeApp(DbBaseApp):
     """Based on the `jupyterhub upgrade-db` command found in jupyterhub.app.UpgradeDB"""
 
     name = 'nbgrader-db-upgrade'
@@ -397,7 +419,7 @@ class DbUpgradeApp(NbGrader):
     def _backup_db_file(self, db_file):
         """Backup a database file"""
         if not os.path.exists(db_file):
-            with Gradebook("sqlite:///{}".format(db_file)):
+            with Gradebook("sqlite:///{}".format(db_file), self.course_id):
                 pass
 
         timestamp = datetime.now().strftime('.%Y-%m-%d-%H%M%S.%f')
@@ -417,7 +439,7 @@ class DbUpgradeApp(NbGrader):
         dbutil.upgrade(self.coursedir.db_url)
 
 
-class DbApp(NbGrader):
+class DbApp(DbBaseApp):
 
     name = 'nbgrader-db'
     description = u'Perform operations on the nbgrader database'
