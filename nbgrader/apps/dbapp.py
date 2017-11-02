@@ -36,19 +36,9 @@ class DbBaseApp(NbGrader):
         if sys.platform != 'win32':
             lister = ExchangeList(coursedir=self.coursedir, parent=self)
             self.course_id = lister.course_id
-            self.exchange = lister.root
-
-            try:
-                lister.start()
-            except ExchangeError:
-                self.exchange_missing = True
-            else:
-                self.exchange_missing = False
-
         else:
             self.course_id = ''
-            self.exchange = ''
-            self.exchange_missing = True
+        super(DbBaseApp, self).start()
 
 class DbStudentAddApp(DbBaseApp):
 
