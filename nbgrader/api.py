@@ -1105,7 +1105,8 @@ class Gradebook(object):
         try:
             course_id_record = self.db.query(CourseID)\
                 .one()
-            course_id_record.id = course_id
+            if course_id: # update id only if not empty
+                course_id_record.id = course_id
         except NoResultFound:
             course_id_record = CourseID(id=course_id, **kwargs)
             self.db.add(course_id_record)
