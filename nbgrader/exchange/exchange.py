@@ -3,6 +3,7 @@ import datetime
 import sys
 import shutil
 import glob
+import json
 
 from textwrap import dedent
 
@@ -161,7 +162,6 @@ class Exchange(LoggingConfigurable):
             user = os.environ['JUPYTERHUB_USER']
         else:
             sys.exit("JUPYTERHUB_USER env is required to run the exchange features of nbgrader.")
-        import json
         auth_header = {
                 'Authorization': 'token %s' % api_token
             }
