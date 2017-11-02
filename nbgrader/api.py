@@ -961,7 +961,20 @@ class Comment(Base):
         return "Comment<{}/{}/{} for {}>".format(
             self.assignment.name, self.notebook.name, self.name, self.student.id)
 
-# Needs manual grade
+class CourseID(Base):
+    """Table to store the course_id, it should have only one row"""
+
+    __tablename__ = "course_id"
+    __table_args__ = (UniqueConstraint("unique_check"),)
+
+    id = Column(String(128), unique=True, primary_key=True, nullable=False)
+    # This should help to prevent having 2 rows in this table
+    unique_check = Column(Boolean, unique=False, default=True)
+
+    def __repr__(self):
+        return "CourseID<{}>".format(self.name)
+
+## Needs manual grade
 
 SubmittedNotebook.needs_manual_grade = column_property(
     exists().where(and_(
@@ -1297,13 +1310,16 @@ class Gradebook(object):
 
     """
 
-    def __init__(self, db_url):
+    def __init__(self, db_url, course_id=""):
         """Initialize the connection to the database.
 
         Parameters
         ----------
         db_url : string
             The URL to the database, e.g. ``sqlite:///grades.db``
+        course_id : string, optional
+            identifier of the course necessary for supporting multiple classes
+            default course_id is '' to be consistent with :class:~`nbgrader.apps.api.NbGraderAPI`
 
         """
         # create the connection to the database
@@ -1320,6 +1336,8 @@ class Gradebook(object):
             self.db.execute("CREATE TABLE alembic_version (version_num VARCHAR(32) NOT NULL);")
             self.db.execute("INSERT INTO alembic_version (version_num) VALUES ('{}');".format(alembic_version))
             self.db.commit()
+
+        self.set_course_id(course_id)
 
     def __enter__(self):
         return self
@@ -1339,7 +1357,38 @@ class Gradebook(object):
         self.db.remove()
         self.engine.dispose()
 
-    # Students
+    def set_course_id(self, course_id, **kwargs):
+        """Set the course id
+
+        Parameters
+        ----------
+        course_id : string
+            The unique id of the course
+        `**kwargs` : dict
+            other keyword arguments to the :class:`~nbgrader.api.CourseID` object
+
+        Returns
+        -------
+        course_id : :class:`~nbgrader.api.CourseID`
+
+        """
+
+        try:
+            course_id_record = self.db.query(CourseID)\
+                .one()
+            course_id_record.id = course_id
+        except NoResultFound:
+            course_id_record = CourseID(id=course_id, **kwargs)
+            self.db.add(course_id_record)
+
+        try:
+            self.db.commit()
+        except (IntegrityError, FlushError) as e:
+            self.db.rollback()
+            raise InvalidEntry(*e.args)
+        return course_id_record
+
+    #### Students
 
     @property
     def students(self):
