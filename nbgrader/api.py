@@ -1156,6 +1156,20 @@ class Gradebook(object):
         self.db.add(student)
         try:
             self.db.commit()
+            try:
+                group_name = "nbgrader-{}".format(self.course_id)
+                utils.query_jupyterhub_api(method="POST",
+                                     api_path="/groups/{name}".format(name=group_name),
+                )
+                utils.query_jupyterhub_api(method="POST",
+                                     api_path="/groups/{name}/users".format(name=group_name),
+                                     post_data = {"users":[student_id]}
+                )
+            except utils.JupyterhubEnvironmentError as e:
+                if self.course_id: # we assume user might be using Jupyterhub but something is not working
+                    #FIXME how do we access the logger from here?
+                    print("Student {student} not added to the Jupyterhub group, error: ".format(name) + str(e))
+
         except (IntegrityError, FlushError) as e:
             self.db.rollback()
             raise InvalidEntry(*e.args)
@@ -1234,6 +1248,18 @@ class Gradebook(object):
 
         try:
             self.db.commit()
+
+            try:
+                group_name = "nbgrader-{}".format(self.course_id)
+                utils.query_jupyterhub_api(method="DELETE",
+                                     api_path="/groups/{name}/users".format(name=group_name),
+                                     post_data = {"users":[student_id]}
+                )
+            except utils.JupyterhubEnvironmentError as e:
+                if self.course_id: # we assume user might be using Jupyterhub but something is not working
+                    #FIXME how do we access the logger from here?
+                    print("Student {student} not removed to the Jupyterhub group, error: ".format(name) + str(e))
+
         except (IntegrityError, FlushError) as e:
             self.db.rollback()
             raise InvalidEntry(*e.args)
