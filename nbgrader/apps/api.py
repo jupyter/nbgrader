@@ -95,7 +95,7 @@ class NbGraderAPI(LoggingConfigurable):
         :func:`~nbgrader.api.Gradebook.close`.
 
         """
-        return Gradebook(self.coursedir.db_url)
+        return Gradebook(self.coursedir.db_url, self.course_id)
 
     def get_source_assignments(self):
         """Get the names of all assignments in the `source` directory.
