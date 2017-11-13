@@ -127,7 +127,7 @@ class Exchange(LoggingConfigurable):
 
     def get_current_user_courses(self):
         """Check if student is enrolled in course"""
-        groups = call_jupyterhub_api('GET', '/users/%s' % user)['groups']
+        groups = query_jupyterhub_api('GET', '/users/%s' % user)['groups']
         courses = set()
         for group in groups:
             if group.startswith('nbgrader-') or group.startswith('formgrade-'):
