@@ -1436,10 +1436,18 @@ class Gradebook(object):
                                      api_path="/groups/{name}/users".format(name=group_name),
                                      post_data = {"users":[student_id]}
                 )
+                # log.info
+                print("Student {student} added to Jupyterhub group {group_name}".format(
+                    student=student_id,
+                    group_name=group_name
+                ))
             except utils.JupyterhubEnvironmentError as e:
                 if self.course_id: # we assume user might be using Jupyterhub but something is not working
-                    #FIXME how do we access the logger from here?
-                    print("Student {student} not added to the Jupyterhub group, error: ".format(name) + str(e))
+                    # log.error
+                    print("Student {student} NOT added to Jupyterhub group {group_name}: ".format(
+                        student=student_id,
+                        group_name=group_name
+                    ) + str(e))
 
         except (IntegrityError, FlushError) as e:
             self.db.rollback()
@@ -1526,10 +1534,12 @@ class Gradebook(object):
                                      api_path="/groups/{name}/users".format(name=group_name),
                                      post_data = {"users":[student_id]}
                 )
+                # log.info
+                print("Student {student} removed from the Jupyterhub group {group_name}".format(student=name, group_name=group_name))
             except utils.JupyterhubEnvironmentError as e:
                 if self.course_id: # we assume user might be using Jupyterhub but something is not working
-                    #FIXME how do we access the logger from here?
-                    print("Student {student} not removed to the Jupyterhub group, error: ".format(name) + str(e))
+                    # log.error
+                    print("Student {student} NOT removed from the Jupyterhub group {group_name}: ".format(student=name, group_name=group_name) + str(e))
 
         except (IntegrityError, FlushError) as e:
             self.db.rollback()
