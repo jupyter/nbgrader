@@ -50,7 +50,7 @@ for (dirname, dirnames, filenames) in os.walk("nbgrader/alembic"):
         alembic_files.append(os.path.join(root, filename))
 
 
-name = 'nbgrader'
+name = u'nbgrader'
 here = os.path.abspath(os.path.dirname(__file__))
 version_ns = {}
 with open(os.path.join(here, name, '_version.py')) as f:

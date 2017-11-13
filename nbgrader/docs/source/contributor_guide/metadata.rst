@@ -28,6 +28,20 @@ The metadata is always stored at the cell level, in the cell's ``metadata`` fiel
 
 Details about the metadata are given below.
 
+Version 2
+---------
+
+Version 2 is the same as Version 1 (see below), except that it also includes
+the following optional key:
+
+.. data:: cell_type
+
+    Added by ``nbgrader assign``.
+
+    This is the original cell type for the cell, which is used by ``nbgrader
+    validate`` to determine whether the cell type has been changed by the
+    student.
+
 Version 1
 ---------
 

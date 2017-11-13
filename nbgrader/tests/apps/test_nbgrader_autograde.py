@@ -1,3 +1,6 @@
+# -*- coding: utf-8 -*-
+
+import io
 import os
 import sys
 import json
@@ -585,7 +588,7 @@ class TestNbGraderAutograde(BaseTestApp):
         run_nbgrader(["assign", "ps1", "--db", db])
 
         # make sure hidden tests are removed in release
-        with open(join(course_dir, "release", "ps1", "p1.ipynb"), 'r') as nb:
+        with io.open(join(course_dir, "release", "ps1", "p1.ipynb"), mode='r', encoding='utf-8') as nb:
             source = nb.read()
         assert "BEGIN HIDDEN TESTS" not in source
 
@@ -605,7 +608,7 @@ class TestNbGraderAutograde(BaseTestApp):
 
         # make sure hidden tests are placed back in autograded
         sub_nb = join(course_dir, "autograded", "foo", "ps1", "p1.ipynb")
-        with open(sub_nb, 'r') as nb:
+        with io.open(sub_nb, mode='r', encoding='utf-8') as nb:
             source = nb.read()
         assert "BEGIN HIDDEN TESTS" in source
 
@@ -711,11 +714,11 @@ class TestNbGraderAutograde(BaseTestApp):
         run_nbgrader(["assign", "ps1"])
 
         self._copy_file(join("files", "test-with-output.ipynb"), join(course_dir, "submitted", "foo", "ps1", "p1.ipynb"))
-        with open(join(os.path.dirname(__file__), "files", "test-with-output.ipynb"), "r") as fh:
+        with io.open(join(os.path.dirname(__file__), "files", "test-with-output.ipynb"), mode="r", encoding='utf-8') as fh:
             orig_contents = reads(fh.read(), as_version=current_nbformat)
 
         run_nbgrader(["autograde", "ps1"])
-        with open(join(course_dir, "autograded", "foo", "ps1", "p1.ipynb"), "r") as fh:
+        with io.open(join(course_dir, "autograded", "foo", "ps1", "p1.ipynb"), mode="r", encoding="utf-8") as fh:
             new_contents = reads(fh.read(), as_version=current_nbformat)
 
         different = False
@@ -732,7 +735,7 @@ class TestNbGraderAutograde(BaseTestApp):
         assert different
 
         run_nbgrader(["autograde", "ps1", "--force", "--no-execute"])
-        with open(join(course_dir, "autograded", "foo", "ps1", "p1.ipynb"), "r") as fh:
+        with io.open(join(course_dir, "autograded", "foo", "ps1", "p1.ipynb"), mode="r", encoding="utf-8") as fh:
             new_contents = reads(fh.read(), as_version=current_nbformat)
 
         for i in range(len(orig_contents.cells)):

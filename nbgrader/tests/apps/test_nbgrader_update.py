@@ -24,9 +24,14 @@ class TestNbGraderUpdate(BaseTestApp):
             fh.write("blah")
         run_nbgrader(["update", "foo"])
 
-    def test_single_notebook(self):
+    def test_single_notebook_v0(self):
         """Does it work with just a single notebook?"""
         self._copy_file(join("files", "test-v0.ipynb"), "p1.ipynb")
+        run_nbgrader(["update", "p1.ipynb"])
+
+    def test_single_notebook_v1(self):
+        """Does it work with just a single notebook?"""
+        self._copy_file(join("files", "test-v1.ipynb"), "p1.ipynb")
         run_nbgrader(["update", "p1.ipynb"])
 
     def test_validate(self):

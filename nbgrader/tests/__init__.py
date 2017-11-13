@@ -15,6 +15,7 @@ from nbconvert.filters import strip_ansi
 from ..utils import compute_checksum
 from ..apps.nbgraderapp import NbGraderApp
 from ..validator import Validator
+from ..nbgraderformat import SCHEMA_VERSION
 
 
 def create_code_cell():
@@ -32,7 +33,7 @@ def create_text_cell():
     return cell
 
 
-def create_grade_cell(source, cell_type, grade_id, points, schema_version=1):
+def create_grade_cell(source, cell_type, grade_id, points, schema_version=SCHEMA_VERSION):
     if cell_type == "markdown":
         cell = new_markdown_cell(source=source)
     elif cell_type == "code":
@@ -51,7 +52,7 @@ def create_grade_cell(source, cell_type, grade_id, points, schema_version=1):
     return cell
 
 
-def create_solution_cell(source, cell_type, grade_id, schema_version=1):
+def create_solution_cell(source, cell_type, grade_id, schema_version=SCHEMA_VERSION):
     if cell_type == "markdown":
         cell = new_markdown_cell(source=source)
     elif cell_type == "code":
@@ -69,7 +70,7 @@ def create_solution_cell(source, cell_type, grade_id, schema_version=1):
     return cell
 
 
-def create_locked_cell(source, cell_type, grade_id, schema_version=1):
+def create_locked_cell(source, cell_type, grade_id, schema_version=SCHEMA_VERSION):
     if cell_type == "markdown":
         cell = new_markdown_cell(source=source)
     elif cell_type == "code":
@@ -87,7 +88,7 @@ def create_locked_cell(source, cell_type, grade_id, schema_version=1):
     return cell
 
 
-def create_grade_and_solution_cell(source, cell_type, grade_id, points, schema_version=1):
+def create_grade_and_solution_cell(source, cell_type, grade_id, points, schema_version=SCHEMA_VERSION):
     if cell_type == "markdown":
         cell = new_markdown_cell(source=source)
     elif cell_type == "code":

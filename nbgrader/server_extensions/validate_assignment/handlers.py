@@ -2,7 +2,6 @@
 
 import os
 import json
-import contextlib
 import traceback
 
 from tornado import web
@@ -15,21 +14,18 @@ from jupyter_core.paths import jupyter_config_path
 
 from ...apps import NbGrader
 from ...validator import Validator
+from ...nbgraderformat import SchemaMismatchError
 from ... import __version__ as nbgrader_version
 
 
 static = os.path.join(os.path.dirname(__file__), 'static')
 
 
-@contextlib.contextmanager
-def chdir(dirname):
-    currdir = os.getcwd()
-    os.chdir(dirname)
-    yield
-    os.chdir(currdir)
-
-
 class ValidateAssignmentHandler(IPythonHandler):
+
+    @property
+    def notebook_dir(self):
+        return self.settings['notebook_dir']
 
     def load_config(self):
         paths = jupyter_config_path()
@@ -47,10 +43,25 @@ class ValidateAssignmentHandler(IPythonHandler):
         return full_config
 
     def validate_notebook(self, path):
+        fullpath = os.path.join(self.notebook_dir, path)
+
         try:
             config = self.load_config()
             validator = Validator(config=config)
-            result = validator.validate(path)
+            result = validator.validate(fullpath)
+
+        except SchemaMismatchError:
+            self.log.error(traceback.format_exc())
+            msg = (
+                "The notebook '{}' uses an old version "
+                "of the nbgrader metadata format. Please **back up this "
+                "notebook** and then update the metadata using:\n\nnbgrader update {}\n"
+            ).format(fullpath, fullpath)
+            self.log.error(msg)
+            retvalue = {
+                "success": False,
+                "value": msg
+            }
 
         except:
             self.log.error(traceback.format_exc())
@@ -113,6 +124,7 @@ def load_jupyter_server_extension(nbapp):
     nbapp.log.info("Loading the validate_assignment nbgrader serverextension")
     webapp = nbapp.web_app
     base_url = webapp.settings['base_url']
+    webapp.settings['notebook_dir'] = nbapp.notebook_dir
     webapp.add_handlers(".*$", [
         (ujoin(base_url, pat), handler)
         for pat, handler in default_handlers

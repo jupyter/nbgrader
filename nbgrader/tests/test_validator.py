@@ -47,6 +47,27 @@ class TestValidator(object):
         assert validator._indent("\x1b[30mHello, world!\x1b[0m") == "    Hel..."
         assert validator._indent("\x1b[30mHello,\n world!\x1b[0m") == "    Hel...\n     wo..."
 
+    def test_print_type_changed(self, validator, stream):
+        cell = create_code_cell()
+        validator.stream = stream
+        validator.width = 20
+        validator._print_type_changed("markdown", "code", cell.source.strip())
+
+        expected = dedent(
+            """
+            ====================
+            The following markdown cell has changed to a code cell:
+
+                print("someth...
+                ### BEGIN SOL...
+                print("hello"...
+                ### END SOLUT...
+
+            """
+        )
+
+        assert stream.getvalue() == expected
+
     def test_print_changed(self, validator, stream):
         cell = create_code_cell()
         validator.stream = stream
@@ -160,6 +181,16 @@ class TestValidator(object):
         )
 
         assert stream.getvalue() == expected
+
+    def test_print_num_type_changed_0(self, validator, stream):
+        validator.stream = stream
+        validator._print_num_type_changed(0)
+        assert stream.getvalue() == ""
+
+    def test_print_num_type_changed_1(self, validator, stream):
+        validator.stream = stream
+        validator._print_num_type_changed(1)
+        assert stream.getvalue().startswith("THE TYPES OF 1 CELL(S) HAVE CHANGED!")
 
     def test_print_num_changed_0(self, validator, stream):
         validator.stream = stream
@@ -410,3 +441,139 @@ class TestValidator(object):
         assert list(output.keys()) == ["passed"]
         assert len(output["passed"]) == 1
         assert output["passed"][0]["source"] == 'print("Success!")'
+
+    def test_answer_cell_type_changed(self, validator, stream):
+        """Does the validate fail if the type of a answer cell has changed?"""
+        filename = os.path.join(os.path.dirname(__file__), "preprocessors", "files", "submitted-answer-cell-type-changed.ipynb")
+        validator.stream = stream
+        validator.validate_and_print(filename)
+        assert stream.getvalue().split("\n")[0] == "THE TYPES OF 1 CELL(S) HAVE CHANGED! This might mean that even though the tests are"
+
+    def test_answer_cell_type_changed_ignore_checksums(self, validator, stream):
+        """Does the validate fail if the type of a answer cell has changed but we're ignoring checksums?"""
+        filename = os.path.join(os.path.dirname(__file__), "preprocessors", "files", "submitted-answer-cell-type-changed.ipynb")
+        validator.stream = stream
+        validator.ignore_checksums = True
+        validator.validate_and_print(filename)
+        assert stream.getvalue().split("\n")[0] == "THE TYPES OF 1 CELL(S) HAVE CHANGED! This might mean that even though the tests are"
+
+    def test_invert_answer_cell_type_changed(self, validator, stream):
+        """Does the validate fail if the type of a answer cell has changed, even with --invert?"""
+        filename = os.path.join(os.path.dirname(__file__), "preprocessors", "files", "submitted-answer-cell-type-changed.ipynb")
+        validator.stream = stream
+        validator.invert = True
+        validator.validate_and_print(filename)
+        assert stream.getvalue().split("\n")[0] == "THE TYPES OF 1 CELL(S) HAVE CHANGED! This might mean that even though the tests are"
+
+    def test_invert_answer_cell_type_changed_ignore_checksums(self, validator, stream):
+        """Does the validate fail if the type of a answer cell has changed with --invert and ignoring checksums?"""
+        filename = os.path.join(os.path.dirname(__file__), "preprocessors", "files", "submitted-answer-cell-type-changed.ipynb")
+        validator.stream = stream
+        validator.invert = True
+        validator.ignore_checksums = True
+        validator.validate_and_print(filename)
+        assert stream.getvalue().split("\n")[0] == "THE TYPES OF 1 CELL(S) HAVE CHANGED! This might mean that even though the tests are"
+
+    def test_answer_cell_type_changed_json(self, validator):
+        """Does the validate fail if the type of a answer cell has changed?"""
+        filename = os.path.join(os.path.dirname(__file__), "preprocessors", "files", "submitted-answer-cell-type-changed.ipynb")
+        output = validator.validate(filename)
+        assert list(output.keys()) == ["type_changed"]
+        assert len(output["type_changed"]) == 1
+        assert output["type_changed"][0]["source"] == "# YOUR CODE HERE\nraise NotImplementedError()"
+
+    def test_answer_cell_type_changed_ignore_checksums_json(self, validator):
+        """Does the validate pass if the type of a answer cell has changed but we're ignoring checksums?"""
+        filename = os.path.join(os.path.dirname(__file__), "preprocessors", "files", "submitted-answer-cell-type-changed.ipynb")
+        validator.ignore_checksums = True
+        output = validator.validate(filename)
+        assert list(output.keys()) == ["type_changed"]
+        assert len(output["type_changed"]) == 1
+        assert output["type_changed"][0]["source"] == "# YOUR CODE HERE\nraise NotImplementedError()"
+
+    def test_invert_answer_cell_type_changed_json(self, validator):
+        """Does the validate fail if the type of a answer cell has changed, even with --invert?"""
+        filename = os.path.join(os.path.dirname(__file__), "preprocessors", "files", "submitted-answer-cell-type-changed.ipynb")
+        validator.invert = True
+        output = validator.validate(filename)
+        assert list(output.keys()) == ["type_changed"]
+        assert len(output["type_changed"]) == 1
+        assert output["type_changed"][0]["source"] == "# YOUR CODE HERE\nraise NotImplementedError()"
+
+    def test_invert_answer_cell_type_changed_ignore_checksums_json(self, validator):
+        """Does the validate fail if the type of a answer cell has changed with --invert and ignoring checksums?"""
+        filename = os.path.join(os.path.dirname(__file__), "preprocessors", "files", "submitted-answer-cell-type-changed.ipynb")
+        validator.invert = True
+        validator.ignore_checksums = True
+        output = validator.validate(filename)
+        assert list(output.keys()) == ["type_changed"]
+        assert len(output["type_changed"]) == 1
+        assert output["type_changed"][0]["source"] == "# YOUR CODE HERE\nraise NotImplementedError()"
+
+    def test_grade_cell_type_changed(self, validator, stream):
+        """Does the validate fail if the type of a grade cell has changed?"""
+        filename = os.path.join(os.path.dirname(__file__), "preprocessors", "files", "submitted-grade-cell-type-changed.ipynb")
+        validator.stream = stream
+        validator.validate_and_print(filename)
+        assert stream.getvalue().split("\n")[0] == "THE TYPES OF 1 CELL(S) HAVE CHANGED! This might mean that even though the tests are"
+
+    def test_grade_cell_type_changed_ignore_checksums(self, validator, stream):
+        """Does the validate fail if the type of a grade cell has changed but we're ignoring checksums?"""
+        filename = os.path.join(os.path.dirname(__file__), "preprocessors", "files", "submitted-grade-cell-type-changed.ipynb")
+        validator.stream = stream
+        validator.ignore_checksums = True
+        validator.validate_and_print(filename)
+        assert stream.getvalue().split("\n")[0] == "THE TYPES OF 1 CELL(S) HAVE CHANGED! This might mean that even though the tests are"
+
+    def test_invert_grade_cell_type_changed(self, validator, stream):
+        """Does the validate fail if the type of a grade cell has changed, even with --invert?"""
+        filename = os.path.join(os.path.dirname(__file__), "preprocessors", "files", "submitted-grade-cell-type-changed.ipynb")
+        validator.stream = stream
+        validator.invert = True
+        validator.validate_and_print(filename)
+        assert stream.getvalue().split("\n")[0] == "THE TYPES OF 1 CELL(S) HAVE CHANGED! This might mean that even though the tests are"
+
+    def test_invert_grade_cell_type_changed_ignore_checksums(self, validator, stream):
+        """Does the validate fail if the type of a grade cell has changed with --invert and ignoring checksums?"""
+        filename = os.path.join(os.path.dirname(__file__), "preprocessors", "files", "submitted-grade-cell-type-changed.ipynb")
+        validator.stream = stream
+        validator.invert = True
+        validator.ignore_checksums = True
+        validator.validate_and_print(filename)
+        assert stream.getvalue().split("\n")[0] == "THE TYPES OF 1 CELL(S) HAVE CHANGED! This might mean that even though the tests are"
+
+    def test_grade_cell_type_changed_json(self, validator):
+        """Does the validate fail if the type of a grade cell has changed?"""
+        filename = os.path.join(os.path.dirname(__file__), "preprocessors", "files", "submitted-grade-cell-type-changed.ipynb")
+        output = validator.validate(filename)
+        assert list(output.keys()) == ["type_changed"]
+        assert len(output["type_changed"]) == 1
+        assert output["type_changed"][0]["source"] == "assert a == 1"
+
+    def test_grade_cell_type_changed_ignore_checksums_json(self, validator):
+        """Does the validate pass if the type of a grade cell has changed but we're ignoring checksums?"""
+        filename = os.path.join(os.path.dirname(__file__), "preprocessors", "files", "submitted-grade-cell-type-changed.ipynb")
+        validator.ignore_checksums = True
+        output = validator.validate(filename)
+        assert list(output.keys()) == ["type_changed"]
+        assert len(output["type_changed"]) == 1
+        assert output["type_changed"][0]["source"] == "assert a == 1"
+
+    def test_invert_grade_cell_type_changed_json(self, validator):
+        """Does the validate fail if the type of a grade cell has changed, even with --invert?"""
+        filename = os.path.join(os.path.dirname(__file__), "preprocessors", "files", "submitted-grade-cell-type-changed.ipynb")
+        validator.invert = True
+        output = validator.validate(filename)
+        assert list(output.keys()) == ["type_changed"]
+        assert len(output["type_changed"]) == 1
+        assert output["type_changed"][0]["source"] == "assert a == 1"
+
+    def test_invert_grade_cell_type_changed_ignore_checksums_json(self, validator):
+        """Does the validate fail if the type of a grade cell has changed with --invert and ignoring checksums?"""
+        filename = os.path.join(os.path.dirname(__file__), "preprocessors", "files", "submitted-grade-cell-type-changed.ipynb")
+        validator.invert = True
+        validator.ignore_checksums = True
+        output = validator.validate(filename)
+        assert list(output.keys()) == ["type_changed"]
+        assert len(output["type_changed"]) == 1
+        assert output["type_changed"][0]["source"] == "assert a == 1"

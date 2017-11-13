@@ -1,3 +1,7 @@
+# -*- coding: utf-8 -*-
+
+import io
+
 from nbformat import current_nbformat
 from traitlets import Unicode
 
@@ -20,7 +24,7 @@ class IncludeHeaderFooter(NbGraderPreprocessor):
 
         # header
         if self.header:
-            with open(self.header, 'r') as fh:
+            with io.open(self.header, encoding='utf-8') as fh:
                 header_nb = read_nb(fh, as_version=current_nbformat)
             new_cells.extend(header_nb.cells)
 
@@ -29,7 +33,7 @@ class IncludeHeaderFooter(NbGraderPreprocessor):
 
         # footer
         if self.footer:
-            with open(self.footer, 'r') as fh:
+            with io.open(self.footer, encoding='utf-8') as fh:
                 footer_nb = read_nb(fh, as_version=current_nbformat)
             new_cells.extend(footer_nb.cells)
 

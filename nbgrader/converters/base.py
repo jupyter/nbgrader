@@ -15,6 +15,7 @@ from nbconvert.writers import FilesWriter
 from ..coursedir import CourseDirectory
 from ..utils import find_all_files, rmtree, remove
 from ..preprocessors.execute import UnresponsiveKernelError
+from ..nbgraderformat import SchemaMismatchError
 
 
 class NbGraderException(Exception):
@@ -316,6 +317,16 @@ class BaseConverter(LoggingConfigurable):
                     "may occur if you recently upgraded nbgrader. To resolve "
                     "the issue, first BACK UP your database and then run the "
                     "command `nbgrader db upgrade`."
+                )
+                self.log.error(msg)
+                raise NbGraderException(msg)
+
+            except SchemaMismatchError:
+                _handle_failure(gd)
+                msg = (
+                    "One or more notebooks in the assignment use an old version \n"
+                    "of the nbgrader metadata format. Please **back up your class files \n"
+                    "directory** and then update the metadata using:\n\nnbgrader update .\n"
                 )
                 self.log.error(msg)
                 raise NbGraderException(msg)

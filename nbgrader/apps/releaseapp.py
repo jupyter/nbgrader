@@ -1,3 +1,5 @@
+# coding: utf-8
+
 from traitlets import default
 
 from .baseapp import NbGrader, nbgrader_aliases, nbgrader_flags

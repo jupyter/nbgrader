@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# encoding: utf-8
+# coding: utf-8
 
 import csv
 import os
@@ -7,11 +7,11 @@ import sys
 import shutil
 
 from textwrap import dedent
-from traitlets import default, Unicode, Bool
+from traitlets import default, Unicode, Bool, List
 from datetime import datetime
 
 from . import NbGrader
-from ..api import Gradebook, MissingEntry
+from ..api import Gradebook, MissingEntry, Student, Assignment
 from ..exchange import ExchangeList, ExchangeError
 from .. import dbutil
 
@@ -42,8 +42,8 @@ class DbBaseApp(NbGrader):
 
 class DbStudentAddApp(DbBaseApp):
 
-    name = 'nbgrader-db-student-add'
-    description = 'Add a student to the nbgrader database'
+    name = u'nbgrader-db-student-add'
+    description = u'Add a student to the nbgrader database'
 
     aliases = student_add_aliases
     flags = flags
@@ -94,8 +94,8 @@ student_remove_flags.update({
 
 class DbStudentRemoveApp(DbBaseApp):
 
-    name = 'nbgrader-db-student-remove'
-    description = 'Remove a student from the nbgrader database'
+    name = u'nbgrader-db-student-remove'
+    description = u'Remove a student from the nbgrader database'
 
     aliases = aliases
     flags = student_remove_flags
@@ -128,16 +128,72 @@ class DbStudentRemoveApp(DbBaseApp):
             gb.remove_student(student_id)
 
 
-class DbStudentImportApp(DbBaseApp):
-
-    name = 'nbgrader-db-student-import'
-    description = 'Import students into the nbgrader database from a CSV file'
+class DbGenericImportApp(DbBaseApp):
 
     aliases = aliases
     flags = flags
 
+    expected_keys = List(help="These are the keys expected by the database")
+    excluded_keys = List([], help=dedent(
+        """
+        These are the column names in database table that should not be
+        imported via a csv file.
+        """).strip())
+
+    def db_update_method_name(self):
+        """
+        Name of the update method used on the Gradebook for this import app.
+
+        Arguments
+        ---------
+        instance_id: string
+            Identifies which instance you are updating based on self.primary_key
+        instance: dictionary
+            Contents for the update from the parsed csv rows; unpacked as kwargs
+
+        """
+        raise NotImplementedError
+
+    name = u""
+    description = u""
+
+
+    @default('examples')
+    def examples_default(self):
+        keys = [x for x in self.expected_keys if
+                not(x == self.primary_key
+                or x in self.excluded_keys)]
+        example_string = dedent(
+            """
+            This command imports a CSV file into the database. The columns of
+            the CSV file must match the names of the columns in the database.
+            All columns are optional, except the columns corresponding to the
+            unique identifier of the {}. The keys/column names that are
+            expected are the following:
+
+              - {} (required)
+            """.format(self.table_class.__name__, self.primary_key)).strip()
+        for key in keys:
+            example_string += "\n  - {}".format(key)
+        return example_string
+
+    @property
+    def table_class(self):
+        raise NotImplementedError
+
+    @property
+    def primary_key_default(self):
+        """
+        The key for the instance_id passed to the get_db_update_method.
+        """
+        raise NotImplementedError
+
+    @default("expected_keys")
+    def expected_keys_default(self):
+        return self.table_class.__table__.c.keys()
+
     def start(self):
-        super(DbStudentImportApp, self).start()
+        super(DbGenericImportApp, self).start()
 
         if len(self.extra_args) != 1:
             self.fail("Path to CSV file not provided.")
@@ -145,37 +201,75 @@ class DbStudentImportApp(DbBaseApp):
         path = self.extra_args[0]
         if not os.path.exists(path):
             self.fail("No such file: '%s'", path)
-        self.log.info("Importing students from: '%s'", path)
+        self.log.info("Importing from: '%s'", path)
 
-        allowed_keys = ["last_name", "first_name", "email", "id"]
 
         with Gradebook(self.coursedir.db_url, self.course_id) as gb:
             with open(path, 'r') as fh:
                 reader = csv.DictReader(fh)
+                reader.fieldnames = self._preprocess_keys(reader.fieldnames)
                 for row in reader:
-                    if "id" not in row:
-                        self.fail("Malformatted CSV file: must contain a column for 'id'")
+                    if self.primary_key not in row:
+                        self.fail("Malformatted CSV file: must contain a column for '%s'" % self.primary_key)
 
                     # make sure all the keys are actually allowed in the database,
                     # and that any empty strings are parsed as None
-                    student = {}
+                    instance = {}
                     for key, val in row.items():
-                        if key not in allowed_keys:
+                        if key not in self.expected_keys:
                             continue
                         if val == '':
-                            student[key] = None
+                            instance[key] = None
                         else:
-                            student[key] = val
-                    student_id = student.pop("id")
+                            instance[key] = val
+                    instance_primary_key = instance.pop(self.primary_key)
 
-                    self.log.info("Creating/updating student with ID '%s': %s", student_id, student)
-                    gb.update_or_create_student(student_id, **student)
+
+                    self.log.info("Creating/updating %s with %s '%s': %s",
+                                  self.table_class.__name__,
+                                  self.primary_key,
+                                  instance_primary_key,
+                                  instance)
+                    db_update_method = getattr(gb, self.db_update_method_name)
+                    db_update_method(instance_primary_key, **instance)
+
+
+    def _preprocess_keys(self, keys):
+        """
+        Helper function for preprocessing keys
+        """
+        proposed_keys = [key.strip() for key in keys]
+        unknown_keys = [k for k in proposed_keys if k not in self.expected_keys]
+        if unknown_keys:
+            self.log.info("Unknown keys in csv: '%s'",
+                          (', '.join(unknown_keys[:-1])
+                           + 'and '
+                           + unknown_keys[-1]))
+        return proposed_keys
+
+
+class DbStudentImportApp(DbGenericImportApp):
+
+    name = u'nbgrader-db-student-import'
+    description = u'Import students into the nbgrader database from a CSV file'
+
+    @property
+    def table_class(self):
+        return Student
+
+    @property
+    def primary_key(self):
+        return "id"
+
+    @property
+    def db_update_method_name(self):
+        return "update_or_create_student"
 
 
 class DbStudentListApp(DbBaseApp):
 
-    name = 'nbgrader-db-student-list'
-    description = 'List students in the nbgrader database'
+    name = u'nbgrader-db-student-list'
+    description = u'List students in the nbgrader database'
 
     aliases = aliases
     flags = flags
@@ -197,8 +291,8 @@ assignment_add_aliases.update({
 
 class DbAssignmentAddApp(DbBaseApp):
 
-    name = 'nbgrader-db-assignment-add'
-    description = 'Add an assignment to the nbgrader database'
+    name = u'nbgrader-db-assignment-add'
+    description = u'Add an assignment to the nbgrader database'
 
     aliases = assignment_add_aliases
     flags = flags
@@ -236,8 +330,8 @@ assignment_remove_flags.update({
 
 class DbAssignmentRemoveApp(DbBaseApp):
 
-    name = 'nbgrader-db-assignment-remove'
-    description = 'Remove an assignment from the nbgrader database'
+    name = u'nbgrader-db-assignment-remove'
+    description = u'Remove an assignment from the nbgrader database'
 
     aliases = aliases
     flags = assignment_remove_flags
@@ -270,26 +364,14 @@ class DbAssignmentRemoveApp(DbBaseApp):
             gb.remove_assignment(assignment_id)
 
 
-class DbAssignmentImportApp(DbBaseApp):
+class DbAssignmentImportApp(DbGenericImportApp):
 
-    name = 'nbgrader-db-assignment-import'
-    description = 'Import assignments into the nbgrader database from a CSV file'
+    name = u'nbgrader-db-assignment-import'
+    description = u'Import assignments into the nbgrader database from a CSV file'
 
-    aliases = aliases
-    flags = flags
-
-    def start(self):
-        super(DbAssignmentImportApp, self).start()
-
-        if len(self.extra_args) != 1:
-            self.fail("Path to CSV file not provided.")
-
-        path = self.extra_args[0]
-        if not os.path.exists(path):
-            self.fail("No such file: '%s'", path)
-        self.log.info("Importing assignments from: '%s'", path)
-
-        allowed_keys = ["duedate", "name"]
+    def __init__(self, *args, **kwargs):
+        super(DbAssignmentImportApp, self).__init__(*args, **kwargs)
+        self.excluded_keys = ["id"]
 
         with Gradebook(self.coursedir.db_url, self.course_id) as gb:
             with open(path, 'r') as fh:
@@ -310,14 +392,22 @@ class DbAssignmentImportApp(DbBaseApp):
                             assignment[key] = val
                     assignment_id = assignment.pop("name")
 
-                    self.log.info("Creating/updating assignment with name '%s': %s", assignment_id, assignment)
-                    gb.update_or_create_assignment(assignment_id, **assignment)
+    @property
+    def table_class(self):
+        return Assignment
 
+    @property
+    def primary_key(self):
+        return "name"
+
+    @property
+    def db_update_method_name(self):
+        return "update_or_create_assignment"
 
 class DbAssignmentListApp(DbBaseApp):
 
-    name = 'nbgrader-db-assignment-list'
-    description = 'List assignments int the nbgrader database'
+    name = u'nbgrader-db-assignment-list'
+    description = u'List assignments int the nbgrader database'
 
     aliases = aliases
     flags = flags
@@ -335,7 +425,7 @@ class DbAssignmentListApp(DbBaseApp):
 
 class DbStudentApp(DbBaseApp):
 
-    name = 'nbgrader-db-student'
+    name = u'nbgrader-db-student'
     description = u'Modify or list students in the nbgrader database'
 
     subcommands = {
@@ -368,7 +458,7 @@ class DbStudentApp(DbBaseApp):
 
 class DbAssignmentApp(DbBaseApp):
 
-    name = 'nbgrader-db-assignment'
+    name = u'nbgrader-db-assignment'
     description = u'Modify or list assignments in the nbgrader database'
 
     subcommands = {
@@ -403,7 +493,7 @@ class DbAssignmentApp(DbBaseApp):
 class DbUpgradeApp(DbBaseApp):
     """Based on the `jupyterhub upgrade-db` command found in jupyterhub.app.UpgradeDB"""
 
-    name = 'nbgrader-db-upgrade'
+    name = u'nbgrader-db-upgrade'
     description = u'Upgrade the database schema to the latest version'
 
     def _backup_db_file(self, db_file):
@@ -431,7 +521,7 @@ class DbUpgradeApp(DbBaseApp):
 
 class DbApp(DbBaseApp):
 
-    name = 'nbgrader-db'
+    name = u'nbgrader-db'
     description = u'Perform operations on the nbgrader database'
 
     subcommands = dict(
