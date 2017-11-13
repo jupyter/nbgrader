@@ -12,7 +12,7 @@ from traitlets.config import LoggingConfigurable
 from traitlets import Unicode, Bool, Instance, default, validate
 from jupyter_core.paths import jupyter_data_dir
 
-from ..utils import check_directory, query_jupyterhub_api
+from ..utils import check_directory, query_jupyterhub_api, JupyterhubEnvironmentError, JupyterhubApiError 
 from ..coursedir import CourseDirectory
 
 class ExchangeError(Exception):
@@ -147,11 +147,31 @@ class Exchange(LoggingConfigurable):
 
         raise ExchangeError(msg)
 
-    def get_current_user_courses(self):
+    def get_user_courses(self, student_id):
         """Check if student is enrolled in course"""
-        groups = query_jupyterhub_api('GET', '/users/%s' % user)['groups']
+        if student_id == "*":
+            student_id = "{authenticated_user}"
+        response = None
+        try:
+            response = query_jupyterhub_api('GET', '/users/%s' % student_id)
+        except JupyterhubEnvironmentError as e: # Should only go here if we are not running on Jupyterhub.
+            print("Not running on Jupyterhub, not able to GET Jupyterhub user")
+            print("Warning: " + str(e))
+            self.log.info('Not running on Jupyterhub, not able to GET Jupyterhub user')
+            self.log.info("Error caught: " + str(e))
+            return []
+        except JupyterhubApiError as e: # Should only go here if the api_token is invalid.
+            print(str(e))
+            print("Make sure you start your service with a valid admin_user 'api_token' in your Jupyterhub config")
+            self.log.error("Error: Not able to get Jupyterhub user: " + student_id + ": " + str(e))
+            self.log.error("Make sure you start your service with a valid admin_user 'api_token' in your Jupyterhub config")
+            return []
         courses = set()
-        for group in groups:
-            if group.startswith('nbgrader-') or group.startswith('formgrade-'):
-                courses.add(group.split('-', 1)[1])
+        try:
+            for group in response['groups']:
+                if group.startswith('nbgrader-') or group.startswith('formgrade-'):
+                    courses.add(group.split('-', 1)[1])
+        except KeyError:
+            print("KeyError: See Jupyterhub API: " + str(response))
+            self.log.error("KeyError: See Jupyterhub API: " + str(response))
         return list(courses)

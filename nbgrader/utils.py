@@ -66,6 +66,7 @@ def query_jupyterhub_api(method, api_path, post_data=None):
             'Authorization': 'token %s' % api_token
         }
 
+    api_path = api_path.format(authenticated_user = user)
     req = requests.request(url=hub_api_url + api_path,
         method=method,
         headers=auth_header,

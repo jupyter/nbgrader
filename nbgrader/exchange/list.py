@@ -58,36 +58,37 @@ class ExchangeList(Exchange):
 
     def parse_assignments(self):
         assignments = []
-        courses = self.get_current_user_courses()
-        for path in self.assignments:
-            info = self.parse_assignment(path)
-            if info['course_id'] in courses:
-                if self.path_includes_course:
-                    root = os.path.join(info['course_id'], info['assignment_id'])
-                else:
-                    root = info['assignment_id']
+        if self.coursedir.student_id:
+            courses = self.get_user_courses(self.coursedir.student_id)
+            for path in self.assignments:
+                info = self.parse_assignment(path)
+                if info['course_id'] in courses:
+                    if self.path_includes_course:
+                        root = os.path.join(info['course_id'], info['assignment_id'])
+                    else:
+                        root = info['assignment_id']
 
-                if self.inbound or self.cached:
-                    info['status'] = 'submitted'
-                    info['path'] = path
-                elif os.path.exists(root):
-                    info['status'] = 'fetched'
-                    info['path'] = os.path.abspath(root)
-                else:
-                    info['status'] = 'released'
-                    info['path'] = path
+                    if self.inbound or self.cached:
+                        info['status'] = 'submitted'
+                        info['path'] = path
+                    elif os.path.exists(root):
+                        info['status'] = 'fetched'
+                        info['path'] = os.path.abspath(root)
+                    else:
+                        info['status'] = 'released'
+                        info['path'] = path
 
-                if self.remove:
-                    info['status'] = 'removed'
+                    if self.remove:
+                        info['status'] = 'removed'
 
-                info['notebooks'] = []
-                for notebook in sorted(glob.glob(os.path.join(info['path'], '*.ipynb'))):
-                    info['notebooks'].append({
-                        'notebook_id': os.path.splitext(os.path.split(notebook)[1])[0],
-                        'path': os.path.abspath(notebook)
-                    })
+                    info['notebooks'] = []
+                    for notebook in sorted(glob.glob(os.path.join(info['path'], '*.ipynb'))):
+                        info['notebooks'].append({
+                            'notebook_id': os.path.splitext(os.path.split(notebook)[1])[0],
+                            'path': os.path.abspath(notebook)
+                        })
 
-                assignments.append(info)
+                    assignments.append(info)
 
         return assignments
 
