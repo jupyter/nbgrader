@@ -1532,7 +1532,7 @@ class Gradebook(object):
                 group_name = "nbgrader-{}".format(self.course_id)
                 utils.query_jupyterhub_api(method="DELETE",
                                      api_path="/groups/{name}/users".format(name=group_name),
-                                     post_data = {"users":[student_id]}
+                                     post_data = {"users":[student.id]}
                 )
                 # log.info
                 print("Student {student} removed from the Jupyterhub group {group_name}".format(student=name, group_name=group_name))
