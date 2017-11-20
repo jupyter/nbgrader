@@ -55,12 +55,18 @@ able to use the nbgrader extensions.
 There are a number of ways you may need to customize the installation:
 
 -  To install or enable the nbextensions/serverextension for just the
-   current user, replace ``--sys-prefix`` by ``--user`` in any of the above
-   commands.
+   current user, run the above commands with ``--user`` instead of ``--sys-prefix``::
+    
+    jupyter nbextension install --user --py nbgrader --overwrite
+    jupyter nbextension enable --user --py nbgrader
+    jupyter serverextension enable --user --py nbgrader
 
 -  To install or enable the nbextensions/serverextension for all
-   Python installations on the system, replace ``--sys-prefix`` by ``--system``
-   in any of the above commands.
+   Python installations on the system, run the above commands with ``--system`` instead of ``--sys-prefix``::
+
+    jupyter nbextension install --system --py nbgrader --overwrite
+    jupyter nbextension enable --system --py nbgrader
+    jupyter serverextension enable --system --py nbgrader
 
 -  You can also use the ``--overwrite`` option along with the ``jupyter
    nbextension install`` command to overwrite existing nbgrader extension
