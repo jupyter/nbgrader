@@ -144,6 +144,19 @@ var AssignmentUI = Backbone.View.extend({
                 .append($("<span/>")
                     .addClass("glyphicon glyphicon-search")
                     .attr("aria-hidden", "true")));
+
+            this.$release.append($("<a/>")
+                    .attr({
+                        href: base_url + "/tree/" + url_prefix + "/" + release_path + "/" + this.$name.text() + ".zip",
+                        download: this.$name.text()
+                    })
+                    .append($("<span/>")
+                        .addClass("glyphicon glyphicon-floppy-disk")
+                        .attr("aria-hidden", "true")))
+                    .append($("<span/>")
+                        .addClass("glyphicon glyphicon-option-vertical")
+                        .attr("aria-hidden", "true")
+                        .attr("style", "margin: 0 5%"));
         }
 
         // release

@@ -4,6 +4,7 @@ import re
 import shutil
 import sqlalchemy
 import traceback
+import zipfile
 
 from traitlets.config import LoggingConfigurable, Config
 from traitlets import Bool, List, Dict, Integer, Instance, Type
@@ -293,6 +294,9 @@ class BaseConverter(LoggingConfigurable):
                 for notebook_filename in self.notebooks:
                     self.convert_single_notebook(notebook_filename)
 
+                # create the archive
+                self.make_archive();
+
                 # set assignment permissions
                 self.set_permissions(gd['assignment_id'], gd['student_id'])
 
@@ -359,3 +363,28 @@ class BaseConverter(LoggingConfigurable):
 
             self.log.error(msg)
             raise NbGraderException(msg)
+
+    def recursively_archive(self, directory, archive_name):
+        all_files_and_folders = [ item for item in os.listdir(directory) if item != archive_name+".zip" ]
+
+        for item in all_files_and_folders:
+            full_path = os.path.join(directory, item)
+            if os.path.isfile(full_path):
+                self.archive.write(os.path.join(self.writer.build_directory, full_path.split(archive_name, 1)[-1][1:]), archive_name+"/"+full_path.split(archive_name, 1)[-1][1:])
+            elif os.path.isdir(full_path):
+                self.recursively_archive(full_path, archive_name)
+
+    def make_archive(self):
+        current_dir = self.writer.build_directory
+        archive_name = os.path.basename(self.writer.build_directory)
+
+        if archive_name+".zip" in os.listdir(current_dir):
+            os.remove(current_dir+"/"+archive_name+".zip")
+            self.log.info("Zip file already exists. File removed.")
+
+        self.archive = zipfile.ZipFile(current_dir+"/"+archive_name+".zip", 'w', compression=zipfile.ZIP_DEFLATED)
+
+        self.recursively_archive(current_dir, archive_name)
+
+        self.archive.close()
+        self.log.info("The archive has been created.")
