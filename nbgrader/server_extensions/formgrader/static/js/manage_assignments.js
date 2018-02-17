@@ -395,6 +395,15 @@ var createAssignmentModal = function () {
             modal.modal('hide');
             return;
         }
+        if (name.includes("+")) {
+            var err = $("#create-error");
+            err.text("Assignment names may not include the '+' character.");
+            err.show();
+            return;
+        } else {
+            var err = $("#create-error");
+            err.hide();
+        }
 
         var model = new Assignment({
             "name": name,
@@ -417,19 +426,22 @@ var createAssignmentModal = function () {
         modal.modal('hide');
     };
 
-    var body = $("<table/>").addClass("table table-striped form-table");
+    var body = $("<p/>")
+    body.append($("<p id='create-error' class='alert alert-danger' style='display: none'/>"));
+    var table = $("<table/>").addClass("table table-striped form-table");
+    body.append(table)
     var name = $("<tr/>");
-    body.append(name);
+    table.append(name);
     name.append($("<td/>").addClass("align-middle").text("Name"));
     name.append($("<td/>").append($("<input/>").addClass("name").attr("type", "text").attr("size", "31")));
 
     var duedate = $("<tr/>");
-    body.append(duedate);
+    table.append(duedate);
     duedate.append($("<td/>").addClass("align-middle").text("Due date (optional)"));
     duedate.append($("<td/>").append($("<input/>").addClass("duedate").attr("type", "datetime-local")));
 
     var timezone = $("<tr/>");
-    body.append(timezone);
+    table.append(timezone);
     timezone.append($("<td/>").addClass("align-middle").text("Timezone as UTC offset (optional)"));
     timezone.append($("<td/>").append($("<input/>").addClass("timezone").attr("type", "text")));
 
