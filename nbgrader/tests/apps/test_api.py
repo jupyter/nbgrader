@@ -1,6 +1,7 @@
 import pytest
 import sys
 import os
+import shutil
 
 from os.path import join
 from traitlets.config import Config
@@ -438,6 +439,25 @@ class TestNbGraderAPI(BaseTestApp):
             notebooks = gb.notebook_submissions("p2", "ps1")
             s = api._filter_existing_notebooks("ps1", notebooks)
             assert s == []
+
+    def test_filter_existing_notebooks_strict(self, api, course_dir, db):
+        api.config.ExchangeSubmit.strict = True
+
+        self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
+        self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "source", "ps1", "p2.ipynb"))
+        run_nbgrader(["assign", "ps1", "--create", "--db", db])
+
+        self._copy_file(join("files", "submitted-changed.ipynb"), join(course_dir, "submitted", "foo", "ps1", "p1.ipynb"))
+        run_nbgrader(["autograde", "ps1", "--create", "--no-execute", "--force", "--db", db])
+
+        with api.gradebook as gb:
+            notebooks = gb.notebook_submissions("p1", "ps1")
+            s = api._filter_existing_notebooks("ps1", notebooks)
+            assert s == notebooks
+
+            notebooks = gb.notebook_submissions("p2", "ps1")
+            s = api._filter_existing_notebooks("ps1", notebooks)
+            assert s == notebooks
 
     def test_get_notebook_submission_indices(self, api, course_dir, db):
         self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
