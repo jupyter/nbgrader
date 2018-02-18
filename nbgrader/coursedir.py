@@ -4,7 +4,7 @@ import re
 from textwrap import dedent
 
 from traitlets.config import LoggingConfigurable
-from traitlets import Unicode, List, default
+from traitlets import Unicode, List, default, validate, TraitError
 
 from .utils import full_split, parse_utc
 
@@ -41,6 +41,12 @@ class CourseDirectory(LoggingConfigurable):
             """
         )
     ).tag(config=True)
+
+    @validate('assignment_id')
+    def _validate_assignment_id(self, proposal):
+        if '+' in proposal['value']:
+            raise TraitError('Assignment names should not contain the following characters: +')
+        return proposal['value']
 
     notebook_id = Unicode(
         "*",

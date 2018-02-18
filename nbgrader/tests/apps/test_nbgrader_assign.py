@@ -1,6 +1,7 @@
 import os
 import sys
 import pytest
+import traitlets
 
 from os.path import join
 from sqlalchemy.exc import InvalidRequestError
@@ -43,6 +44,13 @@ class TestNbGraderAssign(BaseTestApp):
             fh.write("""c.CourseDirectory.db_assignments = [dict(name="ps1")]\n""")
         run_nbgrader(["assign", "ps1"])
         assert os.path.isfile(join(course_dir, "release", "ps1", "foo.ipynb"))
+
+    def test_single_file_bad_assignment_name(self, course_dir, temp_cwd):
+        """Test that an error is thrown when the assignment name is invalid."""
+        self._empty_notebook(join(course_dir, 'source', 'foo+bar', 'foo.ipynb'))
+        with pytest.raises(traitlets.TraitError):
+            run_nbgrader(["assign", "foo+bar", "--create"])
+        assert not os.path.isfile(join(course_dir, "release", "foo+bar", "foo.ipynb"))
 
     def test_multiple_files(self, course_dir):
         """Can multiple files be assigned?"""
