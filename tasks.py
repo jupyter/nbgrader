@@ -87,7 +87,7 @@ def _run_tests(ctx, mark=None, skip=None, junitxml=None):
         cmd.extend(['--junitxml', junitxml])
     cmd.append('-v')
     cmd.append('-x')
-    cmd.extend(['--rerun', '4'])
+    cmd.extend(['--reruns', '4'])
 
     marks = []
     if mark is not None:
