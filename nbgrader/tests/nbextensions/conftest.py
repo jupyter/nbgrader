@@ -176,12 +176,9 @@ def _make_browser(tempdir):
     selenium_logger = logging.getLogger('selenium.webdriver.remote.remote_connection')
     selenium_logger.setLevel(logging.WARNING)
 
-    capabilities = DesiredCapabilities.PHANTOMJS
-    capabilities['loggingPrefs'] = {'browser': 'ALL'}
-    browser = webdriver.PhantomJS(
-        service_args=['--cookies-file=/dev/null', '--proxy-type=none'],
-        desired_capabilities=capabilities,
-        service_log_path=os.path.devnull)
+    options = webdriver.firefox.options.Options()
+    options.add_argument('-headless')
+    browser = webdriver.Firefox(firefox_options=options)
     browser.set_page_load_timeout(30)
     browser.set_script_timeout(30)
 
@@ -189,13 +186,8 @@ def _make_browser(tempdir):
 
 
 def _close_browser(browser):
-    console_messages = browser.get_log('browser')
-    if len(console_messages) > 0:
-        print("\n<-- CAPTURED JAVASCRIPT CONSOLE MESSAGES -->")
-        for message in console_messages:
-            print(message)
-        print("<------------------------------------------>")
     browser.save_screenshot(os.path.join(os.path.dirname(__file__), 'selenium.screenshot.png'))
+    browser.close()
     browser.service.process.send_signal(signal.SIGTERM)
     browser.quit()
 

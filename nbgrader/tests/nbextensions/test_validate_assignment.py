@@ -3,7 +3,7 @@ import pytest
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.common.exceptions import TimeoutException, NoSuchElementException
+from selenium.common.exceptions import TimeoutException, NoSuchElementException, NoAlertPresentException
 
 from .conftest import _make_nbserver, _make_browser, _close_nbserver, _close_browser
 
@@ -19,7 +19,7 @@ def nbserver(request, port, tempdir, jupyter_config_dir, jupyter_data_dir, excha
     return server
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def browser(request, tempdir, nbserver):
     browser = _make_browser(tempdir)
 
@@ -36,7 +36,23 @@ def _wait(browser):
 
 def _load_notebook(browser, port, notebook, retries=5):
     # go to the correct page
-    browser.get("http://localhost:{}/notebooks/{}".format(port, notebook))
+    url = "http://localhost:{}/notebooks/{}".format(port, notebook)
+    browser.get(url)
+
+    alert = ''
+    for _ in range(5):
+        if alert is None:
+            break
+
+        try:
+            alert = browser.switch_to_alert()
+        except NoAlertPresentException:
+            alert = None
+        else:
+            alert.dismiss()
+            browser.get(url)
+
+    assert browser.current_url == url
 
     def page_loaded(browser):
         return browser.execute_script(

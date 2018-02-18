@@ -24,7 +24,7 @@ def nbserver(request, port, tempdir, jupyter_config_dir, jupyter_data_dir, excha
     return server
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def browser(request, tempdir, nbserver):
     browser = _make_browser(tempdir)
 

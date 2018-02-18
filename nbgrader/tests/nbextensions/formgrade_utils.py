@@ -22,7 +22,8 @@ def _tree_url(port, url=""):
 def _check_url(browser, port, url):
     if not url.startswith("http"):
         url = _formgrade_url(port, url)
-    assert unquote(browser.current_url).rstrip("/") == url
+    url_matches = lambda browser: unquote(browser.current_url).rstrip("/") == url
+    WebDriverWait(browser, 10).until(url_matches)
 
 
 def _check_breadcrumbs(browser, *breadcrumbs):
@@ -37,8 +38,12 @@ def _check_breadcrumbs(browser, *breadcrumbs):
 
 def _click_link(browser, link_text, partial=False):
     if partial:
+        WebDriverWait(browser, 10).until(
+            EC.presence_of_element_located((By.PARTIAL_LINK_TEXT, link_text)))
         element = browser.find_element_by_partial_link_text(link_text)
     else:
+        WebDriverWait(browser, 10).until(
+            EC.presence_of_element_located((By.LINK_TEXT, link_text)))
         element = browser.find_element_by_link_text(link_text)
     element.click()
 
@@ -60,6 +65,12 @@ def _wait_for_gradebook_page(browser, port, url):
         """return typeof models !== "undefined" && models !== undefined && models.loaded === true;""")
     WebDriverWait(browser, 10).until(page_loaded)
     _check_url(browser, port, url)
+
+
+def _switch_to_window(browser, index):
+    handle_exists = lambda browser: index < len(browser.window_handles)
+    WebDriverWait(browser, 10).until(handle_exists)
+    browser.switch_to_window(browser.window_handles[index])
 
 
 def _get(browser, url, retries=5):

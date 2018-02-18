@@ -47,27 +47,6 @@ To work properly, the *assignment list* and *formgrader* extensions require
 both the nbextension and serverextension. The *create assignment* extension
 only has an nbextension part.
 
-Installing Phantomjs
---------------------
-To run tests while developing nbgrader and its documentation, Phantomjs must
-be installed.
-
-Install using npm
-~~~~~~~~~~~~~~~~~
-If you have npm installed, you can install phantomjs using::
-
-    npm install phantomjs
-
-Install using other package managers
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-If you do not have npm installed, you can still install phantomjs.
-
-On OS X::
-
-    brew update
-    brew install phantomjs
-
-On Linux::
-
-    apt-get update
-    apt-get install phantomjs
+Installing Firefox Headless WebDriver
+-------------------------------------
+To run tests while developing nbgrader and its documentation, the Firefox headless webdriver must be installed. Please `follow the Mozilla installation instructions <https://developer.mozilla.org/en-US/docs/Mozilla/QA/Marionette/WebDriver>`_ to get Firefox properly setup on your system.
