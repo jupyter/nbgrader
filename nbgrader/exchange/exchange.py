@@ -7,7 +7,7 @@ from textwrap import dedent
 
 from dateutil.tz import gettz
 from traitlets.config import LoggingConfigurable
-from traitlets import Unicode, Bool, Instance, default
+from traitlets import Unicode, Bool, Instance, default, validate
 from jupyter_core.paths import jupyter_data_dir
 
 from ..utils import check_directory
@@ -30,6 +30,12 @@ class Exchange(LoggingConfigurable):
             """
         )
     ).tag(config=True)
+
+    @validate('course_id')
+    def _validate_course_id(self, proposal):
+        if proposal['value'].strip() != proposal['value']:
+            self.log.warning("course_id '%s' has trailing whitespace, stripping it away", proposal['value'])
+        return proposal['value'].strip()
 
     timezone = Unicode(
         "UTC",

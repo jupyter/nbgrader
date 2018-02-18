@@ -841,7 +841,9 @@ def test_add_new_assignment(browser, port, gradebook):
     elem = browser.find_element_by_css_selector("#add-assignment-modal .name")
     elem.clear()
     elem.click()
-    elem.send_keys("ps2")
+    # check with a name containing whitespace, as this should be stripped
+    # away and handled by the interface
+    elem.send_keys("ps2 ")
 
     # click save and wait for the modal to close
     utils._click_element(browser, "#add-assignment-modal .save")
@@ -1246,7 +1248,9 @@ def test_add_new_student(browser, port, gradebook):
     # set the name and dudedate
     elem = browser.find_element_by_css_selector("#add-student-modal .id")
     elem.click()
-    elem.send_keys("ator")
+    # check with a name containing whitespace, as this should be stripped
+    # away and handled by the interface
+    elem.send_keys("ator  ")
     elem = browser.find_element_by_css_selector("#add-student-modal .first-name")
     elem.click()
     elem.send_keys("Eva Lou")
