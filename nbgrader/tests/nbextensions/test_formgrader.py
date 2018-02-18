@@ -825,13 +825,23 @@ def test_add_new_assignment(browser, port, gradebook):
     # set the name and dudedate
     elem = browser.find_element_by_css_selector("#add-assignment-modal .name")
     elem.click()
-    elem.send_keys("ps2")
+    elem.send_keys("ps2+a")
     elem = browser.find_element_by_css_selector("#add-assignment-modal .duedate")
     elem.click()
     elem.send_keys("2017-07-05T17:00")
     elem = browser.find_element_by_css_selector("#add-assignment-modal .timezone")
     elem.click()
     elem.send_keys("UTC")
+
+    # click save and wait for the error message to appear
+    utils._click_element(browser, "#add-assignment-modal .save")
+    WebDriverWait(browser, 10).until(EC.visibility_of_element_located((By.CSS_SELECTOR, "#create-error")))
+
+    # set a valid name
+    elem = browser.find_element_by_css_selector("#add-assignment-modal .name")
+    elem.clear()
+    elem.click()
+    elem.send_keys("ps2")
 
     # click save and wait for the modal to close
     utils._click_element(browser, "#add-assignment-modal .save")

@@ -395,7 +395,7 @@ var createAssignmentModal = function () {
             modal.modal('hide');
             return;
         }
-        if (name.includes("+")) {
+        if (name.indexOf("+") != -1) {
             var err = $("#create-error");
             err.text("Assignment names may not include the '+' character.");
             err.show();
