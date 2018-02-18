@@ -124,6 +124,7 @@ class AssignmentHandler(BaseApiHandler):
         if duedate and timezone:
             duedate = duedate + " " + timezone
         assignment = {"duedate": duedate}
+        assignment_id = assignment_id.strip()
         self.gradebook.update_or_create_assignment(assignment_id, **assignment)
         sourcedir = os.path.abspath(self.coursedir.format_path(self.coursedir.source_directory, '.', assignment_id))
         if not os.path.isdir(sourcedir):
@@ -191,6 +192,7 @@ class StudentHandler(BaseApiHandler):
             "first_name": data.get("first_name", None),
             "email": data.get("email", None),
         }
+        student_id = student_id.strip()
         self.gradebook.update_or_create_student(student_id, **student)
         self.write(json.dumps(self.api.get_student(student_id)))
 
