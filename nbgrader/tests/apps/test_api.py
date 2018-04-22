@@ -440,6 +440,7 @@ class TestNbGraderAPI(BaseTestApp):
             s = api._filter_existing_notebooks("ps1", notebooks)
             assert s == []
 
+    @notwindows
     def test_filter_existing_notebooks_strict(self, api, course_dir, db):
         api.config.ExchangeSubmit.strict = True
 
