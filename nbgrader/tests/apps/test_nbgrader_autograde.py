@@ -389,20 +389,24 @@ class TestNbGraderAutograde(BaseTestApp):
         """Are dependent files properly linked and overwritten?"""
         with open("nbgrader_config.py", "a") as fh:
             fh.write("""c.CourseDirectory.db_assignments = [dict(name='ps1', duedate='2015-02-02 14:58:23.948203 PST')]\n""")
-            fh.write("""c.CourseDirectory.db_students = [dict(id="foo"), dict(id="bar")]""")
+            fh.write("""c.CourseDirectory.db_students = [dict(id="foo"), dict(id="bar")]\n""")
+            fh.write("""c.Autograde.exclude_overwriting = {"ps1": ["helper.py"]}\n""")
 
         self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
         self._make_file(join(course_dir, "source", "ps1", "data.csv"), "some,data\n")
+        self._make_file(join(course_dir, "source", "ps1", "helper.py"), "print('hello!')\n")
         run_nbgrader(["assign", "ps1", "--db", db])
 
         self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "submitted", "foo", "ps1", "p1.ipynb"))
         self._make_file(join(course_dir, "submitted", "foo", "ps1", "timestamp.txt"), "2015-02-02 15:58:23.948203 PST")
         self._make_file(join(course_dir, "submitted", "foo", "ps1", "data.csv"), "some,other,data\n")
+        self._make_file(join(course_dir, "submitted", "foo", "ps1", "helper.py"), "print('this is different!')\n")
         run_nbgrader(["autograde", "ps1", "--db", db])
 
         assert os.path.isfile(join(course_dir, "autograded", "foo", "ps1", "p1.ipynb"))
         assert os.path.isfile(join(course_dir, "autograded", "foo", "ps1", "timestamp.txt"))
         assert os.path.isfile(join(course_dir, "autograded", "foo", "ps1", "data.csv"))
+        assert os.path.isfile(join(course_dir, "autograded", "foo", "ps1", "helper.py"))
 
         with open(join(course_dir, "autograded", "foo", "ps1", "timestamp.txt"), "r") as fh:
             contents = fh.read()
@@ -411,6 +415,45 @@ class TestNbGraderAutograde(BaseTestApp):
         with open(join(course_dir, "autograded", "foo", "ps1", "data.csv"), "r") as fh:
             contents = fh.read()
         assert contents == "some,data\n"
+
+        with open(join(course_dir, "autograded", "foo", "ps1", "helper.py"), "r") as fh:
+            contents = fh.read()
+        assert contents == "print('this is different!')\n"
+
+    def test_grade_overwrite_files_subdirs(self, db, course_dir):
+        """Are dependent files properly linked and overwritten?"""
+        with open("nbgrader_config.py", "a") as fh:
+            fh.write("""c.CourseDirectory.db_assignments = [dict(name='ps1', duedate='2015-02-02 14:58:23.948203 PST')]\n""")
+            fh.write("""c.CourseDirectory.db_students = [dict(id="foo"), dict(id="bar")]\n""")
+            fh.write("""c.Autograde.exclude_overwriting = {"ps1": ["subdir/helper.py"]}\n""")
+
+        self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
+        self._make_file(join(course_dir, "source", "ps1", "subdir", "data.csv"), "some,data\n")
+        self._make_file(join(course_dir, "source", "ps1", "subdir", "helper.py"), "print('hello!')\n")
+        run_nbgrader(["assign", "ps1", "--db", db])
+
+        self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "submitted", "foo", "ps1", "p1.ipynb"))
+        self._make_file(join(course_dir, "submitted", "foo", "ps1", "timestamp.txt"), "2015-02-02 15:58:23.948203 PST")
+        self._make_file(join(course_dir, "submitted", "foo", "ps1", "subdir", "data.csv"), "some,other,data\n")
+        self._make_file(join(course_dir, "submitted", "foo", "ps1", "subdir", "helper.py"), "print('this is different!')\n")
+        run_nbgrader(["autograde", "ps1", "--db", db])
+
+        assert os.path.isfile(join(course_dir, "autograded", "foo", "ps1", "p1.ipynb"))
+        assert os.path.isfile(join(course_dir, "autograded", "foo", "ps1", "timestamp.txt"))
+        assert os.path.isfile(join(course_dir, "autograded", "foo", "ps1", "subdir", "data.csv"))
+        assert os.path.isfile(join(course_dir, "autograded", "foo", "ps1", "subdir", "helper.py"))
+
+        with open(join(course_dir, "autograded", "foo", "ps1", "timestamp.txt"), "r") as fh:
+            contents = fh.read()
+        assert contents == "2015-02-02 15:58:23.948203 PST"
+
+        with open(join(course_dir, "autograded", "foo", "ps1", "subdir", "data.csv"), "r") as fh:
+            contents = fh.read()
+        assert contents == "some,data\n"
+
+        with open(join(course_dir, "autograded", "foo", "ps1", "subdir", "helper.py"), "r") as fh:
+            contents = fh.read()
+        assert contents == "print('this is different!')\n"
 
     def test_side_effects(self, db, course_dir):
         with open("nbgrader_config.py", "a") as fh:
