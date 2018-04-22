@@ -99,7 +99,7 @@ class QuickStartApp(NbGrader):
         self.log.info("Generating example config file...")
         currdir = os.getcwd()
         os.chdir(course_path)
-        subprocess.call([sys.executable, "-m", "nbgrader", "--generate-config"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        subprocess.call([sys.executable, "-m", "nbgrader", "generate_config"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         os.chdir(currdir)
         with open(os.path.join(course_path, "nbgrader_config.py"), "r") as fh:
             config = fh.read()

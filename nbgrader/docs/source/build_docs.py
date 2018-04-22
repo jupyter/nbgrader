@@ -46,6 +46,7 @@ def autogen_command_line(root):
         'UpdateApp',
         'ValidateApp',
         'ZipCollectApp',
+        'GenerateConfigApp'
     ]
 
     print('Generating command line documentation')

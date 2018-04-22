@@ -35,6 +35,7 @@ from . import (
     DbApp,
     UpdateApp,
     ZipCollectApp,
+    GenerateConfigApp
 )
 
 aliases = {}
@@ -45,10 +46,6 @@ aliases.update({
 flags = {}
 flags.update(nbgrader_flags)
 flags.update({
-    'generate-config': (
-        {'NbGraderApp' : {'generate_config': True}},
-        "Generate a config file."
-    )
 })
 
 
@@ -234,7 +231,15 @@ class NbGraderApp(NbGrader):
                 Update nbgrader cell metadata to the most recent version.
                 """
             ).strip()
-        )
+        ),
+        generate_config=(
+            GenerateConfigApp,
+            dedent(
+                """
+                Generates a default nbgrader_config.py file.
+                """
+            ).strip()
+        ),
     )
 
     @default("classes")
@@ -280,19 +285,6 @@ class NbGraderApp(NbGrader):
         super(NbGraderApp, self).initialize(argv)
 
     def start(self):
-        # if we're generating a config file, then do only that
-        if self.generate_config:
-            s = self.generate_config_file()
-            filename = "nbgrader_config.py"
-
-            if os.path.exists(filename):
-                self.fail("Config file '{}' already exists".format(filename))
-
-            with open(filename, 'w') as fh:
-                fh.write(s)
-            self.log.info("New config file saved to '{}'".format(filename))
-            raise NoStart()
-
         # check: is there a subapp given?
         if self.subapp is None:
             print("No command given (run with --help for options). List of subcommands:\n")

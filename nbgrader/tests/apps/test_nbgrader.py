@@ -15,19 +15,6 @@ class TestNbGrader(BaseTestApp):
         """Is the help displayed when no subapp is given?"""
         run_nbgrader([], retcode=0)
 
-    def test_generate_config(self):
-        """Is the config file properly generated?"""
-
-        # it already exists, because we create it in conftest.py
-        os.remove("nbgrader_config.py")
-
-        # try recreating it
-        run_nbgrader(["--generate-config"])
-        assert os.path.isfile("nbgrader_config.py")
-
-        # does it fail if it already exists?
-        run_nbgrader(["--generate-config"], retcode=1)
-
     def test_check_version(self, capfd):
         """Is the version the same regardless of how we run nbgrader?"""
         out1 = '\n'.join(

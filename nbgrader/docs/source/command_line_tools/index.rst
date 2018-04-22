@@ -8,6 +8,7 @@ Basic commands
     :maxdepth: 1
 
     nbgrader
+    nbgrader-generate-config
 
 Instructor commands
 -------------------
