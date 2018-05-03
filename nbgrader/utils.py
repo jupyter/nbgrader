@@ -194,8 +194,10 @@ def find_all_files(path, exclude=None):
     """Recursively finds all filenames rooted at `path`, optionally excluding
     some based on filename globs."""
     files = []
+    to_skip = []
     for dirname, dirnames, filenames in os.walk(path):
-        if is_ignored(dirname, exclude):
+        if is_ignored(dirname, exclude) or dirname in to_skip:
+            to_skip.extend([os.path.join(dirname, x) for x in dirnames])
             continue
         for filename in filenames:
             fullpath = os.path.join(dirname, filename)
