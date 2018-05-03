@@ -129,6 +129,7 @@ class Exchange(LoggingConfigurable):
         """Check if student is enrolled in course"""
         if student_id == "*":
             student_id = "{authenticated_user}"
+        response = None
         try:
             response = query_jupyterhub_api('GET', '/users/%s' % student_id)
         except (JupyterhubEnvironmentError, JupyterhubApiError) as e:
