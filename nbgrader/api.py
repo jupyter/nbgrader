@@ -1173,11 +1173,15 @@ class Gradebook(object):
             except (utils.JupyterhubEnvironmentError, utils.JupyterhubApiError) as e:
                 self.log.error("Error caught: " + e)
                 if self.course_id: # we assume user might be using Jupyterhub but something is not working
-                    # log.error
-                    self.log.error("Student {student} NOT added to Jupyterhub group {group_name}: ".format(
+                    # log.error 
+                    # Note: check if log ever appears.
+                    err_msg = "Student {student} NOT added to Jupyterhub group {group_name}: ".format(
                         student=student_id,
                         group_name=group_name
-                    ))
+                    )
+                    print(err_msg + e)
+                    self.log.error(err_msg)
+                print("Make sure you set a valid api_token in your config file before starting the service")
                 self.log.error("Make sure you set a valid api_token in your config file before starting the service")
         except (IntegrityError, FlushError) as e:
             self.db.rollback()

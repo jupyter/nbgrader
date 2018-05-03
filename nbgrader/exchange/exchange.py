@@ -129,13 +129,17 @@ class Exchange(LoggingConfigurable):
         """Check if student is enrolled in course"""
         if student_id == "*":
             student_id = "{authenticated_user}"
-        response = query_jupyterhub_api('GET', '/users/%s' % student_id)
+        try:
+            response = query_jupyterhub_api('GET', '/users/%s' % student_id)
+        except (utils.JupyterhubEnvironmentError, utils.JupyterhubApiError) as e:
+            self.log.error("Error caught: " + e)
+            self.log.error("Make sure you start your service with a valid 'api_token' in your config file")
         courses = set()
         try:
             for group in response['groups']:
                 if group.startswith('nbgrader-') or group.startswith('formgrade-'):
                     courses.add(group.split('-', 1)[1])
         except KeyError:
-            self.log.error("Error in calling Jupyterhub API: " + str(response)) 
+            self.log.error("KeyError: See Jupyterhub API: " + str(response)) 
             self.log.error("Make sure you start your service with a valid 'api_token' in your config file")
         return list(courses)
