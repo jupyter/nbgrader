@@ -132,7 +132,7 @@ class Exchange(LoggingConfigurable):
         try:
             response = query_jupyterhub_api('GET', '/users/%s' % student_id)
         except (JupyterhubEnvironmentError, JupyterhubApiError) as e:
-            self.log.error("Error caught: " + e)
+            self.log.error("Error caught: " + str(e))
             self.log.error("Make sure you start your service with a valid 'api_token' in your config file")
         courses = set()
         try:
