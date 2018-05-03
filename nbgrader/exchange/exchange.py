@@ -11,7 +11,7 @@ from traitlets.config import LoggingConfigurable
 from traitlets import Unicode, Bool, Instance, default
 from jupyter_core.paths import jupyter_data_dir
 
-from ..utils import check_directory, query_jupyterhub_api
+from ..utils import check_directory, query_jupyterhub_api, JupyterhubEnvironmentError, JupyterhubApiError 
 from ..coursedir import CourseDirectory
 
 class ExchangeError(Exception):
@@ -131,7 +131,7 @@ class Exchange(LoggingConfigurable):
             student_id = "{authenticated_user}"
         try:
             response = query_jupyterhub_api('GET', '/users/%s' % student_id)
-        except (utils.JupyterhubEnvironmentError, utils.JupyterhubApiError) as e:
+        except (JupyterhubEnvironmentError, JupyterhubApiError) as e:
             self.log.error("Error caught: " + e)
             self.log.error("Make sure you start your service with a valid 'api_token' in your config file")
         courses = set()
