@@ -32,6 +32,9 @@ else:
 class JupyterhubEnvironmentError(Exception):
     pass
 
+class JupyterhubApiError(Exception):
+    pass
+
 def query_jupyterhub_api(method, api_path, post_data=None):
     """Query Jupyterhub api
 
@@ -72,6 +75,8 @@ def query_jupyterhub_api(method, api_path, post_data=None):
         headers=auth_header,
         json = post_data,
     )
+    if not req.ok:
+        raise JupyterhubApiError("Jupyterhub returned a status code of: " + req.status_code)
 
     return req.json()
 
