@@ -136,5 +136,5 @@ class Exchange(LoggingConfigurable):
                 if group.startswith('nbgrader-') or group.startswith('formgrade-'):
                     courses.add(group.split('-', 1)[1])
         except KeyError:
-            print("Error in calling Jupyterhub API: " + str(response))
+            self.log.error("Error in calling Jupyterhub API: " + str(response) + "Make sure you start your service with a valid 'api_token' in your config file")
         return list(courses)
