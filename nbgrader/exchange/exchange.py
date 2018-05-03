@@ -2,6 +2,7 @@ import os
 import datetime
 import sys
 import shutil
+import json
 
 from textwrap import dedent
 
@@ -10,13 +11,11 @@ from traitlets.config import LoggingConfigurable
 from traitlets import Unicode, Bool, Instance, default
 from jupyter_core.paths import jupyter_data_dir
 
-from ..utils import check_directory
+from ..utils import check_directory, query_jupyterhub_api
 from ..coursedir import CourseDirectory
-
 
 class ExchangeError(Exception):
     pass
-
 
 class Exchange(LoggingConfigurable):
 
@@ -125,3 +124,17 @@ class Exchange(LoggingConfigurable):
         self.init_src()
         self.init_dest()
         self.copy_files()
+
+    def get_user_courses(self, student_id):
+        """Check if student is enrolled in course"""
+        if student_id == "*":
+            student_id = "{authenticated_user}"
+        response = query_jupyterhub_api('GET', '/users/%s' % student_id)
+        courses = set()
+        try:
+            for group in response['groups']:
+                if group.startswith('nbgrader-') or group.startswith('formgrade-'):
+                    courses.add(group.split('-', 1)[1])
+        except KeyError:
+            print("Error in calling Jupyterhub API: " + str(response))
+        return list(courses)
