@@ -425,7 +425,7 @@ class TestNbGraderAutograde(BaseTestApp):
         with open("nbgrader_config.py", "a") as fh:
             fh.write("""c.CourseDirectory.db_assignments = [dict(name='ps1', duedate='2015-02-02 14:58:23.948203 PST')]\n""")
             fh.write("""c.CourseDirectory.db_students = [dict(id="foo"), dict(id="bar")]\n""")
-            fh.write("""c.Autograde.exclude_overwriting = {"ps1": ["subdir/helper.py"]}\n""")
+            fh.write("""c.Autograde.exclude_overwriting = {{"ps1": ["{}"]}}\n""".format(os.path.join("subdir", "helper.py")))
 
         self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
         self._make_file(join(course_dir, "source", "ps1", "subdir", "data.csv"), "some,data\n")
