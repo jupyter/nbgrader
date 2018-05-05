@@ -2,7 +2,7 @@ import os
 import shutil
 
 from textwrap import dedent
-from traitlets import Bool, List
+from traitlets import Bool, List, Dict
 
 from .base import BaseConverter, NbGraderException
 from ..preprocessors import (
@@ -20,6 +20,19 @@ class Autograde(BaseConverter):
             """
             Whether to create the student at runtime if it does not
             already exist.
+            """
+        )
+    ).tag(config=True)
+
+    exclude_overwriting = Dict(
+        {},
+        help=dedent(
+            """
+            A dictionary with keys corresponding to assignment names and values
+            being a list of filenames (relative to the assignment's source
+            directory) that should NOT be overwritten with the source version.
+            This is to allow students to e.g. edit a python file and submit it
+            alongside the notebooks in their assignment.
             """
         )
     ).tag(config=True)
@@ -109,7 +122,9 @@ class Autograde(BaseConverter):
         self.log.info("Overwriting files with master versions from the source directory")
         dest_path = self._format_dest(assignment_id, student_id)
         source_path = self.coursedir.format_path(self.coursedir.source_directory, '.', assignment_id)
-        source_files = utils.find_all_files(source_path, self.coursedir.ignore + ["*.ipynb"])
+        source_files = set(utils.find_all_files(source_path, self.coursedir.ignore + ["*.ipynb"]))
+        exclude_files = set([os.path.join(source_path, x) for x in self.exclude_overwriting.get(assignment_id, [])])
+        source_files = list(source_files - exclude_files)
 
         # copy them to the build directory
         for filename in source_files:
