@@ -100,3 +100,4 @@ conda-bld
 gh_api.sqlite
 MANIFEST
 README
+.pytest_cache
