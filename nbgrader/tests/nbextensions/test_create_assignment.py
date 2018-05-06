@@ -6,6 +6,7 @@ from selenium.webdriver.support.ui import Select
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.keys import Keys
 from selenium.common.exceptions import TimeoutException, NoSuchElementException, NoAlertPresentException
+from selenium.webdriver.common.action_chains import ActionChains
 from textwrap import dedent
 
 from ...nbgraderformat import read
@@ -82,7 +83,10 @@ def _load_notebook(browser, port, retries=5, name="blank"):
 def _activate_toolbar(browser, name="Create%20Assignment"):
     def celltoolbar_exists(browser):
         return browser.execute_script(
-            'return $("#view_menu #menu-cell-toolbar").find("[data-name=\'{}\']").length == 1;'.format(name))
+            """
+            return typeof $ !== "undefined" && $ !== undefined &&
+                $("#view_menu #menu-cell-toolbar").find("[data-name=\'{}\']").length == 1;
+            """.format(name))
 
     # wait for the view menu to appear
     _wait(browser).until(celltoolbar_exists)
@@ -127,16 +131,28 @@ def _select_locked(browser, index=0):
 
 
 def _set_points(browser, points=2, index=0):
-    elem = browser.find_elements_by_css_selector(".nbgrader-points-input")[index]
-    elem.clear()
-    elem.send_keys(points)
+    # This is a bit of a hack to use .val() and .change() rather than
+    # using Selenium's sendkeys, but I can't get it to reliably work. It works
+    # on Windows (both headless and non-) and headless on mac but not when
+    # running with the visible browser on mac. I wasn't able to find any issues
+    # regarding this and think it has something to do with the notebook
+    # capturing keypresses, but wasn't able to make any further progress
+    # debugging the problem.
+    browser.execute_script(
+        """
+        $($(".nbgrader-points-input")[{}]).val("{}").change().blur();
+        """.format(index, points)
+    )
     browser.find_elements_by_css_selector(".nbgrader-cell")[index].click()
 
 
 def _set_id(browser, cell_id="foo", index=0):
-    elem = browser.find_elements_by_css_selector(".nbgrader-id-input")[index]
-    elem.clear()
-    elem.send_keys(cell_id)
+    # This is a hack, see the comment in _set_points above.
+    browser.execute_script(
+        """
+        $($(".nbgrader-id-input")[{}]).val("{}").change().blur();
+        """.format(index, cell_id)
+    )
     browser.find_elements_by_css_selector(".nbgrader-cell")[index].click()
 
 
@@ -218,9 +234,9 @@ def test_manual_cell(browser, port):
 
     # wait for the points and id fields to appear
     _wait(browser).until(
-        EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".nbgrader-points")))
+        EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".nbgrader-points-input")))
     _wait(browser).until(
-        EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".nbgrader-id")))
+        EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".nbgrader-id-input")))
 
     # set the points
     _set_points(browser)
@@ -455,21 +471,23 @@ def test_tabbing(browser, port):
     _load_notebook(browser, port)
     _activate_toolbar(browser)
 
+    def active_element_is(class_name):
+        def waitfor(browser):
+            elem = browser.execute_script("return document.activeElement")
+            return elem.get_attribute("class") == class_name
+        return waitfor
+
     # make it manually graded
     _select_manual(browser)
 
     # click the id field
     element = browser.find_element_by_css_selector(".nbgrader-points-input")
     element.click()
-
-    # get the active element
-    element = browser.execute_script("return document.activeElement")
-    assert "nbgrader-points-input" == element.get_attribute("class")
+    _wait(browser).until(active_element_is("nbgrader-points-input"))
 
     # press tab and check that the active element is correct
     element.send_keys(Keys.TAB)
-    element = browser.execute_script("return document.activeElement")
-    assert "nbgrader-id-input" == element.get_attribute("class")
+    _wait(browser).until(active_element_is("nbgrader-id-input"))
 
     # make it autograder tests
     _select_tests(browser)
@@ -477,15 +495,11 @@ def test_tabbing(browser, port):
     # click the id field
     element = browser.find_element_by_css_selector(".nbgrader-points-input")
     element.click()
-
-    # get the active element
-    element = browser.execute_script("return document.activeElement")
-    assert "nbgrader-points-input" == element.get_attribute("class")
+    _wait(browser).until(active_element_is("nbgrader-points-input"))
 
     # press tab and check that the active element is correct
     element.send_keys(Keys.TAB)
-    element = browser.execute_script("return document.activeElement")
-    assert "nbgrader-id-input" == element.get_attribute("class")
+    _wait(browser).until(active_element_is("nbgrader-id-input"))
 
 
 @pytest.mark.nbextensions

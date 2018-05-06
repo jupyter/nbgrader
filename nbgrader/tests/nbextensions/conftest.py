@@ -10,7 +10,10 @@ import signal
 import glob
 
 from selenium import webdriver
-from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.common.exceptions import NoAlertPresentException
 from textwrap import dedent
 
 from .. import copy_coverage_files, get_free_ports
@@ -187,6 +190,16 @@ def _make_browser(tempdir):
 
 def _close_browser(browser):
     browser.save_screenshot(os.path.join(os.path.dirname(__file__), 'selenium.screenshot.png'))
+    browser.get("about:blank")
+
+    try:
+        alert = browser.switch_to_alert()
+    except NoAlertPresentException:
+        pass
+    else:
+        print("Warning: dismissing unexpected alert ({})".format(alert.text))
+        alert.accept()
+
     browser.quit()
 
 
