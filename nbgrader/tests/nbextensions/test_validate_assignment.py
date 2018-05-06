@@ -36,7 +36,7 @@ def _wait(browser):
 
 def _load_notebook(browser, port, notebook, retries=5):
     # go to the correct page
-    url = "http://localhost:{}/notebooks/{}".format(port, notebook)
+    url = "http://localhost:{}/notebooks/{}.ipynb".format(port, notebook)
     browser.get(url)
 
     alert = ''
@@ -49,14 +49,16 @@ def _load_notebook(browser, port, notebook, retries=5):
         except NoAlertPresentException:
             alert = None
         else:
-            alert.dismiss()
-            browser.get(url)
-
-    assert browser.current_url == url
+            print("Warning: dismissing unexpected alert ({})".format(alert.text))
+            alert.accept()
 
     def page_loaded(browser):
         return browser.execute_script(
-            'return typeof Jupyter !== "undefined" && Jupyter.page !== undefined;')
+            """
+            return (typeof Jupyter !== "undefined" &&
+                    Jupyter.page !== undefined &&
+                    $("#notebook_name").text() === "{}");
+            """.format(notebook))
 
     # wait for the page to load
     try:
@@ -65,14 +67,20 @@ def _load_notebook(browser, port, notebook, retries=5):
         if retries > 0:
             print("Retrying page load...")
             # page timeout, but sometimes this happens, so try refreshing?
-            _load_notebook(browser, port, retries=retries - 1)
+            _load_notebook(browser, port, retries=retries - 1, notebook=notebook)
         else:
             print("Failed to load the page too many times")
             raise
 
 
 def _wait_for_validate_button(browser):
-    _wait(browser).until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, "button.validate")))
+    def validate_exists(browser):
+        try:
+            browser.find_element_by_css_selector("button.validate")
+        except NoSuchElementException:
+            return False
+        return True
+    _wait(browser).until(validate_exists)
 
 
 def _wait_for_modal(browser):
@@ -94,7 +102,7 @@ def _dismiss_modal(browser):
 
 @pytest.mark.nbextensions
 def test_validate_ok(browser, port):
-    _load_notebook(browser, port, "submitted-changed.ipynb")
+    _load_notebook(browser, port, "submitted-changed")
     _wait_for_validate_button(browser)
 
     # click the "validate" button
@@ -112,7 +120,7 @@ def test_validate_ok(browser, port):
 
 @pytest.mark.nbextensions
 def test_validate_failure(browser, port):
-    _load_notebook(browser, port, "submitted-unchanged.ipynb")
+    _load_notebook(browser, port, "submitted-unchanged")
     _wait_for_validate_button(browser)
 
     # click the "validate" button
@@ -130,7 +138,7 @@ def test_validate_failure(browser, port):
 
 @pytest.mark.nbextensions
 def test_validate_grade_cell_changed(browser, port):
-    _load_notebook(browser, port, "submitted-grade-cell-changed.ipynb")
+    _load_notebook(browser, port, "submitted-grade-cell-changed")
     _wait_for_validate_button(browser)
 
     # click the "validate" button
@@ -148,7 +156,7 @@ def test_validate_grade_cell_changed(browser, port):
 
 @pytest.mark.nbextensions
 def test_validate_locked_cell_changed(browser, port):
-    _load_notebook(browser, port, "submitted-locked-cell-changed.ipynb")
+    _load_notebook(browser, port, "submitted-locked-cell-changed")
     _wait_for_validate_button(browser)
 
     # click the "validate" button
@@ -166,7 +174,7 @@ def test_validate_locked_cell_changed(browser, port):
 
 @pytest.mark.nbextensions
 def test_validate_open_relative_file(browser, port):
-    _load_notebook(browser, port, "open_relative_file.ipynb")
+    _load_notebook(browser, port, "open_relative_file")
     _wait_for_validate_button(browser)
 
     # click the "validate" button
@@ -184,7 +192,7 @@ def test_validate_open_relative_file(browser, port):
 
 @pytest.mark.nbextensions
 def test_validate_grade_cell_type_changed(browser, port):
-    _load_notebook(browser, port, "submitted-grade-cell-type-changed.ipynb")
+    _load_notebook(browser, port, "submitted-grade-cell-type-changed")
     _wait_for_validate_button(browser)
 
     # click the "validate" button
@@ -202,7 +210,7 @@ def test_validate_grade_cell_type_changed(browser, port):
 
 @pytest.mark.nbextensions
 def test_validate_answer_cell_type_changed(browser, port):
-    _load_notebook(browser, port, "submitted-answer-cell-type-changed.ipynb")
+    _load_notebook(browser, port, "submitted-answer-cell-type-changed")
     _wait_for_validate_button(browser)
 
     # click the "validate" button
@@ -216,3 +224,15 @@ def test_validate_answer_cell_type_changed(browser, port):
 
     # close the modal dialog
     _dismiss_modal(browser)
+
+
+################################################################################
+####### DO NOT ADD TESTS BELOW THIS LINE #######################################
+################################################################################
+
+@pytest.mark.nbextensions
+def test_final(browser, port):
+    """This is a final test to be run so that the browser doesn't hang, see
+    https://github.com/mozilla/geckodriver/issues/1151
+    """
+    _load_notebook(browser, port, "blank")

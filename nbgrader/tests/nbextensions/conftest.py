@@ -187,8 +187,6 @@ def _make_browser(tempdir):
 
 def _close_browser(browser):
     browser.save_screenshot(os.path.join(os.path.dirname(__file__), 'selenium.screenshot.png'))
-    browser.close()
-    browser.service.process.send_signal(signal.SIGTERM)
     browser.quit()
 
 

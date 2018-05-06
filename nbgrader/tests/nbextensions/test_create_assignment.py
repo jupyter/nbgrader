@@ -5,7 +5,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support.ui import Select
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.keys import Keys
-from selenium.common.exceptions import TimeoutException, NoSuchElementException
+from selenium.common.exceptions import TimeoutException, NoSuchElementException, NoAlertPresentException
 from textwrap import dedent
 
 from ...nbgraderformat import read
@@ -39,13 +39,31 @@ def _wait(browser):
     return WebDriverWait(browser, 30)
 
 
-def _load_notebook(browser, port, retries=5, name="blank.ipynb"):
+def _load_notebook(browser, port, retries=5, name="blank"):
     # go to the correct page
-    browser.get("http://localhost:{}/notebooks/{}".format(port, name))
+    url = "http://localhost:{}/notebooks/{}.ipynb".format(port, name)
+    browser.get(url)
+
+    alert = ''
+    for _ in range(5):
+        if alert is None:
+            break
+
+        try:
+            alert = browser.switch_to_alert()
+        except NoAlertPresentException:
+            alert = None
+        else:
+            print("Warning: dismissing unexpected alert ({})".format(alert.text))
+            alert.accept()
 
     def page_loaded(browser):
         return browser.execute_script(
-            'return typeof Jupyter !== "undefined" && Jupyter.page !== undefined && Jupyter.notebook !== undefined;')
+            """
+            return (typeof Jupyter !== "undefined" &&
+                    Jupyter.page !== undefined &&
+                    $("#notebook_name").text() === "{}");
+            """.format(name))
 
     # wait for the page to load
     try:
@@ -54,10 +72,11 @@ def _load_notebook(browser, port, retries=5, name="blank.ipynb"):
         if retries > 0:
             print("Retrying page load...")
             # page timeout, but sometimes this happens, so try refreshing?
-            _load_notebook(browser, port, retries=retries - 1)
+            _load_notebook(browser, port, retries=retries - 1, name=name)
         else:
             print("Failed to load the page too many times")
             raise
+
 
 
 def _activate_toolbar(browser, name="Create%20Assignment"):
@@ -596,10 +615,22 @@ def test_negative_points(browser, port):
 
 @pytest.mark.nbextensions
 def test_schema_version(browser, port):
-    _load_notebook(browser, port, name="old-schema.ipynb")
+    _load_notebook(browser, port, name="old-schema")
 
     # activating the toolbar should cause the dialog warning about the schema
     # version to appear
     _activate_toolbar(browser)
     _wait_for_modal(browser)
     _dismiss_modal(browser)
+
+
+################################################################################
+####### DO NOT ADD TESTS BELOW THIS LINE #######################################
+################################################################################
+
+@pytest.mark.nbextensions
+def test_final(browser, port):
+    """This is a final test to be run so that the browser doesn't hang, see
+    https://github.com/mozilla/geckodriver/issues/1151
+    """
+    _load_notebook(browser, port)
