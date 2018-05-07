@@ -36,7 +36,10 @@ def nbserver(request, port, tempdir, jupyter_config_dir, jupyter_data_dir, excha
     return server
 
 
-@pytest.fixture(scope="module")
+# Firefox does not seem to release memory, and so will easily eat up
+# almost 1GB if we do not close the browser after each test :-/
+# This causes tests to time out on travis.
+@pytest.fixture(scope="function")
 def browser(request, tempdir, nbserver):
     browser = _make_browser(tempdir)
 

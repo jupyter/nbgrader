@@ -1,3 +1,5 @@
+import os
+
 from six.moves.urllib.parse import urljoin, unquote
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
@@ -107,7 +109,7 @@ def _wait_for_formgrader(browser, port, url, retries=5):
             return false;
         }
 
-        if (!(typeof formgrader !== "undefined" && formgrader !== undefined)) {
+        if (!(typeof formgrader !== "undefined" && formgrader !== undefined && formgrader.loaded)) {
             return false;
         }
 
@@ -120,6 +122,14 @@ def _wait_for_formgrader(browser, port, url, retries=5):
         }
 
         if (!(typeof autosize !== "undefined" && autosize !== undefined)) {
+            return false;
+        }
+
+        if (!(typeof $ !== "undefined" && $ !== undefined)) {
+            return false;
+        }
+
+        if ($("body")[0] === undefined) {
             return false;
         }
 
@@ -216,3 +226,7 @@ def _child_exists(elem, selector):
         return False
     else:
         return True
+
+
+def _save_screenshot(browser):
+    browser.save_screenshot(os.path.join(os.path.dirname(__file__), "selenium.screenshot.png"))
