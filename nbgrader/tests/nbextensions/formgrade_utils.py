@@ -5,7 +5,7 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
-from selenium.common.exceptions import TimeoutException, NoSuchElementException
+from selenium.common.exceptions import TimeoutException, NoSuchElementException, NoAlertPresentException
 
 
 
@@ -85,6 +85,14 @@ def _get(browser, url, retries=5):
         else:
             print("Failed to load '{}', trying again...".format(url))
             _get(browser, url, retries=retries - 1)
+
+    try:
+        alert = browser.switch_to_alert()
+    except NoAlertPresentException:
+        pass
+    else:
+        print("Warning: dismissing unexpected alert ({})".format(alert.text))
+        alert.accept()
 
 
 def _load_gradebook_page(browser, port, url):
