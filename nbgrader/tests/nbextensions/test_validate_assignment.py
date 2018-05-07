@@ -57,6 +57,7 @@ def _load_notebook(browser, port, notebook, retries=5):
             """
             return (typeof Jupyter !== "undefined" &&
                     Jupyter.page !== undefined &&
+                    Jupyter.notebook !== undefined &&
                     $("#notebook_name").text() === "{}");
             """.format(notebook))
 
