@@ -1,3 +1,4 @@
+import os
 import pytest
 
 from selenium.webdriver.common.by import By
@@ -216,6 +217,10 @@ def _dismiss_modal(browser):
             return True
         return False
     _wait(browser).until(modal_gone)
+
+
+def _save_screenshot(browser):
+    browser.save_screenshot(os.path.join(os.path.dirname(__file__), "selenium.screenshot.png"))
 
 
 @pytest.mark.nbextensions
@@ -482,7 +487,12 @@ def test_tabbing(browser, port):
 
     # click the id field
     element = browser.find_element_by_css_selector(".nbgrader-points-input")
+    # There is a bug where sometimes the click doesn't register, so we also press enter
+    # here which for some reason seems to help. It's not clear here what's happening
+    # to cause this bug but see https://github.com/mozilla/geckodriver/issues/322 for
+    # reference. It only seemed to be a problem on Linux, not Mac or Windows.
     element.click()
+    element.send_keys(Keys.RETURN)
     _wait(browser).until(active_element_is("nbgrader-points-input"))
 
     # press tab and check that the active element is correct
@@ -495,6 +505,7 @@ def test_tabbing(browser, port):
     # click the id field
     element = browser.find_element_by_css_selector(".nbgrader-points-input")
     element.click()
+    element.send_keys(Keys.RETURN)
     _wait(browser).until(active_element_is("nbgrader-points-input"))
 
     # press tab and check that the active element is correct
