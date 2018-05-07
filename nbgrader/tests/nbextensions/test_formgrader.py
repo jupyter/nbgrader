@@ -353,6 +353,7 @@ def test_load_live_notebook(browser, port, gradebook):
                     port, "autograded/{}/Problem Set 1/{}.ipynb".format(submission.student.id, problem.name)))
             browser.close()
             utils._switch_to_window(browser, 0)
+            utils._wait_for_formgrader(browser, port, "submissions/{}/?index=0".format(submission.id))
 
 
 @pytest.mark.nbextensions
