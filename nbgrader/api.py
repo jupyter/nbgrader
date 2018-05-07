@@ -1171,7 +1171,7 @@ class Gradebook(object):
                     group_name=group_name
                 ))
             except (utils.JupyterhubEnvironmentError, utils.JupyterhubApiError) as e:
-                self.log.error("Error caught: " + e)
+                #self.log.error("Error caught: " + e) # self.log not working. Gradebook has no attribute log
                 if self.course_id: # we assume user might be using Jupyterhub but something is not working
                     # log.error 
                     # Note: check if log ever appears.
@@ -1179,10 +1179,10 @@ class Gradebook(object):
                         student=student_id,
                         group_name=group_name
                     )
-                    print(err_msg + e)
-                    self.log.error(err_msg)
+                    print(err_msg + str(e))
+                    #self.log.error(err_msg)
                 print("Make sure you set a valid api_token in your config file before starting the service")
-                self.log.error("Make sure you set a valid api_token in your config file before starting the service")
+                #self.log.error("Make sure you set a valid api_token in your config file before starting the service")
         except (IntegrityError, FlushError) as e:
             self.db.rollback()
             raise InvalidEntry(*e.args)
@@ -1264,17 +1264,17 @@ class Gradebook(object):
 
             try:
                 group_name = "nbgrader-{}".format(self.course_id)
-                utils.query_jupyterhub_api(method="DELETE",
+                res = utils.query_jupyterhub_api(method="DELETE",
                                      api_path="/groups/{name}/users".format(name=group_name),
                                      post_data = {"users":[student.id]}
                 )
                 # log.info
-                print("Student {student} removed from the Jupyterhub group {group_name}".format(student=name, group_name=group_name))
+                print("Student {student} removed or was not in the Jupyterhub group {group_name}".format(student=name, group_name=group_name))
             except (utils.JupyterhubEnvironmentError, utils.JupyterhubApiError) as e:
                 if self.course_id: # we assume user might be using Jupyterhub but something is not working
                     # log.error
                     print("Student {student} NOT removed from the Jupyterhub group {group_name}: ".format(student=name, group_name=group_name) + str(e))
-                self.log.error("Error caught in remove_student(): " + e)
+                #self.log.error("Error caught in remove_student(): " + e)
         except (IntegrityError, FlushError) as e:
             self.db.rollback()
             raise InvalidEntry(*e.args)
