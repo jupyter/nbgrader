@@ -27,4 +27,4 @@ install:
 script:
   - invoke tests --group="$GROUP"
 after_success:
-  - invoke after_success --group="$GROUP"
+  - invoke aftersuccess --group="$GROUP"
