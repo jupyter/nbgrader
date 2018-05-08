@@ -48,7 +48,7 @@ def docs(ctx):
 
 
 @task
-def clean_docs(ctx):
+def cleandocs(ctx):
     run(ctx, 'python nbgrader/docs/source/clear_docs.py')
 
 
@@ -123,7 +123,7 @@ def tests(ctx, group='all', skip=None, junitxml=None):
 
 
 @task
-def after_success(ctx, group):
+def aftersuccess(ctx, group):
     if group in ('python', 'nbextensions'):
         run(ctx, 'codecov')
     else:
@@ -152,8 +152,8 @@ def install(ctx, group):
 
 
 ns = collection.Collection(
-    after_success,
-    clean_docs,
+    aftersuccess,
+    cleandocs,
     docs,
     install,
     js,
