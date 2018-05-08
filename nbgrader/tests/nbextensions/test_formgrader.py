@@ -2,7 +2,9 @@ import pytest
 import os
 import shutil
 import sys
+import time
 import glob
+import itertools
 
 from os.path import join
 
@@ -10,6 +12,7 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
+from selenium.webdriver.common.action_chains import ActionChains
 
 from .. import run_nbgrader
 from ...api import Gradebook, MissingEntry
@@ -35,7 +38,10 @@ def nbserver(request, port, tempdir, jupyter_config_dir, jupyter_data_dir, excha
     return server
 
 
-@pytest.fixture
+# Firefox does not seem to release memory, and so will easily eat up
+# almost 1GB if we do not close the browser after each test :-/
+# This causes tests to time out on travis.
+@pytest.fixture(scope="function")
 def browser(request, tempdir, nbserver):
     browser = _make_browser(tempdir)
 
@@ -100,21 +106,21 @@ def test_load_manage_assignments(browser, port, gradebook):
 
     # click on the "Problem Set 1" link
     utils._click_link(browser, "Problem Set 1")
-    browser.switch_to_window(browser.window_handles[1])
+    utils._switch_to_window(browser, 1)
     utils._wait_for_tree_page(
         browser, port,
         utils._tree_url(port, "source/Problem Set 1"))
     browser.close()
-    browser.switch_to_window(browser.window_handles[0])
+    utils._switch_to_window(browser, 0)
 
     # click on the preview link
     browser.find_element_by_css_selector("td.preview .glyphicon").click()
-    browser.switch_to_window(browser.window_handles[1])
+    utils._switch_to_window(browser, 1)
     utils._wait_for_tree_page(
         browser, port,
         utils._tree_url(port, "release/Problem Set 1"))
     browser.close()
-    browser.switch_to_window(browser.window_handles[0])
+    utils._switch_to_window(browser, 0)
 
     # click on the number of submissions
     browser.find_element_by_css_selector("td.num-submissions a").click()
@@ -331,24 +337,27 @@ def test_formgrade_view_breadcrumbs(browser, port, gradebook):
 
 
 @pytest.mark.nbextensions
-def test_load_live_notebook(browser, port, gradebook):
-    for problem in gradebook.find_assignment("Problem Set 1").notebooks:
-        submissions = problem.submissions
-        submissions.sort(key=lambda x: x.id)
+@pytest.mark.parametrize("iproblem,isubmission", itertools.product(range(2), range(2)))
+def test_load_live_notebook(browser, port, gradebook, iproblem, isubmission):
+    problem = gradebook.find_assignment("Problem Set 1").notebooks[iproblem]
+    submissions = problem.submissions
+    submissions.sort(key=lambda x: x.id)
+    submission = submissions[isubmission]
 
-        for i, submission in enumerate(submissions):
-            utils._get(browser, utils._formgrade_url(port, "submissions/{}".format(submission.id)))
-            utils._wait_for_formgrader(browser, port, "submissions/{}/?index=0".format(submission.id))
+    utils._get(browser, utils._formgrade_url(port, "submissions/{}".format(submission.id)))
+    utils._wait_for_formgrader(browser, port, "submissions/{}/?index=0".format(submission.id))
 
-            # check the live notebook link
-            utils._click_link(browser, "Submission #{}".format(i + 1))
-            browser.switch_to_window(browser.window_handles[1])
-            utils._wait_for_notebook_page(
-                browser, port,
-                utils._notebook_url(
-                    port, "autograded/{}/Problem Set 1/{}.ipynb".format(submission.student.id, problem.name)))
-            browser.close()
-            browser.switch_to_window(browser.window_handles[0])
+    # check the live notebook link
+    utils._click_link(browser, "Submission #{}".format(isubmission + 1))
+    utils._switch_to_window(browser, 1)
+    utils._wait_for_notebook_page(
+        browser, port,
+        utils._notebook_url(
+            port, "autograded/{}/Problem Set 1/{}.ipynb".format(submission.student.id, problem.name)))
+
+    utils._get(browser, utils._formgrade_url(port, "submissions/{}".format(submission.id)))
+    browser.close()
+    utils._switch_to_window(browser, 0)
 
 
 @pytest.mark.nbextensions
@@ -395,10 +404,12 @@ def test_next_prev_assignments(browser, port, gradebook):
         utils._wait_for_formgrader(browser, port, "submissions/{}/?index=0".format(submissions[0].id))
 
         # Move to the next submission
+        time.sleep(0.5)
         next_function()
         utils._wait_for_formgrader(browser, port, "submissions/{}/?index=0".format(submissions[1].id))
 
         # Move to the next submission (should return to notebook list)
+        time.sleep(0.5)
         next_function()
         utils._wait_for_gradebook_page(browser, port, "gradebook/Problem Set 1/Problem 1")
 
@@ -407,10 +418,12 @@ def test_next_prev_assignments(browser, port, gradebook):
         utils._wait_for_formgrader(browser, port, "submissions/{}/?index=0".format(submissions[1].id))
 
         # Move to the previous submission
+        time.sleep(0.5)
         prev_function()
         utils._wait_for_formgrader(browser, port, "submissions/{}/?index=0".format(submissions[0].id))
 
         # Move to the previous submission (should return to the notebook list)
+        time.sleep(0.5)
         prev_function()
         utils._wait_for_gradebook_page(browser, port, "gradebook/Problem Set 1/Problem 1")
 
@@ -435,6 +448,7 @@ def test_next_prev_failed_assignments(browser, port, gradebook):
 
     if submissions[0].failed_tests:
         # Go to the next failed submission (should return to the notebook list)
+        time.sleep(0.5)
         utils._send_keys_to_body(browser, Keys.CONTROL, Keys.SHIFT, ".")
         utils._wait_for_gradebook_page(browser, port, "gradebook/Problem Set 1/Problem 1")
 
@@ -443,6 +457,7 @@ def test_next_prev_failed_assignments(browser, port, gradebook):
         utils._wait_for_formgrader(browser, port, "submissions/{}/?index=0".format(submissions[0].id))
 
         # Go to the previous failed submission (should return to the notebook list)
+        time.sleep(0.5)
         utils._send_keys_to_body(browser, Keys.CONTROL, Keys.SHIFT, ",")
         utils._wait_for_gradebook_page(browser, port, "gradebook/Problem Set 1/Problem 1")
 
@@ -451,10 +466,12 @@ def test_next_prev_failed_assignments(browser, port, gradebook):
         utils._wait_for_formgrader(browser, port, "submissions/{}/?index=0".format(submissions[0].id))
 
         # Go to the other notebook
+        time.sleep(0.5)
         utils._send_keys_to_body(browser, Keys.CONTROL, ".")
         utils._wait_for_formgrader(browser, port, "submissions/{}/?index=0".format(submissions[1].id))
 
         # Go to the next failed submission (should return to the notebook list)
+        time.sleep(0.5)
         utils._send_keys_to_body(browser, Keys.CONTROL, Keys.SHIFT, ".")
         utils._wait_for_gradebook_page(browser, port, "gradebook/Problem Set 1/Problem 1")
 
@@ -463,11 +480,13 @@ def test_next_prev_failed_assignments(browser, port, gradebook):
         utils._wait_for_formgrader(browser, port, "submissions/{}/?index=0".format(submissions[1].id))
 
         # Go to the previous failed submission
+        time.sleep(0.5)
         utils._send_keys_to_body(browser, Keys.CONTROL, Keys.SHIFT, ",")
         utils._wait_for_formgrader(browser, port, "submissions/{}/?index=0".format(submissions[0].id))
 
     else:
         # Go to the next failed submission
+        time.sleep(0.5)
         utils._send_keys_to_body(browser, Keys.CONTROL, Keys.SHIFT, ".")
         utils._wait_for_formgrader(browser, port, "submissions/{}/?index=0".format(submissions[1].id))
 
@@ -476,6 +495,7 @@ def test_next_prev_failed_assignments(browser, port, gradebook):
         utils._wait_for_formgrader(browser, port, "submissions/{}/?index=0".format(submissions[0].id))
 
         # Go to the previous failed submission (should return to the notebook list)
+        time.sleep(0.5)
         utils._send_keys_to_body(browser, Keys.CONTROL, Keys.SHIFT, ",")
         utils._wait_for_gradebook_page(browser, port, "gradebook/Problem Set 1/Problem 1")
 
@@ -484,10 +504,12 @@ def test_next_prev_failed_assignments(browser, port, gradebook):
         utils._wait_for_formgrader(browser, port, "submissions/{}/?index=0".format(submissions[0].id))
 
         # Go to the other notebook
+        time.sleep(0.5)
         utils._send_keys_to_body(browser, Keys.CONTROL, ".")
         utils._wait_for_formgrader(browser, port, "submissions/{}/?index=0".format(submissions[1].id))
 
         # Go to the next failed submission (should return to the notebook list)
+        time.sleep(0.5)
         utils._send_keys_to_body(browser, Keys.CONTROL, Keys.SHIFT, ".")
         utils._wait_for_gradebook_page(browser, port, "gradebook/Problem Set 1/Problem 1")
 
@@ -717,24 +739,28 @@ def test_same_part_navigation(browser, port, gradebook):
     utils._get_comment_box(browser, 1).click()
     utils._send_keys_to_body(browser, Keys.CONTROL, ".")
     utils._wait_for_formgrader(browser, port, "submissions/{}/?index=6".format(submissions[1].id))
-    assert utils._get_active_element(browser) == utils._get_comment_box(browser, 1)
+    element_active = lambda browser: utils._get_active_element(browser) == utils._get_comment_box(browser, 1)
+    WebDriverWait(browser, 10).until(element_active)
 
     # Click the third score box and navigate to the previous submission
     utils._get_score_box(browser, 2).click()
     utils._send_keys_to_body(browser, Keys.CONTROL, ",")
     utils._wait_for_formgrader(browser, port, "submissions/{}/?index=7".format(submissions[0].id))
-    assert utils._get_active_element(browser) == utils._get_score_box(browser, 2)
+    element_active = lambda browser: utils._get_active_element(browser) == utils._get_score_box(browser, 2)
+    WebDriverWait(browser, 10).until(element_active)
 
     # Click the third comment box and navigate to the next submission
     utils._get_comment_box(browser, 2).click()
     utils._send_keys_to_body(browser, Keys.CONTROL, ".")
     utils._wait_for_formgrader(browser, port, "submissions/{}/?index=11".format(submissions[1].id))
-    assert utils._get_active_element(browser) == utils._get_score_box(browser, 4)
+    element_active = lambda browser: utils._get_active_element(browser) == utils._get_score_box(browser, 4)
+    WebDriverWait(browser, 10).until(element_active)
 
     # Navigate to the previous submission
     utils._send_keys_to_body(browser, Keys.CONTROL, ",")
     utils._wait_for_formgrader(browser, port, "submissions/{}/?index=11".format(submissions[0].id))
-    assert utils._get_active_element(browser) == utils._get_score_box(browser, 4)
+    element_active = lambda browser: utils._get_active_element(browser) == utils._get_score_box(browser, 4)
+    WebDriverWait(browser, 10).until(element_active)
 
 
 @pytest.mark.nbextensions
@@ -789,6 +815,8 @@ def test_formgrade_show_hide_names(browser, port, gradebook):
 
     # click the show icon
     hidden.click()
+    # move the mouse to the first breadcrumb so it's not hovering over the tooltip
+    ActionChains(browser).move_to_element(browser.find_elements_by_css_selector(".breadcrumb li")[0]).perform()
     WebDriverWait(browser, 10).until_not(EC.presence_of_element_located((By.CSS_SELECTOR, ".tooltip")))
 
     # check that the name is shown
@@ -798,6 +826,8 @@ def test_formgrade_show_hide_names(browser, port, gradebook):
 
     # click the hide icon
     shown.click()
+    # move the mouse to the first breadcrumb so it's not hovering over the tooltip
+    ActionChains(browser).move_to_element(browser.find_elements_by_css_selector(".breadcrumb li")[0]).perform()
     WebDriverWait(browser, 10).until_not(EC.presence_of_element_located((By.CSS_SELECTOR, ".tooltip")))
 
     # check that the name is hidden

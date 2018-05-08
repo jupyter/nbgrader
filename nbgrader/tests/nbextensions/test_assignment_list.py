@@ -31,7 +31,7 @@ def nbserver(request, port, tempdir, jupyter_config_dir, jupyter_data_dir, excha
     return server
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def browser(request, tempdir, nbserver):
     browser = _make_browser(tempdir)
 
@@ -107,7 +107,7 @@ def _load_assignments_list(browser, port, retries=5):
 
 
 def _expand(browser, list_id, assignment):
-    browser.find_element_by_link_text(assignment).click()
+    browser.find_element_by_id("fetched_assignments_list").find_element_by_link_text(assignment).click()
     rows = browser.find_elements_by_css_selector("{} .list_item".format(list_id))
     for i in range(1, len(rows)):
         _wait(browser).until(lambda browser: browser.find_elements_by_css_selector("{} .list_item".format(list_id))[i].is_displayed())
