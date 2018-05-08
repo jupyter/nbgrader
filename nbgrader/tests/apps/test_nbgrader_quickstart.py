@@ -39,3 +39,28 @@ class TestNbGraderQuickStart(BaseTestApp):
         # nbgrader assign should work
         run_nbgrader(["assign", "ps1"])
 
+    def test_quickstart_f(self):
+        """Is the quickstart example properly generated?"""
+
+        run_nbgrader(["quickstart", "example"])
+
+        # it should fail if it already exists
+        run_nbgrader(["quickstart", "example"], retcode=1)
+
+        # it should succeed if --force is given
+        os.remove(os.path.join("example", "nbgrader_config.py"))
+        run_nbgrader(["quickstart", "example", "-f"])
+        assert os.path.exists(os.path.join("example", "nbgrader_config.py"))
+
+        # nbgrader validate should work
+        os.chdir("example")
+        for nb in os.listdir(os.path.join("source", "ps1")):
+            if not nb.endswith(".ipynb"):
+                continue
+            output = run_nbgrader(["validate", os.path.join("source", "ps1", nb)], stdout=True)
+            assert output.strip() == "Success! Your notebook passes all the tests."
+
+        # nbgrader assign should work
+        run_nbgrader(["assign", "ps1"])
+
+

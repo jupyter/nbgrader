@@ -72,6 +72,25 @@ class TestNbGraderZipCollect(BaseTestApp):
         assert os.path.isdir(extracted_dir)
         assert len(os.listdir(extracted_dir)) == 1
 
+    def test_extract_single_notebook_f(self, course_dir, archive_dir):
+        extracted_dir = join(archive_dir, "..", "extracted")
+        self._make_notebook(archive_dir,
+            'ps1', 'hacker', '2016-01-30-15-30-10', 'problem1')
+
+        run_nbgrader(["zip_collect", "ps1"])
+        assert os.path.isdir(extracted_dir)
+        assert len(os.listdir(extracted_dir)) == 1
+
+        # Run again should fail
+        run_nbgrader(["zip_collect", "ps1"], retcode=1)
+        assert os.path.isdir(extracted_dir)
+        assert len(os.listdir(extracted_dir)) == 1
+
+        # Run again with --force flag should pass
+        run_nbgrader(["zip_collect", "-f", "ps1"])
+        assert os.path.isdir(extracted_dir)
+        assert len(os.listdir(extracted_dir)) == 1
+
     def test_extract_sub_dir_single_notebook(self, course_dir, archive_dir):
         extracted_dir = join(archive_dir, "..", "extracted")
         self._make_notebook(join(archive_dir, 'hacker'),

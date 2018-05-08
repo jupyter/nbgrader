@@ -19,6 +19,10 @@ flags.update({
         {'BaseConverter': {'force': True}},
         "Overwrite an assignment/submission if it already exists."
     ),
+    'f': (
+        {'BaseConverter': {'force': True}},
+        "Overwrite an assignment/submission if it already exists."
+    ),
 })
 
 class FeedbackApp(NbGrader):
