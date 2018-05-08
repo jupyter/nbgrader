@@ -1271,7 +1271,7 @@ class Gradebook(object):
                 # log.info
                 print("Student {student} removed or was not in the Jupyterhub group {group_name}".format(student=name, group_name=group_name))
             except (utils.JupyterhubEnvironmentError, utils.JupyterhubApiError) as e:
-                if self.course_id: # we assume user might be using Jupyterhub but something is not working
+                if self.course_id: # We assume user might be using Jupyterhub but something is not working
                     # log.error
                     print("Student {student} NOT removed from the Jupyterhub group {group_name}: ".format(student=name, group_name=group_name) + str(e))
                 #self.log.error("Error caught in remove_student(): " + e)
