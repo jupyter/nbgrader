@@ -1,6 +1,6 @@
 import pytest
 
-from datetime import datetime
+from datetime import datetime, timedelta
 from ... import api
 from ... import utils
 from ...api import InvalidEntry, MissingEntry
@@ -782,3 +782,31 @@ def test_submission_dicts(assignment):
     a = sorted(assignment.submission_dicts("foo"), key=lambda x: x["id"])
     b = sorted([x.to_dict() for x in assignment.find_assignment("foo").submissions], key=lambda x: x["id"])
     assert a == b
+
+
+def test_grant_extension(gradebook):
+    gradebook.add_assignment("ps1", duedate="2018-05-09 10:00:00")
+    gradebook.add_student("hacker123")
+    s1 = gradebook.add_submission("ps1", "hacker123")
+    assert s1.extension is None
+    assert s1.duedate == datetime(2018, 5, 9, 10, 0, 0)
+
+    gradebook.grant_extension('ps1', 'hacker123', minutes=10)
+    assert s1.extension == timedelta(minutes=10)
+    assert s1.duedate == datetime(2018, 5, 9, 10, 10, 0)
+
+    gradebook.grant_extension('ps1', 'hacker123', hours=1)
+    assert s1.extension == timedelta(hours=1)
+    assert s1.duedate == datetime(2018, 5, 9, 11, 0, 0)
+
+    gradebook.grant_extension('ps1', 'hacker123', days=2)
+    assert s1.extension == timedelta(days=2)
+    assert s1.duedate == datetime(2018, 5, 11, 10, 0, 0)
+
+    gradebook.grant_extension('ps1', 'hacker123', weeks=3)
+    assert s1.extension == timedelta(weeks=3)
+    assert s1.duedate == datetime(2018, 5, 30, 10, 0, 0)
+
+    gradebook.grant_extension('ps1', 'hacker123')
+    assert s1.extension is None
+    assert s1.duedate == datetime(2018, 5, 9, 10, 0, 0)
