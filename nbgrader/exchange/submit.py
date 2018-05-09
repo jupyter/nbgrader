@@ -25,12 +25,14 @@ class ExchangeSubmit(Exchange):
     def init_src(self):
         if self.path_includes_course:
             root = os.path.join(self.course_id, self.coursedir.assignment_id)
+            other_path = os.path.join(self.course_id, "*")
         else:
             root = self.coursedir.assignment_id
+            other_path = "*"
         self.src_path = os.path.abspath(root)
         self.coursedir.assignment_id = os.path.split(self.src_path)[-1]
         if not os.path.isdir(self.src_path):
-            self.fail("Assignment not found: {}".format(self.src_path))
+            self._assignment_not_found(self.src_path, os.path.abspath(other_path))
 
     def init_dest(self):
         if self.course_id == '':
