@@ -2,11 +2,11 @@ from __future__ import division
 
 from . import utils
 
-import contextlib
+import datetime
 import subprocess as sp
 
 from sqlalchemy import (create_engine, ForeignKey, Column, String, Text,
-    DateTime, Interval, Float, Enum, UniqueConstraint, Boolean)
+                        DateTime, Interval, Float, Enum, UniqueConstraint, Boolean)
 from sqlalchemy.orm import sessionmaker, scoped_session, relationship, column_property
 from sqlalchemy.orm.exc import NoResultFound, FlushError
 from sqlalchemy.ext.declarative import declarative_base
@@ -1832,6 +1832,46 @@ class Gradebook(object):
                 raise InvalidEntry(*e.args)
 
         return submission
+
+    def grant_extension(self, assignment, student, minutes=0, hours=0, days=0, weeks=0):
+        """Gives an extension to a student for an assignment.
+
+        Note that extensions do not stack: if you call this method multiple
+        times for the same assignment and student, the extension will be
+        replaced. So if you want to extend an assignment by two days, and then
+        another day, you will need to call this method with days=3 the second
+        time.
+
+        If you do not provide any of the time arguments (minutes, hours, days,
+        weeks), then any existing extension will be removed.
+
+        Parameters
+        ----------
+        assignment : string
+            the name of an assignment
+        student : string
+            the unique id of a student
+        minutes : number (default=0)
+            The number of minutes in the extension
+        hours : number (default=0)
+            The number of hours in the extension
+        days : number (default=0)
+            The number of days in the extension
+        weeks : number (default=0)
+            The number of weeks in the extension
+
+        """
+        submission = self.find_submission(assignment, student)
+        if minutes == 0 and hours == 0 and days == 0 and weeks == 0:
+            submission.extension = None
+        else:
+            submission.extension = datetime.timedelta(
+                minutes=minutes, hours=hours, days=days, weeks=weeks)
+        try:
+            self.db.commit()
+        except (IntegrityError, FlushError) as e:
+            self.db.rollback()
+            raise InvalidEntry(*e.args)
 
     def remove_submission(self, assignment, student):
         """Removes a submission from the database.
