@@ -35,6 +35,13 @@ flags = {
         },
         "Force overwrite of existing files."
     ),
+    'f': (
+        {
+            'ZipCollectApp': {'force': True},
+            'ExtractorPlugin': {'force': True}
+        },
+        "Force overwrite of existing files."
+    ),
     'strict': (
         {'ZipCollectApp': {'strict': True}},
         "Skip submitted notebooks with invalid names."

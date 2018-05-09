@@ -105,7 +105,33 @@ class TestNbGraderDb(BaseTestApp):
         # now force it to complete
         run_nbgrader(["db", "student", "remove", "foo", "--force", "--db", db])
 
-            # student should be gone
+        # student should be gone
+        with Gradebook(db) as gb:
+            with pytest.raises(MissingEntry):
+                gb.find_student("foo")
+
+    def test_student_remove_with_submissions_f(self, db, course_dir):
+        run_nbgrader(["db", "student", "add", "foo", "--db", db])
+        run_nbgrader(["db", "assignment", "add", "ps1", "--db", db])
+        self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
+        run_nbgrader(["assign", "ps1", "--db", db])
+        self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "submitted", "foo", "ps1", "p1.ipynb"))
+        run_nbgrader(["autograde", "ps1", "--db", db])
+
+        with Gradebook(db) as gb:
+            gb.find_student("foo")
+
+        # it should fail if we don't run with --force
+        run_nbgrader(["db", "student", "remove", "foo", "--db", db], retcode=1)
+
+        # make sure we can still find the student
+        with Gradebook(db) as gb:
+            gb.find_student("foo")
+
+        # now force it to complete
+        run_nbgrader(["db", "student", "remove", "foo", "-f", "--db", db])
+
+        # student should be gone
         with Gradebook(db) as gb:
             with pytest.raises(MissingEntry):
                 gb.find_student("foo")
@@ -243,6 +269,32 @@ class TestNbGraderDb(BaseTestApp):
 
         # now force it to complete
         run_nbgrader(["db", "assignment", "remove", "ps1", "--force", "--db", db])
+
+            # assignment should be gone
+        with Gradebook(db) as gb:
+            with pytest.raises(MissingEntry):
+                gb.find_assignment("ps1")
+
+    def test_assignment_remove_with_submissions_f(self, db, course_dir):
+        run_nbgrader(["db", "student", "add", "foo", "--db", db])
+        run_nbgrader(["db", "assignment", "add", "ps1", "--db", db])
+        self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
+        run_nbgrader(["assign", "ps1", "--db", db])
+        self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "submitted", "foo", "ps1", "p1.ipynb"))
+        run_nbgrader(["autograde", "ps1", "--db", db])
+
+        with Gradebook(db) as gb:
+            gb.find_assignment("ps1")
+
+        # it should fail if we don't run with --force
+        run_nbgrader(["db", "assignment", "remove", "ps1", "--db", db], retcode=1)
+
+        # make sure we can still find the assignment
+        with Gradebook(db) as gb:
+            gb.find_assignment("ps1")
+
+        # now force it to complete
+        run_nbgrader(["db", "assignment", "remove", "ps1", "-f", "--db", db])
 
             # assignment should be gone
         with Gradebook(db) as gb:

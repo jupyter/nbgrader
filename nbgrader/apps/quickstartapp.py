@@ -26,6 +26,20 @@ flags = {
             """
         )
     ),
+    'f': (
+        {'QuickStartApp': {'force': True}},
+        dedent(
+            """
+            Overwrite existing files if they already exist. WARNING: this is
+            equivalent to doing:
+
+                rm -r <course_id>
+                nbgrader quickstart <course_id>
+
+            So be careful when using this flag!
+            """
+        )
+    ),
 }
 
 class QuickStartApp(NbGrader):
