@@ -24,6 +24,7 @@ For an overview and demonstration of nbgrader's core functionality, check out th
     user_guide/autograding_resources
     user_guide/faq
     user_guide/advanced
+    user_guide/third_party
     api/index
 
 .. toctree::
