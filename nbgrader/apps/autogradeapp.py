@@ -34,6 +34,39 @@ flags.update({
         {'BaseConverter': {'force': True}},
         "Overwrite an assignment/submission if it already exists."
     ),
+    'only-sanitize': (
+        {
+            'Execute': {'enabled': False},
+            'LimitOutput': {'enabled': False},
+            'SaveAutoGrades': {'enabled': False},
+            'AssignLatePenalties': {'enabled': False},
+        },
+        "Only apply sanitizing preprocessors."
+    ),
+    'only-execute': (
+        {
+            'ClearOutput': {'enabled': False},
+            'DeduplicateIds': {'enabled': False},
+            'OverwriteKernelspec': {'enabled': False},
+            'OverwriteCells': {'enabled': False},
+            'CheckCellMetadata': {'enabled': False},
+            'LimitOutput': {'enabled': False},
+            'SaveAutoGrades': {'enabled': False},
+            'AssignLatePenalties': {'enabled': False},
+            'CheckCellMetadata': {'enabled': False}
+        },
+        "Only perform execution of notebooks."
+    ),
+    'only-record': (
+        {
+            'ClearOutput': {'enabled': False},
+            'DeduplicateIds': {'enabled': False},
+            'OverwriteKernelspec': {'enabled': False},
+            'OverwriteCells': {'enabled': False},
+            'Execute': {'enabled': False},
+        },
+        "Only record grades."
+    ),
 })
 
 
