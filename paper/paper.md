@@ -7,6 +7,9 @@ tags:
 - autograding
 authors:
 - name: Project Jupyter
+- name: David Bourgin
+  orcid: 0000-0003-1039-6195
+  affiliation: 1
 - name: Matthias Bussonnier
   orcid: 
   affiliation: 1
