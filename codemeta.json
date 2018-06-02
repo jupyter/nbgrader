@@ -42,6 +42,13 @@
       "affiliation": "University of Pretoria"
     },
     {
+      "@id": "",
+      "@type": "Person",
+      "email": "Fernando.Perez@berkeley.edu",
+      "name": "Fernando Pérez",
+      "affiliation": "University of California, Berkeley"
+    },
+    {
       "@id": "http://orcid.org/0000-0002-1023-7082",
       "@type": "Person",
       "email": "benjaminrk@gmail.com",
