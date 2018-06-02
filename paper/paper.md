@@ -51,6 +51,8 @@ date: 2 June 2018
 bibliography: paper.bib
 ---
 
+*Note: Authors on this paper are listed in alphabetical order.*
+
 # Summary
 
 nbgrader is a tool for creating and grading assignments in the Jupyter notebook [@kluyver2016jupyter]. nbgrader allows instructors to create a single, master copy of the assignment, from which the student version is generated—thus obviating the need to maintain two separate versions. nbgrader automatically grades submitted assignments by executing the notebooks and storing the results in a database. After auto-grading, instructors can provide partial credit or manually grade free-responses using the *formgrader* notebook extension. Finally, instructors can use nbgrader to leave personalized feedback for each student, including instructor comments as well as detailed error information.
