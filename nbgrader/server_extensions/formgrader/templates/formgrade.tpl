@@ -15,7 +15,7 @@
 {% endfor %}
 
 <!-- Loading mathjax macro -->
-{{ mathjax() }}
+{{ mathjax( resources.base_url + '/' + resources.mathjax_url + '?config=TeX-AMS-MML_HTMLorMML-full') }}
 
 <link rel="stylesheet" href="{{ resources.base_url }}/formgrader/static/css/formgrade.css" />
 
