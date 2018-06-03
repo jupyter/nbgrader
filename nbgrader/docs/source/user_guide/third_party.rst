@@ -25,7 +25,7 @@ Libraries, Tools, and Platforms
 `plotchecker <https://github.com/jhamrick/plotchecker>`_
     A set of utilities for checking and grading matplotlib plots
 
-`activity magic <https://athena.brynmawr.edu/jupyter/hub/dblank/public/Activity%20Magic.ipynb>`_
+`activity magic <https://jupyter.brynmawr.edu/services/public/dblank/Activity%20Magic.ipynb>`_
     The Activity Magic is a method of giving quizzes, polls, etc. to a group of users on a jupyterhub server.
 
 `nbscan <https://github.com/conery/nbscan>`_
