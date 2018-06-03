@@ -160,9 +160,9 @@ downloading them, and where to find the notebooks in order to submit them.
 
 nbgrader streamlines the repetitive tasks found in course management and
 grading, and its flexibility allows greater communication between instructor and
-student. Overall, does—and with further development will continue to—improve the
-learning experience for both instructors and students, enabling them to focus on
-content and building understanding.
+student. Overall, nbgrader does—and with further development will continue
+to—improve the learning experience for both instructors and students, enabling
+them to focus on content and building understanding.
 
 
 # References
