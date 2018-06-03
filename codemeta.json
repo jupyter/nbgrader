@@ -70,6 +70,13 @@
       "affiliation": "Simula Research Laboratory"
     },
     {
+      "@id": "http://orcid.org/0000-0001-9848-4872",
+      "@type": "Person",
+      "email": "suchow@berkeley.edu",
+      "name": "Jordan W. Suchow",
+      "affiliation": "University of California, Berkeley"
+    },
+    {
       "@id": "http://orcid.org/0000-0002-9817-8485",
       "@type": "Person",
       "email": "willingc@gmail.com",

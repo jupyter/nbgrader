@@ -34,6 +34,9 @@ authors:
 - name: Benjamin Ragan-Kelley
   orcid: 0000-0002-1023-7082
   affiliation: 6
+- name: Jordan W. Suchow
+  orcid: 0000-0001-9848-4872
+  affiliation: 1
 - name: Carol Willing
   orcid: 0000-0002-9817-8485
   affiliation: 3
