@@ -159,9 +159,7 @@ to find the notebooks in order to submit them.
 nbgrader streamlines the repetitive tasks found in course management and
 grading, and its flexibility allows greater communication between instructor and
 student. Overall, nbgrader improves the learning experience for both instructors
-and students, enabling them to focus on content and building understanding by
-minimizing or automating the tedious and repetitive tasks associated with
-grading.
+and students, enabling them to focus on content and building understanding.
 
 # References
 
