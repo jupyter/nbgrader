@@ -7,6 +7,9 @@ tags:
 - autograding
 authors:
 - name: Project Jupyter
+- name: Douglas Blank
+  orcid: 0000-0003-3538-8829
+  affiliation: 7
 - name: David Bourgin
   orcid: 0000-0003-1039-6195
   affiliation: 1
@@ -47,6 +50,8 @@ affiliations:
   index: 5
 - name: Simula Research Laboratory
   index: 6
+- name: Bryn Mawr College
+  index: 7
 date: 2 June 2018
 bibliography: paper.bib
 ---
