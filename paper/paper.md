@@ -84,7 +84,7 @@ available for instructors. Afterwards, instructors can collect the assignments
 with a single command and use the auto-grading functionality in the normal way.
 
 Since its conception in September 2014, nbgrader has been battle-tested in a
-number of classes all over the world, including at the UC Berkeley, Cal Poly,
+number of educational contexts, including courses at UC Berkeley, Cal Poly,
 University of Pretoria, University of Edinburgh, Northeastern University,
 Central Connecticut State University, KTH Royal Institute of Technology, CU
 Boulder, University of Amsterdam, George Washington University, Texas A&M, Bryn
@@ -93,27 +93,27 @@ nbgrader-based notebooks exist on GitHub. In addition to its core functionality,
 nbgrader has expanded to support a number of other features, including the
 ability to handle multiple courses on the same JupyterHub instance; the option
 to either include or hide autograder tests; customizable late penalties; and
-support for importing assignment files downloaded from a Learning
-Management System (LMS).
+support for importing assignment files downloaded from a Learning Management
+System (LMS).
 
 # Statement of Need
 
 The use of computational methods has become increasingly widespread in fields
-outside of computer science. As these disciplines begin to require computational
-tools, undergraduate curricula also begin to include topics in programming and
-computer science. However, because students are focused on the discipline that
-is the object of their study—and programming is likely a secondary
-interest—teaching students through traditional computer science offerings is not
-always effective [@Cortina2007; @Forte2005; @Guzdial2005]. While there are
-visual programming languages such as Raptor [@Carlisle2004] and Scratch
-[@Resnick2009] that are intended to be easy and enjoyable for non-computer
-science majors to learn, they lack specialized tools such as numerical or data
-visualization libraries, which are required for effective work in domain
-sciences. A hybrid approach is to teach students computational concepts in an
-interactive environment where it is possible to quickly write, test, and tweak
-small units of code. Many such environments exist, including Mathematica
-[@mathematica], Maple [@maple], MATLAB [@matlab], Sage [@sage] and IPython
-[@PerezGranger2007].
+outside of computer science [@wing2008computational]. As these disciplines begin
+to require computational tools, undergraduate curricula also begin to include
+topics in programming and computer science. However, because students are
+focused on the discipline that is the object of their study—and programming is
+likely a secondary interest—teaching students through traditional computer
+science offerings is not always effective [@Cortina2007; @Forte2005;
+@Guzdial2005]. While there are visual programming languages such as Raptor
+[@Carlisle2004] and Scratch [@Resnick2009] that are intended to be easy and
+enjoyable for those unfamiliar with programming to learn, they lack specialized
+tools such as numerical or data visualization libraries, which are required for
+effective work in domain sciences. A hybrid approach is to teach students
+computational concepts in an interactive environment where it is possible to
+quickly write, test, and tweak small units of code. Many such environments
+exist, including Mathematica [@mathematica], Maple [@maple], MATLAB [@matlab],
+Sage [@sage] and IPython [@PerezGranger2007].
 
 In recent years, the IPython project introduced the *Jupyter notebook*
 [@kluyver2016jupyter], an interface that is conducive to interactive and
@@ -158,9 +158,10 @@ to find the notebooks in order to submit them.
 
 nbgrader streamlines the repetitive tasks found in course management and
 grading, and its flexibility allows greater communication between instructor and
-student. Overall, nbgrader improves the learning experience because students and
-instructors can focus on content and building understanding by minimizing or
-automating the tedious and repetitive tasks associated with grading.
+student. Overall, nbgrader improves the learning experience for both instructors
+and students, enabling them to focus on content and building understanding by
+minimizing or automating the tedious and repetitive tasks associated with
+grading.
 
 # References
 
