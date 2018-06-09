@@ -91,18 +91,17 @@ available for instructors. After students submit their assignments, instructors
 can collect the assignments with a single command and use the auto-grading
 functionality in the normal way.
 
-Since its conception in September 2014, nbgrader has been used in a
-number of educational contexts, including courses at UC Berkeley, Cal Poly,
-University of Pretoria, University of Edinburgh, Northeastern University,
-Central Connecticut State University, KTH Royal Institute of Technology, CU
-Boulder, University of Amsterdam, George Washington University, Texas A&M, Bryn
-Mawr College, and University of Maryland; and, as of May 2018, over 10,000
-nbgrader-based notebooks exist on GitHub. In addition to its core functionality,
-nbgrader has expanded to support a number of other features, including the
-ability to handle multiple courses on the same JupyterHub instance; the option
-to either include or hide autograder tests; customizable late penalties; and
-support for importing assignment files downloaded from a Learning Management
-System (LMS).
+Since its conception in September 2014, nbgrader has been used in a number of
+educational contexts, including courses at UC Berkeley, Cal Poly, University of
+Pretoria, University of Edinburgh, Northeastern University, Central Connecticut
+State University, KTH Royal Institute of Technology, CU Boulder, University of
+Amsterdam, George Washington University, Texas A&M, Bryn Mawr College, and
+University of Maryland; and, as of May 2018, over 10,000 nbgrader-based
+notebooks exist on GitHub. In addition to its core functionality, nbgrader has
+expanded to support a number of other features, including the ability to handle
+multiple courses on the same JupyterHub instance; the option to either include
+or hide automatically graded tests; customizable late penalties; and support for
+importing assignment files downloaded from a Learning Management System (LMS).
 
 # Statement of Need
 
@@ -120,19 +119,18 @@ possible to quickly write, test, and tweak small units of code. Many such
 environments exist, including Mathematica [@mathematica], Maple [@maple], MATLAB
 [@matlab], Sage [@sage] and IPython [@PerezGranger2007].
 
-In recent years, the IPython project introduced the *Jupyter notebook*
+In recent years, the IPython project introduced the *Jupyter Notebook*
 [@kluyver2016jupyter], an interface that is conducive to interactive and
-literate computing, where programmers can interleave prose with code, figures,
-and other media. The Jupyter notebook is ideal for educators because
-it allows them to create assignments which include instructions along with code
-or Markdown cells, in which students can provide solutions to exercises.
-Students can, for example, write code both to compute and visualize a particular
-result. Because the notebook is interactive, students can iterate on a coding
-problem without needing to switch back and forth between a command line and a
-text editor, and they can rapidly see results alongside the code which produced
-them.
+literate computing, where programmers can interleave prose with code, equations,
+figures, and other media. The Jupyter Notebook is ideal for educators because it
+allows them to create assignments which include instructions along with code or
+Markdown cells, in which students can provide solutions to exercises. Students
+can, for example, write code both to compute and visualize a particular result.
+Because the notebook is interactive, students can iterate on a coding problem
+without needing to switch back and forth between a command line and a text
+editor, and they can rapidly see results alongside the code which produced them.
 
-Instructors in many fields have begun using the Jupyter notebook as a teaching
+Instructors in many fields have begun using the Jupyter Notebook as a teaching
 platform. The notebook has appeared in over 100 classes [@Hamrick2016;
 @Castano_Jupyter_Map; @Castano_Jupyter_Map_Dataset] on subjects including
 geology, mathematics, mechanical engineering, data science, chemical
@@ -147,21 +145,22 @@ enough that notebooks could be graded by hand (sometimes even by printing them
 out on paper and grading them like a traditional assignment). This is because
 there are several challenges to using the notebook for graded assignments at
 scale. First, for large classes, it is not feasible for an instructor to
-manually grade the code that students write: there must be a way to autograde
-the assignments. However, a Jupyter notebook is not a typical script that can be
-run and may contain multiple parts of a problem within the same notebook; thus,
-autograding a notebook is less straightforward than it is for a traditional
-script. Second, for many courses, programming is a means to an end:
-understanding concepts in a specific domain. Specifically, instructors may want
-students to provide both code and written free-responses interpreting the
-results of that code. Instructors thus need to be able to rely on autograding
-for the coding parts of an assignment, but also be able to manually grade the
-written responses in the surrounding context of the student's code. Third, the
-process of distributing assignments to students and later collecting them can be
-tedious, even more so with Jupyter notebooks because there is a separate
-interface for accessing them beyond the standard system file browser. This often
-leads to confusion on the part of students about how to open notebooks after
-downloading them, and where to find the notebooks in order to submit them.
+manually grade the code that students write: there must be a way to
+automatically grade the assignments. However, a Jupyter Notebook is not a
+typical script that can be run and may contain multiple parts of a problem
+within the same notebook; thus, automatically grading a notebook is less
+straightforward than it is for a traditional script. Second, for many courses,
+programming is a means to an end: understanding concepts in a specific domain.
+Specifically, instructors may want students to provide both code and written
+free-responses interpreting the results of that code. Instructors thus need to
+be able to rely on automatic grading for the coding parts of an assignment, but
+also be able to manually grade the written responses in the surrounding context
+of the student's code. Third, the process of distributing assignments to
+students and later collecting them can be tedious, even more so with Jupyter
+Notebooks because there is a separate interface for accessing them beyond the
+standard system file browser. This often leads to confusion on the part of
+students about how to open notebooks after downloading them, and where to find
+the notebooks in order to submit them.
 
 nbgrader streamlines the repetitive tasks found in course management and
 grading, and its flexibility allows greater communication between instructor and
