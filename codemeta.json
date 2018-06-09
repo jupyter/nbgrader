@@ -21,6 +21,13 @@
       "affiliation": "University of California, Berkeley"
     },
     {
+      "@id": "https://orcid.org/0000-0002-3945-7337",
+      "@type": "Person",
+      "email": "brownaa@lafayette.edu",
+      "name": "Alexander Brown",
+      "affiliation": "Lafayette College"
+    },
+    {
       "@id": "",
       "@type": "Person",
       "email": "bussonniermatthias@gmail.com",

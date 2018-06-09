@@ -13,6 +13,9 @@ authors:
 - name: David Bourgin
   orcid: 0000-0003-1039-6195
   affiliation: 1
+- name: Alexander Brown
+  orcid: 0000-0002-3945-7337
+  affiliation: 8
 - name: Matthias Bussonnier
   orcid: 
   affiliation: 1
@@ -55,6 +58,8 @@ affiliations:
   index: 6
 - name: Bryn Mawr College
   index: 7
+- name: Lafayette College
+  index: 8
 date: 2 June 2018
 bibliography: paper.bib
 ---
