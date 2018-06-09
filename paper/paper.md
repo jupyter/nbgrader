@@ -23,7 +23,7 @@ authors:
   orcid: 0000-0003-4805-2216
   affiliation: 2
 - name: Brian Granger
-  orcid: 
+  orcid: 0000-0002-5223-6168
   affiliation: 3
 - name: Jessica Hamrick
   orcid: 0000-0002-3860-0429
