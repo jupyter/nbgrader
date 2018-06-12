@@ -88,8 +88,12 @@ window.MathJax = {
 
 {% macro nbgrader_heading(cell) -%}
 <div class="panel-heading">
-{%- if cell.metadata.nbgrader.solution -%}
+{%- if cell.metadata.nbgrader.solution or cell.metadata.nbgrader.task -%}
+  {%- if cell.metadata.nbgrader.task -%}
+  <span class="nbgrader-label">Student's task</span>
+  {%- else -%}
   <span class="nbgrader-label">Student's answer</span>
+  {%- endif -%}
   <span class="glyphicon glyphicon-ok comment-saved save-icon"></span>
   {%- if cell.metadata.nbgrader.grade -%}
   {{ score(cell) }}

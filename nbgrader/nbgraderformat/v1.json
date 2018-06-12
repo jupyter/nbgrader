@@ -14,6 +14,11 @@
             "type": "boolean",
             "default": false
         },
+        "task": {
+            "description": "whether this cell is a task",
+            "type": "boolean",
+            "default": false
+        },
         "locked": {
             "description": "whether the cell should be editable",
             "type": "boolean",

@@ -88,6 +88,7 @@ FormGrader.prototype.loadGrades = function () {
             "submission_id": this.submission_id
         },
         success: function () {
+            console.log(that.grades);
             that.grades.each(function (model) {
                 var grade_ui = new GradeUI({
                     "model": model,

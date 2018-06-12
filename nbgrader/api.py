@@ -131,6 +131,10 @@ class Notebook(Base):
     #: by :class:`~nbgrader.api.SolutionCell` objects
     solution_cells = relationship("SolutionCell", backref="notebook")
 
+    #: A collection of task cells contained within this notebook, represented
+    #: by :class:`~nbgrader.api.TaskCell` objects
+    task_cells = relationship("TaskCell", backref="notebook")
+
     #: A collection of source cells contained within this notebook, represented
     #: by :class:`~nbgrader.api.SourceCell` objects
     source_cells = relationship("SourceCell", backref="notebook")
@@ -210,7 +214,7 @@ class GradeCell(Base):
     #: :class:`~nbgrader.api.Assignment` object
     assignment = association_proxy("notebook", "assignment")
 
-    #: A collection of grades assigned to submitted versions of this grade cell,
+    #: A collection of  assigned to submitted versions of this grade cell,
     #: represented by :class:`~nbgrader.api.Grade` objects
     grades = relationship("Grade", backref="cell")
 
@@ -278,6 +282,60 @@ class SolutionCell(Base):
         return "{}/{}".format(self.notebook, self.name)
 
 
+class TaskCell(Base):
+    __tablename__ = "task_cell"
+    __table_args__ = (UniqueConstraint('name', 'notebook_id'),)
+
+    #: Unique id of the solution cell (automatically generated)
+    id = Column(String(32), primary_key=True, default=new_uuid)
+
+    #: Maximum score that can be assigned to this grade cell
+    max_score = Column(Float(), nullable=False)
+
+    #: The cell type, either "code" or "markdown"
+    cell_type = Column(Enum("code", "markdown", name="source_cell_type"), nullable=False)
+
+
+    #: Unique human-readable name of the solution cell. This need only be unique
+    #: within the notebook, not across notebooks.
+    name = Column(String(128), nullable=False)
+
+    #: The :class:`~nbgrader.api.Notebook` that this solution cell is contained in
+    notebook = None
+
+    #: Unique id of the :attr:`~nbgrader.api.TaskCell.notebook`
+    notebook_id = Column(String(32), ForeignKey('notebook.id'))
+
+    #: The assignment that this cell is contained within, represented by a
+    #: :class:`~nbgrader.api.Assignment` object
+    assignment = association_proxy("notebook", "assignment")
+
+    #: A collection of comments assigned to submitted versions of this grade cell,
+    #: represented by :class:`~nbgrader.api.Comment` objects
+    comments = relationship("TaskComment", backref="cell")
+
+    grades = relationship("TaskGrade", backref="cell")
+
+    def to_dict(self):
+        """Convert the task cell object to a JSON-friendly dictionary
+        representation. Note that this includes keys for ``notebook`` and
+        ``assignment`` which correspond to the names of the notebook and
+        assignment, not the objects themselves.
+
+        """
+        return {
+            "id": self.id,
+            "name": self.name,
+            "max_score": self.max_score,
+            "notebook": self.notebook.name,
+            "assignment": self.assignment.name
+        }
+
+    def __repr__(self):
+        return "{}/{}".format(self.notebook, self.name)
+
+
+
 class SourceCell(Base):
     __tablename__ = "source_cell"
     __table_args__ = (UniqueConstraint('name', 'notebook_id'),)
@@ -332,7 +390,7 @@ class SourceCell(Base):
         }
 
     def __repr__(self):
-        return "SolutionCell<{}/{}/{}>".format(
+        return "SourceCell<{}/{}/{}>".format(
             self.assignment.name, self.notebook.name, self.name)
 
 
@@ -540,13 +598,21 @@ class SubmittedNotebook(Base):
     #: Unique id of :attr:`~nbgrader.api.SubmittedNotebook.notebook`
     notebook_id = Column(String(32), ForeignKey('notebook.id'))
 
-    #: Collection of grades associated with this submitted notebook, represented
+    #: Collection of associated with this submitted notebook, represented
     #: by :class:`~nbgrader.api.Grade` objects
     grades = relationship("Grade", backref="notebook")
+
+    #: Collection of grades associated with this submitted notebook, represented
+    #: by :class:`~nbgrader.api.Grade` objects
+    taskgrades = relationship("TaskGrade", backref="notebook")
 
     #: Collection of comments associated with this submitted notebook, represented
     #: by :class:`~nbgrader.api.Comment` objects
     comments = relationship("Comment", backref="notebook")
+
+    #: Collection of comments associated with this submitted notebook, represented
+    #: by :class:`~nbgrader.api.Comment` objects
+    taskcomments = relationship("TaskComment", backref="notebook")
 
     #: The student who submitted this notebook, represented by a
     #: :class:`~nbgrader.api.Student` object
@@ -727,6 +793,111 @@ class Grade(Base):
             self.assignment.name, self.notebook.name, self.name, self.student.id)
 
 
+
+class TaskGrade(Base):
+    """Database representation of a grade assigned to the submitted version of
+    a grade cell.
+
+    """
+
+    __tablename__ = "taskgrade"
+    __table_args__ = (UniqueConstraint('cell_id', 'notebook_id'),)
+
+    #: Unique id of the grade (automatically generated)
+    id = Column(String(32), primary_key=True, default=new_uuid)
+
+    #: Unique name of the grade cell, inherited from :class:`~nbgrader.api.GradeCell`
+    name = association_proxy('cell', 'name')
+
+    #: The submitted assignment that this grade is contained in, represented by
+    #: a :class:`~nbgrader.api.SubmittedAssignment` object
+    assignment = association_proxy('notebook', 'assignment')
+
+    #: The submitted notebook that this grade is assigned to, represented by a
+    #: :class:`~nbgrader.api.SubmittedNotebook` object
+    notebook = None
+
+    #: Unique id of :attr:`~nbgrader.api.Grade.notebook`
+    notebook_id = Column(String(32), ForeignKey('submitted_notebook.id'))
+
+    #: The master version of the cell this grade is assigned to, represented by
+    #: a :class:`~nbgrader.api.GradeCell` object.
+    cell = None
+
+    #: Unique id of :attr:`~nbgrader.api.Grade.cell`
+    cell_id = Column(String(32), ForeignKey('task_cell.id'))
+
+    #: The type of cell this grade corresponds to, inherited from
+    #: :class:`~nbgrader.api.GradeCell`
+    cell_type = None
+
+    #: The student who this grade is assigned to, represented by a
+    #: :class:`~nbgrader.api.Student` object
+    student = association_proxy('notebook', 'student')
+
+    #: Score assigned by the autograder
+    auto_score = Column(Float())
+
+    #: Score assigned by a human grader
+    manual_score = Column(Float())
+
+    #: Extra credit assigned by a human grader
+    extra_credit = Column(Float())
+
+    #: Whether a score needs to be assigned manually. This is True by default.
+    needs_manual_grade = Column(Boolean, default=True, nullable=False)
+
+    #: The overall score, computed automatically from the
+    #: :attr:`~nbgrader.api.Grade.auto_score` and :attr:`~nbgrader.api.Grade.manual_score`
+    #: values. If neither are set, the score is zero. If both are set, then the
+    #: manual score takes precedence. If only one is set, then that value is used
+    #: for the score.
+    score = column_property(case(
+        [
+            (manual_score != None, manual_score + case([(extra_credit != None, extra_credit)], else_=literal_column("0.0"))),
+            (auto_score != None, auto_score + case([(extra_credit != None, extra_credit)], else_=literal_column("0.0")))
+        ],
+        else_=literal_column("0.0")
+    ))
+
+    #: The maximum possible score that can be assigned, inherited from
+    #: :class:`~nbgrader.api.GradeCell`
+    max_score = None
+
+    #: Whether the autograded score is a result of failed autograder tests. This
+    #: is True if the autograder score is zero and the cell type is "code", and
+    #: otherwise False.
+    failed_tests = None
+
+    def to_dict(self):
+        """Convert the grade object to a JSON-friendly dictionary representation.
+        Note that this includes keys for ``notebook`` and ``assignment`` which
+        correspond to the name of the notebook and assignment, not the actual
+        objects. It also includes a key for ``student`` which corresponds to the
+        unique id of the student, not the actual student object.
+
+        """
+        return {
+            "id": self.id,
+            "name": self.name,
+            "notebook": self.notebook.name,
+            "assignment": self.assignment.name,
+            "student": self.student.id,
+            "auto_score": self.auto_score,
+            "manual_score": self.manual_score,
+            "extra_credit": self.extra_credit,
+            "max_score": self.max_score,
+            "needs_manual_grade": self.needs_manual_grade,
+            "failed_tests": self.failed_tests,
+            "cell_type": self.cell_type
+        }
+
+    def __repr__(self):
+        return "Grade<{}/{}/{} for {}>".format(
+            self.assignment.name, self.notebook.name, self.name, self.student.id)
+
+
+
 class Comment(Base):
     """Database representation of a comment on a cell in a submitted notebook."""
 
@@ -804,6 +975,84 @@ class Comment(Base):
             self.assignment.name, self.notebook.name, self.name, self.student.id)
 
 
+class TaskComment(Base):
+    """Database representation of a comment on a cell in a submitted notebook."""
+
+    __tablename__ = "taskcomment"
+    __table_args__ = (UniqueConstraint('cell_id', 'notebook_id'),)
+
+    #: Unique id of the comment (automatically generated)
+    id = Column(String(32), primary_key=True, default=new_uuid)
+
+    #: Unique name of the solution cell, inherited from :class:`~nbgrader.api.SolutionCell`
+    name = association_proxy('cell', 'name')
+
+    #: The submitted assignment that this comment is contained in, represented by
+    #: a :class:`~nbgrader.api.SubmittedAssignment` object
+    assignment = association_proxy('notebook', 'assignment')
+
+    #: The submitted notebook that this comment is assigned to, represented by a
+    #: :class:`~nbgrader.api.SubmittedNotebook` object
+    notebook = None
+
+    #: Unique id of :attr:`~nbgrader.api.Comment.notebook`
+    notebook_id = Column(String(32), ForeignKey('submitted_notebook.id'))
+
+    #: The master version of the cell this comment is assigned to, represented by
+    #: a :class:`~nbgrader.api.SolutionCell` object.
+    cell = None
+
+    #: Unique id of :attr:`~nbgrader.api.Comment.cell`
+    cell_id = Column(String(32), ForeignKey('task_cell.id'))
+
+    #: The student who this comment is assigned to, represented by a
+    #: :class:`~nbgrader.api.Student` object
+    student = association_proxy('notebook', 'student')
+
+    #: A comment which is automatically assigned by the autograder
+    auto_comment = Column(Text())
+
+    #: A comment which is assigned manually
+    manual_comment = Column(Text())
+
+    #: The overall comment, computed automatically from the
+    #: :attr:`~nbgrader.api.Comment.auto_comment` and
+    #: :attr:`~nbgrader.api.Comment.manual_comment` values. If neither are set,
+    #: the comment is None. If both are set, then the manual comment
+    #: takes precedence. If only one is set, then that value is used for the
+    #: comment.
+    comment = column_property(case(
+        [
+            (manual_comment != None, manual_comment),
+            (auto_comment != None, auto_comment)
+        ],
+        else_=None
+    ))
+
+    def to_dict(self):
+        """Convert the comment object to a JSON-friendly dictionary representation.
+        Note that this includes keys for ``notebook`` and ``assignment`` which
+        correspond to the name of the notebook and assignment, not the actual
+        objects. It also includes a key for ``student`` which corresponds to the
+        unique id of the student, not the actual student object.
+
+        """
+        return {
+            "id": self.id,
+            "name": self.name,
+            "notebook": self.notebook.name,
+            "assignment": self.assignment.name,
+            "student": self.student.id,
+            "auto_comment": self.auto_comment,
+            "manual_comment": self.manual_comment
+        }
+
+    def __repr__(self):
+        return "Comment<{}/{}/{} for {}>".format(
+            self.assignment.name, self.notebook.name, self.name, self.student.id)
+
+
+
 ## Needs manual grade
 
 SubmittedNotebook.needs_manual_grade = column_property(
@@ -856,6 +1105,12 @@ Grade.max_score = column_property(
     select([GradeCell.max_score])\
         .where(Grade.cell_id == GradeCell.id)\
         .correlate_except(GradeCell), deferred=True)
+
+TaskGrade.max_score = column_property(
+    select([TaskGrade.max_score])\
+        .where(TaskGrade.cell_id == GradeCell.id)\
+        .correlate_except(TaskCell), deferred=True)
+
 
 Notebook.max_score = column_property(
     select([func.coalesce(func.sum(GradeCell.max_score), 0.0)])\
@@ -1616,6 +1871,103 @@ class Gradebook(object):
 
         return solution_cell
 
+#### Task cells
+
+    def add_task_cell(self, name, notebook, assignment, **kwargs):
+        """Add a new task cell to an existing notebook of an existing
+        assignment.
+
+        Parameters
+        ----------
+        name : string
+            the name of the new solution cell
+        notebook : string
+            the name of an existing notebook
+        assignment : string
+            the name of an existing assignment
+        `**kwargs`
+            additional keyword arguments for :class:`~nbgrader.api.TaskCell`
+
+        Returns
+        -------
+        solution_cell : :class:`~nbgrader.api.TaskCell`
+
+        """
+
+        notebook = self.find_notebook(notebook, assignment)
+        task_cell = TaskCell(name=name, notebook=notebook, **kwargs)
+        self.db.add(task_cell)
+        try:
+            self.db.commit()
+        except (IntegrityError, FlushError) as e:
+            self.db.rollback()
+            raise InvalidEntry(*e.args)
+        return task_cell
+
+    def find_task_cell(self, name, notebook, assignment):
+        """Find a task cell in a particular notebook of an assignment.
+
+        Parameters
+        ----------
+        name : string
+            the name of the solution cell
+        notebook : string
+            the name of the notebook
+        assignment : string
+            the name of the assignment
+
+        Returns
+        -------
+        solution_cell : :class:`~nbgrader.api.TaskCell`
+
+        """
+
+        try:
+            task_cell = self.db.query(TaskCell)\
+                .join(Notebook, Notebook.id == TaskCell.notebook_id)\
+                .join(Assignment, Assignment.id == Notebook.assignment_id)\
+                .filter(TaskCell.name == name, Notebook.name == notebook, Assignment.name == assignment)\
+                .one()
+        except NoResultFound:
+            raise MissingEntry("No such task cell: {}/{}/{}".format(assignment, notebook, name))
+
+        return task_cell
+
+    def update_or_create_task_cell(self, name, notebook, assignment, **kwargs):
+        """Update an existing task cell in a notebook of an assignment, or
+        create the solution cell if it does not exist.
+
+        Parameters
+        ----------
+        name : string
+            the name of the solution cell
+        notebook : string
+            the name of the notebook
+        assignment : string
+            the name of the assignment
+        `**kwargs`
+            additional keyword arguments for :class:`~nbgrader.api.TaskCell`
+
+        Returns
+        -------
+        task_cell : :class:`~nbgrader.api.TaskCell`
+
+        """
+
+        try:
+            task_cell = self.find_task_cell(name, notebook, assignment)
+        except MissingEntry:
+            task_cell = self.add_task_cell(name, notebook, assignment, **kwargs)
+        else:
+            for attr in kwargs:
+                setattr(task_cell, attr, kwargs[attr])
+            try:
+                self.db.commit()
+            except (IntegrityError, FlushError) as e:
+                raise InvalidEntry(*e.args)
+
+        return task_cell
+
     #### Source cells
 
     def add_source_cell(self, name, notebook, assignment, **kwargs):
@@ -1749,12 +2101,17 @@ class Gradebook(object):
 
             for notebook in submission.assignment.notebooks:
                 nb = SubmittedNotebook(notebook=notebook, assignment=submission)
-
+                print(nb.to_dict())
                 for grade_cell in notebook.grade_cells:
                     Grade(cell=grade_cell, notebook=nb)
 
                 for solution_cell in notebook.solution_cells:
                     Comment(cell=solution_cell, notebook=nb)
+
+                for task_cell in notebook.task_cells:
+                    print("in loop!")
+                    TaskComment(cell=task_cell, notebook=nb)
+                    TaskGrade(cell=task_cell, notebook=nb)
 
             self.db.add(submission)
             self.db.commit()
@@ -2108,6 +2465,69 @@ class Gradebook(object):
 
         return grade
 
+    def find_taskgrade(self, task_cell, notebook, assignment, student):
+        """Find a particular grade in a notebook in a student's submission
+        for a given assignment.
+
+        Parameters
+        ----------
+        grade_cell : string
+            the name of a grade cell
+        notebook : string
+            the name of a notebook
+        assignment : string
+            the name of an assignment
+        student : string
+            the unique id of a student
+
+        Returns
+        -------
+        grade : :class:`~nbgrader.api.Grade`
+
+        """
+        try:
+            taskgrade = self.db.query(TaskGrade)\
+                .join(TaskCell, TaskCell.id == TaskGrade.cell_id)\
+                .join(SubmittedNotebook, SubmittedNotebook.id == TaskGrade.notebook_id)\
+                .join(Notebook, Notebook.id == SubmittedNotebook.notebook_id)\
+                .join(SubmittedAssignment, SubmittedAssignment.id == SubmittedNotebook.assignment_id)\
+                .join(Assignment, Assignment.id == SubmittedAssignment.assignment_id)\
+                .join(Student, Student.id == SubmittedAssignment.student_id)\
+                .filter(
+                    TaskCell.name == task_cell,
+                    Notebook.name == notebook,
+                    Assignment.name == assignment,
+                    Student.id == student)\
+                .one()
+        except NoResultFound:
+            raise MissingEntry("No such taskgrade: {}/{}/{} for {}".format(
+                assignment, notebook, task_cell, student))
+
+        return taskgrade
+
+    def find_taskgrade_by_id(self, grade_id):
+        """Find a grade by its unique id.
+
+        Parameters
+        ----------
+        grade_id : string
+            the unique id of the grade
+
+        Returns
+        -------
+        grade : :class:`~nbgrader.api.Grade`
+
+        """
+
+        try:
+            grade = self.db.query(Grade).filter(Grade.id == grade_id).one()
+        except NoResultFound:
+            raise MissingEntry("No such grade: {}".format(grade_id))
+
+        return grade
+
+
+
     def find_comment(self, solution_cell, notebook, assignment, student):
         """Find a particular comment in a notebook in a student's submission
         for a given assignment.
@@ -2149,6 +2569,49 @@ class Gradebook(object):
 
         return comment
 
+    def find_taskcomment(self, task_cell, notebook, assignment, student):
+        """Find a particular comment in a notebook in a student's submission
+        for a given assignment.
+
+        Parameters
+        ----------
+        solution_cell : string
+            the name of a solution cell
+        notebook : string
+            the name of a notebook
+        assignment : string
+            the name of an assignment
+        student : string
+            the unique id of a student
+
+        Returns
+        -------
+        comment : :class:`~nbgrader.api.TaskComment`
+
+        """
+
+        try:
+            comment = self.db.query(TaskComment)\
+                .join(TaskCell, TaskCell.id == TaskComment.cell_id)\
+                .join(SubmittedNotebook, SubmittedNotebook.id == TaskComment.notebook_id)\
+                .join(Notebook, Notebook.id == SubmittedNotebook.notebook_id)\
+                .join(SubmittedAssignment, SubmittedAssignment.id == SubmittedNotebook.assignment_id)\
+                .join(Assignment, Assignment.id == SubmittedAssignment.assignment_id)\
+                .join(Student, Student.id == SubmittedAssignment.student_id)\
+                .filter(
+                    TaskCell.name == task_cell,
+                    Notebook.name == notebook,
+                    Assignment.name == assignment,
+                    Student.id == student)\
+                .one()
+        except NoResultFound:
+            raise MissingEntry("No such taskcomment: {}/{}/{} for {}".format(
+                assignment, notebook, task_cell, student))
+
+        return comment
+
+
+
     def find_comment_by_id(self, comment_id):
         """Find a comment by its unique id.
 
@@ -2167,6 +2630,27 @@ class Gradebook(object):
             comment = self.db.query(Comment).filter(Comment.id == comment_id).one()
         except NoResultFound:
             raise MissingEntry("No such comment: {}".format(comment_id))
+
+        return comment
+
+    def find_taskcomment_by_id(self, taskcomment_id):
+        """Find a comment by its unique id.
+
+        Parameters
+        ----------
+        comment_id : string
+            the unique id of the comment
+
+        Returns
+        -------
+        comment : :class:`~nbgrader.api.Comment`
+
+        """
+
+        try:
+            comment = self.db.query(TaskComment).filter(TaskComment.id == taskcomment_id).one()
+        except NoResultFound:
+            raise MissingEntry("No such comment: {}".format(taskcomment_id))
 
         return comment
 

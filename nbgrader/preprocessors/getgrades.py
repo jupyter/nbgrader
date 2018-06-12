@@ -73,5 +73,10 @@ class GetGrades(NbGraderPreprocessor):
         # if it's a grade cell, the add a grade
         if utils.is_grade(cell):
             self._get_score(cell, resources)
+        # if it's a task cell, then add a comment and a score
+        if utils.is_task(cell):
+            self._get_comment(cell, resources)
+            self._get_score(cell, resources)
+            print ("added comment for task")
 
         return cell, resources

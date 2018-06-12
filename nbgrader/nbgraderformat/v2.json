@@ -24,6 +24,11 @@
             "type": "boolean",
             "default": false
         },
+        "task": {
+            "description": "whether this cell contains a task",
+            "type": "boolean",
+            "default": false
+        },
         "grade_id": {
             "description": "the nbgrader id of the cell, only present if one or more of grade/locked/solution is true",
             "type": "string",

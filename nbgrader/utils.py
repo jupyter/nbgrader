@@ -27,6 +27,13 @@ else:
     pwd = None
 
 
+def is_task(cell):
+    """Returns True if the cell is a task cell."""
+    if 'nbgrader' not in cell.metadata:
+        return False
+    return cell.metadata['nbgrader'].get('task', False)
+
+
 def is_grade(cell):
     """Returns True if the cell is a grade cell."""
     if 'nbgrader' not in cell.metadata:
