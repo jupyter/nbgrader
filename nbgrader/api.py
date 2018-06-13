@@ -1103,11 +1103,13 @@ Student.score = column_property(
 
 Grade.max_score = column_property(
     select([GradeCell.max_score])\
+        .select_from(GradeCell)\
         .where(Grade.cell_id == GradeCell.id)\
         .correlate_except(GradeCell), deferred=True)
 
 TaskGrade.max_score = column_property(
     select([TaskGrade.max_score])\
+        .select_from(TaskCell)\
         .where(TaskGrade.cell_id == GradeCell.id)\
         .correlate_except(TaskCell), deferred=True)
 
@@ -3072,7 +3074,7 @@ class Gradebook(object):
          .filter(GradeCell.cell_type == "code")\
          .group_by(SubmittedNotebook.id)\
          .subquery()
-        print(code_scores)
+        #print(code_scores.all())
 
         # subquery for the written scores
         written_scores = self.db.query(
