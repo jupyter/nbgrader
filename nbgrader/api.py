@@ -14,7 +14,7 @@ from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.sql import and_
 from sqlalchemy import select, func, exists, case, literal_column
-
+from sqlalchemy.ext.declarative import declared_attr
 from uuid import uuid4
 from .dbutil import _temp_alembic_ini
 
@@ -184,12 +184,11 @@ class Notebook(Base):
     def __repr__(self):
         return "Notebook<{}/{}>".format(self.assignment.name, self.name)
 
-
-class GradeCell(Base):
+class BaseCell(Base):
     """Database representation of the master/source version of a grade cell."""
 
-    __tablename__ = "grade_cell"
-    __table_args__ = (UniqueConstraint('name', 'notebook_id'),)
+    __tablename__ = "base_cell"
+    __table_args__ = (UniqueConstraint('name', 'notebook_id','type'),)
 
     #: Unique id of the grade cell (automatically generated)
     id = Column(String(32), primary_key=True, default=new_uuid)
@@ -197,12 +196,6 @@ class GradeCell(Base):
     #: Unique human-readable name of the grade cell. This need only be unique
     #: within the notebook, not across notebooks.
     name = Column(String(128), nullable=False)
-
-    #: Maximum score that can be assigned to this grade cell
-    max_score = Column(Float(), nullable=False)
-
-    #: The cell type, either "code" or "markdown"
-    cell_type = Column(Enum("code", "markdown", name="grade_cell_type"), nullable=False)
 
     #: The :class:`~nbgrader.api.Notebook` that this grade cell is contained in
     notebook = None
@@ -214,9 +207,44 @@ class GradeCell(Base):
     #: :class:`~nbgrader.api.Assignment` object
     assignment = association_proxy("notebook", "assignment")
 
+    def __repr__(self):
+        return "GradeCell<{}/{}/{}>".format(
+            self.assignment.name, self.notebook.name, self.name)
+
+    type = Column(String(50))
+
+    __mapper_args__ = {
+        'polymorphic_identity':'BaseCell',
+        'polymorphic_on':type
+    }
+
+
+class GradedMixin():
+
+    #: Maximum score that can be assigned to this grade cell
+    @declared_attr
+    def max_score(cls):
+        return Column(Float(), nullable=False)
+
+    #: The cell type, either "code" or "markdown"
+    @declared_attr
+    def cell_type(cls):
+        return Column(Enum("code", "markdown", name="grade_cell_type"), nullable=False)
+
     #: A collection of  assigned to submitted versions of this grade cell,
     #: represented by :class:`~nbgrader.api.Grade` objects
-    grades = relationship("Grade", backref="cell")
+    @declared_attr
+    def grades(cls):
+        return relationship("Grade", backref="graded_"+cls.__name__)
+
+
+class GradeCell(BaseCell,GradedMixin):
+    """Database representation of the master/source version of a grade cell."""
+
+    __tablename__ = "grade_cell"
+
+    #: Unique id of the solution cell (automatically generated)
+    id = Column(String(32), ForeignKey('base_cell.id'), primary_key=True)
 
     def to_dict(self):
         """Convert the grade cell object to a JSON-friendly dictionary
@@ -238,31 +266,24 @@ class GradeCell(Base):
         return "GradeCell<{}/{}/{}>".format(
             self.assignment.name, self.notebook.name, self.name)
 
+    __mapper_args__ = {
+        'polymorphic_identity':'GradeCell',
+    }
 
-class SolutionCell(Base):
-    __tablename__ = "solution_cell"
-    __table_args__ = (UniqueConstraint('name', 'notebook_id'),)
 
-    #: Unique id of the solution cell (automatically generated)
-    id = Column(String(32), primary_key=True, default=new_uuid)
-
-    #: Unique human-readable name of the solution cell. This need only be unique
-    #: within the notebook, not across notebooks.
-    name = Column(String(128), nullable=False)
-
-    #: The :class:`~nbgrader.api.Notebook` that this solution cell is contained in
-    notebook = None
-
-    #: Unique id of the :attr:`~nbgrader.api.SolutionCell.notebook`
-    notebook_id = Column(String(32), ForeignKey('notebook.id'))
-
-    #: The assignment that this cell is contained within, represented by a
-    #: :class:`~nbgrader.api.Assignment` object
-    assignment = association_proxy("notebook", "assignment")
-
+class CommentedMixin():
     #: A collection of comments assigned to submitted versions of this grade cell,
     #: represented by :class:`~nbgrader.api.Comment` objects
-    comments = relationship("Comment", backref="cell")
+    @declared_attr
+    def comments(cls):
+        return relationship("Comment", backref="commented_"+cls.__name__)
+
+
+class SolutionCell(BaseCell,CommentedMixin):
+    __tablename__ = "solution_cell"
+    #: Unique id of the solution cell (automatically generated)
+    id = Column(String(32), ForeignKey('base_cell.id'), primary_key=True)
+
 
     def to_dict(self):
         """Convert the solution cell object to a JSON-friendly dictionary
@@ -281,40 +302,16 @@ class SolutionCell(Base):
     def __repr__(self):
         return "{}/{}".format(self.notebook, self.name)
 
+    __mapper_args__ = {
+        'polymorphic_identity':'SolutionCell',
+    }
 
-class TaskCell(Base):
+
+class TaskCell(BaseCell,GradedMixin,CommentedMixin):
     __tablename__ = "task_cell"
-    __table_args__ = (UniqueConstraint('name', 'notebook_id'),)
 
     #: Unique id of the solution cell (automatically generated)
-    id = Column(String(32), primary_key=True, default=new_uuid)
-
-    #: Maximum score that can be assigned to this grade cell
-    max_score = Column(Float(), nullable=False)
-
-    #: The cell type, either "code" or "markdown"
-    cell_type = Column(Enum("code", "markdown", name="source_cell_type"), nullable=False)
-
-
-    #: Unique human-readable name of the solution cell. This need only be unique
-    #: within the notebook, not across notebooks.
-    name = Column(String(128), nullable=False)
-
-    #: The :class:`~nbgrader.api.Notebook` that this solution cell is contained in
-    notebook = None
-
-    #: Unique id of the :attr:`~nbgrader.api.TaskCell.notebook`
-    notebook_id = Column(String(32), ForeignKey('notebook.id'))
-
-    #: The assignment that this cell is contained within, represented by a
-    #: :class:`~nbgrader.api.Assignment` object
-    assignment = association_proxy("notebook", "assignment")
-
-    #: A collection of comments assigned to submitted versions of this grade cell,
-    #: represented by :class:`~nbgrader.api.Comment` objects
-    comments = relationship("TaskComment", backref="cell")
-
-    grades = relationship("TaskGrade", backref="cell")
+    id = Column(String(32), ForeignKey('base_cell.id'), primary_key=True)
 
     def to_dict(self):
         """Convert the task cell object to a JSON-friendly dictionary
@@ -334,6 +331,9 @@ class TaskCell(Base):
     def __repr__(self):
         return "{}/{}".format(self.notebook, self.name)
 
+    __mapper_args__ = {
+        'polymorphic_identity':'TaskCell',
+        }
 
 
 class SourceCell(Base):
@@ -721,7 +721,7 @@ class Grade(Base):
     cell = None
 
     #: Unique id of :attr:`~nbgrader.api.Grade.cell`
-    cell_id = Column(String(32), ForeignKey('grade_cell.id'))
+    cell_id = Column(String(32), ForeignKey('base_cell.id'))
 
     #: The type of cell this grade corresponds to, inherited from
     #: :class:`~nbgrader.api.GradeCell`
@@ -926,7 +926,7 @@ class Comment(Base):
     cell = None
 
     #: Unique id of :attr:`~nbgrader.api.Comment.cell`
-    cell_id = Column(String(32), ForeignKey('solution_cell.id'))
+    cell_id = Column(String(32), ForeignKey('base_cell.id'))
 
     #: The student who this comment is assigned to, represented by a
     #: :class:`~nbgrader.api.Student` object
@@ -1112,10 +1112,21 @@ TaskGrade.max_score = column_property(
         .correlate_except(TaskCell), deferred=True)
 
 
-Notebook.max_score = column_property(
+Notebook.max_score_gradecell = column_property(
     select([func.coalesce(func.sum(GradeCell.max_score), 0.0)])\
+        .select_from(GradeCell)\
         .where(GradeCell.notebook_id == Notebook.id)\
         .correlate_except(GradeCell), deferred=True)
+
+Notebook.max_score_taskcell = column_property(
+    select([func.coalesce(func.sum(TaskCell.max_score), 0.0)])\
+        .select_from(TaskCell)\
+        .where(TaskCell.notebook_id == Notebook.id)\
+        .correlate_except(TaskCell), deferred=True)
+
+Notebook.max_score = column_property(
+        Notebook.max_score_gradecell + Notebook.max_score_taskcell     
+    )
 
 SubmittedNotebook.max_score = column_property(
     select([Notebook.max_score])\
@@ -1124,6 +1135,7 @@ SubmittedNotebook.max_score = column_property(
 
 Assignment.max_score = column_property(
     select([func.coalesce(func.sum(GradeCell.max_score), 0.0)])\
+        .select_from(GradeCell)\
         .where(and_(
             Notebook.assignment_id == Assignment.id,
             GradeCell.notebook_id == Notebook.id))\
@@ -1163,6 +1175,7 @@ SubmittedAssignment.written_score = column_property(
 
 Notebook.max_written_score = column_property(
     select([func.coalesce(func.sum(GradeCell.max_score), 0.0)])\
+        .select_from(GradeCell)\
         .where(and_(
             GradeCell.notebook_id == Notebook.id,
             GradeCell.cell_type == "markdown"))\
@@ -1175,6 +1188,7 @@ SubmittedNotebook.max_written_score = column_property(
 
 Assignment.max_written_score = column_property(
     select([func.coalesce(func.sum(GradeCell.max_score), 0.0)])\
+        .select_from(GradeCell)\
         .where(and_(
             Notebook.assignment_id == Assignment.id,
             GradeCell.notebook_id == Notebook.id,
@@ -1211,6 +1225,7 @@ SubmittedAssignment.code_score = column_property(
 
 Notebook.max_code_score = column_property(
     select([func.coalesce(func.sum(GradeCell.max_score), 0.0)])\
+        .select_from(GradeCell)\
         .where(and_(
             GradeCell.notebook_id == Notebook.id,
             GradeCell.cell_type == "code"))\
@@ -1223,6 +1238,7 @@ SubmittedNotebook.max_code_score = column_property(
 
 Assignment.max_code_score = column_property(
     select([func.coalesce(func.sum(GradeCell.max_score), 0.0)])\
+        .select_from(GradeCell)\
         .where(and_(
             Notebook.assignment_id == Assignment.id,
             GradeCell.notebook_id == Notebook.id,
@@ -1252,6 +1268,7 @@ Notebook.num_submissions = column_property(
 
 Grade.cell_type = column_property(
     select([GradeCell.cell_type])\
+        .select_from(GradeCell)\
         .where(Grade.cell_id == GradeCell.id)\
         .correlate_except(GradeCell), deferred=True)
 
@@ -1292,7 +1309,7 @@ class Gradebook(object):
 
         """
         # create the connection to the database
-        self.engine = create_engine(db_url)
+        self.engine = create_engine(db_url,echo=True)
         self.db = scoped_session(sessionmaker(autoflush=True, bind=self.engine))
 
         # this creates all the tables in the database if they don't already exist
@@ -1738,6 +1755,49 @@ class Gradebook(object):
 
         return grade_cell
 
+    def find_graded_cell(self, name, notebook, assignment):
+        """Find a grade cell in a particular notebook of an assignment.
+
+        Parameters
+        ----------
+        name : string
+            the name of the grade cell
+        notebook : string
+            the name of the notebook
+        assignment : string
+            the name of the assignment
+
+        Returns
+        -------
+        grade_cell : :class:`~nbgrader.api.GradeCell`
+
+        """
+
+        try:
+            grade_cell = self.db.query(GradeCell)\
+                .join(Notebook, Notebook.id == GradeCell.notebook_id)\
+                .join(Assignment, Assignment.id == Notebook.assignment_id)\
+                .filter(
+                    GradeCell.name == name,
+                    Notebook.name == notebook,
+                    Assignment.name == assignment)\
+                .one()
+        except NoResultFound:
+            try:
+                grade_cell = self.db.query(TaskCell)\
+                    .join(Notebook, Notebook.id == TaskCell.notebook_id)\
+                    .join(Assignment, Assignment.id == Notebook.assignment_id)\
+                    .filter(
+                        TaskCell.name == name,
+                        Notebook.name == notebook,
+                        Assignment.name == assignment)\
+                    .one()
+            except NoResultFound:          
+                raise MissingEntry("No such grade cell: {}/{}/{}".format(assignment, notebook, name))
+
+        return grade_cell
+
+
     def update_or_create_grade_cell(self, name, notebook, assignment, **kwargs):
         """Update an existing grade cell in a notebook of an assignment, or
         create the grade cell if it does not exist.
@@ -2103,15 +2163,15 @@ class Gradebook(object):
                 nb = SubmittedNotebook(notebook=notebook, assignment=submission)
                 print(nb.to_dict())
                 for grade_cell in notebook.grade_cells:
-                    Grade(cell=grade_cell, notebook=nb)
+                    Grade(cell_id=grade_cell.id, notebook=nb)
 
                 for solution_cell in notebook.solution_cells:
-                    Comment(cell=solution_cell, notebook=nb)
+                    Comment(cell_id=solution_cell.id, notebook=nb)
 
                 for task_cell in notebook.task_cells:
                     print("in loop!")
-                    TaskComment(cell=task_cell, notebook=nb)
-                    TaskGrade(cell=task_cell, notebook=nb)
+                    Comment(cell_id=task_cell.id, notebook=nb)
+                    Grade(cell_id=task_cell.id, notebook=nb)
 
             self.db.add(submission)
             self.db.commit()
@@ -2439,7 +2499,22 @@ class Gradebook(object):
                     Student.id == student)\
                 .one()
         except NoResultFound:
-            raise MissingEntry("No such grade: {}/{}/{} for {}".format(
+            try:
+                grade = self.db.query(Grade)\
+                    .join(TaskCell, TaskCell.id == Grade.cell_id)\
+                    .join(SubmittedNotebook, SubmittedNotebook.id == Grade.notebook_id)\
+                    .join(Notebook, Notebook.id == SubmittedNotebook.notebook_id)\
+                    .join(SubmittedAssignment, SubmittedAssignment.id == SubmittedNotebook.assignment_id)\
+                    .join(Assignment, Assignment.id == SubmittedAssignment.assignment_id)\
+                    .join(Student, Student.id == SubmittedAssignment.student_id)\
+                    .filter(
+                        TaskCell.name == grade_cell,
+                        Notebook.name == notebook,
+                        Assignment.name == assignment,
+                        Student.id == student)\
+                    .one()
+            except NoResultFound:        
+                raise MissingEntry("No such grade: {}/{}/{} for {}".format(
                 assignment, notebook, grade_cell, student))
 
         return grade
@@ -2564,7 +2639,22 @@ class Gradebook(object):
                     Student.id == student)\
                 .one()
         except NoResultFound:
-            raise MissingEntry("No such comment: {}/{}/{} for {}".format(
+            try:
+                comment = self.db.query(Comment)\
+                    .join(TaskCell, TaskCell.id == Comment.cell_id)\
+                    .join(SubmittedNotebook, SubmittedNotebook.id == Comment.notebook_id)\
+                    .join(Notebook, Notebook.id == SubmittedNotebook.notebook_id)\
+                    .join(SubmittedAssignment, SubmittedAssignment.id == SubmittedNotebook.assignment_id)\
+                    .join(Assignment, Assignment.id == SubmittedAssignment.assignment_id)\
+                    .join(Student, Student.id == SubmittedAssignment.student_id)\
+                    .filter(
+                        TaskCell.name == solution_cell,
+                        Notebook.name == notebook,
+                        Assignment.name == assignment,
+                        Student.id == student)\
+                    .one()
+            except NoResultFound:
+                raise MissingEntry("No such taskcomment: {}/{}/{} for {}".format(
                 assignment, notebook, solution_cell, student))
 
         return comment
@@ -2982,6 +3072,7 @@ class Gradebook(object):
          .filter(GradeCell.cell_type == "code")\
          .group_by(SubmittedNotebook.id)\
          .subquery()
+        print(code_scores)
 
         # subquery for the written scores
         written_scores = self.db.query(

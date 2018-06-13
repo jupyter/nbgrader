@@ -54,7 +54,7 @@ class SaveAutoGrades(NbGraderPreprocessor):
 
     def _add_comment(self, cell, resources):
         if utils.is_task(cell):
-            taskcomment = self.gradebook.find_taskcomment(
+            taskcomment = self.gradebook.find_comment(
                 cell.metadata['nbgrader']['grade_id'],
                 self.notebook_id,
                 self.assignment_id,

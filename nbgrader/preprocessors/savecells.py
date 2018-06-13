@@ -42,7 +42,6 @@ class SaveCells(NbGraderPreprocessor):
 
         # create the notebook
 
-        self.log.debug("new grade cells:  %s", self.new_grade_cells.items())
         
         if notebook_info is not None:
             kernelspec = nb.metadata.get('kernelspec', {})
@@ -51,6 +50,9 @@ class SaveCells(NbGraderPreprocessor):
             self.log.debug("Notebook kernelspec: {}".format(kernelspec))
             self.gradebook.add_notebook(self.notebook_id, self.assignment_id, **notebook_info)
         self.log.debug("new grade cells:  %s", self.new_grade_cells.items())
+        self.log.debug("new solution cells:  %s", self.new_solution_cells.items())
+        self.log.debug("new task cells:  %s", self.new_task_cells.items())
+        self.log.debug("new source cells:  %s", self.new_source_cells.items())
         # save grade cells
         for name, info in self.new_grade_cells.items():
             grade_cell = self.gradebook.update_or_create_grade_cell(name, self.notebook_id, self.assignment_id, **info)

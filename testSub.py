@@ -6,4 +6,4 @@ cd=coursedir.CourseDirectory(root='/home/daniel/Teaching/L2python')
 api=NbGraderAPI(cd)
 
 api.exchange='/home/daniel/Teaching/L2python/exchange'
-print (api.get_submissions('bbbbbbbbb'))
+print (api.get_submissions('a_a'))

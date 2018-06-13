@@ -302,6 +302,11 @@ define([
         cell.metadata.nbgrader.task = val;
     };
 
+    var is_graded = function (cell) {
+        return ( is_grade(cell) || is_task(cell) );
+    };
+
+
     var get_points = function (cell) {
         if (cell.metadata.nbgrader === undefined) {
             return 0;
@@ -343,7 +348,7 @@ define([
     var is_locked = function (cell) {
         if (is_solution(cell)) {
             return false;
-        } else if (is_grade(cell)) {
+        } else if (is_graded(cell)) {
             return true;
         } else if (cell.metadata.nbgrader === undefined) {
             return false;
@@ -360,7 +365,7 @@ define([
         }
         if (is_solution(cell)) {
             cell.metadata.nbgrader.locked = false;
-        } else if (is_grade(cell)) {
+        } else if (is_graded(cell)) {
             cell.metadata.nbgrader.locked = true;
         } else {
             cell.metadata.nbgrader.locked = val;
@@ -382,7 +387,7 @@ define([
      */
     var display_cell = function (cell) {
         console.log("display_cell called");
-        if (is_grade(cell) || is_solution(cell)) {
+        if (is_graded(cell) || is_solution(cell)) {
             if (cell.element && !cell.element.hasClass(nbgrader_highlight_cls)) {
                 cell.element.addClass(nbgrader_highlight_cls);
             }
@@ -548,7 +553,7 @@ define([
      * is worth.
      */
     var create_points_input = function (div, cell, celltoolbar) {
-        if (!is_grade(cell)) {
+        if (! (is_grade(cell) || is_task(cell)) ) {
             return;
         }
 

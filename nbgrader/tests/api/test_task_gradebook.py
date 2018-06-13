@@ -4,6 +4,8 @@ from datetime import datetime, timedelta
 from ... import api
 from ... import utils
 from ...api import InvalidEntry, MissingEntry
+from sqlalchemy import select, func, exists, case, literal_column
+
 
 @pytest.fixture
 def gradebook(request):
@@ -109,64 +111,41 @@ def test_update_or_create_task_cell(gradebook):
     assert gc1.max_score == 3
     assert gc1.cell_type == 'markdown'
 
+def test_find_graded_cell(gradebook):
+    # first test creating it
+    gradebook.add_assignment('foo')
+    gradebook.add_assignment('foo2')
+    gradebook.add_notebook('p1', 'foo')
+    gradebook.add_notebook('p2', 'foo2')
+    gc1 = gradebook.update_or_create_task_cell('test1', 'p1', 'foo', max_score=2, cell_type='markdown')
+    assert gc1.max_score == 2
+    assert gc1.cell_type == 'markdown'
+    assert gradebook.find_graded_cell('test1', 'p1', 'foo') == gc1
+    print (gc1)
+    gc2 = gradebook.update_or_create_grade_cell('test2', 'p2', 'foo2', max_score=2, cell_type='code')
+    print (type(gc2))
+    assert gc2.max_score == 2
+    assert gc2.cell_type == 'code'
+    assert gradebook.find_grade_cell('test2', 'p2', 'foo2') == gc2
+    assert gradebook.find_graded_cell('test2', 'p2', 'foo2') == gc2
 
 
-
-
-
-def test_find_taskgrade(assignment):
-    assignment.add_student('hacker123')
-    s = assignment.add_submission('foo', 'hacker123')
-    n1, = s.notebooks
-    taskgrades = n1.taskgrades
-
-    for g1 in taskgrades:
-        g2 = assignment.find_taskgrade(g1.name, 'p1', 'foo', 'hacker123')
-        assert g1 == g2
-
-    with pytest.raises(MissingEntry):
-        assignment.find_taskgrade('asdf', 'p1', 'foo', 'hacker123')
-
-
-def test_find_taskgrade_by_id(assignment):
-    assignment.add_student('hacker123')
-    s = assignment.add_submission('foo', 'hacker123')
-    n1, = s.notebooks
-    taskgrades = n1.taskgrades
-
-    for g1 in taskgrades:
-        g2 = assignment.find_taskgrade_by_id(g1.id)
-        assert g1 == g2
-
-    with pytest.raises(MissingEntry):
-        assignment.find_taskgrade_by_id('12345')
-
-
-def test_find_taskcomment(assignment):
-    assignment.add_student('hacker123')
-    s = assignment.add_submission('foo', 'hacker123')
-    n1, = s.notebooks
-    taskcomments = n1.taskcomments
-
-    for c1 in taskcomments:
-        c2 = assignment.find_taskcomment(c1.name, 'p1', 'foo', 'hacker123')
-        assert c1 == c2
-
-    with pytest.raises(MissingEntry):
-        assignment.find_taskcomment('asdf', 'p1', 'foo', 'hacker123')
-
-
-def test_find_taskcomment_by_id(assignment):
-    assignment.add_student('hacker123')
-    s = assignment.add_submission('foo', 'hacker123')
-    n1, = s.notebooks
-    taskcomments = n1.taskcomments
-
-    for c1 in taskcomments:
-        c2 = assignment.find_taskcomment_by_id(c1.id)
-        assert c1 == c2
-
-    with pytest.raises(MissingEntry):
-        assignment.find_taskcomment_by_id('12345')
-
-
+def test_grade_cell_maxscore(gradebook):
+    # first test creating it
+    gradebook.add_assignment('foo')
+    gradebook.add_notebook('p1', 'foo')
+    gc1 = gradebook.update_or_create_task_cell('test1', 'p1', 'foo', max_score=1000, cell_type='markdown')
+    gc1a = gradebook.update_or_create_task_cell('test1a', 'p1', 'foo', max_score=3000, cell_type='markdown')
+    gc2 = gradebook.update_or_create_grade_cell('test2', 'p1', 'foo', max_score=5, cell_type='code')
+    gc3 = gradebook.update_or_create_grade_cell('test3', 'p1', 'foo', max_score=7, cell_type='code')
+    gc4 = gradebook.update_or_create_grade_cell('test4', 'p1', 'foo', max_score=13, cell_type='code')
+    gc5 = gradebook.update_or_create_grade_cell('test5', 'p1', 'foo', max_score=10, cell_type='code')
+    print (gradebook.db.query(api.GradeCell.notebook_id)\
+        #.filter(api.GradeCell.notebook_id == api.Notebook.id)
+        .all()
+    )
+    #assert gc2.max_score == 5
+    n1=gradebook.find_notebook('p1','foo')
+    assert n1.max_score_gradecell == 35
+    assert n1.max_score_taskcell == 4000
+    assert n1.max_score == 4035
