@@ -703,7 +703,15 @@ class Grade(Base):
     id = Column(String(32), primary_key=True, default=new_uuid)
 
     #: Unique name of the grade cell, inherited from :class:`~nbgrader.api.GradeCell`
-    name = association_proxy('cell', 'name')
+    taskcell_name = association_proxy('graded_TaskCell', 'name')
+    gradecell_name = association_proxy('graded_GradeCell', 'name')
+    
+    @property
+    def name(self):
+        if self.taskcell_name:
+            return self.taskcell_name
+        else:
+            return self.gradecell_name
 
     #: The submitted assignment that this grade is contained in, represented by
     #: a :class:`~nbgrader.api.SubmittedAssignment` object
@@ -718,14 +726,32 @@ class Grade(Base):
 
     #: The master version of the cell this grade is assigned to, represented by
     #: a :class:`~nbgrader.api.GradeCell` object.
-    cell = None
+    #cell = None
+
+    graded_GradeCell = None
+    graded_TaskCell = None
+
+    @property
+    def cell(self):
+        if self.graded_TaskCell:
+            return self.graded_TaskCell
+        else:
+            return self.graded_GradeCell
 
     #: Unique id of :attr:`~nbgrader.api.Grade.cell`
     cell_id = Column(String(32), ForeignKey('base_cell.id'))
 
     #: The type of cell this grade corresponds to, inherited from
     #: :class:`~nbgrader.api.GradeCell`
-    cell_type = None
+    cell_type_gradecell = None
+    cell_type_taskcell = None
+
+    @property
+    def cell_type(self):
+        if self.cell_type_taskcell:
+            return self.cell_type_taskcell
+        else:
+            return self.cell_type_gradecell
 
     #: The student who this grade is assigned to, represented by a
     #: :class:`~nbgrader.api.Student` object
@@ -758,8 +784,14 @@ class Grade(Base):
 
     #: The maximum possible score that can be assigned, inherited from
     #: :class:`~nbgrader.api.GradeCell`
-    max_score = None
-
+    max_score_gradecell = None
+    max_score_taskcell = None
+    @property
+    def max_score(self):
+        if self.max_score_taskcell:
+            return self.max_score_taskcell
+        else:
+            return self.max_score_gradecell
     #: Whether the autograded score is a result of failed autograder tests. This
     #: is True if the autograder score is zero and the cell type is "code", and
     #: otherwise False.
@@ -908,7 +940,15 @@ class Comment(Base):
     id = Column(String(32), primary_key=True, default=new_uuid)
 
     #: Unique name of the solution cell, inherited from :class:`~nbgrader.api.SolutionCell`
-    name = association_proxy('cell', 'name')
+    name_taskcell = association_proxy('commented_TaskCell', 'name')
+    name_solutioncell = association_proxy('commented_SolutionCell', 'name')
+    @property
+    def name(self):
+        if self.commented_TaskCell:
+            return self.name_taskcell
+        else:
+            return self.name_solutioncell
+
 
     #: The submitted assignment that this comment is contained in, represented by
     #: a :class:`~nbgrader.api.SubmittedAssignment` object
@@ -923,7 +963,15 @@ class Comment(Base):
 
     #: The master version of the cell this comment is assigned to, represented by
     #: a :class:`~nbgrader.api.SolutionCell` object.
-    cell = None
+    commented_TaskCell = None
+    commented_SolutionCell = None
+
+    @property
+    def cell(self):
+        if self.commented_TaskCell:
+            return self.commented_TaskCell
+        else:
+            return self.commented_SolutionCell
 
     #: Unique id of :attr:`~nbgrader.api.Comment.cell`
     cell_id = Column(String(32), ForeignKey('base_cell.id'))
@@ -1101,11 +1149,17 @@ Student.score = column_property(
 
 ## Overall max scores
 
-Grade.max_score = column_property(
+Grade.max_score_gradecell = column_property(
     select([GradeCell.max_score])\
         .select_from(GradeCell)\
         .where(Grade.cell_id == GradeCell.id)\
         .correlate_except(GradeCell), deferred=True)
+
+Grade.max_score_taskcell = column_property(
+    select([TaskCell.max_score])\
+        .select_from(TaskCell)\
+        .where(Grade.cell_id == TaskCell.id)\
+        .correlate_except(TaskCell), deferred=True)
 
 TaskGrade.max_score = column_property(
     select([TaskGrade.max_score])\
@@ -1268,17 +1322,26 @@ Notebook.num_submissions = column_property(
 
 ## Cell type
 
-Grade.cell_type = column_property(
+Grade.cell_type_gradecell = column_property(
     select([GradeCell.cell_type])\
         .select_from(GradeCell)\
         .where(Grade.cell_id == GradeCell.id)\
         .correlate_except(GradeCell), deferred=True)
 
+Grade.cell_type_taskcell = column_property(
+    select([TaskCell.cell_type])\
+        .select_from(TaskCell)\
+        .where(Grade.cell_id == TaskCell.id)\
+        .correlate_except(TaskCell), deferred=True)
+
 
 ## Failed tests
 
 Grade.failed_tests = column_property(
-    (Grade.auto_score < Grade.max_score) & (Grade.cell_type == "code"))
+    (Grade.cell_type_gradecell!=None) & ((Grade.auto_score < Grade.max_score_gradecell) & (Grade.cell_type_gradecell == "code"))
+    )
+
+
 
 SubmittedNotebook.failed_tests = column_property(
     exists().where(and_(

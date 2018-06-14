@@ -59,6 +59,18 @@ failed_tests = api.gradebook.db.query(
 print(manual_grade)
 print (failed_tests)
 
+
+ft=api.gradebook.db.query(
+    Grade.auto_score, 
+    Grade.max_score_gradecell,
+    Grade.max_score_taskcell,
+    Grade.cell_type_gradecell ,
+    (Grade.cell_type_gradecell!=None)  & (Grade.auto_score < Grade.max_score_gradecell)  
+        ).all()
+print (ft)
+#import sys
+#sys.exit()
+
 #api.gradebook.notebook_submission_dicts('Assessment 1', 'a_0_a')
 
 code_scores = api.gradebook.db.query(

@@ -95,7 +95,7 @@ window.MathJax = {
   <span class="nbgrader-label">Student's answer</span>
   {%- endif -%}
   <span class="glyphicon glyphicon-ok comment-saved save-icon"></span>
-  {%- if cell.metadata.nbgrader.grade -%}
+  {%- if cell.metadata.nbgrader.grade or cell.metadata.nbgrader.task  -%}
   {{ score(cell) }}
   {%- endif -%}
 {%- elif cell.metadata.nbgrader.grade -%}
@@ -106,7 +106,7 @@ window.MathJax = {
 {%- endmacro %}
 
 {% macro nbgrader_footer(cell) -%}
-{%- if cell.metadata.nbgrader.solution -%}
+{%- if cell.metadata.nbgrader.solution or cell.metadata.nbgrader.task -%}
 <div class="panel-footer">
   <div><textarea id="{{ cell.metadata.nbgrader.grade_id }}-comment" class="comment tabbable"></textarea></div>
 </div>
@@ -117,7 +117,7 @@ window.MathJax = {
 <div class="cell border-box-sizing text_cell rendered">
   {{ self.empty_in_prompt() }}
 
-  {%- if 'nbgrader' in cell.metadata and (cell.metadata.nbgrader.solution or cell.metadata.nbgrader.grade) -%}
+  {%- if 'nbgrader' in cell.metadata and (cell.metadata.nbgrader.solution or cell.metadata.nbgrader.grade or cell.metadata.nbgrader.task ) -%}
   <div class="panel panel-primary nbgrader_cell">
     {{ nbgrader_heading(cell) }}
     <div class="panel-body">
@@ -142,7 +142,7 @@ window.MathJax = {
 {% endblock markdowncell %}
 
 {% block input %}
-  {%- if 'nbgrader' in cell.metadata and (cell.metadata.nbgrader.solution or cell.metadata.nbgrader.grade) -%}
+  {%- if 'nbgrader' in cell.metadata and (cell.metadata.nbgrader.solution or cell.metadata.nbgrader.grade or cell.metadata.nbgrader.task) -%}
   <div class="panel panel-primary nbgrader_cell">
     {{ nbgrader_heading(cell) }}
     <div class="panel-body">
