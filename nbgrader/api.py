@@ -7,7 +7,7 @@ import subprocess as sp
 
 from sqlalchemy import (create_engine, ForeignKey, Column, String, Text,
                         DateTime, Interval, Float, Enum, UniqueConstraint, Boolean)
-from sqlalchemy.orm import sessionmaker, scoped_session, relationship, column_property
+from sqlalchemy.orm import sessionmaker, scoped_session, relationship, column_property, aliased
 from sqlalchemy.orm.exc import NoResultFound, FlushError
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.ext.associationproxy import association_proxy
@@ -125,15 +125,15 @@ class Notebook(Base):
 
     #: A collection of grade cells contained within this notebook, represented
     #: by :class:`~nbgrader.api.GradeCell` objects
-    grade_cells = relationship("GradeCell", backref="notebook")
+    grade_cells = relationship("GradeCell", backref="grade_notebook")
 
     #: A collection of solution cells contained within this notebook, represented
     #: by :class:`~nbgrader.api.SolutionCell` objects
-    solution_cells = relationship("SolutionCell", backref="notebook")
+    solution_cells = relationship("SolutionCell", backref="solution_notebook")
 
     #: A collection of task cells contained within this notebook, represented
     #: by :class:`~nbgrader.api.TaskCell` objects
-    task_cells = relationship("TaskCell", backref="notebook")
+    task_cells = relationship("TaskCell", backref="task_notebook")
 
     #: A collection of source cells contained within this notebook, represented
     #: by :class:`~nbgrader.api.SourceCell` objects
@@ -198,14 +198,35 @@ class BaseCell(Base):
     name = Column(String(128), nullable=False)
 
     #: The :class:`~nbgrader.api.Notebook` that this grade cell is contained in
-    notebook = None
+    @property
+    def notebook(self):
+        if hasattr(self,'task_notebook'):
+            return self.task_notebook
+        elif hasattr(self,'solution_notebook'):
+            return self.solution_notebook
+        elif  hasattr(self,'grade_notebook'):
+            return self.grade_notebook
+
+    @notebook.setter
+    def notebook(self,value):
+        if hasattr(self,'task_notebook'):
+            self.task_notebook=value
+        elif hasattr(self,'solution_notebook'):
+            self.solution_notebook=value
+        elif  hasattr(self,'grade_notebook'):
+            self.grade_notebook=value
+
 
     #: Unique id of the :attr:`~nbgrader.api.GradeCell.notebook`
     notebook_id = Column(String(32), ForeignKey('notebook.id'))
 
     #: The assignment that this cell is contained within, represented by a
     #: :class:`~nbgrader.api.Assignment` object
-    assignment = association_proxy("notebook", "assignment")
+
+    @property
+    def assignment(self):
+        return self.notebook.assignment
+
 
     def __repr__(self):
         return "GradeCell<{}/{}/{}>".format(
@@ -390,7 +411,7 @@ class SourceCell(Base):
         }
 
     def __repr__(self):
-        return "SourceCell<{}/{}/{}>".format(
+        return "SolutionCell<{}/{}/{}>".format(
             self.assignment.name, self.notebook.name, self.name)
 
 
@@ -735,23 +756,31 @@ class Grade(Base):
     def cell(self):
         if self.graded_TaskCell:
             return self.graded_TaskCell
-        else:
+        elif self.graded_GradeCell:
             return self.graded_GradeCell
+        else:
+            raise ValueError(self)
+    @cell.setter
+    def cell(self, value):
+        if value.__class__.__name__=="TaskCell":
+            self.graded_TaskCell=value
+        elif value.__class__.__name__=="GradeCell":
+            self.graded_GradeCell=value
+        else:
+            raise ValueError(value)
 
     #: Unique id of :attr:`~nbgrader.api.Grade.cell`
     cell_id = Column(String(32), ForeignKey('base_cell.id'))
 
     #: The type of cell this grade corresponds to, inherited from
     #: :class:`~nbgrader.api.GradeCell`
-    cell_type_gradecell = None
-    cell_type_taskcell = None
 
-    @property
-    def cell_type(self):
-        if self.cell_type_taskcell:
-            return self.cell_type_taskcell
-        else:
-            return self.cell_type_gradecell
+    #@property
+    #def cell_type(self):
+    #    if self.cell_type_taskcell:
+    #        return self.cell_type_taskcell
+    #    else:
+    #        return self.cell_type_gradecell
 
     #: The student who this grade is assigned to, represented by a
     #: :class:`~nbgrader.api.Student` object
@@ -970,8 +999,21 @@ class Comment(Base):
     def cell(self):
         if self.commented_TaskCell:
             return self.commented_TaskCell
-        else:
+        elif self.commented_SolutionCell:
             return self.commented_SolutionCell
+        else:
+            raise ValueError(self)
+
+    @cell.setter
+    def cell(self, value):
+        if value.__class__.__name__=="TaskCell":
+            self.commented_TaskCell=value
+        elif value.__class__.__name__=="SolutionCell":
+            self.commented_SolutionCell=value
+        else:
+            raise ValueError(value)
+
+
 
     #: Unique id of :attr:`~nbgrader.api.Comment.cell`
     cell_id = Column(String(32), ForeignKey('base_cell.id'))
@@ -1149,17 +1191,45 @@ Student.score = column_property(
 
 ## Overall max scores
 
+#Grade.cell_type = column_property(select([func.coalesce(grade.c.cell_type_gradecell,grade.c.cell_type_taskcell,3)])\
+#        .select_from(Grade)\
+#        .correlate_except(GradeCell), deferred=True)
+
+
 Grade.max_score_gradecell = column_property(
-    select([GradeCell.max_score])\
+    select([func.coalesce(GradeCell.max_score,0.0)])\
         .select_from(GradeCell)\
         .where(Grade.cell_id == GradeCell.id)\
         .correlate_except(GradeCell), deferred=True)
 
 Grade.max_score_taskcell = column_property(
-    select([TaskCell.max_score])\
+    select([func.coalesce(TaskCell.max_score,0.0)])\
         .select_from(TaskCell)\
         .where(Grade.cell_id == TaskCell.id)\
         .correlate_except(TaskCell), deferred=True)
+# a grade is either from a grade cell or a task cell , so only one will not be none
+Grade.max_score = column_property(func.coalesce(Grade.max_score_gradecell , Grade.max_score_taskcell,0.0 ),deferred=True)
+
+# try defining the cell_type_**** as athe result of a search as for the max_score
+# and not through the relationship
+
+Grade.cell_type_from_taskcell = column_property(
+    select([TaskCell.cell_type])\
+        .select_from(TaskCell)\
+        .where(Grade.cell_id == TaskCell.id)\
+        .correlate_except(TaskCell), deferred=True)
+
+Grade.cell_type_from_gradecell = column_property(
+    select([GradeCell.cell_type])\
+        .select_from(GradeCell)\
+        .where(Grade.cell_id == GradeCell.id)\
+        .correlate_except(GradeCell), deferred=True)
+
+Grade.cell_type=column_property(
+        select([func.coalesce(Grade.cell_type_from_gradecell,Grade.cell_type_from_taskcell,3)])
+        )
+
+
 
 TaskGrade.max_score = column_property(
     select([TaskGrade.max_score])\
