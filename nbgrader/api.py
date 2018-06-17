@@ -1001,11 +1001,6 @@ Student.score = column_property(
 
 ## Overall max scores
 
-#Grade.cell_type = column_property(select([func.coalesce(grade.c.cell_type_gradecell,grade.c.cell_type_taskcell,3)])\
-#        .select_from(Grade)\
-#        .correlate_except(GradeCell), deferred=True)
-
-
 Grade.max_score_gradecell = column_property(
     select([func.coalesce(GradeCell.max_score,0.0)])\
         .select_from(GradeCell)\
@@ -2099,7 +2094,7 @@ class Gradebook(object):
 
             for notebook in submission.assignment.notebooks:
                 nb = SubmittedNotebook(notebook=notebook, assignment=submission)
-                print(nb.to_dict())
+
                 for grade_cell in notebook.grade_cells:
                     Grade(cell_id=grade_cell.id, notebook=nb)
 
@@ -2107,7 +2102,6 @@ class Gradebook(object):
                     Comment(cell_id=solution_cell.id, notebook=nb)
 
                 for task_cell in notebook.task_cells:
-                    print("in loop!")
                     Comment(cell_id=task_cell.id, notebook=nb)
                     Grade(cell_id=task_cell.id, notebook=nb)
 
@@ -2553,27 +2547,6 @@ class Gradebook(object):
             comment = self.db.query(Comment).filter(Comment.id == comment_id).one()
         except NoResultFound:
             raise MissingEntry("No such comment: {}".format(comment_id))
-
-        return comment
-
-    def find_taskcomment_by_id(self, taskcomment_id):
-        """Find a comment by its unique id.
-
-        Parameters
-        ----------
-        comment_id : string
-            the unique id of the comment
-
-        Returns
-        -------
-        comment : :class:`~nbgrader.api.Comment`
-
-        """
-
-        try:
-            comment = self.db.query(TaskComment).filter(TaskComment.id == taskcomment_id).one()
-        except NoResultFound:
-            raise MissingEntry("No such comment: {}".format(taskcomment_id))
 
         return comment
 
