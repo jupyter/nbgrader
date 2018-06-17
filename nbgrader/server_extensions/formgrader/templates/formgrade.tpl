@@ -1,5 +1,6 @@
 {%- extends 'basic.tpl' -%}
 {% from 'formgrade_macros.tpl' import nav, header %}
+{% from 'mathjax.tpl' import mathjax %}
 
 {%- block header -%}
 <!DOCTYPE html>
@@ -13,26 +14,8 @@
     </style>
 {% endfor %}
 
-<!-- MathJax -->
-<script type="text/javascript">
-window.MathJax = {
-    tex2jax: {
-        inlineMath: [ ['$','$'], ["\\(","\\)"] ],
-        displayMath: [ ['$$','$$'], ["\\[","\\]"] ],
-        processEscapes: true,
-        processEnvironments: true
-    },
-    // Center justify equations in code and markdown cells. Elsewhere
-    // we use CSS to left justify single line equations in code cells.
-    displayAlign: 'center',
-    "HTML-CSS": {
-        styles: {'.MathJax_Display': {"margin": 0}},
-        linebreaks: { automatic: true }
-    }
-};
-</script>
-
-<script type="text/javascript" src="{{ resources.base_url }}/{{ resources.mathjax_url }}?config=TeX-AMS-MML_HTMLorMML-full"></script>
+<!-- Loading mathjax macro -->
+{{ mathjax( resources.base_url + '/' + resources.mathjax_url + '?config=TeX-AMS-MML_HTMLorMML-full') }}
 
 <link rel="stylesheet" href="{{ resources.base_url }}/formgrader/static/css/formgrade.css" />
 
