@@ -23,6 +23,7 @@ var assignment_id = "{{ assignment_id }}";
   <th class="text-center">Overall Score</th>
   <th class="text-center">Code Score</th>
   <th class="text-center">Written Score</th>
+  <th class="text-center">Task Score</th>
   <th class="text-center">Needs manual grade?</th>
   <th class="text-center">Tests failed?</th>
   <th class="text-center">Flagged?</th>

@@ -14,6 +14,7 @@ var SubmittedNotebookUI = Backbone.View.extend({
         this.$score = this.$el.find(".score");
         this.$code_score = this.$el.find(".code-score");
         this.$written_score = this.$el.find(".written-score");
+        this.$task_score = this.$el.find(".task-score");
         this.$needs_manual_grade = this.$el.find(".needs-manual-grade");
         this.$tests_failed = this.$el.find(".tests-failed");
         this.$flagged = this.$el.find(".flagged");
@@ -27,6 +28,7 @@ var SubmittedNotebookUI = Backbone.View.extend({
         this.$score.empty();
         this.$code_score.empty();
         this.$written_score.empty();
+        this.$task_score.empty();
         this.$needs_manual_grade.empty();
         this.$tests_failed.empty();
         this.$flagged.empty();
@@ -44,7 +46,7 @@ var SubmittedNotebookUI = Backbone.View.extend({
 
     render: function () {
         this.clear();
-
+        console.log(this.model);
         // show/hide real name
         this.$reveal.append($("<span/>")
             .addClass("glyphicon glyphicon-eye-open name-hidden")
@@ -102,6 +104,16 @@ var SubmittedNotebookUI = Backbone.View.extend({
         }
         this.$written_score.text(score + " / " + max_score);
 
+        // task score
+        score = roundToPrecision(this.model.get("task_score"), 2);
+        max_score = roundToPrecision(this.model.get("max_task_score"), 2);
+        if (max_score === 0) {
+            this.$task_score.attr("data-order", 0.0);
+        } else {
+            this.$task_score.attr("data-order", score / max_score);
+        }
+        this.$task_score.text(score + " / " + max_score);
+        
         // needs manual grade?
         if (this.model.get("needs_manual_grade")) {
             this.$needs_manual_grade.attr("data-search", "needs manual grade");
@@ -144,6 +156,7 @@ var insertRow = function (table) {
     row.append($("<td/>").addClass("text-center score"));
     row.append($("<td/>").addClass("text-center code-score"));
     row.append($("<td/>").addClass("text-center written-score"));
+    row.append($("<td/>").addClass("text-center task-score"));
     row.append($("<td/>").addClass("text-center needs-manual-grade"));
     row.append($("<td/>").addClass("text-center tests-failed"));
     row.append($("<td/>").addClass("text-center flagged"));
@@ -160,7 +173,9 @@ var loadSubmittedNotebooks = function () {
     models.fetch({
         success: function () {
             tbl.empty();
+            console.log(models);
             models.each(function (model) {
+                console.log(model);
                 var view = new SubmittedNotebookUI({
                     "model": model,
                     "el": insertRow(tbl)

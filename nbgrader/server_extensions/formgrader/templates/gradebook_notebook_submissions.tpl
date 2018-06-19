@@ -24,6 +24,7 @@ var notebook_id = "{{ notebook_id }}";
   <th class="text-center">Overall Score</th>
   <th class="text-center">Code Score</th>
   <th class="text-center">Written Score</th>
+  <th class="text-center">Task Score</th>
   <th class="text-center">Needs Manual Grade?</th>
   <th class="text-center">Tests Failed?</th>
   <th class="text-center">Flagged?</th>
@@ -31,5 +32,5 @@ var notebook_id = "{{ notebook_id }}";
 {%- endblock -%}
 
 {%- block table_body -%}
-<tr><td colspan="7">Loading, please wait...</td></tr>
+<tr><td colspan="8">Loading, please wait...</td></tr>
 {%- endblock -%}
