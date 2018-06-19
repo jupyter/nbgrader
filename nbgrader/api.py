@@ -178,6 +178,7 @@ class Notebook(Base):
             "max_score": self.max_score,
             "max_code_score": self.max_code_score,
             "max_written_score": self.max_written_score,
+            "max_task_score": self.max_task_score,
             "needs_manual_grade": self.needs_manual_grade
         }
 
@@ -703,6 +704,8 @@ class SubmittedNotebook(Base):
             "max_code_score": self.max_code_score,
             "written_score": self.written_score,
             "max_written_score": self.max_written_score,
+            "task_score": self.task_score,
+            "max_task_score": self.max_task_score,
             "needs_manual_grade": self.needs_manual_grade,
             "failed_tests": self.failed_tests,
             "flagged": self.flagged,
@@ -1067,13 +1070,26 @@ SubmittedNotebook.max_score = column_property(
         .where(SubmittedNotebook.notebook_id == Notebook.id)\
         .correlate_except(Notebook), deferred=True)
 
-Assignment.max_score = column_property(
+Assignment.max_score_gradecell = column_property(
     select([func.coalesce(func.sum(GradeCell.max_score), 0.0)])\
         .select_from(GradeCell)\
         .where(and_(
             Notebook.assignment_id == Assignment.id,
             GradeCell.notebook_id == Notebook.id))\
         .correlate_except(GradeCell), deferred=True)
+
+Assignment.max_score_taskcell = column_property(
+    select([func.coalesce(func.sum(GradeCell.max_score), 0.0)])\
+        .select_from(GradeCell)\
+        .where(and_(
+            Notebook.assignment_id == Assignment.id,
+            GradeCell.notebook_id == Notebook.id))\
+        .correlate_except(GradeCell), deferred=True)
+
+Assignment.max_score = column_property(
+    Assignment.max_score_gradecell+Assignment.max_score_taskcell
+)
+
 
 SubmittedAssignment.max_score = column_property(
     select([Assignment.max_score])\
@@ -2631,9 +2647,13 @@ class Gradebook(object):
         if assignment.num_submissions == 0:
             return 0.0
 
-        score_sum = self.db.query(func.coalesce(func.sum(Grade.score), 0.0))\
+        score_sum_gradecell = self.db.query(func.coalesce(func.sum(Grade.score), 0.0))\
             .join(GradeCell, Notebook, Assignment)\
             .filter(Assignment.name == assignment_id).scalar()
+        score_sum_taskcell = self.db.query(func.coalesce(func.sum(Grade.score), 0.0))\
+            .join(TaskCell, Notebook, Assignment)\
+            .filter(Assignment.name == assignment_id).scalar()
+        score_sum = score_sum_gradecell+score_sum_taskcell
         return score_sum / assignment.num_submissions
 
     def average_assignment_code_score(self, assignment_id):
@@ -2693,6 +2713,36 @@ class Gradebook(object):
                 Grade.cell_id == GradeCell.id,
                 GradeCell.cell_type == "markdown")).scalar()
         return score_sum / assignment.num_submissions
+
+
+    def average_assignment_task_score(self, assignment_id):
+        """Compute the average task score for an assignment.
+
+        Parameters
+        ----------
+        assignment_id : string
+            the name of the assignment
+
+        Returns
+        -------
+        score : float
+            The average task score
+
+        """
+
+        assignment = self.find_assignment(assignment_id)
+        if assignment.num_submissions == 0:
+            return 0.0
+
+        score_sum = self.db.query(func.coalesce(func.sum(Grade.score), 0.0))\
+            .join(TaskCell, Notebook, Assignment)\
+            .filter(and_(
+                Assignment.name == assignment_id,
+                Notebook.assignment_id == Assignment.id,
+                TaskCell.notebook_id == Notebook.id,
+                Grade.cell_id == TaskCell.id,
+                TaskCell.cell_type == "markdown")).scalar()
+        return score_sum / assignment.num_submissions    
 
     def average_notebook_score(self, notebook_id, assignment_id):
         """Compute the average score for a particular notebook in an assignment.
@@ -2786,6 +2836,39 @@ class Gradebook(object):
                 GradeCell.notebook_id == Notebook.id,
                 Grade.cell_id == GradeCell.id,
                 GradeCell.cell_type == "markdown")).scalar()
+        return score_sum / notebook.num_submissions
+
+    def average_notebook_task_score(self, notebook_id, assignment_id):
+        """Compute the average task score for a particular notebook in an
+        assignment.
+
+        Parameters
+        ----------
+        notebook_id : string
+            the name of the notebook
+        assignment_id : string
+            the name of the assignment
+
+        Returns
+        -------
+        score : float
+            The average notebook task score
+
+        """
+
+        notebook = self.find_notebook(notebook_id, assignment_id)
+        if notebook.num_submissions == 0:
+            return 0.0
+
+        score_sum = self.db.query(func.coalesce(func.sum(Grade.score), 0.0))\
+            .join(TaskCell, Notebook, Assignment)\
+            .filter(and_(
+                Notebook.name == notebook_id,
+                Assignment.name == assignment_id,
+                Notebook.assignment_id == Assignment.id,
+                TaskCell.notebook_id == Notebook.id,
+                Grade.cell_id == TaskCell.id,
+                TaskCell.cell_type == "markdown")).scalar()
         return score_sum / notebook.num_submissions
 
     def student_dicts(self):

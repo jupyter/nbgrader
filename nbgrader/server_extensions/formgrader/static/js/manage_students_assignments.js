@@ -13,6 +13,7 @@ var StudentSubmissionUI = Backbone.View.extend({
         this.$score = this.$el.find(".score");
         this.$code_score = this.$el.find(".code-score");
         this.$written_score = this.$el.find(".written-score");
+        this.$task_score = this.$el.find(".task-score");
         this.$needs_manual_grade = this.$el.find(".needs-manual-grade");
 
         this.render();
@@ -23,6 +24,7 @@ var StudentSubmissionUI = Backbone.View.extend({
         this.$score.empty();
         this.$code_score.empty();
         this.$written_score.empty();
+        this.$task_score.empty();
         this.$needs_manual_grade.empty();
     },
 
@@ -72,6 +74,16 @@ var StudentSubmissionUI = Backbone.View.extend({
         }
         this.$written_score.text(written_score + " / " + max_written_score);
 
+        // task score
+        var task_score = roundToPrecision(this.model.get("task_score"), 2);
+        var max_task_score = roundToPrecision(this.model.get("max_task_score"), 2);
+        if (max_task_score === 0) {
+            this.$task_score.attr("data-order", 0.0);
+        } else {
+            this.$task_score.attr("data-order", task_score / max_task_score);
+        }
+        this.$task_score.text(task_score + " / " + max_task_score);
+        
         // needs manual grade?
         if (this.model.get("needs_manual_grade")) {
             this.$needs_manual_grade.attr("data-search", "needs manual grade");
@@ -91,6 +103,7 @@ var insertRow = function (table) {
     row.append($("<td/>").addClass("text-center score"));
     row.append($("<td/>").addClass("text-center code-score"));
     row.append($("<td/>").addClass("text-center written-score"));
+    row.append($("<td/>").addClass("text-center task-score"));
     row.append($("<td/>").addClass("text-center needs-manual-grade"));
     table.append(row)
     return row;

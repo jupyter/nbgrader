@@ -277,3 +277,5 @@ tt = aliased(union_all(
 print (api.gradebook.db.query(tt).all())
 
 print (api.gradebook.notebook_submission_dicts(notebook_id, assignment_id))
+
+print (api.get_notebooks(assignment_id))
