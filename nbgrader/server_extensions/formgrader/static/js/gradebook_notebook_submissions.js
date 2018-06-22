@@ -46,7 +46,6 @@ var SubmittedNotebookUI = Backbone.View.extend({
 
     render: function () {
         this.clear();
-        console.log(this.model);
         // show/hide real name
         this.$reveal.append($("<span/>")
             .addClass("glyphicon glyphicon-eye-open name-hidden")
@@ -173,7 +172,6 @@ var loadSubmittedNotebooks = function () {
     models.fetch({
         success: function () {
             tbl.empty();
-            console.log(models);
             models.each(function (model) {
                 console.log(model);
                 var view = new SubmittedNotebookUI({

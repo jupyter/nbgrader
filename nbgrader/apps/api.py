@@ -310,6 +310,7 @@ class NbGraderAPI(LoggingConfigurable):
                 assignment["average_score"] = gb.average_assignment_score(assignment_id)
                 assignment["average_code_score"] = gb.average_assignment_code_score(assignment_id)
                 assignment["average_written_score"] = gb.average_assignment_written_score(assignment_id)
+                assignment["average_task_score"] = gb.average_assignment_task_score(assignment_id)
 
         except MissingEntry:
             assignment = {
@@ -834,7 +835,7 @@ class NbGraderAPI(LoggingConfigurable):
                         "written_score": 0,
                         "max_written_score": notebook.max_written_score,
                         "task_score": 0,
-                        "max_task_score": notebook.max_written_score,
+                        "max_task_score": notebook.max_task_score,
                         "needs_manual_grade": False,
                         "failed_tests": False,
                         "flagged": False

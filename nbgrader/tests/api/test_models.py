@@ -991,7 +991,7 @@ def test_notebook_to_dict(submissions):
 
     assert set(nd.keys()) == {
         'id', 'name', 'num_submissions', 'max_score', 'max_code_score',
-        'max_written_score', 'needs_manual_grade'}
+        'max_written_score', 'needs_manual_grade','max_task_score'}
 
     assert nd['id'] == n.id
     assert nd['name'] == 'blah'
@@ -1136,6 +1136,7 @@ def test_submittedassignment_to_dict(submissions):
     assert set(sad.keys()) == {
         'id', 'name', 'student', 'timestamp', 'score', 'max_score', 'code_score',
         'max_code_score', 'written_score', 'max_written_score',
+        'task_score','max_task_score',
         'needs_manual_grade', 'last_name', 'first_name'}
 
     assert sad['id'] == sa.id
@@ -1172,6 +1173,7 @@ def test_submittednotebook_to_dict(submissions):
         'id', 'name', 'student', 'last_name', 'first_name',
         'score', 'max_score', 'code_score',
         'max_code_score', 'written_score', 'max_written_score',
+        'task_score','max_task_score',
         'needs_manual_grade', 'failed_tests', 'flagged'}
 
     assert snd['id'] == sn.id

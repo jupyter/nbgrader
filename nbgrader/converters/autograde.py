@@ -69,7 +69,6 @@ class Autograde(BaseConverter):
 
     def init_assignment(self, assignment_id, student_id):
         super(Autograde, self).init_assignment(assignment_id, student_id)
-        self.log.debug("starting init_assignment in autograde.py")
         # try to get the student from the database, and throw an error if it
         # doesn't exist
         student = {}
@@ -117,9 +116,6 @@ class Autograde(BaseConverter):
                     self.log.warning("%s is %s seconds late", submission, submission.total_seconds_late)
             else:
                 submission = gb.update_or_create_submission(assignment_id, student_id)
-            self.log.debug("submission %s", str(submission.to_dict()))
-
-
 
         # copy files over from the source directory
         self.log.info("Overwriting files with master versions from the source directory")

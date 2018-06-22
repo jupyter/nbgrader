@@ -202,9 +202,6 @@ define([
         if (cell.metadata.hasOwnProperty("nbgrader")) {
             delete cell.metadata.nbgrader;
         }
-        if (cell.metadata.hasOwnProperty("cssclass")) {
-            delete cell.metadata.cssclass;
-        }
     };
 
     /**
@@ -372,21 +369,11 @@ define([
         }
     };
 
-    var set_cssclass = function (cell, val) {
-        if (cell.metadata.cssclass != undefined) {
-          cell.element.removeClass(cell.metadata.cssclass);
-        }
-        cell.metadata.cssclass = val;
-        cell.element.addClass(cell.metadata.cssclass);
-        cell.render();
-    };
-
     /**
      * Add a display class to the cell element, depending on the
      * nbgrader cell type.
      */
     var display_cell = function (cell) {
-        console.log("display_cell called");
         if (is_graded(cell) || is_solution(cell)) {
             if (cell.element && !cell.element.hasClass(nbgrader_highlight_cls)) {
                 cell.element.addClass(nbgrader_highlight_cls);
@@ -397,18 +384,12 @@ define([
                 cell.element.addClass(nbgrader_cls);
             }
         }
-        if (is_grade(cell) || is_solution(cell) || is_locked(cell)) {
-            if (cell.element && !cell.element.hasClass(nbgrader_cls)) {
-                cell.element.addClass(nbgrader_cls);
-            }
-        }
+        
         if (is_task(cell) ){
-          console.log("cell is task cell!");
           if (cell.element && !cell.element.hasClass("nbgrader_task")) {
                 cell.element.addClass("nbgrader_task");
           }
         } else {
-          console.log("cell is not task cell!");
           if (cell.element && cell.element.hasClass("nbgrader_task")) {
                 cell.element.removeClass("nbgrader_task");
           }
@@ -435,8 +416,8 @@ define([
                 options_list.push(["Autograder tests", "tests"]);
             }
             options_list.push(["Read-only", "readonly"]);
-
             var setter = function (cell, val) {
+                console.log('selected: ',val);
                 if (val === "") {
                     remove_metadata(cell);
                 } else if (val === "manual") {
@@ -445,11 +426,7 @@ define([
                     set_grade(cell, true);
                     set_locked(cell, false);
                     set_task(cell,false);
-                    //set_cssclass(cell,"nbgrader_manual");
                 } else if (val === "task") {
-                    if (cell.cell_type != 'text'){
-                      cell.notebook.to_markdown();
-                    }
                     set_schema_version(cell);
                     set_solution(cell, false);
                     set_grade(cell, false);
@@ -459,35 +436,32 @@ define([
                       console.log('empty text!');
                       cell.set_text('Describe the task here!')
                     }
-                    //set_cssclass(cell,"nbgrader_task");
                 } else if (val === "solution") {
+                    console.log('setting cell to solution!');
                     set_schema_version(cell);
                     set_solution(cell, true);
                     set_grade(cell, false);
                     set_locked(cell, false);
                     set_task(cell,false);
-                    //set_cssclass(cell,"nbgrader_solution");
                 } else if (val === "tests") {
                     set_schema_version(cell);
                     set_solution(cell, false);
                     set_grade(cell, true);
                     set_locked(cell, true);
                     set_task(cell,false);
-                    //set_cssclass(cell,"nbgrader_tests");
                 } else if (val === "readonly") {
                     set_schema_version(cell);
                     set_solution(cell, false);
                     set_grade(cell, false);
                     set_locked(cell, true);
                     set_task(cell,false);
-                    //set_cssclass(cell,"nbgrader_manual");
                 } else {
                     throw new Error("invalid nbgrader cell type: " + val);
                 }
-
             };
 
             var getter = function (cell) {
+                console.log("getting cell type... ", cell.metadata );
                 if (is_task(cell) ) {
                     return "task";
                 } else if (is_solution(cell) && is_grade(cell)) {

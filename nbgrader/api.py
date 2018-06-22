@@ -92,6 +92,7 @@ class Assignment(Base):
             "max_score": self.max_score,
             "max_code_score": self.max_code_score,
             "max_written_score": self.max_written_score,
+            "max_task_score": self.max_written_score,
         }
 
     def __repr__(self):

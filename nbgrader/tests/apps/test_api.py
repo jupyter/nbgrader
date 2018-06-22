@@ -127,12 +127,14 @@ class TestNbGraderAPI(BaseTestApp):
             'duedate', 'name', 'num_submissions', 'release_path', 'releaseable',
             'source_path', 'status', 'id', 'max_code_score', 'max_score',
             'max_written_score', 'display_duedate', 'duedate_timezone',
-            'duedate_notimezone'])
+            'duedate_notimezone',
+            'max_task_score','average_task_score'])
 
         default = {
             "average_code_score": 0,
             "average_score": 0,
             "average_written_score": 0,
+            "average_task_score": 0,
             "duedate": None,
             "display_duedate": None,
             "duedate_timezone": "+0000",
@@ -146,7 +148,8 @@ class TestNbGraderAPI(BaseTestApp):
             "id": None,
             "max_code_score": 0,
             "max_score": 0,
-            "max_written_score": 0
+            "max_written_score": 0,
+            "max_task_score": 0
         }
 
         # check that return value is None when there is no assignment
@@ -180,6 +183,7 @@ class TestNbGraderAPI(BaseTestApp):
         target["max_code_score"] = 5
         target["max_score"] = 6
         target["max_written_score"] = 1
+        target["max_task_score"] = 1
         assert a == target
 
         # check that timestamps are handled correctly
@@ -208,6 +212,7 @@ class TestNbGraderAPI(BaseTestApp):
             target["max_code_score"] = 5
             target["max_score"] = 6
             target["max_written_score"] = 1
+            target["max_task_score"] = 1
             target["releaseable"] = True
             target["status"] = "released"
             assert a == target
@@ -221,6 +226,7 @@ class TestNbGraderAPI(BaseTestApp):
             target["max_code_score"] = 5
             target["max_score"] = 6
             target["max_written_score"] = 1
+            target["max_task_score"] = 1
             assert a == target
 
         # check the values once there are submissions as well
@@ -234,6 +240,7 @@ class TestNbGraderAPI(BaseTestApp):
         target["max_code_score"] = 5
         target["max_score"] = 6
         target["max_written_score"] = 1
+        target["max_task_score"] = 1
         target["num_submissions"] = 2
         assert a == target
 
@@ -251,6 +258,7 @@ class TestNbGraderAPI(BaseTestApp):
         keys = set([
             'average_code_score', 'average_score', 'average_written_score',
             'name', 'id', 'max_code_score', 'max_score', 'max_written_score',
+            'max_task_score','average_task_score',
             'needs_manual_grade', 'num_submissions'])
 
         default = {
@@ -262,6 +270,8 @@ class TestNbGraderAPI(BaseTestApp):
             "max_score": 0,
             "average_written_score": 0,
             "max_written_score": 0,
+            "average_task_score": 0,
+            "max_task_score": 0,
             "needs_manual_grade": False,
             "num_submissions": 0
         }
@@ -298,7 +308,7 @@ class TestNbGraderAPI(BaseTestApp):
         keys = set([
             "id", "name", "student", "last_name", "first_name", "score",
             "max_score", "code_score", "max_code_score", "written_score",
-            "max_written_score", "needs_manual_grade", "autograded",
+            "max_written_score", "task_score","max_task_score", "needs_manual_grade", "autograded",
             "timestamp", "submitted", "display_timestamp"])
 
         default = {
@@ -313,6 +323,8 @@ class TestNbGraderAPI(BaseTestApp):
             "max_code_score": 0,
             "written_score": 0,
             "max_written_score": 0,
+            "task_score": 0,
+            "max_task_score": 0,
             "needs_manual_grade": False,
             "autograded": False,
             "timestamp": None,
@@ -357,7 +369,7 @@ class TestNbGraderAPI(BaseTestApp):
         keys = set([
             "id", "name", "student", "last_name", "first_name", "score",
             "max_score", "code_score", "max_code_score", "written_score",
-            "max_written_score", "needs_manual_grade", "autograded",
+            "max_written_score", "task_score", "max_task_score","needs_manual_grade", "autograded",
             "timestamp", "submitted", "display_timestamp"])
 
         default = {
@@ -372,6 +384,8 @@ class TestNbGraderAPI(BaseTestApp):
             "max_code_score": 0,
             "written_score": 0,
             "max_written_score": 0,
+            "task_score": 0,
+            "max_task_score": 0,
             "needs_manual_grade": False,
             "autograded": False,
             "timestamp": None,
@@ -608,6 +622,8 @@ class TestNbGraderAPI(BaseTestApp):
             "max_code_score": 5,
             "written_score": 0,
             "max_written_score": 2,
+            "task_score": 0,
+            "max_task_score": 0,
             "needs_manual_grade": False,
             "failed_tests": False,
             "flagged": False
