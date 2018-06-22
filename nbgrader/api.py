@@ -3017,11 +3017,14 @@ class Gradebook(object):
             SubmittedAssignment.id, Assignment.name,
             SubmittedAssignment.timestamp, Student.first_name, Student.last_name,
             Student.id, 
-            total_scores.c.score,
-            total_scores.c.max_score,
-            code_scores.c.code_score, code_scores.c.max_code_score,
-            written_scores.c.written_score, written_scores.c.max_written_score,
-            task_scores.c.task_score, task_scores.c.max_task_score,
+            func.coalesce(total_scores.c.score, 0.0),
+            func.coalesce(total_scores.c.max_score, 0.0),
+            func.coalesce(code_scores.c.code_score, 0.0), 
+            func.coalesce(code_scores.c.max_code_score, 0.0),
+            func.coalesce(written_scores.c.written_score, 0.0),
+            func.coalesce(written_scores.c.max_written_score, 0.0),
+            func.coalesce(task_scores.c.task_score, 0.0), 
+            func.coalesce(task_scores.c.max_task_score, 0.0),
             _manual_grade
         ).join(SubmittedNotebook, Assignment, Student, Grade)\
          .outerjoin(code_scores, SubmittedAssignment.id == code_scores.c.id)\
@@ -3096,7 +3099,7 @@ class Gradebook(object):
         # subquery for the written scores
         task_scores = self.db.query(
             SubmittedNotebook.id,
-            func.sum(Grade.score).label("task_score"),
+            func.coalesce(func.sum(Grade.score),0.0).label("task_score"),
             func.sum(TaskCell.max_score).label("max_task_score"),
         ).join(SubmittedAssignment, Notebook, Assignment, Student, Grade, TaskCell)\
          .filter(TaskCell.cell_type == "markdown")\
@@ -3177,11 +3180,14 @@ class Gradebook(object):
         submissions = self.db.query(
             SubmittedNotebook.id, Notebook.name,
             Student.id, Student.first_name, Student.last_name,
-            total_scores.c.score, 
-            total_scores.c.max_score,
-            code_scores.c.code_score, code_scores.c.max_code_score,
-            written_scores.c.written_score, written_scores.c.max_written_score,
-            task_scores.c.task_score, task_scores.c.max_task_score,
+            func.coalesce(total_scores.c.score,0.0), 
+            func.coalesce(total_scores.c.max_score,0.0),
+            func.coalesce(code_scores.c.code_score,0.0), 
+            func.coalesce(code_scores.c.max_code_score,0.0),
+            func.coalesce(written_scores.c.written_score,0.0), 
+            func.coalesce(written_scores.c.max_written_score,0.0),
+            func.coalesce(task_scores.c.task_score,0.0), 
+            func.coalesce(task_scores.c.max_task_score,0.0),
             _manual_grade, _failed_tests, SubmittedNotebook.flagged
         ).join(SubmittedAssignment, Notebook, Assignment, Student, Grade)\
          .outerjoin(code_scores, SubmittedNotebook.id == code_scores.c.id)\
