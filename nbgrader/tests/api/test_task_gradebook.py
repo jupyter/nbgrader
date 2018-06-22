@@ -269,9 +269,7 @@ def test_find_graded_cell(gradebook):
     assert gc1.max_score == 2
     assert gc1.cell_type == 'markdown'
     assert gradebook.find_graded_cell('test1', 'p1', 'foo') == gc1
-    print (gc1)
     gc2 = gradebook.update_or_create_grade_cell('test2', 'p2', 'foo2', max_score=2, cell_type='code')
-    print (type(gc2))
     assert gc2.max_score == 2
     assert gc2.cell_type == 'code'
     assert gradebook.find_grade_cell('test2', 'p2', 'foo2') == gc2
@@ -288,10 +286,6 @@ def test_grade_cell_maxscore(gradebook):
     gc3 = gradebook.update_or_create_grade_cell('test3', 'p1', 'foo', max_score=7, cell_type='code')
     gc4 = gradebook.update_or_create_grade_cell('test4', 'p1', 'foo', max_score=13, cell_type='code')
     gc5 = gradebook.update_or_create_grade_cell('test5', 'p1', 'foo', max_score=10, cell_type='code')
-    print (gradebook.db.query(api.GradeCell.notebook_id)\
-        #.filter(api.GradeCell.notebook_id == api.Notebook.id)
-        .all()
-    )
     #assert gc2.max_score == 5
     n1=gradebook.find_notebook('p1','foo')
     assert n1.max_score_gradecell == 35
@@ -469,84 +463,10 @@ def test_submission_dicts_multiple_students(FiveStudents):
     assign=FiveStudents
     a = sorted(assign.submission_dicts("a1"), key=lambda x: x["id"])
     b = sorted([x.to_dict() for x in assign.find_assignment("a1").submissions], key=lambda x: x["id"])
-    print (a[0])
-    print (b[0])
     assert a == b
 
 def test_submission_dicts_multiple_notebooks(FiveNotebooks):
     assign=FiveNotebooks
     a = sorted(assign.submission_dicts("a1"), key=lambda x: x["id"])
     b = sorted([x.to_dict() for x in assign.find_assignment("a1").submissions], key=lambda x: x["id"])
-    print (a[0])
-    print (b[0])
     assert a == b
-
-
-def test_submission_dicts(assignmentManyStudents):
-    assign=assignmentManyStudents
-    a = sorted(assign.submission_dicts("foo"), key=lambda x: x["id"])
-    b = sorted([x.to_dict() for x in assign.find_assignment("foo").submissions], key=lambda x: x["id"])
-    assert a == b
-
-
-
-def test_total_scores(FiveStudents):
-    from sqlalchemy import (create_engine, ForeignKey, Column, String, Text,
-                        DateTime, Interval, Float, Enum, UniqueConstraint, Boolean)
-    from sqlalchemy.orm import sessionmaker, scoped_session, relationship, column_property, aliased
-    from sqlalchemy.orm.exc import NoResultFound, FlushError
-    from sqlalchemy.ext.declarative import declarative_base
-    from sqlalchemy.ext.associationproxy import association_proxy
-    from sqlalchemy.exc import IntegrityError
-    from sqlalchemy.sql import and_,or_
-    from sqlalchemy import select, func, exists, case, literal_column, union_all
-    from sqlalchemy.ext.declarative import declared_attr
-    from nbgrader.api import SubmittedNotebook,Grade,GradeCell,Notebook,Assignment,Student,SubmittedAssignment,BaseCell,TaskCell
-    from sqlalchemy import select, func, exists, union_all
-    from sqlalchemy.orm import aliased
-    from sqlalchemy.sql import  and_
-
-    a=FiveStudents
-
-    all_scores=aliased(union_all(
-            a.db.query(
-                SubmittedNotebook.id.label('id'),
-                func.sum(Grade.score).label("score"),
-                func.sum(GradeCell.max_score).label("max_score"),
-            ).join( Grade, GradeCell)\
-            .filter(GradeCell.cell_type == "code")\
-            .group_by(SubmittedNotebook.id),
-        #print(code_scores.all())
-
-        # subquery for the written scores
-            a.db.query(
-                SubmittedNotebook.id.label('id'),
-                func.sum(Grade.score).label("score"),
-                func.sum(GradeCell.max_score).label("max_score"),
-            ).join(Grade, GradeCell)\
-            .filter(GradeCell.cell_type == "markdown")\
-            .group_by(SubmittedNotebook.id),
-            
-            a.db.query(
-                SubmittedNotebook.id.label('id'),
-                func.sum(Grade.score).label("score"),
-                func.sum(TaskCell.max_score).label("max_score"),
-            ).join( Grade, TaskCell)\
-            .filter(TaskCell.cell_type == "markdown")\
-            .group_by(SubmittedNotebook.id)
-        )
-        )
-    
-    
-    
-    
-    total_scores = a.db.query(
-            func.sum(all_scores.c.score).label("score"),
-            func.sum(all_scores.c.max_score).label("max_score"),
-            all_scores.c.id.label("id"),
-            )\
-            .group_by(all_scores.c.id)\
-            .subquery()
-
-    print (a.db.query(    
-        total_scores.c.score,total_scores.c.max_score,total_scores.c.id).all())
