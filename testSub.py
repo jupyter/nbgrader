@@ -12,8 +12,8 @@ api=NbGraderAPI(cd)
 api.exchange='/home/daniel/Teaching/L2python/exchange'
 #print (api.get_submissions('a_a'))
 
-notebook_id='Assignment 1'
-assignment_id='a_0_a'
+notebook_id='lessEmpty'
+assignment_id='lessEmpty'
 
 res = api.gradebook.db.query(
             SubmittedNotebook.id,
@@ -25,6 +25,9 @@ res = api.gradebook.db.query(
          .all()
 
 print (res)
+
+import sys
+#sys.exit()
 
 res = api.gradebook.db.query(
             SubmittedNotebook.id,
@@ -274,8 +277,8 @@ tt = aliased(union_all(
         )
         )
 
-print (api.gradebook.db.query(tt).all())
+#print (api.gradebook.db.query(tt).all())
 
 print (api.gradebook.notebook_submission_dicts(notebook_id, assignment_id))
 
-print (api.get_notebooks(assignment_id))
+#print (api.get_notebooks(assignment_id))
