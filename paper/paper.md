@@ -43,6 +43,9 @@ authors:
 - name: Carol Willing
   orcid: 0000-0002-9817-8485
   affiliation: 3
+- name: Kyle Kelley
+  orcid: 0000-0002-4281-9351
+  affiliation: 9
 affiliations:
 - name: University of California, Berkeley
   index: 1
@@ -60,6 +63,8 @@ affiliations:
   index: 7
 - name: Lafayette College
   index: 8
+- name: Netflix, Inc:
+  index: 9
 date: 2 June 2018
 bibliography: paper.bib
 ---

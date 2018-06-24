@@ -70,6 +70,13 @@
       "affiliation": "University of California, Berkeley"
     },
     {
+      "@id": "http://orcid.org/0000-0002-4281-9351",
+      "@type": "Person",
+      "email": "rgbkrk@gmail.com",
+      "name": "Kyle Kelley",
+      "affiliation": "Netflix, Inc"
+    },
+    {
       "@id": "http://orcid.org/0000-0002-1023-7082",
       "@type": "Person",
       "email": "benjaminrk@gmail.com",
