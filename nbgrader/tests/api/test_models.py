@@ -968,7 +968,7 @@ def test_assignment_to_dict(submissions):
 
     assert set(ad.keys()) == {
         'id', 'name', 'duedate', 'num_submissions', 'max_score',
-        'max_code_score', 'max_written_score'}
+        'max_code_score', 'max_written_score','max_task_score'}
 
     assert ad['id'] == a.id
     assert ad['name'] == "foo"

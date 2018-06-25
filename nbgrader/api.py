@@ -264,7 +264,7 @@ class GradedMixin():
 class GradeCell(BaseCell,GradedMixin):
     """Database representation of the master/source version of a grade cell."""
 
-    __tablename__ = "grade_cell"
+    __tablename__ = "grade_cells"
 
     #: Unique id of the solution cell (automatically generated)
     id = Column(String(32), ForeignKey('base_cell.id'), primary_key=True)
@@ -303,7 +303,7 @@ class CommentedMixin():
 
 
 class SolutionCell(BaseCell,CommentedMixin):
-    __tablename__ = "solution_cell"
+    __tablename__ = "solution_cells"
     #: Unique id of the solution cell (automatically generated)
     id = Column(String(32), ForeignKey('base_cell.id'), primary_key=True)
 
@@ -331,7 +331,7 @@ class SolutionCell(BaseCell,CommentedMixin):
 
 
 class TaskCell(BaseCell,GradedMixin,CommentedMixin):
-    __tablename__ = "task_cell"
+    __tablename__ = "task_cells"
 
     #: Unique id of the solution cell (automatically generated)
     id = Column(String(32), ForeignKey('base_cell.id'), primary_key=True)
