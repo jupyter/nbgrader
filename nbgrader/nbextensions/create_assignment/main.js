@@ -100,7 +100,7 @@ define([
         var total_points = 0;
         var cells = Jupyter.notebook.get_cells();
         for (var i=0; i < cells.length; i++) {
-            if (is_grade(cells[i])) {
+            if (is_graded(cells[i])) {
                 total_points += to_float(cells[i].metadata.nbgrader.points);
             }
         }
