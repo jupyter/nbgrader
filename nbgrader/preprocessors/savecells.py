@@ -178,7 +178,7 @@ class SaveCells(NbGraderPreprocessor):
         if utils.is_task(cell):
             self._create_task_cell(cell)
 
-        if utils.is_grade(cell) or utils.is_solution(cell) or utils.is_locked(cell):
+        if utils.is_grade(cell) or utils.is_solution(cell) or utils.is_locked(cell) or utils.is_task(cell):
             self._create_source_cell(cell)
 
         return cell, resources

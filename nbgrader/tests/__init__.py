@@ -106,6 +106,23 @@ def create_grade_and_solution_cell(source, cell_type, grade_id, points, schema_v
 
     return cell
 
+def create_task_cell(source, cell_type, grade_id, points, schema_version=SCHEMA_VERSION):
+    if cell_type == "markdown":
+        cell = new_markdown_cell(source=source)
+    else:
+        raise ValueError("invalid cell type: {}".format(cell_type))
+
+    cell.metadata.nbgrader = {}
+    cell.metadata.nbgrader["solution"] = False
+    cell.metadata.nbgrader["grade"] = False
+    cell.metadata.nbgrader["task"] = True
+    cell.metadata.nbgrader["grade_id"] = grade_id
+    cell.metadata.nbgrader["points"] = points
+    cell.metadata.nbgrader["locked"] = True
+    cell.metadata.nbgrader["schema_version"] = schema_version
+
+    return cell
+
 
 def start_subprocess(command, **kwargs):
     kwargs['env'] = kwargs.get('env', os.environ.copy())

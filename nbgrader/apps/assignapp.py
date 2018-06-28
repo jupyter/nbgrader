@@ -27,6 +27,7 @@ flags.update({
         {
             'ClearSolutions': {'enforce_metadata': False},
             'ClearHiddenTests': {'enforce_metadata': False},
+            'ClearMarkScheme': {'enforce_metadata': False},
             'CheckCellMetadata': {'enabled': False},
             'ComputeChecksums': {'enabled': False}
         },
