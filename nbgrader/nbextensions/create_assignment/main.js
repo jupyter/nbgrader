@@ -379,7 +379,7 @@ define([
                 cell.element.addClass(nbgrader_highlight_cls);
             }
         }
-        if (is_grade(cell) || is_solution(cell) || is_locked(cell)) {
+        if (is_graded(cell) || is_solution(cell) || is_locked(cell)) {
             if (cell.element && !cell.element.hasClass(nbgrader_cls)) {
                 cell.element.addClass(nbgrader_cls);
             }
@@ -527,7 +527,7 @@ define([
      * is worth.
      */
     var create_points_input = function (div, cell, celltoolbar) {
-        if (! (is_grade(cell) || is_task(cell)) ) {
+        if (!is_graded(cell)) {
             return;
         }
 

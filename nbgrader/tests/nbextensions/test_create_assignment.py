@@ -584,6 +584,8 @@ def test_cell_ids(browser, port):
 
     # turn it into a cell with an id
     _select_solution(browser)
+    # for some reason only one call doesn't trigger on_change event
+    _select_solution(browser)
     _set_id(browser, cell_id="")
 
     # save and check for an error (blank id)
