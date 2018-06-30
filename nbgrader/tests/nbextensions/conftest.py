@@ -180,7 +180,7 @@ def _make_browser(tempdir):
     selenium_logger.setLevel(logging.WARNING)
 
     options = webdriver.firefox.options.Options()
-    #options.add_argument('-headless')
+    options.add_argument('-headless')
     browser = webdriver.Firefox(firefox_options=options)
     browser.set_page_load_timeout(30)
     browser.set_script_timeout(30)
