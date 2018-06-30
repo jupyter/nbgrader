@@ -365,10 +365,10 @@ def test_average_assignment_no_score(assignmentWithSubmissionNoMarks):
     assert assignmentWithSubmissionNoMarks.average_assignment_task_score('foo') == 0.0
 
 def test_average_assignment_with_score(assignmentWithSubmissionWithMarks):
-    assert assignmentWithSubmissionWithMarks.average_assignment_score('foo') == sum(assignmentWithSubmissionWithMarks.usedgrades)/2 
-    assert assignmentWithSubmissionWithMarks.average_assignment_code_score('foo') == sum(assignmentWithSubmissionWithMarks.usedgrades_code)/2 
-    assert assignmentWithSubmissionWithMarks.average_assignment_written_score('foo') == sum(assignmentWithSubmissionWithMarks.usedgrades_written)/2 
-    assert assignmentWithSubmissionWithMarks.average_assignment_task_score('foo') == sum(assignmentWithSubmissionWithMarks.usedgrades_task)/2 
+    assert assignmentWithSubmissionWithMarks.average_assignment_score('foo') == sum(assignmentWithSubmissionWithMarks.usedgrades)/2.0 
+    assert assignmentWithSubmissionWithMarks.average_assignment_code_score('foo') == sum(assignmentWithSubmissionWithMarks.usedgrades_code)/2.0 
+    assert assignmentWithSubmissionWithMarks.average_assignment_written_score('foo') == sum(assignmentWithSubmissionWithMarks.usedgrades_written)/2.0 
+    assert assignmentWithSubmissionWithMarks.average_assignment_task_score('foo') == sum(assignmentWithSubmissionWithMarks.usedgrades_task)/2.0 
 
 
 def test_average_notebook_score_empty(assignment):
