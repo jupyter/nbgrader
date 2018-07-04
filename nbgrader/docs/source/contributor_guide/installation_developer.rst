@@ -32,15 +32,14 @@ To install and enable all the frontend nbextensions (*assignment list*,
 
     # The nbextensions are JavaScript/HTML/CSS so they require
     # separate installation and enabling.
+    # The --symlink option is recommended since it updates the extensions
+    # whenever you update the nbgrader repository.
     jupyter nbextension install --symlink --sys-prefix --py nbgrader
     jupyter nbextension enable --sys-prefix --py nbgrader
 
-The ``--symlink`` option is recommended since it updates the extensions
-whenever you update the nbgrader repository. To install the server extensions
-for *assignment_list* and *formgrader* run::
-
     # The serverextension is a Python module inside nbgrader, so only an
     # enable step is needed.
+    # To install the server extensions for assignment_list and formgrader run:
     jupyter serverextension enable --sys-prefix --py nbgrader
 
 To work properly, the *assignment list* and *formgrader* extensions require
