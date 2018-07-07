@@ -7,14 +7,14 @@
       "name": "Project Jupyter"
     },
     {
-      "@id": "http://orcid.org/0000-0003-3538-8829",
+      "@id": "https://orcid.org/0000-0003-3538-8829",
       "@type": "Person",
       "email": "dblank@brynmawr.edu",
       "name": "Douglas Blank",
       "affiliation": "Bryn Mawr College"
     },
     {
-      "@id": "http://orcid.org/0000-0003-1039-6195",
+      "@id": "https://orcid.org/0000-0003-1039-6195",
       "@type": "Person",
       "email": "ddbourgin@berkeley.edu",
       "name": "David Bourgin",
@@ -35,28 +35,35 @@
       "affiliation": "University of California, Berkeley"
     },
     {
-      "@id": "http://orcid.org/0000-0003-4805-2216",
+      "@id": "https://orcid.org/0000-0003-4805-2216",
       "@type": "Person",
       "email": "jfrederic@google.com",
       "name": "Jonathan Frederic",
       "affiliation": "Google Inc."
     },
     {
-      "@id": "http://orcid.org/0000-0002-5223-6168",
+      "@id": "https://orcid.org/0000-0002-5223-6168",
       "@type": "Person",
       "email": "bgranger@calpoly.edu",
       "name": "Brian E. Granger",
       "affiliation": "Cal Poly, San Luis Obispo"
     },
     {
-      "@id": "http://orcid.org/0000-0002-3860-0429",
+      "@id": "https://orcid.org/0000-0002-3860-0429",
       "@type": "Person",
       "email": "jessica.b.hamrick@gmail.com",
       "name": "Jessica B. Hamrick",
       "affiliation": "DeepMind"
     },
     {
-      "@id": "http://orcid.org/0000-0002-5799-8524",
+      "@id": "https://orcid.org/0000-0002-4281-9351",
+      "@type": "Person",
+      "email": "rgbkrk@gmail.com",
+      "name": "Kyle Kelley",
+      "affiliation": "Netflix, Inc"
+    },
+    {
+      "@id": "https://orcid.org/0000-0002-5799-8524",
       "@type": "Person",
       "email": "page.lg@gmail.com",
       "name": "Logan Page",
@@ -70,28 +77,21 @@
       "affiliation": "University of California, Berkeley"
     },
     {
-      "@id": "http://orcid.org/0000-0002-4281-9351",
-      "@type": "Person",
-      "email": "rgbkrk@gmail.com",
-      "name": "Kyle Kelley",
-      "affiliation": "Netflix, Inc"
-    },
-    {
-      "@id": "http://orcid.org/0000-0002-1023-7082",
+      "@id": "https://orcid.org/0000-0002-1023-7082",
       "@type": "Person",
       "email": "benjaminrk@gmail.com",
       "name": "Benjamin Ragan-Kelley",
       "affiliation": "Simula Research Laboratory"
     },
     {
-      "@id": "http://orcid.org/0000-0001-9848-4872",
+      "@id": "https://orcid.org/0000-0001-9848-4872",
       "@type": "Person",
       "email": "suchow@berkeley.edu",
       "name": "Jordan W. Suchow",
       "affiliation": "University of California, Berkeley"
     },
     {
-      "@id": "http://orcid.org/0000-0002-9817-8485",
+      "@id": "https://orcid.org/0000-0002-9817-8485",
       "@type": "Person",
       "email": "willingc@gmail.com",
       "name": "Carol Willing",
