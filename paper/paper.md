@@ -28,6 +28,9 @@ authors:
 - name: Jessica Hamrick
   orcid: 0000-0002-3860-0429
   affiliation: 4
+- name: Kyle Kelley
+  orcid: 0000-0002-4281-9351
+  affiliation: 9
 - name: Logan Page
   orcid: 0000-0002-5799-8524
   affiliation: 5
@@ -43,9 +46,6 @@ authors:
 - name: Carol Willing
   orcid: 0000-0002-9817-8485
   affiliation: 3
-- name: Kyle Kelley
-  orcid: 0000-0002-4281-9351
-  affiliation: 9
 affiliations:
 - name: University of California, Berkeley
   index: 1
@@ -100,13 +100,14 @@ Since its conception in September 2014, nbgrader has been used in a number of
 educational contexts, including courses at UC Berkeley, Cal Poly, University of
 Pretoria, University of Edinburgh, Northeastern University, Central Connecticut
 State University, KTH Royal Institute of Technology, CU Boulder, University of
-Amsterdam, George Washington University, Texas A&M, Bryn Mawr College, and
-University of Maryland; and, as of May 2018, over 10,000 nbgrader-based
-notebooks exist on GitHub. In addition to its core functionality, nbgrader has
-expanded to support a number of other features, including the ability to handle
-multiple courses on the same JupyterHub instance; the option to either include
-or hide automatically graded tests; customizable late penalties; and support for
-importing assignment files downloaded from a Learning Management System (LMS).
+Amsterdam, George Washington University, Texas A&M, Bryn Mawr College, Lafayette
+College, and University of Maryland; and, as of May 2018, over 10,000
+nbgrader-based notebooks exist on GitHub. In addition to its core functionality,
+nbgrader has expanded to support a number of other features, including the
+ability to handle multiple courses on the same JupyterHub instance; the option
+to either include or hide automatically graded tests; customizable late
+penalties; and support for importing assignment files downloaded from a Learning
+Management System (LMS).
 
 # Statement of Need
 
@@ -122,18 +123,23 @@ in a way that facilitates exploration with interdisciplinary questions is to
 teach students computational concepts in an interactive environment where it is
 possible to quickly write, test, and tweak small units of code. Many such
 environments exist, including Mathematica [@mathematica], Maple [@maple], MATLAB
-[@matlab], Sage [@sage] and IPython [@PerezGranger2007].
+[@matlab], Sage [@sage] and IPython [@PerezGranger2007]. However, these are
+often focused on programming in a single language, and lack an efficient system
+for distributing, collecting, and evaluating student work.
 
 In recent years, the IPython project introduced the *Jupyter Notebook*
 [@kluyver2016jupyter], an interface that is conducive to interactive and
 literate computing, where programmers can interleave prose with code, equations,
-figures, and other media. The Jupyter Notebook is ideal for educators because it
-allows them to create assignments which include instructions along with code or
-Markdown cells, in which students can provide solutions to exercises. Students
-can, for example, write code both to compute and visualize a particular result.
-Because the notebook is interactive, students can iterate on a coding problem
-without needing to switch back and forth between a command line and a text
-editor, and they can rapidly see results alongside the code which produced them.
+figures, and other media. Jupyter notebooks were originally developed for
+programming in the Python programming language, but multiple languages are now
+supported using the same infrastructure. The Jupyter Notebook is ideal for
+educators because it allows them to create assignments which include
+instructions along with code or Markdown cells, in which students can provide
+solutions to exercises. Students can, for example, write code both to compute
+and visualize a particular result. Because the notebook is interactive, students
+can iterate on a coding problem without needing to switch back and forth between
+a command line and a text editor, and they can rapidly see results alongside the
+code which produced them.
 
 Instructors in many fields have begun using the Jupyter Notebook as a teaching
 platform. The notebook has appeared in over 100 classes [@Hamrick2016;
