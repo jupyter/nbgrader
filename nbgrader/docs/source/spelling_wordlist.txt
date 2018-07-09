@@ -81,6 +81,7 @@ globbing
 Gradebook
 gradebook
 Granger
+grepping
 hardcoded
 hasn
 hasn’t
@@ -157,6 +158,8 @@ np
 npm
 ok
 olgabot
+online
+Ordo
 org
 osx
 overwritekernelspec
@@ -205,6 +208,7 @@ student’s
 subclasses
 subcommand
 subcommands
+subpackage
 suchow
 suprocesses
 svurens
@@ -233,6 +237,7 @@ utcnow
 ve
 vinaykola
 webapp
+webdriver
 weren
 weren’t
 we’ll
@@ -254,4 +259,5 @@ xsrf
 XSRF
 yml
 you’ll
+Zesje
 zpincus
