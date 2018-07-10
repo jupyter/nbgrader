@@ -299,8 +299,8 @@ def test_load_student2(browser, port, gradebook):
 
         utils._click_link(browser, "Problem Set 1")
         utils._wait_for_gradebook_page(browser, port, "manage_students/{}/Problem Set 1".format(student.id))
-	elements = browser.find_elements_by_xpath('//th[text()="Task Score"]')
-        assert len(elements) == 1
+    elements = browser.find_elements_by_xpath('//th[text()="Task Score"]')
+    assert len(elements) == 1
 
 @pytest.mark.nbextensions
 def test_load_student3(browser, port, gradebook):
