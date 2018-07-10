@@ -27,19 +27,18 @@ Previously this was done using the ``nbgrader extension install`` command.
 However, moving forward this is done using the ``jupyter nbextension`` and
 ``jupyter serverextension`` commands.
 
+The nbextensions are Javascript/HTML/CSS so they require
+separate installation and enabling.
+The --symlink option is recommended since it updates the extensions
+whenever you update the nbgrader repository.
+The serverextension is a Python module inside nbgrader, so only an
+enable step is needed.
 To install and enable all the frontend nbextensions (*assignment list*,
-*create assignment*, and *formgrader*) run::
+*create assignment*, and *formgrader*) along with the server extensions
+(*assignment list* and *formgrader*) run::
 
-    # The nbextensions are JavaScript/HTML/CSS so they require
-    # separate installation and enabling.
-    # The --symlink option is recommended since it updates the extensions
-    # whenever you update the nbgrader repository.
     jupyter nbextension install --symlink --sys-prefix --py nbgrader
     jupyter nbextension enable --sys-prefix --py nbgrader
-
-    # The serverextension is a Python module inside nbgrader, so only an
-    # enable step is needed.
-    # To install the server extensions for assignment_list and formgrader run:
     jupyter serverextension enable --sys-prefix --py nbgrader
 
 To work properly, the *assignment list* and *formgrader* extensions require
