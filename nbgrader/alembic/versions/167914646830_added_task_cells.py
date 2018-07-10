@@ -15,10 +15,17 @@ down_revision = '724cde206c17'
 branch_labels = None
 depends_on = None
 
-
 def upgrade():
-
-
+    """ 
+    To upgrade we need to split the grade_cell and solution_cell database
+    entries into a part in base_cell and a part in either grade_cell or 
+    solution_cell. Because the names are the same for the new and old grade_cell and 
+    solution_cell tables we create temporary tables 'grade_cells' and 'solution_cells'
+    and once the transfer has occured we drop the old tables and rename the temporary
+    tables to the original names. 
+    """
+    
+    
     new_grade_table = sa.sql.table(
         'grade_cells',
         sa.Column('id', sa.VARCHAR(32), nullable=False),
@@ -56,8 +63,6 @@ def upgrade():
         sa.Column('type', sa.VARCHAR(50))
     )
 
-
-
     connection = op.get_bind()
     results = connection.execute(sa.select([
             old_grade_table.c.name,
@@ -67,6 +72,7 @@ def upgrade():
             old_grade_table.c.max_score
             ])).fetchall()
 
+    # copy info to the base_cell table 
     cells = [
         {'name': name,
          'id': cellid,
@@ -76,6 +82,7 @@ def upgrade():
     
     op.bulk_insert(base_cell_table, cells)
 
+    # copy the grade_cell specific info to the grade_cells temporary database
     cells = [
         {
          'id': cellid,
@@ -84,13 +91,15 @@ def upgrade():
         } for _,cellid,celltype,_,max_score in results ]
 
     op.bulk_insert(new_grade_table, cells)
-    
+
+    # now transfer the solution cells...
     results = connection.execute(sa.select([
             old_solution_table.c.name,
             old_solution_table.c.id,
             old_solution_table.c.notebook_id,
             ])).fetchall()
 
+    # copy info to the base_cell table 
     cells = [
         {'name': name,
          'id': cellid,
@@ -100,6 +109,7 @@ def upgrade():
     
     op.bulk_insert(base_cell_table, cells)
 
+    # copy the solution_cell specific info to the grade_cells temporary database
     cells = [
         {
          'id': cellid,
@@ -110,7 +120,8 @@ def upgrade():
 
     op.drop_table(u'grade_cell')
     op.drop_table(u'solution_cell')
-
+    op.rename_table('solution_cells','solution_cell')
+    op.rename_table('grade_cells','grade_cell')
 
 def downgrade():
     pass
