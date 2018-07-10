@@ -77,6 +77,5 @@ class GetGrades(NbGraderPreprocessor):
         if utils.is_task(cell):
             self._get_comment(cell, resources)
             self._get_score(cell, resources)
-            print ("added comment for task")
 
         return cell, resources

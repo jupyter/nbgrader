@@ -568,7 +568,7 @@ class NbGraderAPI(LoggingConfigurable):
         """
         with self.gradebook as gb:
             db_submissions = gb.submission_dicts(assignment_id)
-            print("db_submission",db_submissions)
+
         ungraded = self.get_submitted_students(assignment_id) - self.get_autograded_students(assignment_id)
         students = {x['id']: x for x in self.get_students()}
         submissions = []

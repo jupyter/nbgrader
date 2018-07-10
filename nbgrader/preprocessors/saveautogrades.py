@@ -52,24 +52,16 @@ class SaveAutoGrades(NbGraderPreprocessor):
         self.gradebook.db.commit()
 
     def _add_comment(self, cell, resources):
-        if utils.is_task(cell):
-            taskcomment = self.gradebook.find_comment(
-                cell.metadata['nbgrader']['grade_id'],
-                self.notebook_id,
-                self.assignment_id,
-                self.student_id)
-            taskcomment.auto_comment = "Comment on how the student fulfilled the task here."
+        comment = self.gradebook.find_comment(
+        cell.metadata['nbgrader']['grade_id'],
+        self.notebook_id,
+        self.assignment_id,
+        self.student_id)
+        if cell.metadata.nbgrader.get("checksum", None) == utils.compute_checksum(cell) and not utils.is_task(cell):
+            comment.auto_comment = "No response."
         else:
-            comment = self.gradebook.find_comment(
-            cell.metadata['nbgrader']['grade_id'],
-            self.notebook_id,
-            self.assignment_id,
-            self.student_id)
+            comment.auto_comment = None
 
-            if cell.metadata.nbgrader.get("checksum", None) == utils.compute_checksum(cell):
-                comment.auto_comment = "No response."
-            else:
-                comment.auto_comment = None
         self.gradebook.db.commit()
 
 

@@ -75,7 +75,6 @@ class MetadataValidatorV1(BaseMetadataValidator):
         grade = meta['grade']
         solution = meta['solution']
         locked = meta['locked']
-        task = meta.get('task', False)
 
         # check for a valid grade id
         if grade or solution or locked:
@@ -91,18 +90,13 @@ class MetadataValidatorV1(BaseMetadataValidator):
                     meta['grade_id']))
 
         # check that markdown cells are grade AND solution (not either/or)
-        if not task:
-            if cell.cell_type == "markdown" and grade and not solution:
-                raise ValidationError(
-                    "Markdown grade cell '{}' is not marked as a solution cell".format(
-                        meta['grade_id']))
-            if cell.cell_type == "markdown" and not grade and solution:
-                raise ValidationError(
-                    "Markdown solution cell is not marked as a grade cell: {}".format(cell.source))
-        else:
-            if cell.cell_type != "markdown":
-                raise ValidationError(
-                    "Task cells have to be markdown: {}".format(cell.source))
+        if cell.cell_type == "markdown" and grade and not solution:
+            raise ValidationError(
+                "Markdown grade cell '{}' is not marked as a solution cell".format(
+                    meta['grade_id']))
+        if cell.cell_type == "markdown" and not grade and solution:
+            raise ValidationError(
+                "Markdown solution cell is not marked as a grade cell: {}".format(cell.source))
 
     def validate_nb(self, nb):
         super(MetadataValidatorV1, self).validate_nb(nb)

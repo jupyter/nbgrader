@@ -220,7 +220,7 @@ class BaseCell(Base):
 
 
     #: Unique id of the :attr:`~nbgrader.api.GradeCell.notebook`
-    notebook_id = Column(String(32), ForeignKey('notebook.id'))
+    notebook_id = Column(String(32), ForeignKey('notebook.id'), nullable=False)
 
     #: The assignment that this cell is contained within, represented by a
     #: :class:`~nbgrader.api.Assignment` object
@@ -1694,6 +1694,8 @@ class Gradebook(object):
             self.db.delete(solution_cell)
         for source_cell in notebook.source_cells:
             self.db.delete(source_cell)
+        for task_cell in notebook.task_cells:
+            self.db.delete(task_cell)
         self.db.delete(notebook)
 
         try:

@@ -130,7 +130,6 @@ class SaveCells(NbGraderPreprocessor):
 
     def _create_task_cell(self, cell):
         grade_id = cell.metadata.nbgrader['grade_id']
-        self.log.debug("in _create task!")
         try:
             task_cell = self.gradebook.find_task_cell(grade_id, self.notebook_id, self.assignment_id).to_dict()
             del task_cell['name']

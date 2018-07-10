@@ -12,7 +12,7 @@ define([
     var nbgrader_preset_name = "Create Assignment";
     var nbgrader_highlight_cls = "nbgrader-highlight";
     var nbgrader_cls = "nbgrader-cell";
-    var nbgrader_schema_version = 2;
+    var nbgrader_schema_version = 3;
     var warning;
 
     var CellToolbar = celltoolbar.CellToolbar;
@@ -417,7 +417,6 @@ define([
             }
             options_list.push(["Read-only", "readonly"]);
             var setter = function (cell, val) {
-                console.log('selected: ',val);
                 if (val === "") {
                     remove_metadata(cell);
                 } else if (val === "manual") {
@@ -425,19 +424,17 @@ define([
                     set_solution(cell, true);
                     set_grade(cell, true);
                     set_locked(cell, false);
-                    set_task(cell,false);
+                    set_task(cell, false);
                 } else if (val === "task") {
                     set_schema_version(cell);
                     set_solution(cell, false);
                     set_grade(cell, false);
                     set_locked(cell, true);
                     set_task(cell,true);
-                    if (cell.get_text()==''){
-                      console.log('empty text!');
+                    if (cell.get_text() === ''){
                       cell.set_text('Describe the task here!')
                     }
                 } else if (val === "solution") {
-                    console.log('setting cell to solution!');
                     set_schema_version(cell);
                     set_solution(cell, true);
                     set_grade(cell, false);
@@ -461,7 +458,6 @@ define([
             };
 
             var getter = function (cell) {
-                console.log("getting cell type... ", cell.metadata );
                 if (is_task(cell) ) {
                     return "task";
                 } else if (is_solution(cell) && is_grade(cell)) {

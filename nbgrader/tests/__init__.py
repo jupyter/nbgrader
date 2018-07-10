@@ -46,6 +46,7 @@ def create_grade_cell(source, cell_type, grade_id, points, schema_version=SCHEMA
     cell.metadata.nbgrader["grade_id"] = grade_id
     cell.metadata.nbgrader["points"] = points
     cell.metadata.nbgrader["solution"] = False
+    cell.metadata.nbgrader["task"] = False
     cell.metadata.nbgrader["locked"] = False
     cell.metadata.nbgrader["schema_version"] = schema_version
 
@@ -64,6 +65,7 @@ def create_solution_cell(source, cell_type, grade_id, schema_version=SCHEMA_VERS
     cell.metadata.nbgrader["solution"] = True
     cell.metadata.nbgrader["grade_id"] = grade_id
     cell.metadata.nbgrader["grade"] = False
+    cell.metadata.nbgrader["task"] = False
     cell.metadata.nbgrader["locked"] = False
     cell.metadata.nbgrader["schema_version"] = schema_version
 
@@ -82,6 +84,7 @@ def create_locked_cell(source, cell_type, grade_id, schema_version=SCHEMA_VERSIO
     cell.metadata.nbgrader["locked"] = True
     cell.metadata.nbgrader["grade_id"] = grade_id
     cell.metadata.nbgrader["solution"] = False
+    cell.metadata.nbgrader["task"] = False
     cell.metadata.nbgrader["grade"] = False
     cell.metadata.nbgrader["schema_version"] = schema_version
 
@@ -99,6 +102,7 @@ def create_grade_and_solution_cell(source, cell_type, grade_id, points, schema_v
     cell.metadata.nbgrader = {}
     cell.metadata.nbgrader["solution"] = True
     cell.metadata.nbgrader["grade"] = True
+    cell.metadata.nbgrader["task"] = False
     cell.metadata.nbgrader["grade_id"] = grade_id
     cell.metadata.nbgrader["points"] = points
     cell.metadata.nbgrader["locked"] = False

@@ -173,7 +173,6 @@ var loadSubmittedNotebooks = function () {
         success: function () {
             tbl.empty();
             models.each(function (model) {
-                console.log(model);
                 var view = new SubmittedNotebookUI({
                     "model": model,
                     "el": insertRow(tbl)

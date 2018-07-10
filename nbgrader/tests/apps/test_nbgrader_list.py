@@ -64,7 +64,7 @@ class TestNbGraderList(BaseTestApp):
         """Does the help display without error?"""
         run_nbgrader(["list", "--help-all"])
 
-    def test_list_released(self, exchange, cache, course_dir):
+    def test_list_released(self, exchange, cache, course_dir, fake_home_dir):
         self._release("ps1", exchange, cache, course_dir)
         self._release("ps1", exchange, cache, course_dir, course="xyz200")
         output = self._list(exchange, cache, "ps1", flags=["--course", "abc101"])
