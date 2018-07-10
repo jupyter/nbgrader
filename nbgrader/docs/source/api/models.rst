@@ -86,16 +86,25 @@ Master version of an assignment
 
     .. automethod:: to_dict
 
-.. autoclass:: GradeCell
 
-    .. autoattribute:: id
-
-    .. autoattribute:: name
-
+.. autoclass:: GradedMixin
+    
     .. autoattribute:: max_score
 
     .. autoattribute:: cell_type
 
+    .. autoattribute:: grades 
+
+.. autoclass:: CommentedMixin
+
+    .. autoattribute:: comments
+
+.. autoclass:: BaseCell
+
+    .. autoattribute:: id
+
+    .. autoattribute:: name
+    
     .. autoattribute:: notebook
         :annotation:
 
@@ -103,24 +112,16 @@ Master version of an assignment
 
     .. autoattribute:: assignment
 
-    .. autoattribute:: grades
+.. autoclass:: GradeCell
+    :show-inheritance:
+
+    .. autoattribute:: id
 
     .. automethod:: to_dict
 
 .. autoclass:: SolutionCell
 
     .. autoattribute:: id
-
-    .. autoattribute:: name
-
-    .. autoattribute:: notebook
-        :annotation:
-
-    .. autoattribute:: notebook_id
-
-    .. autoattribute:: assignment
-
-    .. autoattribute:: comments
 
     .. automethod:: to_dict
 
@@ -145,6 +146,12 @@ Master version of an assignment
 
     .. automethod:: to_dict
 
+.. autoclass:: TaskCell
+    :show-inheritance:
+    
+    .. autoattribute:: id
+
+    .. automethod:: to_dict
 
 Submitted assignments
 ---------------------

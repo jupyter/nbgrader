@@ -187,7 +187,7 @@ class Notebook(Base):
         return "Notebook<{}/{}>".format(self.assignment.name, self.name)
 
 class BaseCell(Base):
-    """Database representation of the master/source version of a grade cell."""
+    """Database representation of a cell. It is meant as a base class for cells where additional behavior is added through mixin classes."""
 
     __tablename__ = "base_cell"
     __table_args__ = (UniqueConstraint('name', 'notebook_id','type'),)
@@ -243,7 +243,7 @@ class BaseCell(Base):
 
 
 class GradedMixin():
-
+    """Mixin class providing the reference to a grade and the data members relevant for graded cells."""
     #: Maximum score that can be assigned to this grade cell
     @declared_attr
     def max_score(cls):
@@ -266,7 +266,7 @@ class GradeCell(BaseCell,GradedMixin):
 
     __tablename__ = "grade_cells"
 
-    #: Unique id of the solution cell (automatically generated)
+    #: Unique id of the cell (automatically generated from BaseCell)
     id = Column(String(32), ForeignKey('base_cell.id'), primary_key=True)
 
     def to_dict(self):
@@ -295,6 +295,8 @@ class GradeCell(BaseCell,GradedMixin):
 
 
 class CommentedMixin():
+    """Mixin class providing the reference to comments for commented cells."""
+
     #: A collection of comments assigned to submitted versions of this grade cell,
     #: represented by :class:`~nbgrader.api.Comment` objects
     @declared_attr
@@ -304,7 +306,7 @@ class CommentedMixin():
 
 class SolutionCell(BaseCell,CommentedMixin):
     __tablename__ = "solution_cells"
-    #: Unique id of the solution cell (automatically generated)
+    #: Unique id of the cell (automatically generated from BaseCell)
     id = Column(String(32), ForeignKey('base_cell.id'), primary_key=True)
 
 
@@ -331,9 +333,11 @@ class SolutionCell(BaseCell,CommentedMixin):
 
 
 class TaskCell(BaseCell,GradedMixin,CommentedMixin):
+    """Database representation of a task cell."""
+    
     __tablename__ = "task_cells"
 
-    #: Unique id of the solution cell (automatically generated)
+    #: Unique id of the cell (automatically generated from BaseCell)
     id = Column(String(32), ForeignKey('base_cell.id'), primary_key=True)
 
     def to_dict(self):
@@ -1770,7 +1774,7 @@ class Gradebook(object):
         return grade_cell
 
     def find_graded_cell(self, name, notebook, assignment):
-        """Find a grade cell in a particular notebook of an assignment.
+        """Find a graded cell in a particular notebook of an assignment. This can be either a GradeCell or a TaskCell
 
         Parameters
         ----------
@@ -1783,7 +1787,7 @@ class Gradebook(object):
 
         Returns
         -------
-        grade_cell : :class:`~nbgrader.api.GradeCell`
+        grade_cell : :class:`~nbgrader.api.GradeCell` or :class:`~nbgrader.api.TaskCell`
 
         """
 
@@ -2484,7 +2488,7 @@ class Gradebook(object):
         Parameters
         ----------
         grade_cell : string
-            the name of a grade cell
+            the name of a grade or task cell
         notebook : string
             the name of a notebook
         assignment : string
@@ -2560,7 +2564,7 @@ class Gradebook(object):
         Parameters
         ----------
         solution_cell : string
-            the name of a solution cell
+            the name of a solution or task cell
         notebook : string
             the name of a notebook
         assignment : string
