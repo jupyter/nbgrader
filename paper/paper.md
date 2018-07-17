@@ -35,7 +35,7 @@ authors:
   orcid: 0000-0002-5799-8524
   affiliation: 5
 - name: Fernando Pérez
-  orcid: 
+  orcid: 0000-0002-1725-9815
   affiliation: 1
 - name: Benjamin Ragan-Kelley
   orcid: 0000-0002-1023-7082
