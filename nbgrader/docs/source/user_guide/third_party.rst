@@ -52,3 +52,6 @@ Presentations and Educational Materials
 
 `Instructor Workshop: Jupyter in the Classroom <https://github.com/lucentdan/JupyterInTheClassroom>`_
     Teaching Instructors about Jupyter
+
+`Jupyter in Education Map <https://elc.github.io/jupyter-map/>`_
+    Interactive map with universities using Jupyter
