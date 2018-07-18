@@ -49,6 +49,13 @@
       "affiliation": "Cal Poly, San Luis Obispo"
     },
     {
+      "@id": "https://orcid.org/0000-0002-5138-7255",
+      "@type": "Person",
+      "email": "tom_griffiths@berkeley.edu",
+      "name": "Thomas L. Griffiths",
+      "affiliation": "University of California, Berkeley"
+    },
+    {
       "@id": "https://orcid.org/0000-0002-3860-0429",
       "@type": "Person",
       "email": "jessica.b.hamrick@gmail.com",
@@ -60,7 +67,14 @@
       "@type": "Person",
       "email": "rgbkrk@gmail.com",
       "name": "Kyle Kelley",
-      "affiliation": "Netflix, Inc"
+      "affiliation": "Netflix, Inc."
+    },
+    {
+      "@id": "",
+      "@type": "Person",
+      "email": "mpacer.phd@gmail.com",
+      "name": "M Pacer",
+      "affiliation": "Netflix, Inc."
     },
     {
       "@id": "https://orcid.org/0000-0002-5799-8524",

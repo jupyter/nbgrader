@@ -25,11 +25,17 @@ authors:
 - name: Brian Granger
   orcid: 0000-0002-5223-6168
   affiliation: 3
+- name: Thomas L. Griffiths
+  orcid: 0000-0002-5138-7255
+  affiliation: 1
 - name: Jessica Hamrick
   orcid: 0000-0002-3860-0429
   affiliation: 4
 - name: Kyle Kelley
   orcid: 0000-0002-4281-9351
+  affiliation: 9
+- name: M Pacer
+  orcid:
   affiliation: 9
 - name: Logan Page
   orcid: 0000-0002-5799-8524
@@ -63,7 +69,7 @@ affiliations:
   index: 7
 - name: Lafayette College
   index: 8
-- name: Netflix, Inc:
+- name: Netflix, Inc.
   index: 9
 date: 2 June 2018
 bibliography: paper.bib
