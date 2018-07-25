@@ -68,6 +68,17 @@ class Exchange(LoggingConfigurable):
         )
     ).tag(config=True)
 
+    groupshared = Bool(
+        False,
+        help=dedent(
+            """
+            Be less strict about user permissions (instructor files are by
+            default group writeable.  Requires that admins ensure that primary
+            groups are correct!
+            """
+        )
+    ).tag(config=True)
+
     coursedir = Instance(CourseDirectory, allow_none=True)
     authenticator = Instance(Authenticator, allow_none=True)
 
