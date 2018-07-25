@@ -77,19 +77,22 @@ class ExchangeReleaseAssignment(Exchange):
         self.inbound_path = os.path.join(self.course_path, 'inbound')
         self.dest_path = os.path.join(self.outbound_path, self.coursedir.assignment_id)
         # 0755
+        # groupshared: +2040
         self.ensure_directory(
             self.course_path,
-            S_IRUSR|S_IWUSR|S_IXUSR|S_IRGRP|S_IXGRP|S_IROTH|S_IXOTH
+            S_IRUSR|S_IWUSR|S_IXUSR|S_IRGRP|S_IXGRP|S_IROTH|S_IXOTH|((S_ISGID|S_IWGRP) if self.groupshared else 0)
         )
         # 0755
+        # groupshared: +2040
         self.ensure_directory(
             self.outbound_path,
-            S_IRUSR|S_IWUSR|S_IXUSR|S_IRGRP|S_IXGRP|S_IROTH|S_IXOTH
+            S_IRUSR|S_IWUSR|S_IXUSR|S_IRGRP|S_IXGRP|S_IROTH|S_IXOTH|((S_ISGID|S_IWGRP) if self.groupshared else 0)
         )
         # 0733 with set GID so student submission will have the instructors group
+        # groupshared: +0040
         self.ensure_directory(
             self.inbound_path,
-            S_ISGID|S_IRUSR|S_IWUSR|S_IXUSR|S_IWGRP|S_IXGRP|S_IWOTH|S_IXOTH
+            S_ISGID|S_IRUSR|S_IWUSR|S_IXUSR|S_IWGRP|S_IXGRP|S_IWOTH|S_IXOTH|(S_IRGRP if self.groupshared else 0)
         )
 
     def copy_files(self):
@@ -108,6 +111,6 @@ class ExchangeReleaseAssignment(Exchange):
         self.do_copy(self.src_path, self.dest_path)
         self.set_perms(
             self.dest_path,
-            fileperms=(S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH),
-            dirperms=(S_IRUSR|S_IWUSR|S_IXUSR|S_IRGRP|S_IXGRP|S_IROTH|S_IXOTH))
+            fileperms=(S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH|(S_IWGRP if self.groupshared else 0)),
+            dirperms=(S_IRUSR|S_IWUSR|S_IXUSR|S_IRGRP|S_IXGRP|S_IROTH|S_IXOTH|((S_ISGID|S_IWGRP) if self.groupshared else 0)))
         self.log.info("Released as: {} {}".format(self.coursedir.course_id, self.coursedir.assignment_id))
