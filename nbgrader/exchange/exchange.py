@@ -142,7 +142,11 @@ class Exchange(LoggingConfigurable):
         if sys.platform == 'win32':
             self.fail("Sorry, the exchange is not available on Windows.")
 
-        self.ensure_root()
+        if not self.groupshared:
+            # This just makes sure that directory is o+rwx.  In group shared
+            # case, it is up to admins to ensure that instructors can write
+            # there.
+            self.ensure_root()
         self.set_timestamp()
 
         self.init_src()
