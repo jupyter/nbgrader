@@ -57,7 +57,7 @@ class BaseConverter(LoggingConfigurable):
 
     @default("permissions")
     def _permissions_default(self):
-        return 444
+        return 664 if self.groupshared else 444
 
     coursedir = Instance(CourseDirectory, allow_none=True)
 
