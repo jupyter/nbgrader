@@ -32,7 +32,7 @@ class ExchangeReleaseAssignment(Exchange):
         super(ExchangeReleaseAssignment, self)._load_config(cfg, **kwargs)
 
     def ensure_root(self):
-        perms = S_IRUSR|S_IWUSR|S_IXUSR|S_IRGRP|S_IWGRP|S_IXGRP|S_IROTH|S_IWOTH|S_IXOTH
+        perms = S_IRUSR|S_IWUSR|S_IXUSR|S_IRGRP|S_IWGRP|S_IXGRP|S_IROTH|S_IWOTH|S_IXOTH|((S_IWGRP|S_ISGID) if self.groupshared else 0)
 
         # if root doesn't exist, create it and set permissions
         if not os.path.exists(self.root):
