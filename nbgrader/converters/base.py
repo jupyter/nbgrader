@@ -44,6 +44,17 @@ class BaseConverter(LoggingConfigurable):
         )
     ).tag(config=True)
 
+    groupshared = Bool(
+        False,
+        help=dedent(
+            """
+            Be less strict about user permissions (instructor files are by
+            default group writeable.  Requires that admins ensure that primary
+            groups are correct!
+            """
+        )
+    ).tag(config=True)
+
     @default("permissions")
     def _permissions_default(self):
         return 444

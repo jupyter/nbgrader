@@ -42,7 +42,7 @@ class GenerateAssignment(BaseConverter):
 
     @default("permissions")
     def _permissions_default(self):
-        return 644
+        return 664 if self.groupshared else 644
 
     @property
     def _input_directory(self):
