@@ -74,9 +74,9 @@ class AssignmentList(LoggingConfigurable):
             else:
                 for assignment in assignments:
                     if assignment['status'] == 'fetched':
-                        assignment['path'] = os.path.relpath(assignment['path'], self.assignment_dir)
+                        assignment['path'] = os.path.relpath(assignment['path'], self.parent.notebook_dir)
                         for notebook in assignment['notebooks']:
-                            notebook['path'] = os.path.relpath(notebook['path'], self.assignment_dir)
+                            notebook['path'] = os.path.relpath(notebook['path'], self.parent.notebook_dir)
                 retvalue = {
                     "success": True,
                     "value": sorted(assignments, key=lambda x: (x['course_id'], x['assignment_id']))
