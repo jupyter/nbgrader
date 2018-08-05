@@ -33,7 +33,7 @@ def chdir(dirname):
 
 class AssignmentList(LoggingConfigurable):
 
-    assignment_dir = Unicode('', help='Directory where the nbgrader commands should be run')
+    assignment_dir = Unicode('', help='Directory where the nbgrader commands should be run').tag(config=True)
     @default("assignment_dir")
     def _assignment_dir_default(self):
         return self.parent.notebook_dir
