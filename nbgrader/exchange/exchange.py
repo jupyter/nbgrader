@@ -143,7 +143,7 @@ class Exchange(LoggingConfigurable):
             for dirname, _, filenames in os.walk(dest):
                 # dirs become ug+rwx
                 if os.stat(dirname).st_uid == os.getuid():
-                    os.chmod(dirname, (os.stat(dirname).st_mode|0o770) & 0o777)
+                    os.chmod(dirname, (os.stat(dirname).st_mode|0o2770) & 0o2777)
                 for filename in filenames:
                     filename = os.path.join(dirname, filename)
                     if os.stat(filename).st_uid == os.getuid():
