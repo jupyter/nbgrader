@@ -137,6 +137,17 @@ class Exchange(LoggingConfigurable):
                                                include=self.coursedir.include,
                                                max_file_size=self.coursedir.max_file_size,
                                                log=self.log))
+        # copytree copies access mode too - so we must add go+rw back to it if
+        # we are in groupshared.
+        if self.groupshared:
+            for dirname, _, filenames in os.walk(dest):
+                # dirs become ug+rwx
+                if os.stat(dirname).st_uid == os.getuid():
+                    os.chmod(dirname, (os.stat(dirname).st_mode|0o770) & 0o777)
+                for filename in filenames:
+                    filename = os.path.join(dirname, filename)
+                    if os.stat(filename).st_uid == os.getuid():
+                        os.chmod(filename, (os.stat(filename).st_mode|0o660) & 0o777)
 
     def start(self):
         if sys.platform == 'win32':
