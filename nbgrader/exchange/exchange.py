@@ -142,12 +142,12 @@ class Exchange(LoggingConfigurable):
         if self.groupshared:
             for dirname, _, filenames in os.walk(dest):
                 # dirs become ug+rwx
-                if os.stat(dirname).st_uid == os.getuid():
-                    os.chmod(dirname, (os.stat(dirname).st_mode|0o2770) & 0o2777)
+                try:   os.chmod(dirname, (os.stat(dirname).st_mode|0o2770) & 0o2777)
+                except PermissionError: pass
                 for filename in filenames:
                     filename = os.path.join(dirname, filename)
-                    if os.stat(filename).st_uid == os.getuid():
-                        os.chmod(filename, (os.stat(filename).st_mode|0o660) & 0o777)
+                    try:    os.chmod(filename, (os.stat(filename).st_mode|0o660) & 0o777)
+                    except PermissionError: pass
 
     def start(self):
         if sys.platform == 'win32':

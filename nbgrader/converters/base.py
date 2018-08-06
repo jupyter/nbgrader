@@ -264,7 +264,8 @@ class BaseConverter(LoggingConfigurable):
             if self.groupshared and os.stat(dirname).st_uid == os.getuid():
                 #for subdirname in subdirnames:
                 #    subdirname = os.path.join(dirname, subdirname)
-                os.chmod(dirname, (os.stat(dirname).st_mode|0o2770) & 0o2777)
+                try:   os.chmod(dirname, (os.stat(dirname).st_mode|0o2770) & 0o2777)
+                except PermissionError: pass
         # If groupshared, set write permissions on directories.  Directories
         # are created within ipython_genutils.path.ensure_dir_exists via
         # nbconvert.writer, (unless there are supplementary files) with a
@@ -273,9 +274,10 @@ class BaseConverter(LoggingConfigurable):
         if self.groupshared:
             # Root may be created in this step, and is not included above.
             rootdir = self.coursedir.format_path(self._output_directory, '.', '.')
-            if os.stat(rootdir).st_uid == os.getuid():
-                # Add 2770 to existing dir permissions (don't unconditionally override)
-                os.chmod(rootdir, (os.stat(rootdir).st_mode|0o2770) & 0o2777)
+            # Add 2770 to existing dir permissions (don't unconditionally override)
+            try:   os.chmod(rootdir, (os.stat(rootdir).st_mode|0o2770) & 0o2777)
+            except PermissionError: pass
+
 
     def convert_single_notebook(self, notebook_filename):
         """Convert a single notebook.
