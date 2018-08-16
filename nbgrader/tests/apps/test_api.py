@@ -2,6 +2,7 @@ import pytest
 import sys
 import os
 import shutil
+import filecmp
 
 from os.path import join
 from traitlets.config import Config
@@ -676,3 +677,32 @@ class TestNbGraderAPI(BaseTestApp):
 
         result = api.autograde("ps1", "foo")
         assert result["success"]
+
+    def test_feedback(self, api, course_dir, db):
+        self._copy_file(
+            join("files", "autograded-unchanged.ipynb"), 
+            join(course_dir, "autograded", "foo", "ps1", "p1.ipynb")
+        )
+        result = api.feedback("ps1")
+        assert result["success"]
+        assert os.path.exists(join(course_dir, "feedback", "foo", "ps1", "p1.html"))
+        assert filecmp.cmp(
+            join("files", "feedback-unchanged.html"), 
+            join(course_dir, "feedback", "foo", "ps1", "p1.html")
+        )
+
+        self._copy_file(
+            join("files", "autograded-changed.ipynb"), 
+            join(course_dir, "autograded", "foo", "ps1", "p1.ipynb")
+        )
+        result = api.feedback("ps1")
+        assert result["success"]
+        assert os.path.exists(join(course_dir, "feedback", "foo", "ps1", "p1.html"))
+        assert filecmp.cmp(
+            join("files", "feedback-changed.html"), 
+            join(course_dir, "feedback", "foo", "ps1", "p1.html")
+        )
+
+        os.makedirs(join(course_dir, "submitted", "foo", "ps2"))
+        result = api.feedback("ps2")
+        assert not result["success"]
