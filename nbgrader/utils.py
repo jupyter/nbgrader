@@ -168,8 +168,10 @@ def get_username():
     """Get the username of the current process."""
     if pwd is None:
         raise OSError("get_username cannot be called on Windows")
-    return pwd.getpwuid(os.getuid())[0]
-
+    osname=pwd.getpwuid(os.getuid())[0]
+    if osname=='jovyan':
+        return os.environ.get('JUPYTERHUB_USER','jovyan')
+    return osname
 
 def find_owner(path):
     """Get the username of the owner of path."""
