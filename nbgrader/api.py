@@ -1049,7 +1049,7 @@ Grade.cell_type_from_gradecell = column_property(
         .correlate_except(GradeCell), deferred=True)
 
 Grade.cell_type=column_property(
-        select([func.coalesce(Grade.cell_type_from_gradecell,Grade.cell_type_from_taskcell,3)])
+        select([func.coalesce(Grade.cell_type_from_gradecell,Grade.cell_type_from_taskcell)])
         )
 
 
