@@ -110,7 +110,7 @@ class ExchangeSubmit(Exchange):
         self.init_release()
 
         dest_path = os.path.join(self.inbound_path, self.assignment_filename)
-        cache_path = os.path.join(self.cache_path, self.assignment_filename)
+        cache_path = os.path.join(self.cache_path, self.assignment_filename.rsplit('+', 1)[0])
 
         self.log.info("Source: {}".format(self.src_path))
         self.log.info("Destination: {}".format(dest_path))
