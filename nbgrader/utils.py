@@ -163,15 +163,19 @@ def check_directory(path, read=False, write=False, execute=False):
     else:
         return False
 
-
-def get_username():
+def get_osusername():
     """Get the username of the current process."""
     if pwd is None:
         raise OSError("get_username cannot be called on Windows")
-    osname=pwd.getpwuid(os.getuid())[0]
+    return pwd.getpwuid(os.getuid())[0]
+
+def get_username():
+    """ Get the username, use os user name but override if username is jovyan ."""
+    osname = get_osusername()
     if osname=='jovyan':
         return os.environ.get('JUPYTERHUB_USER','jovyan')
-    return osname
+    else:
+        return osname
 
 def find_owner(path):
     """Get the username of the owner of path."""
@@ -182,7 +186,7 @@ def find_owner(path):
 
 def self_owned(path):
     """Is the path owned by the current user of this process?"""
-    return get_username() == find_owner(os.path.abspath(path))
+    return get_osusername() == find_owner(os.path.abspath(path))
 
 
 def is_ignored(filename, ignore_globs=None):
