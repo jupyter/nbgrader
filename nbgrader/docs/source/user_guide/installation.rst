@@ -9,7 +9,7 @@ system and command line tools::
 
     pip install nbgrader
 
-Or, if you use `Anaconda <https://www.continuum.io/downloads>`__::
+Or, if you use `Anaconda <https://www.anaconda.com/download>`__::
 
     conda install jupyter
     conda install -c conda-forge nbgrader
@@ -18,7 +18,7 @@ nbgrader extensions
 -------------------
 
 **Take note:** If you install nbgrader via `Anaconda
-<https://www.continuum.io/downloads>`__ the nbgrader extensions will be
+<https://www.anaconda.com/download`__ the nbgrader extensions will be
 installed and enabled for you upon installation. See the `Installation
 options`_ and `Disabling extensions`_ sections below for more information on
 changing the default installation option ``--sys-prefix`` or disabling one or
@@ -99,7 +99,7 @@ or to disable the Formgrader extension::
     jupyter serverextension disable --sys-prefix nbgrader.server_extensions.formgrader
 
 For example lets assume you have installed nbgrader via `Anaconda
-<https://www.continuum.io/downloads>`__ (meaning all extensions are installed
+<https://www.anaconda.com/download>`__ (meaning all extensions are installed
 and enabled with the ``--sys-prefix`` flag, i.e. anyone using the particular
 Python installation or conda environment where nbgrader is installed). But you
 only want the *create assignment* extension available to a specific user and
