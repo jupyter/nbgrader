@@ -47,4 +47,4 @@ only has an nbextension part.
 
 Installing Firefox Headless WebDriver
 -------------------------------------
-To run tests while developing nbgrader and its documentation, the Firefox headless webdriver must be installed. Please `follow the Mozilla installation instructions <https://developer.mozilla.org/en-US/docs/Mozilla/QA/Marionette/WebDriver>`_ to get Firefox properly setup on your system.
+To run tests while developing nbgrader and its documentation, the Firefox headless webdriver must be installed. Please `follow the Mozilla installation instructions <https://developer.mozilla.org/en-US/docs/Web/WebDriver>`_ to get Firefox properly setup on your system.
