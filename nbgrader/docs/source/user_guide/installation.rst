@@ -18,7 +18,7 @@ nbgrader extensions
 -------------------
 
 **Take note:** If you install nbgrader via `Anaconda
-<https://www.anaconda.com/download`__ the nbgrader extensions will be
+<https://www.anaconda.com/download>`__ the nbgrader extensions will be
 installed and enabled for you upon installation. See the `Installation
 options`_ and `Disabling extensions`_ sections below for more information on
 changing the default installation option ``--sys-prefix`` or disabling one or
@@ -56,7 +56,7 @@ There are a number of ways you may need to customize the installation:
 
 -  To install or enable the nbextensions/serverextension for just the
    current user, run the above commands with ``--user`` instead of ``--sys-prefix``::
-    
+
     jupyter nbextension install --user --py nbgrader --overwrite
     jupyter nbextension enable --user --py nbgrader
     jupyter serverextension enable --user --py nbgrader
