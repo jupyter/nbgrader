@@ -1,3 +1,4 @@
+import base64
 import os
 from stat import (
     S_IRUSR, S_IWUSR, S_IXUSR,
@@ -45,7 +46,9 @@ class ExchangeSubmit(Exchange):
             self.fail("You don't have write permissions to the directory: {}".format(self.inbound_path))
 
         self.cache_path = os.path.join(self.cache, self.course_id)
-        self.assignment_filename = '{}+{}+{}'.format(get_username(), self.coursedir.assignment_id, self.timestamp)
+        random_str = base64.urlsafe_b64encode(os.urandom(9)).decode('ascii')
+        self.assignment_filename = '{}+{}+{}+{}'.format(
+            get_username(), self.coursedir.assignment_id, self.timestamp, random_str)
 
     def init_release(self):
         if self.course_id == '':
@@ -107,7 +110,7 @@ class ExchangeSubmit(Exchange):
         self.init_release()
 
         dest_path = os.path.join(self.inbound_path, self.assignment_filename)
-        cache_path = os.path.join(self.cache_path, self.assignment_filename)
+        cache_path = os.path.join(self.cache_path, self.assignment_filename.rsplit('+', 1)[0])
 
         self.log.info("Source: {}".format(self.src_path))
         self.log.info("Destination: {}".format(dest_path))
