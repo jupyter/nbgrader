@@ -41,7 +41,7 @@ While the documentation gets built automatically on Read The Docs, the notebooks
 However, executing the notebooks is easy to do!
 
 Our docs are built with `nbconvert <https://nbconvert.readthedocs.io/en/latest/>`_,
-`Pandoc <http://pandoc.org/>`_, and `Sphinx <http://sphinx-doc.org/>`_.
+`Pandoc <http://pandoc.org/>`_, and `Sphinx <http://www.sphinx-doc.org/en/master/>`_.
 To build the docs locally, run the following command::
 
     invoke docs
@@ -65,4 +65,4 @@ Automatic builds
 ----------------
 When a commit is made on the ``master`` branch, documentation is automatically
 built by Read The Docs and rendered at
-`nbgrader.readthedocs.org <https://nbgrader.readthedocs.io>`_.
+`nbgrader.readthedocs.org <https://nbgrader.readthedocs.io/en/stable/>`_.
