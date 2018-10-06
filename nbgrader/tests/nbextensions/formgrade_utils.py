@@ -87,7 +87,7 @@ def _get(browser, url, retries=5):
             _get(browser, url, retries=retries - 1)
 
     try:
-        alert = browser.switch_to_alert()
+        alert = browser.switch_to.alert
     except NoAlertPresentException:
         pass
     else:
