@@ -1,5 +1,6 @@
 import os
 import pytest
+import time
 
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
@@ -65,7 +66,8 @@ def _load_notebook(browser, port, retries=5, name="blank"):
             return (typeof Jupyter !== "undefined" &&
                     Jupyter.page !== undefined &&
                     Jupyter.notebook !== undefined &&
-                    $("#notebook_name").text() === "{}");
+                    $("#notebook_name").text() === "{}" &&
+                    Jupyter.notebook._fully_loaded);
             """.format(name))
 
     # wait for the page to load
@@ -80,6 +82,12 @@ def _load_notebook(browser, port, retries=5, name="blank"):
             print("Failed to load the page too many times")
             raise
 
+    # Hack: there seems to be some race condition here where sometimes the
+    # page is still not fully loaded, but I can't figure out exactly what I need
+    # to check for to ensure that it is. So for now just add a small sleep to
+    # make sure everything finishes loading, though this is not really a robust
+    # fix for the problem :/
+    time.sleep(1)
 
 
 def _activate_toolbar(browser, name="Create%20Assignment"):
@@ -107,29 +115,51 @@ def _activate_toolbar(browser, name="Create%20Assignment"):
             EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".celltoolbar button")))
 
 
+def _select(browser, text, index=0):
+    def is_clickable(browser):
+        elems = browser.find_elements_by_css_selector('.celltoolbar select')
+        if len(elems) <= index:
+            return False
+        elem = elems[index]
+        return elem.is_displayed and elem.is_enabled
+
+    def is_option(browser):
+        elem = browser.find_elements_by_css_selector('.celltoolbar select')[index]
+        select = Select(elem)
+        options = [x.get_attribute('value') for x in select.options]
+        return text in options
+
+    _wait(browser).until(is_clickable)
+    _wait(browser).until(is_option)
+    elem = browser.find_elements_by_css_selector('.celltoolbar select')[index]
+    select = Select(elem)
+    select.select_by_value(text)
+
+    def selected(browser):
+        elem = browser.find_elements_by_css_selector('.celltoolbar select')[index]
+        return elem.get_attribute('value') == text
+
+    _wait(browser).until(selected)
+
+
 def _select_none(browser, index=0):
-    select = Select(browser.find_elements_by_css_selector('.celltoolbar select')[index])
-    select.select_by_value('')
+    _select(browser, '', index=index)
 
 
 def _select_manual(browser, index=0):
-    select = Select(browser.find_elements_by_css_selector('.celltoolbar select')[index])
-    select.select_by_value('manual')
+    _select(browser, 'manual', index=index)
 
 
 def _select_solution(browser, index=0):
-    select = Select(browser.find_elements_by_css_selector('.celltoolbar select')[index])
-    select.select_by_value('solution')
+    _select(browser, 'solution', index=index)
 
 
 def _select_tests(browser, index=0):
-    select = Select(browser.find_elements_by_css_selector('.celltoolbar select')[index])
-    select.select_by_value('tests')
+    _select(browser, 'tests', index=index)
 
 
 def _select_locked(browser, index=0):
-    select = Select(browser.find_elements_by_css_selector('.celltoolbar select')[index])
-    select.select_by_value('readonly')
+    _select(browser, 'readonly', index=index)
 
 
 def _set_points(browser, points=2, index=0):
