@@ -102,7 +102,7 @@ def _run_tests(ctx, mark=None, skip=None, junitxml=None):
 
     if not WINDOWS:
         run(ctx, "ls -a .coverage*")
-        run(ctx, "coverage combine")
+        run(ctx, "coverage combine || true")
 
 
 @task
