@@ -118,7 +118,11 @@ def parse_utc(ts):
         parts = ts.split(" ")
         if len(parts) == 3:
             ts = " ".join(parts[:2] + ["TZ"])
-            tz = dateutil.tz.gettz(parts[2])
+            tz = parts[2]
+            try:
+                tz = int(tz)
+            except ValueError:
+                tz = dateutil.tz.gettz(tz)
             ts = dateutil.parser.parse(ts, tzinfos=dict(TZ=tz))
         else:
             ts = dateutil.parser.parse(ts)
