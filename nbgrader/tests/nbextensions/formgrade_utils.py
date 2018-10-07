@@ -57,6 +57,12 @@ def _wait_for_element(browser, element_id, time=10):
     )
 
 
+def _wait_for_tag(browser, tag, time=10):
+    return WebDriverWait(browser, time).until(
+        EC.presence_of_element_located((By.TAG_NAME, tag))
+    )
+
+
 def _wait_for_visibility_of_element(browser, element_id, time=10):
     return WebDriverWait(browser, time).until(
         EC.visibility_of_element_located((By.ID, element_id))
@@ -177,6 +183,7 @@ def _focus_body(browser, num_tries=5):
 
 
 def _send_keys_to_body(browser, *keys):
+    _wait_for_tag(browser, "body")
     _focus_body(browser)
     body = browser.find_element_by_tag_name("body")
     body.send_keys(*keys)
