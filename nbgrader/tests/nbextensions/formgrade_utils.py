@@ -6,7 +6,7 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
-from selenium.common.exceptions import TimeoutException, NoSuchElementException, NoAlertPresentException
+from selenium.common.exceptions import TimeoutException, NoSuchElementException, NoAlertPresentException, WebDriverException
 
 
 
@@ -54,6 +54,12 @@ def _click_link(browser, link_text, partial=False):
 def _wait_for_element(browser, element_id, time=10):
     return WebDriverWait(browser, time).until(
         EC.presence_of_element_located((By.ID, element_id))
+    )
+
+
+def _wait_for_tag(browser, tag, time=10):
+    return WebDriverWait(browser, time).until(
+        EC.presence_of_element_located((By.TAG_NAME, tag))
     )
 
 
@@ -162,8 +168,23 @@ def _click_element(browser, name):
     browser.find_element_by_css_selector(name).click()
 
 
+def _focus_body(browser, num_tries=5):
+    for i in range(num_tries):
+        try:
+            browser.execute_script("$('body').focus();")
+        except WebDriverException:
+            if i == (num_tries - 1):
+                raise
+            else:
+                print("Couldn't focus body, waiting and trying again...")
+                time.sleep(1)
+        else:
+            break
+
+
 def _send_keys_to_body(browser, *keys):
-    browser.execute_script("$('body').focus();")
+    _wait_for_tag(browser, "body")
+    _focus_body(browser)
     body = browser.find_element_by_tag_name("body")
     body.send_keys(*keys)
 
@@ -173,27 +194,36 @@ def _get_next_arrow(browser):
 
 
 def _get_comment_box(browser, index):
-    comments = browser.find_elements_by_css_selector(".comment")
-    if len(comments) <= index:
-        return None
-    else:
-        return comments[index]
+    def comment_is_present(browser):
+        comments = browser.find_elements_by_css_selector(".comment")
+        if len(comments) <= index:
+            return False
+        return True
+
+    WebDriverWait(browser, 10).until(comment_is_present)
+    return browser.find_elements_by_css_selector(".comment")[index]
 
 
 def _get_score_box(browser, index):
-    scores = browser.find_elements_by_css_selector(".score")
-    if len(scores) <= index:
-        return None
-    else:
-        return scores[index]
+    def score_is_present(browser):
+        scores = browser.find_elements_by_css_selector(".score")
+        if len(scores) <= index:
+            return False
+        return True
+
+    WebDriverWait(browser, 10).until(score_is_present)
+    return browser.find_elements_by_css_selector(".score")[index]
 
 
 def _get_extra_credit_box(browser, index):
-    ecs = browser.find_elements_by_css_selector(".extra-credit")
-    if len(ecs) <= index:
-        return None
-    else:
-        return ecs[index]
+    def extra_credit_is_present(browser):
+        extra_credits = browser.find_elements_by_css_selector(".extra-credit")
+        if len(extra_credits) <= index:
+            return False
+        return True
+
+    WebDriverWait(browser, 10).until(extra_credit_is_present)
+    return browser.find_elements_by_css_selector(".extra-credit")[index]
 
 
 def _save_comment(browser, index):
