@@ -15,8 +15,8 @@ class TestNbGraderExport(BaseTestApp):
     def test_export(self, db, course_dir):
         with open("nbgrader_config.py", "a") as fh:
             fh.write("""c.CourseDirectory.db_assignments = [
-                dict(name='ps1', duedate='2015-02-02 14:58:23.948203 PST'),
-                dict(name='ps2', duedate='2015-02-02 14:58:23.948203 PST')]\n""")
+                dict(name='ps1', duedate='2015-02-02 14:58:23.948203 America/Los_Angeles'),
+                dict(name='ps2', duedate='2015-02-02 14:58:23.948203 America/Los_Angeles')]\n""")
             fh.write("""c.CourseDirectory.db_students = [dict(id="foo"), dict(id="bar")]""")
 
         self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))

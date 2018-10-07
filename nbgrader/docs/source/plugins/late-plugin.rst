@@ -7,7 +7,7 @@ nbgrader will still compute how late each submission is.
 
 For this to work, you must include a duedate for the assignment and then a
 ``timestamp.txt`` file in the folder for each submission with a single line
-containing a timestamp (e.g. ``2015-02-02 14:58:23.948203 PST``).
+containing a timestamp (e.g. ``2015-02-02 14:58:23.948203 America/Los_Angeles``).
 Then, when you run ``nbgrader autograde``, nbgrader will record these
 timestamps into the database, compute how late each submission is and assign a
 late penalty (if specified). Also see the :doc:`faq </user_guide/faq>`.

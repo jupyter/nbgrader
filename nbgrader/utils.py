@@ -115,7 +115,13 @@ def parse_utc(ts):
     if ts is None:
         return None
     if isinstance(ts, six.string_types):
-        ts = dateutil.parser.parse(ts)
+        parts = ts.split(" ")
+        if len(parts) == 3:
+            ts = " ".join(parts[:2] + ["TZ"])
+            tz = dateutil.tz.gettz(parts[2])
+            ts = dateutil.parser.parse(ts, tzinfos=dict(TZ=tz))
+        else:
+            ts = dateutil.parser.parse(ts)
     if ts.tzinfo is not None:
         ts = (ts - ts.utcoffset()).replace(tzinfo=None)
     return ts

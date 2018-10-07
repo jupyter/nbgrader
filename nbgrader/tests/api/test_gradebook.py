@@ -174,9 +174,9 @@ def test_update_or_create_assignment(gradebook):
     assert a1.duedate is None
 
     # now test finding/updating it
-    a2 = gradebook.update_or_create_assignment('foo', duedate="2015-02-02 14:58:23.948203 PST")
+    a2 = gradebook.update_or_create_assignment('foo', duedate="2015-02-02 14:58:23.948203 America/Los_Angeles")
     assert a1 == a2
-    assert a2.duedate == utils.parse_utc("2015-02-02 14:58:23.948203 PST")
+    assert a2.duedate == utils.parse_utc("2015-02-02 14:58:23.948203 America/Los_Angeles")
 
 
 #### Test notebooks
@@ -532,9 +532,9 @@ def test_update_or_create_submission(assignment):
     s1 = assignment.update_or_create_submission('foo', 'hacker123')
     assert s1.timestamp is None
 
-    s2 = assignment.update_or_create_submission('foo', 'hacker123', timestamp="2015-02-02 14:58:23.948203 PST")
+    s2 = assignment.update_or_create_submission('foo', 'hacker123', timestamp="2015-02-02 14:58:23.948203 America/Los_Angeles")
     assert s1 == s2
-    assert s2.timestamp == utils.parse_utc("2015-02-02 14:58:23.948203 PST")
+    assert s2.timestamp == utils.parse_utc("2015-02-02 14:58:23.948203 America/Los_Angeles")
 
 
 def test_find_submission_notebook(assignment):
