@@ -194,27 +194,36 @@ def _get_next_arrow(browser):
 
 
 def _get_comment_box(browser, index):
-    comments = browser.find_elements_by_css_selector(".comment")
-    if len(comments) <= index:
-        return None
-    else:
-        return comments[index]
+    def comment_is_present(browser):
+        comments = browser.find_elements_by_css_selector(".comment")
+        if len(comments) <= index:
+            return False
+        return True
+
+    WebDriverWait(browser, 10).until(comment_is_present)
+    return browser.find_elements_by_css_selector(".comment")[index]
 
 
 def _get_score_box(browser, index):
-    scores = browser.find_elements_by_css_selector(".score")
-    if len(scores) <= index:
-        return None
-    else:
-        return scores[index]
+    def score_is_present(browser):
+        scores = browser.find_elements_by_css_selector(".score")
+        if len(scores) <= index:
+            return False
+        return True
+
+    WebDriverWait(browser, 10).until(score_is_present)
+    return browser.find_elements_by_css_selector(".score")[index]
 
 
 def _get_extra_credit_box(browser, index):
-    ecs = browser.find_elements_by_css_selector(".extra-credit")
-    if len(ecs) <= index:
-        return None
-    else:
-        return ecs[index]
+    def extra_credit_is_present(browser):
+        extra_credits = browser.find_elements_by_css_selector(".extra-credit")
+        if len(extra_credits) <= index:
+            return False
+        return True
+
+    WebDriverWait(browser, 10).until(extra_credit_is_present)
+    return browser.find_elements_by_css_selector(".extra-credit")[index]
 
 
 def _save_comment(browser, index):
