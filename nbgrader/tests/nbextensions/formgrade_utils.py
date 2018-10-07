@@ -6,7 +6,7 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
-from selenium.common.exceptions import TimeoutException, NoSuchElementException, NoAlertPresentException
+from selenium.common.exceptions import TimeoutException, NoSuchElementException, NoAlertPresentException, WebDriverException
 
 
 
@@ -162,8 +162,22 @@ def _click_element(browser, name):
     browser.find_element_by_css_selector(name).click()
 
 
+def _focus_body(browser, num_tries=5):
+    for i in range(num_tries):
+        try:
+            browser.execute_script("$('body').focus();")
+        except WebDriverException:
+            if i == (num_tries - 1):
+                raise
+            else:
+                print("Couldn't focus body, waiting and trying again...")
+                time.sleep(1)
+        else:
+            break
+
+
 def _send_keys_to_body(browser, *keys):
-    browser.execute_script("$('body').focus();")
+    _focus_body(browser)
     body = browser.find_element_by_tag_name("body")
     body.send_keys(*keys)
 
