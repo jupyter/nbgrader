@@ -282,7 +282,8 @@ class Validator(LoggingConfigurable):
             } for cell in type_changed]
             return results
 
-        nb = self._preprocess(nb)
+        with utils.chdir(dirname):
+            nb = self._preprocess(nb)
         changed = self._get_changed_cells(nb)
         passed = self._get_passed_cells(nb)
         failed = self._get_failed_cells(nb)

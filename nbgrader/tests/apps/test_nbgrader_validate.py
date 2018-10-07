@@ -22,6 +22,13 @@ class TestNbGraderValidate(BaseTestApp):
         output = run_nbgrader(["validate", "submitted-changed.ipynb"], stdout=True)
         assert output.strip() == "Success! Your notebook passes all the tests."
 
+    def test_validate_subdir(self):
+        """Does the validation fail on an unchanged notebook?"""
+        self._copy_file(join("files", "open_relative_file.ipynb"), "my_subdir/open_relative_file.ipynb")
+        self._copy_file(join("files", "data.txt"), "my_subdir/data.txt")
+        output = run_nbgrader(["validate", "my_subdir/open_relative_file.ipynb"], stdout=True)
+        assert output.strip() == "Success! Your notebook passes all the tests."
+
     def test_invert_validate_unchanged(self):
         """Does the inverted validation pass on an unchanged notebook?"""
         self._copy_file(join("files", "submitted-unchanged.ipynb"), "submitted-unchanged.ipynb")
