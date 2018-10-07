@@ -42,6 +42,7 @@ def docs(ctx):
     if not WINDOWS:
         run(ctx, 'py.test --nbval-lax --current-env nbgrader/docs/source/user_guide/*.ipynb')
     run(ctx, 'python nbgrader/docs/source/build_docs.py')
+    run(ctx, 'python nbgrader/docs/source/clear_docs.py')
     run(ctx, 'make -C nbgrader/docs html')
     run(ctx, 'make -C nbgrader/docs linkcheck')
     run(ctx, 'make -C nbgrader/docs spelling')
@@ -101,7 +102,7 @@ def _run_tests(ctx, mark=None, skip=None, junitxml=None):
 
     if not WINDOWS:
         run(ctx, "ls -a .coverage*")
-        run(ctx, "coverage combine")
+        run(ctx, "coverage combine || true")
 
 
 @task

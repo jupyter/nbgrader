@@ -1,4 +1,5 @@
 import os
+import time
 
 from six.moves.urllib.parse import urljoin, unquote
 from selenium.webdriver.common.keys import Keys
@@ -87,7 +88,7 @@ def _get(browser, url, retries=5):
             _get(browser, url, retries=retries - 1)
 
     try:
-        alert = browser.switch_to_alert()
+        alert = browser.switch_to.alert
     except NoAlertPresentException:
         pass
     else:
@@ -172,15 +173,27 @@ def _get_next_arrow(browser):
 
 
 def _get_comment_box(browser, index):
-    return browser.find_elements_by_css_selector(".comment")[index]
+    comments = browser.find_elements_by_css_selector(".comment")
+    if len(comments) <= index:
+        return None
+    else:
+        return comments[index]
 
 
 def _get_score_box(browser, index):
-    return browser.find_elements_by_css_selector(".score")[index]
+    scores = browser.find_elements_by_css_selector(".score")
+    if len(scores) <= index:
+        return None
+    else:
+        return scores[index]
 
 
 def _get_extra_credit_box(browser, index):
-    return browser.find_elements_by_css_selector(".extra-credit")[index]
+    ecs = browser.find_elements_by_css_selector(".extra-credit")
+    if len(ecs) <= index:
+        return None
+    else:
+        return ecs[index]
 
 
 def _save_comment(browser, index):
@@ -226,6 +239,11 @@ def _load_formgrade(browser, port, gradebook):
     _load_gradebook_page(browser, port, "gradebook/Problem Set 1/Problem 1")
     _click_link(browser, "Submission #1")
     _wait_for_formgrader(browser, port, "submissions/{}/?index=0".format(submissions[0].id))
+
+    # Hack: there is a race condition here where sometimes the formgrader doesn't
+    # fully finish loading. So we add a wait here, though this is not really a
+    # robust solution.
+    time.sleep(1)
 
 
 def _child_exists(elem, selector):

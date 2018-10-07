@@ -45,7 +45,7 @@ def _load_notebook(browser, port, notebook, retries=5):
             break
 
         try:
-            alert = browser.switch_to_alert()
+            alert = browser.switch_to.alert
         except NoAlertPresentException:
             alert = None
         else:

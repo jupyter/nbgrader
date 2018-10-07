@@ -43,6 +43,7 @@ cogsci
 conda
 config
 contextmanager
+CSS
 customizable
 cwd
 datefmt
@@ -113,6 +114,7 @@ ivanslapnicar
 ixjlyons
 I’m
 I’ve
+Javascript
 jcsutherland
 jdfreder
 jhamrick
@@ -212,6 +214,7 @@ subpackage
 suchow
 suprocesses
 svurens
+symlink
 sys
 systemwide
 Szepi

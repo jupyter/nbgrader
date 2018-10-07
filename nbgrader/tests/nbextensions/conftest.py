@@ -181,7 +181,7 @@ def _make_browser(tempdir):
 
     options = webdriver.firefox.options.Options()
     options.add_argument('-headless')
-    browser = webdriver.Firefox(firefox_options=options)
+    browser = webdriver.Firefox(options=options)
     browser.set_page_load_timeout(30)
     browser.set_script_timeout(30)
 
@@ -193,7 +193,7 @@ def _close_browser(browser):
     browser.get("about:blank")
 
     try:
-        alert = browser.switch_to_alert()
+        alert = browser.switch_to.alert
     except NoAlertPresentException:
         pass
     else:
