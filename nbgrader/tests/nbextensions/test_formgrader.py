@@ -13,7 +13,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.action_chains import ActionChains
-from selenium.common.exceptions import SessionNotCreatedException
+from selenium.common.exceptions import SessionNotCreatedException, WebDriverException
 
 from .. import run_nbgrader
 from ...api import Gradebook, MissingEntry
@@ -49,7 +49,7 @@ def browser(request, tempdir, nbserver):
     def fin():
         try:
             _close_browser(browser)
-        except SessionNotCreatedException:
+        except (SessionNotCreatedException, WebDriverException):
             print("Failed to close browser")
     request.addfinalizer(fin)
 

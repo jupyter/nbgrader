@@ -172,15 +172,27 @@ def _get_next_arrow(browser):
 
 
 def _get_comment_box(browser, index):
-    return browser.find_elements_by_css_selector(".comment")[index]
+    comments = browser.find_elements_by_css_selector(".comment")
+    if len(comments) <= index:
+        return None
+    else:
+        return comments[index]
 
 
 def _get_score_box(browser, index):
-    return browser.find_elements_by_css_selector(".score")[index]
+    scores = browser.find_elements_by_css_selector(".score")
+    if len(scores) <= index:
+        return None
+    else:
+        return scores[index]
 
 
 def _get_extra_credit_box(browser, index):
-    return browser.find_elements_by_css_selector(".extra-credit")[index]
+    ecs = browser.find_elements_by_css_selector(".extra-credit")
+    if len(ecs) <= index:
+        return None
+    else:
+        return ecs[index]
 
 
 def _save_comment(browser, index):
