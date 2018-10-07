@@ -227,22 +227,22 @@ class TestNbGraderFeedback(BaseTestApp):
         run_nbgrader(["assign", "ps1"])
 
         self._copy_file(join("files", "test.ipynb"), join(course_dir, "submitted", "foo", "ps1", "p1.ipynb"))
-        self._make_file(join(course_dir, "submitted", "foo", "ps1", "timestamp.txt"), "2015-02-02 15:58:23.948203 PST")
+        self._make_file(join(course_dir, "submitted", "foo", "ps1", "timestamp.txt"), "2015-02-02 15:58:23.948203 America/Los_Angeles")
         run_nbgrader(["autograde", "ps1"])
         run_nbgrader(["feedback", "ps1"])
 
         assert isfile(join(course_dir, "feedback", "foo", "ps1", "p1.html"))
         assert isfile(join(course_dir, "feedback", "foo", "ps1", "timestamp.txt"))
-        assert self._file_contents(join(course_dir, "feedback", "foo", "ps1", "timestamp.txt")) == "2015-02-02 15:58:23.948203 PST"
+        assert self._file_contents(join(course_dir, "feedback", "foo", "ps1", "timestamp.txt")) == "2015-02-02 15:58:23.948203 America/Los_Angeles"
         p = self._file_contents(join(course_dir, "feedback", "foo", "ps1", "p1.html"))
 
         self._empty_notebook(join(course_dir, "autograded", "foo", "ps1", "p1.ipynb"))
-        self._make_file(join(course_dir, "autograded", "foo", "ps1", "timestamp.txt"), "2015-02-02 16:58:23.948203 PST")
+        self._make_file(join(course_dir, "autograded", "foo", "ps1", "timestamp.txt"), "2015-02-02 16:58:23.948203 America/Los_Angeles")
         run_nbgrader(["feedback", "ps1"])
 
         assert isfile(join(course_dir, "feedback", "foo", "ps1", "p1.html"))
         assert isfile(join(course_dir, "feedback", "foo", "ps1", "timestamp.txt"))
-        assert self._file_contents(join(course_dir, "feedback", "foo", "ps1", "timestamp.txt")) == "2015-02-02 16:58:23.948203 PST"
+        assert self._file_contents(join(course_dir, "feedback", "foo", "ps1", "timestamp.txt")) == "2015-02-02 16:58:23.948203 America/Los_Angeles"
         assert p != self._file_contents(join(course_dir, "feedback", "foo", "ps1", "p1.html"))
 
     def test_update_newer_single_notebook(self, course_dir):
@@ -255,25 +255,25 @@ class TestNbGraderFeedback(BaseTestApp):
 
         self._copy_file(join("files", "test.ipynb"), join(course_dir, "submitted", "foo", "ps1", "p1.ipynb"))
         self._copy_file(join("files", "test.ipynb"), join(course_dir, "submitted", "foo", "ps1", "p2.ipynb"))
-        self._make_file(join(course_dir, "submitted", "foo", "ps1", "timestamp.txt"), "2015-02-02 15:58:23.948203 PST")
+        self._make_file(join(course_dir, "submitted", "foo", "ps1", "timestamp.txt"), "2015-02-02 15:58:23.948203 America/Los_Angeles")
         run_nbgrader(["autograde", "ps1"])
         run_nbgrader(["feedback", "ps1"])
 
         assert exists(join(course_dir, "feedback", "foo", "ps1", "p1.html"))
         assert exists(join(course_dir, "feedback", "foo", "ps1", "p2.html"))
         assert isfile(join(course_dir, "feedback", "foo", "ps1", "timestamp.txt"))
-        assert self._file_contents(join(course_dir, "feedback", "foo", "ps1", "timestamp.txt")) == "2015-02-02 15:58:23.948203 PST"
+        assert self._file_contents(join(course_dir, "feedback", "foo", "ps1", "timestamp.txt")) == "2015-02-02 15:58:23.948203 America/Los_Angeles"
         p1 = self._file_contents(join(course_dir, "feedback", "foo", "ps1", "p1.html"))
         p2 = self._file_contents(join(course_dir, "feedback", "foo", "ps1", "p2.html"))
 
         self._empty_notebook(join(course_dir, "autograded", "foo", "ps1", "p1.ipynb"))
         self._empty_notebook(join(course_dir, "autograded", "foo", "ps1", "p2.ipynb"))
-        self._make_file(join(course_dir, "autograded", "foo", "ps1", "timestamp.txt"), "2015-02-02 16:58:23.948203 PST")
+        self._make_file(join(course_dir, "autograded", "foo", "ps1", "timestamp.txt"), "2015-02-02 16:58:23.948203 America/Los_Angeles")
         run_nbgrader(["feedback", "ps1", "--notebook", "p1"])
 
         assert exists(join(course_dir, "feedback", "foo", "ps1", "p1.html"))
         assert exists(join(course_dir, "feedback", "foo", "ps1", "p2.html"))
         assert isfile(join(course_dir, "feedback", "foo", "ps1", "timestamp.txt"))
-        assert self._file_contents(join(course_dir, "feedback", "foo", "ps1", "timestamp.txt")) == "2015-02-02 16:58:23.948203 PST"
+        assert self._file_contents(join(course_dir, "feedback", "foo", "ps1", "timestamp.txt")) == "2015-02-02 16:58:23.948203 America/Los_Angeles"
         assert p1 != self._file_contents(join(course_dir, "feedback", "foo", "ps1", "p1.html"))
         assert p2 == self._file_contents(join(course_dir, "feedback", "foo", "ps1", "p2.html"))

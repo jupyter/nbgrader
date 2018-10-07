@@ -54,7 +54,7 @@ behavior see :doc:`adding customization plugins </plugins/index>`.
 
 For this to work, you must include a duedate for the assignment and then a
 ``timestamp.txt`` file in the folder for each submission with a single line
-containing a timestamp (e.g. ``2015-02-02 14:58:23.948203 PST``). Then, when
+containing a timestamp (e.g. ``2015-02-02 14:58:23.948203 America/Los_Angeles``). Then, when
 you run ``nbgrader autograde``, nbgrader will record these timestamps into the
 database. You can access the timestamps through the API, like so:
 
