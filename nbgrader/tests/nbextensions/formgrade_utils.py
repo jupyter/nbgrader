@@ -1,4 +1,5 @@
 import os
+import time
 
 from six.moves.urllib.parse import urljoin, unquote
 from selenium.webdriver.common.keys import Keys
@@ -238,6 +239,11 @@ def _load_formgrade(browser, port, gradebook):
     _load_gradebook_page(browser, port, "gradebook/Problem Set 1/Problem 1")
     _click_link(browser, "Submission #1")
     _wait_for_formgrader(browser, port, "submissions/{}/?index=0".format(submissions[0].id))
+
+    # Hack: there is a race condition here where sometimes the formgrader doesn't
+    # fully finish loading. So we add a wait here, though this is not really a
+    # robust solution.
+    time.sleep(1)
 
 
 def _child_exists(elem, selector):
