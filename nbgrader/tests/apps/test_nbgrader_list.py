@@ -170,6 +170,38 @@ class TestNbGraderList(BaseTestApp):
             """.format(os.environ["USER"], timestamps[0], os.environ["USER"], timestamps[1])
         ).lstrip()
 
+    def test_list_inbound_no_random_string(self, exchange, cache, course_dir):
+        self._release("ps1", exchange, cache, course_dir)
+
+        assert self._list(exchange, cache, "ps1", flags=["--inbound"]) == dedent(
+            """
+            [ListApp | INFO] Submitted assignments:
+            """
+        ).lstrip()
+
+        self._fetch("ps1", exchange, cache)
+        self._submit("ps1", exchange, cache, flags=["--ExchangeSubmit.add_random_string=False"])
+        filename, = os.listdir(os.path.join(exchange, "abc101", "inbound"))
+        timestamp = filename.split("+")[2]
+        assert self._list(exchange, cache, "ps1", flags=["--inbound"]) == dedent(
+            """
+            [ListApp | INFO] Submitted assignments:
+            [ListApp | INFO] abc101 {} ps1 {}
+            """.format(os.environ["USER"], timestamp)
+        ).lstrip()
+
+        time.sleep(1)
+        self._submit("ps1", exchange, cache, flags=["--ExchangeSubmit.add_random_string=False"])
+        filenames = sorted(os.listdir(os.path.join(exchange, "abc101", "inbound")))
+        timestamps = [x.split("+")[2] for x in filenames]
+        assert self._list(exchange, cache, "ps1", flags=["--inbound"]) == dedent(
+            """
+            [ListApp | INFO] Submitted assignments:
+            [ListApp | INFO] abc101 {} ps1 {}
+            [ListApp | INFO] abc101 {} ps1 {}
+            """.format(os.environ["USER"], timestamps[0], os.environ["USER"], timestamps[1])
+        ).lstrip()
+
     def test_list_cached(self, exchange, cache, course_dir):
         self._release("ps1", exchange, cache, course_dir)
 
@@ -261,3 +293,18 @@ class TestNbGraderList(BaseTestApp):
 
     def test_list_cached_and_inbound(self, exchange, cache):
         self._list(exchange, cache, flags=["--inbound", "--cached"], retcode=1)
+
+    def test_list_without_random_string(self, exchange, cache, course_dir):
+        self._release("ps1", exchange, cache, course_dir)
+        self._fetch("ps1", exchange, cache)
+
+        self._submit("ps1", exchange, cache, flags=["--ExchangeSubmit.add_random_string=False"])
+
+        filename, = os.listdir(os.path.join(exchange, "abc101", "inbound"))
+        timestamp = filename.split("+")[2]
+        assert self._list(exchange, cache, "ps1", flags=["--inbound"]) == dedent(
+            """
+            [ListApp | INFO] Submitted assignments:
+            [ListApp | INFO] abc101 {} ps1 {}
+            """.format(os.environ["USER"], timestamp)
+        ).lstrip()
