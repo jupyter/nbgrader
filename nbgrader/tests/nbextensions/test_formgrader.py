@@ -729,6 +729,7 @@ def test_save_extra_credit(browser, port, gradebook, index):
     assert elem.get_attribute("value") == ""
 
 
+@pytest.mark.xfail(strict=False)
 @pytest.mark.nbextensions
 def test_same_part_navigation(browser, port, gradebook):
     problem = gradebook.find_notebook("Problem 1", "Problem Set 1")
