@@ -178,7 +178,9 @@ What should I do if validation or grading of a notebook fails with a "Timeout wa
 ---------------------------------------------------------------------------------------------------------------
 This occurs because the validator or autograder is taking too long to validate or autograde your notebook. This
 can be fixed by adding the following line to nbgrader_config.py:
+
 .. code:: python
+
    # increase timeout to 60 seconds
    c.ExecutePreprocessor.timeout = 60
 
