@@ -275,7 +275,8 @@ class SolutionCell(Base):
         }
 
     def __repr__(self):
-        return "{}/{}".format(self.notebook, self.name)
+        return "SolutionCell<{}/{}/{}>".format(
+            self.assignment.name, self.notebook.name, self.name)
 
 
 class SourceCell(Base):
@@ -332,7 +333,7 @@ class SourceCell(Base):
         }
 
     def __repr__(self):
-        return "SolutionCell<{}/{}/{}>".format(
+        return "SourceCell<{}/{}/{}>".format(
             self.assignment.name, self.notebook.name, self.name)
 
 
