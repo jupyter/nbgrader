@@ -11,6 +11,7 @@ import traceback
 import json
 import urllib.parse
 import contextlib
+import re # new
 
 from setuptools.archive_util import unpack_archive
 from setuptools.archive_util import unpack_tarfile
@@ -123,6 +124,10 @@ def determine_grade(cell):
         for output in cell.outputs:
             if output.output_type == 'error':
                 return 0, max_points
+            elif output.output_type == 'stream': #new
+                if hasattr(output, 'text'): #new
+                    if re.match('error: ', output.text): # new
+                        return 0, max_points #new
         return max_points, max_points
 
     else:

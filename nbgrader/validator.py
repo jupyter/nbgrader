@@ -1,5 +1,6 @@
 import sys
 import os
+import re #new
 
 from traitlets.config import LoggingConfigurable
 from traitlets import List, Unicode, Integer, Bool
@@ -101,10 +102,16 @@ class Validator(LoggingConfigurable):
 
     def _extract_error(self, cell):
         errors = []
+        #self.log.info('IN extract Error'+ cell.cell_type)
         if cell.cell_type == "code":
             for output in cell.outputs:
+                #self.log.info('Printing output.output_type: '+output.output_type)
                 if output.output_type == "error":
                     errors.append("\n".join(output.traceback))
+                elif output.output_type == "stream": #new
+                    if hasattr(output, "text"): #new
+                        if re.match("error: ", output.text): #new
+                            errors.append(output.text) #new
 
             if len(errors) == 0:
                 errors.append("You did not provide a response.")
@@ -230,6 +237,8 @@ class Validator(LoggingConfigurable):
 
             # if it's a grade cell, the check the grade
             if utils.is_grade(cell):
+                #self.log.info("PRINTING CELL")
+                #self.log.info(cell)
                 score, max_score = utils.determine_grade(cell)
 
                 # it's a markdown cell, so we can't do anything
@@ -266,7 +275,8 @@ class Validator(LoggingConfigurable):
         return nb
 
     def validate(self, filename):
-        self.log.info("Validating '{}'".format(os.path.abspath(filename)))
+        #self.log.info("Validating '{}'".format(os.path.abspath(filename)))
+        #self.log.info("HEREHEREHERHE")
         basename = os.path.basename(filename)
         dirname = os.path.dirname(filename)
         with utils.chdir(dirname):
@@ -283,6 +293,8 @@ class Validator(LoggingConfigurable):
             return results
 
         nb = self._preprocess(nb)
+        language = nb.metadata.get('kernelspec',{}).get("language","python")
+        self.log.info("LANG:"+ language)
         changed = self._get_changed_cells(nb)
         passed = self._get_passed_cells(nb)
         failed = self._get_failed_cells(nb)
