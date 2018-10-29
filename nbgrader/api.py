@@ -371,7 +371,7 @@ class Student(Base):
 
     #: The lms user ID, this is mainly for identifying students in your LMS system
     #: and was added so teachers and TA's can easily send grades to an LMS such as CanvasLMS.
-    lms_user_id = None
+    lms_user_id = Column(String(128), unique=True, nullable=True)
 
     def to_dict(self):
         """Convert the student object to a JSON-friendly dictionary
@@ -384,7 +384,7 @@ class Student(Base):
             "last_name": self.last_name,
             "email": self.email,
             "score": self.score,
-            "max_score": self.max_score
+            "max_score": self.max_score,
             "lms_user_id": self.lms_user_id
         }
 
