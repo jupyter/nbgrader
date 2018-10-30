@@ -2,7 +2,9 @@ import os
 import datetime
 import sys
 import shutil
+import json
 import glob
+
 
 from textwrap import dedent
 
@@ -11,13 +13,11 @@ from traitlets.config import LoggingConfigurable
 from traitlets import Unicode, Bool, Instance, default, validate
 from jupyter_core.paths import jupyter_data_dir
 
-from ..utils import check_directory
+from ..utils import check_directory, query_jupyterhub_api, JupyterhubEnvironmentError, JupyterhubApiError 
 from ..coursedir import CourseDirectory
-
 
 class ExchangeError(Exception):
     pass
-
 
 class Exchange(LoggingConfigurable):
 
@@ -133,6 +133,27 @@ class Exchange(LoggingConfigurable):
         self.init_dest()
         self.copy_files()
 
+
+    def get_user_courses(self, student_id):
+        """Check if student is enrolled in course"""
+        if student_id == "*":
+            student_id = "{authenticated_user}"
+        response = None
+        try:
+            response = query_jupyterhub_api('GET', '/users/%s' % student_id)
+        except (JupyterhubEnvironmentError, JupyterhubApiError) as e:
+            self.log.error("Error caught: " + str(e))
+            self.log.error("Make sure you start your service with a valid 'api_token' in your config file")
+        courses = set()
+        try:
+            for group in response['groups']:
+                if group.startswith('nbgrader-') or group.startswith('formgrade-'):
+                    courses.add(group.split('-', 1)[1])
+        except KeyError:
+            self.log.error("KeyError: See Jupyterhub API: " + str(response)) 
+            self.log.error("Make sure you start your service with a valid 'api_token' in your config file")
+        return list(courses)
+
     def _assignment_not_found(self, src_path, other_path):
         msg = "Assignment not found at: {}".format(src_path)
         self.log.fatal(msg)
@@ -147,3 +168,4 @@ class Exchange(LoggingConfigurable):
             self.log.error("Did you mean: %s", scores[-1][1])
 
         raise ExchangeError(msg)
+

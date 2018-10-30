@@ -14,6 +14,9 @@ class ExchangeFetch(Exchange):
     def init_src(self):
         if self.course_id == '':
             self.fail("No course id specified. Re-run with --course flag.")
+        courses = self.get_user_courses(self.coursedir.student_id)
+        if not self.course_id in courses:
+            self.fail("You do not have access to this course.")
 
         self.course_path = os.path.join(self.root, self.course_id)
         self.outbound_path = os.path.join(self.course_path, 'outbound')

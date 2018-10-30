@@ -1,5 +1,6 @@
 import sys
 import os
+import re
 
 from traitlets.config import LoggingConfigurable
 from traitlets import List, Unicode, Integer, Bool
@@ -105,6 +106,10 @@ class Validator(LoggingConfigurable):
             for output in cell.outputs:
                 if output.output_type == "error":
                     errors.append("\n".join(output.traceback))
+                elif output.output_type == "stream": 
+                    if hasattr(output, "text"): 
+                        if re.match("error: ", output.text):
+                            errors.append(output.text)
 
             if len(errors) == 0:
                 errors.append("You did not provide a response.")
@@ -266,7 +271,6 @@ class Validator(LoggingConfigurable):
         return nb
 
     def validate(self, filename):
-        self.log.info("Validating '{}'".format(os.path.abspath(filename)))
         basename = os.path.basename(filename)
         dirname = os.path.dirname(filename)
         with utils.chdir(dirname):
