@@ -172,7 +172,17 @@ def parse_utc(ts):
     if ts is None:
         return None
     if isinstance(ts, six.string_types):
-        ts = dateutil.parser.parse(ts)
+        parts = ts.split(" ")
+        if len(parts) == 3:
+            ts = " ".join(parts[:2] + ["TZ"])
+            tz = parts[2]
+            try:
+                tz = int(tz)
+            except ValueError:
+                tz = dateutil.tz.gettz(tz)
+            ts = dateutil.parser.parse(ts, tzinfos=dict(TZ=tz))
+        else:
+            ts = dateutil.parser.parse(ts)
     if ts.tzinfo is not None:
         ts = (ts - ts.utcoffset()).replace(tzinfo=None)
     return ts
@@ -251,8 +261,10 @@ def find_all_files(path, exclude=None):
     """Recursively finds all filenames rooted at `path`, optionally excluding
     some based on filename globs."""
     files = []
+    to_skip = []
     for dirname, dirnames, filenames in os.walk(path):
-        if is_ignored(dirname, exclude):
+        if is_ignored(dirname, exclude) or dirname in to_skip:
+            to_skip.extend([os.path.join(dirname, x) for x in dirnames])
             continue
         for filename in filenames:
             fullpath = os.path.join(dirname, filename)

@@ -1,11 +1,14 @@
+import os
 import pytest
+import time
 
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support.ui import Select
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.keys import Keys
-from selenium.common.exceptions import TimeoutException, NoSuchElementException
+from selenium.common.exceptions import TimeoutException, NoSuchElementException, NoAlertPresentException
+from selenium.webdriver.common.action_chains import ActionChains
 from textwrap import dedent
 
 from ...nbgraderformat import read
@@ -24,7 +27,7 @@ def nbserver(request, port, tempdir, jupyter_config_dir, jupyter_data_dir, excha
     return server
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def browser(request, tempdir, nbserver):
     browser = _make_browser(tempdir)
 
@@ -39,13 +42,33 @@ def _wait(browser):
     return WebDriverWait(browser, 30)
 
 
-def _load_notebook(browser, port, retries=5, name="blank.ipynb"):
+def _load_notebook(browser, port, retries=5, name="blank"):
     # go to the correct page
-    browser.get("http://localhost:{}/notebooks/{}".format(port, name))
+    url = "http://localhost:{}/notebooks/{}.ipynb".format(port, name)
+    browser.get(url)
+
+    alert = ''
+    for _ in range(5):
+        if alert is None:
+            break
+
+        try:
+            alert = browser.switch_to.alert
+        except NoAlertPresentException:
+            alert = None
+        else:
+            print("Warning: dismissing unexpected alert ({})".format(alert.text))
+            alert.accept()
 
     def page_loaded(browser):
         return browser.execute_script(
-            'return typeof Jupyter !== "undefined" && Jupyter.page !== undefined && Jupyter.notebook !== undefined;')
+            """
+            return (typeof Jupyter !== "undefined" &&
+                    Jupyter.page !== undefined &&
+                    Jupyter.notebook !== undefined &&
+                    $("#notebook_name").text() === "{}" &&
+                    Jupyter.notebook._fully_loaded);
+            """.format(name))
 
     # wait for the page to load
     try:
@@ -54,16 +77,26 @@ def _load_notebook(browser, port, retries=5, name="blank.ipynb"):
         if retries > 0:
             print("Retrying page load...")
             # page timeout, but sometimes this happens, so try refreshing?
-            _load_notebook(browser, port, retries=retries - 1)
+            _load_notebook(browser, port, retries=retries - 1, name=name)
         else:
             print("Failed to load the page too many times")
             raise
+
+    # Hack: there seems to be some race condition here where sometimes the
+    # page is still not fully loaded, but I can't figure out exactly what I need
+    # to check for to ensure that it is. So for now just add a small sleep to
+    # make sure everything finishes loading, though this is not really a robust
+    # fix for the problem :/
+    time.sleep(1)
 
 
 def _activate_toolbar(browser, name="Create%20Assignment"):
     def celltoolbar_exists(browser):
         return browser.execute_script(
-            'return $("#view_menu #menu-cell-toolbar").find("[data-name=\'{}\']").length == 1;'.format(name))
+            """
+            return typeof $ !== "undefined" && $ !== undefined &&
+                $("#view_menu #menu-cell-toolbar").find("[data-name=\'{}\']").length == 1;
+            """.format(name))
 
     # wait for the view menu to appear
     _wait(browser).until(celltoolbar_exists)
@@ -82,42 +115,76 @@ def _activate_toolbar(browser, name="Create%20Assignment"):
             EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".celltoolbar button")))
 
 
+def _select(browser, text, index=0):
+    def is_clickable(browser):
+        elems = browser.find_elements_by_css_selector('.celltoolbar select')
+        if len(elems) <= index:
+            return False
+        elem = elems[index]
+        return elem.is_displayed and elem.is_enabled
+
+    def is_option(browser):
+        elem = browser.find_elements_by_css_selector('.celltoolbar select')[index]
+        select = Select(elem)
+        options = [x.get_attribute('value') for x in select.options]
+        return text in options
+
+    _wait(browser).until(is_clickable)
+    _wait(browser).until(is_option)
+    elem = browser.find_elements_by_css_selector('.celltoolbar select')[index]
+    select = Select(elem)
+    select.select_by_value(text)
+
+    def selected(browser):
+        elem = browser.find_elements_by_css_selector('.celltoolbar select')[index]
+        return elem.get_attribute('value') == text
+
+    _wait(browser).until(selected)
+
+
 def _select_none(browser, index=0):
-    select = Select(browser.find_elements_by_css_selector('.celltoolbar select')[index])
-    select.select_by_value('')
+    _select(browser, '', index=index)
 
 
 def _select_manual(browser, index=0):
-    select = Select(browser.find_elements_by_css_selector('.celltoolbar select')[index])
-    select.select_by_value('manual')
+    _select(browser, 'manual', index=index)
 
 
 def _select_solution(browser, index=0):
-    select = Select(browser.find_elements_by_css_selector('.celltoolbar select')[index])
-    select.select_by_value('solution')
+    _select(browser, 'solution', index=index)
 
 
 def _select_tests(browser, index=0):
-    select = Select(browser.find_elements_by_css_selector('.celltoolbar select')[index])
-    select.select_by_value('tests')
+    _select(browser, 'tests', index=index)
 
 
 def _select_locked(browser, index=0):
-    select = Select(browser.find_elements_by_css_selector('.celltoolbar select')[index])
-    select.select_by_value('readonly')
+    _select(browser, 'readonly', index=index)
 
 
 def _set_points(browser, points=2, index=0):
-    elem = browser.find_elements_by_css_selector(".nbgrader-points-input")[index]
-    elem.clear()
-    elem.send_keys(points)
+    # This is a bit of a hack to use .val() and .change() rather than
+    # using Selenium's sendkeys, but I can't get it to reliably work. It works
+    # on Windows (both headless and non-) and headless on mac but not when
+    # running with the visible browser on mac. I wasn't able to find any issues
+    # regarding this and think it has something to do with the notebook
+    # capturing keypresses, but wasn't able to make any further progress
+    # debugging the problem.
+    browser.execute_script(
+        """
+        $($(".nbgrader-points-input")[{}]).val("{}").change().blur();
+        """.format(index, points)
+    )
     browser.find_elements_by_css_selector(".nbgrader-cell")[index].click()
 
 
 def _set_id(browser, cell_id="foo", index=0):
-    elem = browser.find_elements_by_css_selector(".nbgrader-id-input")[index]
-    elem.clear()
-    elem.send_keys(cell_id)
+    # This is a hack, see the comment in _set_points above.
+    browser.execute_script(
+        """
+        $($(".nbgrader-id-input")[{}]).val("{}").change().blur();
+        """.format(index, cell_id)
+    )
     browser.find_elements_by_css_selector(".nbgrader-cell")[index].click()
 
 
@@ -183,6 +250,10 @@ def _dismiss_modal(browser):
     _wait(browser).until(modal_gone)
 
 
+def _save_screenshot(browser):
+    browser.save_screenshot(os.path.join(os.path.dirname(__file__), "selenium.screenshot.png"))
+
+
 @pytest.mark.nbextensions
 def test_manual_cell(browser, port):
     _load_notebook(browser, port)
@@ -199,9 +270,9 @@ def test_manual_cell(browser, port):
 
     # wait for the points and id fields to appear
     _wait(browser).until(
-        EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".nbgrader-points")))
+        EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".nbgrader-points-input")))
     _wait(browser).until(
-        EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".nbgrader-id")))
+        EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".nbgrader-id-input")))
 
     # set the points
     _set_points(browser)
@@ -436,21 +507,28 @@ def test_tabbing(browser, port):
     _load_notebook(browser, port)
     _activate_toolbar(browser)
 
+    def active_element_is(class_name):
+        def waitfor(browser):
+            elem = browser.execute_script("return document.activeElement")
+            return elem.get_attribute("class") == class_name
+        return waitfor
+
     # make it manually graded
     _select_manual(browser)
 
     # click the id field
     element = browser.find_element_by_css_selector(".nbgrader-points-input")
+    # There is a bug where sometimes the click doesn't register, so we also press enter
+    # here which for some reason seems to help. It's not clear here what's happening
+    # to cause this bug but see https://github.com/mozilla/geckodriver/issues/322 for
+    # reference. It only seemed to be a problem on Linux, not Mac or Windows.
     element.click()
-
-    # get the active element
-    element = browser.execute_script("return document.activeElement")
-    assert "nbgrader-points-input" == element.get_attribute("class")
+    element.send_keys(Keys.RETURN)
+    _wait(browser).until(active_element_is("nbgrader-points-input"))
 
     # press tab and check that the active element is correct
     element.send_keys(Keys.TAB)
-    element = browser.execute_script("return document.activeElement")
-    assert "nbgrader-id-input" == element.get_attribute("class")
+    _wait(browser).until(active_element_is("nbgrader-id-input"))
 
     # make it autograder tests
     _select_tests(browser)
@@ -458,15 +536,12 @@ def test_tabbing(browser, port):
     # click the id field
     element = browser.find_element_by_css_selector(".nbgrader-points-input")
     element.click()
-
-    # get the active element
-    element = browser.execute_script("return document.activeElement")
-    assert "nbgrader-points-input" == element.get_attribute("class")
+    element.send_keys(Keys.RETURN)
+    _wait(browser).until(active_element_is("nbgrader-points-input"))
 
     # press tab and check that the active element is correct
     element.send_keys(Keys.TAB)
-    element = browser.execute_script("return document.activeElement")
-    assert "nbgrader-id-input" == element.get_attribute("class")
+    _wait(browser).until(active_element_is("nbgrader-id-input"))
 
 
 @pytest.mark.nbextensions
@@ -596,10 +671,22 @@ def test_negative_points(browser, port):
 
 @pytest.mark.nbextensions
 def test_schema_version(browser, port):
-    _load_notebook(browser, port, name="old-schema.ipynb")
+    _load_notebook(browser, port, name="old-schema")
 
     # activating the toolbar should cause the dialog warning about the schema
     # version to appear
     _activate_toolbar(browser)
     _wait_for_modal(browser)
     _dismiss_modal(browser)
+
+
+################################################################################
+####### DO NOT ADD TESTS BELOW THIS LINE #######################################
+################################################################################
+
+@pytest.mark.nbextensions
+def test_final(browser, port):
+    """This is a final test to be run so that the browser doesn't hang, see
+    https://github.com/mozilla/geckodriver/issues/1151
+    """
+    _load_notebook(browser, port)

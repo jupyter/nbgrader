@@ -26,7 +26,7 @@ class TestNbGraderAutograde(BaseTestApp):
     def test_missing_student(self, db, course_dir):
         """Is an error thrown when the student is missing?"""
         with open("nbgrader_config.py", "a") as fh:
-            fh.write("""c.CourseDirectory.db_assignments = [dict(name='ps1', duedate='2015-02-02 14:58:23.948203 PST')]\n""")
+            fh.write("""c.CourseDirectory.db_assignments = [dict(name='ps1', duedate='2015-02-02 14:58:23.948203 America/Los_Angeles')]\n""")
             fh.write("""c.CourseDirectory.db_students = [dict(id="foo"), dict(id="bar")]""")
 
         self._copy_file(join("files", "submitted-changed.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
@@ -41,7 +41,7 @@ class TestNbGraderAutograde(BaseTestApp):
     def test_missing_assignment(self, db, course_dir):
         """Is an error thrown when the assignment is missing?"""
         with open("nbgrader_config.py", "a") as fh:
-            fh.write("""c.CourseDirectory.db_assignments = [dict(name='ps1', duedate='2015-02-02 14:58:23.948203 PST')]\n""")
+            fh.write("""c.CourseDirectory.db_assignments = [dict(name='ps1', duedate='2015-02-02 14:58:23.948203 America/Los_Angeles')]\n""")
             fh.write("""c.CourseDirectory.db_students = [dict(id="foo"), dict(id="bar")]""")
 
         self._copy_file(join("files", "submitted-changed.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
@@ -53,7 +53,7 @@ class TestNbGraderAutograde(BaseTestApp):
     def test_grade(self, db, course_dir):
         """Can files be graded?"""
         with open("nbgrader_config.py", "a") as fh:
-            fh.write("""c.CourseDirectory.db_assignments = [dict(name='ps1', duedate='2015-02-02 14:58:23.948203 PST')]\n""")
+            fh.write("""c.CourseDirectory.db_assignments = [dict(name='ps1', duedate='2015-02-02 14:58:23.948203 America/Los_Angeles')]\n""")
             fh.write("""c.CourseDirectory.db_students = [dict(id="foo"), dict(id="bar")]""")
 
         self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
@@ -95,17 +95,17 @@ class TestNbGraderAutograde(BaseTestApp):
     def test_grade_timestamp(self, db, course_dir):
         """Is a timestamp correctly read in?"""
         with open("nbgrader_config.py", "a") as fh:
-            fh.write("""c.CourseDirectory.db_assignments = [dict(name='ps1', duedate='2015-02-02 14:58:23.948203 PST')]\n""")
+            fh.write("""c.CourseDirectory.db_assignments = [dict(name='ps1', duedate='2015-02-02 14:58:23.948203 America/Los_Angeles')]\n""")
             fh.write("""c.CourseDirectory.db_students = [dict(id="foo"), dict(id="bar")]""")
 
         self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
         run_nbgrader(["assign", "ps1", "--db", db])
 
         self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "submitted", "foo", "ps1", "p1.ipynb"))
-        self._make_file(join(course_dir, "submitted", "foo", "ps1", "timestamp.txt"), "2015-02-02 15:58:23.948203 PST")
+        self._make_file(join(course_dir, "submitted", "foo", "ps1", "timestamp.txt"), "2015-02-02 15:58:23.948203 America/Los_Angeles")
 
         self._copy_file(join("files", "submitted-changed.ipynb"), join(course_dir, "submitted", "bar", "ps1", "p1.ipynb"))
-        self._make_file(join(course_dir, "submitted", "bar", "ps1", "timestamp.txt"), "2015-02-01 14:58:23.948203 PST")
+        self._make_file(join(course_dir, "submitted", "bar", "ps1", "timestamp.txt"), "2015-02-01 14:58:23.948203 America/Los_Angeles")
 
         run_nbgrader(["autograde", "ps1", "--db", db])
 
@@ -127,7 +127,7 @@ class TestNbGraderAutograde(BaseTestApp):
         """Issue #580 - Does the autograder handle empty or invalid timestamp
         strings"""
         with open("nbgrader_config.py", "a") as fh:
-            fh.write("""c.CourseDirectory.db_assignments = [dict(name='ps1', duedate='2015-02-02 14:58:23.948203 PST')]\n""")
+            fh.write("""c.CourseDirectory.db_assignments = [dict(name='ps1', duedate='2015-02-02 14:58:23.948203 America/Los_Angeles')]\n""")
             fh.write("""c.CourseDirectory.db_students = [dict(id="foo"), dict(id="bar")]""")
 
         self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
@@ -152,7 +152,7 @@ class TestNbGraderAutograde(BaseTestApp):
     def test_late_submission_penalty_none(self, db, course_dir):
         """Does 'none' method do nothing?"""
         with open("nbgrader_config.py", "a") as fh:
-            fh.write("""c.CourseDirectory.db_assignments = [dict(name='ps1', duedate='2015-02-02 14:58:23.948203 PST')]\n""")
+            fh.write("""c.CourseDirectory.db_assignments = [dict(name='ps1', duedate='2015-02-02 14:58:23.948203 America/Los_Angeles')]\n""")
             fh.write("""c.CourseDirectory.db_students = [dict(id="foo"), dict(id="bar")]""")
 
         self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
@@ -160,11 +160,11 @@ class TestNbGraderAutograde(BaseTestApp):
 
         # not late
         self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "submitted", "foo", "ps1", "p1.ipynb"))
-        self._make_file(join(course_dir, "submitted", "foo", "ps1", "timestamp.txt"), "2015-02-02 14:58:23.948203 PST")
+        self._make_file(join(course_dir, "submitted", "foo", "ps1", "timestamp.txt"), "2015-02-02 14:58:23.948203 America/Los_Angeles")
 
         # 1h late
         self._copy_file(join("files", "submitted-changed.ipynb"), join(course_dir, "submitted", "bar", "ps1", "p1.ipynb"))
-        self._make_file(join(course_dir, "submitted", "bar", "ps1", "timestamp.txt"), "2015-02-02 15:58:23.948203 PST")
+        self._make_file(join(course_dir, "submitted", "bar", "ps1", "timestamp.txt"), "2015-02-02 15:58:23.948203 America/Los_Angeles")
 
         run_nbgrader(["autograde", "ps1", "--db", db])
 
@@ -191,7 +191,7 @@ class TestNbGraderAutograde(BaseTestApp):
     def test_late_submission_penalty_zero(self, db, course_dir):
         """Does 'zero' method assign notebook.score as penalty if late?"""
         with open("nbgrader_config.py", "a") as fh:
-            fh.write("""c.CourseDirectory.db_assignments = [dict(name='ps1', duedate='2015-02-02 14:58:23.948203 PST')]\n""")
+            fh.write("""c.CourseDirectory.db_assignments = [dict(name='ps1', duedate='2015-02-02 14:58:23.948203 America/Los_Angeles')]\n""")
             fh.write("""c.CourseDirectory.db_students = [dict(id="foo"), dict(id="bar")]\n""")
             fh.write("""c.LateSubmissionPlugin.penalty_method = 'zero'""")
 
@@ -200,11 +200,11 @@ class TestNbGraderAutograde(BaseTestApp):
 
         # not late
         self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "submitted", "foo", "ps1", "p1.ipynb"))
-        self._make_file(join(course_dir, "submitted", "foo", "ps1", "timestamp.txt"), "2015-02-02 14:58:23.948203 PST")
+        self._make_file(join(course_dir, "submitted", "foo", "ps1", "timestamp.txt"), "2015-02-02 14:58:23.948203 America/Los_Angeles")
 
         # 1h late
         self._copy_file(join("files", "submitted-changed.ipynb"), join(course_dir, "submitted", "bar", "ps1", "p1.ipynb"))
-        self._make_file(join(course_dir, "submitted", "bar", "ps1", "timestamp.txt"), "2015-02-02 15:58:23.948203 PST")
+        self._make_file(join(course_dir, "submitted", "bar", "ps1", "timestamp.txt"), "2015-02-02 15:58:23.948203 America/Los_Angeles")
 
         run_nbgrader(["autograde", "ps1", "--db", db])
 
@@ -229,7 +229,7 @@ class TestNbGraderAutograde(BaseTestApp):
             assert nb.late_submission_penalty == nb.score
 
         # Issue 723 - check penalty is reset if timestamp changed
-        self._make_file(join(course_dir, "submitted", "bar", "ps1", "timestamp.txt"), "2015-02-02 14:58:23.948203 PST")
+        self._make_file(join(course_dir, "submitted", "bar", "ps1", "timestamp.txt"), "2015-02-02 14:58:23.948203 America/Los_Angeles")
         run_nbgrader(["autograde", "--force", "ps1", "--db", db])
 
         with Gradebook(db) as gb:
@@ -258,7 +258,7 @@ class TestNbGraderAutograde(BaseTestApp):
             fh.write(plugin)
 
         with open("nbgrader_config.py", "a") as fh:
-            fh.write("""c.CourseDirectory.db_assignments = [dict(name='ps1', duedate='2015-02-02 14:58:23.948203 PST')]\n""")
+            fh.write("""c.CourseDirectory.db_assignments = [dict(name='ps1', duedate='2015-02-02 14:58:23.948203 America/Los_Angeles')]\n""")
             fh.write("""c.CourseDirectory.db_students = [dict(id="foo"), dict(id="bar")]\n""")
             fh.write("""c.AssignLatePenalties.plugin_class = 'late_plugin.Blarg'""")
 
@@ -267,11 +267,11 @@ class TestNbGraderAutograde(BaseTestApp):
 
         # 4h late
         self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "submitted", "foo", "ps1", "p1.ipynb"))
-        self._make_file(join(course_dir, "submitted", "foo", "ps1", "timestamp.txt"), "2015-02-02 18:58:23.948203 PST")
+        self._make_file(join(course_dir, "submitted", "foo", "ps1", "timestamp.txt"), "2015-02-02 18:58:23.948203 America/Los_Angeles")
 
         # 1h late
         self._copy_file(join("files", "submitted-changed.ipynb"), join(course_dir, "submitted", "bar", "ps1", "p1.ipynb"))
-        self._make_file(join(course_dir, "submitted", "bar", "ps1", "timestamp.txt"), "2015-02-02 15:58:23.948203 PST")
+        self._make_file(join(course_dir, "submitted", "bar", "ps1", "timestamp.txt"), "2015-02-02 15:58:23.948203 America/Los_Angeles")
 
         run_nbgrader(["autograde", "ps1", "--db", db])
 
@@ -298,7 +298,7 @@ class TestNbGraderAutograde(BaseTestApp):
     def test_force(self, db, course_dir):
         """Ensure the force option works properly"""
         with open("nbgrader_config.py", "a") as fh:
-            fh.write("""c.CourseDirectory.db_assignments = [dict(name='ps1', duedate='2015-02-02 14:58:23.948203 PST')]\n""")
+            fh.write("""c.CourseDirectory.db_assignments = [dict(name='ps1', duedate='2015-02-02 14:58:23.948203 America/Los_Angeles')]\n""")
             fh.write("""c.CourseDirectory.db_students = [dict(id="foo"), dict(id="bar")]""")
 
         self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
@@ -335,10 +335,50 @@ class TestNbGraderAutograde(BaseTestApp):
         assert os.path.isfile(join(course_dir, "autograded", "foo", "ps1", "data", "bar.txt"))
         assert not os.path.isfile(join(course_dir, "autograded", "foo", "ps1", "blah.pyc"))
 
+    def test_force_f(self, db, course_dir):
+        """Ensure the force option works properly"""
+        with open("nbgrader_config.py", "a") as fh:
+            fh.write("""c.CourseDirectory.db_assignments = [dict(name='ps1', duedate='2015-02-02 14:58:23.948203 America/Los_Angeles')]\n""")
+            fh.write("""c.CourseDirectory.db_students = [dict(id="foo"), dict(id="bar")]""")
+
+        self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
+        self._make_file(join(course_dir, "source", "ps1", "foo.txt"), "foo")
+        self._make_file(join(course_dir, "source", "ps1", "data", "bar.txt"), "bar")
+        run_nbgrader(["assign", "ps1", "--db", db])
+
+        self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "submitted", "foo", "ps1", "p1.ipynb"))
+        self._make_file(join(course_dir, "submitted", "foo", "ps1", "foo.txt"), "foo")
+        self._make_file(join(course_dir, "submitted", "foo", "ps1", "data", "bar.txt"), "bar")
+        self._make_file(join(course_dir, "submitted", "foo", "ps1", "blah.pyc"), "asdf")
+        run_nbgrader(["autograde", "ps1", "--db", db])
+
+        assert os.path.isfile(join(course_dir, "autograded", "foo", "ps1", "p1.ipynb"))
+        assert os.path.isfile(join(course_dir, "autograded", "foo", "ps1", "foo.txt"))
+        assert os.path.isfile(join(course_dir, "autograded", "foo", "ps1", "data", "bar.txt"))
+        assert not os.path.isfile(join(course_dir, "autograded", "foo", "ps1", "blah.pyc"))
+
+        # check that it skips the existing directory
+        remove(join(course_dir, "autograded", "foo", "ps1", "foo.txt"))
+        run_nbgrader(["autograde", "ps1", "--db", db])
+        assert not os.path.isfile(join(course_dir, "autograded", "foo", "ps1", "foo.txt"))
+
+        # force overwrite the supplemental files
+        run_nbgrader(["autograde", "ps1", "--db", db, "-f"])
+        assert os.path.isfile(join(course_dir, "autograded", "foo", "ps1", "foo.txt"))
+
+        # force overwrite
+        remove(join(course_dir, "source", "ps1", "foo.txt"))
+        remove(join(course_dir, "submitted", "foo", "ps1", "foo.txt"))
+        run_nbgrader(["autograde", "ps1", "--db", db, "-f"])
+        assert os.path.isfile(join(course_dir, "autograded", "foo", "ps1", "p1.ipynb"))
+        assert not os.path.isfile(join(course_dir, "autograded", "foo", "ps1", "foo.txt"))
+        assert os.path.isfile(join(course_dir, "autograded", "foo", "ps1", "data", "bar.txt"))
+        assert not os.path.isfile(join(course_dir, "autograded", "foo", "ps1", "blah.pyc"))
+
     def test_filter_notebook(self, db, course_dir):
         """Does autograding filter by notebook properly?"""
         with open("nbgrader_config.py", "a") as fh:
-            fh.write("""c.CourseDirectory.db_assignments = [dict(name='ps1', duedate='2015-02-02 14:58:23.948203 PST')]\n""")
+            fh.write("""c.CourseDirectory.db_assignments = [dict(name='ps1', duedate='2015-02-02 14:58:23.948203 America/Los_Angeles')]\n""")
             fh.write("""c.CourseDirectory.db_students = [dict(id="foo"), dict(id="bar")]""")
 
         self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
@@ -388,33 +428,76 @@ class TestNbGraderAutograde(BaseTestApp):
     def test_grade_overwrite_files(self, db, course_dir):
         """Are dependent files properly linked and overwritten?"""
         with open("nbgrader_config.py", "a") as fh:
-            fh.write("""c.CourseDirectory.db_assignments = [dict(name='ps1', duedate='2015-02-02 14:58:23.948203 PST')]\n""")
-            fh.write("""c.CourseDirectory.db_students = [dict(id="foo"), dict(id="bar")]""")
+            fh.write("""c.CourseDirectory.db_assignments = [dict(name='ps1', duedate='2015-02-02 14:58:23.948203 America/Los_Angeles')]\n""")
+            fh.write("""c.CourseDirectory.db_students = [dict(id="foo"), dict(id="bar")]\n""")
+            fh.write("""c.Autograde.exclude_overwriting = {"ps1": ["helper.py"]}\n""")
 
         self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
         self._make_file(join(course_dir, "source", "ps1", "data.csv"), "some,data\n")
+        self._make_file(join(course_dir, "source", "ps1", "helper.py"), "print('hello!')\n")
         run_nbgrader(["assign", "ps1", "--db", db])
 
         self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "submitted", "foo", "ps1", "p1.ipynb"))
-        self._make_file(join(course_dir, "submitted", "foo", "ps1", "timestamp.txt"), "2015-02-02 15:58:23.948203 PST")
+        self._make_file(join(course_dir, "submitted", "foo", "ps1", "timestamp.txt"), "2015-02-02 15:58:23.948203 America/Los_Angeles")
         self._make_file(join(course_dir, "submitted", "foo", "ps1", "data.csv"), "some,other,data\n")
+        self._make_file(join(course_dir, "submitted", "foo", "ps1", "helper.py"), "print('this is different!')\n")
         run_nbgrader(["autograde", "ps1", "--db", db])
 
         assert os.path.isfile(join(course_dir, "autograded", "foo", "ps1", "p1.ipynb"))
         assert os.path.isfile(join(course_dir, "autograded", "foo", "ps1", "timestamp.txt"))
         assert os.path.isfile(join(course_dir, "autograded", "foo", "ps1", "data.csv"))
+        assert os.path.isfile(join(course_dir, "autograded", "foo", "ps1", "helper.py"))
 
         with open(join(course_dir, "autograded", "foo", "ps1", "timestamp.txt"), "r") as fh:
             contents = fh.read()
-        assert contents == "2015-02-02 15:58:23.948203 PST"
+        assert contents == "2015-02-02 15:58:23.948203 America/Los_Angeles"
 
         with open(join(course_dir, "autograded", "foo", "ps1", "data.csv"), "r") as fh:
             contents = fh.read()
         assert contents == "some,data\n"
 
+        with open(join(course_dir, "autograded", "foo", "ps1", "helper.py"), "r") as fh:
+            contents = fh.read()
+        assert contents == "print('this is different!')\n"
+
+    def test_grade_overwrite_files_subdirs(self, db, course_dir):
+        """Are dependent files properly linked and overwritten?"""
+        with open("nbgrader_config.py", "a") as fh:
+            fh.write("""c.CourseDirectory.db_assignments = [dict(name='ps1', duedate='2015-02-02 14:58:23.948203 America/Los_Angeles')]\n""")
+            fh.write("""c.CourseDirectory.db_students = [dict(id="foo"), dict(id="bar")]\n""")
+            fh.write("""c.Autograde.exclude_overwriting = {{"ps1": ["{}"]}}\n""".format(os.path.join("subdir", "helper.py")))
+
+        self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
+        self._make_file(join(course_dir, "source", "ps1", "subdir", "data.csv"), "some,data\n")
+        self._make_file(join(course_dir, "source", "ps1", "subdir", "helper.py"), "print('hello!')\n")
+        run_nbgrader(["assign", "ps1", "--db", db])
+
+        self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "submitted", "foo", "ps1", "p1.ipynb"))
+        self._make_file(join(course_dir, "submitted", "foo", "ps1", "timestamp.txt"), "2015-02-02 15:58:23.948203 America/Los_Angeles")
+        self._make_file(join(course_dir, "submitted", "foo", "ps1", "subdir", "data.csv"), "some,other,data\n")
+        self._make_file(join(course_dir, "submitted", "foo", "ps1", "subdir", "helper.py"), "print('this is different!')\n")
+        run_nbgrader(["autograde", "ps1", "--db", db])
+
+        assert os.path.isfile(join(course_dir, "autograded", "foo", "ps1", "p1.ipynb"))
+        assert os.path.isfile(join(course_dir, "autograded", "foo", "ps1", "timestamp.txt"))
+        assert os.path.isfile(join(course_dir, "autograded", "foo", "ps1", "subdir", "data.csv"))
+        assert os.path.isfile(join(course_dir, "autograded", "foo", "ps1", "subdir", "helper.py"))
+
+        with open(join(course_dir, "autograded", "foo", "ps1", "timestamp.txt"), "r") as fh:
+            contents = fh.read()
+        assert contents == "2015-02-02 15:58:23.948203 America/Los_Angeles"
+
+        with open(join(course_dir, "autograded", "foo", "ps1", "subdir", "data.csv"), "r") as fh:
+            contents = fh.read()
+        assert contents == "some,data\n"
+
+        with open(join(course_dir, "autograded", "foo", "ps1", "subdir", "helper.py"), "r") as fh:
+            contents = fh.read()
+        assert contents == "print('this is different!')\n"
+
     def test_side_effects(self, db, course_dir):
         with open("nbgrader_config.py", "a") as fh:
-            fh.write("""c.CourseDirectory.db_assignments = [dict(name='ps1', duedate='2015-02-02 14:58:23.948203 PST')]\n""")
+            fh.write("""c.CourseDirectory.db_assignments = [dict(name='ps1', duedate='2015-02-02 14:58:23.948203 America/Los_Angeles')]\n""")
             fh.write("""c.CourseDirectory.db_students = [dict(id="foo"), dict(id="bar")]""")
 
         self._copy_file(join("files", "side-effects.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
@@ -428,7 +511,7 @@ class TestNbGraderAutograde(BaseTestApp):
 
     def test_skip_extra_notebooks(self, db, course_dir):
         with open("nbgrader_config.py", "a") as fh:
-            fh.write("""c.CourseDirectory.db_assignments = [dict(name='ps1', duedate='2015-02-02 14:58:23.948203 PST')]\n""")
+            fh.write("""c.CourseDirectory.db_assignments = [dict(name='ps1', duedate='2015-02-02 14:58:23.948203 America/Los_Angeles')]\n""")
             fh.write("""c.CourseDirectory.db_students = [dict(id="foo"), dict(id="bar")]""")
 
         self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
@@ -444,7 +527,7 @@ class TestNbGraderAutograde(BaseTestApp):
     def test_permissions(self, course_dir):
         """Are permissions properly set?"""
         with open("nbgrader_config.py", "a") as fh:
-            fh.write("""c.CourseDirectory.db_assignments = [dict(name='ps1', duedate='2015-02-02 14:58:23.948203 PST')]\n""")
+            fh.write("""c.CourseDirectory.db_assignments = [dict(name='ps1', duedate='2015-02-02 14:58:23.948203 America/Los_Angeles')]\n""")
             fh.write("""c.CourseDirectory.db_students = [dict(id="foo"), dict(id="bar")]""")
 
         self._empty_notebook(join(course_dir, "source", "ps1", "foo.ipynb"))
@@ -463,7 +546,7 @@ class TestNbGraderAutograde(BaseTestApp):
     def test_custom_permissions(self, course_dir):
         """Are custom permissions properly set?"""
         with open("nbgrader_config.py", "a") as fh:
-            fh.write("""c.CourseDirectory.db_assignments = [dict(name='ps1', duedate='2015-02-02 14:58:23.948203 PST')]\n""")
+            fh.write("""c.CourseDirectory.db_assignments = [dict(name='ps1', duedate='2015-02-02 14:58:23.948203 America/Los_Angeles')]\n""")
             fh.write("""c.CourseDirectory.db_students = [dict(id="foo"), dict(id="bar")]""")
 
         self._empty_notebook(join(course_dir, "source", "ps1", "foo.ipynb"))
@@ -486,7 +569,7 @@ class TestNbGraderAutograde(BaseTestApp):
 
     def test_force_single_notebook(self, course_dir):
         with open("nbgrader_config.py", "a") as fh:
-            fh.write("""c.CourseDirectory.db_assignments = [dict(name='ps1', duedate='2015-02-02 14:58:23.948203 PST')]\n""")
+            fh.write("""c.CourseDirectory.db_assignments = [dict(name='ps1', duedate='2015-02-02 14:58:23.948203 America/Los_Angeles')]\n""")
             fh.write("""c.CourseDirectory.db_students = [dict(id="foo"), dict(id="bar")]""")
 
         self._copy_file(join("files", "test.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
@@ -514,33 +597,33 @@ class TestNbGraderAutograde(BaseTestApp):
 
     def test_update_newer(self, course_dir):
         with open("nbgrader_config.py", "a") as fh:
-            fh.write("""c.CourseDirectory.db_assignments = [dict(name='ps1', duedate='2015-02-02 14:58:23.948203 PST')]\n""")
+            fh.write("""c.CourseDirectory.db_assignments = [dict(name='ps1', duedate='2015-02-02 14:58:23.948203 America/Los_Angeles')]\n""")
             fh.write("""c.CourseDirectory.db_students = [dict(id="foo"), dict(id="bar")]""")
 
         self._copy_file(join("files", "test.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
         run_nbgrader(["assign", "ps1"])
 
         self._copy_file(join("files", "test.ipynb"), join(course_dir, "submitted", "foo", "ps1", "p1.ipynb"))
-        self._make_file(join(course_dir, "submitted", "foo", "ps1", "timestamp.txt"), "2015-02-02 15:58:23.948203 PST")
+        self._make_file(join(course_dir, "submitted", "foo", "ps1", "timestamp.txt"), "2015-02-02 15:58:23.948203 America/Los_Angeles")
         run_nbgrader(["autograde", "ps1"])
 
         assert os.path.isfile(join(course_dir, "autograded", "foo", "ps1", "p1.ipynb"))
         assert os.path.isfile(join(course_dir, "autograded", "foo", "ps1", "timestamp.txt"))
-        assert self._file_contents(join(course_dir, "autograded", "foo", "ps1", "timestamp.txt")) == "2015-02-02 15:58:23.948203 PST"
+        assert self._file_contents(join(course_dir, "autograded", "foo", "ps1", "timestamp.txt")) == "2015-02-02 15:58:23.948203 America/Los_Angeles"
         p = self._file_contents(join(course_dir, "autograded", "foo", "ps1", "p1.ipynb"))
 
         self._empty_notebook(join(course_dir, "submitted", "foo", "ps1", "p1.ipynb"))
-        self._make_file(join(course_dir, "submitted", "foo", "ps1", "timestamp.txt"), "2015-02-02 16:58:23.948203 PST")
+        self._make_file(join(course_dir, "submitted", "foo", "ps1", "timestamp.txt"), "2015-02-02 16:58:23.948203 America/Los_Angeles")
         run_nbgrader(["autograde", "ps1"])
 
         assert os.path.isfile(join(course_dir, "autograded", "foo", "ps1", "p1.ipynb"))
         assert os.path.isfile(join(course_dir, "autograded", "foo", "ps1", "timestamp.txt"))
-        assert self._file_contents(join(course_dir, "autograded", "foo", "ps1", "timestamp.txt")) == "2015-02-02 16:58:23.948203 PST"
+        assert self._file_contents(join(course_dir, "autograded", "foo", "ps1", "timestamp.txt")) == "2015-02-02 16:58:23.948203 America/Los_Angeles"
         assert p != self._file_contents(join(course_dir, "autograded", "foo", "ps1", "p1.ipynb"))
 
     def test_update_newer_single_notebook(self, course_dir):
         with open("nbgrader_config.py", "a") as fh:
-            fh.write("""c.CourseDirectory.db_assignments = [dict(name='ps1', duedate='2015-02-02 14:58:23.948203 PST')]\n""")
+            fh.write("""c.CourseDirectory.db_assignments = [dict(name='ps1', duedate='2015-02-02 14:58:23.948203 America/Los_Angeles')]\n""")
             fh.write("""c.CourseDirectory.db_students = [dict(id="foo"), dict(id="bar")]""")
 
         self._copy_file(join("files", "test.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
@@ -549,32 +632,32 @@ class TestNbGraderAutograde(BaseTestApp):
 
         self._copy_file(join("files", "test.ipynb"), join(course_dir, "submitted", "foo", "ps1", "p1.ipynb"))
         self._copy_file(join("files", "test.ipynb"), join(course_dir, "submitted", "foo", "ps1", "p2.ipynb"))
-        self._make_file(join(course_dir, "submitted", "foo", "ps1", "timestamp.txt"), "2015-02-02 15:58:23.948203 PST")
+        self._make_file(join(course_dir, "submitted", "foo", "ps1", "timestamp.txt"), "2015-02-02 15:58:23.948203 America/Los_Angeles")
         run_nbgrader(["autograde", "ps1"])
 
         assert os.path.exists(join(course_dir, "autograded", "foo", "ps1", "p1.ipynb"))
         assert os.path.exists(join(course_dir, "autograded", "foo", "ps1", "p2.ipynb"))
         assert os.path.isfile(join(course_dir, "autograded", "foo", "ps1", "timestamp.txt"))
-        assert self._file_contents(join(course_dir, "autograded", "foo", "ps1", "timestamp.txt")) == "2015-02-02 15:58:23.948203 PST"
+        assert self._file_contents(join(course_dir, "autograded", "foo", "ps1", "timestamp.txt")) == "2015-02-02 15:58:23.948203 America/Los_Angeles"
         p1 = self._file_contents(join(course_dir, "autograded", "foo", "ps1", "p1.ipynb"))
         p2 = self._file_contents(join(course_dir, "autograded", "foo", "ps1", "p2.ipynb"))
         assert p1 == p2
 
         self._empty_notebook(join(course_dir, "submitted", "foo", "ps1", "p1.ipynb"))
         self._empty_notebook(join(course_dir, "submitted", "foo", "ps1", "p2.ipynb"))
-        self._make_file(join(course_dir, "submitted", "foo", "ps1", "timestamp.txt"), "2015-02-02 16:58:23.948203 PST")
+        self._make_file(join(course_dir, "submitted", "foo", "ps1", "timestamp.txt"), "2015-02-02 16:58:23.948203 America/Los_Angeles")
         run_nbgrader(["autograde", "ps1", "--notebook", "p1"])
 
         assert os.path.exists(join(course_dir, "autograded", "foo", "ps1", "p1.ipynb"))
         assert os.path.exists(join(course_dir, "autograded", "foo", "ps1", "p2.ipynb"))
         assert os.path.isfile(join(course_dir, "autograded", "foo", "ps1", "timestamp.txt"))
-        assert self._file_contents(join(course_dir, "autograded", "foo", "ps1", "timestamp.txt")) == "2015-02-02 16:58:23.948203 PST"
+        assert self._file_contents(join(course_dir, "autograded", "foo", "ps1", "timestamp.txt")) == "2015-02-02 16:58:23.948203 America/Los_Angeles"
         assert p1 != self._file_contents(join(course_dir, "autograded", "foo", "ps1", "p1.ipynb"))
         assert p2 == self._file_contents(join(course_dir, "autograded", "foo", "ps1", "p2.ipynb"))
 
     def test_hidden_tests_single_notebook(self, db, course_dir):
         with open("nbgrader_config.py", "a") as fh:
-            fh.write("""c.CourseDirectory.db_assignments = [dict(name='ps1', duedate='2015-02-02 14:58:23.948203 PST')]\n""")
+            fh.write("""c.CourseDirectory.db_assignments = [dict(name='ps1', duedate='2015-02-02 14:58:23.948203 America/Los_Angeles')]\n""")
             fh.write("""c.CourseDirectory.db_students = [dict(id="foo"), dict(id="bar")]\n""")
             fh.write("""c.ClearSolutions.code_stub=dict(python="# YOUR CODE HERE")""")
 
@@ -628,7 +711,7 @@ class TestNbGraderAutograde(BaseTestApp):
 
     def test_handle_failure(self, course_dir):
         with open("nbgrader_config.py", "a") as fh:
-            fh.write("""c.CourseDirectory.db_assignments = [dict(name='ps1', duedate='2015-02-02 14:58:23.948203 PST')]\n""")
+            fh.write("""c.CourseDirectory.db_assignments = [dict(name='ps1', duedate='2015-02-02 14:58:23.948203 America/Los_Angeles')]\n""")
             fh.write("""c.CourseDirectory.db_students = [dict(id="foo"), dict(id="bar")]""")
 
         self._empty_notebook(join(course_dir, "source", "ps1", "p1.ipynb"))
@@ -646,7 +729,7 @@ class TestNbGraderAutograde(BaseTestApp):
 
     def test_handle_failure_single_notebook(self, course_dir):
         with open("nbgrader_config.py", "a") as fh:
-            fh.write("""c.CourseDirectory.db_assignments = [dict(name='ps1', duedate='2015-02-02 14:58:23.948203 PST')]\n""")
+            fh.write("""c.CourseDirectory.db_assignments = [dict(name='ps1', duedate='2015-02-02 14:58:23.948203 America/Los_Angeles')]\n""")
             fh.write("""c.CourseDirectory.db_students = [dict(id="foo"), dict(id="bar")]""")
 
         self._empty_notebook(join(course_dir, "source", "ps1", "p1.ipynb"))
@@ -663,7 +746,7 @@ class TestNbGraderAutograde(BaseTestApp):
 
     def test_missing_source_kernelspec(self, course_dir):
         with open("nbgrader_config.py", "a") as fh:
-            fh.write("""c.CourseDirectory.db_assignments = [dict(name='ps1', duedate='2015-02-02 14:58:23.948203 PST')]\n""")
+            fh.write("""c.CourseDirectory.db_assignments = [dict(name='ps1', duedate='2015-02-02 14:58:23.948203 America/Los_Angeles')]\n""")
             fh.write("""c.CourseDirectory.db_students = [dict(id="foo"), dict(id="bar")]\n""")
             fh.write("""c.ClearSolutions.code_stub = {'python': '## Answer', 'blah': '## Answer'}""")
 
@@ -681,7 +764,7 @@ class TestNbGraderAutograde(BaseTestApp):
 
     def test_incorrect_source_kernelspec(self, course_dir):
         with open("nbgrader_config.py", "a") as fh:
-            fh.write("""c.CourseDirectory.db_assignments = [dict(name='ps1', duedate='2015-02-02 14:58:23.948203 PST')]\n""")
+            fh.write("""c.CourseDirectory.db_assignments = [dict(name='ps1', duedate='2015-02-02 14:58:23.948203 America/Los_Angeles')]\n""")
             fh.write("""c.CourseDirectory.db_students = [dict(id="foo"), dict(id="bar")]\n""")
             fh.write("""c.ClearSolutions.code_stub = {'python': '## Answer', 'blah': '## Answer'}""")
 
@@ -694,7 +777,7 @@ class TestNbGraderAutograde(BaseTestApp):
 
     def test_incorrect_submitted_kernelspec(self, db, course_dir):
         with open("nbgrader_config.py", "a") as fh:
-            fh.write("""c.CourseDirectory.db_assignments = [dict(name='ps1', duedate='2015-02-02 14:58:23.948203 PST')]\n""")
+            fh.write("""c.CourseDirectory.db_assignments = [dict(name='ps1', duedate='2015-02-02 14:58:23.948203 America/Los_Angeles')]\n""")
             fh.write("""c.CourseDirectory.db_students = [dict(id="foo"), dict(id="bar")]""")
 
         self._empty_notebook(join(course_dir, "source", "ps1", "p1.ipynb"), kernel="python")
@@ -707,7 +790,7 @@ class TestNbGraderAutograde(BaseTestApp):
 
     def test_no_execute(self, course_dir):
         with open("nbgrader_config.py", "a") as fh:
-            fh.write("""c.CourseDirectory.db_assignments = [dict(name='ps1', duedate='2015-02-02 14:58:23.948203 PST')]\n""")
+            fh.write("""c.CourseDirectory.db_assignments = [dict(name='ps1', duedate='2015-02-02 14:58:23.948203 America/Los_Angeles')]\n""")
             fh.write("""c.CourseDirectory.db_students = [dict(id="foo")]""")
 
         self._copy_file(join("files", "test.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
@@ -762,7 +845,7 @@ class TestNbGraderAutograde(BaseTestApp):
             students.append(dict(id=student_fmt.format(i)))
 
         with open("nbgrader_config.py", "a") as fh:
-            fh.write("""c.CourseDirectory.db_assignments = [dict(name='ps1', duedate='2015-02-02 14:58:23.948203 PST')]\n""")
+            fh.write("""c.CourseDirectory.db_assignments = [dict(name='ps1', duedate='2015-02-02 14:58:23.948203 America/Los_Angeles')]\n""")
             fh.write("""c.CourseDirectory.db_students = {}""".format(json.dumps(students)))
 
         self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
@@ -775,7 +858,7 @@ class TestNbGraderAutograde(BaseTestApp):
 
     def test_infinite_loop(self, db, course_dir):
         with open("nbgrader_config.py", "a") as fh:
-            fh.write("""c.CourseDirectory.db_assignments = [dict(name='ps1', duedate='2015-02-02 14:58:23.948203 PST')]\n""")
+            fh.write("""c.CourseDirectory.db_assignments = [dict(name='ps1', duedate='2015-02-02 14:58:23.948203 America/Los_Angeles')]\n""")
             fh.write("""c.CourseDirectory.db_students = [dict(id="foo")]\n""")
             fh.write("""c.ExecutePreprocessor.timeout = 1""")
 
@@ -791,7 +874,7 @@ class TestNbGraderAutograde(BaseTestApp):
         pytest.skip("this test takes too long to run and consumes a LOT of memory")
 
         with open("nbgrader_config.py", "a") as fh:
-            fh.write("""c.CourseDirectory.db_assignments = [dict(name='ps1', duedate='2015-02-02 14:58:23.948203 PST')]\n""")
+            fh.write("""c.CourseDirectory.db_assignments = [dict(name='ps1', duedate='2015-02-02 14:58:23.948203 America/Los_Angeles')]\n""")
             fh.write("""c.CourseDirectory.db_students = [dict(id="foo")]\n""")
 
         self._copy_file(join("files", "infinite-loop-with-output.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
@@ -804,7 +887,7 @@ class TestNbGraderAutograde(BaseTestApp):
 
     def test_missing_files(self, db, course_dir):
         with open("nbgrader_config.py", "a") as fh:
-            fh.write("""c.CourseDirectory.db_assignments = [dict(name='ps1', duedate='2015-02-02 14:58:23.948203 PST')]\n""")
+            fh.write("""c.CourseDirectory.db_assignments = [dict(name='ps1', duedate='2015-02-02 14:58:23.948203 America/Los_Angeles')]\n""")
             fh.write("""c.CourseDirectory.db_students = [dict(id="foo"), dict(id="bar")]""")
 
         self._empty_notebook(join(course_dir, "source", "ps1", "p1.ipynb"))
@@ -820,7 +903,7 @@ class TestNbGraderAutograde(BaseTestApp):
 
     def test_grade_missing_notebook(self, db, course_dir):
         with open("nbgrader_config.py", "a") as fh:
-            fh.write("""c.CourseDirectory.db_assignments = [dict(name='ps1', duedate='2015-02-02 14:58:23.948203 PST')]\n""")
+            fh.write("""c.CourseDirectory.db_assignments = [dict(name='ps1', duedate='2015-02-02 14:58:23.948203 America/Los_Angeles')]\n""")
             fh.write("""c.CourseDirectory.db_students = [dict(id="foo"), dict(id="bar")]""")
 
         self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))

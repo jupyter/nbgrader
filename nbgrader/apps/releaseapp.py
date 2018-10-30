@@ -20,6 +20,10 @@ flags.update({
         {'ExchangeRelease' : {'force' : True}},
         "Force overwrite of existing files in the exchange."
     ),
+    'f': (
+        {'ExchangeRelease' : {'force' : True}},
+        "Force overwrite of existing files in the exchange."
+    ),
 })
 
 class ReleaseApp(NbGrader):

@@ -4,7 +4,7 @@ import re
 from textwrap import dedent
 
 from traitlets.config import LoggingConfigurable
-from traitlets import Unicode, List, default
+from traitlets import Unicode, List, default, validate, TraitError
 
 from .utils import full_split, parse_utc
 
@@ -31,6 +31,12 @@ class CourseDirectory(LoggingConfigurable):
         )
     ).tag(config=True)
 
+    @validate('student_id')
+    def _validate_student_id(self, proposal):
+        if proposal['value'].strip() != proposal['value']:
+            self.log.warning("student_id '%s' has trailing whitespace, stripping it away", proposal['value'])
+        return proposal['value'].strip()
+
     assignment_id = Unicode(
         "",
         help=dedent(
@@ -42,6 +48,14 @@ class CourseDirectory(LoggingConfigurable):
         )
     ).tag(config=True)
 
+    @validate('assignment_id')
+    def _validate_assignment_id(self, proposal):
+        if '+' in proposal['value']:
+            raise TraitError('Assignment names should not contain the following characters: +')
+        if proposal['value'].strip() != proposal['value']:
+            self.log.warning("assignment_id '%s' has trailing whitespace, stripping it away", proposal['value'])
+        return proposal['value'].strip()
+
     notebook_id = Unicode(
         "*",
         help=dedent(
@@ -51,6 +65,12 @@ class CourseDirectory(LoggingConfigurable):
             """
         )
     ).tag(config=True)
+
+    @validate('notebook_id')
+    def _validate_notebook_id(self, proposal):
+        if proposal['value'].strip() != proposal['value']:
+            self.log.warning("notebook_id '%s' has trailing whitespace, stripping it away", proposal['value'])
+        return proposal['value'].strip()
 
     directory_structure = Unicode(
         os.path.join("{nbgrader_step}", "{student_id}", "{assignment_id}"),

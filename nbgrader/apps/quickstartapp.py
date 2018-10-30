@@ -26,6 +26,20 @@ flags = {
             """
         )
     ),
+    'f': (
+        {'QuickStartApp': {'force': True}},
+        dedent(
+            """
+            Overwrite existing files if they already exist. WARNING: this is
+            equivalent to doing:
+
+                rm -r <course_id>
+                nbgrader quickstart <course_id>
+
+            So be careful when using this flag!
+            """
+        )
+    ),
 }
 
 class QuickStartApp(NbGrader):
@@ -65,6 +79,14 @@ class QuickStartApp(NbGrader):
         classes.append(QuickStartApp)
         return classes
 
+    def _course_folder_content_exists(self, course_path):
+        course_folder_content = {
+            "source_dir": os.path.join(course_path, "source"),
+            "config_file": os.path.join(course_path, "nbgrader_config.py")
+        }
+        exists = os.path.isdir(course_folder_content['source_dir']) or os.path.isfile(course_folder_content['config_file'])
+        return exists
+
     def start(self):
         super(QuickStartApp, self).start()
 
@@ -75,19 +97,23 @@ class QuickStartApp(NbGrader):
         # make sure it doesn't exist
         course_id = self.extra_args[0]
         course_path = os.path.abspath(course_id)
+
         if os.path.exists(course_path):
             if self.force:
                 self.log.warning("Removing existing directory '%s'", course_path)
                 utils.rmtree(course_path)
             else:
-                self.fail(
-                    "Directory '{}' already exists! Rerun with --force to remove "
-                    "this directory first (warning: this will remove the ENTIRE "
-                    "directory and all files in it.) ".format(course_path))
+                if self._course_folder_content_exists(course_path):
+                    self.fail(
+                        "Directory '{}' and it's content already exists! Rerun with --force to remove "
+                        "this directory first (warning: this will remove the ENTIRE "
+                        "directory and all files in it.) ".format(course_path))
 
         # create the directory
         self.log.info("Creating directory '%s'...", course_path)
-        os.mkdir(course_path)
+
+        if not os.path.isdir(course_path):
+            os.mkdir(course_path)
 
         # populating it with an example
         self.log.info("Copying example from the user guide...")
@@ -99,7 +125,7 @@ class QuickStartApp(NbGrader):
         self.log.info("Generating example config file...")
         currdir = os.getcwd()
         os.chdir(course_path)
-        subprocess.call([sys.executable, "-m", "nbgrader", "--generate-config"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        subprocess.call([sys.executable, "-m", "nbgrader", "generate_config"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         os.chdir(currdir)
         with open(os.path.join(course_path, "nbgrader_config.py"), "r") as fh:
             config = fh.read()
@@ -149,7 +175,7 @@ class QuickStartApp(NbGrader):
 
                 For further details, please see the full nbgrader documentation at:
 
-                    https://nbgrader.readthedocs.io/
+                    https://nbgrader.readthedocs.io/en/stable/
                 """
             ).lstrip(),
             course_path,

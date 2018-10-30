@@ -43,6 +43,7 @@ cogsci
 conda
 config
 contextmanager
+CSS
 customizable
 cwd
 datefmt
@@ -81,6 +82,7 @@ globbing
 Gradebook
 gradebook
 Granger
+grepping
 hardcoded
 hasn
 hasn’t
@@ -112,6 +114,7 @@ ivanslapnicar
 ixjlyons
 I’m
 I’ve
+Javascript
 jcsutherland
 jdfreder
 jhamrick
@@ -157,6 +160,8 @@ np
 npm
 ok
 olgabot
+online
+Ordo
 org
 osx
 overwritekernelspec
@@ -205,9 +210,11 @@ student’s
 subclasses
 subcommand
 subcommands
+subpackage
 suchow
 suprocesses
 svurens
+symlink
 sys
 systemwide
 Szepi
@@ -233,6 +240,7 @@ utcnow
 ve
 vinaykola
 webapp
+webdriver
 weren
 weren’t
 we’ll
@@ -254,4 +262,5 @@ xsrf
 XSRF
 yml
 you’ll
+Zesje
 zpincus

@@ -67,6 +67,46 @@ class TestNbGraderFeedback(BaseTestApp):
         assert isfile(join(course_dir, "feedback", "foo", "ps1", "data", "bar.txt"))
         assert not isfile(join(course_dir, "feedback", "foo", "ps1", "blah.pyc"))
 
+    def test_force_f(self, db, course_dir):
+        """Ensure the force option works properly"""
+        with open("nbgrader_config.py", "a") as fh:
+            fh.write("""c.CourseDirectory.db_assignments = [dict(name="ps1")]\n""")
+            fh.write("""c.CourseDirectory.db_students = [dict(id="foo")]\n""")
+        self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
+        self._make_file(join(course_dir, "source", "ps1", "foo.txt"), "foo")
+        self._make_file(join(course_dir, "source", "ps1", "data", "bar.txt"), "bar")
+        run_nbgrader(["assign", "ps1", "--db", db])
+
+        self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "submitted", "foo", "ps1", "p1.ipynb"))
+        self._make_file(join(course_dir, "submitted", "foo", "ps1", "foo.txt"), "foo")
+        self._make_file(join(course_dir, "submitted", "foo", "ps1", "data", "bar.txt"), "bar")
+        run_nbgrader(["autograde", "ps1", "--db", db])
+
+        self._make_file(join(course_dir, "autograded", "foo", "ps1", "blah.pyc"), "asdf")
+        run_nbgrader(["feedback", "ps1", "--db", db])
+
+        assert isfile(join(course_dir, "feedback", "foo", "ps1", "p1.html"))
+        assert isfile(join(course_dir, "feedback", "foo", "ps1", "foo.txt"))
+        assert isfile(join(course_dir, "feedback", "foo", "ps1", "data", "bar.txt"))
+        assert not isfile(join(course_dir, "feedback", "foo", "ps1", "blah.pyc"))
+
+        # check that it skips the existing directory
+        remove(join(course_dir, "feedback", "foo", "ps1", "foo.txt"))
+        run_nbgrader(["feedback", "ps1", "--db", db])
+        assert not isfile(join(course_dir, "feedback", "foo", "ps1", "foo.txt"))
+
+        # force overwrite the supplemental files
+        run_nbgrader(["feedback", "ps1", "--db", db, "-f"])
+        assert isfile(join(course_dir, "feedback", "foo", "ps1", "foo.txt"))
+
+        # force overwrite
+        remove(join(course_dir, "autograded", "foo", "ps1", "foo.txt"))
+        run_nbgrader(["feedback", "ps1", "--db", db, "--force"])
+        assert isfile(join(course_dir, "feedback", "foo", "ps1", "p1.html"))
+        assert not isfile(join(course_dir, "feedback", "foo", "ps1", "foo.txt"))
+        assert isfile(join(course_dir, "feedback", "foo", "ps1", "data", "bar.txt"))
+        assert not isfile(join(course_dir, "feedback", "foo", "ps1", "blah.pyc"))
+
     def test_filter_notebook(self, db, course_dir):
         """Does feedback filter by notebook properly?"""
         with open("nbgrader_config.py", "a") as fh:
@@ -187,22 +227,22 @@ class TestNbGraderFeedback(BaseTestApp):
         run_nbgrader(["assign", "ps1"])
 
         self._copy_file(join("files", "test.ipynb"), join(course_dir, "submitted", "foo", "ps1", "p1.ipynb"))
-        self._make_file(join(course_dir, "submitted", "foo", "ps1", "timestamp.txt"), "2015-02-02 15:58:23.948203 PST")
+        self._make_file(join(course_dir, "submitted", "foo", "ps1", "timestamp.txt"), "2015-02-02 15:58:23.948203 America/Los_Angeles")
         run_nbgrader(["autograde", "ps1"])
         run_nbgrader(["feedback", "ps1"])
 
         assert isfile(join(course_dir, "feedback", "foo", "ps1", "p1.html"))
         assert isfile(join(course_dir, "feedback", "foo", "ps1", "timestamp.txt"))
-        assert self._file_contents(join(course_dir, "feedback", "foo", "ps1", "timestamp.txt")) == "2015-02-02 15:58:23.948203 PST"
+        assert self._file_contents(join(course_dir, "feedback", "foo", "ps1", "timestamp.txt")) == "2015-02-02 15:58:23.948203 America/Los_Angeles"
         p = self._file_contents(join(course_dir, "feedback", "foo", "ps1", "p1.html"))
 
         self._empty_notebook(join(course_dir, "autograded", "foo", "ps1", "p1.ipynb"))
-        self._make_file(join(course_dir, "autograded", "foo", "ps1", "timestamp.txt"), "2015-02-02 16:58:23.948203 PST")
+        self._make_file(join(course_dir, "autograded", "foo", "ps1", "timestamp.txt"), "2015-02-02 16:58:23.948203 America/Los_Angeles")
         run_nbgrader(["feedback", "ps1"])
 
         assert isfile(join(course_dir, "feedback", "foo", "ps1", "p1.html"))
         assert isfile(join(course_dir, "feedback", "foo", "ps1", "timestamp.txt"))
-        assert self._file_contents(join(course_dir, "feedback", "foo", "ps1", "timestamp.txt")) == "2015-02-02 16:58:23.948203 PST"
+        assert self._file_contents(join(course_dir, "feedback", "foo", "ps1", "timestamp.txt")) == "2015-02-02 16:58:23.948203 America/Los_Angeles"
         assert p != self._file_contents(join(course_dir, "feedback", "foo", "ps1", "p1.html"))
 
     def test_update_newer_single_notebook(self, course_dir):
@@ -215,25 +255,25 @@ class TestNbGraderFeedback(BaseTestApp):
 
         self._copy_file(join("files", "test.ipynb"), join(course_dir, "submitted", "foo", "ps1", "p1.ipynb"))
         self._copy_file(join("files", "test.ipynb"), join(course_dir, "submitted", "foo", "ps1", "p2.ipynb"))
-        self._make_file(join(course_dir, "submitted", "foo", "ps1", "timestamp.txt"), "2015-02-02 15:58:23.948203 PST")
+        self._make_file(join(course_dir, "submitted", "foo", "ps1", "timestamp.txt"), "2015-02-02 15:58:23.948203 America/Los_Angeles")
         run_nbgrader(["autograde", "ps1"])
         run_nbgrader(["feedback", "ps1"])
 
         assert exists(join(course_dir, "feedback", "foo", "ps1", "p1.html"))
         assert exists(join(course_dir, "feedback", "foo", "ps1", "p2.html"))
         assert isfile(join(course_dir, "feedback", "foo", "ps1", "timestamp.txt"))
-        assert self._file_contents(join(course_dir, "feedback", "foo", "ps1", "timestamp.txt")) == "2015-02-02 15:58:23.948203 PST"
+        assert self._file_contents(join(course_dir, "feedback", "foo", "ps1", "timestamp.txt")) == "2015-02-02 15:58:23.948203 America/Los_Angeles"
         p1 = self._file_contents(join(course_dir, "feedback", "foo", "ps1", "p1.html"))
         p2 = self._file_contents(join(course_dir, "feedback", "foo", "ps1", "p2.html"))
 
         self._empty_notebook(join(course_dir, "autograded", "foo", "ps1", "p1.ipynb"))
         self._empty_notebook(join(course_dir, "autograded", "foo", "ps1", "p2.ipynb"))
-        self._make_file(join(course_dir, "autograded", "foo", "ps1", "timestamp.txt"), "2015-02-02 16:58:23.948203 PST")
+        self._make_file(join(course_dir, "autograded", "foo", "ps1", "timestamp.txt"), "2015-02-02 16:58:23.948203 America/Los_Angeles")
         run_nbgrader(["feedback", "ps1", "--notebook", "p1"])
 
         assert exists(join(course_dir, "feedback", "foo", "ps1", "p1.html"))
         assert exists(join(course_dir, "feedback", "foo", "ps1", "p2.html"))
         assert isfile(join(course_dir, "feedback", "foo", "ps1", "timestamp.txt"))
-        assert self._file_contents(join(course_dir, "feedback", "foo", "ps1", "timestamp.txt")) == "2015-02-02 16:58:23.948203 PST"
+        assert self._file_contents(join(course_dir, "feedback", "foo", "ps1", "timestamp.txt")) == "2015-02-02 16:58:23.948203 America/Los_Angeles"
         assert p1 != self._file_contents(join(course_dir, "feedback", "foo", "ps1", "p1.html"))
         assert p2 == self._file_contents(join(course_dir, "feedback", "foo", "ps1", "p2.html"))

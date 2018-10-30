@@ -22,7 +22,9 @@ class ExchangeFetch(Exchange):
         self.outbound_path = os.path.join(self.course_path, 'outbound')
         self.src_path = os.path.join(self.outbound_path, self.coursedir.assignment_id)
         if not os.path.isdir(self.src_path):
-            self.fail("Assignment not found: {}".format(self.src_path))
+            self._assignment_not_found(
+                self.src_path,
+                os.path.join(self.outbound_path, "*"))
         if not check_mode(self.src_path, read=True, execute=True):
             self.fail("You don't have read permissions for the directory: {}".format(self.src_path))
 

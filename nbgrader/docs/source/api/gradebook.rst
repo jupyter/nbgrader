@@ -61,6 +61,8 @@ Gradebook
 
     .. automethod:: update_or_create_submission
 
+    .. automethod:: grant_extension
+
     .. automethod:: remove_submission
 
     .. automethod:: remove_submission_notebook

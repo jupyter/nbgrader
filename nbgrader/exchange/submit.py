@@ -1,3 +1,4 @@
+import base64
 import os
 from stat import (
     S_IRUSR, S_IWUSR, S_IXUSR,
@@ -22,15 +23,24 @@ class ExchangeSubmit(Exchange):
         )
     ).tag(config=True)
 
+    add_random_string = Bool(
+        True,
+        help=dedent(
+            "Whether to add a random string on the end of the submission."
+        )
+    ).tag(config=True)
+
     def init_src(self):
         if self.path_includes_course:
             root = os.path.join(self.course_id, self.coursedir.assignment_id)
+            other_path = os.path.join(self.course_id, "*")
         else:
             root = self.coursedir.assignment_id
+            other_path = "*"
         self.src_path = os.path.abspath(root)
         self.coursedir.assignment_id = os.path.split(self.src_path)[-1]
         if not os.path.isdir(self.src_path):
-            self.fail("Assignment not found: {}".format(self.src_path))
+            self._assignment_not_found(self.src_path, os.path.abspath(other_path))
 
     def init_dest(self):
         if self.course_id == '':
@@ -46,7 +56,13 @@ class ExchangeSubmit(Exchange):
             self.fail("You don't have write permissions to the directory: {}".format(self.inbound_path))
 
         self.cache_path = os.path.join(self.cache, self.course_id)
-        self.assignment_filename = '{}+{}+{}'.format(get_username(), self.coursedir.assignment_id, self.timestamp)
+        if self.add_random_string:
+            random_str = base64.urlsafe_b64encode(os.urandom(9)).decode('ascii')
+            self.assignment_filename = '{}+{}+{}+{}'.format(
+                get_username(), self.coursedir.assignment_id, self.timestamp, random_str)
+        else:
+            self.assignment_filename = '{}+{}+{}'.format(
+                get_username(), self.coursedir.assignment_id, self.timestamp)
 
     def init_release(self):
         if self.course_id == '':
@@ -108,7 +124,10 @@ class ExchangeSubmit(Exchange):
         self.init_release()
 
         dest_path = os.path.join(self.inbound_path, self.assignment_filename)
-        cache_path = os.path.join(self.cache_path, self.assignment_filename)
+        if self.add_random_string:
+            cache_path = os.path.join(self.cache_path, self.assignment_filename.rsplit('+', 1)[0])
+        else:
+            cache_path = os.path.join(self.cache_path, self.assignment_filename)
 
         self.log.info("Source: {}".format(self.src_path))
         self.log.info("Destination: {}".format(dest_path))

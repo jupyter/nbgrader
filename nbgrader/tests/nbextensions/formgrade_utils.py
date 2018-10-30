@@ -1,9 +1,12 @@
+import os
+import time
+
 from six.moves.urllib.parse import urljoin, unquote
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
-from selenium.common.exceptions import TimeoutException, NoSuchElementException
+from selenium.common.exceptions import TimeoutException, NoSuchElementException, NoAlertPresentException, WebDriverException
 
 
 
@@ -22,7 +25,8 @@ def _tree_url(port, url=""):
 def _check_url(browser, port, url):
     if not url.startswith("http"):
         url = _formgrade_url(port, url)
-    assert unquote(browser.current_url).rstrip("/") == url
+    url_matches = lambda browser: unquote(browser.current_url).rstrip("/") == url
+    WebDriverWait(browser, 10).until(url_matches)
 
 
 def _check_breadcrumbs(browser, *breadcrumbs):
@@ -37,8 +41,12 @@ def _check_breadcrumbs(browser, *breadcrumbs):
 
 def _click_link(browser, link_text, partial=False):
     if partial:
+        WebDriverWait(browser, 10).until(
+            EC.presence_of_element_located((By.PARTIAL_LINK_TEXT, link_text)))
         element = browser.find_element_by_partial_link_text(link_text)
     else:
+        WebDriverWait(browser, 10).until(
+            EC.presence_of_element_located((By.LINK_TEXT, link_text)))
         element = browser.find_element_by_link_text(link_text)
     element.click()
 
@@ -46,6 +54,12 @@ def _click_link(browser, link_text, partial=False):
 def _wait_for_element(browser, element_id, time=10):
     return WebDriverWait(browser, time).until(
         EC.presence_of_element_located((By.ID, element_id))
+    )
+
+
+def _wait_for_tag(browser, tag, time=10):
+    return WebDriverWait(browser, time).until(
+        EC.presence_of_element_located((By.TAG_NAME, tag))
     )
 
 
@@ -62,6 +76,12 @@ def _wait_for_gradebook_page(browser, port, url):
     _check_url(browser, port, url)
 
 
+def _switch_to_window(browser, index):
+    handle_exists = lambda browser: index < len(browser.window_handles)
+    WebDriverWait(browser, 10).until(handle_exists)
+    browser.switch_to_window(browser.window_handles[index])
+
+
 def _get(browser, url, retries=5):
     try:
         browser.get(url)
@@ -72,6 +92,14 @@ def _get(browser, url, retries=5):
         else:
             print("Failed to load '{}', trying again...".format(url))
             _get(browser, url, retries=retries - 1)
+
+    try:
+        alert = browser.switch_to.alert
+    except NoAlertPresentException:
+        pass
+    else:
+        print("Warning: dismissing unexpected alert ({})".format(alert.text))
+        alert.accept()
 
 
 def _load_gradebook_page(browser, port, url):
@@ -96,7 +124,7 @@ def _wait_for_formgrader(browser, port, url, retries=5):
             return false;
         }
 
-        if (!(typeof formgrader !== "undefined" && formgrader !== undefined)) {
+        if (!(typeof formgrader !== "undefined" && formgrader !== undefined && formgrader.loaded)) {
             return false;
         }
 
@@ -109,6 +137,14 @@ def _wait_for_formgrader(browser, port, url, retries=5):
         }
 
         if (!(typeof autosize !== "undefined" && autosize !== undefined)) {
+            return false;
+        }
+
+        if (!(typeof $ !== "undefined" && $ !== undefined)) {
+            return false;
+        }
+
+        if ($("body")[0] === undefined) {
             return false;
         }
 
@@ -132,7 +168,23 @@ def _click_element(browser, name):
     browser.find_element_by_css_selector(name).click()
 
 
+def _focus_body(browser, num_tries=5):
+    for i in range(num_tries):
+        try:
+            browser.execute_script("$('body').focus();")
+        except WebDriverException:
+            if i == (num_tries - 1):
+                raise
+            else:
+                print("Couldn't focus body, waiting and trying again...")
+                time.sleep(1)
+        else:
+            break
+
+
 def _send_keys_to_body(browser, *keys):
+    _wait_for_tag(browser, "body")
+    _focus_body(browser)
     body = browser.find_element_by_tag_name("body")
     body.send_keys(*keys)
 
@@ -142,14 +194,35 @@ def _get_next_arrow(browser):
 
 
 def _get_comment_box(browser, index):
+    def comment_is_present(browser):
+        comments = browser.find_elements_by_css_selector(".comment")
+        if len(comments) <= index:
+            return False
+        return True
+
+    WebDriverWait(browser, 10).until(comment_is_present)
     return browser.find_elements_by_css_selector(".comment")[index]
 
 
 def _get_score_box(browser, index):
+    def score_is_present(browser):
+        scores = browser.find_elements_by_css_selector(".score")
+        if len(scores) <= index:
+            return False
+        return True
+
+    WebDriverWait(browser, 10).until(score_is_present)
     return browser.find_elements_by_css_selector(".score")[index]
 
 
 def _get_extra_credit_box(browser, index):
+    def extra_credit_is_present(browser):
+        extra_credits = browser.find_elements_by_css_selector(".extra-credit")
+        if len(extra_credits) <= index:
+            return False
+        return True
+
+    WebDriverWait(browser, 10).until(extra_credit_is_present)
     return browser.find_elements_by_css_selector(".extra-credit")[index]
 
 
@@ -197,6 +270,11 @@ def _load_formgrade(browser, port, gradebook):
     _click_link(browser, "Submission #1")
     _wait_for_formgrader(browser, port, "submissions/{}/?index=0".format(submissions[0].id))
 
+    # Hack: there is a race condition here where sometimes the formgrader doesn't
+    # fully finish loading. So we add a wait here, though this is not really a
+    # robust solution.
+    time.sleep(1)
+
 
 def _child_exists(elem, selector):
     try:
@@ -205,3 +283,7 @@ def _child_exists(elem, selector):
         return False
     else:
         return True
+
+
+def _save_screenshot(browser):
+    browser.save_screenshot(os.path.join(os.path.dirname(__file__), "selenium.screenshot.png"))

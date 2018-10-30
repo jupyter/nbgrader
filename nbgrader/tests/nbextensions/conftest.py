@@ -10,7 +10,10 @@ import signal
 import glob
 
 from selenium import webdriver
-from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.common.exceptions import NoAlertPresentException
 from textwrap import dedent
 
 from .. import copy_coverage_files, get_free_ports
@@ -176,12 +179,9 @@ def _make_browser(tempdir):
     selenium_logger = logging.getLogger('selenium.webdriver.remote.remote_connection')
     selenium_logger.setLevel(logging.WARNING)
 
-    capabilities = DesiredCapabilities.PHANTOMJS
-    capabilities['loggingPrefs'] = {'browser': 'ALL'}
-    browser = webdriver.PhantomJS(
-        service_args=['--cookies-file=/dev/null', '--proxy-type=none'],
-        desired_capabilities=capabilities,
-        service_log_path=os.path.devnull)
+    options = webdriver.firefox.options.Options()
+    options.add_argument('-headless')
+    browser = webdriver.Firefox(options=options)
     browser.set_page_load_timeout(30)
     browser.set_script_timeout(30)
 
@@ -189,14 +189,17 @@ def _make_browser(tempdir):
 
 
 def _close_browser(browser):
-    console_messages = browser.get_log('browser')
-    if len(console_messages) > 0:
-        print("\n<-- CAPTURED JAVASCRIPT CONSOLE MESSAGES -->")
-        for message in console_messages:
-            print(message)
-        print("<------------------------------------------>")
     browser.save_screenshot(os.path.join(os.path.dirname(__file__), 'selenium.screenshot.png'))
-    browser.service.process.send_signal(signal.SIGTERM)
+    browser.get("about:blank")
+
+    try:
+        alert = browser.switch_to.alert
+    except NoAlertPresentException:
+        pass
+    else:
+        print("Warning: dismissing unexpected alert ({})".format(alert.text))
+        alert.accept()
+
     browser.quit()
 
 

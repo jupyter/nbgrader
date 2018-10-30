@@ -54,7 +54,7 @@ behavior see :doc:`adding customization plugins </plugins/index>`.
 
 For this to work, you must include a duedate for the assignment and then a
 ``timestamp.txt`` file in the folder for each submission with a single line
-containing a timestamp (e.g. ``2015-02-02 14:58:23.948203 PST``). Then, when
+containing a timestamp (e.g. ``2015-02-02 14:58:23.948203 America/Los_Angeles``). Then, when
 you run ``nbgrader autograde``, nbgrader will record these timestamps into the
 database. You can access the timestamps through the API, like so:
 
@@ -173,6 +173,16 @@ Do students have to install anything on their own computers to use nbgrader?
 No, nbgrader only needs to be installed for the instructor. However, students
 may optionally install the Validate extension to verify that their submission
 passes all the test cases.
+
+What should I do if validation or grading of a notebook fails with a "Timeout waiting for execute reply" error?
+---------------------------------------------------------------------------------------------------------------
+This occurs because the validator or autograder is taking too long to validate or autograde your notebook. This
+can be fixed by adding the following line to nbgrader_config.py:
+
+.. code:: python
+
+   # increase timeout to 60 seconds
+   c.ExecutePreprocessor.timeout = 60
 
 Can tests be only temporarily hidden, so that students can reveal them?
 -----------------------------------------------------------------------

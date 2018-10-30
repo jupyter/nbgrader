@@ -129,6 +129,94 @@ A test case that does this might look something like this:
         del old_mse
 
 
+Checking how functions were called or not called with mocking
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+In unit testing it is desirable to test your own code but not necessarily to include calls your code makes to external libraries.
+In particular calls that involve file systems and databases are typically replaced with so called mock objects that can record
+what arguments were passed in the call but which do not otherwise do any work. 
+
+We can use this in autograding in the following situations
+with the ``patch`` function from the ``mock`` library (since Python 3 a subpackage of ``unittest``). The argument to ``patch`` is a string
+which represents where a certain function is *used* (rather than where it is *defined*).
+In the context of jupyter notebooks this argument will be `'__main__.function_name'`.
+
+Example
+^^^^^^^
+Problem: verify that a function call results in the printing of a certain result
+
+.. code:: python
+
+    def foo()
+        #...
+        print('right result')
+
+The test code for this can be written as
+
+.. code:: python
+
+    from unittest.mock import patch
+    with patch('__main__.print') as mock_print:
+        foo()
+    mock_print.assert_called_once_with('right_result')
+
+This test passes silently if the print is correct, but of the print is wrong 
+
+.. code:: python
+
+    def foo()
+        #...
+        print('wrong result')
+
+an assertion error is raised with output of the form
+
+.. code:: python
+
+    ---------------------------------------------------------------------------
+    AssertionError                            Traceback (most recent call last)
+    ...
+
+    AssertionError: Expected call: print('right result')
+    Actual call: print('wrong result')
+
+Example
+^^^^^^^
+Problem: verify that the students has implemented a `min` function without using the built-in function.
+That is, you expect the student to write a solution like
+
+.. code:: python
+
+    def mymin(x, y):
+        if x < y:
+            return x
+        else:
+            return y
+
+However, if the student has implemented
+
+.. code:: python
+
+    def mymin(x, y):
+        return min(x, y)
+
+the following test will capture this with an error
+
+.. code:: python
+
+    with patch('__main__.min') as mock_min:
+        mymin(1, 2)
+
+    mock_min.assert_not_called()
+
+    ---------------------------------------------------------------------------
+    AssertionError                            Traceback (most recent call last)
+    ...
+    AssertionError: Expected 'min' to not have been called. Called 1 times.
+
+
+
+
+
 Grading plots
 ~~~~~~~~~~~~~
 

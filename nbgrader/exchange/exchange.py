@@ -3,12 +3,14 @@ import datetime
 import sys
 import shutil
 import json
+import glob
+
 
 from textwrap import dedent
 
 from dateutil.tz import gettz
 from traitlets.config import LoggingConfigurable
-from traitlets import Unicode, Bool, Instance, default
+from traitlets import Unicode, Bool, Instance, default, validate
 from jupyter_core.paths import jupyter_data_dir
 
 from ..utils import check_directory, query_jupyterhub_api, JupyterhubEnvironmentError, JupyterhubApiError 
@@ -29,6 +31,12 @@ class Exchange(LoggingConfigurable):
             """
         )
     ).tag(config=True)
+
+    @validate('course_id')
+    def _validate_course_id(self, proposal):
+        if proposal['value'].strip() != proposal['value']:
+            self.log.warning("course_id '%s' has trailing whitespace, stripping it away", proposal['value'])
+        return proposal['value'].strip()
 
     timezone = Unicode(
         "UTC",
@@ -125,6 +133,7 @@ class Exchange(LoggingConfigurable):
         self.init_dest()
         self.copy_files()
 
+
     def get_user_courses(self, student_id):
         """Check if student is enrolled in course"""
         if student_id == "*":
@@ -144,3 +153,19 @@ class Exchange(LoggingConfigurable):
             self.log.error("KeyError: See Jupyterhub API: " + str(response)) 
             self.log.error("Make sure you start your service with a valid 'api_token' in your config file")
         return list(courses)
+
+    def _assignment_not_found(self, src_path, other_path):
+        msg = "Assignment not found at: {}".format(src_path)
+        self.log.fatal(msg)
+        found = glob.glob(other_path)
+        if found:
+            # Normally it is a bad idea to put imports in the middle of
+            # a function, but we do this here because otherwise fuzzywuzzy
+            # prints an annoying message about python-Levenshtein every
+            # time nbgrader is run.
+            from fuzzywuzzy import fuzz
+            scores = sorted([(fuzz.ratio(self.src_path, x), x) for x in found])
+            self.log.error("Did you mean: %s", scores[-1][1])
+
+        raise ExchangeError(msg)
+

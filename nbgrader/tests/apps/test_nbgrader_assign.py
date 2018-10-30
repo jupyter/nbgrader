@@ -1,6 +1,7 @@
 import os
 import sys
 import pytest
+import traitlets
 
 from os.path import join
 from sqlalchemy.exc import InvalidRequestError
@@ -43,6 +44,13 @@ class TestNbGraderAssign(BaseTestApp):
             fh.write("""c.CourseDirectory.db_assignments = [dict(name="ps1")]\n""")
         run_nbgrader(["assign", "ps1"])
         assert os.path.isfile(join(course_dir, "release", "ps1", "foo.ipynb"))
+
+    def test_single_file_bad_assignment_name(self, course_dir, temp_cwd):
+        """Test that an error is thrown when the assignment name is invalid."""
+        self._empty_notebook(join(course_dir, 'source', 'foo+bar', 'foo.ipynb'))
+        with pytest.raises(traitlets.TraitError):
+            run_nbgrader(["assign", "foo+bar", "--create"])
+        assert not os.path.isfile(join(course_dir, "release", "foo+bar", "foo.ipynb"))
 
     def test_multiple_files(self, course_dir):
         """Can multiple files be assigned?"""
@@ -113,6 +121,38 @@ class TestNbGraderAssign(BaseTestApp):
         # force overwrite
         os.remove(join(course_dir, 'source', 'ps1', 'foo.txt'))
         run_nbgrader(["assign", "ps1", "--force"])
+        assert os.path.isfile(join(course_dir, "release", "ps1", "test.ipynb"))
+        assert os.path.isfile(join(course_dir, "release", "ps1", "data", "bar.txt"))
+        assert not os.path.isfile(join(course_dir, "release", "ps1", "foo.txt"))
+        assert not os.path.isfile(join(course_dir, "release", "ps1", "blah.pyc"))
+
+    def test_force_f(self, course_dir):
+        """Ensure the force option works properly"""
+        self._copy_file(join('files', 'test.ipynb'), join(course_dir, 'source', 'ps1', 'test.ipynb'))
+        self._make_file(join(course_dir, 'source', 'ps1', 'foo.txt'), "foo")
+        self._make_file(join(course_dir, 'source', 'ps1', 'data', 'bar.txt'), "bar")
+        self._make_file(join(course_dir, 'source', 'ps1', 'blah.pyc'), "asdf")
+        with open("nbgrader_config.py", "a") as fh:
+            fh.write("""c.CourseDirectory.db_assignments = [dict(name="ps1")]\n""")
+
+        run_nbgrader(["assign", "ps1"])
+        assert os.path.isfile(join(course_dir, 'release', 'ps1', 'test.ipynb'))
+        assert os.path.isfile(join(course_dir, 'release', 'ps1', 'foo.txt'))
+        assert os.path.isfile(join(course_dir, 'release', 'ps1', 'data', 'bar.txt'))
+        assert not os.path.isfile(join(course_dir, 'release', 'ps1', 'blah.pyc'))
+
+        # check that it skips the existing directory
+        os.remove(join(course_dir, 'release', 'ps1', 'foo.txt'))
+        run_nbgrader(["assign", "ps1"])
+        assert not os.path.isfile(join(course_dir, 'release', 'ps1', 'foo.txt'))
+
+        # force overwrite the supplemental files
+        run_nbgrader(["assign", "ps1", "-f"])
+        assert os.path.isfile(join(course_dir, 'release', 'ps1', 'foo.txt'))
+
+        # force overwrite
+        os.remove(join(course_dir, 'source', 'ps1', 'foo.txt'))
+        run_nbgrader(["assign", "ps1", "-f"])
         assert os.path.isfile(join(course_dir, "release", "ps1", "test.ipynb"))
         assert os.path.isfile(join(course_dir, "release", "ps1", "data", "bar.txt"))
         assert not os.path.isfile(join(course_dir, "release", "ps1", "foo.txt"))

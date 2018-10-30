@@ -45,7 +45,7 @@ class ValidateApp(NbGrader):
 
     def _load_config(self, cfg, **kwargs):
         if 'DisplayAutoGrades' in cfg:
-            self.log.warn(
+            self.log.warning(
                 "Use Validator in config, not DisplayAutoGrades. Outdated config:\n%s",
                 '\n'.join(
                     'DisplayAutoGrades.{key} = {value!r}'.format(key=key, value=value)

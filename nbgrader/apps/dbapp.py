@@ -90,6 +90,10 @@ student_remove_flags.update({
         {'DbStudentRemoveApp': {'force': True}},
         "Complete the operation, even if it means grades will be deleted."
     ),
+    'f': (
+        {'DbStudentRemoveApp': {'force': True}},
+        "Complete the operation, even if it means grades will be deleted."
+    ),
 })
 
 class DbStudentRemoveApp(DbBaseApp):
@@ -323,6 +327,10 @@ assignment_remove_flags = {}
 assignment_remove_flags.update(flags)
 assignment_remove_flags.update({
     'force': (
+        {'DbAssignmentRemoveApp': {'force': True}},
+        "Complete the operation, even if it means grades will be deleted."
+    ),
+    'f': (
         {'DbAssignmentRemoveApp': {'force': True}},
         "Complete the operation, even if it means grades will be deleted."
     ),

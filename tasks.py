@@ -42,13 +42,14 @@ def docs(ctx):
     if not WINDOWS:
         run(ctx, 'py.test --nbval-lax --current-env nbgrader/docs/source/user_guide/*.ipynb')
     run(ctx, 'python nbgrader/docs/source/build_docs.py')
+    run(ctx, 'python nbgrader/docs/source/clear_docs.py')
     run(ctx, 'make -C nbgrader/docs html')
     run(ctx, 'make -C nbgrader/docs linkcheck')
     run(ctx, 'make -C nbgrader/docs spelling')
 
 
 @task
-def clean_docs(ctx):
+def cleandocs(ctx):
     run(ctx, 'python nbgrader/docs/source/clear_docs.py')
 
 
@@ -87,7 +88,7 @@ def _run_tests(ctx, mark=None, skip=None, junitxml=None):
         cmd.extend(['--junitxml', junitxml])
     cmd.append('-v')
     cmd.append('-x')
-    cmd.extend(['--rerun', '4'])
+    cmd.extend(['--reruns', '4'])
 
     marks = []
     if mark is not None:
@@ -101,7 +102,7 @@ def _run_tests(ctx, mark=None, skip=None, junitxml=None):
 
     if not WINDOWS:
         run(ctx, "ls -a .coverage*")
-        run(ctx, "coverage combine")
+        run(ctx, "coverage combine || true")
 
 
 @task
@@ -123,7 +124,7 @@ def tests(ctx, group='all', skip=None, junitxml=None):
 
 
 @task
-def after_success(ctx, group):
+def aftersuccess(ctx, group):
     if group in ('python', 'nbextensions'):
         run(ctx, 'codecov')
     else:
@@ -152,8 +153,8 @@ def install(ctx, group):
 
 
 ns = collection.Collection(
-    after_success,
-    clean_docs,
+    aftersuccess,
+    cleandocs,
     docs,
     install,
     js,
