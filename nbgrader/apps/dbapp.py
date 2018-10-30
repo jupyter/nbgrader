@@ -27,7 +27,8 @@ student_add_aliases.update(aliases)
 student_add_aliases.update({
     'last-name': 'DbStudentAddApp.last_name',
     'first-name': 'DbStudentAddApp.first_name',
-    'email': 'DbStudentAddApp.email'
+    'email': 'DbStudentAddApp.email',
+    'lms-user-id': 'DbStudentAddApp.lms_user_id',
 })
 
 class DbBaseApp(NbGrader):
@@ -66,6 +67,13 @@ class DbStudentAddApp(DbBaseApp):
         help="The email of the student"
     ).tag(config=True)
 
+    lms_user_id = Unicode(
+        None,
+        allow_none=True,
+        help="The LMS user id of the student"
+    ).tag(config=True)
+    
+
     def start(self):
         super(DbStudentAddApp, self).start()
 
@@ -76,7 +84,8 @@ class DbStudentAddApp(DbBaseApp):
         student = {
             "last_name": self.last_name,
             "first_name": self.first_name,
-            "email": self.email
+            "email": self.email,
+            "lms_user_id": self.lms_user_id
         }
 
         self.log.info("Creating/updating student with ID '%s': %s", student_id, student)
