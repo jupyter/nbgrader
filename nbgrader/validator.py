@@ -245,10 +245,10 @@ class Validator(LoggingConfigurable):
         return cells
 
     def _get_failed_cells(self, nb):
-        return self._get_cells_op(self, nb, operator.lt)
+        return self._get_cells_op(nb, operator.lt)
 
     def _get_passed_cells(self, nb):
-        return self._get_cells_op(self, nb, operator.ge)
+        return self._get_cells_op(nb, operator.ge)
 
     def _preprocess(self, nb):
         resources = {}
