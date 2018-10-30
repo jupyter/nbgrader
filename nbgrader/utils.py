@@ -89,7 +89,7 @@ def determine_grade(cell, lang = None):
             return None, max_points
 
     elif cell.cell_type == 'code':
-        if any(is_validate_error(cell, lang, 1))
+        if any(is_validate_error(cell, lang, 1)):
                 return 0, max_points
         return max_points, max_points
 
