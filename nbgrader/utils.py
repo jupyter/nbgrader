@@ -54,7 +54,7 @@ def is_locked(cell):
 
 def is_validate_error(cell, lang = None, cutoff = 100):
     errors = []
-    if lang == 'octave'
+    if lang == 'octave':
         for output in cell.outputs:
             if output.output_type == "stream": 
                 if hasattr(output, "text"):

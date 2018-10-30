@@ -232,7 +232,7 @@ class Validator(LoggingConfigurable):
             if not (utils.is_grade(cell) or utils.is_locked(cell)):
                 continue
 
-            # if it's a grade cell, the check the grade
+            # if it's a grade cell, then check the grade
             if utils.is_grade(cell):
                 score, max_score = utils.determine_grade(cell, lang)
 
