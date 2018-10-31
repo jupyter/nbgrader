@@ -1446,7 +1446,7 @@ class Gradebook(object):
                     group_name=group_name
                 )
             print(err_msg + str(e))
-            print("Make sure you set a valid api_token in your config file before starting the service")
+            print("Make sure you set a valid admin_user 'api_token' in your config file before starting the service")
 
     def add_student(self, student_id, **kwargs):
         """Add a new student to the database.
