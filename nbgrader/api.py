@@ -1432,6 +1432,7 @@ class Gradebook(object):
                 jup_groups = utils.query_jupyterhub_api(method="GET",
                                      api_path="/groups",
                 )
+                self.log.info([x['name'] for x in jup_groups])
                 if group_name not in [x['name'] for x in jup_groups]:
                     # This could result in a bad request(JupyterhubApiError) if there is already a group so first we check above if there is a group
                     utils.query_jupyterhub_api(method="POST",
@@ -1442,15 +1443,15 @@ class Gradebook(object):
                                      api_path="/groups/{name}/users".format(name=group_name),
                                      post_data = {"users":[student_id]}
                 )
-                print("Student {student} added to Jupyterhub group {group_name}".format(
+                print("Student {student} added to the Jupyterhub group {group_name}".format(
                     student=student_id,
                     group_name=group_name
                 ))
             except utils.JupyterhubEnvironmentError as e:
-                print("Not running on Jupyterhub, not adding {student} user to Jupyterhub group {group_name}".format(student=student_id, group_name=group_name))
+                print("Not running on Jupyterhub, not adding {student} user to the Jupyterhub group {group_name}".format(student=student_id, group_name=group_name))
             except utils.JupyterhubApiError as e:
                 if self.course_id: # We assume user might be using Jupyterhub but something is not working
-                    err_msg = "Student {student} NOT added to Jupyterhub group {group_name}: ".format(
+                    err_msg = "Student {student} NOT added to the Jupyterhub group {group_name}: ".format(
                         student=student_id,
                         group_name=group_name
                     )
