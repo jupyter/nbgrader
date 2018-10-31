@@ -1432,7 +1432,6 @@ class Gradebook(object):
                 jup_groups = utils.query_jupyterhub_api(method="GET",
                                      api_path="/groups",
                 )
-                self.log.info([x['name'] for x in jup_groups])
                 if group_name not in [x['name'] for x in jup_groups]:
                     # This could result in a bad request(JupyterhubApiError) if there is already a group so first we check above if there is a group
                     utils.query_jupyterhub_api(method="POST",
