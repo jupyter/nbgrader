@@ -1547,7 +1547,7 @@ class Gradebook(object):
             except utils.JupyterhubApiError as e:
                 if self.course_id:
                     print("Student {student} was NOT removed from the Jupyterhub group {group_name}:".format(student=name, group_name=group_name), str(e))
-                    print("Make sure you start your service with a valid 'api_token' in your Jupyterhub config")
+                    print("Make sure you start your service with a valid admin_user 'api_token' in your Jupyterhub config")
         except (IntegrityError, FlushError) as e:
             self.db.rollback()
             raise InvalidEntry(*e.args)
