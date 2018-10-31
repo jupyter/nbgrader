@@ -1430,19 +1430,19 @@ class Gradebook(object):
                 print("Jupyterhub group: {group_name} created.".format(group_name=group_name) )
             utils.query_jupyterhub_api(method="POST",
                                  api_path="/groups/{name}/users".format(name=group_name),
-                                 post_data = {"users":[student_id]}
+                                 post_data = {"users":[student.id]}
             )
             # Saying student could be already here is because the post request returns 200 even if the student_id was already in the group
             print("Student {student} added or was already in the Jupyterhub group: {group_name}".format(
-                student=student_id,
+                student=student.id,
                 group_name=group_name
             ))
         except utils.JupyterhubEnvironmentError as e:
-            print("Not running on Jupyterhub, not adding {student} user to the Jupyterhub group {group_name}".format(student=student_id, group_name=group_name))
+            print("Not running on Jupyterhub, not adding {student} user to the Jupyterhub group {group_name}".format(student=student.id, group_name=group_name))
         except utils.JupyterhubApiError as e:
             if self.course_id: # We assume user might be using Jupyterhub but something is not working
                 err_msg = "Student {student} NOT added to the Jupyterhub group {group_name}: ".format(
-                    student=student_id,
+                    student=student.id,
                     group_name=group_name
                 )
             print(err_msg + str(e))
