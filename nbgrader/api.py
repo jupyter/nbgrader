@@ -1468,7 +1468,7 @@ class Gradebook(object):
         self.db.add(student)
         try:
             self.db.commit()
-            add_student_to_group(student)
+            self.add_student_to_group(student)
                 
         except (IntegrityError, FlushError) as e:
             self.db.rollback()
@@ -1524,7 +1524,7 @@ class Gradebook(object):
                 setattr(student, attr, kwargs[attr])
             try:
                 self.db.commit()
-                add_student_to_group(student)
+                self.add_student_to_group(student)
             except (IntegrityError, FlushError) as e:
                 self.db.rollback()
                 raise InvalidEntry(*e.args)
