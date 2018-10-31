@@ -76,7 +76,7 @@ def query_jupyterhub_api(method, api_path, post_data=None):
         json = post_data,
     )
     if not req.ok:
-        raise JupyterhubApiError("JupyterhubAPI returned a status code of: " + str(req.status_code) + "for api_path: " + api_path)
+        raise JupyterhubApiError("JupyterhubAPI returned a status code of: " + str(req.status_code) + " for api_path: " + api_path)
 
     return req.json()
 
