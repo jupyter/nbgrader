@@ -3,6 +3,7 @@ import os
 import re
 import operator
 
+
 from traitlets.config import LoggingConfigurable
 from traitlets import List, Unicode, Integer, Bool
 from nbformat import current_nbformat, read as read_nb
@@ -109,9 +110,9 @@ class Validator(LoggingConfigurable):
                 errors = ["\n".join(o.text) for (o,f) in zip(cell.outputs, e_filter) if f ]
             else:
                 errors = ["\n".join(o.traceback) for (o,f) in zip(cell.outputs, e_filter) if f ]
+
             if len(errors) == 0:
                 errors.append("You did not provide a response.")
-
         else:
             errors.append("You did not provide a response.")
 
@@ -258,7 +259,6 @@ class Validator(LoggingConfigurable):
         return nb
 
     def validate(self, filename):
-        self.log.info("Validating '{}'".format(os.path.abspath(filename)))
         basename = os.path.basename(filename)
         dirname = os.path.dirname(filename)
         with utils.chdir(dirname):
