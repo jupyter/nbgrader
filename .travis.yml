@@ -3,10 +3,7 @@ sudo: false
 dist: trusty
 python:
   - 2.7
-  - 3.5
-  - 3.6
   - 3.7
-  - nightly
 env:
   global:
     - MOZ_HEADLESS=1
