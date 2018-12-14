@@ -121,7 +121,7 @@ def assignmentWithSubmissionNoMarks(assignmentWithTask):
 
 possiblegrades = [
     [0.5, 2, 3, 5, 1, 7, 2, 1],
-    [0.1, 4, 0.25, 1, 7, 0. 0, 1, 1],
+    [0.1, 4, 0.25, 1, 7, 0.0, 1, 1],
     [0] * 8,
     [2] * 8,
     [0.25] * 8,
