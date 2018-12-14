@@ -806,8 +806,8 @@ class Grade(Base):
     #: for the score.
     score = column_property(case(
         [
-            (manual_score is not None, manual_score + case([(extra_credit is not None, extra_credit)], else_=literal_column("0.0"))),
-            (auto_score is not None, auto_score + case([(extra_credit is not None, extra_credit)], else_=literal_column("0.0")))
+            (manual_score != None, manual_score + case([(extra_credit != None, extra_credit)], else_=literal_column("0.0"))),
+            (auto_score != None, auto_score + case([(extra_credit != None, extra_credit)], else_=literal_column("0.0")))
         ],
         else_=literal_column("0.0")
     ))
@@ -931,8 +931,8 @@ class Comment(Base):
     #: comment.
     comment = column_property(case(
         [
-            (manual_comment is not None, manual_comment),
-            (auto_comment is not None, auto_comment)
+            (manual_comment != None, manual_comment),
+            (auto_comment != None, auto_comment)
         ],
         else_=None
     ))
@@ -1271,7 +1271,7 @@ Grade.cell_type_taskcell = column_property(
 # Failed tests
 
 Grade.failed_tests = column_property(
-    (Grade.cell_type_gradecell is not None) & ((Grade.auto_score < Grade.max_score_gradecell) & (Grade.cell_type_gradecell == "code"))
+    (Grade.cell_type_gradecell != None) & ((Grade.auto_score < Grade.max_score_gradecell) & (Grade.cell_type_gradecell == "code"))
 )
 
 SubmittedNotebook.failed_tests = column_property(
@@ -2985,8 +2985,8 @@ class Gradebook(object):
             func.sum(all_scores.c.score).label("score"),
             func.sum(all_scores.c.max_score).label("max_score"),
             all_scores.c.id.label("id"),
-        ).group_by(all_scores.c.id)
-        .subquery()
+        ).group_by(all_scores.c.id)\
+         .subquery()
 
         # full query
         _manual_grade = func.coalesce(manual_grade.c.needs_manual_grade, False)
