@@ -2,6 +2,7 @@
 
 import io
 import os
+import stat
 import sys
 import shutil
 import subprocess as sp
@@ -51,6 +52,7 @@ def clean_notebook_metadata(root):
                 new_nb = clean_notebook(orig_nb)
 
                 # write the notebook back to disk
+                os.chmod(pth, stat.S_IRUSR | stat.S_IWUSR)
                 with io.open(pth, mode='w', encoding='utf-8') as fh:
                     write(new_nb, fh, 4)
 

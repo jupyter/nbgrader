@@ -116,7 +116,7 @@ class FileNameCollectorPlugin(BasePlugin):
                 ".*_(?P<student_id>\w+)_attempt_(?P<timestamp>[0-9\-]+)_(?P<file_id>\w+)"
 
             For named group regular expression examples see
-            https://docs.python.org/howto/regex.html
+            https://docs.python.org/3/howto/regex.html
             """
         )
     ).tag(config=True)

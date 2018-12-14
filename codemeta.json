@@ -1,0 +1,125 @@
+{
+  "@context": "https://raw.githubusercontent.com/codemeta/codemeta/master/codemeta.jsonld",
+  "@type": "Code",
+  "author": [
+    {
+      "@type": "Organization",
+      "name": "Project Jupyter"
+    },
+    {
+      "@id": "https://orcid.org/0000-0003-3538-8829",
+      "@type": "Person",
+      "email": "dblank@brynmawr.edu",
+      "name": "Douglas Blank",
+      "affiliation": "Bryn Mawr College"
+    },
+    {
+      "@id": "https://orcid.org/0000-0003-1039-6195",
+      "@type": "Person",
+      "email": "ddbourgin@berkeley.edu",
+      "name": "David Bourgin",
+      "affiliation": "University of California, Berkeley"
+    },
+    {
+      "@id": "https://orcid.org/0000-0002-3945-7337",
+      "@type": "Person",
+      "email": "brownaa@lafayette.edu",
+      "name": "Alexander Brown",
+      "affiliation": "Lafayette College"
+    },
+    {
+      "@id": "https://orcid.org/0000-0002-7636-8632",
+      "@type": "Person",
+      "email": "bussonniermatthias@gmail.com",
+      "name": "Matthias Bussonnier",
+      "affiliation": "University of California, Berkeley"
+    },
+    {
+      "@id": "https://orcid.org/0000-0003-4805-2216",
+      "@type": "Person",
+      "email": "jfrederic@google.com",
+      "name": "Jonathan Frederic",
+      "affiliation": "Google Inc."
+    },
+    {
+      "@id": "https://orcid.org/0000-0002-5223-6168",
+      "@type": "Person",
+      "email": "bgranger@calpoly.edu",
+      "name": "Brian E. Granger",
+      "affiliation": "Cal Poly, San Luis Obispo"
+    },
+    {
+      "@id": "https://orcid.org/0000-0002-5138-7255",
+      "@type": "Person",
+      "email": "tom_griffiths@berkeley.edu",
+      "name": "Thomas L. Griffiths",
+      "affiliation": "University of California, Berkeley"
+    },
+    {
+      "@id": "https://orcid.org/0000-0002-3860-0429",
+      "@type": "Person",
+      "email": "jessica.b.hamrick@gmail.com",
+      "name": "Jessica B. Hamrick",
+      "affiliation": "DeepMind"
+    },
+    {
+      "@id": "https://orcid.org/0000-0002-4281-9351",
+      "@type": "Person",
+      "email": "rgbkrk@gmail.com",
+      "name": "Kyle Kelley",
+      "affiliation": "Netflix, Inc."
+    },
+    {
+      "@id": "https://orcid.org/0000-0002-6680-2941",
+      "@type": "Person",
+      "email": "mpacer.phd@gmail.com",
+      "name": "M Pacer",
+      "affiliation": "Netflix, Inc."
+    },
+    {
+      "@id": "https://orcid.org/0000-0002-5799-8524",
+      "@type": "Person",
+      "email": "page.lg@gmail.com",
+      "name": "Logan Page",
+      "affiliation": "University of Pretoria"
+    },
+    {
+      "@id": "http://orcid.org/0000-0002-1725-9815",
+      "@type": "Person",
+      "email": "Fernando.Perez@berkeley.edu",
+      "name": "Fernando Pérez",
+      "affiliation": "University of California, Berkeley"
+    },
+    {
+      "@id": "https://orcid.org/0000-0002-1023-7082",
+      "@type": "Person",
+      "email": "benjaminrk@gmail.com",
+      "name": "Benjamin Ragan-Kelley",
+      "affiliation": "Simula Research Laboratory"
+    },
+    {
+      "@id": "https://orcid.org/0000-0001-9848-4872",
+      "@type": "Person",
+      "email": "suchow@berkeley.edu",
+      "name": "Jordan W. Suchow",
+      "affiliation": "University of California, Berkeley"
+    },
+    {
+      "@id": "https://orcid.org/0000-0002-9817-8485",
+      "@type": "Person",
+      "email": "willingc@gmail.com",
+      "name": "Carol Willing",
+      "affiliation": "Cal Poly, San Luis Obispo"
+    }
+  ],
+  "identifier": "",
+  "codeRepository": "https://github.com/jupyter/nbgrader",
+  "datePublished": "2018-06-02",
+  "dateModified": "2018-06-02",
+  "dateCreated": "2014-09-13",
+  "description": "A system for assigning and grading Jupyter notebooks",
+  "keywords": "jupyter, jupyterhub, grading, autograding",
+  "license": "Modified BSD",
+  "title": "nbgrader",
+  "version": "v0.6.0-dev"
+}

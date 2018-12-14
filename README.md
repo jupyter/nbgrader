@@ -7,7 +7,7 @@ Coverage: [![codecov.io](http://codecov.io/github/jupyter/nbgrader/coverage.svg?
 
 A system for assigning and grading Jupyter notebooks.
 
-[Documentation can be found on Read the Docs.](https://nbgrader.readthedocs.io)
+[Documentation can be found on Read the Docs.](https://nbgrader.readthedocs.io/en/stable/)
 
 ## Highlights of nbgrader
 

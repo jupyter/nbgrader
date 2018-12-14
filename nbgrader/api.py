@@ -2384,7 +2384,7 @@ class Gradebook(object):
         Parameters
         ----------
         notebook : string
-            the name of an assignment
+            the name of a notebook
         assignment : string
             the name of an assignment
 

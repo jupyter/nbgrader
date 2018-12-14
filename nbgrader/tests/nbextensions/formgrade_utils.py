@@ -1,11 +1,12 @@
 import os
+import time
 
 from six.moves.urllib.parse import urljoin, unquote
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
-from selenium.common.exceptions import TimeoutException, NoSuchElementException, NoAlertPresentException
+from selenium.common.exceptions import TimeoutException, NoSuchElementException, NoAlertPresentException, WebDriverException
 
 
 
@@ -56,6 +57,12 @@ def _wait_for_element(browser, element_id, time=10):
     )
 
 
+def _wait_for_tag(browser, tag, time=10):
+    return WebDriverWait(browser, time).until(
+        EC.presence_of_element_located((By.TAG_NAME, tag))
+    )
+
+
 def _wait_for_visibility_of_element(browser, element_id, time=10):
     return WebDriverWait(browser, time).until(
         EC.visibility_of_element_located((By.ID, element_id))
@@ -87,7 +94,7 @@ def _get(browser, url, retries=5):
             _get(browser, url, retries=retries - 1)
 
     try:
-        alert = browser.switch_to_alert()
+        alert = browser.switch_to.alert
     except NoAlertPresentException:
         pass
     else:
@@ -161,8 +168,23 @@ def _click_element(browser, name):
     browser.find_element_by_css_selector(name).click()
 
 
+def _focus_body(browser, num_tries=5):
+    for i in range(num_tries):
+        try:
+            browser.execute_script("$('body').focus();")
+        except WebDriverException:
+            if i == (num_tries - 1):
+                raise
+            else:
+                print("Couldn't focus body, waiting and trying again...")
+                time.sleep(1)
+        else:
+            break
+
+
 def _send_keys_to_body(browser, *keys):
-    browser.execute_script("$('body').focus();")
+    _wait_for_tag(browser, "body")
+    _focus_body(browser)
     body = browser.find_element_by_tag_name("body")
     body.send_keys(*keys)
 
@@ -172,14 +194,35 @@ def _get_next_arrow(browser):
 
 
 def _get_comment_box(browser, index):
+    def comment_is_present(browser):
+        comments = browser.find_elements_by_css_selector(".comment")
+        if len(comments) <= index:
+            return False
+        return True
+
+    WebDriverWait(browser, 10).until(comment_is_present)
     return browser.find_elements_by_css_selector(".comment")[index]
 
 
 def _get_score_box(browser, index):
+    def score_is_present(browser):
+        scores = browser.find_elements_by_css_selector(".score")
+        if len(scores) <= index:
+            return False
+        return True
+
+    WebDriverWait(browser, 10).until(score_is_present)
     return browser.find_elements_by_css_selector(".score")[index]
 
 
 def _get_extra_credit_box(browser, index):
+    def extra_credit_is_present(browser):
+        extra_credits = browser.find_elements_by_css_selector(".extra-credit")
+        if len(extra_credits) <= index:
+            return False
+        return True
+
+    WebDriverWait(browser, 10).until(extra_credit_is_present)
     return browser.find_elements_by_css_selector(".extra-credit")[index]
 
 
@@ -226,6 +269,11 @@ def _load_formgrade(browser, port, gradebook):
     _load_gradebook_page(browser, port, "gradebook/Problem Set 1/Problem 1")
     _click_link(browser, "Submission #1")
     _wait_for_formgrader(browser, port, "submissions/{}/?index=0".format(submissions[0].id))
+
+    # Hack: there is a race condition here where sometimes the formgrader doesn't
+    # fully finish loading. So we add a wait here, though this is not really a
+    # robust solution.
+    time.sleep(1)
 
 
 def _child_exists(elem, selector):

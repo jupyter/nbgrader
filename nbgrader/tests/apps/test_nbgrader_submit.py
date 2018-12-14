@@ -75,7 +75,7 @@ class TestNbGraderSubmit(BaseTestApp):
         self._submit("ps1", exchange, cache)
 
         filename, = os.listdir(join(exchange, "abc101", "inbound"))
-        username, assignment, timestamp1 = filename.split("+")
+        username, assignment, timestamp1 = filename.split("+")[:3]
         assert username == os.environ["USER"]
         assert assignment == "ps1"
         assert parse_utc(timestamp1) > now
@@ -85,7 +85,7 @@ class TestNbGraderSubmit(BaseTestApp):
             assert fh.read() == timestamp1
 
         filename, = os.listdir(join(cache, "abc101"))
-        username, assignment, timestamp1 = filename.split("+")
+        username, assignment, timestamp1 = filename.split("+")[:3]
         assert username == os.environ["USER"]
         assert assignment == "ps1"
         assert parse_utc(timestamp1) > now
@@ -99,7 +99,7 @@ class TestNbGraderSubmit(BaseTestApp):
 
         assert len(os.listdir(join(exchange, "abc101", "inbound"))) == 2
         filename = sorted(os.listdir(join(exchange, "abc101", "inbound")))[1]
-        username, assignment, timestamp2 = filename.split("+")
+        username, assignment, timestamp2 = filename.split("+")[:3]
         assert username == os.environ["USER"]
         assert assignment == "ps1"
         assert parse_utc(timestamp2) > parse_utc(timestamp1)
@@ -110,7 +110,7 @@ class TestNbGraderSubmit(BaseTestApp):
 
         assert len(os.listdir(join(cache, "abc101"))) == 2
         filename = sorted(os.listdir(join(cache, "abc101")))[1]
-        username, assignment, timestamp2 = filename.split("+")
+        username, assignment, timestamp2 = filename.split("+")[:3]
         assert username == os.environ["USER"]
         assert assignment == "ps1"
         assert parse_utc(timestamp2) > parse_utc(timestamp1)
@@ -174,14 +174,14 @@ class TestNbGraderSubmit(BaseTestApp):
             flags=["--Exchange.path_includes_course=True"])
 
         filename, = os.listdir(join(exchange, "abc101", "inbound"))
-        username, assignment, _ = filename.split("+")
+        username, assignment, _ = filename.split("+")[:3]
         assert username == os.environ["USER"]
         assert assignment == "ps1"
         assert isfile(join(exchange, "abc101", "inbound", filename, "p1.ipynb"))
         assert isfile(join(exchange, "abc101", "inbound", filename, "timestamp.txt"))
 
         filename, = os.listdir(join(cache, "abc101"))
-        username, assignment, _ = filename.split("+")
+        username, assignment, _ = filename.split("+")[:3]
         assert username == os.environ["USER"]
         assert assignment == "ps1"
         assert isfile(join(cache, "abc101", filename, "p1.ipynb"))
@@ -192,14 +192,14 @@ class TestNbGraderSubmit(BaseTestApp):
             flags=["--Exchange.path_includes_course=True"])
 
         filename, = os.listdir(join(exchange, "abc102", "inbound"))
-        username, assignment, _ = filename.split("+")
+        username, assignment, _ = filename.split("+")[:3]
         assert username == os.environ["USER"]
         assert assignment == "ps1"
         assert isfile(join(exchange, "abc102", "inbound", filename, "p1.ipynb"))
         assert isfile(join(exchange, "abc102", "inbound", filename, "timestamp.txt"))
 
         filename, = os.listdir(join(cache, "abc102"))
-        username, assignment, _ = filename.split("+")
+        username, assignment, _ = filename.split("+")[:3]
         assert username == os.environ["USER"]
         assert assignment == "ps1"
         assert isfile(join(cache, "abc102", filename, "p1.ipynb"))

@@ -14,6 +14,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.action_chains import ActionChains
+from selenium.common.exceptions import SessionNotCreatedException, WebDriverException
 
 from .. import run_nbgrader
 from ...api import Gradebook, MissingEntry
@@ -71,7 +72,10 @@ def browser(request, tempdir, nbserver):
     browser = _make_browser(tempdir)
 
     def fin():
-        _close_browser(browser)
+        try:
+            _close_browser(browser)
+        except (SessionNotCreatedException, WebDriverException):
+            print("Failed to close browser")
     request.addfinalizer(fin)
 
     return browser
@@ -777,6 +781,7 @@ def test_save_extra_credit(browser, port, gradebook, index):
     assert elem.get_attribute("value") == ""
 
 
+@pytest.mark.xfail(strict=False)
 @pytest.mark.nbextensions
 def test_same_part_navigation(browser, port, gradebook):
     problem = gradebook.find_notebook("Problem 1", "Problem Set 1")
