@@ -120,7 +120,6 @@ class TestNbGraderAPI(BaseTestApp):
         self._make_file(join(course_dir, "submitted", "foo", "ps1", "timestamp.txt"), contents=timestamp.isoformat())
         assert api.get_autograded_students("ps1") == set([])
 
-
     def test_get_assignment(self, api, course_dir, db, exchange):
         keys = set([
             'average_code_score', 'average_score', 'average_written_score',
@@ -128,7 +127,7 @@ class TestNbGraderAPI(BaseTestApp):
             'source_path', 'status', 'id', 'max_code_score', 'max_score',
             'max_written_score', 'display_duedate', 'duedate_timezone',
             'duedate_notimezone',
-            'max_task_score','average_task_score'])
+            'max_task_score', 'average_task_score'])
 
         default = {
             "average_code_score": 0,
@@ -258,7 +257,7 @@ class TestNbGraderAPI(BaseTestApp):
         keys = set([
             'average_code_score', 'average_score', 'average_written_score',
             'name', 'id', 'max_code_score', 'max_score', 'max_written_score',
-            'max_task_score','average_task_score',
+            'max_task_score', 'average_task_score',
             'needs_manual_grade', 'num_submissions'])
 
         default = {
@@ -308,7 +307,7 @@ class TestNbGraderAPI(BaseTestApp):
         keys = set([
             "id", "name", "student", "last_name", "first_name", "score",
             "max_score", "code_score", "max_code_score", "written_score",
-            "max_written_score", "task_score","max_task_score", "needs_manual_grade", "autograded",
+            "max_written_score", "task_score", "max_task_score", "needs_manual_grade", "autograded",
             "timestamp", "submitted", "display_timestamp"])
 
         default = {
@@ -369,7 +368,7 @@ class TestNbGraderAPI(BaseTestApp):
         keys = set([
             "id", "name", "student", "last_name", "first_name", "score",
             "max_score", "code_score", "max_code_score", "written_score",
-            "max_written_score", "task_score", "max_task_score","needs_manual_grade", "autograded",
+            "max_written_score", "task_score", "max_task_score", "needs_manual_grade", "autograded",
             "timestamp", "submitted", "display_timestamp"])
 
         default = {

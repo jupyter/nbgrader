@@ -16,6 +16,7 @@ from .conftest import _make_nbserver, _make_browser, _close_nbserver, _close_bro
 from nbformat import current_nbformat
 import shutil
 
+
 @pytest.fixture(scope="module")
 def nbserver(request, port, tempdir, jupyter_config_dir, jupyter_data_dir, exchange, cache):
     server = _make_nbserver("", port, tempdir, jupyter_config_dir, jupyter_data_dir, exchange, cache)
@@ -148,6 +149,7 @@ def _select_none(browser, index=0):
 
 def _select_manual(browser, index=0):
     _select(browser, 'manual', index=index)
+
 
 def _select_task(browser, index=0):
     select = Select(browser.find_elements_by_css_selector('.celltoolbar select')[index])
@@ -295,6 +297,7 @@ def test_manual_cell(browser, port):
     assert not _get_metadata(browser)
     _save_and_validate(browser)
 
+
 def test_task_cell(browser, port):
     _load_notebook(browser, port, name='task')
     _activate_toolbar(browser)
@@ -331,6 +334,7 @@ def test_task_cell(browser, port):
     _select_none(browser)
     assert not _get_metadata(browser)
     _save_and_validate(browser)
+
 
 @pytest.mark.nbextensions
 def test_solution_cell(browser, port):
@@ -646,9 +650,10 @@ def test_total_points(browser, port):
     element.send_keys("d")
     assert _get_total_points(browser) == 0
 
+
 @pytest.mark.nbextensions
 def test_total_points(browser, port):
-    _load_notebook(browser, port,'task')
+    _load_notebook(browser, port, 'task')
     _activate_toolbar(browser)
 
     # make sure the total points is zero
@@ -668,7 +673,7 @@ def test_total_points(browser, port):
     _select_solution(browser)
     assert _get_total_points(browser) == 0
 
-    # make it task 
+    # make it task
     _select_task(browser)
     assert _get_total_points(browser) == 0
     _set_points(browser)
@@ -707,6 +712,7 @@ def test_total_points(browser, port):
     element.send_keys("d")
     element.send_keys("d")
     assert _get_total_points(browser) == 0
+
 
 @pytest.mark.nbextensions
 def test_cell_ids(browser, port):
@@ -749,6 +755,7 @@ def test_cell_ids(browser, port):
     _save(browser)
     _wait_for_modal(browser)
     _dismiss_modal(browser)
+
 
 @pytest.mark.nbextensions
 def test_task_cell_ids(browser, port):
@@ -814,7 +821,7 @@ def test_negative_points(browser, port):
 
 @pytest.mark.nbextensions
 def test_task_negative_points(browser, port):
-    _load_notebook(browser, port,'task')
+    _load_notebook(browser, port, 'task')
     _activate_toolbar(browser)
 
     # make sure the total points is zero
@@ -831,7 +838,6 @@ def test_task_negative_points(browser, port):
     _set_points(browser, points=-1)
     assert _get_total_points(browser) == 0
     assert 0 == _get_metadata(browser)['points']
-
 
 
 @pytest.mark.nbextensions

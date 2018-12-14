@@ -209,9 +209,9 @@ def test_create_submitted_assignment(db):
     assert sa.max_written_score == 0
     assert not sa.needs_manual_grade
 
-    assert sa.duedate == None
-    assert sa.timestamp == None
-    assert sa.extension == None
+    assert sa.duedate is None
+    assert sa.timestamp is None
+    assert sa.extension is None
     assert sa.total_seconds_late == 0
 
     d = sa.to_dict()
@@ -242,7 +242,7 @@ def test_submission_timestamp_ontime(db):
 
     assert sa.duedate == duedate
     assert sa.timestamp == timestamp
-    assert sa.extension == None
+    assert sa.extension is None
     assert sa.total_seconds_late == 0
 
 
@@ -258,7 +258,7 @@ def test_submission_timestamp_late(db):
 
     assert sa.duedate == duedate
     assert sa.timestamp == timestamp
-    assert sa.extension == None
+    assert sa.extension is None
     assert sa.total_seconds_late == 172800
 
 
@@ -348,7 +348,7 @@ def test_create_code_grade(db):
     assert g.cell == gc
     assert g.notebook == sn
     assert g.auto_score == 5
-    assert g.manual_score == None
+    assert g.manual_score is None
     assert g.assignment == sa
     assert g.student == s
     assert g.max_score == 10
@@ -407,8 +407,8 @@ def test_create_written_grade(db):
     assert g.id
     assert g.cell == gc
     assert g.notebook == sn
-    assert g.auto_score == None
-    assert g.manual_score == None
+    assert g.auto_score is None
+    assert g.manual_score is None
     assert g.assignment == sa
     assert g.student == s
     assert g.max_score == 10
@@ -473,6 +473,7 @@ def test_create_comment(db):
 
     assert repr(c) == "Comment<foo/blah/foo for 12345>"
 
+
 def test_query_needs_manual_grade_ungraded(submissions):
     db = submissions[0]
 
@@ -516,6 +517,7 @@ def test_query_needs_manual_grade_ungraded(submissions):
         .order_by(api.SubmittedAssignment.id)\
         .all()
     assert a == b
+
 
 def test_query_needs_manual_grade_autograded(submissions):
     db, grades, _ = submissions
@@ -589,6 +591,7 @@ def test_query_needs_manual_grade_autograded(submissions):
         .join(api.SubmittedNotebook, api.Grade)\
         .filter(api.SubmittedNotebook.needs_manual_grade)\
         .all()
+
 
 def test_query_needs_manual_grade_manualgraded(submissions):
     db, grades, _ = submissions
@@ -664,6 +667,7 @@ def test_query_needs_manual_grade_manualgraded(submissions):
         .filter(api.SubmittedNotebook.needs_manual_grade)\
         .all()
 
+
 def test_query_max_score(submissions):
     db = submissions[0]
 
@@ -675,6 +679,7 @@ def test_query_max_score(submissions):
     assert [15, 15] == sorted([x[1] for x in db.query(api.SubmittedAssignment.id, api.SubmittedAssignment.max_score).all()])
     assert [15, 15] == sorted([x[1] for x in db.query(api.Student.id, api.Student.max_score).all()])
 
+
 def test_query_score_ungraded(submissions):
     db = submissions[0]
 
@@ -683,10 +688,12 @@ def test_query_score_ungraded(submissions):
     assert [x[1] for x in db.query(api.SubmittedAssignment.id, api.SubmittedAssignment.score).all()] == [0.0, 0.0]
     assert [x[1] for x in db.query(api.Student.id, api.Student.score).all()] == [0.0, 0.0]
 
+
 def test_query_comment_unchanged(submissions):
     db = submissions[0]
 
     assert [x[0] for x in db.query(api.Comment.comment).all()] == [None, None]
+
 
 def test_query_score_autograded(submissions):
     db, grades, _ = submissions
@@ -702,6 +709,7 @@ def test_query_score_autograded(submissions):
     assert sorted(x[1] for x in db.query(api.SubmittedAssignment.id, api.SubmittedAssignment.score).all()) == [7.5, 10]
     assert sorted(x[1] for x in db.query(api.Student.id, api.Student.score).all()) == [7.5, 10]
 
+
 def test_query_auto_comment(submissions):
     db, _, comments = submissions
 
@@ -710,6 +718,7 @@ def test_query_auto_comment(submissions):
     db.commit()
 
     assert sorted(x[0] for x in db.query(api.Comment.comment).all()) == ["bar", "foo"]
+
 
 def test_query_score_manualgraded(submissions):
     db, grades, _ = submissions
@@ -729,6 +738,7 @@ def test_query_score_manualgraded(submissions):
     assert sorted(x[1] for x in db.query(api.SubmittedAssignment.id, api.SubmittedAssignment.score).all()) == [5.5, 12]
     assert sorted(x[1] for x in db.query(api.Student.id, api.Student.score).all()) == [5.5, 12]
 
+
 def test_query_manual_comment(submissions):
     db, _, comments = submissions
 
@@ -740,6 +750,7 @@ def test_query_manual_comment(submissions):
 
     assert sorted(x[0] for x in db.query(api.Comment.comment).all()) == ["baz", "quux"]
 
+
 def test_query_max_written_score(submissions):
     db = submissions[0]
 
@@ -748,11 +759,13 @@ def test_query_max_written_score(submissions):
     assert [10] == sorted([x[1] for x in db.query(api.Assignment.id, api.Assignment.max_written_score).all()])
     assert [10, 10] == sorted([x[1] for x in db.query(api.SubmittedAssignment.id, api.SubmittedAssignment.max_written_score).all()])
 
+
 def test_query_written_score_ungraded(submissions):
     db = submissions[0]
 
     assert [0.0, 0.0] == [x[1] for x in db.query(api.SubmittedNotebook.id, api.SubmittedNotebook.written_score).all()]
     assert [0.0, 0.0] == [x[1] for x in db.query(api.SubmittedAssignment.id, api.SubmittedAssignment.written_score).all()]
+
 
 def test_query_written_score_autograded(submissions):
     db, grades, _ = submissions
@@ -765,6 +778,7 @@ def test_query_written_score_autograded(submissions):
 
     assert [5, 10] == sorted(x[1] for x in db.query(api.SubmittedNotebook.id, api.SubmittedNotebook.written_score).all())
     assert [5, 10] == sorted(x[1] for x in db.query(api.SubmittedAssignment.id, api.SubmittedAssignment.written_score).all())
+
 
 def test_query_written_score_manualgraded(submissions):
     db, grades, _ = submissions
@@ -782,6 +796,7 @@ def test_query_written_score_manualgraded(submissions):
     assert [4, 9] == sorted(x[1] for x in db.query(api.SubmittedNotebook.id, api.SubmittedNotebook.written_score).all())
     assert [4, 9] == sorted(x[1] for x in db.query(api.SubmittedAssignment.id, api.SubmittedAssignment.written_score).all())
 
+
 def test_query_max_code_score(submissions):
     db = submissions[0]
 
@@ -790,11 +805,13 @@ def test_query_max_code_score(submissions):
     assert [5] == sorted([x[1] for x in db.query(api.Assignment.id, api.Assignment.max_code_score).all()])
     assert [5, 5] == sorted([x[1] for x in db.query(api.SubmittedAssignment.id, api.SubmittedAssignment.max_code_score).all()])
 
+
 def test_query_code_score_ungraded(submissions):
     db = submissions[0]
 
     assert [0.0, 0.0] == [x[1] for x in db.query(api.SubmittedNotebook.id, api.SubmittedNotebook.code_score).all()]
     assert [0.0, 0.0] == [x[1] for x in db.query(api.SubmittedAssignment.id, api.SubmittedAssignment.code_score).all()]
+
 
 def test_query_code_score_autograded(submissions):
     db, grades, _ = submissions
@@ -807,6 +824,7 @@ def test_query_code_score_autograded(submissions):
 
     assert [0, 2.5] == sorted(x[1] for x in db.query(api.SubmittedNotebook.id, api.SubmittedNotebook.code_score).all())
     assert [0, 2.5] == sorted(x[1] for x in db.query(api.SubmittedAssignment.id, api.SubmittedAssignment.code_score).all())
+
 
 def test_query_code_score_manualgraded(submissions):
     db, grades, _ = submissions
@@ -823,6 +841,7 @@ def test_query_code_score_manualgraded(submissions):
 
     assert [1.5, 3] == sorted(x[1] for x in db.query(api.SubmittedNotebook.id, api.SubmittedNotebook.code_score).all())
     assert [1.5, 3] == sorted(x[1] for x in db.query(api.SubmittedAssignment.id, api.SubmittedAssignment.code_score).all())
+
 
 def test_query_auto_score_extra_credit(submissions):
     db, grades, _ = submissions
@@ -842,6 +861,7 @@ def test_query_auto_score_extra_credit(submissions):
     assert sorted(x[1] for x in db.query(api.SubmittedNotebook.id, api.SubmittedNotebook.score).all()) == [10.5, 10.9]
     assert sorted(x[1] for x in db.query(api.SubmittedAssignment.id, api.SubmittedAssignment.score).all()) == [10.5, 10.9]
     assert sorted(x[1] for x in db.query(api.Student.id, api.Student.score).all()) == [10.5, 10.9]
+
 
 def test_query_manual_score_extra_credit(submissions):
     db, grades, _ = submissions
@@ -867,11 +887,13 @@ def test_query_manual_score_extra_credit(submissions):
     assert sorted(x[1] for x in db.query(api.SubmittedAssignment.id, api.SubmittedAssignment.score).all()) == [6, 15.4]
     assert sorted(x[1] for x in db.query(api.Student.id, api.Student.score).all()) == [6, 15.4]
 
+
 def test_query_num_submissions(submissions):
     db = submissions[0]
 
     assert [2] == [x[0] for x in db.query(api.Assignment.num_submissions).all()]
     assert [2] == [x[0] for x in db.query(api.Notebook.num_submissions).all()]
+
 
 def test_student_max_score(db):
     now = datetime.datetime.utcnow()
@@ -887,6 +909,7 @@ def test_student_max_score(db):
     db.commit()
 
     assert s.max_score == 15
+
 
 def test_query_grade_cell_types(submissions):
     db = submissions[0]
@@ -912,6 +935,7 @@ def test_query_grade_cell_types(submissions):
         .order_by(api.Grade.id)\
         .all()
     assert a == b
+
 
 def test_query_failed_tests_failed(submissions):
     db, grades, _ = submissions
@@ -940,6 +964,7 @@ def test_query_failed_tests_failed(submissions):
     b = db.query(api.SubmittedNotebook)\
         .order_by(api.SubmittedNotebook.id)\
         .all()
+
 
 def test_query_failed_tests_ok(submissions):
     db, all_grades, _ = submissions

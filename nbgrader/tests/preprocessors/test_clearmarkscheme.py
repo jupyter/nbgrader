@@ -41,7 +41,7 @@ class TestClearMarkScheme(BaseTestPreprocessor):
             """
         ).strip()
         cell = create_task_cell(source, 'markdown', 'some-task-id', 2)
-        
+
         with pytest.raises(RuntimeError):
             preprocessor._remove_mark_scheme_region(cell)
 
@@ -74,7 +74,6 @@ class TestClearMarkScheme(BaseTestPreprocessor):
         resources = dict()
         with pytest.raises(RuntimeError):
             preprocessor.preprocess_cell(cell, resources, 1)
-
 
     def test_preprocess_text_cell_metadata(self, preprocessor):
         """Is an error thrown when a mark scheme region exists in a non-task text cell?"""

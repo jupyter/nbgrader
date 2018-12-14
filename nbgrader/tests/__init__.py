@@ -110,6 +110,7 @@ def create_grade_and_solution_cell(source, cell_type, grade_id, points, schema_v
 
     return cell
 
+
 def create_task_cell(source, cell_type, grade_id, points, schema_version=SCHEMA_VERSION):
     if cell_type == "markdown":
         cell = new_markdown_cell(source=source)

@@ -36,11 +36,12 @@ def monkeypatch_module():
     yield m
     m.undo()
 
+
 @pytest.fixture(scope="module")
-def fake_home_dir(request,monkeypatch_module):
+def fake_home_dir(request, monkeypatch_module):
     '''
-    this fixture creates a temporary home directory. This prevents existing 
-    nbgrader_config.py files in the user directory to interfer with the tests. 
+    this fixture creates a temporary home directory. This prevents existing
+    nbgrader_config.py files in the user directory to interfer with the tests.
     '''
     path = tempfile.mkdtemp()
 
@@ -48,7 +49,7 @@ def fake_home_dir(request,monkeypatch_module):
         rmtree(path)
     request.addfinalizer(fin)
 
-    monkeypatch_module.setenv('HOME',str(path))
+    monkeypatch_module.setenv('HOME', str(path))
 
     return path
 
@@ -189,9 +190,10 @@ def test_load_gradebook1(browser, port, gradebook):
     utils._click_link(browser, "Problem Set 1")
     utils._wait_for_gradebook_page(browser, port, "gradebook/Problem Set 1")
 
-    # test that the task column is present    
+    # test that the task column is present
     elements = browser.find_elements_by_xpath('//th[text()="Avg. Task Score"]')
     assert len(elements) == 1
+
 
 @pytest.mark.nbextensions
 def test_load_gradebook2(browser, port, gradebook):
@@ -235,7 +237,7 @@ def test_load_gradebook3(browser, port, gradebook):
             utils._click_link(browser, "Submission #{}".format(i + 1))
             utils._wait_for_formgrader(browser, port, "submissions/{}/?index=0".format(submission.id))
             # only the first problem has a task cell
-            if problem.name=="Problem 1":
+            if problem.name == "Problem 1":
                 elements = browser.find_elements_by_xpath('//span[text()="Student\'s task"]')
                 assert len(elements) == 1
             browser.back()
@@ -305,6 +307,7 @@ def test_load_student2(browser, port, gradebook):
         utils._wait_for_gradebook_page(browser, port, "manage_students/{}/Problem Set 1".format(student.id))
     elements = browser.find_elements_by_xpath('//th[text()="Task Score"]')
     assert len(elements) == 1
+
 
 @pytest.mark.nbextensions
 def test_load_student3(browser, port, gradebook):
@@ -672,7 +675,6 @@ def test_tabbing(browser, port, gradebook):
     assert utils._get_index(browser) == 0
 
 
-
 @pytest.mark.nbextensions
 @pytest.mark.parametrize("index", range(5))
 def test_save_comment(browser, port, gradebook, index):
@@ -696,7 +698,6 @@ def test_save_comment(browser, port, gradebook, index):
     utils._load_formgrade(browser, port, gradebook)
     elem = utils._get_comment_box(browser, index)
     assert elem.get_attribute("value") == "this comment has index {}\nblah blah blah".format(index)
-
 
 
 @pytest.mark.nbextensions

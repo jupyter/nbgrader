@@ -100,4 +100,3 @@ class TestNbGraderUpdate(BaseTestApp):
 
         # now autograde should suceed
         run_nbgrader(["autograde", "ps1", "--db", db])
-

@@ -6,13 +6,15 @@ import datetime
 import subprocess as sp
 
 from sqlalchemy import (create_engine, ForeignKey, Column, String, Text,
-                        DateTime, Interval, Float, Enum, UniqueConstraint, Boolean)
-from sqlalchemy.orm import sessionmaker, scoped_session, relationship, column_property, aliased
+                        DateTime, Interval, Float, Enum, UniqueConstraint,
+                        Boolean)
+from sqlalchemy.orm import (sessionmaker, scoped_session, relationship,
+                            column_property, aliased)
 from sqlalchemy.orm.exc import NoResultFound, FlushError
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy.sql import and_,or_
+from sqlalchemy.sql import and_, or_
 from sqlalchemy import select, func, exists, case, literal_column, union_all
 from sqlalchemy.ext.declarative import declared_attr
 from uuid import uuid4
@@ -186,11 +188,12 @@ class Notebook(Base):
     def __repr__(self):
         return "Notebook<{}/{}>".format(self.assignment.name, self.name)
 
+
 class BaseCell(Base):
     """Database representation of a cell. It is meant as a base class for cells where additional behavior is added through mixin classes."""
 
     __tablename__ = "base_cell"
-    __table_args__ = (UniqueConstraint('name', 'notebook_id','type'),)
+    __table_args__ = (UniqueConstraint('name', 'notebook_id', 'type'),)
 
     #: Unique id of the grade cell (automatically generated)
     id = Column(String(32), primary_key=True, default=new_uuid)
@@ -202,22 +205,21 @@ class BaseCell(Base):
     #: The :class:`~nbgrader.api.Notebook` that this grade cell is contained in
     @property
     def notebook(self):
-        if hasattr(self,'task_notebook'):
+        if hasattr(self, 'task_notebook'):
             return self.task_notebook
-        elif hasattr(self,'solution_notebook'):
+        elif hasattr(self, 'solution_notebook'):
             return self.solution_notebook
-        elif  hasattr(self,'grade_notebook'):
+        elif hasattr(self, 'grade_notebook'):
             return self.grade_notebook
 
     @notebook.setter
-    def notebook(self,value):
-        if hasattr(self,'task_notebook'):
-            self.task_notebook=value
-        elif hasattr(self,'solution_notebook'):
-            self.solution_notebook=value
-        elif  hasattr(self,'grade_notebook'):
-            self.grade_notebook=value
-
+    def notebook(self, value):
+        if hasattr(self, 'task_notebook'):
+            self.task_notebook = value
+        elif hasattr(self, 'solution_notebook'):
+            self.solution_notebook = value
+        elif hasattr(self, 'grade_notebook'):
+            self.grade_notebook = value
 
     #: Unique id of the :attr:`~nbgrader.api.GradeCell.notebook`
     notebook_id = Column(String(32), ForeignKey('notebook.id'), nullable=False)
@@ -229,7 +231,6 @@ class BaseCell(Base):
     def assignment(self):
         return self.notebook.assignment
 
-
     def __repr__(self):
         return "GradeCell<{}/{}/{}>".format(
             self.assignment.name, self.notebook.name, self.name)
@@ -237,8 +238,8 @@ class BaseCell(Base):
     type = Column(String(50))
 
     __mapper_args__ = {
-        'polymorphic_identity':'BaseCell',
-        'polymorphic_on':type
+        'polymorphic_identity': 'BaseCell',
+        'polymorphic_on': type
     }
 
 
@@ -258,10 +259,10 @@ class GradedMixin():
     #: represented by :class:`~nbgrader.api.Grade` objects
     @declared_attr
     def grades(cls):
-        return relationship("Grade", backref="graded_"+cls.__name__)
+        return relationship("Grade", backref="graded_" + cls.__name__)
 
 
-class GradeCell(BaseCell,GradedMixin):
+class GradeCell(BaseCell, GradedMixin):
     """Database representation of the master/source version of a grade cell."""
 
     __tablename__ = "grade_cells"
@@ -290,7 +291,7 @@ class GradeCell(BaseCell,GradedMixin):
             self.assignment.name, self.notebook.name, self.name)
 
     __mapper_args__ = {
-        'polymorphic_identity':'GradeCell',
+        'polymorphic_identity': 'GradeCell',
     }
 
 
@@ -301,14 +302,13 @@ class CommentedMixin():
     #: represented by :class:`~nbgrader.api.Comment` objects
     @declared_attr
     def comments(cls):
-        return relationship("Comment", backref="commented_"+cls.__name__)
+        return relationship("Comment", backref="commented_" + cls.__name__)
 
 
-class SolutionCell(BaseCell,CommentedMixin):
+class SolutionCell(BaseCell, CommentedMixin):
     __tablename__ = "solution_cells"
     #: Unique id of the cell (automatically generated from BaseCell)
     id = Column(String(32), ForeignKey('base_cell.id'), primary_key=True)
-
 
     def to_dict(self):
         """Convert the solution cell object to a JSON-friendly dictionary
@@ -328,13 +328,13 @@ class SolutionCell(BaseCell,CommentedMixin):
         return "{}/{}".format(self.notebook, self.name)
 
     __mapper_args__ = {
-        'polymorphic_identity':'SolutionCell',
+        'polymorphic_identity': 'SolutionCell',
     }
 
 
-class TaskCell(BaseCell,GradedMixin,CommentedMixin):
+class TaskCell(BaseCell, GradedMixin, CommentedMixin):
     """Database representation of a task cell."""
-    
+
     __tablename__ = "task_cells"
 
     #: Unique id of the cell (automatically generated from BaseCell)
@@ -358,9 +358,7 @@ class TaskCell(BaseCell,GradedMixin,CommentedMixin):
     def __repr__(self):
         return "{}/{}".format(self.notebook, self.name)
 
-    __mapper_args__ = {
-        'polymorphic_identity':'TaskCell',
-        }
+    __mapper_args__ = {'polymorphic_identity': 'TaskCell'}
 
 
 class SourceCell(Base):
@@ -736,7 +734,7 @@ class Grade(Base):
     #: Unique name of the grade cell, inherited from :class:`~nbgrader.api.GradeCell`
     taskcell_name = association_proxy('graded_TaskCell', 'name')
     gradecell_name = association_proxy('graded_GradeCell', 'name')
-    
+
     @property
     def name(self):
         if self.taskcell_name:
@@ -757,7 +755,6 @@ class Grade(Base):
 
     #: The master version of the cell this grade is assigned to, represented by
     #: a :class:`~nbgrader.api.GradeCell` object.
-    #cell = None
 
     graded_GradeCell = None
     graded_TaskCell = None
@@ -770,12 +767,13 @@ class Grade(Base):
             return self.graded_GradeCell
         else:
             raise ValueError(self)
+
     @cell.setter
     def cell(self, value):
-        if value.__class__.__name__=="TaskCell":
-            self.graded_TaskCell=value
-        elif value.__class__.__name__=="GradeCell":
-            self.graded_GradeCell=value
+        if value.__class__.__name__ == "TaskCell":
+            self.graded_TaskCell = value
+        elif value.__class__.__name__ == "GradeCell":
+            self.graded_GradeCell = value
         else:
             raise ValueError(value)
 
@@ -784,13 +782,6 @@ class Grade(Base):
 
     #: The type of cell this grade corresponds to, inherited from
     #: :class:`~nbgrader.api.GradeCell`
-
-    #@property
-    #def cell_type(self):
-    #    if self.cell_type_taskcell:
-    #        return self.cell_type_taskcell
-    #    else:
-    #        return self.cell_type_gradecell
 
     #: The student who this grade is assigned to, represented by a
     #: :class:`~nbgrader.api.Student` object
@@ -815,8 +806,8 @@ class Grade(Base):
     #: for the score.
     score = column_property(case(
         [
-            (manual_score != None, manual_score + case([(extra_credit != None, extra_credit)], else_=literal_column("0.0"))),
-            (auto_score != None, auto_score + case([(extra_credit != None, extra_credit)], else_=literal_column("0.0")))
+            (manual_score is not None, manual_score + case([(extra_credit is not None, extra_credit)], else_=literal_column("0.0"))),
+            (auto_score is not None, auto_score + case([(extra_credit is not None, extra_credit)], else_=literal_column("0.0")))
         ],
         else_=literal_column("0.0")
     ))
@@ -825,6 +816,7 @@ class Grade(Base):
     #: :class:`~nbgrader.api.GradeCell`
     max_score_gradecell = None
     max_score_taskcell = None
+
     @property
     def max_score(self):
         if self.max_score_taskcell:
@@ -863,6 +855,7 @@ class Grade(Base):
         return "Grade<{}/{}/{} for {}>".format(
             self.assignment.name, self.notebook.name, self.name, self.student.id)
 
+
 class Comment(Base):
     """Database representation of a comment on a cell in a submitted notebook."""
 
@@ -875,13 +868,13 @@ class Comment(Base):
     #: Unique name of the solution cell, inherited from :class:`~nbgrader.api.SolutionCell`
     name_taskcell = association_proxy('commented_TaskCell', 'name')
     name_solutioncell = association_proxy('commented_SolutionCell', 'name')
+
     @property
     def name(self):
         if self.commented_TaskCell:
             return self.name_taskcell
         else:
             return self.name_solutioncell
-
 
     #: The submitted assignment that this comment is contained in, represented by
     #: a :class:`~nbgrader.api.SubmittedAssignment` object
@@ -910,14 +903,12 @@ class Comment(Base):
 
     @cell.setter
     def cell(self, value):
-        if value.__class__.__name__=="TaskCell":
-            self.commented_TaskCell=value
-        elif value.__class__.__name__=="SolutionCell":
-            self.commented_SolutionCell=value
+        if value.__class__.__name__ == "TaskCell":
+            self.commented_TaskCell = value
+        elif value.__class__.__name__ == "SolutionCell":
+            self.commented_SolutionCell = value
         else:
             raise ValueError(value)
-
-
 
     #: Unique id of :attr:`~nbgrader.api.Comment.cell`
     cell_id = Column(String(32), ForeignKey('base_cell.id'))
@@ -940,8 +931,8 @@ class Comment(Base):
     #: comment.
     comment = column_property(case(
         [
-            (manual_comment != None, manual_comment),
-            (auto_comment != None, auto_comment)
+            (manual_comment is not None, manual_comment),
+            (auto_comment is not None, auto_comment)
         ],
         else_=None
     ))
@@ -968,345 +959,334 @@ class Comment(Base):
         return "Comment<{}/{}/{} for {}>".format(
             self.assignment.name, self.notebook.name, self.name, self.student.id)
 
-
-
-
-## Needs manual grade
+# Needs manual grade
 
 SubmittedNotebook.needs_manual_grade = column_property(
     exists().where(and_(
         Grade.notebook_id == SubmittedNotebook.id,
-        Grade.needs_manual_grade))\
+        Grade.needs_manual_grade))
     .correlate_except(Grade), deferred=True)
 
 SubmittedAssignment.needs_manual_grade = column_property(
     exists().where(and_(
         SubmittedNotebook.assignment_id == SubmittedAssignment.id,
         Grade.notebook_id == SubmittedNotebook.id,
-        Grade.needs_manual_grade))\
+        Grade.needs_manual_grade))
     .correlate_except(Grade), deferred=True)
 
 Notebook.needs_manual_grade = column_property(
     exists().where(and_(
         Notebook.id == SubmittedNotebook.notebook_id,
         Grade.notebook_id == SubmittedNotebook.id,
-        Grade.needs_manual_grade))\
+        Grade.needs_manual_grade))
     .correlate_except(Grade), deferred=True)
 
 
-## Overall scores
+# Overall scores
 
 SubmittedNotebook.score = column_property(
-    select([func.coalesce(func.sum(Grade.score), 0.0)])\
-        .where(Grade.notebook_id == SubmittedNotebook.id)\
-        .correlate_except(Grade), deferred=True)
+    select([func.coalesce(func.sum(Grade.score), 0.0)])
+    .where(Grade.notebook_id == SubmittedNotebook.id)
+    .correlate_except(Grade), deferred=True)
 
 SubmittedAssignment.score = column_property(
-    select([func.coalesce(func.sum(Grade.score), 0.0)])\
-        .where(and_(
-            SubmittedNotebook.assignment_id == SubmittedAssignment.id,
-            Grade.notebook_id == SubmittedNotebook.id))\
-        .correlate_except(Grade), deferred=True)
+    select([func.coalesce(func.sum(Grade.score), 0.0)])
+    .where(and_(
+        SubmittedNotebook.assignment_id == SubmittedAssignment.id,
+        Grade.notebook_id == SubmittedNotebook.id))
+    .correlate_except(Grade), deferred=True)
 
 Student.score = column_property(
-    select([func.coalesce(func.sum(Grade.score), 0.0)])\
-        .where(and_(
-            SubmittedAssignment.student_id == Student.id,
-            SubmittedNotebook.assignment_id == SubmittedAssignment.id,
-            Grade.notebook_id == SubmittedNotebook.id))\
-        .correlate_except(Grade), deferred=True)
+    select([func.coalesce(func.sum(Grade.score), 0.0)])
+    .where(and_(
+        SubmittedAssignment.student_id == Student.id,
+        SubmittedNotebook.assignment_id == SubmittedAssignment.id,
+        Grade.notebook_id == SubmittedNotebook.id))
+    .correlate_except(Grade), deferred=True)
 
 
-## Overall max scores
+# Overall max scores
 
 Grade.max_score_gradecell = column_property(
-    select([func.coalesce(GradeCell.max_score,0.0)])\
-        .select_from(GradeCell)\
-        .where(Grade.cell_id == GradeCell.id)\
-        .correlate_except(GradeCell), deferred=True)
+    select([func.coalesce(GradeCell.max_score, 0.0)])
+    .select_from(GradeCell)
+    .where(Grade.cell_id == GradeCell.id)
+    .correlate_except(GradeCell), deferred=True)
 
 Grade.max_score_taskcell = column_property(
-    select([func.coalesce(TaskCell.max_score,0.0)])\
-        .select_from(TaskCell)\
-        .where(Grade.cell_id == TaskCell.id)\
-        .correlate_except(TaskCell), deferred=True)
+    select([func.coalesce(TaskCell.max_score, 0.0)])
+    .select_from(TaskCell)
+    .where(Grade.cell_id == TaskCell.id)
+    .correlate_except(TaskCell), deferred=True)
 # a grade is either from a grade cell or a task cell , so only one will not be none
-Grade.max_score = column_property(func.coalesce(Grade.max_score_gradecell , Grade.max_score_taskcell,0.0 ),deferred=True)
+Grade.max_score = column_property(func.coalesce(Grade.max_score_gradecell, Grade.max_score_taskcell, 0.0), deferred=True)
 
 # try defining the cell_type_**** as athe result of a search as for the max_score
 # and not through the relationship
 
 Grade.cell_type_from_taskcell = column_property(
-    select([TaskCell.cell_type])\
-        .select_from(TaskCell)\
-        .where(Grade.cell_id == TaskCell.id)\
-        .correlate_except(TaskCell), deferred=True)
+    select([TaskCell.cell_type])
+    .select_from(TaskCell)
+    .where(Grade.cell_id == TaskCell.id)
+    .correlate_except(TaskCell), deferred=True)
 
 Grade.cell_type_from_gradecell = column_property(
-    select([GradeCell.cell_type])\
-        .select_from(GradeCell)\
-        .where(Grade.cell_id == GradeCell.id)\
-        .correlate_except(GradeCell), deferred=True)
+    select([GradeCell.cell_type])
+    .select_from(GradeCell)
+    .where(Grade.cell_id == GradeCell.id)
+    .correlate_except(GradeCell), deferred=True)
 
-Grade.cell_type=column_property(
-        select([func.coalesce(Grade.cell_type_from_gradecell,Grade.cell_type_from_taskcell)])
-        )
-
+Grade.cell_type = column_property(
+    select([func.coalesce(Grade.cell_type_from_gradecell, Grade.cell_type_from_taskcell)])
+)
 
 
 Notebook.max_score_gradecell = column_property(
-    select([func.coalesce(func.sum(GradeCell.max_score), 0.0)])\
-        .select_from(GradeCell)\
-        .where(GradeCell.notebook_id == Notebook.id)\
+    select([func.coalesce(func.sum(GradeCell.max_score), 0.0)])
+        .select_from(GradeCell)
+        .where(GradeCell.notebook_id == Notebook.id)
         .correlate_except(GradeCell), deferred=True)
 
 Notebook.max_score_taskcell = column_property(
-    select([func.coalesce(func.sum(TaskCell.max_score), 0.0)])\
-        .select_from(TaskCell)\
-        .where(TaskCell.notebook_id == Notebook.id)\
+    select([func.coalesce(func.sum(TaskCell.max_score), 0.0)])
+        .select_from(TaskCell)
+        .where(TaskCell.notebook_id == Notebook.id)
         .correlate_except(TaskCell), deferred=True)
 
 Notebook.max_score = column_property(
-        Notebook.max_score_gradecell + Notebook.max_score_taskcell     
-    )
+    Notebook.max_score_gradecell + Notebook.max_score_taskcell
+)
 
 SubmittedNotebook.max_score = column_property(
-    select([Notebook.max_score])\
-        .where(SubmittedNotebook.notebook_id == Notebook.id)\
-        .correlate_except(Notebook), deferred=True)
+    select([Notebook.max_score])
+    .where(SubmittedNotebook.notebook_id == Notebook.id)
+    .correlate_except(Notebook), deferred=True)
 
 Assignment.max_score_gradecell = column_property(
-    select([func.coalesce(func.sum(GradeCell.max_score), 0.0)])\
-        .select_from(GradeCell)\
-        .where(and_(
-            Notebook.assignment_id == Assignment.id,
-            GradeCell.notebook_id == Notebook.id))\
-        .correlate_except(GradeCell), deferred=True)
+    select([func.coalesce(func.sum(GradeCell.max_score), 0.0)])
+    .select_from(GradeCell)
+    .where(and_(
+        Notebook.assignment_id == Assignment.id,
+        GradeCell.notebook_id == Notebook.id))
+    .correlate_except(GradeCell), deferred=True)
 
 Assignment.max_score_taskcell = column_property(
-    select([func.coalesce(func.sum(TaskCell.max_score), 0.0)])\
-        .select_from(TaskCell)\
-        .where(and_(
-            Notebook.assignment_id == Assignment.id,
-            TaskCell.notebook_id == Notebook.id))\
-        .correlate_except(TaskCell), deferred=True)
+    select([func.coalesce(func.sum(TaskCell.max_score), 0.0)])
+    .select_from(TaskCell)
+    .where(and_(
+        Notebook.assignment_id == Assignment.id,
+        TaskCell.notebook_id == Notebook.id))
+    .correlate_except(TaskCell), deferred=True)
 
 Assignment.max_score = column_property(
-    Assignment.max_score_gradecell+Assignment.max_score_taskcell
+    Assignment.max_score_gradecell + Assignment.max_score_taskcell
 )
 
 
 SubmittedAssignment.max_score = column_property(
-    select([Assignment.max_score])\
-        .where(SubmittedAssignment.assignment_id == Assignment.id)\
-        .correlate_except(Assignment), deferred=True)
+    select([Assignment.max_score])
+    .where(SubmittedAssignment.assignment_id == Assignment.id)
+    .correlate_except(Assignment), deferred=True)
 
 Student.max_score = column_property(
-    select([func.coalesce(func.sum(Assignment.max_score), 0.0)])\
-        .correlate_except(Assignment), deferred=True)
+    select([func.coalesce(func.sum(Assignment.max_score), 0.0)])
+    .correlate_except(Assignment), deferred=True)
 
 
-## Written scores
+# Written scores
 
 SubmittedNotebook.written_score = column_property(
-    select([func.coalesce(func.sum(Grade.score), 0.0)])\
-        .where(and_(
-            Grade.notebook_id == SubmittedNotebook.id,
-            GradeCell.id == Grade.cell_id,
-            GradeCell.cell_type == "markdown"))\
-        .correlate_except(Grade), deferred=True)
+    select([func.coalesce(func.sum(Grade.score), 0.0)])
+    .where(and_(
+        Grade.notebook_id == SubmittedNotebook.id,
+        GradeCell.id == Grade.cell_id,
+        GradeCell.cell_type == "markdown"))
+    .correlate_except(Grade), deferred=True)
 
 SubmittedAssignment.written_score = column_property(
-    select([func.coalesce(func.sum(Grade.score), 0.0)])\
-        .where(and_(
-            SubmittedNotebook.assignment_id == SubmittedAssignment.id,
-            Grade.notebook_id == SubmittedNotebook.id,
-            GradeCell.id == Grade.cell_id,
-            GradeCell.cell_type == "markdown"))\
-        .correlate_except(Grade), deferred=True)
+    select([func.coalesce(func.sum(Grade.score), 0.0)])
+    .where(and_(
+        SubmittedNotebook.assignment_id == SubmittedAssignment.id,
+        Grade.notebook_id == SubmittedNotebook.id,
+        GradeCell.id == Grade.cell_id,
+        GradeCell.cell_type == "markdown"))
+    .correlate_except(Grade), deferred=True)
 
 
-## Written max scores
+# Written max scores
 
 Notebook.max_written_score = column_property(
-    select([func.coalesce(func.sum(GradeCell.max_score), 0.0)])\
-        .select_from(GradeCell)\
-        .where(and_(
-            GradeCell.notebook_id == Notebook.id,
-            GradeCell.cell_type == "markdown"))\
-        .correlate_except(GradeCell), deferred=True)
+    select([func.coalesce(func.sum(GradeCell.max_score), 0.0)])
+    .select_from(GradeCell)
+    .where(and_(
+        GradeCell.notebook_id == Notebook.id,
+        GradeCell.cell_type == "markdown"))
+    .correlate_except(GradeCell), deferred=True)
 
 SubmittedNotebook.max_written_score = column_property(
-    select([Notebook.max_written_score])\
-        .where(Notebook.id == SubmittedNotebook.notebook_id)\
-        .correlate_except(Notebook), deferred=True)
+    select([Notebook.max_written_score])
+    .where(Notebook.id == SubmittedNotebook.notebook_id)
+    .correlate_except(Notebook), deferred=True)
 
 Assignment.max_written_score = column_property(
-    select([func.coalesce(func.sum(GradeCell.max_score), 0.0)])\
-        .select_from(GradeCell)\
-        .where(and_(
-            Notebook.assignment_id == Assignment.id,
-            GradeCell.notebook_id == Notebook.id,
-            GradeCell.cell_type == "markdown"))\
-        .correlate_except(GradeCell), deferred=True)
+    select([func.coalesce(func.sum(GradeCell.max_score), 0.0)])
+    .select_from(GradeCell)
+    .where(and_(
+        Notebook.assignment_id == Assignment.id,
+        GradeCell.notebook_id == Notebook.id,
+        GradeCell.cell_type == "markdown"))
+    .correlate_except(GradeCell), deferred=True)
 
 SubmittedAssignment.max_written_score = column_property(
-    select([Assignment.max_written_score])\
-        .where(Assignment.id == SubmittedAssignment.assignment_id)\
-        .correlate_except(Assignment), deferred=True)
+    select([Assignment.max_written_score])
+    .where(Assignment.id == SubmittedAssignment.assignment_id)
+    .correlate_except(Assignment), deferred=True)
 
 
-## Code scores
+# Code scores
 
 SubmittedNotebook.code_score = column_property(
-    select([func.coalesce(func.sum(Grade.score), 0.0)])\
-        .where(and_(
-            Grade.notebook_id == SubmittedNotebook.id,
-            GradeCell.id == Grade.cell_id,
-            GradeCell.cell_type == "code"))\
-        .correlate_except(Grade), deferred=True)
+    select([func.coalesce(func.sum(Grade.score), 0.0)])
+    .where(and_(
+        Grade.notebook_id == SubmittedNotebook.id,
+        GradeCell.id == Grade.cell_id,
+        GradeCell.cell_type == "code"))
+    .correlate_except(Grade), deferred=True)
 
 SubmittedAssignment.code_score = column_property(
-    select([func.coalesce(func.sum(Grade.score), 0.0)])\
-        .where(and_(
-            SubmittedNotebook.assignment_id == SubmittedAssignment.id,
-            Grade.notebook_id == SubmittedNotebook.id,
-            GradeCell.id == Grade.cell_id,
-            GradeCell.cell_type == "code"))\
-        .correlate_except(Grade), deferred=True)
+    select([func.coalesce(func.sum(Grade.score), 0.0)])
+    .where(and_(
+        SubmittedNotebook.assignment_id == SubmittedAssignment.id,
+        Grade.notebook_id == SubmittedNotebook.id,
+        GradeCell.id == Grade.cell_id,
+        GradeCell.cell_type == "code"))
+    .correlate_except(Grade), deferred=True)
 
 
-## Code max scores
+# Code max scores
 
 Notebook.max_code_score = column_property(
-    select([func.coalesce(func.sum(GradeCell.max_score), 0.0)])\
-        .select_from(GradeCell)\
+    select([func.coalesce(func.sum(GradeCell.max_score), 0.0)])
+        .select_from(GradeCell)
         .where(and_(
             GradeCell.notebook_id == Notebook.id,
-            GradeCell.cell_type == "code"))\
+            GradeCell.cell_type == "code"))
         .correlate_except(GradeCell), deferred=True)
 
 SubmittedNotebook.max_code_score = column_property(
-    select([Notebook.max_code_score])\
-        .where(Notebook.id == SubmittedNotebook.notebook_id)\
-        .correlate_except(Notebook), deferred=True)
+    select([Notebook.max_code_score])
+    .where(Notebook.id == SubmittedNotebook.notebook_id)
+    .correlate_except(Notebook), deferred=True)
 
 Assignment.max_code_score = column_property(
-    select([func.coalesce(func.sum(GradeCell.max_score), 0.0)])\
-        .select_from(GradeCell)\
-        .where(and_(
-            Notebook.assignment_id == Assignment.id,
-            GradeCell.notebook_id == Notebook.id,
-            GradeCell.cell_type == "code"))\
-        .correlate_except(GradeCell), deferred=True)
+    select([func.coalesce(func.sum(GradeCell.max_score), 0.0)])
+    .select_from(GradeCell)
+    .where(and_(
+        Notebook.assignment_id == Assignment.id,
+        GradeCell.notebook_id == Notebook.id,
+        GradeCell.cell_type == "code"))
+    .correlate_except(GradeCell), deferred=True)
 
 SubmittedAssignment.max_code_score = column_property(
-    select([Assignment.max_code_score])\
-        .where(Assignment.id == SubmittedAssignment.assignment_id)\
-        .correlate_except(Assignment), deferred=True)
+    select([Assignment.max_code_score])
+    .where(Assignment.id == SubmittedAssignment.assignment_id)
+    .correlate_except(Assignment), deferred=True)
 
-## task score
+# task score
 
 SubmittedNotebook.task_score = column_property(
-    select([func.coalesce(func.sum(Grade.score), 0.0)])\
-        .where(and_(
-            Grade.notebook_id == SubmittedNotebook.id,
-            TaskCell.id == Grade.cell_id,
-            TaskCell.cell_type == "markdown"))\
-        .correlate_except(Grade), deferred=True)
+    select([func.coalesce(func.sum(Grade.score), 0.0)])
+    .where(and_(
+        Grade.notebook_id == SubmittedNotebook.id,
+        TaskCell.id == Grade.cell_id,
+        TaskCell.cell_type == "markdown"))
+    .correlate_except(Grade), deferred=True)
 
 SubmittedAssignment.task_score = column_property(
-    select([func.coalesce(func.sum(Grade.score), 0.0)])\
-        .where(and_(
-            SubmittedNotebook.assignment_id == SubmittedAssignment.id,
-            Grade.notebook_id == SubmittedNotebook.id,
-            TaskCell.id == Grade.cell_id,
-            TaskCell.cell_type == "markdown"))\
-        .correlate_except(Grade), deferred=True)
+    select([func.coalesce(func.sum(Grade.score), 0.0)])
+    .where(and_(
+        SubmittedNotebook.assignment_id == SubmittedAssignment.id,
+        Grade.notebook_id == SubmittedNotebook.id,
+        TaskCell.id == Grade.cell_id,
+        TaskCell.cell_type == "markdown"))
+    .correlate_except(Grade), deferred=True)
 
 
-## task max scores
+# task max scores
 
 Notebook.max_task_score = column_property(
-    select([func.coalesce(func.sum(TaskCell.max_score), 0.0)])\
-        .select_from(TaskCell)\
-        .where(and_(
-            TaskCell.notebook_id == Notebook.id,
-            TaskCell.cell_type == "markdown"))\
-        .correlate_except(TaskCell), deferred=True)
+    select([func.coalesce(func.sum(TaskCell.max_score), 0.0)])
+    .select_from(TaskCell)
+    .where(and_(
+        TaskCell.notebook_id == Notebook.id,
+        TaskCell.cell_type == "markdown"))
+    .correlate_except(TaskCell), deferred=True)
 
 SubmittedNotebook.max_task_score = column_property(
-    select([Notebook.max_task_score])\
-        .where(Notebook.id == SubmittedNotebook.notebook_id)\
-        .correlate_except(Notebook), deferred=True)
+    select([Notebook.max_task_score])
+    .where(Notebook.id == SubmittedNotebook.notebook_id)
+    .correlate_except(Notebook), deferred=True)
 
 Assignment.max_task_score = column_property(
-    select([func.coalesce(func.sum(TaskCell.max_score), 0.0)])\
-        .select_from(TaskCell)\
-        .where(and_(
-            Notebook.assignment_id == Assignment.id,
-            TaskCell.notebook_id == Notebook.id,
-            TaskCell.cell_type == "markdown"))\
-        .correlate_except(TaskCell), deferred=True)
+    select([func.coalesce(func.sum(TaskCell.max_score), 0.0)])
+    .select_from(TaskCell)
+    .where(and_(
+        Notebook.assignment_id == Assignment.id,
+        TaskCell.notebook_id == Notebook.id,
+        TaskCell.cell_type == "markdown"))
+    .correlate_except(TaskCell), deferred=True)
 
 SubmittedAssignment.max_task_score = column_property(
-    select([func.coalesce(Assignment.max_task_score,0.0)])\
-        .where(Assignment.id == SubmittedAssignment.assignment_id)\
-        .correlate_except(Assignment), deferred=True)
+    select([func.coalesce(Assignment.max_task_score, 0.0)])
+)
 
-
-
-
-
-## Number of submissions
+# Number of submissions
 
 Assignment.num_submissions = column_property(
-    select([func.count(SubmittedAssignment.id)])\
-        .where(SubmittedAssignment.assignment_id == Assignment.id)\
-        .correlate_except(SubmittedAssignment), deferred=True)
+    select([func.count(SubmittedAssignment.id)])
+    .where(SubmittedAssignment.assignment_id == Assignment.id)
+    .correlate_except(SubmittedAssignment), deferred=True)
 
 Notebook.num_submissions = column_property(
-    select([func.count(SubmittedNotebook.id)])\
-        .where(SubmittedNotebook.notebook_id == Notebook.id)\
-        .correlate_except(SubmittedNotebook), deferred=True)
+    select([func.count(SubmittedNotebook.id)])
+    .where(SubmittedNotebook.notebook_id == Notebook.id)
+    .correlate_except(SubmittedNotebook), deferred=True)
 
 
-## Cell type
+# Cell type
 
 Grade.cell_type_gradecell = column_property(
-    select([GradeCell.cell_type])\
-        .select_from(GradeCell)\
-        .where(Grade.cell_id == GradeCell.id)\
-        .correlate_except(GradeCell), deferred=True)
+    select([GradeCell.cell_type])
+    .select_from(GradeCell)
+    .where(Grade.cell_id == GradeCell.id)
+    .correlate_except(GradeCell), deferred=True)
 
 Grade.cell_type_taskcell = column_property(
-    select([TaskCell.cell_type])\
-        .select_from(TaskCell)\
-        .where(Grade.cell_id == TaskCell.id)\
-        .correlate_except(TaskCell), deferred=True)
+    select([TaskCell.cell_type])
+    .select_from(TaskCell)
+    .where(Grade.cell_id == TaskCell.id)
+    .correlate_except(TaskCell), deferred=True)
 
 
-## Failed tests
+# Failed tests
 
 Grade.failed_tests = column_property(
-    (Grade.cell_type_gradecell!=None) & ((Grade.auto_score < Grade.max_score_gradecell) & (Grade.cell_type_gradecell == "code"))
-    )
-
-
+    (Grade.cell_type_gradecell is not None) & ((Grade.auto_score < Grade.max_score_gradecell) & (Grade.cell_type_gradecell == "code"))
+)
 
 SubmittedNotebook.failed_tests = column_property(
     exists().where(and_(
         Grade.notebook_id == SubmittedNotebook.id,
-        Grade.failed_tests))\
+        Grade.failed_tests))
     .correlate_except(Grade), deferred=True)
 
 
-## Late penalties
+# Late penalties
 
 SubmittedAssignment.late_submission_penalty = column_property(
-    select([func.coalesce(func.sum(SubmittedNotebook.late_submission_penalty), 0.0)])\
-        .where(SubmittedNotebook.assignment_id == SubmittedAssignment.id)\
-        .correlate_except(SubmittedNotebook), deferred=True)
+    select([func.coalesce(func.sum(SubmittedNotebook.late_submission_penalty), 0.0)])
+    .where(SubmittedNotebook.assignment_id == SubmittedAssignment.id)
+    .correlate_except(SubmittedNotebook), deferred=True)
 
 
 class Gradebook(object):
@@ -1325,7 +1305,7 @@ class Gradebook(object):
 
         """
         # create the connection to the database
-        self.engine = create_engine(db_url,echo=False)
+        self.engine = create_engine(db_url, echo=False)
         self.db = scoped_session(sessionmaker(autoflush=True, bind=self.engine))
 
         # this creates all the tables in the database if they don't already exist
@@ -1357,7 +1337,7 @@ class Gradebook(object):
         self.db.remove()
         self.engine.dispose()
 
-    #### Students
+    # Students
 
     @property
     def students(self):
@@ -1468,7 +1448,7 @@ class Gradebook(object):
             self.db.rollback()
             raise InvalidEntry(*e.args)
 
-    #### Assignments
+    # Assignments
 
     @property
     def assignments(self):
@@ -1586,7 +1566,7 @@ class Gradebook(object):
             self.db.rollback()
             raise InvalidEntry(*e.args)
 
-    #### Notebooks
+    # Notebooks
 
     def add_notebook(self, name, assignment, **kwargs):
         """Add a new notebook to an assignment.
@@ -1708,7 +1688,7 @@ class Gradebook(object):
             self.db.rollback()
             raise InvalidEntry(*e.args)
 
-    #### Grade cells
+    # Grade cells
 
     def add_grade_cell(self, name, notebook, assignment, **kwargs):
         """Add a new grade cell to an existing notebook of an existing
@@ -1810,11 +1790,10 @@ class Gradebook(object):
                         Notebook.name == notebook,
                         Assignment.name == assignment)\
                     .one()
-            except NoResultFound:          
+            except NoResultFound:
                 raise MissingEntry("No such grade cell: {}/{}/{}".format(assignment, notebook, name))
 
         return grade_cell
-
 
     def update_or_create_grade_cell(self, name, notebook, assignment, **kwargs):
         """Update an existing grade cell in a notebook of an assignment, or
@@ -1852,7 +1831,7 @@ class Gradebook(object):
 
         return grade_cell
 
-    #### Solution cells
+    # Solution cells
 
     def add_solution_cell(self, name, notebook, assignment, **kwargs):
         """Add a new solution cell to an existing notebook of an existing
@@ -1949,7 +1928,7 @@ class Gradebook(object):
 
         return solution_cell
 
-#### Task cells
+# Task cells
 
     def add_task_cell(self, name, notebook, assignment, **kwargs):
         """Add a new task cell to an existing notebook of an existing
@@ -2046,7 +2025,7 @@ class Gradebook(object):
 
         return task_cell
 
-    #### Source cells
+    # Source cells
 
     def add_source_cell(self, name, notebook, assignment, **kwargs):
         """Add a new source cell to an existing notebook of an existing
@@ -2143,7 +2122,7 @@ class Gradebook(object):
 
         return source_cell
 
-    #### Submissions
+    # Submissions
 
     def add_submission(self, assignment, student, **kwargs):
         """Add a new submission of an assignment by a student.
@@ -2530,9 +2509,9 @@ class Gradebook(object):
                         Assignment.name == assignment,
                         Student.id == student)\
                     .one()
-            except NoResultFound:        
+            except NoResultFound:
                 raise MissingEntry("No such grade: {}/{}/{} for {}".format(
-                assignment, notebook, grade_cell, student))
+                    assignment, notebook, grade_cell, student))
 
         return grade
 
@@ -2609,11 +2588,10 @@ class Gradebook(object):
                     .one()
             except NoResultFound:
                 raise MissingEntry("No such taskcomment: {}/{}/{} for {}".format(
-                assignment, notebook, solution_cell, student))
+                    assignment, notebook, solution_cell, student))
 
         return comment
 
-    
     def find_comment_by_id(self, comment_id):
         """Find a comment by its unique id.
 
@@ -2660,7 +2638,7 @@ class Gradebook(object):
         score_sum_taskcell = self.db.query(func.coalesce(func.sum(Grade.score), 0.0))\
             .join(TaskCell, Notebook, Assignment)\
             .filter(Assignment.name == assignment_id).scalar()
-        score_sum = score_sum_gradecell+score_sum_taskcell
+        score_sum = score_sum_gradecell + score_sum_taskcell
         return score_sum / assignment.num_submissions
 
     def average_assignment_code_score(self, assignment_id):
@@ -2721,7 +2699,6 @@ class Gradebook(object):
                 GradeCell.cell_type == "markdown")).scalar()
         return score_sum / assignment.num_submissions
 
-
     def average_assignment_task_score(self, assignment_id):
         """Compute the average task score for an assignment.
 
@@ -2749,7 +2726,7 @@ class Gradebook(object):
                 TaskCell.notebook_id == Notebook.id,
                 Grade.cell_id == TaskCell.id,
                 TaskCell.cell_type == "markdown")).scalar()
-        return score_sum / assignment.num_submissions    
+        return score_sum / assignment.num_submissions
 
     def average_notebook_score(self, notebook_id, assignment_id):
         """Compute the average score for a particular notebook in an assignment.
@@ -2939,7 +2916,6 @@ class Gradebook(object):
         # subquery the code scores
         code_scores = self.db.query(
             SubmittedAssignment.id.label("id"),
-            #Notebook.id.label("nbid"),
             func.sum(Grade.score).label("code_score"),
             func.sum(GradeCell.max_score).label("max_code_score"),
         ).join(SubmittedNotebook, Notebook, Assignment, Student, Grade, GradeCell)\
@@ -2951,7 +2927,6 @@ class Gradebook(object):
         written_scores = self.db.query(
             SubmittedAssignment.id.label("id"),
             func.sum(Grade.score).label("written_score"),
-            #Notebook.id.label("nbid"),
             func.sum(GradeCell.max_score).label("max_written_score"),
         ).join(SubmittedNotebook, Notebook, Assignment, Student, Grade, GradeCell)\
          .filter(GradeCell.cell_type == "markdown")\
@@ -2961,7 +2936,6 @@ class Gradebook(object):
         # subquery for the task scores
         task_scores = self.db.query(
             SubmittedAssignment.id.label("id"),
-            #Notebook.id.label("nbid"),
             func.sum(Grade.score).label("task_score"),
             func.sum(TaskCell.max_score).label("max_task_score"),
         ).join(SubmittedNotebook, Notebook, Assignment, Student, Grade, TaskCell)\
@@ -2981,17 +2955,15 @@ class Gradebook(object):
          .group_by(SubmittedAssignment.id)\
          .subquery()
 
-        all_scores=aliased(union_all(
+        all_scores = aliased(union_all(
             self.db.query(
                 SubmittedAssignment.id.label('id'),
                 func.sum(Grade.score).label("score"),
                 func.sum(GradeCell.max_score).label("max_score"),
-            ).join( SubmittedNotebook, Grade, GradeCell)\
-            .filter(GradeCell.cell_type == "code")\
+            ).join(SubmittedNotebook, Grade, GradeCell)
+            .filter(GradeCell.cell_type == "code")
             .group_by(SubmittedAssignment.id),
-        #print(code_scores.all())
-
-        # subquery for the written scores
+            # subquery for the written scores
             self.db.query(
                 SubmittedAssignment.id.label('id'),
                 func.sum(Grade.score).label("score"),
@@ -2999,7 +2971,7 @@ class Gradebook(object):
             ).join(SubmittedNotebook, Grade, GradeCell)\
             .filter(GradeCell.cell_type == "markdown")\
             .group_by(SubmittedAssignment.id),
-            
+
             self.db.query(
                 SubmittedAssignment.id.label('id'),
                 func.sum(Grade.score).label("score"),
@@ -3013,24 +2985,22 @@ class Gradebook(object):
             func.sum(all_scores.c.score).label("score"),
             func.sum(all_scores.c.max_score).label("max_score"),
             all_scores.c.id.label("id"),
-            )\
-            .group_by(all_scores.c.id)\
-            .subquery()
-
+        ).group_by(all_scores.c.id)
+        .subquery()
 
         # full query
         _manual_grade = func.coalesce(manual_grade.c.needs_manual_grade, False)
         assignments = self.db.query(
             SubmittedAssignment.id, Assignment.name,
             SubmittedAssignment.timestamp, Student.first_name, Student.last_name,
-            Student.id, 
+            Student.id,
             func.coalesce(total_scores.c.score, 0.0),
             func.coalesce(total_scores.c.max_score, 0.0),
-            func.coalesce(code_scores.c.code_score, 0.0), 
+            func.coalesce(code_scores.c.code_score, 0.0),
             func.coalesce(code_scores.c.max_code_score, 0.0),
             func.coalesce(written_scores.c.written_score, 0.0),
             func.coalesce(written_scores.c.max_written_score, 0.0),
-            func.coalesce(task_scores.c.task_score, 0.0), 
+            func.coalesce(task_scores.c.task_score, 0.0),
             func.coalesce(task_scores.c.max_task_score, 0.0),
             _manual_grade
         ).join(SubmittedNotebook, Assignment, Student, Grade)\
@@ -3058,8 +3028,8 @@ class Gradebook(object):
         keys = [
             "id", "name", "timestamp", "first_name", "last_name", "student",
             "score", "max_score", "code_score", "max_code_score",
-            "written_score", "max_written_score", 
-            "task_score", "max_task_score", 
+            "written_score", "max_written_score",
+            "task_score", "max_task_score",
             "needs_manual_grade"
         ]
         return [dict(zip(keys, x)) for x in assignments]
@@ -3092,7 +3062,6 @@ class Gradebook(object):
          .filter(GradeCell.cell_type == "code")\
          .group_by(SubmittedNotebook.id)\
          .subquery()
-        #print(code_scores.all())
 
         # subquery for the written scores
         written_scores = self.db.query(
@@ -3106,7 +3075,7 @@ class Gradebook(object):
         # subquery for the written scores
         task_scores = self.db.query(
             SubmittedNotebook.id,
-            func.coalesce(func.sum(Grade.score),0.0).label("task_score"),
+            func.coalesce(func.sum(Grade.score), 0.0).label("task_score"),
             func.sum(TaskCell.max_score).label("max_task_score"),
         ).join(SubmittedAssignment, Notebook, Assignment, Student, Grade, TaskCell)\
          .filter(TaskCell.cell_type == "markdown")\
@@ -3119,18 +3088,16 @@ class Gradebook(object):
         ).join(SubmittedAssignment, task_scores)\
          .group_by(SubmittedNotebook.id)\
          .subquery()
-         
-        all_scores=aliased(union_all(
+
+        all_scores = aliased(union_all(
             self.db.query(
                 SubmittedNotebook.id.label('id'),
                 func.sum(Grade.score).label("score"),
                 func.sum(GradeCell.max_score).label("max_score"),
-            ).join( Grade, GradeCell)\
-            .filter(GradeCell.cell_type == "code")\
+            ).join(Grade, GradeCell)
+            .filter(GradeCell.cell_type == "code")
             .group_by(SubmittedNotebook.id),
-        #print(code_scores.all())
-
-        # subquery for the written scores
+            # subquery for the written scores
             self.db.query(
                 SubmittedNotebook.id.label('id'),
                 func.sum(Grade.score).label("score"),
@@ -3138,12 +3105,12 @@ class Gradebook(object):
             ).join(Grade, GradeCell)\
             .filter(GradeCell.cell_type == "markdown")\
             .group_by(SubmittedNotebook.id),
-            
+
             self.db.query(
                 SubmittedNotebook.id.label('id'),
                 func.sum(Grade.score).label("score"),
                 func.sum(TaskCell.max_score).label("max_score"),
-            ).join( Grade, TaskCell)\
+            ).join(Grade, TaskCell)\
             .filter(TaskCell.cell_type == "markdown")\
             .group_by(SubmittedNotebook.id)
         )
@@ -3152,14 +3119,12 @@ class Gradebook(object):
             func.sum(all_scores.c.score).label("score"),
             func.sum(all_scores.c.max_score).label("max_score"),
             all_scores.c.id.label("id"),
-            )\
+        )\
             .group_by(all_scores.c.id)\
             .subquery()
 
-
-
-
         # subquery for needing manual grading
+
         manual_grade = self.db.query(
             SubmittedNotebook.id,
             exists().where(Grade.needs_manual_grade).label("needs_manual_grade")
@@ -3187,14 +3152,14 @@ class Gradebook(object):
         submissions = self.db.query(
             SubmittedNotebook.id, Notebook.name,
             Student.id, Student.first_name, Student.last_name,
-            func.coalesce(total_scores.c.score,0.0), 
-            func.coalesce(total_scores.c.max_score,0.0),
-            func.coalesce(code_scores.c.code_score,0.0), 
-            func.coalesce(code_scores.c.max_code_score,0.0),
-            func.coalesce(written_scores.c.written_score,0.0), 
-            func.coalesce(written_scores.c.max_written_score,0.0),
-            func.coalesce(task_scores.c.task_score,0.0), 
-            func.coalesce(task_scores.c.max_task_score,0.0),
+            func.coalesce(total_scores.c.score, 0.0),
+            func.coalesce(total_scores.c.max_score, 0.0),
+            func.coalesce(code_scores.c.code_score, 0.0),
+            func.coalesce(code_scores.c.max_code_score, 0.0),
+            func.coalesce(written_scores.c.written_score, 0.0),
+            func.coalesce(written_scores.c.max_written_score, 0.0),
+            func.coalesce(task_scores.c.task_score, 0.0),
+            func.coalesce(task_scores.c.max_task_score, 0.0),
             _manual_grade, _failed_tests, SubmittedNotebook.flagged
         ).join(SubmittedAssignment, Notebook, Assignment, Student, Grade)\
          .outerjoin(code_scores, SubmittedNotebook.id == code_scores.c.id)\
@@ -3210,8 +3175,8 @@ class Gradebook(object):
              SubmittedAssignment.id == SubmittedNotebook.assignment_id,
              SubmittedNotebook.id == Grade.notebook_id,
              SubmittedNotebook.id == total_scores.c.id,
-             ))\
-         .group_by(
+         )
+        ).group_by(
              SubmittedNotebook.id, Notebook.name,
              Student.id, Student.first_name, Student.last_name,
              code_scores.c.code_score, code_scores.c.max_code_score,

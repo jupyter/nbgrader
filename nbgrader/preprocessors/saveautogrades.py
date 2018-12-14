@@ -53,17 +53,16 @@ class SaveAutoGrades(NbGraderPreprocessor):
 
     def _add_comment(self, cell, resources):
         comment = self.gradebook.find_comment(
-        cell.metadata['nbgrader']['grade_id'],
-        self.notebook_id,
-        self.assignment_id,
-        self.student_id)
+            cell.metadata['nbgrader']['grade_id'],
+            self.notebook_id,
+            self.assignment_id,
+            self.student_id)
         if cell.metadata.nbgrader.get("checksum", None) == utils.compute_checksum(cell) and not utils.is_task(cell):
             comment.auto_comment = "No response."
         else:
             comment.auto_comment = None
 
         self.gradebook.db.commit()
-
 
     def preprocess_cell(self, cell, resources, cell_index):
         # if it's a grade cell, the add a grade

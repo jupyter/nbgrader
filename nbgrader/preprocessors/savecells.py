@@ -4,6 +4,7 @@ from .. import utils
 from ..api import Gradebook, MissingEntry
 from . import NbGraderPreprocessor
 
+
 class SaveCells(NbGraderPreprocessor):
     """A preprocessor to save information about grade and solution cells."""
 
@@ -61,8 +62,7 @@ class SaveCells(NbGraderPreprocessor):
         # save task cells
         for name, info in self.new_task_cells.items():
             task_cell = self.gradebook.update_or_create_task_cell(name, self.notebook_id, self.assignment_id, **info)
-            self.log.debug("Recorded task cell %s into the gradebook from info %s", task_cell,info)
-
+            self.log.debug("Recorded task cell %s into the gradebook from info %s", task_cell, info)
 
         # save source cells
         for name, info in self.new_source_cells.items():
@@ -145,7 +145,6 @@ class SaveCells(NbGraderPreprocessor):
 
         self.new_task_cells[grade_id] = task_cell
 
-
     def _create_source_cell(self, cell):
         grade_id = cell.metadata.nbgrader['grade_id']
 
@@ -167,7 +166,7 @@ class SaveCells(NbGraderPreprocessor):
         self.new_source_cells[grade_id] = source_cell
 
     def preprocess_cell(self, cell, resources, cell_index):
-        
+
         if utils.is_grade(cell):
             self._create_grade_cell(cell)
 

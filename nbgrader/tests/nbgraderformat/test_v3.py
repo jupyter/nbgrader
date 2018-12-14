@@ -94,8 +94,9 @@ def test_cell_type():
     MetadataValidatorV3().upgrade_cell_metadata(cell)
     assert cell.metadata.nbgrader['cell_type'] == "code"
 
+
 def test_task_value():
-    cell = create_task_cell("this is a task cell", "markdown", "foo",0)
+    cell = create_task_cell("this is a task cell", "markdown", "foo", 0)
     assert cell.metadata.nbgrader['task'] == True
 
     cell = create_grade_cell("", "code", "foo", "")

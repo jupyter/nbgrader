@@ -15,17 +15,18 @@ down_revision = '724cde206c17'
 branch_labels = None
 depends_on = None
 
+
 def upgrade():
-    """ 
-    To upgrade we need to split the grade_cell and solution_cell database
-    entries into a part in base_cell and a part in either grade_cell or 
-    solution_cell. Because the names are the same for the new and old grade_cell and 
-    solution_cell tables we create temporary tables 'grade_cells' and 'solution_cells'
-    and once the transfer has occured we drop the old tables and rename the temporary
-    tables to the original names. 
     """
-    
-    
+    To upgrade we need to split the grade_cell and solution_cell database
+    entries into a part in base_cell and a part in either grade_cell or
+    solution_cell. Because the names are the same for the new and old
+    grade_cell and solution_cell tables we create temporary tables
+    'grade_cells' and 'solution_cells' and once the transfer has occured
+    we drop the old tables and rename the temporary tables to the
+    original names.
+    """
+
     new_grade_table = sa.sql.table(
         'grade_cells',
         sa.Column('id', sa.VARCHAR(32), nullable=False),
@@ -38,7 +39,8 @@ def upgrade():
         sa.Column('id', sa.VARCHAR(32), nullable=False),
     )
 
-    old_grade_table = sa.Table('grade_cell',
+    old_grade_table = sa.Table(
+        'grade_cell',
         sa.MetaData(),
         sa.Column('id', sa.VARCHAR(32), nullable=False),
         sa.Column('name', sa.VARCHAR(128), nullable=False),
@@ -47,7 +49,8 @@ def upgrade():
         sa.Column('notebook_id', sa.VARCHAR(32)),
     )
 
-    old_solution_table = sa.Table('solution_cell',
+    old_solution_table = sa.Table(
+        'solution_cell',
         sa.MetaData(),
         sa.Column('id', sa.VARCHAR(32), nullable=False),
         sa.Column('name', sa.VARCHAR(128), nullable=False),
@@ -56,7 +59,8 @@ def upgrade():
         sa.Column('notebook_id', sa.VARCHAR(32)),
     )
 
-    base_cell_table= sa.sql.table('base_cell',
+    base_cell_table = sa.sql.table(
+        'base_cell',
         sa.Column('id', sa.VARCHAR(32), nullable=False),
         sa.Column('name', sa.VARCHAR(128), nullable=False),
         sa.Column('notebook_id', sa.VARCHAR(32)),
@@ -72,14 +76,16 @@ def upgrade():
             old_grade_table.c.max_score
             ])).fetchall()
 
-    # copy info to the base_cell table 
+    # copy info to the base_cell table
     cells = [
-        {'name': name,
-         'id': cellid,
-         'type': 'GradeCell',
-         'notebook_id': notebook_id,
-        } for name,cellid,_,notebook_id,_ in results ]
-    
+        {
+            'name': name,
+            'id': cellid,
+            'type': 'GradeCell',
+            'notebook_id': notebook_id,
+        } for name, cellid, _, notebook_id, _ in results
+            ]
+
     op.bulk_insert(base_cell_table, cells)
 
     # copy the grade_cell specific info to the grade_cells temporary database
@@ -88,7 +94,7 @@ def upgrade():
          'id': cellid,
          'type': celltype,
          'max_score': max_score,
-        } for _,cellid,celltype,_,max_score in results ]
+        } for _, cellid, celltype, _, max_score in results]
 
     op.bulk_insert(new_grade_table, cells)
 
@@ -99,29 +105,31 @@ def upgrade():
             old_solution_table.c.notebook_id,
             ])).fetchall()
 
-    # copy info to the base_cell table 
+    # copy info to the base_cell table
     cells = [
-        {'name': name,
-         'id': cellid,
-         'type': 'SolutionCell',
-         'notebook_id': notebook_id,
-        } for name,cellid,notebook_id in results ]
-    
+        {
+            'name': name,
+            'id': cellid,
+            'type': 'SolutionCell',
+            'notebook_id': notebook_id,
+        } for name, cellid, notebook_id in results]
+
     op.bulk_insert(base_cell_table, cells)
 
-    # copy the solution_cell specific info to the grade_cells temporary database
+    # copy the solution_cell specific info to the grade_cells
+    # temporary database
     cells = [
         {
          'id': cellid,
-        } for _,cellid,_ in results ]
+        } for _, cellid, _ in results]
 
     op.bulk_insert(new_solution_table, cells)
 
-
     op.drop_table(u'grade_cell')
     op.drop_table(u'solution_cell')
-    op.rename_table('solution_cells','solution_cell')
-    op.rename_table('grade_cells','grade_cell')
+    op.rename_table('solution_cells', 'solution_cell')
+    op.rename_table('grade_cells', 'grade_cell')
+
 
 def downgrade():
     pass
