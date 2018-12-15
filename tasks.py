@@ -1,10 +1,12 @@
 import os
-import re
-
 from invoke import task, collection
-from textwrap import dedent
-
 import sys
+
+try:
+    from nbformat import read
+except ImportError:
+    echo("Warning: nbformat could not be imported, some tasks may not work")
+
 if sys.platform == 'win32':
     WINDOWS = True
 else:
@@ -20,8 +22,10 @@ def run(ctx, *args, **kwargs):
         kwargs['echo'] = True
     return ctx.run(*args, **kwargs)
 
+
 def echo(msg):
     print("\033[1;37m{0}\033[0m".format(msg))
+
 
 def _check_if_directory_in_path(pth, target):
     while pth != '':
@@ -29,13 +33,6 @@ def _check_if_directory_in_path(pth, target):
         if dirname == target:
             return True
     return False
-
-
-try:
-    from nbformat import read
-except ImportError:
-    echo("Warning: nbformat could not be imported, some tasks may not work")
-
 
 @task
 def docs(ctx):
@@ -53,32 +50,7 @@ def cleandocs(ctx):
 
 
 def _run_tests(ctx, mark=None, skip=None, junitxml=None):
-    if not WINDOWS:
-        import distutils.sysconfig
-        site = distutils.sysconfig.get_python_lib()
-        sitecustomize_path = os.path.join(site, "sitecustomize.py")
-        if os.path.exists(sitecustomize_path):
-            with open(sitecustomize_path, "r") as fh:
-                sitecustomize = fh.read()
-            with open(sitecustomize_path, "w") as fh:
-                fh.write(re.sub(
-                    "^### begin nbgrader changes$.*^### end nbgrader changes$[\n]",
-                    "",
-                    sitecustomize,
-                    flags=re.MULTILINE | re.DOTALL))
-
-        with open(sitecustomize_path, "a") as fh:
-            fh.write(dedent(
-                """
-                ### begin nbgrader changes
-                import coverage; coverage.process_startup()
-                ### end nbgrader changes
-                """
-            ).lstrip())
-
     cmd = []
-    if not WINDOWS:
-        cmd.append('COVERAGE_PROCESS_START={}'.format(os.path.join(os.getcwd(), ".coveragerc")))
     cmd.append('py.test')
     if not WINDOWS:
         cmd.append('--cov nbgrader')
