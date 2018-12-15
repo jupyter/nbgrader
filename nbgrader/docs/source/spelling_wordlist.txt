@@ -211,6 +211,7 @@ subclasses
 subcommand
 subcommands
 subpackage
+subdirectory
 suchow
 suprocesses
 svurens
@@ -237,6 +238,7 @@ url
 username
 usernames
 utcnow
+validator
 ve
 vinaykola
 webapp
