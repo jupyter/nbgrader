@@ -46,7 +46,6 @@ help:
 	@echo "  linkcheck  to check all external links for integrity"
 	@echo "  doctest    to run all doctests embedded in the documentation (if enabled)"
 	@echo "  coverage   to run coverage check of the documentation (if enabled)"
-	@echo "  spelling   to run the spell checker"
 
 clean:
 	rm -rf $(BUILDDIR)/*
@@ -163,11 +162,6 @@ linkcheck:
 	@echo "Link check complete; look for any errors in the above output " \
 	      "or in $(BUILDDIR)/linkcheck/output.txt."
 
-spelling:
-	$(SPHINXBUILD) -b spelling $(ALLSPHINXOPTS) $(BUILDDIR)/spelling
-	@echo
-	@echo "Spell check complete; look for any errors in the above output " \
-	      "or in $(BUILDDIR)/spelling/output.txt."
 doctest:
 	$(SPHINXBUILD) -b doctest $(ALLSPHINXOPTS) $(BUILDDIR)/doctest
 	@echo "Testing of doctests in the sources finished, look at the " \
