@@ -19,14 +19,13 @@ addons:
   firefox: latest
 before_install:
   - pip install -U pip wheel setuptools
-  - pip install invoke
 install:
   - wget https://github.com/mozilla/geckodriver/releases/download/v0.23.0/geckodriver-v0.23.0-linux64.tar.gz
   - mkdir geckodriver
   - tar -xzf geckodriver-v0.23.0-linux64.tar.gz -C geckodriver
   - export PATH=$PATH:$PWD/geckodriver
-  - invoke install --group="$GROUP"
+  - python tasks.py install --group="$GROUP"
 script:
-  - invoke tests --group="$GROUP"
+  - python tasks.py tests --group="$GROUP"
 after_success:
-  - invoke aftersuccess --group="$GROUP"
+  - python tasks.py aftersuccess --group="$GROUP"

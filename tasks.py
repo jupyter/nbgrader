@@ -1,30 +1,24 @@
+#!/usr/bin/env python
+
 import os
-from invoke import task, collection
 import sys
+import subprocess as sp
+import argparse
+
+def echo(msg):
+    print("\033[1;37m{0}\033[0m".format(msg))
+
+
+def run(cmd):
+    echo(cmd)
+    return sp.call(cmd, shell=True)
 
 try:
     from nbformat import read
 except ImportError:
     echo("Warning: nbformat could not be imported, some tasks may not work")
 
-if sys.platform == 'win32':
-    WINDOWS = True
-else:
-    WINDOWS = False
-
-
-def run(ctx, *args, **kwargs):
-    if 'pty' not in kwargs:
-        kwargs['pty'] = True
-    if WINDOWS:
-        kwargs['pty'] = False
-    if 'echo' not in kwargs:
-        kwargs['echo'] = True
-    return ctx.run(*args, **kwargs)
-
-
-def echo(msg):
-    print("\033[1;37m{0}\033[0m".format(msg))
+WINDOWS = sys.platform == 'win32'
 
 
 def _check_if_directory_in_path(pth, target):
@@ -34,22 +28,23 @@ def _check_if_directory_in_path(pth, target):
             return True
     return False
 
-@task
-def docs(ctx):
+
+def docs(args):
+    del args  # unused
     if not WINDOWS:
-        run(ctx, 'py.test --nbval-lax --current-env nbgrader/docs/source/user_guide/*.ipynb')
-    run(ctx, 'python nbgrader/docs/source/build_docs.py')
-    run(ctx, 'python nbgrader/docs/source/clear_docs.py')
-    run(ctx, 'make -C nbgrader/docs html')
-    run(ctx, 'make -C nbgrader/docs linkcheck')
+        run('py.test --nbval-lax --current-env nbgrader/docs/source/user_guide/*.ipynb')
+    run('python nbgrader/docs/source/build_docs.py')
+    run('python nbgrader/docs/source/clear_docs.py')
+    run('make -C nbgrader/docs html')
+    run('make -C nbgrader/docs linkcheck')
 
 
-@task
-def cleandocs(ctx):
-    run(ctx, 'python nbgrader/docs/source/clear_docs.py')
+def cleandocs(args):
+    del args  # unused
+    run('python nbgrader/docs/source/clear_docs.py')
 
 
-def _run_tests(ctx, mark=None, skip=None, junitxml=None):
+def _run_tests(mark, skip, junitxml):
     cmd = []
     cmd.append('py.test')
     if not WINDOWS:
@@ -69,72 +64,90 @@ def _run_tests(ctx, mark=None, skip=None, junitxml=None):
     if len(marks) > 0:
         cmd.append('-m "{}"'.format(" and ".join(marks)))
 
-    run(ctx, " ".join(cmd))
+    run(" ".join(cmd))
 
     if not WINDOWS:
-        run(ctx, "ls -a .coverage*")
-        run(ctx, "coverage combine || true")
+        run("ls -a .coverage*")
+        run("coverage combine || true")
 
 
-@task
-def tests(ctx, group='all', skip=None, junitxml=None):
-    if group == 'python':
-        _run_tests(ctx, mark="not nbextensions", skip=skip, junitxml=junitxml)
+def tests(args):
+    if args.group == 'python':
+        _run_tests(
+            mark="not nbextensions", skip=args.skip, junitxml=args.junitxml)
 
-    elif group == 'nbextensions':
-        _run_tests(ctx, mark="nbextensions", skip=skip, junitxml=junitxml)
+    elif args.group == 'nbextensions':
+        _run_tests(mark="nbextensions", skip=args.skip, junitxml=args.junitxml)
 
-    elif group == 'docs':
-        docs(ctx)
+    elif args.group == 'docs':
+        docs(args)
 
-    elif group == 'all':
-        _run_tests(ctx, skip=skip, junitxml=junitxml)
+    elif args.group == 'all':
+        _run_tests(mark=None, skip=args.skip, junitxml=args.junitxml)
 
     else:
-        raise ValueError("Invalid test group: {}".format(group))
+        raise ValueError("Invalid test group: {}".format(args.group))
 
 
-@task
-def aftersuccess(ctx, group):
-    if group in ('python', 'nbextensions'):
-        run(ctx, 'codecov')
+def aftersuccess(args):
+    if args.group in ('python', 'nbextensions'):
+        run('codecov')
     else:
         echo('Nothing to do.')
 
 
-@task
-def js(ctx, clean=True):
-    run(ctx, 'npm install')
-    run(ctx, './node_modules/.bin/bower install --config.interactive=false')
-    if clean:
-        run(ctx, 'git clean -fdX nbgrader/server_extensions/formgrader/static/components')
+def js(args):
+    run('npm install')
+    run('./node_modules/.bin/bower install --config.interactive=false')
+    if args.clean:
+        run('git clean -fdX nbgrader/server_extensions/formgrader/static/components')
 
 
-@task
-def install(ctx, group):
+def install(args):
     # The docs don't seem to build correctly if it's a symlinked install.
-    if group == 'docs':
+    if args.group == 'docs':
         cmd = 'pip install -r dev-requirements.txt .'
     else:
         cmd = 'pip install -r dev-requirements.txt -e .'
 
     # clone travis wheels repo to make installing requirements easier
-    run(ctx, 'git clone --quiet --depth 1 https://github.com/minrk/travis-wheels ~/travis-wheels')
-    run(ctx, 'PIP_FIND_LINKS=~/travis-wheels/wheelhouse {}'.format(cmd))
+    run('git clone --quiet --depth 1 https://github.com/minrk/travis-wheels ~/travis-wheels')
+    run('PIP_FIND_LINKS=~/travis-wheels/wheelhouse {}'.format(cmd))
 
 
-ns = collection.Collection(
-    aftersuccess,
-    cleandocs,
-    docs,
-    install,
-    js,
-    tests,
-)
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    subparsers = parser.add_subparsers()
 
-if WINDOWS:
-    ns.configure({
-        'run': {
-            'shell': os.environ.get('COMSPEC', os.environ.get('SHELL')),
-        }
-    })
+    # docs
+    docs_parser = subparsers.add_parser('docs')
+    docs_parser.set_defaults(func=docs)
+
+    # cleandocs
+    cleandocs_parser = subparsers.add_parser('cleandocs')
+    cleandocs_parser.set_defaults(func=cleandocs)
+
+    # tests
+    tests_parser = subparsers.add_parser('tests')
+    tests_parser.add_argument('--group', type=str, default='all')
+    tests_parser.add_argument('--skip', type=str, default=None)
+    tests_parser.add_argument('--junitxml', type=str, default=None)
+    tests_parser.set_defaults(func=tests)
+
+    # aftersuccess
+    aftersuccess_parser = subparsers.add_parser('aftersuccess')
+    aftersuccess_parser.add_argument('--group', type=str, required=True)
+    aftersuccess_parser.set_defaults(func=aftersuccess)
+
+    # js
+    js_parser = subparsers.add_parser('js')
+    js_parser.add_argument('--clean', type=bool, default=True)
+    js_parser.set_defaults(func=js)
+
+    # install
+    install_parser = subparsers.add_parser('install')
+    install_parser.add_argument('--group', type=str, required=True)
+    install_parser.set_defaults(func=install)
+
+    args = parser.parse_args()
+    args.func(args)

@@ -13,29 +13,28 @@ Running the full test suite
 To run the full test suite, run the following command from the root of the
 repository::
 
-    invoke tests
+    python tasks.py tests
 
 Running selective groups of tests
 ---------------------------------
-To run a selective group of tests you can use one of the following invoke
-commands:
+To run a selective group of tests you can use one of the following commands:
 
-+---------------------------------------+------------------------------------+
-|  Command                              | Task                               |
-+=======================================+====================================+
-| ``invoke tests --group=python``       | Run tests only for the Python code |
-+---------------------------------------+------------------------------------+
-| ``invoke tests --group=nbextensions`` | Run tests only for the notebook    |
-|                                       | extensions                         |
-+---------------------------------------+------------------------------------+
-| ``invoke tests --group=docs``         | Build the docs                     |
-+---------------------------------------+------------------------------------+
-| ``invoke tests --group=all``          | Same as ``invoke tests``           |
-+---------------------------------------+------------------------------------+
++------------------------------------------------+------------------------------------+
+|  Command                                       | Task                               |
++================================================+====================================+
+| ``python tasks.py tests --group=python``       | Run tests only for the Python code |
++------------------------------------------------+------------------------------------+
+| ``python tasks.py tests --group=nbextensions`` | Run tests only for the notebook    |
+|                                                | extensions                         |
++------------------------------------------------+------------------------------------+
+| ``python tasks.py tests --group=docs``         | Build the docs                     |
++------------------------------------------------+------------------------------------+
+| ``python tasks.py tests --group=all``          | Same as ``python tasks.py tests``  |
++------------------------------------------------+------------------------------------+
 
 Using py.test to run a single test module
 -----------------------------------------
-If you want to choose an even more specific subset of tests, you should invoke
+If you want to choose an even more specific subset of tests, you should run
 ``py.test`` directly. For example, to run only the tests for
 ``nbgrader assign``::
 

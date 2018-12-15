@@ -39,7 +39,7 @@ Our docs are built with `nbconvert <https://nbconvert.readthedocs.io/en/latest/>
 `Pandoc <http://pandoc.org/>`_, and `Sphinx <http://www.sphinx-doc.org/en/master/>`_.
 To build the docs locally, run the following command::
 
-    invoke docs
+    python tasks.py docs
 
 This will perform a few different steps:
 
@@ -50,7 +50,7 @@ This will perform a few different steps:
    ``autogen_command_line.py`` and ``autogen_config.py`` scripts.
 3. The rst files are converted to html using Sphinx.
 
-After running ``invoke docs``, the resultant HTML files will be in
+After running ``python tasks.py docs``, the resultant HTML files will be in
 ``docs/build/html``. You can open these files in your browser to preview what
 the documentation will look like (note, however, that the theme used by Read
 The Docs is different from the default Sphinx theme, so the styling will look
