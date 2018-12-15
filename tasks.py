@@ -109,10 +109,7 @@ def install(args):
         cmd = 'pip install -r dev-requirements.txt .'
     else:
         cmd = 'pip install -r dev-requirements.txt -e .'
-
-    # clone travis wheels repo to make installing requirements easier
-    run('git clone --quiet --depth 1 https://github.com/minrk/travis-wheels ~/travis-wheels')
-    run('PIP_FIND_LINKS=~/travis-wheels/wheelhouse {}'.format(cmd))
+    run(cmd)
 
 
 if __name__ == '__main__':
