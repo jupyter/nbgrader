@@ -32,7 +32,7 @@ def _check_if_directory_in_path(pth, target):
 def docs(args):
     del args  # unused
     if not WINDOWS:
-        run('py.test --nbval-lax --current-env nbgrader/docs/source/user_guide/*.ipynb')
+        run('pytest --nbval-lax --current-env nbgrader/docs/source/user_guide/*.ipynb')
     run('python nbgrader/docs/source/build_docs.py')
     run('python nbgrader/docs/source/clear_docs.py')
     run('make -C nbgrader/docs html')
@@ -46,7 +46,7 @@ def cleandocs(args):
 
 def _run_tests(mark, skip, junitxml):
     cmd = []
-    cmd.append('py.test')
+    cmd.append('pytest')
     if not WINDOWS:
         cmd.append('--cov nbgrader')
         cmd.append('--no-cov-on-fail')

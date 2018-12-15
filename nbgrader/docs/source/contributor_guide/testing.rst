@@ -32,10 +32,10 @@ To run a selective group of tests you can use one of the following commands:
 | ``python tasks.py tests --group=all``          | Same as ``python tasks.py tests``  |
 +------------------------------------------------+------------------------------------+
 
-Using py.test to run a single test module
+Using pytest to run a single test module
 -----------------------------------------
 If you want to choose an even more specific subset of tests, you should run
-``py.test`` directly. For example, to run only the tests for
+``pytest`` directly. For example, to run only the tests for
 ``nbgrader assign``::
 
-    py.test nbgrader/tests/apps/test_nbgrader_assign.py
+    pytest nbgrader/tests/apps/test_nbgrader_assign.py
