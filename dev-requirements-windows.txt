@@ -1,4 +1,4 @@
-pytest
+pytest>=4.0
 pytest-cov
 pytest-rerunfailures
 coverage
@@ -6,4 +6,3 @@ selenium
 invoke
 sphinx
 codecov
-cov-core
