@@ -146,6 +146,8 @@ def test_create_solution_cell(db):
     assert s.comments == []
     assert n.solution_cells == [s]
 
+    assert repr(s) == "SolutionCell<foo/blah/foo>"
+
 
 def test_create_source_cell(db):
     now = datetime.datetime.utcnow()
@@ -167,7 +169,7 @@ def test_create_source_cell(db):
     assert s.notebook == n
     assert n.source_cells == [s]
 
-    assert repr(s) == "SolutionCell<foo/blah/foo>"
+    assert repr(s) == "SourceCell<foo/blah/foo>"
 
 
 def test_create_student(db):
