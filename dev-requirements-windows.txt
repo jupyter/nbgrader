@@ -6,3 +6,4 @@ selenium==3.6.0
 invoke
 sphinx
 codecov
+cov-core
