@@ -46,8 +46,8 @@ install:
 build: off
 
 test_script:
-  - cmd: invoke tests --group=python
-  - cmd: invoke tests --group=nbextensions
+  - cmd: python tasks.py tests --group=python
+  - cmd: python tasks.py tests --group=nbextensions
 
 artifacts:
   - path: dist\*
