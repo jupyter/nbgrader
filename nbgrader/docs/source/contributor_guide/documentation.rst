@@ -30,11 +30,6 @@ the rst version of it to ``.gitignore``.
 Building documentation locally
 ------------------------------
 
-.. warning::
-
-  Building the docs is not currently well-supported on Windows. This is because one of
-  the dependencies (enchant) does not install easily in Windows.
-
 If you have made changes to the user guide or other notebooks that need to be
 executed, please make sure you re-run all the documentation before committing.
 While the documentation gets built automatically on Read The Docs, the notebooks do **not** get execute by Read The Docs -- they must be executed manually.

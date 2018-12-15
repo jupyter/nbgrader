@@ -45,7 +45,6 @@ def docs(ctx):
     run(ctx, 'python nbgrader/docs/source/clear_docs.py')
     run(ctx, 'make -C nbgrader/docs html')
     run(ctx, 'make -C nbgrader/docs linkcheck')
-    run(ctx, 'make -C nbgrader/docs spelling')
 
 
 @task

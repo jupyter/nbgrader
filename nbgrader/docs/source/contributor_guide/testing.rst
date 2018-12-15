@@ -28,7 +28,7 @@ commands:
 | ``invoke tests --group=nbextensions`` | Run tests only for the notebook    |
 |                                       | extensions                         |
 +---------------------------------------+------------------------------------+
-| ``invoke tests --group=docs``         | Build the docs and check spelling  |
+| ``invoke tests --group=docs``         | Build the docs                     |
 +---------------------------------------+------------------------------------+
 | ``invoke tests --group=all``          | Same as ``invoke tests``           |
 +---------------------------------------+------------------------------------+

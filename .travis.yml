@@ -16,7 +16,6 @@ addons:
   apt:
     packages:
     - pandoc
-    - enchant
   firefox: latest
 before_install:
   - pip install -U pip wheel setuptools
