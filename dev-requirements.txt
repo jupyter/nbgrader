@@ -1,5 +1,9 @@
--r dev-requirements-windows.txt
-pyenchant
-sphinxcontrib-spelling
+pytest>=4.0
+pytest-cov
+pytest-rerunfailures
+coverage
+selenium
+sphinx
 sphinx_rtd_theme
+codecov
 nbval

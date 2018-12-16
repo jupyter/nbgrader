@@ -356,7 +356,8 @@ class TaskCell(BaseCell, GradedMixin, CommentedMixin):
         }
 
     def __repr__(self):
-        return "{}/{}".format(self.notebook, self.name)
+        return "SolutionCell<{}/{}/{}>".format(
+            self.assignment.name, self.notebook.name, self.name)
 
     __mapper_args__ = {'polymorphic_identity': 'TaskCell'}
 
@@ -415,7 +416,7 @@ class SourceCell(Base):
         }
 
     def __repr__(self):
-        return "SolutionCell<{}/{}/{}>".format(
+        return "SourceCell<{}/{}/{}>".format(
             self.assignment.name, self.notebook.name, self.name)
 
 

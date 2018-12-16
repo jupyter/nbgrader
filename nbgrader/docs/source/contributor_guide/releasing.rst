@@ -48,7 +48,7 @@ Rebuild the documentation
 
 Regenerate all the documentation for this release by running::
 
-    invoke docs
+    python tasks.py docs
 
 Make sure the linkcheck and spellcheck pass, and commit the results.
 

@@ -34,7 +34,7 @@ install:
   - cmd: python -c "import struct; print(struct.calcsize('P') * 8)"
 
   - cmd: pip install -U wheel
-  - cmd: pip install -r dev-requirements-windows.txt .
+  - cmd: pip install -r dev-requirements.txt .
 
   # Install and early check enable extensions before the actual tests
   - cmd: python setup.py install
@@ -46,8 +46,8 @@ install:
 build: off
 
 test_script:
-  - cmd: invoke tests --group=python
-  - cmd: invoke tests --group=nbextensions
+  - cmd: python tasks.py tests --group=python
+  - cmd: python tasks.py tests --group=nbextensions
 
 artifacts:
   - path: dist\*
