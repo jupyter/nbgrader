@@ -114,6 +114,7 @@ I’m
 I’ve
 jcsutherland
 jdfreder
+jedbrown
 jhamrick
 jilljenn
 jklymak
@@ -205,9 +206,11 @@ student’s
 subclasses
 subcommand
 subcommands
+subdirectory
 suchow
 suprocesses
 svurens
+swarnava
 sys
 systemwide
 Szepi
@@ -230,6 +233,7 @@ url
 username
 usernames
 utcnow
+validator
 ve
 vinaykola
 webapp

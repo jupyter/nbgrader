@@ -33,7 +33,7 @@ install:
   - cmd: python --version
   - cmd: python -c "import struct; print(struct.calcsize('P') * 8)"
 
-  - cmd: pip install -U pip wheel
+  - cmd: pip install -U wheel
   - cmd: pip install -r dev-requirements-windows.txt .
 
   # Install and early check enable extensions before the actual tests
