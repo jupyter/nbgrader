@@ -430,7 +430,7 @@ define([
                     set_solution(cell, false);
                     set_grade(cell, false);
                     set_locked(cell, true);
-                    set_task(cell,true);
+                    set_task(cell, true);
                     if (cell.get_text() === ''){
                       cell.set_text('Describe the task here!')
                     }
@@ -439,26 +439,26 @@ define([
                     set_solution(cell, true);
                     set_grade(cell, false);
                     set_locked(cell, false);
-                    set_task(cell,false);
+                    set_task(cell, false);
                 } else if (val === "tests") {
                     set_schema_version(cell);
                     set_solution(cell, false);
                     set_grade(cell, true);
                     set_locked(cell, true);
-                    set_task(cell,false);
+                    set_task(cell, false);
                 } else if (val === "readonly") {
                     set_schema_version(cell);
                     set_solution(cell, false);
                     set_grade(cell, false);
                     set_locked(cell, true);
-                    set_task(cell,false);
+                    set_task(cell, false);
                 } else {
                     throw new Error("invalid nbgrader cell type: " + val);
                 }
             };
 
             var getter = function (cell) {
-                if (is_task(cell) ) {
+                if (is_task(cell)) {
                     return "task";
                 } else if (is_solution(cell) && is_grade(cell)) {
                     return "manual";
