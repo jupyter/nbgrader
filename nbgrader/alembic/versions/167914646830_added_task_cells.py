@@ -1,7 +1,7 @@
 """added task cells
 
 Revision ID: 167914646830
-Revises: 724cde206c17
+Revises: 50a4d84c131a
 Create Date: 2018-06-23 07:46:30.221922
 
 """
@@ -11,7 +11,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = '167914646830'
-down_revision = '724cde206c17'
+down_revision = '50a4d84c131a'
 branch_labels = None
 depends_on = None
 
