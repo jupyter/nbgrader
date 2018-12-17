@@ -125,6 +125,8 @@ span.nbgrader-label {
             <li><a href="#{{ cell.metadata.nbgrader.grade_id }}">Coding free-response</a> (Score: {{ cell.metadata.nbgrader.score | float | round(2) }} / {{ cell.metadata.nbgrader.points | float | round(2) }})</li>
             {% elif cell.cell_type == "markdown" and cell.metadata.nbgrader and cell.metadata.nbgrader.grade %}
             <li><a href="#{{ cell.metadata.nbgrader.grade_id }}">Written response</a> (Score: {{ cell.metadata.nbgrader.score | float | round(2) }} / {{ cell.metadata.nbgrader.points | float | round(2) }})</li>
+            {% elif cell.cell_type == "markdown" and cell.metadata.nbgrader and cell.metadata.nbgrader.task %}
+            <li><a href="#{{ cell.metadata.nbgrader.grade_id }}">Task</a> (Score: {{ cell.metadata.nbgrader.score | float | round(2) }} / {{ cell.metadata.nbgrader.points | float | round(2) }})</li>
             {% endif %}
             {% if cell.metadata.nbgrader and cell.metadata.nbgrader.comment and cell.metadata.nbgrader.comment %}
             <li><a href="#comment-{{ cell.metadata.nbgrader.grade_id }}">Comment</a></li>
@@ -160,7 +162,7 @@ span.nbgrader-label {
 
 
 {% macro nbgrader_heading(cell) -%}
-{%- if cell.metadata.nbgrader.solution -%}
+{%- if cell.metadata.nbgrader.solution or cell.metadata.nbgrader.task -%}
 <a name="comment-{{ cell.metadata.nbgrader.grade_id }}"></a>
 {%- endif -%}
 {%- if cell.metadata.nbgrader.grade -%}
@@ -169,20 +171,26 @@ span.nbgrader-label {
 <div class="panel-heading">
 {%- if cell.metadata.nbgrader.solution -%}
   <span class="nbgrader-label">Student's answer</span>
-  {%- if cell.metadata.nbgrader.grade -%}
+  {%- if cell.metadata.nbgrader.grade  -%}
   {{ score(cell) }}
   {%- else -%}
   <span class="pull-right"><a href="#top">(Top)</a></span>
   {%- endif -%}
+{%- elif cell.metadata.nbgrader.task -%}
+  <span class="nbgrader-label">Student's task</span>
+  {{ score(cell) }}
 {%- elif cell.metadata.nbgrader.grade -%}
   <span class="nbgrader-label">Grade cell: <code>{{ cell.metadata.nbgrader.grade_id }}</code></span>
+  {{ score(cell) }}
+{%- elif cell.metadata.nbgrader.task -%}
+  <span class="nbgrader-label">Task: <code>{{ cell.metadata.nbgrader.grade_id }}</code></span>
   {{ score(cell) }}
 {%- endif -%}
 </div>
 {%- endmacro %}
 
 {% macro nbgrader_footer(cell) -%}
-{%- if cell.metadata.nbgrader.solution and cell.metadata.nbgrader.comment -%}
+{%- if (cell.metadata.nbgrader.solution and cell.metadata.nbgrader.comment) or (cell.metadata.nbgrader.task and cell.metadata.nbgrader.comment) -%}
 <div class="panel-footer">
   <div>
     <b>Comments:</b> {{ cell.metadata.nbgrader.comment | markdown2html | strip_files_prefix }}
@@ -195,7 +203,7 @@ span.nbgrader-label {
 <div class="cell border-box-sizing text_cell rendered">
   {{ self.empty_in_prompt() }}
 
-  {%- if 'nbgrader' in cell.metadata and (cell.metadata.nbgrader.solution or cell.metadata.nbgrader.grade) -%}
+  {%- if 'nbgrader' in cell.metadata and (cell.metadata.nbgrader.solution or cell.metadata.nbgrader.grade or cell.metadata.nbgrader.task) -%}
   <div class="panel panel-primary nbgrader_cell">
     {{ nbgrader_heading(cell) }}
     <div class="panel-body">

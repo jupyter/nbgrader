@@ -4,6 +4,7 @@ from .. import utils
 from ..api import Gradebook, MissingEntry
 from . import NbGraderPreprocessor
 
+
 class SaveCells(NbGraderPreprocessor):
     """A preprocessor to save information about grade and solution cells."""
 
@@ -18,6 +19,7 @@ class SaveCells(NbGraderPreprocessor):
             # pull out existing cell ids
             self.old_grade_cells = set(x.name for x in notebook.grade_cells)
             self.old_solution_cells = set(x.name for x in notebook.solution_cells)
+            self.old_task_cells = set(x.name for x in notebook.task_cells)
             self.old_source_cells = set(x.name for x in notebook.source_cells)
 
             # throw an error if we're trying to modify a notebook that has
@@ -25,6 +27,7 @@ class SaveCells(NbGraderPreprocessor):
             if len(notebook.submissions) > 0:
                 changed = set(self.new_grade_cells.keys()) != self.old_grade_cells
                 changed = changed | (set(self.new_solution_cells.keys()) != self.old_solution_cells)
+                changed = changed | (set(self.new_task_cells.keys()) != self.old_task_cells)
                 changed = changed | (set(self.new_source_cells.keys()) != self.old_source_cells)
                 if changed:
                     raise RuntimeError(
@@ -56,6 +59,11 @@ class SaveCells(NbGraderPreprocessor):
             solution_cell = self.gradebook.update_or_create_solution_cell(name, self.notebook_id, self.assignment_id, **info)
             self.log.debug("Recorded solution cell %s into the gradebook", solution_cell)
 
+        # save task cells
+        for name, info in self.new_task_cells.items():
+            task_cell = self.gradebook.update_or_create_task_cell(name, self.notebook_id, self.assignment_id, **info)
+            self.log.debug("Recorded task cell %s into the gradebook from info %s", task_cell, info)
+
         # save source cells
         for name, info in self.new_source_cells.items():
             source_cell = self.gradebook.update_or_create_source_cell(name, self.notebook_id, self.assignment_id, **info)
@@ -75,6 +83,7 @@ class SaveCells(NbGraderPreprocessor):
         # create a place to put new cell information
         self.new_grade_cells = {}
         self.new_solution_cells = {}
+        self.new_task_cells = {}
         self.new_source_cells = {}
 
         # connect to the database
@@ -119,6 +128,23 @@ class SaveCells(NbGraderPreprocessor):
 
         self.new_solution_cells[grade_id] = solution_cell
 
+    def _create_task_cell(self, cell):
+        grade_id = cell.metadata.nbgrader['grade_id']
+        try:
+            task_cell = self.gradebook.find_task_cell(grade_id, self.notebook_id, self.assignment_id).to_dict()
+            del task_cell['name']
+            del task_cell['notebook']
+            del task_cell['assignment']
+        except MissingEntry:
+            task_cell = {}
+
+        task_cell.update({
+            'max_score': float(cell.metadata.nbgrader['points']),
+            'cell_type': cell.cell_type
+        })
+
+        self.new_task_cells[grade_id] = task_cell
+
     def _create_source_cell(self, cell):
         grade_id = cell.metadata.nbgrader['grade_id']
 
@@ -140,13 +166,17 @@ class SaveCells(NbGraderPreprocessor):
         self.new_source_cells[grade_id] = source_cell
 
     def preprocess_cell(self, cell, resources, cell_index):
+
         if utils.is_grade(cell):
             self._create_grade_cell(cell)
 
         if utils.is_solution(cell):
             self._create_solution_cell(cell)
 
-        if utils.is_grade(cell) or utils.is_solution(cell) or utils.is_locked(cell):
+        if utils.is_task(cell):
+            self._create_task_cell(cell)
+
+        if utils.is_grade(cell) or utils.is_solution(cell) or utils.is_locked(cell) or utils.is_task(cell):
             self._create_source_cell(cell)
 
         return cell, resources

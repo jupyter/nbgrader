@@ -15,7 +15,7 @@ class TestNbGraderQuickStart(BaseTestApp):
         """Is the help displayed when no course id is given?"""
         run_nbgrader(["quickstart"], retcode=1)
 
-    def test_quickstart(self):
+    def test_quickstart(self, fake_home_dir):
         """Is the quickstart example properly generated?"""
 
         run_nbgrader(["quickstart", "example"])
@@ -117,5 +117,3 @@ class TestNbGraderQuickStart(BaseTestApp):
 
         # nbgrader assign should work
         run_nbgrader(["assign", "ps1"])
-
-

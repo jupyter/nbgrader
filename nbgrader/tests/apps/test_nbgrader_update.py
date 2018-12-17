@@ -34,6 +34,11 @@ class TestNbGraderUpdate(BaseTestApp):
         self._copy_file(join("files", "test-v1.ipynb"), "p1.ipynb")
         run_nbgrader(["update", "p1.ipynb"])
 
+    def test_single_notebook_v2(self):
+        """Does it work with just a single notebook?"""
+        self._copy_file(join("files", "test-v2.ipynb"), "p2.ipynb")
+        run_nbgrader(["update", "p2.ipynb"])
+
     def test_validate(self):
         """Does turning validation on/off work correctly?"""
 
@@ -95,4 +100,3 @@ class TestNbGraderUpdate(BaseTestApp):
 
         # now autograde should suceed
         run_nbgrader(["autograde", "ps1", "--db", db])
-

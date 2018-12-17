@@ -6,8 +6,8 @@
         "schema_version": {
             "description": "the version of the cell metadata schema",
             "type": "integer",
-            "minimum": 1,
-            "maximum": 1
+            "minimum": 3,
+            "maximum": 3
         },
         "grade": {
             "description": "whether this cell should be graded",
@@ -21,6 +21,11 @@
         },
         "solution": {
             "description": "whether this cell contains a solution",
+            "type": "boolean",
+            "default": false
+        },
+        "task": {
+            "description": "whether this cell contains a task",
             "type": "boolean",
             "default": false
         },
@@ -39,6 +44,11 @@
             "type": "string",
             "minLength": 32,
             "maxLength": 32
+        },
+        "cell_type": {
+            "description": "the type the cell was when nbgrader assign was run; used for checking if the cell type has changed and should only be present in the student version of an assignment",
+            "type": "string",
+            "enum": ["raw", "code", "markdown"]
         }
     },
     "required": ["schema_version", "grade", "locked", "solution"],

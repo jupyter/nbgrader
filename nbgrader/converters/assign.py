@@ -15,6 +15,7 @@ from ..preprocessors import (
     CheckCellMetadata,
     ClearOutput,
     ClearHiddenTests,
+    ClearMarkScheme,
 )
 
 
@@ -60,6 +61,7 @@ class Assign(BaseConverter):
         ComputeChecksums,
         SaveCells,
         ClearHiddenTests,
+        ClearMarkScheme,
         ComputeChecksums,
         CheckCellMetadata,
     ])

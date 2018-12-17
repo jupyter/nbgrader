@@ -310,6 +310,7 @@ class NbGraderAPI(LoggingConfigurable):
                 assignment["average_score"] = gb.average_assignment_score(assignment_id)
                 assignment["average_code_score"] = gb.average_assignment_code_score(assignment_id)
                 assignment["average_written_score"] = gb.average_assignment_written_score(assignment_id)
+                assignment["average_task_score"] = gb.average_assignment_task_score(assignment_id)
 
         except MissingEntry:
             assignment = {
@@ -322,9 +323,11 @@ class NbGraderAPI(LoggingConfigurable):
                 "average_score": 0,
                 "average_code_score": 0,
                 "average_written_score": 0,
+                "average_task_score": 0,
                 "max_score": 0,
                 "max_code_score": 0,
-                "max_written_score": 0
+                "max_written_score": 0,
+                "max_task_score": 0
             }
 
         # get released status
@@ -402,6 +405,7 @@ class NbGraderAPI(LoggingConfigurable):
                     x["average_score"] = gb.average_notebook_score(notebook.name, assignment.name)
                     x["average_code_score"] = gb.average_notebook_code_score(notebook.name, assignment.name)
                     x["average_written_score"] = gb.average_notebook_written_score(notebook.name, assignment.name)
+                    x["average_task_score"] = gb.average_notebook_task_score(notebook.name, assignment.name)
                     notebooks.append(x)
 
             # if it doesn't exist in the database
@@ -427,9 +431,11 @@ class NbGraderAPI(LoggingConfigurable):
                         "average_score": 0,
                         "average_code_score": 0,
                         "average_written_score": 0,
+                        "average_task_score": 0,
                         "max_score": 0,
                         "max_code_score": 0,
                         "max_written_score": 0,
+                        "max_task_score": 0,
                         "needs_manual_grade": False,
                         "num_submissions": 0
                     })
@@ -484,6 +490,8 @@ class NbGraderAPI(LoggingConfigurable):
                 "max_code_score": 0.0,
                 "written_score": 0.0,
                 "max_written_score": 0.0,
+                "task_score": 0.0,
+                "max_task_score": 0.0,
                 "needs_manual_grade": False,
                 "autograded": False,
                 "submitted": True,
@@ -526,6 +534,8 @@ class NbGraderAPI(LoggingConfigurable):
                 "max_code_score": 0.0,
                 "written_score": 0.0,
                 "max_written_score": 0.0,
+                "task_score": 0.0,
+                "max_task_score": 0.0,
                 "needs_manual_grade": False,
                 "autograded": False,
                 "submitted": False,
@@ -558,6 +568,7 @@ class NbGraderAPI(LoggingConfigurable):
         """
         with self.gradebook as gb:
             db_submissions = gb.submission_dicts(assignment_id)
+
         ungraded = self.get_submitted_students(assignment_id) - self.get_autograded_students(assignment_id)
         students = {x['id']: x for x in self.get_students()}
         submissions = []
@@ -823,6 +834,8 @@ class NbGraderAPI(LoggingConfigurable):
                         "max_code_score": notebook.max_code_score,
                         "written_score": 0,
                         "max_written_score": notebook.max_written_score,
+                        "task_score": 0,
+                        "max_task_score": notebook.max_task_score,
                         "needs_manual_grade": False,
                         "failed_tests": False,
                         "flagged": False

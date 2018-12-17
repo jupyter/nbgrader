@@ -101,3 +101,14 @@ gh_api.sqlite
 MANIFEST
 README
 .pytest_cache
+
+venv/
+
+gradebook.db
+.buildconfig
+*~
+.vscode/
+package-lock.json
+.goutputstream*
+
+
