@@ -11,7 +11,7 @@ def echo(msg):
 
 def run(cmd):
     echo(cmd)
-    return sp.call(cmd, shell=True)
+    return sp.check_call(cmd, shell=True)
 
 try:
     from nbformat import read
