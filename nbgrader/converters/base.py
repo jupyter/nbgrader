@@ -44,20 +44,9 @@ class BaseConverter(LoggingConfigurable):
         )
     ).tag(config=True)
 
-    groupshared = Bool(
-        False,
-        help=dedent(
-            """
-            Be less strict about user permissions (instructor files are by
-            default group writeable.  Requires that admins ensure that primary
-            groups are correct!
-            """
-        )
-    ).tag(config=True)
-
     @default("permissions")
     def _permissions_default(self):
-        return 664 if self.groupshared else 444
+        return 664 if self.coursedir.groupshared else 444
 
     coursedir = Instance(CourseDirectory, allow_none=True)
 
@@ -261,7 +250,7 @@ class BaseConverter(LoggingConfigurable):
             for filename in filenames:
                 os.chmod(os.path.join(dirname, filename), permissions)
             # If groupshared, set dir permissions - see comment below.
-            if self.groupshared and os.stat(dirname).st_uid == os.getuid():
+            if self.coursedir.groupshared and os.stat(dirname).st_uid == os.getuid():
                 #for subdirname in subdirnames:
                 #    subdirname = os.path.join(dirname, subdirname)
                 try:
@@ -273,7 +262,7 @@ class BaseConverter(LoggingConfigurable):
         # nbconvert.writer, (unless there are supplementary files) with a
         # default mode of 755 and there is no way to pass the mode arguments
         # all the way to there!  So we have to walk and fix.
-        if self.groupshared:
+        if self.coursedir.groupshared:
             # Root may be created in this step, and is not included above.
             rootdir = self.coursedir.format_path(self._output_directory, '.', '.')
             # Add 2770 to existing dir permissions (don't unconditionally override)

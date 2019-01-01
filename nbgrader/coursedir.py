@@ -4,7 +4,7 @@ import re
 from textwrap import dedent
 
 from traitlets.config import LoggingConfigurable
-from traitlets import Integer, Unicode, List, default, validate, TraitError
+from traitlets import Integer, Bool, Unicode, List, default, validate, TraitError
 
 from .utils import full_split, parse_utc
 
@@ -215,6 +215,17 @@ class CourseDirectory(LoggingConfigurable):
             The root directory for the course files (that includes the `source`,
             `release`, `submitted`, `autograded`, etc. directories). Defaults to
             the current working directory.
+            """
+        )
+    ).tag(config=True)
+
+    groupshared = Bool(
+        False,
+        help=dedent(
+            """
+            Be less strict about user permissions (instructor files are by
+            default group writeable.  Requires that admins ensure that primary
+            groups are correct!
             """
         )
     ).tag(config=True)

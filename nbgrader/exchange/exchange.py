@@ -68,17 +68,6 @@ class Exchange(LoggingConfigurable):
         )
     ).tag(config=True)
 
-    groupshared = Bool(
-        False,
-        help=dedent(
-            """
-            Be less strict about user permissions (instructor files are by
-            default group writeable.  Requires that admins ensure that primary
-            groups are correct!
-            """
-        )
-    ).tag(config=True)
-
     coursedir = Instance(CourseDirectory, allow_none=True)
     authenticator = Instance(Authenticator, allow_none=True)
 
@@ -139,7 +128,7 @@ class Exchange(LoggingConfigurable):
                                                log=self.log))
         # copytree copies access mode too - so we must add go+rw back to it if
         # we are in groupshared.
-        if self.groupshared:
+        if self.coursedir.groupshared:
             for dirname, _, filenames in os.walk(dest):
                 # dirs become ug+rwx
                 try:
@@ -157,7 +146,7 @@ class Exchange(LoggingConfigurable):
         if sys.platform == 'win32':
             self.fail("Sorry, the exchange is not available on Windows.")
 
-        if not self.groupshared:
+        if not self.coursedir.groupshared:
             # This just makes sure that directory is o+rwx.  In group shared
             # case, it is up to admins to ensure that instructors can write
             # there.
@@ -191,5 +180,5 @@ class Exchange(LoggingConfigurable):
             # so we have to create and then chmod.
             os.chmod(path, mode)
         else:
-            if not self.groupshared and not self_owned(path):
+            if not self.coursedir.groupshared and not self_owned(path):
                 self.fail("You don't own the directory: {}".format(path))
