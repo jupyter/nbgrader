@@ -17,7 +17,7 @@ depends_on = None
 
 
 def upgrade():
-    op.add_column('student', sa.Column('lms_user_id', sa.String(128), unique=True, nullable=True))
+    op.add_column('student', sa.Column('lms_user_id', sa.String(128), nullable=True))
 
 
 def downgrade():
