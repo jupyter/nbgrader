@@ -24,6 +24,8 @@ documented here for reference.
 
     .. autoattribute:: max_score
 
+    .. autoattribute:: lms_user_id
+
     .. autoattribute:: submissions
 
     .. automethod:: to_dict
