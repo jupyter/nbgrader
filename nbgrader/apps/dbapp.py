@@ -281,7 +281,7 @@ class DbStudentListApp(NbGrader):
         with Gradebook(self.coursedir.db_url) as gb:
             print("There are %d students in the database:" % len(gb.students))
             for student in gb.students:
-                print("%s (%s, %s) -- %s" % (student.id, student.last_name, student.first_name, student.email))
+                print("%s (%s, %s) -- %s, %s" % (student.id, student.last_name, student.first_name, student.email, student.lms_user_id))
 
 
 assignment_add_aliases = {}
