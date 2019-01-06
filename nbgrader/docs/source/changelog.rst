@@ -8,6 +8,26 @@ A summary of changes to nbgrader.
 0.5.x
 -----
 
+0.5.5
+~~~~~
+
+nbgrader version 0.5.5 is a release for the Journal of Open Source education,
+with the following PRs merged:
+
+- PR #1057: Ensure consistency in capitalizing Jupyter Notebook
+- PR #1049: Update test builds on Travis
+- PR #1047: JOSE paper bib updates
+- PR #1045: Dev requirements and spelling tests
+- PR #1016: Fix anaconda link
+- PR #973: Create a paper on nbgrader
+
+Thanks to the following users who submitted PRs or reported issues that were fixed for the 0.5.5 release:
+
+- jedbrown
+- jhamrick
+- swarnava
+- willingc
+
 0.5.4
 ~~~~~
 
