@@ -87,6 +87,11 @@ class Validator(LoggingConfigurable):
         help="Warning to display when a cell passes (when invert=True)"
     ).tag(config=True)
 
+    validate_all = Bool(
+        False,
+        help="Validate all cells, not just the graded tests cells."
+    ).tag(config=True)
+
     stream = sys.stdout
 
     def _indent(self, val):
@@ -225,8 +230,8 @@ class Validator(LoggingConfigurable):
     def _get_failed_cells(self, nb):
         failed = []
         for cell in nb.cells:
-            #if not (utils.is_grade(cell) or utils.is_locked(cell)):
-            #    continue
+            if not (self.validate_all or utils.is_grade(cell) or utils.is_locked(cell)):
+                continue
 
             # if it's a grade cell, the check the grade
             if utils.is_grade(cell):
@@ -237,7 +242,7 @@ class Validator(LoggingConfigurable):
                     pass
                 elif score < max_score:
                     failed.append(cell)
-            elif cell.cell_type == 'code':
+            elif self.validate_all and cell.cell_type == 'code':
                 for output in cell.outputs:
                     if output.output_type == 'error':
                         failed.append(cell)
