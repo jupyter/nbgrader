@@ -237,6 +237,11 @@ class Validator(LoggingConfigurable):
                     pass
                 elif score < max_score:
                     failed.append(cell)
+            elif cell.cell_type == 'code':
+                for output in cell.outputs:
+                    if output.output_type == 'error':
+                        failed.append(cell)
+                        break
 
         return failed
 
