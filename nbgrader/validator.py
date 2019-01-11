@@ -259,10 +259,12 @@ class Validator(LoggingConfigurable):
         return passed
 
     def _preprocess(self, nb):
+        os.environ['NBGRADER_VALIDATING'] = '1'
         resources = {}
         for preprocessor in self.preprocessors:
             pp = preprocessor()
             nb, resources = pp.preprocess(nb, resources)
+        del os.environ['NBGRADER_VALIDATING']
         return nb
 
     def validate(self, filename):
