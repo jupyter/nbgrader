@@ -225,8 +225,8 @@ class Validator(LoggingConfigurable):
     def _get_failed_cells(self, nb):
         failed = []
         for cell in nb.cells:
-            if not (utils.is_grade(cell) or utils.is_locked(cell)):
-                continue
+            #if not (utils.is_grade(cell) or utils.is_locked(cell)):
+            #    continue
 
             # if it's a grade cell, the check the grade
             if utils.is_grade(cell):
