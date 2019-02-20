@@ -272,7 +272,7 @@ class Validator(LoggingConfigurable):
         resources = {}
         with utils.setenv(NBGRADER_VALIDATING='1'):
             for preprocessor in self.preprocessors:
-                pp = preprocessor()
+                pp = preprocessor(**self.config[preprocessor.__name__])
                 nb, resources = pp.preprocess(nb, resources)
         return nb
 
