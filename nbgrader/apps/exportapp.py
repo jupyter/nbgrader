@@ -9,7 +9,10 @@ aliases = {
     'log-level' : 'Application.log_level',
     'db': 'CourseDirectory.db_url',
     'to' : 'ExportPlugin.to',
-    'exporter': 'ExportApp.plugin_class'
+    'exporter': 'ExportApp.plugin_class',
+    'assignment' : 'ExportPlugin.assignment',
+    'student': 'ExportPlugin.student',
+
 }
 flags = {}
 
@@ -31,6 +34,14 @@ class ExportApp(NbGrader):
         You can customize the filename with the --to flag:
 
             nbgrader export --to mygrades.csv
+
+        You can export the grades for a single (or limited set) of students 
+        or assignments with the --assignment and/or --student flag:
+
+            nbgrader export --asignment assignmentID --student [studentID1,studentID2]
+
+        Where the studentIDs are a list of IDs and the assignmentID a string with
+        IDs separated by semicolumns.
 
         To change the export type, you will need a class that inherits from
         nbgrader.plugins.ExportPlugin. If your exporter is named
