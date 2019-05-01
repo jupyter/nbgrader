@@ -59,6 +59,17 @@ def is_locked(cell):
     else:
         return cell.metadata['nbgrader'].get('locked', False)
 
+def is_partial_grade(output):
+    # looking for output.data["text/plain"] with a single value between 0 and 1
+    if not output["data"]["text/plain"]:
+        return False
+    if len(output["data"]["text/plain"]) > 1:
+        return False
+    frac_grade = float(output["data"]["text/plain"][0])
+    if (0 <= frac_grade <= 1):
+        return True
+    else:
+        return False
 
 def determine_grade(cell):
     if not is_grade(cell):
@@ -75,9 +86,25 @@ def determine_grade(cell):
             return None, max_points
 
     elif cell.cell_type == 'code':
+        # for code cells, we look at the output. There are three options:
+        # 1. output contains an error (no credit);
+        # 2. output is a value between 0 and 1 (partial credit);
+        # 3. output is something else, or nothing (full credit).
         for output in cell.outputs:
+            # option 1: error, return 0
             if output.output_type == 'error':
                 return 0, max_points
+            # if not error, then check for option 2, partial credit
+            if output.output_type == 'execute_result':
+                # is there a single result between 0 and 1?
+                if not is_partial_grade(output):
+                    raise ValueError("partial grade cell does not return single value between 0 and 1")
+                points = float(output["data"]["text/plain"][0])
+                return points*max_points,max_points
+
+            elif output.output_type == 'error':
+                return 0, max_points
+        # otherwise, assume all fine and return all the points
         return max_points, max_points
 
     else:
