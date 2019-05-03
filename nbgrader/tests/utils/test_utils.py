@@ -131,6 +131,75 @@ def test_determine_grade_code_grade_and_solution():
     cell.source = 'test!'
     assert utils.determine_grade(cell) == (None, 10)
 
+def test_is_partial_grade():
+    cell = create_grade_cell('test', "code", "foo", 10)
+    test_data = {
+        "text/plain": [ "0.5" ]
+        }
+    cell.outputs = [new_output(
+        output_type="execute_result",
+        execution_count=1,
+        data=test_data)
+        ]
+    assert utils.is_partial_grade(cell.outputs[0])
+
+    cell.outputs = []
+    test_data = {
+        "text/plain": [ "5.5" ]
+        }
+    cell.outputs = [new_output(
+        output_type="execute_result",
+        execution_count=1,
+        data=test_data)
+        ]
+    assert not utils.is_partial_grade(cell.outputs[0])
+
+    cell.outputs = []
+    test_data = {
+        "text/plain": [ "5.5", "abc" ]
+        }
+    cell.outputs = [new_output(
+        output_type="execute_result",
+        execution_count=1,
+        data=test_data)
+        ]
+    assert not utils.is_partial_grade(cell.outputs[0])
+
+def test_determine_grade_code_partial_credit():
+    cell = create_grade_cell('test', "code", "foo", 10)
+    test_data = {
+        "text/plain": [ "0.5" ]
+        }
+    cell.outputs = [new_output(
+        output_type="execute_result",
+        execution_count=1,
+        data=test_data)
+        ]
+    assert utils.determine_grade(cell) == (0.5*10,10)
+
+    cell.outputs = []
+    test_data = {
+        "text/plain": [ "5.5" ]
+        }
+    cell.outputs = [new_output(
+        output_type="execute_result",
+        execution_count=1,
+        data=test_data)
+        ]
+    with pytest.raises(ValueError):
+        utils.determine_grade(cell)
+
+    cell.outputs = []
+    test_data = {
+        "text/plain": [ "0.5", "abc" ]
+        }
+    cell.outputs = [new_output(
+        output_type="execute_result",
+        execution_count=1,
+        data=test_data)
+        ]
+    with pytest.raises(ValueError):
+        utils.determine_grade(cell)
 
 def test_determine_grade_markdown_grade_and_solution():
     cell = create_grade_and_solution_cell('test', "markdown", "foo", 10)

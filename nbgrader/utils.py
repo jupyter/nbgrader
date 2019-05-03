@@ -18,6 +18,7 @@ from tornado.log import LogFormatter
 from dateutil.tz import gettz
 from datetime import datetime
 
+log = logging.getLogger('utils')
 
 # pwd is for unix passwords only, so we shouldn't import it on
 # windows machines
@@ -66,7 +67,7 @@ def is_partial_grade(output):
     if len(output["data"]["text/plain"]) > 1:
         return False
     frac_grade = float(output["data"]["text/plain"][0])
-    if (0 <= frac_grade <= 1):
+    if (0.0 <= frac_grade <= 1.0):
         return True
     else:
         return False
@@ -98,12 +99,10 @@ def determine_grade(cell):
             if output.output_type == 'execute_result':
                 # is there a single result between 0 and 1?
                 if not is_partial_grade(output):
-                    raise ValueError("partial grade cell does not return single value between 0 and 1")
-                points = float(output["data"]["text/plain"][0])
-                return points*max_points,max_points
+                    raise ValueError("partial grade cell must return single value between 0 and 1")
+                frac_grade = float(output["data"]["text/plain"][0])
+                return frac_grade*max_points,max_points
 
-            elif output.output_type == 'error':
-                return 0, max_points
         # otherwise, assume all fine and return all the points
         return max_points, max_points
 
