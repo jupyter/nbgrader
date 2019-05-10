@@ -131,44 +131,29 @@ def test_determine_grade_code_grade_and_solution():
     cell.source = 'test!'
     assert utils.determine_grade(cell) == (None, 10)
 
-def test_is_partial_grade():
-    cell = create_grade_cell('test', "code", "foo", 10)
-    test_data = {
-        "text/plain": [ "0.5" ]
-        }
-    cell.outputs = [new_output(
-        output_type="execute_result",
-        execution_count=1,
-        data=test_data)
-        ]
-    assert utils.is_partial_grade(cell.outputs[0])
+def test_get_partial_grade():
+    test_data = { "data": { "text/plain": [ "0.6" ] } }
+    assert utils.get_partial_grade(test_data) == 0.6
 
-    cell.outputs = []
-    test_data = {
-        "text/plain": [ "5.5" ]
-        }
-    cell.outputs = [new_output(
-        output_type="execute_result",
-        execution_count=1,
-        data=test_data)
-        ]
-    assert not utils.is_partial_grade(cell.outputs[0])
+    test_data = { "data": { "text/plain": "0.6" } }
+    assert utils.get_partial_grade(test_data) == 0.6
 
-    cell.outputs = []
-    test_data = {
-        "text/plain": [ "5.5", "abc" ]
-        }
-    cell.outputs = [new_output(
-        output_type="execute_result",
-        execution_count=1,
-        data=test_data)
-        ]
-    assert not utils.is_partial_grade(cell.outputs[0])
+    test_data = { "data": { "text/plain": [ "abcd" ] } }
+    with pytest.raises(ValueError):
+        utils.get_partial_grade(test_data)
+
+    test_data = { "data": { "text/plain": [ "0.6", "abcd" ] } } 
+    with pytest.raises(ValueError):
+        utils.get_partial_grade(test_data)
+
+    test_data = { "execution_count": 4 }
+    with pytest.raises(KeyError):
+        utils.get_partial_grade(test_data)
 
 def test_determine_grade_code_partial_credit():
     cell = create_grade_cell('test', "code", "foo", 10)
     test_data = {
-        "text/plain": [ "0.5" ]
+        "text/plain": "0.5"
         }
     cell.outputs = [new_output(
         output_type="execute_result",
@@ -179,7 +164,7 @@ def test_determine_grade_code_partial_credit():
 
     cell.outputs = []
     test_data = {
-        "text/plain": [ "5.5" ]
+        "text/plain": "5.5"
         }
     cell.outputs = [new_output(
         output_type="execute_result",

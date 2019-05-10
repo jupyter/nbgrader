@@ -18,8 +18,6 @@ from tornado.log import LogFormatter
 from dateutil.tz import gettz
 from datetime import datetime
 
-log = logging.getLogger('utils')
-
 # pwd is for unix passwords only, so we shouldn't import it on
 # windows machines
 if sys.platform != 'win32':
@@ -60,19 +58,29 @@ def is_locked(cell):
     else:
         return cell.metadata['nbgrader'].get('locked', False)
 
-def is_partial_grade(output):
-    # looking for output.data["text/plain"] with a single value between 0 and 1
+def get_partial_grade(output):
+    # check that output.data["text/plain"] exists. It might be a list (in which
+    # check that is a single item) or might be a string. The value should be
+    # between 0 and 1.
     if not output["data"]["text/plain"]:
-        return False
-    if len(output["data"]["text/plain"]) > 1:
-        return False
-    frac_grade = float(output["data"]["text/plain"][0])
-    if (0.0 <= frac_grade <= 1.0):
-        return True
-    else:
-        return False
+        raise KeyError("output ['data']['text/plain'] does not exist")
+    grade = output["data"]["text/plain"]
+    if (isinstance(grade,list)):
+        if (len(grade)>1):
+            raise ValueError("partial credit cell must output single value")
+        else:
+            grade = grade[0]
+    try:
+        grade = float(grade)
+        if (0.0 <= grade <= 1.0):
+            return grade
+        else:
+            raise ValueError("partial credit cell must return value between 0 and 1")
+    except ValueError:
+        raise ValueError("partial credit cell must return float between 0 and 1")
 
 def determine_grade(cell):
+    print("Determine grade for cell: {0}".format(cell))
     if not is_grade(cell):
         raise ValueError("cell is not a grade cell")
 
@@ -98,10 +106,8 @@ def determine_grade(cell):
             # if not error, then check for option 2, partial credit
             if output.output_type == 'execute_result':
                 # is there a single result between 0 and 1?
-                if not is_partial_grade(output):
-                    raise ValueError("partial grade cell must return single value between 0 and 1")
-                frac_grade = float(output["data"]["text/plain"][0])
-                return frac_grade*max_points,max_points
+                partial_grade = get_partial_grade(output)
+                return partial_grade*max_points, max_points
 
         # otherwise, assume all fine and return all the points
         return max_points, max_points
