@@ -99,7 +99,7 @@ setup_args = dict(
         "jupyter_core",
         "jupyter_client",
         "tornado",
-        "six>=1.9",
+        "six>=1.11",  # jsonschema needs >=1.11
         "requests",
         "jsonschema",
         "alembic",
