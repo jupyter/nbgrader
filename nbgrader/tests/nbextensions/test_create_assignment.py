@@ -298,6 +298,7 @@ def test_manual_cell(browser, port):
     _save_and_validate(browser)
 
 
+@pytest.mark.nbextensions
 def test_task_cell(browser, port):
     _load_notebook(browser, port, name='task')
     _activate_toolbar(browser)
