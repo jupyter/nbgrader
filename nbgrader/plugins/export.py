@@ -9,12 +9,12 @@ class ExportPlugin(BasePlugin):
 
     to = Unicode("", help="destination to export to").tag(config=True)
 
-    student = List([], 
+    student = List([],
         help="list of students to export").tag(config=True)
-    
-    assignment = Unicode("", 
-        help="string of assignments, seperated by ; to export").tag(config=True)
-   
+
+    assignment = List([],
+        help="list of assignments to export").tag(config=True)
+
     def export(self, gradebook):
         """Export grades to another format.
 
@@ -40,18 +40,18 @@ class CsvExportPlugin(ExportPlugin):
             dest = "grades.csv"
         else:
             dest = self.to
-        
+
         if len(self.student) == 0:
             allstudents = False
         else:
             # make sure studentID(s) are a list of strings
             allstudents = [str(item) for item in self.student]
 
-        if self.assignment == "":
+        if len(self.assignment) == 0:
             allassignments = False
         else:
             # make sure assignment(s) are a list of strings
-            allassignments = self.assignment.split(";")
+            allassignments = [str(item) for item in self.assignment]
 
         self.log.info("Exporting grades to %s", dest)
         if allassignments:
@@ -59,7 +59,7 @@ class CsvExportPlugin(ExportPlugin):
 
         if allstudents:
             self.log.info("Exporting only students: %s", self.student)
-        
+
         fh = open(dest, "w")
         keys = [
             "assignment",
@@ -79,50 +79,54 @@ class CsvExportPlugin(ExportPlugin):
 
         # Loop over each assignment in the database
         for assignment in gradebook.assignments:
-            # test if assignment is requested
-            if not allassignments or assignment.name in allassignments:
 
-                # Loop over each student in the database
-                for student in gradebook.students:
+            # only continue if assignment is required
+            if allassignments and assignment.name not in allassignments:
+                continue
 
-                    #test if student is requested
-                    if not allstudents or student.id in allstudents:
-                        # Create a dictionary that will store information 
-                        # about this student's submitted assignment
-                        score = {}
-                        score['assignment'] = assignment.name
-                        score['duedate'] = assignment.duedate
-                        score['student_id'] = student.id
-                        score['last_name'] = student.last_name
-                        score['first_name'] = student.first_name
-                        score['email'] = student.email
-                        score['max_score'] = assignment.max_score
+            # Loop over each student in the database
+            for student in gradebook.students:
 
-                        # Try to find the submission in the database. If it
-                        # doesn't exist, the `MissingEntry` exception will be
-                        # raised, which means the student didn't submit 
-                        # anything, so we assign them a score of zero.
-                        try:
-                            submission = gradebook.find_submission(
-                                assignment.name, student.id)
-                        except MissingEntry:
-                            score['timestamp'] = ''
-                            score['raw_score'] = 0.0
-                            score['late_submission_penalty'] = 0.0
-                            score['score'] = 0.0
-                        else:
-                            penalty = submission.late_submission_penalty
-                            score['timestamp'] = submission.timestamp
-                            score['raw_score'] = submission.score
-                            score['late_submission_penalty'] = penalty
-                            score['score'] = max(0.0, submission.score - penalty)
+                # only continue if student is required
+                if allstudents and student.id not in allstudents:
+                    continue
 
-                        for key in score:
-                            if score[key] is None:
-                                score[key] = ''
-                            if not isinstance(score[key], str):
-                                score[key] = str(score[key])
+                # Create a dictionary that will store information 
+                # about this student's submitted assignment
+                score = {}
+                score['assignment'] = assignment.name
+                score['duedate'] = assignment.duedate
+                score['student_id'] = student.id
+                score['last_name'] = student.last_name
+                score['first_name'] = student.first_name
+                score['email'] = student.email
+                score['max_score'] = assignment.max_score
 
-                        fh.write(fmt.format(**score))
+                # Try to find the submission in the database. If it
+                # doesn't exist, the `MissingEntry` exception will be
+                # raised, which means the student didn't submit 
+                # anything, so we assign them a score of zero.
+                try:
+                    submission = gradebook.find_submission(
+                        assignment.name, student.id)
+                except MissingEntry:
+                    score['timestamp'] = ''
+                    score['raw_score'] = 0.0
+                    score['late_submission_penalty'] = 0.0
+                    score['score'] = 0.0
+                else:
+                    penalty = submission.late_submission_penalty
+                    score['timestamp'] = submission.timestamp
+                    score['raw_score'] = submission.score
+                    score['late_submission_penalty'] = penalty
+                    score['score'] = max(0.0, submission.score - penalty)
+
+                for key in score:
+                    if score[key] is None:
+                        score[key] = ''
+                    if not isinstance(score[key], str):
+                        score[key] = str(score[key])
+
+                fh.write(fmt.format(**score))
 
         fh.close()
