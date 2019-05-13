@@ -38,7 +38,7 @@ class ExportApp(NbGrader):
         You can export the grades for a single (or limited set) of students 
         or assignments with the --assignment and/or --student flag:
 
-            nbgrader export --asignment assignmentID --student [studentID1,studentID2]
+            nbgrader export --assignment assignmentID --student [studentID1,studentID2]
 
         Where the studentIDs are a list of IDs and the assignmentID a string with
         IDs separated by semicolumns.
