@@ -272,7 +272,11 @@ class Validator(LoggingConfigurable):
         resources = {}
         with utils.setenv(NBGRADER_VALIDATING='1'):
             for preprocessor in self.preprocessors:
-                pp = preprocessor()
+                # https://github.com/jupyter/nbgrader/pull/1075
+                # It seemes that without the self.config passed below,
+                # --ExecutePreprocessor.timeout doesn't work.  Better solution
+                # requested, unknown why this is needed.
+                pp = preprocessor(**self.config[preprocessor.__name__])
                 nb, resources = pp.preprocess(nb, resources)
         return nb
 
