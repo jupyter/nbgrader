@@ -48,7 +48,7 @@ class CsvExportPlugin(ExportPlugin):
             allstudents = [str(item) for item in self.student]
 
         if len(self.assignment) == 0:
-            allassignments = False
+            allassignments = []
         else:
             # make sure assignment(s) are a list of strings
             allassignments = [str(item) for item in self.assignment]
