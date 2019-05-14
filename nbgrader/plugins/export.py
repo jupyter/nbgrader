@@ -58,7 +58,7 @@ class CsvExportPlugin(ExportPlugin):
             self.log.info("Exporting only assignments: %s", allassignments)
 
         if allstudents:
-            self.log.info("Exporting only students: %s", self.student)
+            self.log.info("Exporting only students: %s", allstudents)
 
         fh = open(dest, "w")
         keys = [
