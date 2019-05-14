@@ -55,7 +55,7 @@ class CsvExportPlugin(ExportPlugin):
 
         self.log.info("Exporting grades to %s", dest)
         if allassignments:
-            self.log.info("Exporting only assignments: %s", self.assignment)
+            self.log.info("Exporting only assignments: %s", allassignments)
 
         if allstudents:
             self.log.info("Exporting only students: %s", self.student)
