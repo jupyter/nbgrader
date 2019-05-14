@@ -42,7 +42,7 @@ class CsvExportPlugin(ExportPlugin):
             dest = self.to
 
         if len(self.student) == 0:
-            allstudents = False
+            allstudents = []
         else:
             # make sure studentID(s) are a list of strings
             allstudents = [str(item) for item in self.student]
