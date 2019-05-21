@@ -103,8 +103,7 @@ setup_args = dict(
         "requests",
         "jsonschema",
         "alembic",
-        "fuzzywuzzy",
-        "urllib3<1.25"  # >=1.25 currently conflicts with requests
+        "fuzzywuzzy"
     ]
 )
 
