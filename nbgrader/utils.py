@@ -80,7 +80,6 @@ def get_partial_grade(output):
         raise ValueError("partial credit cell must return value greater than 0")
 
 def determine_grade(cell):
-    print("Determine grade for cell: {0}".format(cell))
     if not is_grade(cell):
         raise ValueError("cell is not a grade cell")
 
