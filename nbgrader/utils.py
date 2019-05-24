@@ -59,9 +59,9 @@ def is_locked(cell):
         return cell.metadata['nbgrader'].get('locked', False)
 
 def get_partial_grade(output):
-    # check that output.data["text/plain"] exists. It might be a list (in which
+    # check that output["data"]["text/plain"] exists. It might be a list (in which
     # check that is a single item) or might be a string. The value should be
-    # between 0 and 1.
+    # castable to a float that is greater than 0.
     if not output["data"]["text/plain"]:
         raise KeyError("output ['data']['text/plain'] does not exist")
     grade = output["data"]["text/plain"]
@@ -72,12 +72,12 @@ def get_partial_grade(output):
             grade = grade[0]
     try:
         grade = float(grade)
-        if (0.0 <= grade <= 1.0):
+        if (grade > 0.0):
             return grade
         else:
-            raise ValueError("partial credit cell must return value between 0 and 1")
+            raise ValueError("partial credit cell must return value greater than 0")
     except ValueError:
-        raise ValueError("partial credit cell must return float between 0 and 1")
+        raise ValueError("partial credit cell must return value greater than 0")
 
 def determine_grade(cell):
     print("Determine grade for cell: {0}".format(cell))
@@ -97,7 +97,7 @@ def determine_grade(cell):
     elif cell.cell_type == 'code':
         # for code cells, we look at the output. There are three options:
         # 1. output contains an error (no credit);
-        # 2. output is a value between 0 and 1 (partial credit);
+        # 2. output is a value greater than 0 (partial credit);
         # 3. output is something else, or nothing (full credit).
         for output in cell.outputs:
             # option 1: error, return 0
@@ -107,7 +107,9 @@ def determine_grade(cell):
             if output.output_type == 'execute_result':
                 # is there a single result between 0 and 1?
                 partial_grade = get_partial_grade(output)
-                return partial_grade*max_points, max_points
+                # return the partial credit, or the maximum points, whichever
+                # is less (i.e. will not return partial_grade > max_points)
+                return min(partial_grade,max_points), max_points
 
         # otherwise, assume all fine and return all the points
         return max_points, max_points

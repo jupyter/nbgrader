@@ -135,33 +135,35 @@ def test_get_partial_grade():
     test_data = { "data": { "text/plain": [ "0.6" ] } }
     assert utils.get_partial_grade(test_data) == 0.6
 
-    test_data = { "data": { "text/plain": "0.6" } }
-    assert utils.get_partial_grade(test_data) == 0.6
+    test_data = { "data": { "text/plain": "6.0" } }
+    assert utils.get_partial_grade(test_data) == 6.0
 
     test_data = { "data": { "text/plain": [ "abcd" ] } }
     with pytest.raises(ValueError):
         utils.get_partial_grade(test_data)
 
-    test_data = { "data": { "text/plain": [ "0.6", "abcd" ] } } 
+    test_data = { "data": { "text/plain": [ "0.6", "abcd" ] } }
     with pytest.raises(ValueError):
         utils.get_partial_grade(test_data)
 
-    test_data = { "execution_count": 4 }
+    test_data = { "fake_key": 4 }
     with pytest.raises(KeyError):
         utils.get_partial_grade(test_data)
 
 def test_determine_grade_code_partial_credit():
-    cell = create_grade_cell('test', "code", "foo", 10)
+    # create grade cell with max_points == 5
+    cell = create_grade_cell('test', "code", "foo", 5)
     test_data = {
-        "text/plain": "0.5"
+        "text/plain": "3"
         }
     cell.outputs = [new_output(
         output_type="execute_result",
         execution_count=1,
         data=test_data)
         ]
-    assert utils.determine_grade(cell) == (0.5*10,10)
+    assert utils.determine_grade(cell) == (3,5)
 
+    # should return max_grade when partial_credit > max_grade
     cell.outputs = []
     test_data = {
         "text/plain": "5.5"
@@ -171,8 +173,7 @@ def test_determine_grade_code_partial_credit():
         execution_count=1,
         data=test_data)
         ]
-    with pytest.raises(ValueError):
-        utils.determine_grade(cell)
+    assert utils.determine_grade(cell) == (5,5)
 
     cell.outputs = []
     test_data = {
