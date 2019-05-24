@@ -44,3 +44,21 @@ class TestNbGraderExport(BaseTestApp):
 
         run_nbgrader(["export", "--db", db, "--exporter=nbgrader.tests.apps.files.myexporter.MyExporter", "--to", "foo.txt"])
         assert os.path.isfile("foo.txt")
+
+        run_nbgrader(["export", "--db", db, "--student", "['bar']"])
+        assert os.path.isfile("grades.csv")
+        with open("grades.csv", "r") as fh:
+            contents = fh.readlines()
+        assert len(contents) == 3
+
+        run_nbgrader(["export", "--db", db, "--assignment", "['ps1']"])
+        assert os.path.isfile("grades.csv")
+        with open("grades.csv", "r") as fh:
+            contents = fh.readlines()
+        assert len(contents) == 3
+
+        run_nbgrader(["export", "--db", db, "--assignment", "['ps1']", "--student", "['foo']"])
+        assert os.path.isfile("grades.csv")
+        with open("grades.csv", "r") as fh:
+            contents = fh.readlines()
+        assert len(contents) == 2

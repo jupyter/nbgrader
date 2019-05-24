@@ -300,6 +300,20 @@ def chdir(dirname):
         os.chdir(currdir)
 
 
+@contextlib.contextmanager
+def setenv(**kwargs):
+    previous_env = { }
+    for key, value in kwargs.items():
+        previous_env[key] = os.environ.get(value)
+        os.environ[key] = value
+    yield
+    for key, value in kwargs.items():
+        if previous_env[key] is None:
+            del os.environ[key]
+        else:
+            os.environ[key] = previous_env[key]
+
+
 def rmtree(path):
     # for windows, we need to go through and make sure everything
     # is writeable, otherwise rmtree will fail

@@ -87,6 +87,11 @@ class Validator(LoggingConfigurable):
         help="Warning to display when a cell passes (when invert=True)"
     ).tag(config=True)
 
+    validate_all = Bool(
+        False,
+        help="Validate all cells, not just the graded tests cells."
+    ).tag(config=True)
+
     stream = sys.stdout
 
     def _indent(self, val):
@@ -225,7 +230,7 @@ class Validator(LoggingConfigurable):
     def _get_failed_cells(self, nb):
         failed = []
         for cell in nb.cells:
-            if not (utils.is_grade(cell) or utils.is_locked(cell)):
+            if not (self.validate_all or utils.is_grade(cell) or utils.is_locked(cell)):
                 continue
 
             # if it's a grade cell, the check the grade
@@ -237,6 +242,11 @@ class Validator(LoggingConfigurable):
                     pass
                 elif score == 0:
                     failed.append(cell)
+            elif self.validate_all and cell.cell_type == 'code':
+                for output in cell.outputs:
+                    if output.output_type == 'error':
+                        failed.append(cell)
+                        break
 
         return failed
 
@@ -260,9 +270,14 @@ class Validator(LoggingConfigurable):
 
     def _preprocess(self, nb):
         resources = {}
-        for preprocessor in self.preprocessors:
-            pp = preprocessor()
-            nb, resources = pp.preprocess(nb, resources)
+        with utils.setenv(NBGRADER_VALIDATING='1'):
+            for preprocessor in self.preprocessors:
+                # https://github.com/jupyter/nbgrader/pull/1075
+                # It seemes that without the self.config passed below,
+                # --ExecutePreprocessor.timeout doesn't work.  Better solution
+                # requested, unknown why this is needed.
+                pp = preprocessor(**self.config[preprocessor.__name__])
+                nb, resources = pp.preprocess(nb, resources)
         return nb
 
     def validate(self, filename):

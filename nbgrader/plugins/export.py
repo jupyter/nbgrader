@@ -1,4 +1,4 @@
-from traitlets import Unicode
+from traitlets import Unicode, List
 
 from .base import BasePlugin
 from ..api import MissingEntry
@@ -8,6 +8,12 @@ class ExportPlugin(BasePlugin):
     """Base class for export plugins."""
 
     to = Unicode("", help="destination to export to").tag(config=True)
+
+    student = List([],
+        help="list of students to export").tag(config=True)
+
+    assignment = List([],
+        help="list of assignments to export").tag(config=True)
 
     def export(self, gradebook):
         """Export grades to another format.
@@ -35,7 +41,24 @@ class CsvExportPlugin(ExportPlugin):
         else:
             dest = self.to
 
+        if len(self.student) == 0:
+            allstudents = []
+        else:
+            # make sure studentID(s) are a list of strings
+            allstudents = [str(item) for item in self.student]
+
+        if len(self.assignment) == 0:
+            allassignments = []
+        else:
+            # make sure assignment(s) are a list of strings
+            allassignments = [str(item) for item in self.assignment]
+
         self.log.info("Exporting grades to %s", dest)
+        if allassignments:
+            self.log.info("Exporting only assignments: %s", allassignments)
+
+        if allstudents:
+            self.log.info("Exporting only students: %s", allstudents)
 
         fh = open(dest, "w")
         keys = [
@@ -57,11 +80,19 @@ class CsvExportPlugin(ExportPlugin):
         # Loop over each assignment in the database
         for assignment in gradebook.assignments:
 
+            # only continue if assignment is required
+            if allassignments and assignment.name not in allassignments:
+                continue
+
             # Loop over each student in the database
             for student in gradebook.students:
 
-                # Create a dictionary that will store information about this
-                # student's submitted assignment
+                # only continue if student is required
+                if allstudents and student.id not in allstudents:
+                    continue
+
+                # Create a dictionary that will store information 
+                # about this student's submitted assignment
                 score = {}
                 score['assignment'] = assignment.name
                 score['duedate'] = assignment.duedate
@@ -71,10 +102,10 @@ class CsvExportPlugin(ExportPlugin):
                 score['email'] = student.email
                 score['max_score'] = assignment.max_score
 
-                # Try to find the submission in the database. If it doesn't
-                # exist, the `MissingEntry` exception will be raised, which
-                # means the student didn't submit anything, so we assign them a
-                # score of zero.
+                # Try to find the submission in the database. If it
+                # doesn't exist, the `MissingEntry` exception will be
+                # raised, which means the student didn't submit 
+                # anything, so we assign them a score of zero.
                 try:
                     submission = gradebook.find_submission(
                         assignment.name, student.id)

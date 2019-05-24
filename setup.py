@@ -93,17 +93,18 @@ setup_args = dict(
         "python-dateutil",
         "jupyter",
         "notebook>=4.2",
-        "nbconvert>=4.2",
+        "nbconvert>=4.2,<5.5",  # revert when https://github.com/jupyter/nbconvert/pull/1022 is fixed upstream
         "nbformat",
         "traitlets",
         "jupyter_core",
         "jupyter_client",
         "tornado",
-        "six>=1.9",
+        "six>=1.11",  # jsonschema needs >=1.11
         "requests",
         "jsonschema",
         "alembic",
-        "fuzzywuzzy"
+        "fuzzywuzzy",
+        "urllib3<1.25"  # >=1.25 currently conflicts with requests
     ]
 )
 
