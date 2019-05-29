@@ -381,24 +381,6 @@ class DbAssignmentImportApp(DbGenericImportApp):
         super(DbAssignmentImportApp, self).__init__(*args, **kwargs)
         self.excluded_keys = ["id"]
 
-    with Gradebook(self.coursedir.db_url, self.course_id) as gb:
-        with open(path, 'r') as fh:
-            reader = csv.DictReader(fh)
-            for row in reader:
-                if "name" not in row:
-                    self.fail("Malformatted CSV file: must contain a column for 'name'")
-
-                # make sure all the keys are actually allowed in the database,
-                # and that any empty strings are parsed as None
-                assignment = {}
-                for key, val in row.items():
-                    if key not in allowed_keys:
-                        continue
-                    if val == '':
-                        assignment[key] = None
-                    else:
-                        assignment[key] = val
-                assignment_id = assignment.pop("name")
     @property
     def table_class(self):
         return Assignment
