@@ -961,7 +961,7 @@ class Comment(Base):
         return "Comment<{}/{}/{} for {}>".format(
             self.assignment.name, self.notebook.name, self.name, self.student.id)
 
-class CourseID(Base):
+class Course(Base):
     """Table to store the course_id, it should have only one row"""
 
     __tablename__ = "course_id"
@@ -969,7 +969,7 @@ class CourseID(Base):
     id = Column(String(128), unique=True, primary_key=True, nullable=False)
 
     def __repr__(self):
-        return "CourseID<{}>".format(self.name)
+        return "Course<{}>".format(self.name)
 
 ## Needs manual grade
 
@@ -1362,21 +1362,21 @@ class Gradebook(object):
         course_id : string
             The unique id of the course
         `**kwargs` : dict
-            other keyword arguments to the :class:`~nbgrader.api.CourseID` object
+            other keyword arguments to the :class:`~nbgrader.api.Course` object
 
         Returns
         -------
-        course_id : :class:`~nbgrader.api.CourseID`
+        course_id : :class:`~nbgrader.api.Course`
 
         """
 
         try:
-            course_id_record = self.db.query(CourseID)\
+            course_id_record = self.db.query(Course)\
                 .one()
             if course_id: # update id only if not empty
                 course_id_record.id = course_id
         except NoResultFound:
-            course_id_record = CourseID(id=course_id, **kwargs)
+            course_id_record = Course(id=course_id, **kwargs)
             self.db.add(course_id_record)
 
         try:
@@ -1389,7 +1389,7 @@ class Gradebook(object):
     @property
     def course_id(self):
         try:
-            course_id_record = self.db.query(CourseID)\
+            course_id_record = self.db.query(Course)\
                 .one()
             return course_id_record.id
         except NoResultFound:
