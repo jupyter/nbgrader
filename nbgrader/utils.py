@@ -9,6 +9,8 @@ import stat
 import logging
 import traceback
 import contextlib
+import json
+
 
 from setuptools.archive_util import unpack_archive
 from setuptools.archive_util import unpack_tarfile
@@ -26,6 +28,56 @@ if sys.platform != 'win32':
 else:
     pwd = None
 
+class JupyterhubEnvironmentError(Exception):
+    pass
+
+class JupyterhubApiError(Exception):
+    pass
+
+def query_jupyterhub_api(method, api_path, post_data=None):
+    """Query Jupyterhub api
+
+    Detects Jupyterhub environment variables and makes a call to the Hub API
+ 
+    Parameters
+    ----------
+    method : string
+        HTTP method, e.g. GET or POST
+    api_path : string
+        relative path, for example /users/
+    post_data : dict
+        JSON arguments for the API call
+
+    Returns
+    -------
+    response : dict
+        JSON response converted to dictionary"""
+
+    import requests
+
+    if os.getenv('JUPYTERHUB_API_TOKEN'):
+        api_token = os.environ['JUPYTERHUB_API_TOKEN']
+    else:
+        raise JupyterhubEnvironmentError("JUPYTERHUB_API_TOKEN env is required to run the exchange features of nbgrader.")
+    hub_api_url = os.environ.get('JUPYTERHUB_API_URL') or 'http://127.0.0.1:8081/hub/api'
+    if os.getenv('JUPYTERHUB_USER'):
+        user = os.environ['JUPYTERHUB_USER']
+    else:
+        raise JupyterhubEnvironmentError("JUPYTERHUB_USER env is required to run the exchange features of nbgrader.")
+    auth_header = {
+            'Authorization': 'token %s' % api_token
+        }
+
+    api_path = api_path.format(authenticated_user = user)
+    req = requests.request(url=hub_api_url + api_path,
+        method=method,
+        headers=auth_header,
+        json = post_data,
+    )
+    if not req.ok:
+        raise JupyterhubApiError("JupyterhubAPI returned a status code of: " + str(req.status_code) + " for api_path: " + api_path)
+
+    return req.json()
 
 def is_task(cell):
     """Returns True if the cell is a task cell."""
