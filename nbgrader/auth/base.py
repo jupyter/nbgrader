@@ -36,7 +36,10 @@ class BaseAuthenticator(LoggingConfigurable):
         A boolean indicating whether the student has access.
 
         """
-        raise NotImplementedError
+        courses = self.get_student_courses(student_id)
+        if courses is None:
+            return True
+        return course_id in courses
 
     def add_student_to_course(self, student_id, course_id):
         """Grants a student access to a given course.

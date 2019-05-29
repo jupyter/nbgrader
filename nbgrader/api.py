@@ -1307,13 +1307,16 @@ class Gradebook(object):
 
     """
 
-    def __init__(self, db_url, course_id=""):
+    def __init__(self, db_url, authenticator=None, course_id=""):
         """Initialize the connection to the database.
 
         Parameters
         ----------
         db_url : string
             The URL to the database, e.g. ``sqlite:///grades.db``
+        authenticator : :class:~`nbgrader.auth.BaseAuthenticator`
+            An authenticator instance for communicating with an external
+            database.
         course_id : string, optional
             identifier of the course necessary for supporting multiple classes
             default course_id is '' to be consistent with :class:~`nbgrader.apps.api.NbGraderAPI`
@@ -1335,6 +1338,7 @@ class Gradebook(object):
             self.db.commit()
 
         self.set_course_id(course_id)
+        self.authenticator = authenticator
 
     def __enter__(self):
         return self
@@ -1404,47 +1408,6 @@ class Gradebook(object):
             .order_by(Student.last_name, Student.first_name)\
             .all()
 
-    def add_student_to_group(self, student):
-        """Add a new student to a Jupyterhub group.
-
-        Parameters
-        ----------
-        student_id : string
-            The unique id of the student
-
-
-        """
-        try:
-            group_name = "nbgrader-{}".format(self.course_id)
-            jup_groups = utils.query_jupyterhub_api(method="GET",
-                                 api_path="/groups",
-            )
-            if group_name not in [x['name'] for x in jup_groups]:
-                # This could result in a bad request(JupyterhubApiError) if there is already a group so first we check above if there is a group
-                utils.query_jupyterhub_api(method="POST",
-                                     api_path="/groups/{name}".format(name=group_name),
-                )
-                print("Jupyterhub group: {group_name} created.".format(group_name=group_name) )
-            utils.query_jupyterhub_api(method="POST",
-                                 api_path="/groups/{name}/users".format(name=group_name),
-                                 post_data = {"users":[student.id]}
-            )
-            # Saying student could be already here is because the post request returns 200 even if the student_id was already in the group
-            print("Student {student} added or was already in the Jupyterhub group: {group_name}".format(
-                student=student.id,
-                group_name=group_name
-            ))
-        except utils.JupyterhubEnvironmentError as e:
-            print("Not running on Jupyterhub, not adding {student} user to the Jupyterhub group {group_name}".format(student=student.id, group_name=group_name))
-        except utils.JupyterhubApiError as e:
-            if self.course_id: # We assume user might be using Jupyterhub but something is not working
-                err_msg = "Student {student} NOT added to the Jupyterhub group {group_name}: ".format(
-                    student=student.id,
-                    group_name=group_name
-                )
-            print(err_msg + str(e))
-            print("Make sure you set a valid admin_user 'api_token' in your config file before starting the service")
-
     def add_student(self, student_id, **kwargs):
         """Add a new student to the database.
 
@@ -1460,13 +1423,13 @@ class Gradebook(object):
         student : :class:`~nbgrader.api.Student`
 
         """
+        if self.authenticator:
+            self.authenticator.add_student_to_course(student_id, self.course_id)
 
         student = Student(id=student_id, **kwargs)
         self.db.add(student)
         try:
             self.db.commit()
-            self.add_student_to_group(student)
-                
         except (IntegrityError, FlushError) as e:
             self.db.rollback()
             raise InvalidEntry(*e.args)
@@ -1496,13 +1459,13 @@ class Gradebook(object):
 
         return student
 
-    def update_or_create_student(self, name, **kwargs):
+    def update_or_create_student(self, student_id, **kwargs):
         """Update an existing student, or create it if it doesn't exist.
 
         Parameters
         ----------
-        name : string
-            the name of the student
+        student_id : string
+            The unique id of the student
         `**kwargs`
             additional keyword arguments for the :class:`~nbgrader.api.Student` object
 
@@ -1513,54 +1476,43 @@ class Gradebook(object):
         """
 
         try:
-            student = self.find_student(name)
+            student = self.find_student(student_id)
         except MissingEntry:
-            student = self.add_student(name, **kwargs)
+            student = self.add_student(student_id, **kwargs)
         else:
             for attr in kwargs:
                 setattr(student, attr, kwargs[attr])
             try:
                 self.db.commit()
-                self.add_student_to_group(student)
             except (IntegrityError, FlushError) as e:
                 self.db.rollback()
                 raise InvalidEntry(*e.args)
 
         return student
 
-    def remove_student(self, name):
+    def remove_student(self, student_id):
         """Deletes an existing student from the gradebook, including any
         submissions the might be associated with that student.
 
         Parameters
         ----------
-        name : string
-            the name of the student to delete
+        student_id : string
+            The unique id of the student
 
         """
-        student = self.find_student(name)
+        if self.authenticator:
+            self.authenticator.remove_student_from_course(
+                student_id, self.course_id)
+
+        student = self.find_student(student_id)
 
         for submission in student.submissions:
-            self.remove_submission(submission.assignment.name, name)
+            self.remove_submission(submission.assignment.name, student_id)
 
         self.db.delete(student)
 
         try:
             self.db.commit()
-
-            try:
-                group_name = "nbgrader-{}".format(self.course_id)
-                res = utils.query_jupyterhub_api(method="DELETE",
-                                     api_path="/groups/{name}/users".format(name=group_name),
-                                     post_data = {"users":[student.id]}
-                )
-                print("Student {student} was removed or was already not in the Jupyterhub group {group_name}".format(student=name, group_name=group_name))
-            except utils.JupyterhubEnvironmentError as e:
-                print("Not running on Jupyterhub so {student} was NOT removed from the Jupyterhub group {group_name}:".format(student=name, group_name=group_name), str(e))
-            except utils.JupyterhubApiError as e:
-                if self.course_id:
-                    print("Student {student} was NOT removed from the Jupyterhub group {group_name}:".format(student=name, group_name=group_name), str(e))
-                    print("Make sure you start your service with a valid admin_user 'api_token' in your Jupyterhub config")
         except (IntegrityError, FlushError) as e:
             self.db.rollback()
             raise InvalidEntry(*e.args)
