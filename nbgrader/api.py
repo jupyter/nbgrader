@@ -965,11 +965,8 @@ class CourseID(Base):
     """Table to store the course_id, it should have only one row"""
 
     __tablename__ = "course_id"
-    __table_args__ = (UniqueConstraint("unique_check"),)
 
     id = Column(String(128), unique=True, primary_key=True, nullable=False)
-    # This should help to prevent having 2 rows in this table
-    unique_check = Column(Boolean, unique=False, default=True)
 
     def __repr__(self):
         return "CourseID<{}>".format(self.name)
