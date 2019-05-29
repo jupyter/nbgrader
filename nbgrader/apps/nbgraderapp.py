@@ -23,6 +23,7 @@ from . import (
     AutogradeApp,
     FormgradeApp,
     FeedbackApp,
+    ReleaseFeedbackApp,
     ValidateApp,
     ReleaseApp,
     CollectApp,
@@ -140,6 +141,15 @@ class NbGraderApp(NbGrader):
             dedent(
                 """
                 Release an assignment to students through the nbgrader exchange.
+                Intended for use by instructors only.
+                """
+            ).strip()
+        ),
+        releasefeeback=(
+            ReleaseFeedbackApp,
+            dedent(
+                """
+                Release assignment feedback to students through the nbgrader exchange.
                 Intended for use by instructors only.
                 """
             ).strip()
