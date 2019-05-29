@@ -248,6 +248,20 @@ class AutogradeHandler(BaseApiHandler):
         self.write(json.dumps(self.api.autograde(assignment_id, student_id)))
 
 
+class GenerateFeedbackHandler(BaseApiHandler):
+    @web.authenticated
+    @check_xsrf
+    def post(self, assignment_id):
+        self.write(json.dumps(self.api.generate_feedback(assignment_id)))
+
+
+class ReleaseFeedbackHandler(BaseApiHandler):
+    @web.authenticated
+    @check_xsrf
+    def post(self, assignment_id):
+        self.write(json.dumps(self.api.release_feedback(assignment_id)))
+
+
 default_handlers = [
     (r"/formgrader/api/assignments", AssignmentCollectionHandler),
     (r"/formgrader/api/assignment/([^/]+)", AssignmentHandler),
@@ -276,4 +290,7 @@ default_handlers = [
 
     (r"/formgrader/api/student_submissions/([^/]+)", StudentSubmissionCollectionHandler),
     (r"/formgrader/api/student_notebook_submissions/([^/]+)/([^/]+)", StudentNotebookSubmissionCollectionHandler),
+
+    (r"/formgrader/api/assignment/([^/]+)/generate_feedback", GenerateFeedbackHandler),
+    (r"/formgrader/api/assignment/([^/]+)/release_feedback", ReleaseFeedbackHandler),
 ]
