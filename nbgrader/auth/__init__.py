@@ -1,9 +1,9 @@
-from .base import BaseAuthenticator
-from .noauth import NoAuthentication
-from .jupyterhub import JupyterHubAuthenticator
+from .base import BaseAuthPlugin, NoAuthPlugin, Authenticator
+from .jupyterhub import JupyterHubAuthPlugin
 
 __all__ = [
-    "BaseAuthenticator",
-    "NoAuthentication",
-    "JupyterHubAuthenticator"
+    "BaseAuthPlugin",
+    "NoAuthPlugin",
+    "JupyterHubAuthPlugin",
+    "Authenticator"
 ]

@@ -12,7 +12,7 @@ from datetime import datetime
 
 from . import NbGrader
 from ..api import Gradebook, MissingEntry, Student, Assignment
-from ..exchange import ExchangeList, ExchangeError
+from ..exchange import ExchangeList
 from .. import dbutil
 
 aliases = {
@@ -30,6 +30,7 @@ student_add_aliases.update({
     'email': 'DbStudentAddApp.email'
 })
 
+
 class DbBaseApp(NbGrader):
 
     def start(self):
@@ -39,6 +40,7 @@ class DbBaseApp(NbGrader):
         else:
             self.course_id = ''
         super(DbBaseApp, self).start()
+
 
 class DbStudentAddApp(DbBaseApp):
 
@@ -80,7 +82,7 @@ class DbStudentAddApp(DbBaseApp):
         }
 
         self.log.info("Creating/updating student with ID '%s': %s", student_id, student)
-        with Gradebook(self.coursedir.db_url, self.course_id) as gb:
+        with Gradebook(self.coursedir.db_url, self.course_id, self.authenticator) as gb:
             gb.update_or_create_student(student_id, **student)
 
 student_remove_flags = {}
@@ -114,7 +116,7 @@ class DbStudentRemoveApp(DbBaseApp):
 
         student_id = self.extra_args[0]
 
-        with Gradebook(self.coursedir.db_url, self.course_id) as gb:
+        with Gradebook(self.coursedir.db_url, self.course_id, self.authenticator) as gb:
             try:
                 student = gb.find_student(student_id)
             except MissingEntry:
@@ -208,7 +210,7 @@ class DbGenericImportApp(DbBaseApp):
         self.log.info("Importing from: '%s'", path)
 
 
-        with Gradebook(self.coursedir.db_url, self.course_id) as gb:
+        with Gradebook(self.coursedir.db_url, self.course_id, self.authenticator) as gb:
             with open(path, 'r') as fh:
                 reader = csv.DictReader(fh)
                 reader.fieldnames = self._preprocess_keys(reader.fieldnames)
@@ -281,7 +283,7 @@ class DbStudentListApp(DbBaseApp):
     def start(self):
         super(DbStudentListApp, self).start()
 
-        with Gradebook(self.coursedir.db_url, self.course_id) as gb:
+        with Gradebook(self.coursedir.db_url, self.course_id, self.authenticator) as gb:
             print("There are %d students in the database:" % len(gb.students))
             for student in gb.students:
                 print("%s (%s, %s) -- %s" % (student.id, student.last_name, student.first_name, student.email))
@@ -319,7 +321,7 @@ class DbAssignmentAddApp(DbBaseApp):
         }
 
         self.log.info("Creating/updating assignment with ID '%s': %s", assignment_id, assignment)
-        with Gradebook(self.coursedir.db_url, self.course_id) as gb:
+        with Gradebook(self.coursedir.db_url, self.course_id, self.authenticator) as gb:
             gb.update_or_create_assignment(assignment_id, **assignment)
 
 
@@ -354,7 +356,7 @@ class DbAssignmentRemoveApp(DbBaseApp):
 
         assignment_id = self.extra_args[0]
 
-        with Gradebook(self.coursedir.db_url, self.course_id) as gb:
+        with Gradebook(self.coursedir.db_url, self.course_id, self.authenticator) as gb:
             try:
                 assignment = gb.find_assignment(assignment_id)
             except MissingEntry:
@@ -404,7 +406,7 @@ class DbAssignmentListApp(DbBaseApp):
     def start(self):
         super(DbAssignmentListApp, self).start()
 
-        with Gradebook(self.coursedir.db_url, self.course_id) as gb:
+        with Gradebook(self.coursedir.db_url, self.course_id, self.authenticator) as gb:
             print("There are %d assignments in the database:" % len(gb.assignments))
             for assignment in gb.assignments:
                 print("%s (due: %s)" % (assignment.name, assignment.duedate))
@@ -488,7 +490,7 @@ class DbUpgradeApp(DbBaseApp):
     def _backup_db_file(self, db_file):
         """Backup a database file"""
         if not os.path.exists(db_file):
-            with Gradebook("sqlite:///{}".format(db_file), self.course_id):
+            with Gradebook("sqlite:///{}".format(db_file), self.course_id, self.authenticator):
                 pass
 
         timestamp = datetime.now().strftime('.%Y-%m-%d-%H%M%S.%f')

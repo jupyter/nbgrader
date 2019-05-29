@@ -1307,19 +1307,19 @@ class Gradebook(object):
 
     """
 
-    def __init__(self, db_url, authenticator=None, course_id=""):
+    def __init__(self, db_url, course_id="", authenticator=None):
         """Initialize the connection to the database.
 
         Parameters
         ----------
         db_url : string
             The URL to the database, e.g. ``sqlite:///grades.db``
-        authenticator : :class:~`nbgrader.auth.BaseAuthenticator`
-            An authenticator instance for communicating with an external
-            database.
         course_id : string, optional
             identifier of the course necessary for supporting multiple classes
             default course_id is '' to be consistent with :class:~`nbgrader.apps.api.NbGraderAPI`
+        authenticator : :class:~`nbgrader.auth.BaseAuthenticator`
+            An authenticator instance for communicating with an external
+            database.
 
         """
         # create the connection to the database
@@ -1480,6 +1480,12 @@ class Gradebook(object):
         except MissingEntry:
             student = self.add_student(student_id, **kwargs)
         else:
+            # Make sure the student is in the course, even if it's somehow
+            # already in the database.
+            if self.authenticator:
+                self.authenticator.add_student_to_course(
+                    student_id, self.course_id)
+
             for attr in kwargs:
                 setattr(student, attr, kwargs[attr])
             try:

@@ -1,7 +1,8 @@
+from traitlets import Instance, Type
 from traitlets.config import LoggingConfigurable
 
 
-class BaseAuthenticator(LoggingConfigurable):
+class BaseAuthPlugin(LoggingConfigurable):
 
     def get_student_courses(self, student_id):
         """Gets the list of courses that the student is enrolled in.
@@ -20,6 +21,85 @@ class BaseAuthenticator(LoggingConfigurable):
 
         """
         raise NotImplementedError
+
+    def add_student_to_course(self, student_id, course_id):
+        """Grants a student access to a given course.
+
+        Arguments
+        ---------
+        student_id: string
+            The unique id of the student.
+        course_id: string
+            The unique id of the course.
+
+        """
+        raise NotImplementedError
+
+    def remove_student_from_course(self, student_id, course_id):
+        """Removes a student's access to a given course.
+
+        Arguments
+        ---------
+        student_id: string
+            The unique id of the student.
+        course_id: string
+            The unique id of the course.
+
+        """
+        raise NotImplementedError
+
+
+class NoAuthPlugin(BaseAuthPlugin):
+
+    def get_student_courses(self, student_id):
+        # None means that the student has access to any course that might exist
+        # on the system.
+        return None
+
+    def add_student_to_course(self, student_id, course_id):
+        # Nothing to do, we don't keep track of which students are in which
+        # courses in the default setting.
+        pass
+
+    def remove_student_from_course(self, student_id, course_id):
+        # Nothing to do, we don't keep track of which students are in which
+        # courses in the default setting.
+        pass
+
+
+
+class Authenticator(LoggingConfigurable):
+
+    plugin_class = Type(
+        NoAuthPlugin,
+        klass=BaseAuthPlugin,
+        help="A plugin for different authentication methods."
+    ).tag(config=True)
+
+    plugin = Instance(BaseAuthPlugin).tag(config=False)
+
+    def __init__(self, *args, **kwargs):
+        self.log.debug("Using authenticator: %s", self.plugin_class.__name__)
+        self.plugin = self.plugin_class(parent=self)
+        super(Authenticator, self).__init__(*args, **kwargs)
+
+    def get_student_courses(self, student_id):
+        """Gets the list of courses that the student is enrolled in.
+
+        Arguments
+        ---------
+        student_id: string
+            The unique id of the student.
+
+        Returns
+        -------
+        A list of unique course ids, or None. If None is returned this means
+        that the student has access to any course that might exist. Otherwise
+        the student is only allowed access to the specific courses returned in
+        the list.
+
+        """
+        return self.plugin.get_student_courses(student_id)
 
     def has_access(self, student_id, course_id):
         """Checks whether a student has access to a particular course.
@@ -52,7 +132,7 @@ class BaseAuthenticator(LoggingConfigurable):
             The unique id of the course.
 
         """
-        raise NotImplementedError
+        return self.plugin.add_student_to_course(student_id, course_id)
 
     def remove_student_from_course(self, student_id, course_id):
         """Removes a student's access to a given course.
@@ -65,4 +145,4 @@ class BaseAuthenticator(LoggingConfigurable):
             The unique id of the course.
 
         """
-        raise NotImplementedError
+        self.plugin.remove_student_from_course(student_id, course_id)

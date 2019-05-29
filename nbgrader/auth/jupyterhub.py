@@ -1,7 +1,7 @@
 import os
 import requests
 
-from .base import BaseAuthenticator
+from .base import BaseAuthPlugin
 
 
 class JupyterhubEnvironmentError(Exception):
@@ -58,7 +58,7 @@ def _query_jupyterhub_api(method, api_path, post_data=None):
     return req.json()
 
 
-class JupyterHubAuthenticator(BaseAuthenticator):
+class JupyterHubAuthPlugin(BaseAuthPlugin):
 
     def get_student_courses(self, student_id):
         if student_id == "*":

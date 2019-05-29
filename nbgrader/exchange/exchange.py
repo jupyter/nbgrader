@@ -13,7 +13,7 @@ from jupyter_core.paths import jupyter_data_dir
 
 from ..utils import check_directory
 from ..coursedir import CourseDirectory
-from ..auth import BaseAuthenticator, NoAuthentication
+from ..auth import Authenticator
 
 
 class ExchangeError(Exception):
@@ -76,22 +76,11 @@ class Exchange(LoggingConfigurable):
     ).tag(config=True)
 
     coursedir = Instance(CourseDirectory, allow_none=True)
+    authenticator = Instance(Authenticator, allow_none=True)
 
-    authenticator_class = Type(
-        NoAuthentication,
-        klass=BaseAuthenticator,
-        help="The class for authenticating users."
-    ).tag(config=True)
-
-    authenticator = Instance(BaseAuthenticator).tag(config=False)
-
-    def init_authenticator(self):
-        self.log.info("Using authenticator: %s", self.authenticator_class.__name__)
-        self.authenticator = self.authenticator_class(parent=self)
-
-    def __init__(self, coursedir=None, **kwargs):
+    def __init__(self, coursedir=None, authenticator=None, **kwargs):
         self.coursedir = coursedir
-        self.init_authenticator()
+        self.authenticator = authenticator
         super(Exchange, self).__init__(**kwargs)
 
     def fail(self, msg):
