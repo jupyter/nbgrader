@@ -47,7 +47,7 @@ def cleandocs(args):
     run('python nbgrader/docs/source/clear_docs.py')
 
 
-def _run_tests(mark, skip, junitxml):
+def _run_tests(mark, skip, junitxml, paralell=False):
     cmd = []
     cmd.append('pytest')
     if not WINDOWS:
@@ -57,7 +57,8 @@ def _run_tests(mark, skip, junitxml):
         cmd.extend(['--junitxml', junitxml])
     cmd.append('-v')
     cmd.append('-x')
-    cmd.extend(['--numprocesses', 'auto'])
+    if paralell:
+        cmd.extend(['--numprocesses', 'auto'])
     cmd.extend(['--reruns', '4'])
 
     marks = []
@@ -78,7 +79,7 @@ def _run_tests(mark, skip, junitxml):
 def tests(args):
     if args.group == 'python':
         _run_tests(
-            mark="not nbextensions", skip=args.skip, junitxml=args.junitxml)
+            mark="not nbextensions", skip=args.skip, junitxml=args.junitxml, paralell=True)
 
     elif args.group == 'nbextensions':
         _run_tests(mark="nbextensions", skip=args.skip, junitxml=args.junitxml)
