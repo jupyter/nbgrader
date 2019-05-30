@@ -5,6 +5,7 @@ import sys
 import subprocess as sp
 import argparse
 
+
 def echo(msg):
     print("\033[1;37m{0}\033[0m".format(msg))
 
@@ -12,6 +13,7 @@ def echo(msg):
 def run(cmd):
     echo(cmd)
     return sp.check_call(cmd, shell=True)
+
 
 try:
     from nbformat import read
@@ -55,6 +57,7 @@ def _run_tests(mark, skip, junitxml):
         cmd.extend(['--junitxml', junitxml])
     cmd.append('-v')
     cmd.append('-x')
+    cmd.extend(['--numprocesses', 'auto'])
     cmd.extend(['--reruns', '4'])
 
     marks = []
