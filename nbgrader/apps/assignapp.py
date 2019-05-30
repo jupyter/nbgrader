@@ -7,7 +7,9 @@ from traitlets import default
 from .baseapp import NbGrader, nbgrader_aliases, nbgrader_flags
 from ..converters import BaseConverter, Assign, NbGraderException
 
-aliases = {}
+aliases = {
+    'course_id': 'Assign.course_id'
+}
 aliases.update(nbgrader_aliases)
 del aliases['student']
 aliases.update({
@@ -36,7 +38,7 @@ flags.update({
     'create': (
         {'Assign': {'create_assignment': True}},
         "Create an entry for the assignment in the database, if one does not already exist."
-    ),
+    ),  
     'force': (
         {'BaseConverter': {'force': True}},
         "Overwrite an assignment/submission if it already exists."
