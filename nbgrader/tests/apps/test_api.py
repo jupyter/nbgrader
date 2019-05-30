@@ -505,6 +505,7 @@ class TestNbGraderAPI(BaseTestApp):
             "last_name": None,
             "first_name": None,
             "email": None,
+            "lms_user_id": None,
             "max_score": 0,
             "score": 0
         }
@@ -517,16 +518,18 @@ class TestNbGraderAPI(BaseTestApp):
                 "last_name": None,
                 "first_name": None,
                 "email": None,
+                "lms_user_id": None,
                 "max_score": 0,
                 "score": 0
             }
 
-            gb.update_or_create_student("foo", last_name="Foo", first_name="A", email="a.foo@email.com")
+            gb.update_or_create_student("foo", last_name="Foo", first_name="A", email="a.foo@email.com", lms_user_id="230")
             assert api.get_student("foo") == {
                 "id": "foo",
                 "last_name": "Foo",
                 "first_name": "A",
                 "email": "a.foo@email.com",
+                "lms_user_id": "230",
                 "max_score": 0,
                 "score": 0
             }
@@ -540,6 +543,7 @@ class TestNbGraderAPI(BaseTestApp):
             "last_name": "Foo",
             "first_name": "A",
             "email": "a.foo@email.com",
+            "lms_user_id": "230",
             "max_score": 7,
             "score": 2
         }
@@ -548,12 +552,13 @@ class TestNbGraderAPI(BaseTestApp):
         assert api.get_students() == []
 
         with api.gradebook as gb:
-            gb.update_or_create_student("foo", last_name="Foo", first_name="A", email="a.foo@email.com")
+            gb.update_or_create_student("foo", last_name="Foo", first_name="A", email="a.foo@email.com", lms_user_id=None)
             s1 = {
                 "id": "foo",
                 "last_name": "Foo",
                 "first_name": "A",
                 "email": "a.foo@email.com",
+                "lms_user_id": None,
                 "max_score": 0,
                 "score": 0
             }
@@ -565,6 +570,7 @@ class TestNbGraderAPI(BaseTestApp):
             "last_name": None,
             "first_name": None,
             "email": None,
+            "lms_user_id": None,
             "max_score": 0,
             "score": 0
         }

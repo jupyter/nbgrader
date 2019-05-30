@@ -143,8 +143,8 @@ class TestNbGraderDb(BaseTestApp):
         assert out == dedent(
             """
             There are 2 students in the database:
-            bar (None, None) -- None
-            foo (xyz, abc) -- foo@bar.com
+            bar (None, None) -- None, None
+            foo (xyz, abc) -- foo@bar.com, None
             """
         ).strip() + "\n"
 

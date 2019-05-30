@@ -369,8 +369,8 @@ class Student(Base):
     #: of each assignment.
     max_score = None
 
-    #: The lms user ID, this is mainly for identifying students in your LMS system
-    #: and was added so teachers and TA's can easily send grades to an LMS such as CanvasLMS.
+    #: The LMS user ID, this is mainly for identifying students in your LMS system
+    #: and was added so teachers and TA's can easily send grades to a LMS such as Canvas and Blackboard.
     lms_user_id = Column(String(128), nullable=True)
 
     def to_dict(self):
