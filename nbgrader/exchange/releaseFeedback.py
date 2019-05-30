@@ -12,7 +12,7 @@ from stat import (
 from traitlets import Bool
 
 from .exchange import Exchange
-from ..utils import self_owned, compute_checksum
+from ..utils import self_owned, compute_checksum, notebook_hash
 
 
 class ExchangeReleaseFeedback(Exchange):
@@ -46,21 +46,22 @@ class ExchangeReleaseFeedback(Exchange):
 
     def copy_files(self):
         self.log.info("using src path: {}".format(self.src_path))
-        for dirname, dirnames, _ in os.walk(self.src_path):
-            for udir in dirnames:
-                if udir == self.coursedir.assignment_id:
-                    self.log.info("found directory {0} {1}".format( udir,os.path.join( dirname, udir)+'/*.html'))
-                    timestamp = open(os.path.join( dirname, udir,'timestamp.txt')).read()
-                    self.log.info("timestamp {}".format( timestamp ))
-                    user = dirname.split('/')[-1]    
-                    submissionDir = os.path.join( self.src_path , '../submitted/' , '{0}/{1}'.format(user,udir,timestamp) )
-                    for html_file in glob.glob(os.path.join(dirname, udir)+'/*.html'):
-                        fname = html_file.split('/')[-1].replace('.html','')
-                        self.log.info("found html file {}".format( fname))
-                        nbfile = "{0}/{1}.ipynb".format( submissionDir,fname)
-                        m = hashlib.md5()
-                        m.update(open(nbfile,'rb').read())
-                        checksum = m.hexdigest()
-                        dest = os.path.join(self.dest_path,checksum+'.html')
-                        self.log.info(dest)
-                        shutil.copy(html_file, dest)
+        student_id = self.coursedir.student_id if self.coursedir.student_id else '*'
+        self.log.info("student_id: {}".format(student_id))        
+        html_files = glob.glob(os.path.join(self.src_path,student_id,self.coursedir.assignment_id,'*.html'))
+        self.log.info("html_files: {}".format(html_files))        
+        for html_file in html_files:   
+            assignment_dir, file_name = os.path.split(html_file)
+            timestamp = open(os.path.join( assignment_dir, 'timestamp.txt')).read()
+            self.log.info("timestamp {}".format( timestamp ))
+            user = assignment_dir.split('/')[-2]    
+            submissionDir = os.path.join( self.src_path , '../submitted/' , '{0}/{1}'.format(user, self.coursedir.assignment_id,timestamp) )
+            fname, _ = os.path.splitext(file_name.replace('.html',''))
+            self.log.info("found html file {}".format( fname))
+            nbfile = "{0}/{1}.ipynb".format( submissionDir,fname)
+            checksum = notebook_hash(nbfile)
+            dest = os.path.join(self.dest_path,checksum+'.html')
+            self.log.info(dest)
+            shutil.copy(html_file, dest)
+
+
