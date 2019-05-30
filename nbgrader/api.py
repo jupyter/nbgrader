@@ -41,6 +41,16 @@ class InvalidEntry(ValueError):
 class MissingEntry(ValueError):
     pass
 
+class Course(Base):
+    """Database representation of the course a user or assignment belongs to."""
+
+    __tablename__ = "course"
+
+    id = Column(String(128), unique=True, primary_key=True, nullable=False)
+    assignments = relationship("Assignment", back_populates="course")
+
+    def __repr__(self):
+        return "Course<{}>".format(self.name)
 
 class Assignment(Base):
     """Database representation of the master/source version of an assignment."""
@@ -55,6 +65,10 @@ class Assignment(Base):
 
     #: (Optional) Duedate for the assignment in datetime format, with UTC timezone
     duedate = Column(DateTime())
+
+    #: The course for this assignment
+    course_id = Column(String(128), ForeignKey('course.id'), nullable=False)
+    course = relationship("Course", back_populates="assignments")
 
     #: A collection of notebooks contained in this assignment, represented
     #: by :class:`~nbgrader.api.Notebook` objects
@@ -1554,6 +1568,12 @@ class Gradebook(object):
         """
         if 'duedate' in kwargs:
             kwargs['duedate'] = utils.parse_utc(kwargs['duedate'])
+        if 'course_id' not in kwargs:
+            default_course = self.db.query(Course).first()
+            if not default_course:
+                default_course = Course(id="default_course")
+                self.db.add(default_course)
+            kwargs['course_id'] = default_course.id
         assignment = Assignment(name=name, **kwargs)
         self.db.add(assignment)
         try:
