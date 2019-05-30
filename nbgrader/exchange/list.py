@@ -2,7 +2,7 @@ import os
 import glob
 import shutil
 import re
-
+import hashlib
 from traitlets import Bool
 
 from .exchange import Exchange
@@ -21,7 +21,7 @@ class ExchangeList(Exchange):
         course_id = self.course_id if self.course_id else '*'
         assignment_id = self.coursedir.assignment_id if self.coursedir.assignment_id else '*'
         student_id = self.coursedir.student_id if self.coursedir.student_id else '*'
-
+        
         if self.inbound:
             pattern = os.path.join(self.root, course_id, 'inbound', '{}+{}+*'.format(student_id, assignment_id))
         elif self.cached:
@@ -79,12 +79,21 @@ class ExchangeList(Exchange):
                 info['status'] = 'removed'
 
             info['notebooks'] = []
+            hasFeedback = False
             for notebook in sorted(glob.glob(os.path.join(info['path'], '*.ipynb'))):
-                info['notebooks'].append({
+                nbInfo = {
                     'notebook_id': os.path.splitext(os.path.split(notebook)[1])[0],
                     'path': os.path.abspath(notebook)
-                })
-
+                }
+                m = hashlib.md5()
+                m.update(open(notebook,'rb').read())
+                feedbackpath = os.path.join(self.root, info['course_id'], 'feedback','{0}.html'.format(m.hexdigest()))  
+                if os.path.exists(feedbackpath):
+                    nbInfo['feedbackPath'] = feedbackpath 
+                    hasFeedback = True
+                info['notebooks'].append(nbInfo)
+            
+            info['hasFeedback'] = hasFeedback
             assignments.append(info)
 
         return assignments
@@ -92,7 +101,7 @@ class ExchangeList(Exchange):
     def list_files(self):
         """List files."""
         assignments = self.parse_assignments()
-
+            
         if self.inbound or self.cached:
             self.log.info("Submitted assignments:")
             for info in assignments:
@@ -102,6 +111,7 @@ class ExchangeList(Exchange):
             for info in assignments:
                 self.log.info(self.format_outbound_assignment(info))
 
+        #self.log.info("assignments: {}".format(assignments))
         return assignments
 
     def remove_files(self):
