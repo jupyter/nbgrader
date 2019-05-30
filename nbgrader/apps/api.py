@@ -1000,14 +1000,15 @@ class NbGraderAPI(LoggingConfigurable):
             - log (string): captured log output
 
         """
-        if student_id is not None:
-            with temp_attrs(self.coursedir, assignment_id=assignment_id, student_id=student_id):
-                app = Feedback(coursedir=self.coursedir, parent=self)
-                app.force = True
-                return capture_log(app)
-        else:
-            ## FIXME: loop over all
-            return {"success": True}
+        with temp_attrs(self.coursedir,
+                        assignment_id=assignment_id,
+                        student_id=student_id):
+            app = Feedback(coursedir=self.coursedir, parent=self)
+            app.force = True
+            c = Config()
+            c.HTMLExporter.template_file = 'feedback.tpl'
+            app.update_config(c)
+            return capture_log(app)
 
     def release_feedback(self, assignment_id, student_id=None):
         """Run ``nbgrader release_feedback`` for a particular assignment/student.
