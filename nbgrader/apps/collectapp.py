@@ -92,7 +92,10 @@ class CollectApp(NbGrader):
         elif self.coursedir.assignment_id == "":
             self.fail("Must provide assignment name:\nnbgrader <command> ASSIGNMENT [ --course COURSE ]")
 
-        collect = ExchangeCollect(coursedir=self.coursedir, parent=self)
+        collect = ExchangeCollect(
+            coursedir=self.coursedir,
+            authenticator=self.authenticator,
+            parent=self)
         try:
             collect.start()
         except ExchangeError:
