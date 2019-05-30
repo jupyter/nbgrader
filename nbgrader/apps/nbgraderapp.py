@@ -28,6 +28,7 @@ from . import (
     ReleaseApp,
     CollectApp,
     FetchApp,
+    FetchFeedbackApp,
     SubmitApp,
     ListApp,
     ExtensionApp,
@@ -178,6 +179,15 @@ class NbGraderApp(NbGrader):
             dedent(
                 """
                 Fetch an assignment from an instructor through the nbgrader exchange.
+                Intended for use by students only.
+                """
+            ).strip()
+        ),
+        fetchfeedback=(
+            FetchFeedbackApp,
+            dedent(
+                """
+                Fetch feedback for an assignment from an instructor through the nbgrader exchange.
                 Intended for use by students only.
                 """
             ).strip()

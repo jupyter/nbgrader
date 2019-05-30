@@ -4,7 +4,7 @@ import shutil
 import re
 import hashlib
 from traitlets import Bool
-
+from ..utils import notebook_hash
 from .exchange import Exchange
 
 
@@ -85,9 +85,8 @@ class ExchangeList(Exchange):
                     'notebook_id': os.path.splitext(os.path.split(notebook)[1])[0],
                     'path': os.path.abspath(notebook)
                 }
-                m = hashlib.md5()
-                m.update(open(notebook,'rb').read())
-                feedbackpath = os.path.join(self.root, info['course_id'], 'feedback','{0}.html'.format(m.hexdigest()))  
+                nb_hash = notebook_hash(notebook)
+                feedbackpath = os.path.join(self.root, info['course_id'], 'feedback','{0}.html'.format(nb_hash))  
                 if os.path.exists(feedbackpath):
                     nbInfo['feedbackPath'] = feedbackpath 
                     hasFeedback = True
@@ -111,7 +110,7 @@ class ExchangeList(Exchange):
             for info in assignments:
                 self.log.info(self.format_outbound_assignment(info))
 
-        #self.log.info("assignments: {}".format(assignments))
+        self.log.info("assignments: {}".format(assignments))
         return assignments
 
     def remove_files(self):

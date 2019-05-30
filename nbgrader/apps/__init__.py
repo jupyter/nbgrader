@@ -8,6 +8,7 @@ from .releaseapp import ReleaseApp
 from .releasefeedbackapp import ReleaseFeedbackApp
 from .collectapp import CollectApp
 from .fetchapp import FetchApp
+from .fetchfeedbackapp import FetchFeedbackApp
 from .submitapp import SubmitApp
 from .listapp import ListApp
 from .extensionapp import ExtensionApp
@@ -35,6 +36,7 @@ __all__ = [
     'ReleaseFeedbackApp',
     'CollectApp',
     'FetchApp',
+    'FetchFeedbackApp',
     'SubmitApp',
     'ListApp',
     'ExtensionApp',

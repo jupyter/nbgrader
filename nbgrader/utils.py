@@ -438,3 +438,10 @@ def capture_log(app, fmt="[%(levelname)s] %(message)s"):
         app.log.removeHandler(handler)
 
     return result
+
+
+def notebook_hash(path):
+    m = hashlib.md5()
+    m.update(open(path,'rb').read())
+    return m.hexdigest()  
+            

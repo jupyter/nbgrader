@@ -1,6 +1,7 @@
 from .exchange import Exchange, ExchangeError
 from .collect import ExchangeCollect
 from .fetch import ExchangeFetch
+from .fetchfeedback import ExchangeFetchFeedback
 from .list import ExchangeList
 from .release import ExchangeRelease
 from .releaseFeedback import ExchangeReleaseFeedback
@@ -11,6 +12,7 @@ __all__ = [
     "ExchangeError",
     "ExchangeCollect",
     "ExchangeFetch",
+    "ExchangeFetchFeedback",
     "ExchangeList",
     "ExchangeRelease",
     "ExchangeReleaseFeedback",
