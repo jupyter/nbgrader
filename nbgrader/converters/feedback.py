@@ -40,7 +40,6 @@ class Feedback(BaseConverter):
 
     def __init__(self, coursedir=None, **kwargs):
         super(Feedback, self).__init__(coursedir=coursedir, **kwargs)
-
         c = Config()
         if 'template_file' not in self.config.HTMLExporter:
             c.HTMLExporter.template_file = 'feedback.tpl'

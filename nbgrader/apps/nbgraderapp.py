@@ -146,7 +146,7 @@ class NbGraderApp(NbGrader):
                 """
             ).strip()
         ),
-        releasefeeback=(
+        releasefeedback=(
             ReleaseFeedbackApp,
             dedent(
                 """

@@ -30,13 +30,13 @@ class ExchangeReleaseFeedback(Exchange):
         # 0755
         self.ensure_directory(
             self.outbound_feedback_path,
-            S_IRUSR|S_IWUSR|S_IXUSR|S_IRGRP|S_IXGRP|S_IROTH|S_IXOTH
+            S_IRUSR|S_IWUSR|S_IXUSR|S_IXGRP|S_IXOTH
         )
     # should be moved up to Exchange? Common to this and release
     def ensure_directory(self, path, mode):
         """Ensure that the path exists, has the right mode and is self owned."""
         if not os.path.isdir(path):
-            os.mkdir(path)
+            os.makedirs(path)
             # For some reason, Python won't create a directory with a mode of 0o733
             # so we have to create and then chmod.
             os.chmod(path, mode)
