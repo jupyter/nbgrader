@@ -75,17 +75,22 @@ def test_jupyterhub_get_student_courses(env, jupyterhub_auth):
         assert jupyterhub_auth.get_student_courses('foo') == ['course123']
 
 
-def test_jupyterhub_add_student_to_course_failures(env, jupyterhub_auth, caplog):
+def test_jupyterhub_add_student_to_course_no_token(jupyterhub_auth):
     # this will fail, because the api token hasn't been set
     with pytest.raises(JupyterhubEnvironmentError):
         jupyterhub_auth.add_student_to_course('foo', 'course123')
 
+
+def test_jupyterhub_add_student_to_course_no_user(env, jupyterhub_auth):
     # should still fail, because the user hasn't been set
     env['JUPYTERHUB_API_TOKEN'] = 'abcd1234'
     with pytest.raises(JupyterhubEnvironmentError):
         jupyterhub_auth.add_student_to_course('foo', 'course123')
 
+
+def test_jupyterhub_add_student_to_course_forbidden(env, jupyterhub_auth, caplog):
     # test case where something goes wrong
+    env['JUPYTERHUB_API_TOKEN'] = 'abcd1234'
     env['JUPYTERHUB_USER'] = 'foo'
     with requests_mock.Mocker() as m:
         _mock_api_call(m.get, '/groups', status_code=403)
@@ -104,17 +109,22 @@ def test_jupyterhub_add_student_to_course_success(env, jupyterhub_auth, caplog):
         assert 'ERROR' not in [rec.levelname for rec in caplog.records]
 
 
-def test_jupyterhub_remove_student_from_course_failures(env, jupyterhub_auth, caplog):
+def test_jupyterhub_remove_student_from_course_no_token(jupyterhub_auth):
     # this will fail, because the api token hasn't been set
     with pytest.raises(JupyterhubEnvironmentError):
         jupyterhub_auth.remove_student_from_course('foo', 'course123')
 
+
+def test_jupyterhub_remove_student_from_course_no_user(env, jupyterhub_auth):
     # should still fail, because the user hasn't been set
     env['JUPYTERHUB_API_TOKEN'] = 'abcd1234'
     with pytest.raises(JupyterhubEnvironmentError):
         jupyterhub_auth.remove_student_from_course('foo', 'course123')
 
+
+def test_jupyterhub_remove_student_from_course_forbidden(env, jupyterhub_auth, caplog):
     # test case where something goes wrong
+    env['JUPYTERHUB_API_TOKEN'] = 'abcd1234'
     env['JUPYTERHUB_USER'] = 'foo'
     with requests_mock.Mocker() as m:
         _mock_api_call(m.delete, '/groups/nbgrader-course123/users', status_code=403)
