@@ -5,7 +5,7 @@ import os
 import six
 import logging
 
-from traitlets.config import LoggingConfigurable
+from traitlets.config import LoggingConfigurable, Config
 from traitlets import Instance, Enum, Unicode, observe
 
 from ..coursedir import CourseDirectory
@@ -1000,15 +1000,23 @@ class NbGraderAPI(LoggingConfigurable):
             - log (string): captured log output
 
         """
-        with temp_attrs(self.coursedir,
-                        assignment_id=assignment_id,
-                        student_id=student_id):
-            app = Feedback(coursedir=self.coursedir, parent=self)
-            app.force = True
-            c = Config()
-            c.HTMLExporter.template_file = 'feedback.tpl'
-            app.update_config(c)
-            return capture_log(app)
+        if student_id is not None:
+            with temp_attrs(self.coursedir,
+                            assignment_id=assignment_id,
+                            student_id=student_id):
+                app = Feedback(coursedir=self.coursedir, parent=self)
+                c = Config()
+                c.HTMLExporter.template_file = 'feedback.tpl'
+                app.update_config(c)
+                return capture_log(app)
+        else:
+            with temp_attrs(self.coursedir,
+                            assignment_id=assignment_id):
+                app = Feedback(coursedir=self.coursedir, parent=self)
+                c = Config()
+                c.HTMLExporter.template_file = 'feedback.tpl'
+                app.update_config(c)
+                return capture_log(app)
 
     def release_feedback(self, assignment_id, student_id=None):
         """Run ``nbgrader release_feedback`` for a particular assignment/student.
