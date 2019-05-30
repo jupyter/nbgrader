@@ -10,7 +10,7 @@ from traitlets import Instance, Enum, Unicode, observe
 
 from ..coursedir import CourseDirectory
 from ..converters import Assign, Autograde, Feedback
-from ..exchange import ExchangeList, ExchangeRelease, ExchangeCollect, ExchangeError, ExchangeSubmit
+from ..exchange import ExchangeList, ExchangeRelease, ExchangeReleaseFeedback, ExchangeCollect, ExchangeError, ExchangeSubmit
 from ..api import MissingEntry, Gradebook, Student, SubmittedAssignment
 from ..utils import parse_utc, temp_attrs, capture_log, as_timezone, to_numeric_tz
 
@@ -1031,6 +1031,11 @@ class NbGraderAPI(LoggingConfigurable):
 
         """
         if student_id is not None:
-            return {"success": True}
+            #return {"success": True}
+            with temp_attrs(self.coursedir, assignment_id=assignment_id):
+                app = ExchangeReleaseFeedback(coursedir=self.coursedir, parent=self)
+                return capture_log(app)
+
+
         else:
             return {"success": True}

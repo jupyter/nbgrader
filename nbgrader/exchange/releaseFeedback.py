@@ -18,7 +18,7 @@ from ..utils import self_owned, compute_checksum
 class ExchangeReleaseFeedback(Exchange):
 
     def init_src(self):
-        self.src_path = self.coursedir.feedback_directory
+        self.src_path = os.path.join(self.coursedir.root, self.coursedir.feedback_directory)
 
     def init_dest(self):
         if self.course_id == '':
