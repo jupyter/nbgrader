@@ -9,7 +9,7 @@ from traitlets.config import LoggingConfigurable
 from traitlets import Instance, Enum, Unicode, observe
 
 from ..coursedir import CourseDirectory
-from ..converters import Assign, Autograde
+from ..converters import Assign, Autograde, Feedback
 from ..exchange import ExchangeList, ExchangeRelease, ExchangeCollect, ExchangeError, ExchangeSubmit
 from ..api import MissingEntry, Gradebook, Student, SubmittedAssignment
 from ..utils import parse_utc, temp_attrs, capture_log, as_timezone, to_numeric_tz
@@ -981,15 +981,14 @@ class NbGraderAPI(LoggingConfigurable):
             return capture_log(app)
 
     def generate_feedback(self, assignment_id, student_id=None):
-        """Run ``nbgrader generate_feedback`` for a particular assignment/student.
+        """Run ``nbgrader feedback`` for a particular assignment and student.
 
         Arguments
         ---------
         assignment_id: string
             The name of the assignment
-        assignment_id: string
-            The name of the student (optional). If not provided, then generate
-            all feedback.
+        student_id: string
+            The unique id of the student
 
         Returns
         -------
@@ -1001,7 +1000,14 @@ class NbGraderAPI(LoggingConfigurable):
             - log (string): captured log output
 
         """
-        return {"success": True}
+        if student_id is not None:
+            with temp_attrs(self.coursedir, assignment_id=assignment_id, student_id=student_id):
+                app = Feedback(coursedir=self.coursedir, parent=self)
+                app.force = True
+                return capture_log(app)
+        else:
+            ## FIXME: loop over all
+            return {"success": True}
 
     def release_feedback(self, assignment_id, student_id=None):
         """Run ``nbgrader release_feedback`` for a particular assignment/student.
@@ -1024,5 +1030,7 @@ class NbGraderAPI(LoggingConfigurable):
             - log (string): captured log output
 
         """
-        return {"success": True}
-
+        if student_id is not None:
+            return {"success": True}
+        else:
+            return {"success": True}

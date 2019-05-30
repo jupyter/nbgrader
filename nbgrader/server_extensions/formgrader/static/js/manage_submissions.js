@@ -177,7 +177,7 @@ var SubmissionUI = Backbone.View.extend({
         this.$student_name.text("Please wait...");
         var student = this.model.get("student");
         var assignment = this.model.get("name");
-        $.post(base_url + "/formgrader/api/submission/" + assignment + "/" + student + "/generate_feedback")
+        $.post(base_url + "/formgrader/api/assignment/" + assignment + "/" + student + "/generate_feedback")
             .done(_.bind(this.generate_feedback_success, this))
             .fail(_.bind(this.generate_feedback_failure, this));
     },
@@ -219,7 +219,7 @@ var SubmissionUI = Backbone.View.extend({
         this.$student_name.text("Please wait...");
         var student = this.model.get("student");
         var assignment = this.model.get("name");
-        $.post(base_url + "/formgrader/api/submission/" + assignment + "/" + student + "/release_feedback")
+        $.post(base_url + "/formgrader/api/assignment/" + assignment + "/" + student + "/release_feedback")
             .done(_.bind(this.release_feedback_success, this))
             .fail(_.bind(this.release_feedback_failure, this));
     },
