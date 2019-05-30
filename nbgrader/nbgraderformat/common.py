@@ -18,6 +18,14 @@ class SchemaMismatchError(Exception):
         self.expected_version = expected_version
 
 
+class SchemaTooOldError(SchemaMismatchError):
+    pass
+
+
+class SchemaTooNewError(SchemaMismatchError):
+    pass
+
+
 class BaseMetadataValidator(LoggingConfigurable):
 
     schema = None
@@ -51,15 +59,12 @@ class BaseMetadataValidator(LoggingConfigurable):
             return
         schema = cell.metadata['nbgrader'].get('schema_version', 0)
         if schema < SCHEMA_VERSION:
-            raise SchemaMismatchError(
+            raise SchemaTooOldError(
                 "Outdated schema version: {} (expected {})".format(schema, SCHEMA_VERSION),
                 schema, SCHEMA_VERSION)
         elif schema > SCHEMA_VERSION:
-            raise SchemaMismatchError(
-                "Schema version is too new: {} (expected {}). This means this "
-                "notebook was created with a newer version of nbgrader. Please "
-                "update your version of nbgrader to the latest version to be "
-                "able to use this notebook.".format(schema, SCHEMA_VERSION),
+            raise SchemaTooNewError(
+                "Schema version is too new: {} (expected {})".format(schema, SCHEMA_VERSION),
                 schema, SCHEMA_VERSION)
         jsonschema.validate(cell.metadata['nbgrader'], self.schema)
 
