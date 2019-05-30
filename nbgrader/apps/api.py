@@ -979,3 +979,50 @@ class NbGraderAPI(LoggingConfigurable):
             app.force = force
             app.create_student = create
             return capture_log(app)
+
+    def generate_feedback(self, assignment_id, student_id=None):
+        """Run ``nbgrader generate_feedback`` for a particular assignment/student.
+
+        Arguments
+        ---------
+        assignment_id: string
+            The name of the assignment
+        assignment_id: string
+            The name of the student (optional). If not provided, then generate
+            all feedback.
+
+        Returns
+        -------
+        result: dict
+            A dictionary with the following keys (error and log may or may not be present):
+
+            - success (bool): whether or not the operation completed successfully
+            - error (string): formatted traceback
+            - log (string): captured log output
+
+        """
+        return {"success": True}
+
+    def release_feedback(self, assignment_id, student_id=None):
+        """Run ``nbgrader release_feedback`` for a particular assignment/student.
+
+        Arguments
+        ---------
+        assignment_id: string
+            The name of the assignment
+        assignment_id: string
+            The name of the student (optional). If not provided, then release
+            all feedback.
+
+        Returns
+        -------
+        result: dict
+            A dictionary with the following keys (error and log may or may not be present):
+
+            - success (bool): whether or not the operation completed successfully
+            - error (string): formatted traceback
+            - log (string): captured log output
+
+        """
+        return {"success": True}
+
