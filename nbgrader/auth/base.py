@@ -79,9 +79,9 @@ class Authenticator(LoggingConfigurable):
     plugin = Instance(BaseAuthPlugin).tag(config=False)
 
     def __init__(self, *args, **kwargs):
+        super(Authenticator, self).__init__(*args, **kwargs)
         self.log.debug("Using authenticator: %s", self.plugin_class.__name__)
         self.plugin = self.plugin_class(parent=self)
-        super(Authenticator, self).__init__(*args, **kwargs)
 
     def get_student_courses(self, student_id):
         """Gets the list of courses that the student is enrolled in.

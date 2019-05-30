@@ -103,6 +103,7 @@ class NbGrader(JupyterApp):
                 self.log.removeHandler(handler)
 
     coursedir = Instance(CourseDirectory, allow_none=True)
+    authenticator = Instance(Authenticator, allow_none=True)
     verbose_crash = Bool(False)
 
     # The classes added here determine how configuration will be documented

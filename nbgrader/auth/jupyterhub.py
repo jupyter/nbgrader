@@ -100,6 +100,7 @@ class JupyterHubAuthPlugin(BaseAuthPlugin):
                 )
                 self.log.info("Jupyterhub group: {group_name} created.".format(
                     group_name=group_name))
+
             _query_jupyterhub_api(
                 method="POST",
                 api_path="/groups/{name}/users".format(name=group_name),
@@ -112,18 +113,12 @@ class JupyterHubAuthPlugin(BaseAuthPlugin):
                     student=student_id,
                     group_name=group_name))
 
-        except JupyterhubEnvironmentError as e:
-            self.log.error(
-                "Not running on Jupyterhub, not adding {student} user to the Jupyterhub group {group_name}".format(
-                    student=student_id,
-                    group_name=group_name))
-
         except JupyterhubApiError as e:
-            if self.course_id: # We assume user might be using Jupyterhub but something is not working
-                err_msg = "Student {student} NOT added to the Jupyterhub group {group_name}: ".format(
-                    student=student_id,
-                    group_name=group_name
-                )
+            # We assume user might be using Jupyterhub but something is not working
+            err_msg = "Student {student} NOT added to the Jupyterhub group {group_name}: ".format(
+                student=student_id,
+                group_name=group_name
+            )
             self.log.error(err_msg + str(e))
             self.log.error("Make sure you set a valid admin_user 'api_token' in your config file before starting the service")
 
@@ -138,11 +133,6 @@ class JupyterHubAuthPlugin(BaseAuthPlugin):
             self.log.info(
                 "Student {student} was removed or was already not in the Jupyterhub group {group_name}".format(
                     student=student_id, group_name=group_name))
-
-        except JupyterhubEnvironmentError as e:
-            self.log.error(
-                "Not running on Jupyterhub so {student} was NOT removed from the Jupyterhub group {group_name}:".format(
-                    student=student_id, group_name=group_name), str(e))
 
         except JupyterhubApiError as e:
             self.log.error(
