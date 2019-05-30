@@ -1001,6 +1001,7 @@ class NbGraderAPI(LoggingConfigurable):
 
         """
         if student_id is not None:
+            import pdb; pdb.set_trace()
             with temp_attrs(self.coursedir, assignment_id=assignment_id, student_id=student_id):
                 app = Feedback(coursedir=self.coursedir, parent=self)
                 app.force = True

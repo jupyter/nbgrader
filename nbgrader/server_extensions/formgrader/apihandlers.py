@@ -266,14 +266,14 @@ class GenerateFeedbackHandler(BaseApiHandler):
     @web.authenticated
     @check_xsrf
     def post(self, assignment_id, student_id):
-        self.write(json.dumps(self.api.generate_feedback(assignment_id)))
+        self.write(json.dumps(self.api.generate_feedback(assignment_id, student_id)))
 
 
 class ReleaseFeedbackHandler(BaseApiHandler):
     @web.authenticated
     @check_xsrf
     def post(self, assignment_id, student_id):
-        self.write(json.dumps(self.api.release_feedback(assignment_id)))
+        self.write(json.dumps(self.api.release_feedback(assignment_id, student_id)))
 
 
 default_handlers = [
