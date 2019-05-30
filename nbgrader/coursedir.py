@@ -209,7 +209,8 @@ class CourseDirectory(LoggingConfigurable):
         [
             ".ipynb_checkpoints",
             "*.pyc",
-            "__pycache__"
+            "__pycache__",
+            "feedback",
         ],
         help=dedent(
             """
