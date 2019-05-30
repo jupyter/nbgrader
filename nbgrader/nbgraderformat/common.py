@@ -27,6 +27,17 @@ class BaseMetadataValidator(LoggingConfigurable):
             with open(os.path.join(root, "v{:d}.json".format(version)), "r") as fh:
                 self.schema = json.loads(fh.read())
 
+    def _remove_extra_keys(self, cell):
+        if 'nbgrader' not in cell.metadata:
+            return
+        meta = cell.metadata['nbgrader']
+        allowed = set(self.schema["properties"].keys())
+        keys = set(meta.keys()) - allowed
+        if len(keys) > 0:
+            self.log.warning("extra keys detected in metadata, these will be removed: {}".format(keys))
+            for key in keys:
+                del meta[key]
+
     def upgrade_notebook_metadata(self, nb):
         for cell in nb.cells:
             self.upgrade_cell_metadata(cell)
@@ -39,9 +50,16 @@ class BaseMetadataValidator(LoggingConfigurable):
         if 'nbgrader' not in cell.metadata:
             return
         schema = cell.metadata['nbgrader'].get('schema_version', 0)
-        if schema != SCHEMA_VERSION:
+        if schema < SCHEMA_VERSION:
             raise SchemaMismatchError(
-                "outdated schema version: {} (expected {})".format(schema, SCHEMA_VERSION),
+                "Outdated schema version: {} (expected {})".format(schema, SCHEMA_VERSION),
+                schema, SCHEMA_VERSION)
+        elif schema > SCHEMA_VERSION:
+            raise SchemaMismatchError(
+                "Schema version is too new: {} (expected {}). This means this "
+                "notebook was created with a newer version of nbgrader. Please "
+                "update your version of nbgrader to the latest version to be "
+                "able to use this notebook.".format(schema, SCHEMA_VERSION),
                 schema, SCHEMA_VERSION)
         jsonschema.validate(cell.metadata['nbgrader'], self.schema)
 

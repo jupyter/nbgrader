@@ -64,6 +64,16 @@ def test_extra_keys():
     MetadataValidatorV3().upgrade_cell_metadata(cell)
     assert "foo" not in cell.metadata.nbgrader
 
+    cell = create_grade_cell("", "code", "foo", "", 1)
+    cell.metadata.nbgrader["foo"] = "bar"
+    MetadataValidatorV3().upgrade_cell_metadata(cell)
+    assert "foo" not in cell.metadata.nbgrader
+
+    cell = create_grade_cell("", "code", "foo", "", 2)
+    cell.metadata.nbgrader["foo"] = "bar"
+    MetadataValidatorV3().upgrade_cell_metadata(cell)
+    assert "foo" not in cell.metadata.nbgrader
+
 
 def test_schema_version():
     cell = create_grade_cell("", "code", "foo", "", 0)
@@ -86,7 +96,7 @@ def test_cell_type():
     cell.metadata.nbgrader["checksum"] = "abcd"
     cell.metadata.nbgrader["cell_type"] = "markdown"
     MetadataValidatorV3().upgrade_cell_metadata(cell)
-    assert cell.metadata.nbgrader['cell_type'] == "code"
+    assert cell.metadata.nbgrader['cell_type'] == "markdown"
 
     cell = create_grade_cell("", "code", "foo", "", 0)
     cell.metadata.nbgrader["checksum"] = "abcd"
