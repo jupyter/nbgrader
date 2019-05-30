@@ -1,9 +1,9 @@
 language: python
 python:
   - 2.7
-  - 3.4
   - 3.5
   - 3.6
+  - 3.7
   - nightly
 env:
   global:
@@ -16,9 +16,9 @@ matrix:
   exclude:
   - python: 2.7
     env: GROUP=docs
-  - python: 3.4
-    env: GROUP=docs
   - python: 3.5
+    env: GROUP=docs
+  - python: 3.6
     env: GROUP=docs
   - python: nightly
     env: GROUP=docs
