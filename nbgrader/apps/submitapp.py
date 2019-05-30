@@ -50,7 +50,19 @@ class SubmitApp(NbGrader):
         get the most recent version. Your assignment submission are timestamped
         so instructors can tell when you turned it in. No other students will
         be able to see your submissions.
-        """
+
+        Certain setups may require to specify an alternative student id,
+        for example to include additional information such as the
+        student's group:
+
+            nbgrader submit assignment1 --student a4.jane.doo
+
+        The provided id should contain no `+` signs nor wildcards `*`.
+        This feature is typically meant for scripted use. Do *not* use
+        it to try to cheat and fake a submission from another student:
+        your actual student id can be recovered from the file ownership,
+        leaving behind a big trace leading to you.
+    """
 
     @default("classes")
     def _classes_default(self):
