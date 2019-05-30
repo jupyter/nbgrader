@@ -256,6 +256,21 @@ def test_compute_checksum_utf8():
     utils.compute_checksum(create_solution_cell("\u03b8", "markdown", "foo"))
     utils.compute_checksum(create_solution_cell(u'$$\\int^\u221e_0 x^2dx$$', "markdown", "foo"))
 
+def test_ignore(temp_cwd):
+    dir = "foo"
+    os.mkdir(dir)
+    files = ["foo.txt", "long.txt", "truc.png"]
+    for file in files:
+        with open(join(dir, file), "w") as fh:
+            fh.write("bar")
+            if file == "long.txt":
+                fh.write("x"*2000)
+    os.mkdir(join(dir,"foo"))
+    files.append("foo")
+    assert utils.ignore(exclude=["foo*"])(dir, files) == ["foo.txt", "foo"]
+    assert utils.ignore(include=["*.txt"])(dir, files) == ["truc.png"]
+    assert utils.ignore(exclude=["foo.*"], include=["*.txt"])(dir, files) == ['foo.txt', 'truc.png']
+    assert utils.ignore(max_file_size=2)(dir, files) == ["long.txt"]
 
 def test_is_ignored(temp_cwd):
     os.mkdir("foo")

@@ -9,6 +9,7 @@ import stat
 import logging
 import traceback
 import contextlib
+import fnmatch
 
 from setuptools.archive_util import unpack_archive
 from setuptools.archive_util import unpack_tarfile
@@ -214,6 +215,39 @@ def is_ignored(filename, ignore_globs=None):
         if filename in globs:
             return True
     return False
+
+def ignore_patterns(exclude=None, include=None, max_file_size=None, log=None):
+    """
+    A generalization of shutils.ignore_patterns that supports
+    include globs, exclude globs, and max file size (in kb).
+    Optionally, it logs ignored files.
+
+    As shutils.ignore_patterns, it returns a function taking
+    a directory and list of file/directory names and returning the
+    list of files/directories to be ignored.
+
+    A file/directory is ignored as soon as it is either excluded, or
+    not included explicitely, or too large.
+    """
+    def ignore_patterns(directory, filelist):
+        ignored = []
+        for filename in filelist:
+            rationale = None
+            fullname = os.path.join(directory, filename)
+            if exclude and any(fnmatch.fnmatch(filename, glob) for glob in exclude):
+                rationale = "excluded file"
+            else:
+                if os.path.isfile(fullname):
+                    if include and not any(fnmatch.fnmatch(filename, glob) for glob in include):
+                        rationale = "non included"
+                    elif max_file_size and os.path.getsize(fullname) > 1000*max_file_size:
+                        rationale = "file too large"
+            if rationale:
+                if log:
+                    log.warning("Ignoring {} {}".format(rationale, fullfilename))
+                ignored.append(filename)
+        return ignored
+    return ignore_patterns
 
 
 def find_all_files(path, exclude=None):
