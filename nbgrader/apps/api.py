@@ -1031,11 +1031,10 @@ class NbGraderAPI(LoggingConfigurable):
 
         """
         if student_id is not None:
-            #return {"success": True}
             with temp_attrs(self.coursedir, assignment_id=assignment_id, student_id=student_id):
                 app = ExchangeReleaseFeedback(coursedir=self.coursedir, parent=self)
                 return capture_log(app)
-
-
         else:
-            return {"success": True}
+            with temp_attrs(self.coursedir, assignment_id=assignment_id, student_id='*'):
+                app = ExchangeReleaseFeedback(coursedir=self.coursedir, parent=self)
+                return capture_log(app)
