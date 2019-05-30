@@ -50,6 +50,9 @@ Libraries, Tools, and Platforms
 Presentations and Educational Materials
 ---------------------------------------
 
+`Teaching and Learning with Jupyter Book <https://jupyter4edu.github.io/jupyter-edu-book/>`_
+    An extensive handbook by and for instructors using Jupyter in the classroom.
+
 `Instructor Workshop: Jupyter in the Classroom <https://github.com/lucentdan/JupyterInTheClassroom>`_
     Teaching Instructors about Jupyter
 
