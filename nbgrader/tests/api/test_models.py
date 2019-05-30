@@ -41,7 +41,7 @@ def submissions(db):
     db.add(a)
     db.commit()
 
-    s = api.Student(id="12345", first_name='Jane', last_name='Doe', email='janedoe@nowhere')
+    s = api.Student(id="12345", first_name='Jane', last_name='Doe', email='janedoe@nowhere', lms_user_id='230')
     sa = api.SubmittedAssignment(assignment=a, student=s)
     sn = api.SubmittedNotebook(assignment=sa, notebook=n)
     g1a = api.Grade(cell=gc1, notebook=sn)
@@ -51,7 +51,7 @@ def submissions(db):
     db.add(s)
     db.commit()
 
-    s = api.Student(id="6789", first_name='John', last_name='Doe', email='johndoe@nowhere')
+    s = api.Student(id="6789", first_name='John', last_name='Doe', email='johndoe@nowhere', lms_user_id='230')
     sa = api.SubmittedAssignment(assignment=a, student=s)
     sn = api.SubmittedNotebook(assignment=sa, notebook=n)
     g1b = api.Grade(cell=gc1, notebook=sn)
@@ -1102,7 +1102,7 @@ def test_student_to_dict(submissions):
 
     assert set(s1d.keys()) == set(s2d.keys())
     assert set(s1d.keys()) == {
-        'id', 'first_name', 'last_name', 'email', 'score', 'max_score'}
+        'id', 'first_name', 'last_name', 'email', 'score', 'max_score', 'lms_user_id'}
 
     assert s1d['id'] == '12345'
     assert s1d['first_name'] == 'Jane'
@@ -1110,6 +1110,7 @@ def test_student_to_dict(submissions):
     assert s1d['email'] == 'janedoe@nowhere'
     assert s1d['score'] == 0
     assert s1d['max_score'] == 15
+    assert s1d['lms_user_id'] == '230'
 
     assert s2d['id'] == '6789'
     assert s2d['first_name'] == 'John'
@@ -1117,6 +1118,7 @@ def test_student_to_dict(submissions):
     assert s2d['email'] == 'johndoe@nowhere'
     assert s2d['score'] == 0
     assert s2d['max_score'] == 15
+    assert s2d['lms_user_id'] == '230'
 
     # make sure it can be JSONified
     json.dumps(s1d)

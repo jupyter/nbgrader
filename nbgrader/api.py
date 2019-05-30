@@ -2378,14 +2378,14 @@ class Gradebook(object):
             students = self.db.query(
                 Student.id, Student.first_name, Student.last_name,
                 Student.email, _scores,
-                func.sum(Assignment.max_score)
+                func.sum(Assignment.max_score), Student.lms_user_id
             ).outerjoin(scores, Student.id == scores.c.id)\
              .group_by(
                  Student.id, Student.first_name, Student.last_name,
-                 Student.email, _scores)\
+                 Student.email, _scores, Student.lms_user_id)\
              .all()
 
-            keys = ["id", "first_name", "last_name", "email", "score", "max_score"]
+            keys = ["id", "first_name", "last_name", "email", "score", "max_score", "lms_user_id"]
             return [dict(zip(keys, x)) for x in students]
 
         else:
