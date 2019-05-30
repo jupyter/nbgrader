@@ -62,12 +62,16 @@ nbgrader autograde "{{ assignment_id }}"</pre>
   <th class="text-center">Status</th>
   <th class="text-center">Score</th>
   <th class="text-center no-sort">Autograde</th>
+  <th class="text-center no-sort">Generate Feedback</th>
+  <th class="text-center no-sort">Release Feedback</th>
 </tr>
 {%- endblock -%}
 
 {%- block table_body -%}
 <tr>
   <td>Loading, please wait...</td>
+  <td></td>
+  <td></td>
   <td></td>
   <td></td>
   <td></td>

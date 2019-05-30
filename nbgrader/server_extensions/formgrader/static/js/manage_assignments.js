@@ -199,7 +199,7 @@ var AssignmentUI = Backbone.View.extend({
 		.attr("href", "#")
                 .click(_.bind(this.generate_feedback, this))
 		.append($("<span/>")
-		   .addClass("glyphicon glyphicon-star-empty")
+		   .addClass("glyphicon glyphicon-comment")
                    .attr("aria-hidden", "true")));
         }
 
@@ -209,7 +209,7 @@ var AssignmentUI = Backbone.View.extend({
 		.attr("href", "#")
                 .click(_.bind(this.release_feedback, this))
 		.append($("<span/>")
-		   .addClass("glyphicon glyphicon-star")
+		   .addClass("glyphicon glyphicon-envelope")
                    .attr("aria-hidden", "true")));
         }
 
