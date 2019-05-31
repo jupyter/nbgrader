@@ -87,7 +87,7 @@ class CourseListHandler(IPythonHandler):
             }])
 
         self.log.error("Local formgrader not accessible")
-        raise gen.Return(course)
+        raise gen.Return([])
 
     @gen.coroutine
     def check_for_jupyterhub_formgraders(self, config):
