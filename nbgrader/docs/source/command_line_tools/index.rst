@@ -21,7 +21,7 @@ Instructor commands
     nbgrader-validate
     nbgrader-update
     nbgrader-autograde
-    nbgrader-feedback
+    nbgrader-generate-feedback
     nbgrader-export
 
 The following commands are used to manage the database:
@@ -44,6 +44,7 @@ The following commands are meant for instructors, but are only relevant when usi
     :maxdepth: 1
 
     nbgrader-release
+    nbgrader-release-feedback
     nbgrader-list
     nbgrader-collect
     nbgrader-zip-collect
@@ -58,5 +59,6 @@ Note that these commands are meant for students, but are only relevant when usin
 
     nbgrader-list
     nbgrader-fetch
+    nbgrader-fetch-feedback
     nbgrader-validate
     nbgrader-submit
