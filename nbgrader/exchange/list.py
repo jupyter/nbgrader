@@ -110,7 +110,6 @@ class ExchangeList(Exchange):
             for info in assignments:
                 self.log.info(self.format_outbound_assignment(info))
 
-        self.log.info("assignments: {}".format(assignments))
         return assignments
 
     def remove_files(self):
