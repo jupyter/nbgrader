@@ -4,7 +4,7 @@ import time
 from .. import run_nbgrader
 from .base import BaseTestApp
 from .conftest import notwindows
-from ...utils import parse_utc
+from ...utils import parse_utc, get_username
 
 
 @notwindows
@@ -67,7 +67,7 @@ class TestNbGraderCollect(BaseTestApp):
 
         # try to collect when there"s nothing to collect
         self._collect("ps1", exchange)
-        root = os.path.os.path.join(os.path.join(course_dir, "submitted", os.environ["USER"], "ps1"))
+        root = os.path.os.path.join(os.path.join(course_dir, "submitted", get_username(), "ps1"))
         assert not os.path.isdir(os.path.join(course_dir, "submitted"))
 
         # submit something
@@ -101,7 +101,7 @@ class TestNbGraderCollect(BaseTestApp):
 
         # try to collect when there"s nothing to collect
         self._collect("--assignment=ps1", exchange)
-        root = os.path.os.path.join(os.path.join(course_dir, "submitted", os.environ["USER"], "ps1"))
+        root = os.path.os.path.join(os.path.join(course_dir, "submitted", get_username(), "ps1"))
         assert os.path.isfile(os.path.os.path.join(root, "p1.ipynb"))
         assert os.path.isfile(os.path.os.path.join(root, "timestamp.txt"))
 
