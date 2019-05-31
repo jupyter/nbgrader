@@ -385,8 +385,8 @@ class TestNbGraderDb(BaseTestApp):
         self._copy_file(join("files", "test.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
         self._copy_file(join("files", "test.ipynb"), join(course_dir, "source", "ps1", "p2.ipynb"))
 
-        # check that nbgrader assign fails
-        run_nbgrader(["assign", "ps1", "--create"])
+        # check that nbgrader assign passes
+        run_nbgrader(["assign", "ps1"])
 
         # test upgrading with a current database
         run_nbgrader(["db", "upgrade"])
@@ -400,10 +400,10 @@ class TestNbGraderDb(BaseTestApp):
         self._copy_file(join("files", "gradebook.db"), join(course_dir, "gradebook.db"))
 
         # check that nbgrader assign fails
-        run_nbgrader(["assign", "ps1", "--create"], retcode=1)
+        run_nbgrader(["assign", "ps1"], retcode=1)
 
         # upgrade the database
         run_nbgrader(["db", "upgrade"])
 
         # check that nbgrader assign passes
-        run_nbgrader(["assign", "ps1", "--create"])
+        run_nbgrader(["assign", "ps1"])
