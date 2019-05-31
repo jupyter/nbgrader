@@ -10,6 +10,12 @@ from traitlets import Bool
 from .exchange import Exchange
 from ..utils import check_mode, parse_utc
 
+# pwd is for matching unix names with student ide, so we shouldn't import it on
+# windows machines
+if sys.platform != 'win32':
+    import pwd
+else:
+    pwd = None
 
 def groupby(l, key=lambda x: x):
     d = defaultdict(list)
@@ -78,7 +84,7 @@ class ExchangeCollect(Exchange):
             src_path = os.path.join(self.inbound_path, rec['filename'])
 
             # Cross check the student id with the owner of the submitted directory
-            if self.check_owner:
+            if self.check_owner and pwd is not None: # check disabled under windows
                 try:
                     owner = pwd.getpwuid(os.stat(src_path).st_uid).pw_name
                 except KeyError:
