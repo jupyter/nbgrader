@@ -315,20 +315,20 @@ define([
 
     Assignment.prototype.make_row = function () {
         var row = $('<div/>').addClass('col-md-12');
-        var feedback_url = '';
-        var feedback_url_text = '';
         row.append(this.make_link());
         row.append($('<span/>').addClass('item_course col-sm-2').text(this.data.course_id));
-        if (this.data.status === 'submitted') {
-            if (feedback_url) {
-                row.append($('<span/>').addClass('item_feedback col-sm-1').html('<a href="' + feedback_url + '">' + feedback_url_text + '</a>'));
-                row.append($('<span/>').addClass('item_status col-sm-3').text(this.data.timestamp));
+	if (this.data.status === 'submitted') {
+	    // This is called in the submitted section:
+            if (this.data.hasFeedback) {
+		row.append(this.make_feedback_button());
+		row.append($('<span/>').addClass('item_status col-sm-3').text(this.data.timestamp));
             } else {
-                row.append($('<span/>').addClass('item_status col-sm-4').text(this.data.timestamp));
+		row.append($('<span/>').addClass('item_status col-sm-4').text(this.data.timestamp));
             }
-        } else {
-            row.append(this.make_button());
-        }
+	} else {
+	    // This is called in the fetched section:
+	    row.append(this.make_button());
+	}
         this.element.empty().append(row);
 
         if (this.data.status === 'fetched') {
@@ -350,6 +350,9 @@ define([
 
             this.element.append(children);
         }
+	// else if (this.data.status === 'submitted') {
+	// add the folding stuff here
+	// }
     };
 
     Assignment.prototype.make_link = function () {
@@ -463,6 +466,48 @@ define([
             });
         }
 
+        return container;
+    };
+
+    Assignment.prototype.make_feedback_button = function () {
+        var that = this;
+        var container = $('<span/>').addClass('item_status col-sm-1');
+        var button = $('<button/>').addClass("btn btn-primary btn-xs");
+        container.append(button);
+	// One of these must be true: data.hasLocalFeedbackPath or data.hasFeedback
+        if (that.data.hasLocalFeedbackPath) {
+            button.text("View Feedback");
+            button.click(function (e) {
+            });
+        } else {
+            button.text("Fetch Feedback");
+            button.click(function (e) {
+                var settings = {
+                    cache : false,
+                    data : {
+                        course_id: that.data.course_id,
+                        assignment_id: that.data.assignment_id
+                    },
+                    type : "POST",
+                    dataType : "json",
+                    success : $.proxy(that.on_refresh, that),
+                    error : function (xhr, status, error) {
+                        container.empty().text("Error fetching feedback.");
+                        utils.log_ajax_error(xhr, status, error);
+                    }
+                };
+                button.text('Fetching Feedback...');
+                button.attr('disabled', 'disabled');
+                var url = utils.url_path_join(
+		    'api',
+                    that.base_url,
+                    'assignments',
+		    that.data.student_id,
+                    'fetch_feedback'
+                );
+                ajax(url, settings);
+            });
+        }
         return container;
     };
 
