@@ -212,18 +212,18 @@ With the advent of JupyterHubAuthPlugin students who don't have a specified cour
 Requirements for using ``JupyterHubAuthPlugin``: 
 
 * Jupyterhub > 0.8
-* Activating the JupyterHubAuthPlugin requires you to add it as an authentication plugin class into /etc/jupyter/nbgrader_config.py
+* Activating the JupyterHubAuthPlugin requires you to add it as an authentication plugin class into ``/etc/jupyter/nbgrader_config.py``
 .. code:: python
 
     from nbgrader.auth import JupyterHubAuthPlugin
     c = get_config()
     c.Authenticator.plugin_class = JupyterHubAuthPlugin
 
-* Instructor and student groups need to be named formgrade-{course_id} for instructors and nbgrader-{course_id} for students
+* Instructor and student groups need to be named ``formgrade-{course_id}`` for instructors and ``nbgrader-{course_id}`` for students
 * The course service needs to have an api_token set that is from a jupyterhub admin see: Creating an `api token <https://jupyterhub.readthedocs.io/en/stable/reference/rest.html#create-an-api-token>`_
 
 
-* The service user also has to be added to the formgrade group (see jupyterhub config below)
+* The service user also needs to be added to the formgrade group (see the jupyterhub_config example below)
 
 
 As in the case of multiple graders for a single class, if you have multiple
@@ -294,7 +294,7 @@ this:
     ]
 
 
-Note: As you can see the ``nbgrader-{course_id}`` group is an empty list, adding students to the jupyterhub group is automatically done when the instructor adds them to the course database with the ``nbgrader db student add` command or through the formgrader.
+Note: As you can see the ``nbgrader-{course_id}`` group is an empty list, adding students to the jupyterhub group is automatically done when the instructor adds them to the course database with the ``nbgrader db student add`` command or through the formgrader.
 
 
 There also needs to be a ``nbgrader_config.py`` file in the root of each grader
@@ -321,13 +321,13 @@ Custom Authentication
 
 To make your own custom authentication such as through an LTI you could start by making a method that inherits the Authenticator class, which is a plugin for different authentication methods.
 
-There are now 3 authentication classes:
+There are now three authentication classes:
 
-* NoAuthPlugin : The default old behaviour. Using this plugin will allow any user to any course if he does not have a course_id in his nbgrader_config. This is still the default behaviour so no need to specify it in etc/jupyter/nbgrader_config.py
+* ``NoAuthPlugin`` : The default old behaviour. Using this plugin will allow any user to any course if he does not have a course_id in his nbgrader_config. This is still the default behaviour so no need to specify it in ``etc/jupyter/nbgrader_config.py``
 
-* JupyterHubAuthPlugin : Uses the Jupyterhub groups part of the Jupyterhub API for authentication.
+* ``JupyterHubAuthPlugin`` : Uses the Jupyterhub groups part of the Jupyterhub API for authentication.
 
-* Authenticator: Inherit this class to make your own Authenticator plugin, thought of as a way to enable LTI use cases.
+* ``Authenticator``: Inherit this class to make your own Authenticator plugin, thought of as a way to enable LTI use cases.
 
 
 
