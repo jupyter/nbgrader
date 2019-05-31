@@ -10,7 +10,7 @@ aliases = {}
 aliases.update(nbgrader_aliases)
 aliases.update({
     "timezone": "Exchange.timezone",
-    "course": "Exchange.course_id",
+    "course": "CourseDirectory.course_id",
 })
 
 flags = {}

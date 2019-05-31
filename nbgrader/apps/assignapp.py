@@ -8,7 +8,7 @@ from .baseapp import NbGrader, nbgrader_aliases, nbgrader_flags
 from ..converters import BaseConverter, Assign, NbGraderException
 
 aliases = {
-    'course_id': 'Assign.course_id'
+    'course': 'CourseDirectory.course_id'
 }
 aliases.update(nbgrader_aliases)
 del aliases['student']

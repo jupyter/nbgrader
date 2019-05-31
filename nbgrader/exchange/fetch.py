@@ -12,13 +12,13 @@ class ExchangeFetch(Exchange):
     replace_missing_files = Bool(False, help="Whether to replace missing files on fetch").tag(config=True)
 
     def init_src(self):
-        if self.course_id == '':
+        if self.coursedir.course_id == '':
             self.fail("No course id specified. Re-run with --course flag.")
         courses = self.get_user_courses(self.coursedir.student_id)
-        if not self.course_id in courses:
+        if not self.coursedir.course_id in courses:
             self.fail("You do not have access to this course.")
 
-        self.course_path = os.path.join(self.root, self.course_id)
+        self.course_path = os.path.join(self.root, self.coursedir.course_id)
         self.outbound_path = os.path.join(self.course_path, 'outbound')
         self.src_path = os.path.join(self.outbound_path, self.coursedir.assignment_id)
         if not os.path.isdir(self.src_path):
@@ -30,7 +30,7 @@ class ExchangeFetch(Exchange):
 
     def init_dest(self):
         if self.path_includes_course:
-            root = os.path.join(self.course_id, self.coursedir.assignment_id)
+            root = os.path.join(self.coursedir.course_id, self.coursedir.assignment_id)
         else:
             root = self.coursedir.assignment_id
         self.dest_path = os.path.abspath(os.path.join('.', root))
@@ -70,4 +70,4 @@ class ExchangeFetch(Exchange):
         self.log.info("Source: {}".format(self.src_path))
         self.log.info("Destination: {}".format(self.dest_path))
         self.do_copy(self.src_path, self.dest_path)
-        self.log.info("Fetched as: {} {}".format(self.course_id, self.coursedir.assignment_id))
+        self.log.info("Fetched as: {} {}".format(self.coursedir.course_id, self.coursedir.assignment_id))

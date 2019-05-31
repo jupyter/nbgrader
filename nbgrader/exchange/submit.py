@@ -32,8 +32,8 @@ class ExchangeSubmit(Exchange):
 
     def init_src(self):
         if self.path_includes_course:
-            root = os.path.join(self.course_id, self.coursedir.assignment_id)
-            other_path = os.path.join(self.course_id, "*")
+            root = os.path.join(self.coursedir.course_id, self.coursedir.assignment_id)
+            other_path = os.path.join(self.coursedir.course_id, "*")
         else:
             root = self.coursedir.assignment_id
             other_path = "*"
@@ -43,19 +43,19 @@ class ExchangeSubmit(Exchange):
             self._assignment_not_found(self.src_path, os.path.abspath(other_path))
 
     def init_dest(self):
-        if self.course_id == '':
+        if self.coursedir.course_id == '':
             self.fail("No course id specified. Re-run with --course flag.")
         courses = self.get_user_courses(self.coursedir.student_id)
-        if not self.course_id in courses:
+        if not self.coursedir.course_id in courses:
             self.fail("You do not have access to this course.")
 
-        self.inbound_path = os.path.join(self.root, self.course_id, 'inbound')
+        self.inbound_path = os.path.join(self.root, self.coursedir.course_id, 'inbound')
         if not os.path.isdir(self.inbound_path):
             self.fail("Inbound directory doesn't exist: {}".format(self.inbound_path))
         if not check_mode(self.inbound_path, write=True, execute=True):
             self.fail("You don't have write permissions to the directory: {}".format(self.inbound_path))
 
-        self.cache_path = os.path.join(self.cache, self.course_id)
+        self.cache_path = os.path.join(self.cache, self.coursedir.course_id)
         if self.add_random_string:
             random_str = base64.urlsafe_b64encode(os.urandom(9)).decode('ascii')
             self.assignment_filename = '{}+{}+{}+{}'.format(
@@ -65,10 +65,10 @@ class ExchangeSubmit(Exchange):
                 get_username(), self.coursedir.assignment_id, self.timestamp)
 
     def init_release(self):
-        if self.course_id == '':
+        if self.coursedir.course_id == '':
             self.fail("No course id specified. Re-run with --course flag.")
 
-        course_path = os.path.join(self.root, self.course_id)
+        course_path = os.path.join(self.root, self.coursedir.course_id)
         outbound_path = os.path.join(course_path, 'outbound')
         self.release_path = os.path.join(outbound_path, self.coursedir.assignment_id)
         if not os.path.isdir(self.release_path):
@@ -156,5 +156,5 @@ class ExchangeSubmit(Exchange):
             fh.write(self.timestamp)
 
         self.log.info("Submitted as: {} {} {}".format(
-            self.course_id, self.coursedir.assignment_id, str(self.timestamp)
+            self.coursedir.course_id, self.coursedir.assignment_id, str(self.timestamp)
         ))

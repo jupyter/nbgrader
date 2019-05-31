@@ -37,10 +37,10 @@ class ExchangeCollect(Exchange):
         return sorted(records, key=lambda item: item['timestamp'], reverse=True)
 
     def init_src(self):
-        if self.course_id == '':
+        if self.coursedir.course_id == '':
             self.fail("No course id specified. Re-run with --course flag.")
 
-        self.course_path = os.path.join(self.root, self.course_id)
+        self.course_path = os.path.join(self.root, self.coursedir.course_id)
         self.inbound_path = os.path.join(self.course_path, 'inbound')
         if not os.path.isdir(self.inbound_path):
             self.fail("Course not found: {}".format(self.inbound_path))
@@ -59,12 +59,12 @@ class ExchangeCollect(Exchange):
         if len(self.src_records) == 0:
             self.log.warning("No submissions of '{}' for course '{}' to collect".format(
                 self.coursedir.assignment_id,
-                self.course_id))
+                self.coursedir.course_id))
         else:
             self.log.info("Processing {} submissions of '{}' for course '{}'".format(
                 len(self.src_records),
                 self.coursedir.assignment_id,
-                self.course_id))
+                self.coursedir.course_id))
 
         for rec in self.src_records:
             student_id = rec['username']
