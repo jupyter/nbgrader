@@ -5,7 +5,7 @@ import stat
 
 from os.path import join, isfile
 
-from ...utils import parse_utc
+from ...utils import parse_utc, get_username
 from .. import run_nbgrader
 from .base import BaseTestApp
 from .conftest import notwindows
@@ -76,7 +76,7 @@ class TestNbGraderSubmit(BaseTestApp):
 
         filename, = os.listdir(join(exchange, "abc101", "inbound"))
         username, assignment, timestamp1 = filename.split("+")[:3]
-        assert username == os.environ["USER"]
+        assert username == get_username()
         assert assignment == "ps1"
         assert parse_utc(timestamp1) > now
         assert isfile(join(exchange, "abc101", "inbound", filename, "p1.ipynb"))
@@ -86,7 +86,7 @@ class TestNbGraderSubmit(BaseTestApp):
 
         filename, = os.listdir(join(cache, "abc101"))
         username, assignment, timestamp1 = filename.split("+")[:3]
-        assert username == os.environ["USER"]
+        assert username == get_username()
         assert assignment == "ps1"
         assert parse_utc(timestamp1) > now
         assert isfile(join(cache, "abc101", filename, "p1.ipynb"))
@@ -100,7 +100,7 @@ class TestNbGraderSubmit(BaseTestApp):
         assert len(os.listdir(join(exchange, "abc101", "inbound"))) == 2
         filename = sorted(os.listdir(join(exchange, "abc101", "inbound")))[1]
         username, assignment, timestamp2 = filename.split("+")[:3]
-        assert username == os.environ["USER"]
+        assert username == get_username()
         assert assignment == "ps1"
         assert parse_utc(timestamp2) > parse_utc(timestamp1)
         assert isfile(join(exchange, "abc101", "inbound", filename, "p1.ipynb"))
@@ -111,7 +111,7 @@ class TestNbGraderSubmit(BaseTestApp):
         assert len(os.listdir(join(cache, "abc101"))) == 2
         filename = sorted(os.listdir(join(cache, "abc101")))[1]
         username, assignment, timestamp2 = filename.split("+")[:3]
-        assert username == os.environ["USER"]
+        assert username == get_username()
         assert assignment == "ps1"
         assert parse_utc(timestamp2) > parse_utc(timestamp1)
         assert isfile(join(cache, "abc101", filename, "p1.ipynb"))
@@ -186,14 +186,14 @@ class TestNbGraderSubmit(BaseTestApp):
 
         filename, = os.listdir(join(exchange, "abc101", "inbound"))
         username, assignment, _ = filename.split("+")[:3]
-        assert username == os.environ["USER"]
+        assert username == get_username()
         assert assignment == "ps1"
         assert isfile(join(exchange, "abc101", "inbound", filename, "p1.ipynb"))
         assert isfile(join(exchange, "abc101", "inbound", filename, "timestamp.txt"))
 
         filename, = os.listdir(join(cache, "abc101"))
         username, assignment, _ = filename.split("+")[:3]
-        assert username == os.environ["USER"]
+        assert username == get_username()
         assert assignment == "ps1"
         assert isfile(join(cache, "abc101", filename, "p1.ipynb"))
         assert isfile(join(cache, "abc101", filename, "timestamp.txt"))
@@ -204,14 +204,14 @@ class TestNbGraderSubmit(BaseTestApp):
 
         filename, = os.listdir(join(exchange, "abc102", "inbound"))
         username, assignment, _ = filename.split("+")[:3]
-        assert username == os.environ["USER"]
+        assert username == get_username()
         assert assignment == "ps1"
         assert isfile(join(exchange, "abc102", "inbound", filename, "p1.ipynb"))
         assert isfile(join(exchange, "abc102", "inbound", filename, "timestamp.txt"))
 
         filename, = os.listdir(join(cache, "abc102"))
         username, assignment, _ = filename.split("+")[:3]
-        assert username == os.environ["USER"]
+        assert username == get_username()
         assert assignment == "ps1"
         assert isfile(join(cache, "abc102", filename, "p1.ipynb"))
         assert isfile(join(cache, "abc102", filename, "timestamp.txt"))

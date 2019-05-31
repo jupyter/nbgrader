@@ -17,6 +17,7 @@ from .. import (
     create_grade_cell, create_solution_cell,
     create_grade_and_solution_cell)
 
+from .conftest import notwindows
 
 @pytest.fixture
 def temp_cwd(request):
@@ -357,3 +358,9 @@ def test_unzip_tree(temp_cwd):
     assert os.path.isdir(os.path.join("data", "bar"))
     assert os.path.isdir(os.path.join("data", "baz", "bar"))
     assert os.path.isfile(os.path.join("data", "baz", "bar", "foo.txt"))
+
+@notwindows
+def test_get_username():
+    assert utils.get_username() == os.environ["USER"]
+    # Can't test get_username's support for JUPYTERHUB_USER, as
+    # this would require actually running the tests as 'jovyan'.
