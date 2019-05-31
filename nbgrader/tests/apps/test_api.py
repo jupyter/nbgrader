@@ -693,12 +693,11 @@ class TestNbGraderAPI(BaseTestApp):
         result = api.autograde("ps1", "foo")
         assert result["success"]
 
-    def test_feedback(self, api, course_dir, db):
+    def test_generate_feedback(self, api, course_dir, db):
         self._copy_file(join("files", "submitted-changed.ipynb"), join(course_dir, "submitted", "foo", "ps1", "p1.ipynb"))
-        result = api.autograde("ps1", "foo")
-        assert result["success"]
-
-        result = api.feedback("ps1", "foo")
+        api.assign("ps1")
+        api.autograde("ps1", "foo")
+        result = api.generate_feedback("ps1", "foo")
         assert result["success"]
         assert os.path.exists(join(course_dir, "feedback", "foo", "ps1", "p1.html"))
 
