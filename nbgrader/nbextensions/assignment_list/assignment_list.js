@@ -499,10 +499,12 @@ define([
                 button.text('Fetching Feedback...');
                 button.attr('disabled', 'disabled');
                 var url = utils.url_path_join(
-		    'api',
+                    'formgrader',
+                    'api',
                     that.base_url,
-                    'assignments',
-		    that.data.student_id,
+                    'assignment',
+                    that.data.assignment_id,
+                    that.data.student_id,
                     'fetch_feedback'
                 );
                 ajax(url, settings);
