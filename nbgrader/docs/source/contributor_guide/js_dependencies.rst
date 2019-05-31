@@ -24,7 +24,7 @@ To install npm on Linux with apt-get, use::
 Modify the ``bower.json`` file in the root of the nbgrader
 repository and then run::
 
-    invoke js
+    python tasks.py js
 
 This will download and install the correct versions of the dependencies to
 ``nbgrader/server_extensions/formgrader/static/components``.

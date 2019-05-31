@@ -14,6 +14,7 @@ from textwrap import dedent
 from ...nbgraderformat import read
 from .conftest import _make_nbserver, _make_browser, _close_nbserver, _close_browser
 from nbformat import current_nbformat
+import shutil
 
 
 @pytest.fixture(scope="module")
@@ -150,6 +151,11 @@ def _select_manual(browser, index=0):
     _select(browser, 'manual', index=index)
 
 
+def _select_task(browser, index=0):
+    select = Select(browser.find_elements_by_css_selector('.celltoolbar select')[index])
+    select.select_by_value('task')
+
+
 def _select_solution(browser, index=0):
     _select(browser, 'solution', index=index)
 
@@ -267,6 +273,45 @@ def test_manual_cell(browser, port):
     assert _get_metadata(browser)['solution']
     assert _get_metadata(browser)['grade']
     assert not _get_metadata(browser)['locked']
+
+    # wait for the points and id fields to appear
+    _wait(browser).until(
+        EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".nbgrader-points-input")))
+    _wait(browser).until(
+        EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".nbgrader-id-input")))
+
+    # set the points
+    _set_points(browser)
+    assert 2 == _get_metadata(browser)['points']
+
+    # set the id
+    assert _get_metadata(browser)['grade_id'].startswith("cell-")
+    _set_id(browser)
+    assert "foo" == _get_metadata(browser)['grade_id']
+
+    # make sure the metadata is valid
+    _save_and_validate(browser)
+
+    # make it nothing
+    _select_none(browser)
+    assert not _get_metadata(browser)
+    _save_and_validate(browser)
+
+
+@pytest.mark.nbextensions
+def test_task_cell(browser, port):
+    _load_notebook(browser, port, name='task')
+    _activate_toolbar(browser)
+
+    # does the nbgrader metadata exist?
+    assert _get_metadata(browser) is None
+
+    # make it manually graded
+    _select_task(browser)
+    assert _get_metadata(browser)['task']
+    assert not _get_metadata(browser)['solution']
+    assert not _get_metadata(browser)['grade']
+    assert _get_metadata(browser)['locked']
 
     # wait for the points and id fields to appear
     _wait(browser).until(
@@ -608,11 +653,76 @@ def test_total_points(browser, port):
 
 
 @pytest.mark.nbextensions
+def test_total_points(browser, port):
+    _load_notebook(browser, port, 'task')
+    _activate_toolbar(browser)
+
+    # make sure the total points is zero
+    assert _get_total_points(browser) == 0
+
+    # make it autograder tests and set the points to two
+    _select_task(browser)
+    _set_points(browser)
+    _set_id(browser)
+    assert _get_total_points(browser) == 2
+
+    # make it manually graded
+    _select_manual(browser)
+    assert _get_total_points(browser) == 2
+
+    # make it a solution make sure the total points is zero
+    _select_solution(browser)
+    assert _get_total_points(browser) == 0
+
+    # make it task
+    _select_task(browser)
+    assert _get_total_points(browser) == 0
+    _set_points(browser)
+    assert _get_total_points(browser) == 2
+
+    # create a new cell
+    element = browser.find_element_by_tag_name("body")
+    element.send_keys(Keys.ESCAPE)
+    element.send_keys("b")
+
+    # make sure the toolbar appeared
+    def find_toolbar(browser):
+        try:
+            browser.find_elements_by_css_selector(".celltoolbar select")[1]
+        except IndexError:
+            return False
+        return True
+    _wait(browser).until(find_toolbar)
+
+    # make it a test cell
+    _select_tests(browser, index=1)
+    _set_points(browser, points=1, index=1)
+    _set_id(browser, cell_id="bar", index=1)
+    assert _get_total_points(browser) == 3
+
+    # delete the new cell
+    element = browser.find_elements_by_css_selector(".cell")[0]
+    element.click()
+    element.send_keys(Keys.ESCAPE)
+    element.send_keys("d")
+    element.send_keys("d")
+    assert _get_total_points(browser) == 1
+
+    # delete the first cell
+    element = browser.find_elements_by_css_selector(".cell")[0]
+    element.send_keys("d")
+    element.send_keys("d")
+    assert _get_total_points(browser) == 0
+
+
+@pytest.mark.nbextensions
 def test_cell_ids(browser, port):
     _load_notebook(browser, port)
     _activate_toolbar(browser)
 
     # turn it into a cell with an id
+    _select_solution(browser)
+    # for some reason only one call doesn't trigger on_change event
     _select_solution(browser)
     _set_id(browser, cell_id="")
 
@@ -649,6 +759,47 @@ def test_cell_ids(browser, port):
 
 
 @pytest.mark.nbextensions
+def test_task_cell_ids(browser, port):
+    _load_notebook(browser, port, name='task')
+    _activate_toolbar(browser)
+
+    # turn it into a cell with an id
+    _select_task(browser)
+    _set_id(browser, cell_id="")
+
+    # save and check for an error (blank id)
+    _save(browser)
+    _wait_for_modal(browser)
+    _dismiss_modal(browser)
+
+    # set the label
+    _set_id(browser)
+
+    # create a new cell
+    element = browser.find_element_by_tag_name("body")
+    element.send_keys(Keys.ESCAPE)
+    element.send_keys("b")
+
+    # make sure the toolbar appeared
+    def find_toolbar(browser):
+        try:
+            browser.find_elements_by_css_selector(".celltoolbar select")[1]
+        except IndexError:
+            return False
+        return True
+    _wait(browser).until(find_toolbar)
+
+    # make it a test cell and set the label
+    _select_task(browser, index=1)
+    _set_id(browser, index=1)
+
+    # save and check for an error (duplicate id)
+    _save(browser)
+    _wait_for_modal(browser)
+    _dismiss_modal(browser)
+
+
+@pytest.mark.nbextensions
 def test_negative_points(browser, port):
     _load_notebook(browser, port)
     _activate_toolbar(browser)
@@ -658,6 +809,27 @@ def test_negative_points(browser, port):
 
     # make it autograder tests and set the points to two
     _select_tests(browser)
+    _set_points(browser, points=2)
+    _set_id(browser)
+    assert _get_total_points(browser) == 2
+    assert 2 == _get_metadata(browser)['points']
+
+    # set the points to negative one
+    _set_points(browser, points=-1)
+    assert _get_total_points(browser) == 0
+    assert 0 == _get_metadata(browser)['points']
+
+
+@pytest.mark.nbextensions
+def test_task_negative_points(browser, port):
+    _load_notebook(browser, port, 'task')
+    _activate_toolbar(browser)
+
+    # make sure the total points is zero
+    assert _get_total_points(browser) == 0
+
+    # make it autograder tests and set the points to two
+    _select_task(browser)
     _set_points(browser, points=2)
     _set_id(browser)
     assert _get_total_points(browser) == 2

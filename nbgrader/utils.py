@@ -27,6 +27,13 @@ else:
     pwd = None
 
 
+def is_task(cell):
+    """Returns True if the cell is a task cell."""
+    if 'nbgrader' not in cell.metadata:
+        return False
+    return cell.metadata['nbgrader'].get('task', False)
+
+
 def is_grade(cell):
     """Returns True if the cell is a grade cell."""
     if 'nbgrader' not in cell.metadata:
@@ -167,11 +174,20 @@ def check_directory(path, read=False, write=False, execute=False):
         return False
 
 
-def get_username():
+def get_osusername():
     """Get the username of the current process."""
     if pwd is None:
         raise OSError("get_username cannot be called on Windows")
     return pwd.getpwuid(os.getuid())[0]
+
+
+def get_username():
+    """ Get the username, use os user name but override if username is jovyan ."""
+    osname = get_osusername()
+    if osname == 'jovyan':
+        return os.environ.get('JUPYTERHUB_USER', 'jovyan')
+    else:
+        return osname
 
 
 def find_owner(path):
@@ -183,7 +199,7 @@ def find_owner(path):
 
 def self_owned(path):
     """Is the path owned by the current user of this process?"""
-    return get_username() == find_owner(os.path.abspath(path))
+    return get_osusername() == find_owner(os.path.abspath(path))
 
 
 def is_ignored(filename, ignore_globs=None):
@@ -248,6 +264,20 @@ def chdir(dirname):
         yield
     finally:
         os.chdir(currdir)
+
+
+@contextlib.contextmanager
+def setenv(**kwargs):
+    previous_env = { }
+    for key, value in kwargs.items():
+        previous_env[key] = os.environ.get(value)
+        os.environ[key] = value
+    yield
+    for key, value in kwargs.items():
+        if previous_env[key] is None:
+            del os.environ[key]
+        else:
+            os.environ[key] = previous_env[key]
 
 
 def rmtree(path):

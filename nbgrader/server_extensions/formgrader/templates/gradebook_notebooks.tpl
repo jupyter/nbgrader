@@ -21,10 +21,11 @@ var assignment_id = "{{ assignment_id }}";
   <th class="text-center">Avg. Score</th>
   <th class="text-center">Avg. Code Score</th>
   <th class="text-center">Avg. Written Score</th>
+  <th class="text-center">Avg. Task Score</th>
   <th class="text-center">Needs Manual Grade?</th>
 </tr>
 {%- endblock -%}
 
 {%- block table_body -%}
-<tr><td colspan="5">Loading, please wait...</td></tr>
+<tr><td colspan="6">Loading, please wait...</td></tr>
 {%- endblock -%}

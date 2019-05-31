@@ -1,6 +1,6 @@
-SCHEMA_VERSION = 2
+SCHEMA_VERSION = 3
 
 from .common import ValidationError, SchemaMismatchError
-from .v2 import MetadataValidatorV2 as MetadataValidator
-from .v2 import read_v2 as read, write_v2 as write
-from .v2 import reads_v2 as reads, writes_v2 as writes
+from .v3 import MetadataValidatorV3 as MetadataValidator
+from .v3 import read_v3 as read, write_v3 as write
+from .v3 import reads_v3 as reads, writes_v3 as writes

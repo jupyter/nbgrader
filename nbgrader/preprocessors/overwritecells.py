@@ -4,6 +4,7 @@ from .. import utils
 from ..api import Gradebook, MissingEntry
 from . import NbGraderPreprocessor
 
+
 class OverwriteCells(NbGraderPreprocessor):
     """A preprocessor to overwrite information about grade and solution cells."""
 
@@ -68,7 +69,7 @@ class OverwriteCells(NbGraderPreprocessor):
 
         # if it's a grade cell, check that the max score hasn't changed
         if utils.is_grade(cell):
-            grade_cell = self.gradebook.find_grade_cell(
+            grade_cell = self.gradebook.find_graded_cell(
                 grade_id,
                 self.notebook_id,
                 self.assignment_id)

@@ -78,6 +78,23 @@ def jupyter_data_dir(request):
 
 
 @pytest.fixture
+def fake_home_dir(request, monkeypatch):
+    '''
+    this fixture creates a temporary home directory. This prevents existing
+    nbgrader_config.py files in the user directory to interfer with the tests.
+    '''
+    path = tempfile.mkdtemp()
+
+    def fin():
+        rmtree(path)
+    request.addfinalizer(fin)
+
+    monkeypatch.setenv('HOME', str(path))
+
+    return path
+
+
+@pytest.fixture
 def env(request, jupyter_config_dir, jupyter_data_dir):
     env = os.environ.copy()
     env['JUPYTER_DATA_DIR'] = jupyter_data_dir
@@ -94,6 +111,7 @@ def exchange(request):
     request.addfinalizer(fin)
 
     return path
+
 
 @pytest.fixture
 def cache(request):

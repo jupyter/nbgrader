@@ -1,9 +1,10 @@
 # nbgrader
 
-Linux: [![TravisCI](https://travis-ci.org/jupyter/nbgrader.svg?branch=master)](https://travis-ci.org/jupyter/nbgrader)
-Windows: [![AppVeyor](https://ci.appveyor.com/api/projects/status/github/jupyter/nbgrader?svg=True)](https://ci.appveyor.com/project/jupyter/nbgrader/branch/master)
-Forum: [![Google Group](https://img.shields.io/badge/-Google%20Group-lightgrey.svg)](https://groups.google.com/forum/#!forum/jupyter)
-Coverage: [![codecov.io](http://codecov.io/github/jupyter/nbgrader/coverage.svg?branch=master)](http://codecov.io/github/jupyter/nbgrader?branch=master)
+Linux: [![TravisCI](https://travis-ci.org/jupyter/nbgrader.svg?branch=master)](https://travis-ci.org/jupyter/nbgrader)  
+Windows: [![AppVeyor](https://ci.appveyor.com/api/projects/status/github/jupyter/nbgrader?svg=True)](https://ci.appveyor.com/project/jupyter/nbgrader/branch/master)  
+Forum: [![Google Group](https://img.shields.io/badge/-Google%20Group-lightgrey.svg)](https://groups.google.com/forum/#!forum/jupyter)  
+Coverage: [![codecov.io](http://codecov.io/github/jupyter/nbgrader/coverage.svg?branch=master)](http://codecov.io/github/jupyter/nbgrader?branch=master)  
+Cite: [![DOI](https://jose.theoj.org/papers/10.21105/jose.00032/status.svg)](https://doi.org/10.21105/jose.00032)
 
 A system for assigning and grading Jupyter notebooks.
 

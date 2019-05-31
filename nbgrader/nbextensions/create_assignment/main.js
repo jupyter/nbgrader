@@ -12,7 +12,7 @@ define([
     var nbgrader_preset_name = "Create Assignment";
     var nbgrader_highlight_cls = "nbgrader-highlight";
     var nbgrader_cls = "nbgrader-cell";
-    var nbgrader_schema_version = 2;
+    var nbgrader_schema_version = 3;
     var warning;
 
     var CellToolbar = celltoolbar.CellToolbar;
@@ -100,7 +100,7 @@ define([
         var total_points = 0;
         var cells = Jupyter.notebook.get_cells();
         for (var i=0; i < cells.length; i++) {
-            if (is_grade(cells[i])) {
+            if (is_graded(cells[i])) {
                 total_points += to_float(cells[i].metadata.nbgrader.points);
             }
         }
@@ -276,6 +276,34 @@ define([
         }
     };
 
+    /**
+     * Is the cell a task cell?
+     */
+    var is_task = function (cell) {
+        if (cell.metadata.nbgrader === undefined) {
+            return false;
+        } else if (cell.metadata.nbgrader.task === undefined) {
+            return false;
+        } else {
+            return cell.metadata.nbgrader.task;
+        }
+    };
+
+    /**
+     * Set whether this cell is or is not a grade cell.
+     */
+    var set_task = function (cell, val) {
+        if (cell.metadata.nbgrader === undefined) {
+            cell.metadata.nbgrader = {};
+        }
+        cell.metadata.nbgrader.task = val;
+    };
+
+    var is_graded = function (cell) {
+        return ( is_grade(cell) || is_task(cell) );
+    };
+
+
     var get_points = function (cell) {
         if (cell.metadata.nbgrader === undefined) {
             return 0;
@@ -317,7 +345,7 @@ define([
     var is_locked = function (cell) {
         if (is_solution(cell)) {
             return false;
-        } else if (is_grade(cell)) {
+        } else if (is_graded(cell)) {
             return true;
         } else if (cell.metadata.nbgrader === undefined) {
             return false;
@@ -334,7 +362,7 @@ define([
         }
         if (is_solution(cell)) {
             cell.metadata.nbgrader.locked = false;
-        } else if (is_grade(cell)) {
+        } else if (is_graded(cell)) {
             cell.metadata.nbgrader.locked = true;
         } else {
             cell.metadata.nbgrader.locked = val;
@@ -346,15 +374,25 @@ define([
      * nbgrader cell type.
      */
     var display_cell = function (cell) {
-        if (is_grade(cell) || is_solution(cell)) {
+        if (is_graded(cell) || is_solution(cell)) {
             if (cell.element && !cell.element.hasClass(nbgrader_highlight_cls)) {
                 cell.element.addClass(nbgrader_highlight_cls);
             }
         }
-        if (is_grade(cell) || is_solution(cell) || is_locked(cell)) {
+        if (is_graded(cell) || is_solution(cell) || is_locked(cell)) {
             if (cell.element && !cell.element.hasClass(nbgrader_cls)) {
                 cell.element.addClass(nbgrader_cls);
             }
+        }
+        
+        if (is_task(cell) ){
+          if (cell.element && !cell.element.hasClass("nbgrader_task")) {
+                cell.element.addClass("nbgrader_task");
+          }
+        } else {
+          if (cell.element && cell.element.hasClass("nbgrader_task")) {
+                cell.element.removeClass("nbgrader_task");
+          }
         }
     };
 
@@ -372,12 +410,12 @@ define([
             var options_list = [];
             options_list.push(["-", ""]);
             options_list.push(["Manually graded answer", "manual"]);
+            options_list.push(["Manually graded task", "task"]);
             if (cell.cell_type == "code") {
                 options_list.push(["Autograded answer", "solution"]);
                 options_list.push(["Autograder tests", "tests"]);
             }
             options_list.push(["Read-only", "readonly"]);
-
             var setter = function (cell, val) {
                 if (val === "") {
                     remove_metadata(cell);
@@ -386,28 +424,43 @@ define([
                     set_solution(cell, true);
                     set_grade(cell, true);
                     set_locked(cell, false);
+                    set_task(cell, false);
+                } else if (val === "task") {
+                    set_schema_version(cell);
+                    set_solution(cell, false);
+                    set_grade(cell, false);
+                    set_locked(cell, true);
+                    set_task(cell, true);
+                    if (cell.get_text() === ''){
+                      cell.set_text('Describe the task here!')
+                    }
                 } else if (val === "solution") {
                     set_schema_version(cell);
                     set_solution(cell, true);
                     set_grade(cell, false);
                     set_locked(cell, false);
+                    set_task(cell, false);
                 } else if (val === "tests") {
                     set_schema_version(cell);
                     set_solution(cell, false);
                     set_grade(cell, true);
                     set_locked(cell, true);
+                    set_task(cell, false);
                 } else if (val === "readonly") {
                     set_schema_version(cell);
                     set_solution(cell, false);
                     set_grade(cell, false);
                     set_locked(cell, true);
+                    set_task(cell, false);
                 } else {
                     throw new Error("invalid nbgrader cell type: " + val);
                 }
             };
 
             var getter = function (cell) {
-                if (is_solution(cell) && is_grade(cell)) {
+                if (is_task(cell)) {
+                    return "task";
+                } else if (is_solution(cell) && is_grade(cell)) {
                     return "manual";
                 } else if (is_solution(cell) && cell.cell_type === "code") {
                     return "solution";
@@ -470,7 +523,7 @@ define([
      * is worth.
      */
     var create_points_input = function (div, cell, celltoolbar) {
-        if (!is_grade(cell)) {
+        if (!is_graded(cell)) {
             return;
         }
 

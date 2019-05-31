@@ -55,6 +55,14 @@ Gradebook
 
     .. automethod:: update_or_create_source_cell
 
+    .. automethod:: add_task_cell
+
+    .. automethod:: find_task_cell
+
+    .. automethod:: update_or_create_task_cell
+
+    .. automethod:: find_graded_cell
+
     .. automethod:: add_submission
 
     .. automethod:: find_submission
@@ -91,11 +99,15 @@ Gradebook
 
     .. automethod:: average_assignment_written_score
 
+    .. automethod:: average_assignment_task_score
+
     .. automethod:: average_notebook_score
 
     .. automethod:: average_notebook_code_score
 
     .. automethod:: average_notebook_written_score
+
+    .. automethod:: average_notebook_task_score
 
     .. automethod:: student_dicts
 
