@@ -3,7 +3,7 @@ import datetime
 import time
 import stat
 
-from os.path import join, isfile
+from os.path import join, isfile, exists
 
 from ...utils import parse_utc
 from .. import run_nbgrader
@@ -205,3 +205,27 @@ class TestNbGraderSubmit(BaseTestApp):
         assert isfile(join(cache, "abc102", filename, "p1.ipynb"))
         assert isfile(join(cache, "abc102", filename, "timestamp.txt"))
 
+    def test_submit_exclude(self, exchange, cache, course_dir):
+        self._release_and_fetch("ps1", exchange, cache, course_dir)
+        self._make_file(join("ps1", "foo.pyc"))
+        self._submit("ps1", exchange, cache)
+        filename, = os.listdir(join(exchange, "abc101", "inbound"))
+        assert not exists(join(exchange, "abc101", "inbound", filename, "foo.pyc"))
+
+    def test_submit_include(self, exchange, cache, course_dir):
+        self._release_and_fetch("ps1", exchange, cache, course_dir)
+        self._make_file(join("ps1", "foo.txt"))
+        self._submit("ps1", exchange, cache,
+                     flags=['--CourseDirectory.include=["*.ipynb"]'])
+        filename, = os.listdir(join(exchange, "abc101", "inbound"))
+        assert not exists(join(exchange, "abc101", "inbound", filename, "foo.txt"))
+
+    def test_submit_include(self, exchange, cache, course_dir):
+        self._release_and_fetch("ps1", exchange, cache, course_dir)
+        self._make_file(join("ps1", "small_file"), contents="x"*2000)
+        self._make_file(join("ps1", "large_file"), contents="x"*2001)
+        self._submit("ps1", exchange, cache,
+                     flags=['--CourseDirectory.max_file_size=2'])
+        filename, = os.listdir(join(exchange, "abc101", "inbound"))
+        assert exists(join(exchange, "abc101", "inbound", filename, "small_file"))
+        assert not exists(join(exchange, "abc101", "inbound", filename, "large_file"))
