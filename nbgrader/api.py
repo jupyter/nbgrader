@@ -41,17 +41,6 @@ class InvalidEntry(ValueError):
 class MissingEntry(ValueError):
     pass
 
-class Course(Base):
-    """Database representation of the course a user or assignment belongs to."""
-
-    __tablename__ = "course"
-
-    id = Column(String(128), unique=True, primary_key=True, nullable=False)
-    assignments = relationship("Assignment", back_populates="course")
-
-    def __repr__(self):
-        return "Course<{}>".format(self.name)
-
 class Assignment(Base):
     """Database representation of the master/source version of an assignment."""
 
@@ -94,6 +83,11 @@ class Assignment(Base):
     #: calculated from the :attr:`~nbgrader.api.Notebook.max_written_score` of
     #: each notebook
     max_written_score = None
+
+    def __init__(self, name, duedate=None, course_id="default_course", **kwargs):
+        self.name = name
+        self.duedate = duedate
+        self.course_id = course_id
 
     def to_dict(self):
         """Convert the assignment object to a JSON-friendly dictionary
@@ -981,14 +975,15 @@ class Comment(Base):
             self.assignment.name, self.notebook.name, self.name, self.student.id)
 
 class Course(Base):
-    """Table to store the course_id, it should have only one row"""
+    """Table to store the courses"""
 
-    __tablename__ = "course_id"
+    __tablename__ = "course"
 
     id = Column(String(128), unique=True, primary_key=True, nullable=False)
+    assignments = relationship("Assignment", back_populates="course")
 
     def __repr__(self):
-        return "Course<{}>".format(self.name)
+        return "Course<{}>".format(self.id)
 
 ## Needs manual grade
 
@@ -1326,7 +1321,7 @@ class Gradebook(object):
 
     """
 
-    def __init__(self, db_url, course_id="", authenticator=None):
+    def __init__(self, db_url, course_id="default_course", authenticator=None):
         """Initialize the connection to the database.
 
         Parameters
@@ -1356,7 +1351,7 @@ class Gradebook(object):
             self.db.execute("INSERT INTO alembic_version (version_num) VALUES ('{}');".format(alembic_version))
             self.db.commit()
 
-        self.set_course_id(course_id)
+        self.course_id = self.check_course(course_id)
         self.authenticator = authenticator
 
     def __enter__(self):
@@ -1377,7 +1372,7 @@ class Gradebook(object):
         self.db.remove()
         self.engine.dispose()
 
-    def set_course_id(self, course_id, **kwargs):
+    def check_course(self, course_id, **kwargs):
         """Set the course id
 
         Parameters
@@ -1389,34 +1384,36 @@ class Gradebook(object):
 
         Returns
         -------
-        course_id : :class:`~nbgrader.api.Course`
+        course : :class:`~nbgrader.api.Course`
 
         """
 
         try:
-            course_id_record = self.db.query(Course)\
+            course = self.db.query(Course)\
+                .filter(Course.id==course_id)\
                 .one()
-            if course_id: # update id only if not empty
-                course_id_record.id = course_id
         except NoResultFound:
-            course_id_record = Course(id=course_id, **kwargs)
-            self.db.add(course_id_record)
+            new_course = Course(id=course_id, **kwargs)
+            print(new_course)
+            # raise Exception(f"{course.id} - {course}")
+            course = self.db.add(new_course)
 
         try:
             self.db.commit()
         except (IntegrityError, FlushError) as e:
             self.db.rollback()
             raise InvalidEntry(*e.args)
-        return course_id_record
+        return course
 
-    @property
-    def course_id(self):
-        try:
-            course_id_record = self.db.query(Course)\
-                .one()
-            return course_id_record.id
-        except NoResultFound:
-            raise MissingEntry("No course id")
+    # @property
+    # def course_id(self):
+    #     try:
+    #         course = self.db.query(Course)\
+    #             .filter(course_id=course_id)\
+    #             .one()
+    #         return course_id_record.id
+    #     except NoResultFound:
+    #         raise MissingEntry("No course id")
 
     #### Students
 
@@ -1569,11 +1566,7 @@ class Gradebook(object):
         if 'duedate' in kwargs:
             kwargs['duedate'] = utils.parse_utc(kwargs['duedate'])
         if 'course_id' not in kwargs:
-            default_course = self.db.query(Course).first()
-            if not default_course:
-                default_course = Course(id="default_course")
-                self.db.add(default_course)
-            kwargs['course_id'] = default_course.id
+            kwargs['course_id'] = "default_course"
         assignment = Assignment(name=name, **kwargs)
         self.db.add(assignment)
         try:
