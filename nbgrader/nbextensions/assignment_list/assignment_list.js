@@ -315,10 +315,17 @@ define([
 
     Assignment.prototype.make_row = function () {
         var row = $('<div/>').addClass('col-md-12');
+        var feedback_url = '';
+        var feedback_url_text = '';
         row.append(this.make_link());
         row.append($('<span/>').addClass('item_course col-sm-2').text(this.data.course_id));
         if (this.data.status === 'submitted') {
-            row.append($('<span/>').addClass('item_status col-sm-4').text(this.data.timestamp));
+            if (feedback_url) {
+                row.append($('<span/>').addClass('item_feedback col-sm-1').html('<a href="' + feedback_url + '">' + feedback_url_text + '</a>'));
+                row.append($('<span/>').addClass('item_status col-sm-3').text(this.data.timestamp));
+            } else {
+                row.append($('<span/>').addClass('item_status col-sm-4').text(this.data.timestamp));
+            }
         } else {
             row.append(this.make_button());
         }
