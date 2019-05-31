@@ -499,9 +499,9 @@ define([
                 button.text('Fetching Feedback...');
                 button.attr('disabled', 'disabled');
                 var url = utils.url_path_join(
+                    that.base_url,
                     'formgrader',
                     'api',
-                    that.base_url,
                     'assignment',
                     that.data.assignment_id,
                     that.data.student_id,
