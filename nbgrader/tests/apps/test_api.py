@@ -44,8 +44,7 @@ class TestNbGraderAPI(BaseTestApp):
         self._make_file(join(course_dir, "source", "blah"))
         assert api.get_source_assignments() == {"ps1", "ps2"}
 
-    #@notwindows
-    @pytest.mark.skip(reason="testing")
+    @notwindows
     def test_get_released_assignments(self, api, exchange, course_dir):
         assert api.get_released_assignments() == set([])
 
@@ -121,7 +120,6 @@ class TestNbGraderAPI(BaseTestApp):
         self._make_file(join(course_dir, "submitted", "foo", "ps1", "timestamp.txt"), contents=timestamp.isoformat())
         assert api.get_autograded_students("ps1") == set([])
 
-    @pytest.mark.skip(reason="testing")
     def test_get_assignment(self, api, course_dir, db, exchange):
         keys = set([
             'average_code_score', 'average_score', 'average_written_score',
@@ -655,8 +653,7 @@ class TestNbGraderAPI(BaseTestApp):
         assert result["success"]
         assert not os.path.exists(join(exchange, "abc101", "outbound", "ps1", "p1.ipynb"))
 
-    #@notwindows
-    @pytest.mark.skip(reason="testing")
+    @notwindows
     def test_collect(self, api, course_dir, db, exchange):
         self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
         result = api.assign("ps1")
