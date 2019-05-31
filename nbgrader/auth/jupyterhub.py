@@ -12,6 +12,31 @@ class JupyterhubApiError(Exception):
     pass
 
 
+def get_jupyterhub_user():
+    if os.getenv('JUPYTERHUB_USER'):
+        return os.environ['JUPYTERHUB_USER']
+    else:
+        raise JupyterhubEnvironmentError("JUPYTERHUB_USER env is required to run the exchange features of nbgrader.")
+
+
+def get_jupyterhub_url():
+    return os.environ.get('JUPYTERHUB_BASE_URL') or 'http://127.0.0.1:8000'
+
+
+def get_jupyterhub_api_url():
+    return os.environ.get('JUPYTERHUB_API_URL') or 'http://127.0.0.1:8081/hub/api'
+
+
+def get_jupyterhub_authorization():
+    if os.getenv('JUPYTERHUB_API_TOKEN'):
+        api_token = os.environ['JUPYTERHUB_API_TOKEN']
+    else:
+        raise JupyterhubEnvironmentError("JUPYTERHUB_API_TOKEN env is required to run the exchange features of nbgrader.")
+    return {
+        'Authorization': 'token %s' % api_token
+    }
+
+
 def _query_jupyterhub_api(method, api_path, post_data=None):
     """Query Jupyterhub api
 
@@ -32,19 +57,9 @@ def _query_jupyterhub_api(method, api_path, post_data=None):
         JSON response converted to dictionary
 
     """
-    if os.getenv('JUPYTERHUB_API_TOKEN'):
-        api_token = os.environ['JUPYTERHUB_API_TOKEN']
-    else:
-        raise JupyterhubEnvironmentError("JUPYTERHUB_API_TOKEN env is required to run the exchange features of nbgrader.")
-    hub_api_url = os.environ.get('JUPYTERHUB_API_URL') or 'http://127.0.0.1:8081/hub/api'
-    if os.getenv('JUPYTERHUB_USER'):
-        user = os.environ['JUPYTERHUB_USER']
-    else:
-        raise JupyterhubEnvironmentError("JUPYTERHUB_USER env is required to run the exchange features of nbgrader.")
-    auth_header = {
-        'Authorization': 'token %s' % api_token
-    }
-
+    hub_api_url = get_jupyterhub_api_url()
+    user = get_jupyterhub_user()
+    auth_header = get_jupyterhub_authorization()
     api_path = api_path.format(authenticated_user=user)
     req = requests.request(
         url=hub_api_url + api_path,
