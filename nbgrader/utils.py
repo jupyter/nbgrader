@@ -218,16 +218,33 @@ def is_ignored(filename, ignore_globs=None):
 
 def ignore_patterns(exclude=None, include=None, max_file_size=None, log=None):
     """
-    A generalization of shutils.ignore_patterns that supports
-    include globs, exclude globs, and max file size (in kb).
-    Optionally, it logs ignored files.
+    Function that can be used as :func:`shutils.copytree` ignore parameter.
 
-    As shutils.ignore_patterns, it returns a function taking
-    a directory and list of file/directory names and returning the
-    list of files/directories to be ignored.
+    This is a generalization of :func:`shutils.ignore_patterns` that supports
+    include globs, exclude globs, max file size, and logging.
+
+    Arguments
+    ---------
+    exclude: list or None
+        A list of filename globs or None (the default)
+    include: list or None
+        A list of filename globs or None (the default)
+    max_file_size: int or float
+        The max file size, in kilobytes
+    log: logging.Logger or None (the default)
+
+    Returns
+    -------
+
+    A function taking a directory name and list of file/directory
+    names and returning the list of file/directory names to be
+    ignored.
 
     A file/directory is ignored as soon as it is either excluded, or
     not included explicitely, or too large.
+
+    If a logger is provided, a warning is logged for files too large
+    and a debug message for otherwise ignored files.
     """
     def ignore_patterns(directory, filelist):
         ignored = []
@@ -235,17 +252,19 @@ def ignore_patterns(exclude=None, include=None, max_file_size=None, log=None):
             rationale = None
             fullname = os.path.join(directory, filename)
             if exclude and any(fnmatch.fnmatch(filename, glob) for glob in exclude):
-                rationale = "excluded file"
+                if log:
+                    log.debug("Ignoring excluded file '{}' (see config option CourseDirectory.ignore)".format(fullname))
+                ignored.append(filename)
             else:
                 if os.path.isfile(fullname):
                     if include and not any(fnmatch.fnmatch(filename, glob) for glob in include):
-                        rationale = "non included"
+                        if log:
+                            log.debug("Ignoring non included file '{}' (see config option CourseDirectory.include)".format(fullname))
+                        ignored.append(filename)
                     elif max_file_size and os.path.getsize(fullname) > 1000*max_file_size:
-                        rationale = "file too large"
-            if rationale:
-                if log:
-                    log.warning("Ignoring {} {}".format(rationale, fullfilename))
-                ignored.append(filename)
+                        if log:
+                            log.warning("Ignoring file too large '{}' (see config option CourseDirectory.max_file_size)".format(fullname))
+                        ignored.append(filename)
         return ignored
     return ignore_patterns
 
