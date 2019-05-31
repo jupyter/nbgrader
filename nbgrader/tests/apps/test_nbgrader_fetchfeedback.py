@@ -68,7 +68,7 @@ class TestNbGraderFetchFeedback(BaseTestApp):
     
     def test_help(self):
         """Does the help display without error?"""
-        run_nbgrader(["fetchfeedback", "--help-all"])
+        run_nbgrader(["fetch_feedback", "--help-all"])
 
     def test_single_file(self, db, course_dir, exchange, cache):
         self._copy_file(join("files", "test.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
@@ -86,8 +86,8 @@ class TestNbGraderFetchFeedback(BaseTestApp):
         #self._copy_file(join("files", "submitted-unchanged.ipynb"), nb_path)
         run_nbgrader(["autograde", "ps1", "--create","--db", db])
         run_nbgrader(["feedback", "ps1", "--db", db])
-        run_nbgrader(["releasefeedback", "ps1",  "--Exchange.root={}".format(exchange), '--course', 'abc101'])
-        run_nbgrader(["fetchfeedback", "ps1",  "--Exchange.root={}".format(exchange), '--course', 'abc101'])
+        run_nbgrader(["release_feedback", "ps1",  "--Exchange.root={}".format(exchange), '--course', 'abc101'])
+        run_nbgrader(["fetch_feedback", "ps1",  "--Exchange.root={}".format(exchange), '--course', 'abc101'])
         assert os.path.isdir(join("ps1", "feedback"))
         username = os.environ["USER"]
         timestamp = open(join(course_dir, "submitted", username , "ps1", "timestamp.txt")).read()

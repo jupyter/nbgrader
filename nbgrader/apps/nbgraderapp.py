@@ -146,7 +146,7 @@ class NbGraderApp(NbGrader):
                 """
             ).strip()
         ),
-        releasefeedback=(
+        release_feedback=(
             ReleaseFeedbackApp,
             dedent(
                 """
@@ -183,7 +183,7 @@ class NbGraderApp(NbGrader):
                 """
             ).strip()
         ),
-        fetchfeedback=(
+        fetch_feedback=(
             FetchFeedbackApp,
             dedent(
                 """

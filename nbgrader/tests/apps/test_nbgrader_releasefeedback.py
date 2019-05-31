@@ -11,7 +11,7 @@ class TestNbGraderReleaseFeedback(BaseTestApp):
 
     def test_help(self):
         """Does the help display without error?"""
-        run_nbgrader(["feedbackrelease", "--help-all"])
+        run_nbgrader(["release_feedback", "--help-all"])
 
     def test_single_file(self, db, course_dir, exchange):
         """Can feedback be generated for an unchanged assignment?"""
@@ -26,7 +26,7 @@ class TestNbGraderReleaseFeedback(BaseTestApp):
         
         run_nbgrader(["autograde", "ps1", "--db", db])
         run_nbgrader(["feedback", "ps1", "--db", db])
-        run_nbgrader(["releasefeedback", "ps1",  "--Exchange.root={}".format(exchange), '--course', 'abc101'])
+        run_nbgrader(["release_feedback", "ps1",  "--Exchange.root={}".format(exchange), '--course', 'abc101'])
         nb_hash = notebook_hash(nb_path)
         assert exists(join(exchange, "abc101", "feedback", "{}.html".format(nb_hash)))
 
@@ -45,7 +45,7 @@ class TestNbGraderReleaseFeedback(BaseTestApp):
         self._empty_notebook(join(course_dir, "submitted", "foo", "ps1", "foo.ipynb"))
         run_nbgrader(["autograde", "ps1", "--db", db])
         run_nbgrader(["feedback", "ps1", "--db", db])
-        run_nbgrader(["releasefeedback", "ps1",  "--Exchange.root={}".format(exchange), '--course', 'abc101'])
+        run_nbgrader(["release_feedback", "ps1",  "--Exchange.root={}".format(exchange), '--course', 'abc101'])
 
         if sys.platform == 'win32':
             perms = '711'  # not sure what it should be ....
