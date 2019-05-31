@@ -92,7 +92,7 @@ class ExchangeList(Exchange):
                 localFeedbackpath = os.path.join(self.coursedir.root, info['course_id'], 'feedback','{0}.html'.format(notebookName))  
                 hasLocalFeedback = os.path.isfile(localFeedbackpath)
                 # could check for new version here
-                nbInfo['hasLocalFeedbackPath'] = hasLocalFeedback 
+                nbInfo['hasLocalFeedback'] = hasLocalFeedback 
                 if os.path.exists(feedbackpath):
                     nbInfo['feedbackPath'] = feedbackpath 
                     hasFeedback = True

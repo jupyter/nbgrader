@@ -1,6 +1,7 @@
 pytest>=4.0
 pytest-cov
 pytest-rerunfailures
+pytest-xdist
 coverage
 selenium
 sphinx

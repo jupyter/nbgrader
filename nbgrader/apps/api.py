@@ -10,7 +10,7 @@ from traitlets import Instance, Enum, Unicode, observe
 
 from ..coursedir import CourseDirectory
 from ..converters import Assign, Autograde, Feedback
-from ..exchange import ExchangeList, ExchangeRelease, ExchangeReleaseFeedback, ExchangeCollect, ExchangeError, ExchangeSubmit
+from ..exchange import ExchangeList, ExchangeRelease, ExchangeReleaseFeedback, ExchangeFetchFeedback, ExchangeCollect, ExchangeError, ExchangeSubmit
 from ..api import MissingEntry, Gradebook, Student, SubmittedAssignment
 from ..utils import parse_utc, temp_attrs, capture_log, as_timezone, to_numeric_tz
 

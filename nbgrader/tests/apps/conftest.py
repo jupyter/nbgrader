@@ -12,7 +12,7 @@ from ...utils import rmtree
 
 @pytest.fixture
 def db(request):
-    path = tempfile.mkdtemp()
+    path = tempfile.mkdtemp(prefix='tmp-dbdir-')
     dbpath = os.path.join(path, "nbgrader_test.db")
 
     def fin():
@@ -24,7 +24,7 @@ def db(request):
 
 @pytest.fixture
 def course_dir(request):
-    path = tempfile.mkdtemp()
+    path = tempfile.mkdtemp(prefix='tmp-coursedir-')
 
     def fin():
         rmtree(path)
@@ -36,7 +36,7 @@ def course_dir(request):
 @pytest.fixture
 def temp_cwd(request, course_dir):
     orig_dir = os.getcwd()
-    path = tempfile.mkdtemp()
+    path = tempfile.mkdtemp(prefix='tmp-cdw-')
     os.chdir(path)
 
     with open("nbgrader_config.py", "w") as fh:
@@ -57,7 +57,7 @@ def temp_cwd(request, course_dir):
 
 @pytest.fixture
 def jupyter_config_dir(request):
-    path = tempfile.mkdtemp()
+    path = tempfile.mkdtemp(prefix='tmp-configdir-')
 
     def fin():
         rmtree(path)
@@ -68,7 +68,7 @@ def jupyter_config_dir(request):
 
 @pytest.fixture
 def jupyter_data_dir(request):
-    path = tempfile.mkdtemp()
+    path = tempfile.mkdtemp(prefix='tmp-datadir-')
 
     def fin():
         rmtree(path)
@@ -83,7 +83,7 @@ def fake_home_dir(request, monkeypatch):
     this fixture creates a temporary home directory. This prevents existing
     nbgrader_config.py files in the user directory to interfer with the tests.
     '''
-    path = tempfile.mkdtemp()
+    path = tempfile.mkdtemp(prefix='tmp-homedir-')
 
     def fin():
         rmtree(path)
@@ -104,7 +104,7 @@ def env(request, jupyter_config_dir, jupyter_data_dir):
 
 @pytest.fixture
 def exchange(request):
-    path = tempfile.mkdtemp()
+    path = tempfile.mkdtemp(prefix='tmp-exchange-')
 
     def fin():
         rmtree(path)
@@ -115,7 +115,7 @@ def exchange(request):
 
 @pytest.fixture
 def cache(request):
-    path = tempfile.mkdtemp()
+    path = tempfile.mkdtemp(prefix='tmp-cache-')
 
     def fin():
         rmtree(path)

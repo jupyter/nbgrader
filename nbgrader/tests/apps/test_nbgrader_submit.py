@@ -159,6 +159,17 @@ class TestNbGraderSubmit(BaseTestApp):
         self._release_and_fetch("ps1", exchange, cache, course_dir)
         self._submit("--assignment=ps1", exchange, cache)
 
+    def test_submit_with_student_id(self, exchange, cache, course_dir):
+        self._release_and_fetch("ps1", exchange, cache, course_dir)
+        self._submit("ps1", exchange, cache, flags=["--student=foobar_student",])
+        filename, = os.listdir(join(cache, "abc101"))
+        username, assignment, timestamp1 = filename.split("+")[:3]
+        assert username == "foobar_student"
+        assert assignment == "ps1"
+        # '*' and '+' are forbidden
+        self._submit("ps1", exchange, cache, flags=["--student=foobar+student",], retcode=1)
+        self._submit("ps1", exchange, cache, flags=["--student=foobar*student",], retcode=1)
+
     def test_submit_multiple_courses(self, exchange, cache, course_dir):
         self._release("ps1", exchange, cache, course_dir, course="abc101")
         self._release("ps1", exchange, cache, course_dir, course="abc102")
