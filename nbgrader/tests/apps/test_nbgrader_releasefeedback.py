@@ -7,7 +7,7 @@ from .. import run_nbgrader
 from .base import BaseTestApp
 
 
-class TestNbGraderFeedback(BaseTestApp):
+class TestNbGraderReleaseFeedback(BaseTestApp):
 
     def test_help(self):
         """Does the help display without error?"""
@@ -48,7 +48,7 @@ class TestNbGraderFeedback(BaseTestApp):
         run_nbgrader(["releasefeedback", "ps1",  "--Exchange.root={}".format(exchange), '--course', 'abc101'])
 
         if sys.platform == 'win32':
-            perms = '666'
+            perms = '711'  # not sure what it should be ....
         else:
             perms = '711'
 
