@@ -29,7 +29,9 @@ class TestNbGraderReleaseFeedback(BaseTestApp):
         run_nbgrader(["release_feedback", "ps1",  "--Exchange.root={}".format(exchange), '--course', 'abc101'])
         nb_hash = notebook_hash(nb_path)
         assert exists(join(exchange, "abc101", "feedback", "{}.html".format(nb_hash)))
-
+        # release feedback shoul overwrite without error
+        run_nbgrader(["release_feedback", "ps1",  "--Exchange.root={}".format(exchange), '--course', 'abc101'])
+        
 
     def test_permissions(self, db, course_dir, exchange):
         """Are permissions properly set?"""

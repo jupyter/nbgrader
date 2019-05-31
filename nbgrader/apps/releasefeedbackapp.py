@@ -15,16 +15,6 @@ aliases.update({
 
 flags = {}
 flags.update(nbgrader_flags)
-flags.update({
-    'force': (
-        {'ExchangeReleaseFeedback' : {'force' : True}},
-        "Force overwrite of existing files in the feedback exchange directory."
-    ),
-    'f': (
-        {'ExchangeReleaseFeedback' : {'force' : True}},
-        "Force overwrite of existing files in the feedback exchange directory."
-    ),
-})
 
 class ReleaseFeedbackApp(NbGrader):
 
@@ -35,9 +25,24 @@ class ReleaseFeedbackApp(NbGrader):
     flags = flags
 
     examples = """
-        write this when it works...
-        """
+        Release feedback for an assignment to students. For the usage of instructors.
 
+        This command is run from the top-level nbgrader folder. 
+
+        The command releases the feedback present in the `feedback` folder. To populate 
+        tis folder use the `nbgrader feedback` command. 
+
+        To release the feedback for an assignment named `assignment1` run:
+
+            nbgrader release_feedback assignment1
+        
+        Release feedback overrides existing files. It should not be a problem given
+        that the feedback is associated with the hash of hte notebook. Any new notebook
+        will map to a different file. The only way a file actually gets replaced is when
+        the same input notebook gets re-graded and in these cases one would want the latest
+        grading to be the right one.   
+
+        """
     @default("classes")
     def _classes_default(self):
         classes = super(ReleaseFeedbackApp, self)._classes_default()
@@ -69,8 +74,8 @@ class ReleaseFeedbackApp(NbGrader):
         elif self.coursedir.assignment_id == "":
             self.fail("Must provide assignment name:\nnbgrader <command> ASSIGNMENT [ --course COURSE ]")
 
-        release = ExchangeReleaseFeedback(coursedir=self.coursedir, parent=self)
+        release_feedback = ExchangeReleaseFeedback(coursedir=self.coursedir, parent=self)
         try:
-            release.start()
+            release_feedback.start()
         except ExchangeError:
-            self.fail("nbgrader release failed")
+            self.fail("nbgrader release feedback failed")
