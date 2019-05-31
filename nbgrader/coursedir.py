@@ -213,8 +213,9 @@ class CourseDirectory(LoggingConfigurable):
         ],
         help=dedent(
             """
-            List of file names or file globs to be ignored when copying directories.
-            Directories with matching names will be ignored too.
+            List of file names or file globs.
+            Upon copying directories recursively, matching files and
+            directories will be ignored with a debug message.
             """
         )
     ).tag(config=True)
@@ -225,8 +226,9 @@ class CourseDirectory(LoggingConfigurable):
         ],
         help=dedent(
             """
-            List of file names or file globs: non matching files
-            will be ignored with a warning.
+            List of file names or file globs.
+            Upon copying directories recursively, non matching files
+            will be ignored with a debug message.
             """
         )
     ).tag(config=True)
@@ -235,8 +237,9 @@ class CourseDirectory(LoggingConfigurable):
         100000,
         help=dedent(
             """
-            Maximum size of files (in kilobytes) when copying directories;
-            larger files will be ignored with a warning. Default: 100Mb.
+            Maximum size of files (in kilobytes; default: 100Mb).
+            Upon copying directories recursively, larger files will be
+            ignored with a warning.
             """
         )
     ).tag(config=True)
