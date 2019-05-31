@@ -39,9 +39,8 @@ class CourseListHandler(IPythonHandler):
 
     def get_base_url(self):
         parts = list(urllib.parse.urlsplit(self.request.full_url()))
-        base_url = urllib.parse.urljoin(
-            parts[0] + "://" + parts[1], self.base_url.lstrip("/"))
-        return base_url
+        base_url = parts[0] + "://" + parts[1]
+        return base_url.rstrip()
 
     def load_config(self):
         paths = jupyter_config_path()
@@ -60,8 +59,8 @@ class CourseListHandler(IPythonHandler):
 
     @gen.coroutine
     def check_for_local_formgrader(self, config):
-        base_url = self.get_base_url()
-        url = base_url.rstrip("/") + "/formgrader/api/status"
+        base_url = self.get_base_url() + "/" + self.base_url.lstrip("/")
+        url = base_url + "/formgrader/api/status"
         header = {"Authorization": "token {}".format(self.token)}
         http_client = AsyncHTTPClient()
         try:
@@ -72,7 +71,7 @@ class CourseListHandler(IPythonHandler):
             raise gen.Return([])
 
         try:
-            response = json.loads(response.body)
+            response = json.loads(response.body.decode())
             status = response['status']
         except:
             self.log.error("Couldn't decode response from local formgrader")
@@ -112,7 +111,12 @@ class CourseListHandler(IPythonHandler):
 
         http_client = AsyncHTTPClient()
         response = yield http_client.fetch(url, headers=auth)
-        services = json.loads(response.body)
+
+        try:
+            services = json.loads(response.body.decode())
+        except:
+            self.log.error("Failed to decode response: %s", response.body)
+            raise gen.Return([])
 
         courses = []
         for course in course_names:
@@ -122,7 +126,7 @@ class CourseListHandler(IPythonHandler):
             service = services[course]
             courses.append({
                 'course_id': course,
-                'url': get_jupyterhub_url() + service['prefix'].rstrip('/') + "/formgrader",
+                'url': self.get_base_url() + service['prefix'].rstrip('/') + "/formgrader",
                 'kind': 'jupyterhub'
             })
 
