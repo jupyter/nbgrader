@@ -86,10 +86,18 @@ class ExchangeList(Exchange):
                     'path': os.path.abspath(notebook)
                 }
                 nb_hash = notebook_hash(notebook)
+                _, notebookFilename = os.path.split(notebook)
+                notebookName, _ = os.path.splitext(notebookFilename)
                 feedbackpath = os.path.join(self.root, info['course_id'], 'feedback','{0}.html'.format(nb_hash))  
+                localFeedbackpath = os.path.join(self.coursedir.root, info['course_id'], 'feedback','{0}.html'.format(notebookName))  
+                hasLocalFeedback = os.path.isfile(localFeedbackpath)
+                # could check for new version here
+                nbInfo['hasLocalFeedbackPath'] = hasLocalFeedback 
                 if os.path.exists(feedbackpath):
                     nbInfo['feedbackPath'] = feedbackpath 
                     hasFeedback = True
+                if hasLocalFeedback:
+                    nbInfo['localFeedbackPath'] = localFeedbackpath
                 info['notebooks'].append(nbInfo)
             
             info['hasFeedback'] = hasFeedback
