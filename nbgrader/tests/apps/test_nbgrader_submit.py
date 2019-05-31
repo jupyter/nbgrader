@@ -134,7 +134,7 @@ class TestNbGraderSubmit(BaseTestApp):
     def test_submit_missing(self, exchange, cache, course_dir):
         self._release_and_fetch("ps1", exchange, cache, course_dir)
         self._move_file(join("ps1", "p1.ipynb"), join("ps1", "p2.ipynb"))
-        # Check don't fail on missting notebooks submitted without strict flag
+        # Check don't fail on missing notebooks submitted without strict flag
         self._submit("ps1", exchange, cache)
 
     def test_submit_missing_strict(self, exchange, cache, course_dir):
