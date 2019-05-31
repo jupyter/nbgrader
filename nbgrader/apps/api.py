@@ -1048,3 +1048,27 @@ class NbGraderAPI(LoggingConfigurable):
             with temp_attrs(self.coursedir, assignment_id=assignment_id, student_id='*'):
                 app = ExchangeReleaseFeedback(coursedir=self.coursedir, parent=self)
                 return capture_log(app)
+
+    def fetch_feedback(self, assignment_id, student_id):
+        """Run ``nbgrader fetch_feedback`` for a particular assignment/student.
+
+        Arguments
+        ---------
+        assignment_id: string
+            The name of the assignment
+        student_id: string
+            The name of the student.
+
+        Returns
+        -------
+        result: dict
+            A dictionary with the following keys (error and log may or may not be present):
+
+            - success (bool): whether or not the operation completed successfully
+            - error (string): formatted traceback
+            - log (string): captured log output
+
+        """
+        with temp_attrs(self.coursedir, assignment_id=assignment_id, student_id=student_id):
+            app = ExchangeFetchFeedback(coursedir=self.coursedir, parent=self)
+            return capture_log(app)
