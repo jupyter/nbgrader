@@ -123,13 +123,13 @@ define([
 
     Course.prototype.make_row = function () {
         var row = $('<div/>').addClass('col-md-12');
-        var container = $('<span/>').addClass('item_name col-md-12');
-        var link = $('<a/>')
-            .attr('href', this.url)
-            .attr('target', '_blank')
-            .text(this.course_id);
-        container.append(link).append("(" + this.formgrader_kind + ")");
+        var container = $('<span/>').addClass('item_name col-sm-2').append(
+            $('<a/>')
+                .attr('href', this.url)
+                .attr('target', '_blank')
+                .text(this.course_id));
         row.append(container);
+        row.append($('<span/>').addClass('item_course col-sm-2').text(this.formgrader_kind));
         this.element.empty().append(row);
     };
 
