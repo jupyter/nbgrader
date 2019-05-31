@@ -40,7 +40,7 @@ class CourseListHandler(IPythonHandler):
     def get_base_url(self):
         parts = list(urllib.parse.urlsplit(self.request.full_url()))
         base_url = parts[0] + "://" + parts[1]
-        return base_url.rstrip()
+        return base_url.rstrip("/")
 
     def load_config(self):
         paths = jupyter_config_path()
@@ -60,6 +60,7 @@ class CourseListHandler(IPythonHandler):
     @gen.coroutine
     def check_for_local_formgrader(self, config):
         base_url = self.get_base_url() + "/" + self.base_url.lstrip("/")
+        base_url = base_url.rstrip("/")
         url = base_url + "/formgrader/api/status"
         header = {"Authorization": "token {}".format(self.token)}
         http_client = AsyncHTTPClient()
@@ -98,11 +99,9 @@ class CourseListHandler(IPythonHandler):
             # not running on JupyterHub, or otherwise don't have access
             raise gen.Return([])
 
+        # If course_names is None, that probably means we're not running with
+        # JupyterHub.
         if course_names is None:
-            self.log.warning(
-                "User has access to all formgraders, but I don't know how to tell "
-                "which are services are formgraders. This is probably not supposed "
-                "to happen and may mean that your nbgrader is misconfigured.")
             raise gen.Return([])
 
         base_url = get_jupyterhub_api_url()
