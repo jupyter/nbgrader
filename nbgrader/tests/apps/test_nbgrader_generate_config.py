@@ -20,5 +20,11 @@ class TestNbGraderGenerateConfig(BaseTestApp):
         run_nbgrader(["generate_config"])
         assert os.path.isfile("nbgrader_config.py")
 
+        with open("nbgrader_config.py") as f:
+            contents = f.read()
+
+        # This was missing in issue #1089
+        assert "AssignLatePenalties" in contents
+
         # does it fail if it already exists?
         run_nbgrader(["generate_config"], retcode=1)
