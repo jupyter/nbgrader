@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 
+import contextlib
 import pytest
+import sys
+import subprocess as sp
 
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
@@ -10,19 +13,19 @@ from selenium.common.exceptions import TimeoutException
 from .conftest import notwindows, _make_nbserver, _make_browser, _close_nbserver, _close_browser
 
 
-@pytest.fixture(scope="module")
-def nbserver(request, port, tempdir, jupyter_config_dir, jupyter_data_dir, exchange, cache):
-    server = _make_nbserver("course101", port, tempdir, jupyter_config_dir, jupyter_data_dir, exchange, cache)
-
-    def fin():
+@contextlib.contextmanager
+def nbserver(course, port, tempdir, jupyter_config_dir, jupyter_data_dir, exchange, cache, startup_fn=None):
+    server = _make_nbserver(
+        course, port, tempdir, jupyter_config_dir, jupyter_data_dir, exchange,
+        cache, startup_fn=startup_fn)
+    try:
+        yield server
+    finally:
         _close_nbserver(server)
-    request.addfinalizer(fin)
-
-    return server
 
 
 @pytest.fixture(scope="module")
-def browser(request, tempdir, nbserver):
+def browser(request, tempdir):
     browser = _make_browser(tempdir)
 
     def fin():
@@ -79,16 +82,68 @@ def _wait_for_list(browser, num_rows):
 
 @pytest.mark.nbextensions
 @notwindows
-def test_show_courses_list(browser, port, tempdir):
-    _load_course_list(browser, port)
+def test_no_formgrader(browser, port, tempdir, jupyter_config_dir, jupyter_data_dir, exchange, cache):
+    def disable_formgrader(env):
+        sp.check_call([
+            sys.executable, "-m", "jupyter", "nbextension", "disable", "--user",
+            "formgrader/main", "--section=tree"], env=env)
+        sp.check_call([
+            sys.executable, "-m", "jupyter", "serverextension", "disable",
+            "--user", "nbgrader.server_extensions.formgrader"], env=env)
 
-    # check that there is one local course
-    rows = _wait_for_list(browser, 1)
-    assert rows[0].text == "course101\nlocal"
+    args = [
+        "course101", port, tempdir, jupyter_config_dir, jupyter_data_dir,
+        exchange, cache, disable_formgrader
+    ]
 
-    # make sure the url of the course is correct
-    link = browser.find_elements_by_css_selector("#formgrader_list > .list_item a")[0]
-    url = link.get_attribute("href")
-    assert url == "http://localhost:{}/formgrader".format(port)
+    with nbserver(*args):
+        _load_course_list(browser, port)
+        _wait(browser).until(EC.visibility_of_element_located((By.CSS_SELECTOR, "#formgrader_list_placeholder")))
 
 
+@pytest.mark.nbextensions
+@notwindows
+def test_local_formgrader(browser, port, tempdir, jupyter_config_dir, jupyter_data_dir, exchange, cache):
+    with nbserver("course101", port, tempdir, jupyter_config_dir, jupyter_data_dir, exchange, cache):
+        _load_course_list(browser, port)
+
+        # check that there is one local course
+        rows = _wait_for_list(browser, 1)
+        assert rows[0].text == "course101\nlocal"
+
+        # make sure the url of the course is correct
+        link = browser.find_elements_by_css_selector("#formgrader_list > .list_item a")[0]
+        url = link.get_attribute("href")
+        assert url == "http://localhost:{}/formgrader".format(port)
+
+
+@pytest.mark.nbextensions
+@notwindows
+def test_no_jupyterhub(browser, port, tempdir, jupyter_config_dir, jupyter_data_dir, exchange, cache):
+    def update_config(env):
+        with open('nbgrader_config.py', 'a') as fh:
+            fh.write("from nbgrader.auth import JupyterHubAuthPlugin\n")
+            fh.write("c.Authenticator.plugin_class = JupyterHubAuthPlugin\n")
+
+    args = [
+        "course101", port, tempdir, jupyter_config_dir, jupyter_data_dir,
+        exchange, cache, update_config
+    ]
+
+    with nbserver(*args):
+        _load_course_list(browser, port)
+
+        # check that there is one local course
+        rows = _wait_for_list(browser, 1)
+        assert rows[0].text == "course101\nlocal"
+
+        # make sure the url of the course is correct
+        link = browser.find_elements_by_css_selector("#formgrader_list > .list_item a")[0]
+        url = link.get_attribute("href")
+        assert url == "http://localhost:{}/formgrader".format(port)
+
+
+# TODO: add a test case where jupyterhub is running, and a test case where a
+# course group doesn't have a corresponding formgrader. I think this will
+# require creating a small mock JupyterHub server that can run and accept the
+# basic requests.
