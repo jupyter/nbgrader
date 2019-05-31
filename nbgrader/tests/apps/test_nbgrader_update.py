@@ -51,6 +51,18 @@ class TestNbGraderUpdate(BaseTestApp):
         run_nbgrader(["update", "p1.ipynb", "--UpdateApp.validate=False"])
         run_nbgrader(["validate", "p1.ipynb"], retcode=1)
 
+    def test_validate_too_new(self):
+        """Does turning validation on/off work correctly when the schema is too new?"""
+
+        # updating shouldn't work if we're validating, too
+        self._copy_file(join("files", "too-new.ipynb"), "p1.ipynb")
+        run_nbgrader(["update", "p1.ipynb"], retcode=1)
+
+        # updating should work, but then validation should fail
+        self._copy_file(join("files", "too-new.ipynb"), "p1.ipynb")
+        run_nbgrader(["update", "p1.ipynb", "--UpdateApp.validate=False"])
+        run_nbgrader(["validate", "p1.ipynb"], retcode=1)
+
     def test_update_assign(self, db, course_dir):
         with open("nbgrader_config.py", "a") as fh:
             fh.write("""c.CourseDirectory.db_assignments = [dict(name='ps1', duedate='2015-02-02 14:58:23.948203 America/Los_Angeles')]\n""")
