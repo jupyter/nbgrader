@@ -2,6 +2,7 @@ import os
 import glob
 import pwd
 import shutil
+import sys
 from collections import defaultdict
 from textwrap import dedent
 
