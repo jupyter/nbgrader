@@ -5,7 +5,7 @@ from tornado import web
 
 from .base import BaseApiHandler, check_xsrf
 from ...api import MissingEntry
-
+from ...exchange import ExchangeList
 
 class GradeCollectionHandler(BaseApiHandler):
     @web.authenticated
@@ -279,8 +279,12 @@ class FetchFeedbackHandler(BaseApiHandler):
     @web.authenticated
     @check_xsrf
     def post(self, assignment_id, student_id):
-        self.write(json.dumps(self.api.fetch_feedback(assignment_id, student_id)))
-
+        ret_dict = {}
+        ret_dict.update(self.api.fetch_feedback(assignment_id, student_id))
+        #lister = ExchangeList(coursedir=self.coursedir, config=self.config)
+        #assignments = lister.start()
+        #ret_dict["value"] = sorted(assignments, key=lambda x: (x['course_id'], x['assignment_id']))
+        self.write(json.dumps(ret_dict))        
 
 default_handlers = [
     (r"/formgrader/api/assignments", AssignmentCollectionHandler),
