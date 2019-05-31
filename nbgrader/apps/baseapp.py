@@ -17,6 +17,7 @@ from traitlets.config.application import catch_config_error
 from traitlets.config.loader import Config
 
 from ..coursedir import CourseDirectory
+from ..auth import Authenticator
 
 
 nbgrader_aliases = {
@@ -102,6 +103,7 @@ class NbGrader(JupyterApp):
                 self.log.removeHandler(handler)
 
     coursedir = Instance(CourseDirectory, allow_none=True)
+    authenticator = Instance(Authenticator, allow_none=True)
     verbose_crash = Bool(False)
 
     # The classes added here determine how configuration will be documented
@@ -290,3 +292,7 @@ class NbGrader(JupyterApp):
             self.log.warning("No nbgrader_config.py file found (rerun with --debug to see where nbgrader is looking)")
 
         super(NbGrader, self).load_config_file(**kwargs)
+
+    def start(self):
+        super(NbGrader, self).start()
+        self.authenticator = Authenticator(parent=self)

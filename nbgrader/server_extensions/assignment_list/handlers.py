@@ -17,6 +17,7 @@ from jupyter_core.paths import jupyter_config_path
 from ...apps import NbGrader
 from ...coursedir import CourseDirectory
 from ...exchange import ExchangeList, ExchangeFetch, ExchangeSubmit
+from ...auth import Authenticator
 from ... import __version__ as nbgrader_version
 
 
@@ -61,7 +62,11 @@ class AssignmentList(LoggingConfigurable):
                     config.Exchange.course_id = course_id
 
                 coursedir = CourseDirectory(config=config)
-                lister = ExchangeList(coursedir=coursedir, config=config)
+                authenticator = Authenticator(config=config)
+                lister = ExchangeList(
+                    coursedir=coursedir,
+                    authenticator=authenticator,
+                    config=config)
                 assignments = lister.start()
 
             except:
@@ -93,7 +98,11 @@ class AssignmentList(LoggingConfigurable):
                     config.Exchange.course_id = course_id
 
                 coursedir = CourseDirectory(config=config)
-                lister = ExchangeList(coursedir=coursedir, config=config)
+                authenticator = Authenticator(config=config)
+                lister = ExchangeList(
+                    coursedir=coursedir,
+                    authenticator=authenticator,
+                    config=config)
                 assignments = lister.start()
 
             except:
@@ -147,7 +156,11 @@ class AssignmentList(LoggingConfigurable):
                 config.CourseDirectory.assignment_id = assignment_id
 
                 coursedir = CourseDirectory(config=config)
-                fetch = ExchangeFetch(coursedir=coursedir, config=config)
+                authenticator = Authenticator(config=config)
+                fetch = ExchangeFetch(
+                    coursedir=coursedir,
+                    authenticator=authenticator,
+                    config=config)
                 fetch.start()
 
             except:
@@ -172,7 +185,11 @@ class AssignmentList(LoggingConfigurable):
                 config.CourseDirectory.assignment_id = assignment_id
 
                 coursedir = CourseDirectory(config=config)
-                submit = ExchangeSubmit(coursedir=coursedir, config=config)
+                authenticator = Authenticator(config=config)
+                submit = ExchangeSubmit(
+                    coursedir=coursedir,
+                    authenticator=authenticator,
+                    config=config)
                 submit.start()
 
             except:
@@ -228,10 +245,7 @@ class CourseListHandler(BaseAssignmentHandler):
 
     @web.authenticated
     def get(self):
-        courses_list = self.manager.list_courses()
-        if courses_list['success'] and 'value' in courses_list:
-            courses_list['value'] = [course for course in courses_list['value'] if 'nbgrader-{}'.format(course) in self.current_user['groups'] or 'formgrade-{}'.format(course) in self.current_user['groups']]
-        self.finish(json.dumps(courses_list))
+        self.finish(json.dumps(self.manager.list_courses()))
 
 
 class NbGraderVersionHandler(BaseAssignmentHandler):

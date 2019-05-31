@@ -98,7 +98,10 @@ class ReleaseApp(NbGrader):
         elif self.coursedir.assignment_id == "":
             self.fail("Must provide assignment name:\nnbgrader <command> ASSIGNMENT [ --course COURSE ]")
 
-        release = ExchangeRelease(coursedir=self.coursedir, parent=self)
+        release = ExchangeRelease(
+            coursedir=self.coursedir,
+            authenticator=self.authenticator,
+            parent=self)
         try:
             release.start()
         except ExchangeError:

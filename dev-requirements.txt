@@ -1,9 +1,11 @@
 pytest>=4.0
 pytest-cov
 pytest-rerunfailures
+pytest-xdist
 coverage
 selenium
 sphinx
 sphinx_rtd_theme
 codecov
 nbval
+requests-mock

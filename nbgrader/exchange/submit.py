@@ -45,8 +45,7 @@ class ExchangeSubmit(Exchange):
     def init_dest(self):
         if self.coursedir.course_id == '':
             self.fail("No course id specified. Re-run with --course flag.")
-        courses = self.get_user_courses(self.coursedir.student_id)
-        if not self.coursedir.course_id in courses:
+        if not self.authenticator.has_access(self.coursedir.student_id, self.coursedir.course_id):
             self.fail("You do not have access to this course.")
 
         self.inbound_path = os.path.join(self.root, self.coursedir.course_id, 'inbound')
@@ -56,13 +55,20 @@ class ExchangeSubmit(Exchange):
             self.fail("You don't have write permissions to the directory: {}".format(self.inbound_path))
 
         self.cache_path = os.path.join(self.cache, self.coursedir.course_id)
+        if self.coursedir.student_id != '*':
+            # An explicit student id has been specified on the command line; we use it as student_id
+            if '*' in self.coursedir.student_id or '+' in self.coursedir.student_id:
+                self.fail("The student ID should contain no '*' nor '+'; got {}".format(self.coursedir.student_id))
+            student_id = self.coursedir.student_id
+        else:
+            student_id = get_username()
         if self.add_random_string:
             random_str = base64.urlsafe_b64encode(os.urandom(9)).decode('ascii')
             self.assignment_filename = '{}+{}+{}+{}'.format(
-                get_username(), self.coursedir.assignment_id, self.timestamp, random_str)
+                student_id, self.coursedir.assignment_id, self.timestamp, random_str)
         else:
             self.assignment_filename = '{}+{}+{}'.format(
-                get_username(), self.coursedir.assignment_id, self.timestamp)
+                student_id, self.coursedir.assignment_id, self.timestamp)
 
     def init_release(self):
         if self.coursedir.course_id == '':

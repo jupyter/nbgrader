@@ -117,7 +117,10 @@ class ListApp(NbGrader):
         elif len(self.extra_args) > 2:
             self.fail("Too many arguments")
 
-        lister = ExchangeList(coursedir=self.coursedir, parent=self)
+        lister = ExchangeList(
+            coursedir=self.coursedir,
+            authenticator=self.authenticator,
+            parent=self)
         try:
             lister.start()
         except ExchangeError:
