@@ -18,7 +18,8 @@ class CourseDirectory(LoggingConfigurable):
             File glob to match student IDs. This can be changed to filter by
             student. Note: this is always changed to '.' when running `nbgrader
             assign`, as the assign step doesn't have any student ID associated
-            with it.
+            with it. With `nbgrader submit`, this instead forces the use of
+            an alternative student ID for the submission. See `nbgrader submit --help`.
 
             If the ID is purely numeric and you are passing it as a flag on the
             command line, you will need to escape the quotes in order to have
