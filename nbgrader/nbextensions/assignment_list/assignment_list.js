@@ -474,8 +474,8 @@ define([
         var container = $('<span/>').addClass('item_status col-sm-1');
         var button = $('<button/>').addClass("btn btn-primary btn-xs");
         container.append(button);
-	// One of these must be true: data.hasLocalFeedbackPath or data.hasFeedback
-        if (that.data.hasLocalFeedbackPath) {
+	// One of these must be true: data.hasLocalFeedback or data.hasFeedback
+        if (that.data.hasLocalFeedback) {
             button.text("View Feedback");
             button.click(function (e) {
             });
