@@ -6,7 +6,7 @@ import json
 import traceback
 
 from tornado import web
-from tornado.httpclient import AsyncHTTPClient
+from tornado.httpclient import AsyncHTTPClient, HTTPClientError
 from tornado import gen
 from textwrap import dedent
 from six.moves import urllib
@@ -64,7 +64,13 @@ class CourseListHandler(IPythonHandler):
         url = base_url.rstrip("/") + "/formgrader/api/status"
         header = {"Authorization": "token {}".format(self.token)}
         http_client = AsyncHTTPClient()
-        response = yield http_client.fetch(url, headers=header)
+        try:
+            response = yield http_client.fetch(url, headers=header)
+        except HTTPClientError:
+            # local formgrader isn't running
+            self.log.warning("Local formgrader does not seem to be running")
+            raise gen.Return([])
+
         try:
             response = json.loads(response.body)
             status = response['status']
