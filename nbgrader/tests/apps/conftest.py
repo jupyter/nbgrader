@@ -36,7 +36,7 @@ def course_dir(request):
 @pytest.fixture
 def temp_cwd(request, course_dir):
     orig_dir = os.getcwd()
-    path = tempfile.mkdtemp(prefix='tmp-cdw-')
+    path = tempfile.mkdtemp(prefix='tmp-cwd-')
     os.chdir(path)
 
     with open("nbgrader_config.py", "w") as fh:
