@@ -981,14 +981,15 @@ class NbGraderAPI(LoggingConfigurable):
             return capture_log(app)
 
     def generate_feedback(self, assignment_id, student_id=None):
-        """Run ``nbgrader feedback`` for a particular assignment and student.
+        """Run ``nbgrader generate_feedback`` for a particular assignment and student.
 
         Arguments
         ---------
         assignment_id: string
             The name of the assignment
         student_id: string
-            The unique id of the student
+            The name of the student (optional). If not provided, then generate
+            feedback from autograded submissions.
 
         Returns
         -------
@@ -1027,7 +1028,7 @@ class NbGraderAPI(LoggingConfigurable):
             The name of the assignment
         assignment_id: string
             The name of the student (optional). If not provided, then release
-            all feedback.
+            all generated feedback.
 
         Returns
         -------
