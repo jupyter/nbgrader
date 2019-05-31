@@ -125,7 +125,7 @@ def _make_nbserver(course_id, port, tempdir, jupyter_config_dir, jupyter_data_di
                 """
                 c.Exchange.root = "{}"
                 c.Exchange.cache = "{}"
-                c.Exchange.course_id = "{}"
+                c.CourseDirectory.course_id = "{}"
                 """.format(exchange, cache, course_id)
             ))
 

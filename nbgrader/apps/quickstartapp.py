@@ -58,8 +58,8 @@ class QuickStartApp(NbGrader):
             nbgrader quickstart course101
 
         Note that this class name need not necessarily be the same as the
-        `Exchange.course_id` configuration option, however by default, the
-        quickstart command will set `Exchange.course_id` to be the name you give
+        `CourseDirectory.course_id` configuration option, however by default, the
+        quickstart command will set `CourseDirectory.course_id` to be the name you give
         on the command line. If you want to use a different folder name, go
         ahead and just provide the name of the folder where your class files
         will be stored, e.g.:
@@ -67,7 +67,7 @@ class QuickStartApp(NbGrader):
             nbgrader quickstart "World Music"
 
         and then after running the quickstart commmand, you can edit the
-        `nbgrader_config.py` file to change `Exchange.course_id`.
+        `nbgrader_config.py` file to change `CourseDirectory.course_id`.
 
         """
 
@@ -138,7 +138,7 @@ class QuickStartApp(NbGrader):
                 """
                 # You only need this if you are running nbgrader on a shared
                 # server set up.
-                c.Exchange.course_id = "{}"
+                c.CourseDirectory.course_id = "{}"
 
                 # Update this list with other assignments you want
                 c.CourseDirectory.db_assignments = [dict(name="ps1")]
