@@ -81,7 +81,7 @@ class CourseListHandler(IPythonHandler):
 
         if status:
             raise gen.Return([{
-                'course_id': config.Exchange.course_id,
+                'course_id': config.CourseDirectory.course_id,
                 'url': base_url + '/formgrader',
                 'kind': 'local'
             }])
