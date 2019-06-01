@@ -2,7 +2,7 @@
 
 import os
 
-from traitlets import Unicode
+from traitlets import default, Unicode
 from traitlets.config.application import catch_config_error
 from .baseapp import NbGrader
 
@@ -17,6 +17,10 @@ class GenerateConfigApp(NbGrader):
         "nbgrader_config.py",
         help="The name of the configuration file to generate."
     ).tag(config=True)
+
+    @default("classes")
+    def _classes_default(self):
+        return self.all_configurable_classes()
 
     @catch_config_error
     def initialize(self, argv=None):

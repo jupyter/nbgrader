@@ -11,9 +11,8 @@ from traitlets.config import LoggingConfigurable
 from traitlets import Unicode, Bool, Instance, default, validate
 from jupyter_core.paths import jupyter_data_dir
 
-from ..utils import check_directory
+from ..utils import check_directory, ignore_patterns
 from ..coursedir import CourseDirectory
-
 
 class ExchangeError(Exception):
     pass
@@ -118,9 +117,18 @@ class Exchange(LoggingConfigurable):
         """Actually do the file transfer."""
         raise NotImplementedError
 
-    def do_copy(self, src, dest):
-        """Copy the src dir to the dest dir omitting the self.coursedir.ignore globs."""
-        shutil.copytree(src, dest, ignore=shutil.ignore_patterns(*self.coursedir.ignore))
+    def do_copy(self, src, dest, log=None):
+        """
+        Copy the src dir to the dest dir, omitting excluded
+        file/directories, non included files, and too large files, as
+        specified by the options coursedir.ignore, coursedir.include
+        and coursedir.max_file_size.
+        """
+        shutil.copytree(src, dest,
+                        ignore=ignore_patterns(exclude=self.coursedir.ignore,
+                                               include=self.coursedir.include,
+                                               max_file_size=self.coursedir.max_file_size,
+                                               log=self.log))
 
     def start(self):
         if sys.platform == 'win32':
@@ -147,3 +155,14 @@ class Exchange(LoggingConfigurable):
             self.log.error("Did you mean: %s", scores[-1][1])
 
         raise ExchangeError(msg)
+
+    def ensure_directory(self, path, mode):
+        """Ensure that the path exists, has the right mode and is self owned."""
+        if not os.path.isdir(path):
+            os.makedirs(path)
+            # For some reason, Python won't create a directory with a mode of 0o733
+            # so we have to create and then chmod.
+            os.chmod(path, mode)
+        else:
+            if not self_owned(path):
+                self.fail("You don't own the directory: {}".format(path))

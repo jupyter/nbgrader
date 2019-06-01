@@ -31,11 +31,14 @@ class TestNbGraderAssign(BaseTestApp):
         run_nbgrader(["assign", "foo", "bar"], retcode=1)
 
     def test_no_assignment(self, course_dir):
-        """Is an error thrown if the assignment doesn't exist?"""
+        """Is an assignment automatically created if it doesn't exist?"""
         self._empty_notebook(join(course_dir, 'source', 'ps1', 'foo.ipynb'))
-        run_nbgrader(["assign", "ps1"], retcode=1)
-        # check that the --create flag works
-        run_nbgrader(["assign", "ps1", "--create", "--debug"])
+
+        # If we explicitly disable creating assignments, assign should fail
+        run_nbgrader(["assign", "ps1", "--Assign.create_assignment=False"], retcode=1)
+
+        # The default is now to create missing assignments (formerly --create)
+        run_nbgrader(["assign", "ps1", "--debug"])
 
     def test_single_file(self, course_dir, temp_cwd):
         """Can a single file be assigned?"""
@@ -49,7 +52,7 @@ class TestNbGraderAssign(BaseTestApp):
         """Test that an error is thrown when the assignment name is invalid."""
         self._empty_notebook(join(course_dir, 'source', 'foo+bar', 'foo.ipynb'))
         with pytest.raises(traitlets.TraitError):
-            run_nbgrader(["assign", "foo+bar", "--create"])
+            run_nbgrader(["assign", "foo+bar"])
         assert not os.path.isfile(join(course_dir, "release", "foo+bar", "foo.ipynb"))
 
     def test_multiple_files(self, course_dir):

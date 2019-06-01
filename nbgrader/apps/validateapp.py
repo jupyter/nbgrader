@@ -7,7 +7,7 @@ from traitlets import default
 
 from .baseapp import NbGrader
 from ..validator import Validator
-from ..nbgraderformat import SchemaMismatchError
+from ..nbgraderformat import SchemaTooOldError, SchemaTooNewError
 
 aliases = {}
 flags = {
@@ -70,13 +70,21 @@ class ValidateApp(NbGrader):
             try:
                 validator.validate_and_print(filename)
 
-            except SchemaMismatchError:
+            except SchemaTooOldError:
                 self.log.error(traceback.format_exc())
                 self.fail((
                     "The notebook '{}' uses an old version "
                     "of the nbgrader metadata format. Please **back up this "
                     "notebook** and then update the metadata using:\n\nnbgrader update {}\n"
                 ).format(filename, filename))
+
+            except SchemaTooNewError:
+                self.log.error(traceback.format_exc())
+                self.fail((
+                    "The notebook '{}' uses a newer version "
+                    "of the nbgrader metadata format. Please update your version of "
+                    "nbgrader to the latest version to be able to use this notebook."
+                ).format(filename))
 
             except Exception:
                 self.log.error(traceback.format_exc())

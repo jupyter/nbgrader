@@ -17,6 +17,10 @@ from traitlets.config.application import catch_config_error
 from traitlets.config.loader import Config
 
 from ..coursedir import CourseDirectory
+from .. import preprocessors
+from .. import plugins
+from .. import exchange
+from .. import converters
 
 
 nbgrader_aliases = {
@@ -69,10 +73,11 @@ class NbGrader(JupyterApp):
         return "%(color)s[%(name)s | %(levelname)s]%(end_color)s %(message)s"
 
     logfile = Unicode(
-        ".nbgrader.log",
+        "",
         help=dedent(
             """
-            Name of the logfile to log to.
+            Name of the logfile to log to. By default, log output is not written
+            to any file.
             """
         )
     ).tag(config=True)
@@ -110,6 +115,47 @@ class NbGrader(JupyterApp):
     @default("classes")
     def _classes_default(self):
         return [NbGrader, CourseDirectory]
+
+    def all_configurable_classes(self):
+        """Get a list of all configurable classes for nbgrader
+        """
+        # Call explicitly the method on this class, to avoid infinite recursion
+        # when a subclass calls this method in _classes_default().
+        classes = NbGrader._classes_default(self)
+
+        # include the coursedirectory
+        classes.append(CourseDirectory)
+
+        # include all the apps that have configurable options
+        for _, (app, _) in self.subcommands.items():
+            if len(app.class_traits(config=True)) > 0:
+                classes.append(app)
+
+        # include plugins that have configurable options
+        for pg_name in plugins.__all__:
+            pg = getattr(plugins, pg_name)
+            if pg.class_traits(config=True):
+                classes.append(pg)
+
+        # include all preprocessors that have configurable options
+        for pp_name in preprocessors.__all__:
+            pp = getattr(preprocessors, pp_name)
+            if len(pp.class_traits(config=True)) > 0:
+                classes.append(pp)
+
+        # include all the exchange actions
+        for ex_name in exchange.__all__:
+            ex = getattr(exchange, ex_name)
+            if hasattr(ex, "class_traits") and ex.class_traits(config=True):
+                classes.append(ex)
+
+        # include all the converters
+        for ex_name in converters.__all__:
+            ex = getattr(converters, ex_name)
+            if hasattr(ex, "class_traits") and ex.class_traits(config=True):
+                classes.append(ex)
+
+        return classes
 
     @default("config_file_name")
     def _config_file_name_default(self):
@@ -241,14 +287,15 @@ class NbGrader(JupyterApp):
     @catch_config_error
     def initialize(self, argv=None):
         self.update_config(self.build_extra_config())
-        if self.logfile:
-            self.init_logging(logging.FileHandler, [self.logfile], color=False)
         self.init_syspath()
         self.coursedir = CourseDirectory(parent=self)
         super(NbGrader, self).initialize(argv)
 
         # load config that is in the coursedir directory
         super(JupyterApp, self).load_config_file("nbgrader_config.py", path=self.coursedir.root)
+
+        if self.logfile:
+            self.init_logging(logging.FileHandler, [self.logfile], color=False)
 
     def init_syspath(self):
         """Add the cwd to the sys.path ($PYTHONPATH)"""
