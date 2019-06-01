@@ -1067,16 +1067,14 @@ class NbGraderAPI(LoggingConfigurable):
             - success (bool): whether or not the operation completed successfully
             - error (string): formatted traceback
             - log (string): captured log output
+            - value (list of dict): all submitted assignments
 
         """
         with temp_attrs(self.coursedir, assignment_id=assignment_id, student_id=student_id):
             app = ExchangeFetchFeedback(coursedir=self.coursedir, parent=self)
             ret_dic = capture_log(app)
-            # assignment tab needs a 'value' field with  
         with temp_attrs(self.coursedir, assignment_id='*', student_id=student_id):
-            lister_rel = ExchangeList(inbound=False, coursedir=self.coursedir, config=self.config)
-            lister_sub = ExchangeList(inbound=True, coursedir=self.coursedir, config=self.config)
+            lister_rel = ExchangeList(inbound=False, cached=True, coursedir=self.coursedir, config=self.config)
             assignments = lister_rel.start() 
-            assignments = assignments + lister_sub.start()
             ret_dic["value"] = sorted(assignments, key=lambda x: (x['course_id'], x['assignment_id']))
         return ret_dic
