@@ -31,6 +31,17 @@ class Exchange(LoggingConfigurable):
         )
     ).tag(config=True)
 
+    assignment_dir = Unicode(
+        ".",
+        help=dedent(
+            """
+            Local path for storing student assignments.  Defaults to '.'
+            which is normally Jupyter's notebook_dir.
+            """
+        )
+    ).tag(config=True)
+
+
     @validate('course_id')
     def _validate_course_id(self, proposal):
         if proposal['value'].strip() != proposal['value']:
