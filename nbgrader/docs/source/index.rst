@@ -33,6 +33,7 @@ For additional resources on using Jupyter in educational contexts, see the `jupy
     :caption: Configuration
 
     configuration/student_version
+    configuration/nbgrader_config
     configuration/config_options
     command_line_tools/index
     configuration/jupyterhub_config
