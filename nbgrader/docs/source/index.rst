@@ -32,6 +32,7 @@ For an overview and demonstration of nbgrader's core functionality, check out th
     :caption: Configuration
 
     configuration/student_version
+    configuration/nbgrader_config
     configuration/config_options
     command_line_tools/index
     configuration/jupyterhub_config
