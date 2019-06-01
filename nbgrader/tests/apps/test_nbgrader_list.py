@@ -7,6 +7,7 @@ from .. import run_nbgrader
 from .base import BaseTestApp
 from .conftest import notwindows
 
+from ...utils import get_username
 
 @notwindows
 class TestNbGraderList(BaseTestApp):
@@ -155,7 +156,7 @@ class TestNbGraderList(BaseTestApp):
             """
             [ListApp | INFO] Submitted assignments:
             [ListApp | INFO] abc101 {} ps1 {}
-            """.format(os.environ["USER"], timestamp)
+            """.format(get_username(), timestamp)
         ).lstrip()
 
         time.sleep(1)
@@ -167,7 +168,7 @@ class TestNbGraderList(BaseTestApp):
             [ListApp | INFO] Submitted assignments:
             [ListApp | INFO] abc101 {} ps1 {}
             [ListApp | INFO] abc101 {} ps1 {}
-            """.format(os.environ["USER"], timestamps[0], os.environ["USER"], timestamps[1])
+            """.format(get_username(), timestamps[0], get_username(), timestamps[1])
         ).lstrip()
 
     def test_list_inbound_no_random_string(self, exchange, cache, course_dir):
@@ -187,7 +188,7 @@ class TestNbGraderList(BaseTestApp):
             """
             [ListApp | INFO] Submitted assignments:
             [ListApp | INFO] abc101 {} ps1 {}
-            """.format(os.environ["USER"], timestamp)
+            """.format(get_username(), timestamp)
         ).lstrip()
 
         time.sleep(1)
@@ -199,7 +200,7 @@ class TestNbGraderList(BaseTestApp):
             [ListApp | INFO] Submitted assignments:
             [ListApp | INFO] abc101 {} ps1 {}
             [ListApp | INFO] abc101 {} ps1 {}
-            """.format(os.environ["USER"], timestamps[0], os.environ["USER"], timestamps[1])
+            """.format(get_username(), timestamps[0], get_username(), timestamps[1])
         ).lstrip()
 
     def test_list_cached(self, exchange, cache, course_dir):
@@ -219,7 +220,7 @@ class TestNbGraderList(BaseTestApp):
             """
             [ListApp | INFO] Submitted assignments:
             [ListApp | INFO] abc101 {} ps1 {}
-            """.format(os.environ["USER"], timestamp)
+            """.format(get_username(), timestamp)
         ).lstrip()
 
         time.sleep(1)
@@ -232,7 +233,7 @@ class TestNbGraderList(BaseTestApp):
             [ListApp | INFO] Submitted assignments:
             [ListApp | INFO] abc101 {} ps1 {}
             [ListApp | INFO] abc101 {} ps1 {}
-            """.format(os.environ["USER"], timestamps[0], os.environ["USER"], timestamps[1])
+            """.format(get_username(), timestamps[0], get_username(), timestamps[1])
         ).lstrip()
 
     def test_list_remove_inbound(self, exchange, cache, course_dir):
@@ -251,7 +252,7 @@ class TestNbGraderList(BaseTestApp):
             """
             [ListApp | INFO] Submitted assignments:
             [ListApp | INFO] abc101 {} ps2 {}
-            """.format(os.environ["USER"], timestamps[1])
+            """.format(get_username(), timestamps[1])
         ).lstrip()
         assert len(os.listdir(os.path.join(exchange, "abc101", "inbound"))) == 1
 
@@ -279,7 +280,7 @@ class TestNbGraderList(BaseTestApp):
             """
             [ListApp | INFO] Submitted assignments:
             [ListApp | INFO] abc101 {} ps2 {}
-            """.format(os.environ["USER"], timestamps[1])
+            """.format(get_username(), timestamps[1])
         ).lstrip()
         assert len(os.listdir(os.path.join(cache, "abc101"))) == 1
 
@@ -306,5 +307,5 @@ class TestNbGraderList(BaseTestApp):
             """
             [ListApp | INFO] Submitted assignments:
             [ListApp | INFO] abc101 {} ps1 {}
-            """.format(os.environ["USER"], timestamp)
+            """.format(get_username(), timestamp)
         ).lstrip()

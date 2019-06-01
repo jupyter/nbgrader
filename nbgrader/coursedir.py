@@ -4,7 +4,7 @@ import re
 from textwrap import dedent
 
 from traitlets.config import LoggingConfigurable
-from traitlets import Unicode, List, default, validate, TraitError
+from traitlets import Integer, Unicode, List, default, validate, TraitError
 
 from .utils import full_split, parse_utc
 
@@ -215,7 +215,33 @@ class CourseDirectory(LoggingConfigurable):
         ],
         help=dedent(
             """
-            List of file names or file globs to be ignored when copying directories.
+            List of file names or file globs.
+            Upon copying directories recursively, matching files and
+            directories will be ignored with a debug message.
+            """
+        )
+    ).tag(config=True)
+
+    include = List(
+        [
+            "*",
+        ],
+        help=dedent(
+            """
+            List of file names or file globs.
+            Upon copying directories recursively, non matching files
+            will be ignored with a debug message.
+            """
+        )
+    ).tag(config=True)
+
+    max_file_size = Integer(
+        100000,
+        help=dedent(
+            """
+            Maximum size of files (in kilobytes; default: 100Mb).
+            Upon copying directories recursively, larger files will be
+            ignored with a warning.
             """
         )
     ).tag(config=True)

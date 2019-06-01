@@ -17,6 +17,10 @@ from traitlets.config.application import catch_config_error
 from traitlets.config.loader import Config
 
 from ..coursedir import CourseDirectory
+from .. import preprocessors
+from .. import plugins
+from .. import exchange
+from .. import converters
 
 
 nbgrader_aliases = {
@@ -110,6 +114,47 @@ class NbGrader(JupyterApp):
     @default("classes")
     def _classes_default(self):
         return [NbGrader, CourseDirectory]
+
+    def all_configurable_classes(self):
+        """Get a list of all configurable classes for nbgrader
+        """
+        # Call explicitly the method on this class, to avoid infinite recursion
+        # when a subclass calls this method in _classes_default().
+        classes = NbGrader._classes_default(self)
+
+        # include the coursedirectory
+        classes.append(CourseDirectory)
+
+        # include all the apps that have configurable options
+        for _, (app, _) in self.subcommands.items():
+            if len(app.class_traits(config=True)) > 0:
+                classes.append(app)
+
+        # include plugins that have configurable options
+        for pg_name in plugins.__all__:
+            pg = getattr(plugins, pg_name)
+            if pg.class_traits(config=True):
+                classes.append(pg)
+
+        # include all preprocessors that have configurable options
+        for pp_name in preprocessors.__all__:
+            pp = getattr(preprocessors, pp_name)
+            if len(pp.class_traits(config=True)) > 0:
+                classes.append(pp)
+
+        # include all the exchange actions
+        for ex_name in exchange.__all__:
+            ex = getattr(exchange, ex_name)
+            if hasattr(ex, "class_traits") and ex.class_traits(config=True):
+                classes.append(ex)
+
+        # include all the converters
+        for ex_name in converters.__all__:
+            ex = getattr(converters, ex_name)
+            if hasattr(ex, "class_traits") and ex.class_traits(config=True):
+                classes.append(ex)
+
+        return classes
 
     @default("config_file_name")
     def _config_file_name_default(self):

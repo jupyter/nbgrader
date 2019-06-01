@@ -39,6 +39,7 @@ class MetadataValidatorV3(BaseMetadataValidator):
         if cell.metadata['nbgrader']['schema_version'] == 2:
             cell = self._upgrade_v2_to_v3(cell)
 
+        self._remove_extra_keys(cell)
         return cell
 
     def validate_cell(self, cell):

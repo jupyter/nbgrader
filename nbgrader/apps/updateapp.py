@@ -7,7 +7,7 @@ from nbformat import current_nbformat, read as orig_read, write as orig_write
 from traitlets import Bool
 
 from .baseapp import NbGrader
-from ..nbgraderformat import MetadataValidator, write, ValidationError
+from ..nbgraderformat import MetadataValidator, write, ValidationError, SchemaTooNewError
 from ..utils import find_all_notebooks
 
 aliases = {
@@ -82,6 +82,13 @@ class UpdateApp(NbGrader):
                 except ValidationError:
                     self.log.error(traceback.format_exc())
                     self.fail("Notebook '{}' failed to validate, metadata is corrupted".format(notebook))
+                except SchemaTooNewError:
+                    self.log.error(traceback.format_exc())
+                    self.fail((
+                        "The notebook '{}' uses a newer version "
+                        "of the nbgrader metadata format. Please update your version of "
+                        "nbgrader to the latest version to be able to use this notebook."
+                    ).format(notebook))
             else:
                 orig_write(nb, notebook)
 

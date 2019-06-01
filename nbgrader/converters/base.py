@@ -15,7 +15,7 @@ from nbconvert.writers import FilesWriter
 from ..coursedir import CourseDirectory
 from ..utils import find_all_files, rmtree, remove
 from ..preprocessors.execute import UnresponsiveKernelError
-from ..nbgraderformat import SchemaMismatchError
+from ..nbgraderformat import SchemaTooOldError, SchemaTooNewError
 
 
 class NbGraderException(Exception):
@@ -334,12 +334,22 @@ class BaseConverter(LoggingConfigurable):
                 self.log.error(msg)
                 raise NbGraderException(msg)
 
-            except SchemaMismatchError:
+            except SchemaTooOldError:
                 _handle_failure(gd)
                 msg = (
                     "One or more notebooks in the assignment use an old version \n"
                     "of the nbgrader metadata format. Please **back up your class files \n"
                     "directory** and then update the metadata using:\n\nnbgrader update .\n"
+                )
+                self.log.error(msg)
+                raise NbGraderException(msg)
+
+            except SchemaTooNewError:
+                _handle_failure(gd)
+                msg = (
+                    "One or more notebooks in the assignment use an newer version \n"
+                    "of the nbgrader metadata format. Please update your version of \n"
+                    "nbgrader to the latest version to be able to use this notebook.\n"
                 )
                 self.log.error(msg)
                 raise NbGraderException(msg)
