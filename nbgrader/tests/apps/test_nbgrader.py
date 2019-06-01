@@ -27,9 +27,10 @@ class TestNbGrader(BaseTestApp):
 
     def test_logfile(self):
         # by default, there should be no logfile created
-        files_before = set(os.listdir())
+        cwd = os.getcwd()
+        files_before = set(os.listdir(cwd))
         run_nbgrader([])
-        files_after = set(os.listdir())
+        files_after = set(os.listdir(cwd))
         assert files_before == files_after
 
         # if we specify a logfile, it should get used
