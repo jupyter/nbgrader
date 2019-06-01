@@ -77,6 +77,11 @@ def autogen_config(root):
         Configuration options
         =====================
 
+        .. seealso::
+
+            :doc:`nbgrader_config`
+                Details on how to setup the ``nbgrader_config.py`` file.
+
         These options can be set in ``nbgrader_config.py``, or at the command
         line when you start it.
         """

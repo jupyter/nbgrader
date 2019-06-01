@@ -13,6 +13,11 @@ number of other locations on your system. These locations correspond to the
 configuration directories that Jupyter itself looks in; you can find out what
 these are by running ``jupyter --paths``.
 
+Things get a bit more complicated in certain setups, so this document aims to clarify how to setup the ``nbgrader_config.py`` file in multiple different scenarios.
+
+Using ``nbgrader_config.py``
+----------------------------
+
 To set a configuration option in the config file, you need to use the ``c``
 variable which actually stores the config. For example::
 
