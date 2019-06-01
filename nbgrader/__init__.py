@@ -38,6 +38,14 @@ def _jupyter_nbextension_paths():
                 require="assignment_list/main"
             )
         )
+        paths.append(
+            dict(
+                section="tree",
+                src=os.path.join('nbextensions', 'course_list'),
+                dest="course_list",
+                require="course_list/main"
+            )
+        )
 
     return paths
 
@@ -50,5 +58,6 @@ def _jupyter_server_extension_paths():
 
     if sys.platform != 'win32':
         paths.append(dict(module="nbgrader.server_extensions.assignment_list"))
+        paths.append(dict(module="nbgrader.server_extensions.course_list"))
 
     return paths

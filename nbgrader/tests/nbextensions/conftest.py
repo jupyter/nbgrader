@@ -95,7 +95,7 @@ def port():
     return nbserver_port
 
 
-def _make_nbserver(course_id, port, tempdir, jupyter_config_dir, jupyter_data_dir, exchange, cache):
+def _make_nbserver(course_id, port, tempdir, jupyter_config_dir, jupyter_data_dir, exchange, cache, startup_fn=None):
     env = os.environ.copy()
     env['JUPYTER_CONFIG_DIR'] = jupyter_config_dir
     env['JUPYTER_DATA_DIR'] = jupyter_data_dir
@@ -128,6 +128,9 @@ def _make_nbserver(course_id, port, tempdir, jupyter_config_dir, jupyter_data_di
                 c.CourseDirectory.course_id = "{}"
                 """.format(exchange, cache, course_id)
             ))
+
+    if startup_fn:
+        startup_fn(env)
 
     kwargs = dict(env=env)
     if sys.platform == 'win32':

@@ -1,0 +1,67 @@
+#courses .panel-group .panel {
+    margin-top: 3px;
+    margin-bottom: 1em;
+}
+
+#courses .panel-group .panel .panel-heading {
+    background-color: #eee;
+    padding-top: 4px;
+    padding-bottom: 4px;
+    padding-left: 7px;
+    padding-right: 7px;
+    line-height: 22px;
+}
+
+#courses .panel-group .panel .panel-heading a:focus, a:hover {
+    text-decoration: none;
+}
+
+#courses .panel-group .panel .panel-body {
+    padding: 0;
+}
+
+#courses .panel-group .panel .panel-body .list_container {
+    margin-top: 0px;
+    margin-bottom: 0px;
+    border: 0px;
+    border-radius: 0px;
+}
+
+#courses .panel-group .panel .panel-body .list_container .list_item {
+    border-bottom: 1px solid #ddd;
+}
+
+#courses .panel-group .panel .panel-body .list_container .list_item:last-child {
+    border-bottom: 0px;
+}
+
+#courses .list_item {
+    padding-top: 4px;
+    padding-bottom: 4px;
+    padding-left: 7px;
+    padding-right: 7px;
+    line-height: 22px;
+}
+
+#courses .list_item > div {
+    padding-top: 0;
+    padding-bottom: 0;
+    padding-left: 0;
+    padding-right: 0;
+}
+
+#courses .list_placeholder {
+    display: none;
+}
+
+#courses .list_placeholder, #courses .list_loading, #courses .list_error {
+    font-weight: bold;
+    padding-top: 4px;
+    padding-bottom: 4px;
+    padding-left: 7px;
+    padding-right: 7px;
+}
+
+#courses .list_error, #courses .version_error {
+    display: none;
+}
