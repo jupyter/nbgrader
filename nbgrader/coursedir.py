@@ -223,9 +223,11 @@ class CourseDirectory(LoggingConfigurable):
         False,
         help=dedent(
             """
-            Be less strict about user permissions (instructor files are by
-            default group writeable.  Requires that admins ensure that primary
-            groups are correct!
+            Make all instructor files group writeable (g+ws, default g+r only)
+            and exchange directories group readable/writeable (g+rws, default
+            g=nothing only ) by default.  This should only be used if you
+            carefully set the primary groups of your notebook servers and fully
+            understand the unix permission model.
             """
         )
     ).tag(config=True)
