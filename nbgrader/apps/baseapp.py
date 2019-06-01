@@ -286,14 +286,15 @@ class NbGrader(JupyterApp):
     @catch_config_error
     def initialize(self, argv=None):
         self.update_config(self.build_extra_config())
-        if self.logfile:
-            self.init_logging(logging.FileHandler, [self.logfile], color=False)
         self.init_syspath()
         self.coursedir = CourseDirectory(parent=self)
         super(NbGrader, self).initialize(argv)
 
         # load config that is in the coursedir directory
         super(JupyterApp, self).load_config_file("nbgrader_config.py", path=self.coursedir.root)
+
+        if self.logfile:
+            self.init_logging(logging.FileHandler, [self.logfile], color=False)
 
     def init_syspath(self):
         """Add the cwd to the sys.path ($PYTHONPATH)"""
