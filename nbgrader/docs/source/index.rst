@@ -9,6 +9,8 @@ For an overview and demonstration of nbgrader's core functionality, check out th
 
     <p><iframe width="640" height="360" src="https://www.youtube.com/embed/5WUm0QuJdFw" frameborder="0" allowfullscreen></iframe></p>
 
+For additional resources on using Jupyter in educational contexts, see the `jupyter4edu ideas repository <https://github.com/jupyter4edu/ideas>`_.
+
 
 .. toctree::
     :maxdepth: 1
@@ -24,7 +26,6 @@ For an overview and demonstration of nbgrader's core functionality, check out th
     user_guide/autograding_resources
     user_guide/faq
     user_guide/advanced
-    user_guide/third_party
     api/index
 
 .. toctree::
