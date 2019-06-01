@@ -5,6 +5,7 @@ import os
 import stat
 import sys
 import shutil
+import re
 import subprocess as sp
 from copy import deepcopy
 
@@ -26,6 +27,7 @@ def run(cmd):
 
 
 def _check_if_directory_in_path(pth, target):
+
     while pth not in ('', '/'):
         pth, dirname = os.path.split(pth)
         if dirname == target:
@@ -120,6 +122,37 @@ def clean_metadata(new_nb):
     }
 
 
+def sanatize():
+    root = os.path.abspath(os.path.dirname(__file__))
+    nb_root = '/'.join(root.split('/')[:-3])
+    for dirpath, dirnames, filenames in os.walk(root):
+        for filename in sorted(filenames):
+            if os.path.splitext(filename)[1] == '.ipynb':
+                # read in the notebook
+                pth = os.path.join(dirpath, filename)
+                with open(pth, encoding='utf-8') as fh:
+                    orig_nb = fh.read()
+
+                    # copy the original notebook
+                    new_nb = orig_nb.replace(nb_root,'[NB_GRADER_ROOT]')
+                    new_nb = re.sub(r'([-drwxs][-rwxs]{9}\.?\s+\d\s+)\w+(\s+)\w+(\s+)',r'\1nb_user\2nb_group\3', new_nb)
+                    new_nb = re.sub(r'"total \d+\\n"',r'"total ##\\n"', new_nb)
+                    new_nb = re.sub(r'\d\d\d\d\-\d\d\-\d\d \d\d:\d\d:\d\d\.\d\d\d\d\d\d',r'[timestamp]', new_nb)
+                    new_nb = re.sub(r'(example_course )\w+( ps1 \[timestamp\] UTC)',r'\1nb_user\2', new_nb)
+                    new_nb = re.sub(r'(inbound/)\w+(\+\w+\+\[timestamp\] UTC\+)(\w+)',r'\1nb_user\2[random string]', new_nb)
+                    new_nb = re.sub(r'"(\[CollectApp \| INFO\] Collecting submission:\s+)\w+(\s+\w+\\n)"',r'"\1nb_user\2"',new_nb)
+                    new_nb = re.sub(r'("drwxr\-xr\-x\.?\s+3\s+nb_user\s+nb_group\s+\d+\s+\w{3}\s+\d+\s+\d\d:\d\d\s+)\w+(\\n")',r'\1nb_user\2',new_nb)
+
+                if orig_nb != new_nb:
+                    with open(pth, 'w', encoding='utf-8') as fh:
+                        fh.write(new_nb) 
+                    print ("sanitized {}".format(filename))
+                else:
+                    print ("nothing to sanitize in {}".format(filename))
+
+    
 if __name__ == "__main__":
     root = os.path.abspath(os.path.dirname(__file__))
     clean_notebook_metadata(root)
+    sanatize()
+                        
