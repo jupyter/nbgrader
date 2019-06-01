@@ -78,17 +78,6 @@ class ExchangeRelease(Exchange):
             S_ISGID|S_IRUSR|S_IWUSR|S_IXUSR|S_IWGRP|S_IXGRP|S_IWOTH|S_IXOTH
         )
 
-    def ensure_directory(self, path, mode):
-        """Ensure that the path exists, has the right mode and is self owned."""
-        if not os.path.isdir(path):
-            os.mkdir(path)
-            # For some reason, Python won't create a directory with a mode of 0o733
-            # so we have to create and then chmod.
-            os.chmod(path, mode)
-        else:
-            if not self_owned(path):
-                self.fail("You don't own the directory: {}".format(path))
-
     def copy_files(self):
         if os.path.isdir(self.dest_path):
             if self.force:

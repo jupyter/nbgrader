@@ -33,17 +33,7 @@ class ExchangeReleaseFeedback(Exchange):
             S_IRUSR|S_IWUSR|S_IXUSR|S_IXGRP|S_IXOTH
         )
     # should be moved up to Exchange? Common to this and release
-    def ensure_directory(self, path, mode):
-        """Ensure that the path exists, has the right mode and is self owned."""
-        if not os.path.isdir(path):
-            os.makedirs(path)
-            # For some reason, Python won't create a directory with a mode of 0o733
-            # so we have to create and then chmod.
-            os.chmod(path, mode)
-        else:
-            if not self_owned(path):
-                self.fail("You don't own the directory: {}".format(path))
-
+    
     def copy_files(self):
         self.log.info("using src path: {}".format(self.src_path))
         student_id = self.coursedir.student_id if self.coursedir.student_id else '*'
