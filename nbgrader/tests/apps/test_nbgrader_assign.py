@@ -334,7 +334,7 @@ class TestNbGraderAssign(BaseTestApp):
         """Can a single file be assigned?"""
         self._empty_notebook(join(course_dir, 'source', 'ps1', 'foo.ipynb'))
         if sys.platform == 'win32':
-            trailing_slash = "\\"
+            trailing_slash = "\\\\"
         else:
             trailing_slash = "/"
         with open("nbgrader_config.py", "a") as fh:
