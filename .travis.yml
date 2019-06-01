@@ -19,6 +19,10 @@ matrix:
     env: GROUP=docs
   - python: nightly
     env: GROUP=docs
+  - python: 3.5
+    env: GROUP=nbextensions
+  - python: nightly
+    env: GROUP=nbextensions
 addons:
   apt:
     packages:
