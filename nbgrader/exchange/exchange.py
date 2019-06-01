@@ -22,23 +22,6 @@ class ExchangeError(Exception):
 
 class Exchange(LoggingConfigurable):
 
-    course_id = Unicode(
-        '',
-        help=dedent(
-            """
-            A key that is unique per instructor and course. This MUST be
-            specified, either by setting the config option, or using the
-            --course option on the command line.
-            """
-        )
-    ).tag(config=True)
-
-    @validate('course_id')
-    def _validate_course_id(self, proposal):
-        if proposal['value'].strip() != proposal['value']:
-            self.log.warning("course_id '%s' has trailing whitespace, stripping it away", proposal['value'])
-        return proposal['value'].strip()
-
     timezone = Unicode(
         "UTC",
         help="Timezone for recording timestamps"

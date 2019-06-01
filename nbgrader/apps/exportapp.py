@@ -12,7 +12,7 @@ aliases = {
     'exporter': 'ExportApp.plugin_class',
     'assignment' : 'ExportPlugin.assignment',
     'student': 'ExportPlugin.student',
-
+    'course': 'CourseDirectory.course_id'
 }
 flags = {}
 
@@ -75,5 +75,5 @@ class ExportApp(NbGrader):
     def start(self):
         super(ExportApp, self).start()
         self.init_plugin()
-        with Gradebook(self.coursedir.db_url) as gb:
+        with Gradebook(self.coursedir.db_url, self.coursedir.course_id) as gb:
             self.plugin_inst.export(gb)

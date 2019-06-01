@@ -18,7 +18,7 @@ class ExchangeList(Exchange):
         pass
 
     def init_dest(self):
-        course_id = self.course_id if self.course_id else '*'
+        course_id = self.coursedir.course_id if self.coursedir.course_id else '*'
         assignment_id = self.coursedir.assignment_id if self.coursedir.assignment_id else '*'
         student_id = self.coursedir.student_id if self.coursedir.student_id else '*'
 

@@ -59,7 +59,7 @@ class AssignmentList(LoggingConfigurable):
             try:
                 config = self.load_config()
                 if course_id:
-                    config.Exchange.course_id = course_id
+                    config.CourseDirectory.course_id = course_id
 
                 coursedir = CourseDirectory(config=config)
                 authenticator = Authenticator(config=config)
@@ -95,7 +95,7 @@ class AssignmentList(LoggingConfigurable):
                 config = self.load_config()
                 config.ExchangeList.cached = True
                 if course_id:
-                    config.Exchange.course_id = course_id
+                    config.CourseDirectory.course_id = course_id
 
                 coursedir = CourseDirectory(config=config)
                 authenticator = Authenticator(config=config)
@@ -152,7 +152,7 @@ class AssignmentList(LoggingConfigurable):
         with chdir(self.assignment_dir):
             try:
                 config = self.load_config()
-                config.Exchange.course_id = course_id
+                config.CourseDirectory.course_id = course_id
                 config.CourseDirectory.assignment_id = assignment_id
 
                 coursedir = CourseDirectory(config=config)
@@ -181,7 +181,7 @@ class AssignmentList(LoggingConfigurable):
         with chdir(self.assignment_dir):
             try:
                 config = self.load_config()
-                config.Exchange.course_id = course_id
+                config.CourseDirectory.course_id = course_id
                 config.CourseDirectory.assignment_id = assignment_id
 
                 coursedir = CourseDirectory(config=config)

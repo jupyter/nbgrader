@@ -80,7 +80,7 @@ class NbGraderAPI(LoggingConfigurable):
                 coursedir=self.coursedir,
                 authenticator=self.authenticator,
                 parent=self)
-            self.course_id = lister.course_id
+            self.course_id = self.coursedir.course_id
             self.exchange = lister.root
 
             try:

@@ -186,9 +186,14 @@ class NbGrader(JupyterApp):
                 delattr(cfg.NbGrader, old_opt)
 
         if "course_id" in cfg.NbGrader:
-            self.log.warning("Outdated config: use Exchange.course_id rather than NbGrader.course_id")
-            cfg.Exchange.course_id = cfg.NbGrader.course_id
+            self.log.warning("Outdated config: use CourseDirectory.course_id rather than NbGrader.course_id")
+            cfg.CourseDirectory.course_id = cfg.NbGrader.course_id
             del cfg.NbGrader.course_id
+
+        if "course_id" in cfg.Exchange:
+            self.log.warning("Outdated config: use CourseDirectory.course_id rather than Exchange.course_id")
+            cfg.CourseDirectory.course_id = cfg.Exchange.course_id
+            del cfg.Exchange.course_id
 
         exchange_options = [
             ("timezone", "timezone"),
