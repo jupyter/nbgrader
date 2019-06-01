@@ -79,14 +79,6 @@ def autogen_config(root):
 
         These options can be set in ``nbgrader_config.py``, or at the command
         line when you start it.
-
-        Note: the ``nbgrader_config.py`` file can be either located in the same
-        directory as where you are running the nbgrader commands (which is most
-        likely the root of your course directory), or you can place it in one of
-        a number of locations on your system. These locations correspond to the
-        configuration directories that Jupyter itself looks in; you can find out
-        what these are by running ``jupyter --paths``.
-
         """
     )
 
