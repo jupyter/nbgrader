@@ -135,13 +135,13 @@ def sanatize():
 
                     # copy the original notebook
                     new_nb = orig_nb.replace(nb_root,'[NB_GRADER_ROOT]')
-                    new_nb = re.sub(r'([-drwxs][-rwxs]{9}\.?\s+\d\s+)\w+(\s+)\w+(\s+)',r'\1nb_user\2nb_group\3', new_nb)
+                    new_nb = re.sub(r'([-drwxs][-rwxs]{9}\.?\s+\d\s+)\w+(\s+)\w+(\s+\d+\s+\w+\s+\d+\s+\d\d:\d\d)',r'\1nb_user\2nb_group [size] [date] [time]', new_nb)
                     new_nb = re.sub(r'"total \d+\\n"',r'"total ##\\n"', new_nb)
                     new_nb = re.sub(r'\d\d\d\d\-\d\d\-\d\d \d\d:\d\d:\d\d\.\d\d\d\d\d\d',r'[timestamp]', new_nb)
                     new_nb = re.sub(r'(example_course )\w+( ps1 \[timestamp\] UTC)',r'\1nb_user\2', new_nb)
-                    new_nb = re.sub(r'(inbound/)\w+(\+\w+\+\[timestamp\] UTC\+)(\w+)',r'\1nb_user\2[random string]', new_nb)
+                    new_nb = re.sub(r'(inbound/)\w+(\+\w+\+\[timestamp\] UTC\+)([^\\]+)\\n',r'\1nb_user\2[random string]\\n', new_nb)
                     new_nb = re.sub(r'"(\[CollectApp \| INFO\] Collecting submission:\s+)\w+(\s+\w+\\n)"',r'"\1nb_user\2"',new_nb)
-                    new_nb = re.sub(r'("drwxr\-xr\-x\.?\s+3\s+nb_user\s+nb_group\s+\d+\s+\w{3}\s+\d+\s+\d\d:\d\d\s+)\w+(\\n")',r'\1nb_user\2',new_nb)
+                    new_nb = re.sub(r'("drwxr\-xr\-x\.?\s+3\s+nb_user\s+nb_group\s+\[size\]\s+\[date\]\s+\[time\]\s+)\w+(\\n")',r'\1nb_user\2',new_nb)
 
                 if orig_nb != new_nb:
                     with open(pth, 'w', encoding='utf-8') as fh:
