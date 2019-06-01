@@ -73,10 +73,11 @@ class NbGrader(JupyterApp):
         return "%(color)s[%(name)s | %(levelname)s]%(end_color)s %(message)s"
 
     logfile = Unicode(
-        ".nbgrader.log",
+        "",
         help=dedent(
             """
-            Name of the logfile to log to.
+            Name of the logfile to log to. By default, log output is not written
+            to any file.
             """
         )
     ).tag(config=True)

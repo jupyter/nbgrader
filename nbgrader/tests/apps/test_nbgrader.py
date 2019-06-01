@@ -24,3 +24,14 @@ class TestNbGrader(BaseTestApp):
             run_nbgrader(["--version"], stdout=True).splitlines()[-3:]
         ).strip()
         assert out1 == out2
+
+    def test_logfile(self):
+        # by default, there should be no logfile created
+        files_before = set(os.listdir())
+        run_nbgrader([])
+        files_after = set(os.listdir())
+        assert files_before == files_after
+
+        # if we specify a logfile, it should get used
+        run_nbgrader(["--NbGrader.logfile=log.txt"])
+        assert os.path.exists("log.txt")
