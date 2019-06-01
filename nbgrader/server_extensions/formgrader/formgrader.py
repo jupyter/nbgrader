@@ -33,6 +33,19 @@ class FormgradeExtension(NbGrader):
         # Init jinja environment
         jinja_env = Environment(loader=FileSystemLoader([handlers.template_path]))
 
+        course_dir = self.coursedir.root
+        notebook_dir = self.parent.notebook_dir
+        relpath = os.path.relpath(course_dir, notebook_dir)
+        if relpath.startswith("../"):
+            nbgrader_bad_setup = True
+            self.log.error(
+                "The course directory root is not a subdirectory of the notebook "
+                "server root. This means that nbgrader will not work correctly. "
+                "If you want to use nbgrader, please ensure the course directory "
+                "root is in a subdirectory of the notebook root: %s", notebook_dir)
+        else:
+            nbgrader_bad_setup = False
+
         # Configure the formgrader settings
         tornado_settings = dict(
             nbgrader_url_prefix=os.path.relpath(self.coursedir.root, self.parent.notebook_dir),
@@ -41,6 +54,7 @@ class FormgradeExtension(NbGrader):
             nbgrader_gradebook=None,
             nbgrader_db_url=self.coursedir.db_url,
             nbgrader_jinja2_env=jinja_env,
+            nbgrader_bad_setup=nbgrader_bad_setup
         )
 
         webapp.settings.update(tornado_settings)
