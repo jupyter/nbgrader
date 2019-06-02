@@ -278,20 +278,25 @@ define([
 		    assignment_has_feedback[data.assignment_id] = true;
 		}
 	    }
-            var element = $('<div/>');
 	    var group = null;
+	    var element;
+            this.submitted_element.empty();
+            this.submitted_element.children('.list_placeholder').hide();
             for (var i = 0; i < submissions.length; i++) {
 		var data = submissions[i];
 		if (group !== data.assignment_id) {
 		    // insert a header row
 		    var header = $('<div/>').addClass('col-md-12');
 		    header.append(data.link);
-		    header.append($('<span/>').addClass('item_course col-sm-5').text(data.course_id));
+		    header.append($('<span/>').addClass('item_course col-sm-2').text(data.course_id));
 		    if (assignment_has_feedback[data.assignment_id]) {
 			header.append(data.button);
 		    }
+		    element = $('<div/>').addClass('list_item').addClass("row");
 		    element.append(header);
+		    this.submitted_element.append(element);
 		}
+		element = $('<div/>').addClass('list_item').addClass("row");
 		var row = $('<div/>').addClass('col-md-12');
 		group = data.assignment_id;
 		row.append($('<span/>').addClass('item_course col-sm-8').text(""));
@@ -304,9 +309,8 @@ define([
 		}
 		row.append($('<span/>').addClass('item_status col-sm-3').text(data.timestamp));
 		element.append(row);
+		this.submitted_element.append(element);
 	    }
-            this.submitted_element.empty().append(element);
-            this.submitted_element.children('.list_placeholder').hide();
 	}
 
 	if (update_fetched_only != null) {
@@ -558,7 +562,7 @@ define([
 
     Assignment.prototype.make_feedback_button = function () {
         var that = this;
-        var container = $('<span/>').addClass('item_status col-sm-1');
+        var container = $('<span/>').addClass('item_status col-sm-4');
         var button = $('<button/>').addClass("btn btn-primary btn-xs");
         container.append(button);
         button.text("Fetch Feedback");
