@@ -90,6 +90,16 @@ def _load_notebook(browser, port, retries=5, name="blank"):
     # fix for the problem :/
     time.sleep(1)
 
+    # delete all cells
+    if name == "blank":
+        cells = browser.find_elements_by_css_selector(".cell")
+        for _ in range(len(cells)):
+            element = browser.find_elements_by_css_selector(".cell")[0]
+            element.click()
+            element.send_keys(Keys.ESCAPE)
+            element.send_keys("d")
+            element.send_keys("d")
+
 
 def _activate_toolbar(browser, name="Create%20Assignment"):
     def celltoolbar_exists(browser):
