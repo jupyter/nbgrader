@@ -1003,21 +1003,22 @@ class NbGraderAPI(LoggingConfigurable):
             - log (string): captured log output
 
         """
+        # Because we may be using HTMLExporter.template_file in other
+        # parts of the the UI, we need to make sure that the template
+        # is explicitply 'feedback.tpl` here:
+        c = Config()
+        c.HTMLExporter.template_file = 'feedback.tpl'
         if student_id is not None:
             with temp_attrs(self.coursedir,
                             assignment_id=assignment_id,
                             student_id=student_id):
                 app = Feedback(coursedir=self.coursedir, parent=self)
-                c = Config()
-                c.HTMLExporter.template_file = 'feedback.tpl'
                 app.update_config(c)
                 return capture_log(app)
         else:
             with temp_attrs(self.coursedir,
                             assignment_id=assignment_id):
                 app = Feedback(coursedir=self.coursedir, parent=self)
-                c = Config()
-                c.HTMLExporter.template_file = 'feedback.tpl'
                 app.update_config(c)
                 return capture_log(app)
 
