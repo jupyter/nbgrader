@@ -961,7 +961,17 @@ class Comment(Base):
         return "Comment<{}/{}/{} for {}>".format(
             self.assignment.name, self.notebook.name, self.name, self.student.id)
 
-# Needs manual grade
+class Course(Base):
+    """Table to store the course_id, it should have only one row"""
+
+    __tablename__ = "course_id"
+
+    id = Column(String(128), unique=True, primary_key=True, nullable=False)
+
+    def __repr__(self):
+        return "Course<{}>".format(self.name)
+
+## Needs manual grade
 
 SubmittedNotebook.needs_manual_grade = column_property(
     exists().where(and_(
@@ -1297,13 +1307,19 @@ class Gradebook(object):
 
     """
 
-    def __init__(self, db_url):
+    def __init__(self, db_url, course_id="", authenticator=None):
         """Initialize the connection to the database.
 
         Parameters
         ----------
         db_url : string
             The URL to the database, e.g. ``sqlite:///grades.db``
+        course_id : string, optional
+            identifier of the course necessary for supporting multiple classes
+            default course_id is '' to be consistent with :class:~`nbgrader.apps.api.NbGraderAPI`
+        authenticator : :class:~`nbgrader.auth.BaseAuthenticator`
+            An authenticator instance for communicating with an external
+            database.
 
         """
         # create the connection to the database
@@ -1320,6 +1336,9 @@ class Gradebook(object):
             self.db.execute("CREATE TABLE alembic_version (version_num VARCHAR(32) NOT NULL);")
             self.db.execute("INSERT INTO alembic_version (version_num) VALUES ('{}');".format(alembic_version))
             self.db.commit()
+
+        self.set_course_id(course_id)
+        self.authenticator = authenticator
 
     def __enter__(self):
         return self
@@ -1339,7 +1358,48 @@ class Gradebook(object):
         self.db.remove()
         self.engine.dispose()
 
-    # Students
+    def set_course_id(self, course_id, **kwargs):
+        """Set the course id
+
+        Parameters
+        ----------
+        course_id : string
+            The unique id of the course
+        `**kwargs` : dict
+            other keyword arguments to the :class:`~nbgrader.api.Course` object
+
+        Returns
+        -------
+        course_id : :class:`~nbgrader.api.Course`
+
+        """
+
+        try:
+            course_id_record = self.db.query(Course)\
+                .one()
+            if course_id: # update id only if not empty
+                course_id_record.id = course_id
+        except NoResultFound:
+            course_id_record = Course(id=course_id, **kwargs)
+            self.db.add(course_id_record)
+
+        try:
+            self.db.commit()
+        except (IntegrityError, FlushError) as e:
+            self.db.rollback()
+            raise InvalidEntry(*e.args)
+        return course_id_record
+
+    @property
+    def course_id(self):
+        try:
+            course_id_record = self.db.query(Course)\
+                .one()
+            return course_id_record.id
+        except NoResultFound:
+            raise MissingEntry("No course id")
+
+    #### Students
 
     @property
     def students(self):
@@ -1363,6 +1423,8 @@ class Gradebook(object):
         student : :class:`~nbgrader.api.Student`
 
         """
+        if self.authenticator:
+            self.authenticator.add_student_to_course(student_id, self.course_id)
 
         student = Student(id=student_id, **kwargs)
         self.db.add(student)
@@ -1371,6 +1433,7 @@ class Gradebook(object):
         except (IntegrityError, FlushError) as e:
             self.db.rollback()
             raise InvalidEntry(*e.args)
+
         return student
 
     def find_student(self, student_id):
@@ -1396,13 +1459,13 @@ class Gradebook(object):
 
         return student
 
-    def update_or_create_student(self, name, **kwargs):
+    def update_or_create_student(self, student_id, **kwargs):
         """Update an existing student, or create it if it doesn't exist.
 
         Parameters
         ----------
-        name : string
-            the name of the student
+        student_id : string
+            The unique id of the student
         `**kwargs`
             additional keyword arguments for the :class:`~nbgrader.api.Student` object
 
@@ -1413,10 +1476,16 @@ class Gradebook(object):
         """
 
         try:
-            student = self.find_student(name)
+            student = self.find_student(student_id)
         except MissingEntry:
-            student = self.add_student(name, **kwargs)
+            student = self.add_student(student_id, **kwargs)
         else:
+            # Make sure the student is in the course, even if it's somehow
+            # already in the database.
+            if self.authenticator:
+                self.authenticator.add_student_to_course(
+                    student_id, self.course_id)
+
             for attr in kwargs:
                 setattr(student, attr, kwargs[attr])
             try:
@@ -1427,20 +1496,24 @@ class Gradebook(object):
 
         return student
 
-    def remove_student(self, name):
+    def remove_student(self, student_id):
         """Deletes an existing student from the gradebook, including any
         submissions the might be associated with that student.
 
         Parameters
         ----------
-        name : string
-            the name of the student to delete
+        student_id : string
+            The unique id of the student
 
         """
-        student = self.find_student(name)
+        if self.authenticator:
+            self.authenticator.remove_student_from_course(
+                student_id, self.course_id)
+
+        student = self.find_student(student_id)
 
         for submission in student.submissions:
-            self.remove_submission(submission.assignment.name, name)
+            self.remove_submission(submission.assignment.name, student_id)
 
         self.db.delete(student)
 

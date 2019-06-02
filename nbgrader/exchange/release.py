@@ -55,10 +55,10 @@ class ExchangeRelease(Exchange):
                     self.coursedir.format_path(self.coursedir.release_directory, '.', '*'))
 
     def init_dest(self):
-        if self.course_id == '':
+        if self.coursedir.course_id == '':
             self.fail("No course id specified. Re-run with --course flag.")
 
-        self.course_path = os.path.join(self.root, self.course_id)
+        self.course_path = os.path.join(self.root, self.coursedir.course_id)
         self.outbound_path = os.path.join(self.course_path, 'outbound')
         self.inbound_path = os.path.join(self.course_path, 'inbound')
         self.dest_path = os.path.join(self.outbound_path, self.coursedir.assignment_id)
@@ -93,12 +93,12 @@ class ExchangeRelease(Exchange):
         if os.path.isdir(self.dest_path):
             if self.force:
                 self.log.info("Overwriting files: {} {}".format(
-                    self.course_id, self.coursedir.assignment_id
+                    self.coursedir.course_id, self.coursedir.assignment_id
                 ))
                 shutil.rmtree(self.dest_path)
             else:
                 self.fail("Destination already exists, add --force to overwrite: {} {}".format(
-                    self.course_id, self.coursedir.assignment_id
+                    self.coursedir.course_id, self.coursedir.assignment_id
                 ))
         self.log.info("Source: {}".format(self.src_path))
         self.log.info("Destination: {}".format(self.dest_path))
@@ -107,4 +107,4 @@ class ExchangeRelease(Exchange):
             self.dest_path,
             fileperms=(S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH),
             dirperms=(S_IRUSR|S_IWUSR|S_IXUSR|S_IRGRP|S_IXGRP|S_IROTH|S_IXOTH))
-        self.log.info("Released as: {} {}".format(self.course_id, self.coursedir.assignment_id))
+        self.log.info("Released as: {} {}".format(self.coursedir.course_id, self.coursedir.assignment_id))

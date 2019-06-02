@@ -7,6 +7,13 @@ from .base import BaseApiHandler, check_xsrf
 from ...api import MissingEntry
 
 
+class StatusHandler(BaseApiHandler):
+    @web.authenticated
+    @check_xsrf
+    def get(self):
+        self.write({"status": True})
+
+
 class GradeCollectionHandler(BaseApiHandler):
     @web.authenticated
     @check_xsrf
@@ -249,6 +256,8 @@ class AutogradeHandler(BaseApiHandler):
 
 
 default_handlers = [
+    (r"/formgrader/api/status", StatusHandler),
+
     (r"/formgrader/api/assignments", AssignmentCollectionHandler),
     (r"/formgrader/api/assignment/([^/]+)", AssignmentHandler),
     (r"/formgrader/api/assignment/([^/]+)/assign", AssignHandler),

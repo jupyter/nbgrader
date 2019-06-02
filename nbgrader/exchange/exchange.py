@@ -8,11 +8,12 @@ from textwrap import dedent
 
 from dateutil.tz import gettz
 from traitlets.config import LoggingConfigurable
-from traitlets import Unicode, Bool, Instance, default, validate
+from traitlets import Unicode, Bool, Instance, Type, default, validate
 from jupyter_core.paths import jupyter_data_dir
 
 from ..utils import check_directory
 from ..coursedir import CourseDirectory
+from ..auth import Authenticator
 
 
 class ExchangeError(Exception):
@@ -20,23 +21,6 @@ class ExchangeError(Exception):
 
 
 class Exchange(LoggingConfigurable):
-
-    course_id = Unicode(
-        '',
-        help=dedent(
-            """
-            A key that is unique per instructor and course. This MUST be
-            specified, either by setting the config option, or using the
-            --course option on the command line.
-            """
-        )
-    ).tag(config=True)
-
-    @validate('course_id')
-    def _validate_course_id(self, proposal):
-        if proposal['value'].strip() != proposal['value']:
-            self.log.warning("course_id '%s' has trailing whitespace, stripping it away", proposal['value'])
-        return proposal['value'].strip()
 
     timezone = Unicode(
         "UTC",
@@ -75,9 +59,11 @@ class Exchange(LoggingConfigurable):
     ).tag(config=True)
 
     coursedir = Instance(CourseDirectory, allow_none=True)
+    authenticator = Instance(Authenticator, allow_none=True)
 
-    def __init__(self, coursedir=None, **kwargs):
+    def __init__(self, coursedir=None, authenticator=None, **kwargs):
         self.coursedir = coursedir
+        self.authenticator = authenticator
         super(Exchange, self).__init__(**kwargs)
 
     def fail(self, msg):

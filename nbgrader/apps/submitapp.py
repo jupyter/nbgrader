@@ -10,7 +10,7 @@ aliases = {}
 aliases.update(nbgrader_aliases)
 aliases.update({
     "timezone": "Exchange.timezone",
-    "course": "Exchange.course_id",
+    "course": "CourseDirectory.course_id",
 })
 
 flags = {}
@@ -95,7 +95,10 @@ class SubmitApp(NbGrader):
         elif self.coursedir.assignment_id == "":
             self.fail("Must provide assignment name:\nnbgrader <command> ASSIGNMENT [ --course COURSE ]")
 
-        submit = ExchangeSubmit(coursedir=self.coursedir, parent=self)
+        submit = ExchangeSubmit(
+            coursedir=self.coursedir,
+            authenticator=self.authenticator,
+            parent=self)
         try:
             submit.start()
         except ExchangeError:

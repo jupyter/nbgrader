@@ -18,7 +18,7 @@ from .conftest import notwindows, windows
 @pytest.fixture
 def api(request, course_dir, db, exchange):
     config = Config()
-    config.Exchange.course_id = "abc101"
+    config.CourseDirectory.course_id = "abc101"
     config.Exchange.root = exchange
     config.CourseDirectory.root = course_dir
     config.CourseDirectory.db_url = db

@@ -8,3 +8,4 @@ sphinx
 sphinx_rtd_theme
 codecov
 nbval
+requests-mock

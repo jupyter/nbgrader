@@ -14,6 +14,7 @@ import nbgrader
 from .. import preprocessors
 from .. import plugins
 from ..coursedir import CourseDirectory
+from ..auth import Authenticator
 from .. import exchange
 from .. import converters
 from .baseapp import nbgrader_aliases, nbgrader_flags
@@ -248,6 +249,9 @@ class NbGraderApp(NbGrader):
 
         # include the coursedirectory
         classes.append(CourseDirectory)
+
+        # include the authenticator
+        classes.append(Authenticator)
 
         # include all the apps that have configurable options
         for _, (app, _) in self.subcommands.items():

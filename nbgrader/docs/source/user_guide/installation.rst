@@ -98,6 +98,11 @@ or to disable the Formgrader extension::
     jupyter nbextension disable --sys-prefix formgrader/main --section=tree
     jupyter serverextension disable --sys-prefix nbgrader.server_extensions.formgrader
 
+or to disable the Course List extension::
+
+    jupyter nbextension disable --sys-prefix course_list/main --section=tree
+    jupyter serverextension disable --sys-prefix nbgrader.server_extensions.course_list
+
 For example lets assume you have installed nbgrader via `Anaconda
 <https://www.anaconda.com/download>`__ (meaning all extensions are installed
 and enabled with the ``--sys-prefix`` flag, i.e. anyone using the particular
