@@ -871,7 +871,7 @@ class NbGraderAPI(LoggingConfigurable):
         msg = (
             "The `assign` method is deprecated, please use `generate_assignment` "
             "instead. This method will be removed in a future version of nbgrader.")
-        warnings.warn(msg)
+        warnings.warn(msg, DeprecationWarning)
         self.log.warning(msg)
         return self.generate_assignment(*args, **kwargs)
 

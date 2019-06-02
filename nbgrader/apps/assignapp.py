@@ -1,15 +1,18 @@
 # coding: utf-8
 
 import warnings
+from traitlets.config.application import catch_config_error
 from .generateassignmentapp import GenerateAssignmentApp
 
 
 class AssignApp(GenerateAssignmentApp):
 
-    def __init__(self, *args, **kwargs):
+    @catch_config_error
+    def initialize(self, argv=None):
+        super(AssignApp, self).initialize(argv=argv)
         msg = (
             "`nbgrader assign` is now deprecated, please use `nbgrader "
             "generate_assignment` instead. This command will be removed in "
             "a future version of nbgrader.")
-        warnings.warn(msg)
-        super(AssignApp, self).__init__(*args, **kwargs)
+        warnings.warn(msg, DeprecationWarning)
+        self.log.warn(msg)
