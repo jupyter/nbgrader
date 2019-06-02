@@ -251,8 +251,6 @@ class BaseConverter(LoggingConfigurable):
                 os.chmod(os.path.join(dirname, filename), permissions)
             # If groupshared, set dir permissions - see comment below.
             if self.coursedir.groupshared and os.stat(dirname).st_uid == os.getuid():
-                #for subdirname in subdirnames:
-                #    subdirname = os.path.join(dirname, subdirname)
                 try:
                     os.chmod(dirname, (os.stat(dirname).st_mode|0o2770) & 0o2777)
                 except PermissionError:
