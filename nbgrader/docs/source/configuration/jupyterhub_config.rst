@@ -204,7 +204,7 @@ for details.
 
 JupyterHub Authentication
 ^^^^^^^^^^^^^^^^^^^^^^^^^
-.. versionadded:: 0.7.0
+.. versionadded:: 0.6.0
 
 With the advent of JupyterHubAuthPlugin students who don't have a specified course_id won't see all courses anymore, just the ones they have been added to. 
 
@@ -317,7 +317,7 @@ and ``/home/grader-course123/.jupyter/nbgrader_config.py`` would be:
 
 Custom Authentication
 ^^^^^^^^^^^^^^^^^^^^^
-.. versionadded:: 0.7.0
+.. versionadded:: 0.6.0
 
 To make your own custom authentication such as through an LTI you could start by making a method that inherits the Authenticator class, which is a plugin for different authentication methods.
 
