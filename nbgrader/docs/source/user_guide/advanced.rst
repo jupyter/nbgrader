@@ -187,8 +187,8 @@ nbgrader from the command line
 
     nbgrader autograde --ExecutePreprocessor.kernel_name=NAME ASSIGNMENT_NAME
 
-In addition to docker, ``envkernel`` also supports `singularity
-<https://www.sylabs.io/docs/>`_ as a containerization system. For details 
-on using ``envkernel`` with singularity, see the `README
+In addition to docker, ``envkernel`` also supports singularity as a
+containerization system. For details on using ``envkernel`` with
+singularity, see the `README
 <https://github.com/NordicHPC/envkernel/blob/master/README.md>`_ of
 ``envkernel``.
