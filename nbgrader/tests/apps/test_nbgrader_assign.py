@@ -335,10 +335,11 @@ class TestNbGraderAssign(BaseTestApp):
         self._empty_notebook(join(course_dir, 'source', 'ps1', 'foo.ipynb'))
         if sys.platform == 'win32':
             trailing_slash = "\\\\"
+            path = course_dir.replace("\\", "\\\\") + trailing_slash
         else:
             trailing_slash = "/"
+            path = course_dir + trailing_slash
         with open("nbgrader_config.py", "a") as fh:
-            fh.write("""c.CourseDirectory.root = "{}{}"\n""".format(
-                course_dir, trailing_slash))
+            fh.write("""c.CourseDirectory.root = "{}"\n""".format(path))
         run_nbgrader(["assign", "ps1"])
         assert os.path.isfile(join(course_dir, "release", "ps1", "foo.ipynb"))
