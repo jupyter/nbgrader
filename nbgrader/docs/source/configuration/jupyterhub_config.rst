@@ -115,7 +115,6 @@ Similarly to the use case with just a single grader, there needs to then be a ``
 
 Example Use Case: Multiple Classes
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-.. versionadded:: 0.6.0
 
 
 No Authentication
@@ -205,25 +204,24 @@ for details.
 
 JupyterHub Authentication
 ^^^^^^^^^^^^^^^^^^^^^^^^^
-
+.. versionadded:: 0.7.0
 
 With the advent of JupyterHubAuthPlugin students who don't have a specified course_id won't see all courses anymore, just the ones they have been added to. 
 
 Requirements for using ``JupyterHubAuthPlugin``: 
 
 * Jupyterhub > 0.8
-* Activating the JupyterHubAuthPlugin requires you to add it as an authentication plugin class into ``/etc/jupyter/nbgrader_config.py``
+* Activating the JupyterHubAuthPlugin requires you to add it as an authentication plugin class into the ``nbgrader_config.py`` for both the formgrader services and instructor accounts.
+
 .. code:: python
 
     from nbgrader.auth import JupyterHubAuthPlugin
     c = get_config()
     c.Authenticator.plugin_class = JupyterHubAuthPlugin
-
-* Instructor and student groups need to be named ``formgrade-{course_id}`` for instructors and ``nbgrader-{course_id}`` for students
+* To differentiate student from instructor, their groups need to be named ``formgrade-{course_id}`` for instructors and ``nbgrader-{course_id}`` for students.
 * The course service needs to have an api_token set that is from a jupyterhub admin see: Creating an `api token <https://jupyterhub.readthedocs.io/en/stable/reference/rest.html#create-an-api-token>`_
-
-
 * The service user also needs to be added to the formgrade group (see the jupyterhub_config example below)
+
 
 
 As in the case of multiple graders for a single class, if you have multiple
@@ -243,6 +241,8 @@ this:
         'instructor1',
         'instructor2',
         'student1',
+        'grader-course101',
+        'grader-course123'
     ]
 
     c.Authenticator.admin_users = {
@@ -313,21 +313,40 @@ and ``/home/grader-course123/.jupyter/nbgrader_config.py`` would be:
     c = get_config()
     c.CourseDirectory.root = '/home/grader-course123/course123'
 
-
-
+  
 
 Custom Authentication
-^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^
+.. versionadded:: 0.7.0
 
 To make your own custom authentication such as through an LTI you could start by making a method that inherits the Authenticator class, which is a plugin for different authentication methods.
 
-There are now three authentication classes:
+There are now four authentication classes:
 
-* ``NoAuthPlugin`` : The default old behaviour. Using this plugin will allow any user to any course if he does not have a course_id in his nbgrader_config. This is still the default behaviour so no need to specify it in ``etc/jupyter/nbgrader_config.py``
 
-* ``JupyterHubAuthPlugin`` : Uses the Jupyterhub groups part of the Jupyterhub API for authentication.
+* ``BaseAuthPlugin``: Inherit this class when implementing your own plugin, thought of as a way to enable LTI use cases. This class is never called directly.
+* ``NoAuthPlugin``: The default old behaviour. Using this plugin will allow any user to any course if he does not have a course_id in his nbgrader_config. This is still the default behaviour so no need to specify it in ``etc/jupyter/nbgrader_config.py``
 
-* ``Authenticator``: Inherit this class to make your own Authenticator plugin, thought of as a way to enable LTI use cases.
+* ``JupyterHubAuthPlugin``: Uses the Jupyterhub groups part of the Jupyterhub API for authentication.
+
+* ``Authenticator``: Configurable for different plugins.
+
+
+
+**BaseAuthPlugin methods to override for custom authentication**        
+
+.. list-table::
+   :widths: 33 50
+   :header-rows: 1
+
+   * - Method
+     - Description
+   * - ``get_student_courses``
+     - Gets the list of courses that the student is enrolled in.
+   * - ``add_student_to_course``
+     - Grants a student access to a given course.
+   * - ``remove_student_from_course``
+     - Removes a student's access to a given course.
 
 
 
