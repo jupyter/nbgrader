@@ -17,7 +17,7 @@ Instructor commands
     :maxdepth: 1
 
     nbgrader-quickstart
-    nbgrader-assign
+    nbgrader-generate-assignment
     nbgrader-validate
     nbgrader-update
     nbgrader-autograde

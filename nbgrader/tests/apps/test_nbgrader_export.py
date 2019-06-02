@@ -21,8 +21,8 @@ class TestNbGraderExport(BaseTestApp):
 
         self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
         self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "source", "ps2", "p1.ipynb"))
-        run_nbgrader(["assign", "ps1", "--db", db])
-        run_nbgrader(["assign", "ps2", "--db", db])
+        run_nbgrader(["generate_assignment", "ps1", "--db", db])
+        run_nbgrader(["generate_assignment", "ps2", "--db", db])
 
         self._copy_file(join("files", "submitted-changed.ipynb"), join(course_dir, "submitted", "bar", "ps1", "p1.ipynb"))
         self._copy_file(join("files", "submitted-changed.ipynb"), join(course_dir, "submitted", "foo", "ps2", "p1.ipynb"))

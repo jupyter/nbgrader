@@ -4,7 +4,7 @@ Using nbgrader with JupyterHub
 .. seealso::
 
     :doc:`/user_guide/creating_and_grading_assignments`
-        Documentation for ``nbgrader assign``, ``nbgrader autograde``, ``nbgrader formgrade``, and ``nbgrader feedback``.
+        Documentation for ``nbgrader generate_assignment``, ``nbgrader autograde``, ``nbgrader formgrade``, and ``nbgrader feedback``.
 
     :doc:`/user_guide/managing_assignment_files`
         Documentation for ``nbgrader release``, ``nbgrader fetch``, ``nbgrader submit``, and ``nbgrader collect``.

@@ -52,7 +52,7 @@ class ReleaseApp(NbGrader):
 
         Second, the assignment to be released must already be in the `release` folder.
         The usual way of getting an assignment into this folder is by running
-        `nbgrader assign`.
+        `nbgrader generate_assignment`.
 
         To release an assignment named `assignment1` run:
 

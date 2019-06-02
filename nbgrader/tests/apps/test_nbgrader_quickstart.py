@@ -36,8 +36,8 @@ class TestNbGraderQuickStart(BaseTestApp):
             output = run_nbgrader(["validate", os.path.join("source", "ps1", nb)], stdout=True)
             assert output.strip() == "Success! Your notebook passes all the tests."
 
-        # nbgrader assign should work
-        run_nbgrader(["assign", "ps1"])
+        # nbgrader generate_assignment should work
+        run_nbgrader(["generate_assignment", "ps1"])
 
     def test_quickstart_overwrite_course_folder_if_structure_not_present(self):
         """Is the quickstart example properly generated?"""
@@ -63,8 +63,8 @@ class TestNbGraderQuickStart(BaseTestApp):
             output = run_nbgrader(["validate", os.path.join("source", "ps1", nb)], stdout=True)
             assert output.strip() == "Success! Your notebook passes all the tests."
 
-        # nbgrader assign should work
-        run_nbgrader(["assign", "ps1"])
+        # nbgrader generate_assignment should work
+        run_nbgrader(["generate_assignment", "ps1"])
 
     def test_quickstart_fails_with_source_folder_removed(self):
         """Is the quickstart example properly generated if source folder removed?"""
@@ -115,5 +115,5 @@ class TestNbGraderQuickStart(BaseTestApp):
             output = run_nbgrader(["validate", os.path.join("source", "ps1", nb)], stdout=True)
             assert output.strip() == "Success! Your notebook passes all the tests."
 
-        # nbgrader assign should work
-        run_nbgrader(["assign", "ps1"])
+        # nbgrader generate_assignment should work
+        run_nbgrader(["generate_assignment", "ps1"])

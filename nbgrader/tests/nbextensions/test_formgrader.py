@@ -106,9 +106,9 @@ def gradebook(request, tempdir, nbserver):
     os.rename(join("submitted", "Hacker", "Problem Set 1", "problem1.ipynb"), join("submitted", "Hacker", "Problem Set 1", "Problem 1.ipynb"))
     os.rename(join("submitted", "Hacker", "Problem Set 1", "problem2.ipynb"), join("submitted", "Hacker", "Problem Set 1", "Problem 2.ipynb"))
 
-    # run nbgrader assign
+    # run nbgrader generate_assignment
     run_nbgrader([
-        "assign", "Problem Set 1",
+        "generate_assignment", "Problem Set 1",
         "--IncludeHeaderFooter.header={}".format(join("source", "header.ipynb"))
     ])
 

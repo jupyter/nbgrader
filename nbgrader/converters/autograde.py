@@ -149,7 +149,7 @@ class Autograde(BaseConverter):
                     notebooks.append(notebook)
         self.notebooks = notebooks
         if len(self.notebooks) == 0:
-            msg = "No notebooks found, did you forget to run 'nbgrader assign'?"
+            msg = "No notebooks found, did you forget to run 'nbgrader generate_assignment'?"
             self.log.error(msg)
             raise NbGraderException(msg)
 

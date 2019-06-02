@@ -46,7 +46,7 @@
             "maxLength": 32
         },
         "cell_type": {
-            "description": "the type the cell was when nbgrader assign was run; used for checking if the cell type has changed and should only be present in the student version of an assignment",
+            "description": "the type the cell was when nbgrader generate_assignment was run; used for checking if the cell type has changed and should only be present in the student version of an assignment",
             "type": "string",
             "enum": ["raw", "code", "markdown"]
         }

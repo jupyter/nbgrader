@@ -15,6 +15,7 @@ from .baseapp import nbgrader_aliases, nbgrader_flags
 from . import (
     NbGrader,
     AssignApp,
+    GenerateAssignmentApp,
     AutogradeApp,
     FormgradeApp,
     FeedbackApp,
@@ -83,12 +84,20 @@ class NbGraderApp(NbGrader):
         to see these options).
 
         For more details on how each of the subcommands work, please see the help
-        for that command (e.g. `nbgrader assign --help-all`).
+        for that command (e.g. `nbgrader generate_assignment --help-all`).
         """
 
     subcommands = dict(
         assign=(
             AssignApp,
+            dedent(
+                """
+                DEPRECATED, please use generate_assignment instead.
+                """
+            ).strip()
+        ),
+        generate_assignment=(
+            GenerateAssignmentApp,
             dedent(
                 """
                 Create the student version of an assignment. Intended for use by

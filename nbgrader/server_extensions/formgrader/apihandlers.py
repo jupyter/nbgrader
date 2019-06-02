@@ -245,7 +245,7 @@ class AssignHandler(BaseApiHandler):
     @check_xsrf
     @check_notebook_dir
     def post(self, assignment_id):
-        self.write(json.dumps(self.api.assign(assignment_id)))
+        self.write(json.dumps(self.api.generate_assignment(assignment_id)))
 
 
 class UnReleaseHandler(BaseApiHandler):

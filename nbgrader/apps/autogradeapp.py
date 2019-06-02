@@ -63,7 +63,7 @@ class AutogradeApp(NbGrader):
         exist.
 
         Note that the assignment must also be present in the database. If it is
-        not, you should first create it using `nbgrader assign`. Then, during
+        not, you should first create it using `nbgrader generate_assignment`. Then, during
         autograding, the cells that contain tests for the students' answers will
         be overwritten with the master version of the tests that is saved in the
         database (this prevents students from modifying the tests in order to

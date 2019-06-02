@@ -30,7 +30,7 @@ class TestNbGraderAutograde(BaseTestApp):
             fh.write("""c.CourseDirectory.db_students = [dict(id="foo"), dict(id="bar")]""")
 
         self._copy_file(join("files", "submitted-changed.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
-        run_nbgrader(["assign", "ps1", "--db", db])
+        run_nbgrader(["generate_assignment", "ps1", "--db", db])
 
         self._copy_file(join("files", "submitted-changed.ipynb"), join(course_dir, "submitted", "baz", "ps1", "p1.ipynb"))
 
@@ -47,7 +47,7 @@ class TestNbGraderAutograde(BaseTestApp):
             fh.write("""c.CourseDirectory.db_students = [dict(id="foo"), dict(id="bar")]""")
 
         self._copy_file(join("files", "submitted-changed.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
-        run_nbgrader(["assign", "ps1", "--db", db])
+        run_nbgrader(["generate_assignment", "ps1", "--db", db])
 
         self._copy_file(join("files", "submitted-changed.ipynb"), join(course_dir, "submitted", "ps2", "foo", "p1.ipynb"))
         run_nbgrader(["autograde", "ps2", "--db", db], retcode=1)
@@ -59,7 +59,7 @@ class TestNbGraderAutograde(BaseTestApp):
             fh.write("""c.CourseDirectory.db_students = [dict(id="foo"), dict(id="bar")]""")
 
         self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
-        run_nbgrader(["assign", "ps1", "--db", db])
+        run_nbgrader(["generate_assignment", "ps1", "--db", db])
 
         self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "submitted", "foo", "ps1", "p1.ipynb"))
         self._copy_file(join("files", "submitted-changed.ipynb"), join(course_dir, "submitted", "bar", "ps1", "p1.ipynb"))
@@ -101,7 +101,7 @@ class TestNbGraderAutograde(BaseTestApp):
             fh.write("""c.CourseDirectory.db_students = [dict(id="foo"), dict(id="bar")]""")
 
         self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
-        run_nbgrader(["assign", "ps1", "--db", db])
+        run_nbgrader(["generate_assignment", "ps1", "--db", db])
 
         self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "submitted", "foo", "ps1", "p1.ipynb"))
         self._make_file(join(course_dir, "submitted", "foo", "ps1", "timestamp.txt"), "2015-02-02 15:58:23.948203 America/Los_Angeles")
@@ -133,7 +133,7 @@ class TestNbGraderAutograde(BaseTestApp):
             fh.write("""c.CourseDirectory.db_students = [dict(id="foo"), dict(id="bar")]""")
 
         self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
-        run_nbgrader(["assign", "ps1", "--db", db])
+        run_nbgrader(["generate_assignment", "ps1", "--db", db])
 
         self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "submitted", "foo", "ps1", "p1.ipynb"))
         self._make_file(join(course_dir, "submitted", "foo", "ps1", "timestamp.txt"), "")
@@ -158,7 +158,7 @@ class TestNbGraderAutograde(BaseTestApp):
             fh.write("""c.CourseDirectory.db_students = [dict(id="foo"), dict(id="bar")]""")
 
         self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
-        run_nbgrader(["assign", "ps1", "--db", db])
+        run_nbgrader(["generate_assignment", "ps1", "--db", db])
 
         # not late
         self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "submitted", "foo", "ps1", "p1.ipynb"))
@@ -198,7 +198,7 @@ class TestNbGraderAutograde(BaseTestApp):
             fh.write("""c.LateSubmissionPlugin.penalty_method = 'zero'""")
 
         self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
-        run_nbgrader(["assign", "ps1", "--db", db])
+        run_nbgrader(["generate_assignment", "ps1", "--db", db])
 
         # not late
         self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "submitted", "foo", "ps1", "p1.ipynb"))
@@ -265,7 +265,7 @@ class TestNbGraderAutograde(BaseTestApp):
             fh.write("""c.AssignLatePenalties.plugin_class = 'late_plugin.Blarg'""")
 
         self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
-        run_nbgrader(["assign", "ps1", "--db", db])
+        run_nbgrader(["generate_assignment", "ps1", "--db", db])
 
         # 4h late
         self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "submitted", "foo", "ps1", "p1.ipynb"))
@@ -306,7 +306,7 @@ class TestNbGraderAutograde(BaseTestApp):
         self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
         self._make_file(join(course_dir, "source", "ps1", "foo.txt"), "foo")
         self._make_file(join(course_dir, "source", "ps1", "data", "bar.txt"), "bar")
-        run_nbgrader(["assign", "ps1", "--db", db])
+        run_nbgrader(["generate_assignment", "ps1", "--db", db])
 
         self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "submitted", "foo", "ps1", "p1.ipynb"))
         self._make_file(join(course_dir, "submitted", "foo", "ps1", "foo.txt"), "foo")
@@ -346,7 +346,7 @@ class TestNbGraderAutograde(BaseTestApp):
         self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
         self._make_file(join(course_dir, "source", "ps1", "foo.txt"), "foo")
         self._make_file(join(course_dir, "source", "ps1", "data", "bar.txt"), "bar")
-        run_nbgrader(["assign", "ps1", "--db", db])
+        run_nbgrader(["generate_assignment", "ps1", "--db", db])
 
         self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "submitted", "foo", "ps1", "p1.ipynb"))
         self._make_file(join(course_dir, "submitted", "foo", "ps1", "foo.txt"), "foo")
@@ -386,7 +386,7 @@ class TestNbGraderAutograde(BaseTestApp):
         self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
         self._make_file(join(course_dir, "source", "ps1", "foo.txt"), "foo")
         self._make_file(join(course_dir, "source", "ps1", "data", "bar.txt"), "bar")
-        run_nbgrader(["assign", "ps1", "--db", db])
+        run_nbgrader(["generate_assignment", "ps1", "--db", db])
 
         self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "submitted", "foo", "ps1", "p1.ipynb"))
         self._make_file(join(course_dir, "submitted", "foo", "ps1", "foo.txt"), "foo")
@@ -437,7 +437,7 @@ class TestNbGraderAutograde(BaseTestApp):
         self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
         self._make_file(join(course_dir, "source", "ps1", "data.csv"), "some,data\n")
         self._make_file(join(course_dir, "source", "ps1", "helper.py"), "print('hello!')\n")
-        run_nbgrader(["assign", "ps1", "--db", db])
+        run_nbgrader(["generate_assignment", "ps1", "--db", db])
 
         self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "submitted", "foo", "ps1", "p1.ipynb"))
         self._make_file(join(course_dir, "submitted", "foo", "ps1", "timestamp.txt"), "2015-02-02 15:58:23.948203 America/Los_Angeles")
@@ -472,7 +472,7 @@ class TestNbGraderAutograde(BaseTestApp):
         self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
         self._make_file(join(course_dir, "source", "ps1", "subdir", "data.csv"), "some,data\n")
         self._make_file(join(course_dir, "source", "ps1", "subdir", "helper.py"), "print('hello!')\n")
-        run_nbgrader(["assign", "ps1", "--db", db])
+        run_nbgrader(["generate_assignment", "ps1", "--db", db])
 
         self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "submitted", "foo", "ps1", "p1.ipynb"))
         self._make_file(join(course_dir, "submitted", "foo", "ps1", "timestamp.txt"), "2015-02-02 15:58:23.948203 America/Los_Angeles")
@@ -503,7 +503,7 @@ class TestNbGraderAutograde(BaseTestApp):
             fh.write("""c.CourseDirectory.db_students = [dict(id="foo"), dict(id="bar")]""")
 
         self._copy_file(join("files", "side-effects.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
-        run_nbgrader(["assign", "ps1", "--db", db])
+        run_nbgrader(["generate_assignment", "ps1", "--db", db])
 
         self._copy_file(join("files", "side-effects.ipynb"), join(course_dir, "submitted", "foo", "ps1", "p1.ipynb"))
         run_nbgrader(["autograde", "ps1", "--db", db])
@@ -517,7 +517,7 @@ class TestNbGraderAutograde(BaseTestApp):
             fh.write("""c.CourseDirectory.db_students = [dict(id="foo"), dict(id="bar")]""")
 
         self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
-        run_nbgrader(["assign", "ps1", "--db", db])
+        run_nbgrader(["generate_assignment", "ps1", "--db", db])
 
         self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "submitted", "foo", "ps1", "p1 copy.ipynb"))
         self._copy_file(join("files", "submitted-changed.ipynb"), join(course_dir, "submitted", "foo", "ps1", "p1.ipynb"))
@@ -534,7 +534,7 @@ class TestNbGraderAutograde(BaseTestApp):
 
         self._empty_notebook(join(course_dir, "source", "ps1", "foo.ipynb"))
         self._make_file(join(course_dir, "source", "ps1", "foo.txt"), "foo")
-        run_nbgrader(["assign", "ps1"])
+        run_nbgrader(["generate_assignment", "ps1"])
 
         self._empty_notebook(join(course_dir, "submitted", "foo", "ps1", "foo.ipynb"))
         self._make_file(join(course_dir, "source", "foo", "ps1", "foo.txt"), "foo")
@@ -553,7 +553,7 @@ class TestNbGraderAutograde(BaseTestApp):
 
         self._empty_notebook(join(course_dir, "source", "ps1", "foo.ipynb"))
         self._make_file(join(course_dir, "source", "ps1", "foo.txt"), "foo")
-        run_nbgrader(["assign", "ps1"])
+        run_nbgrader(["generate_assignment", "ps1"])
 
         self._empty_notebook(join(course_dir, "submitted", "foo", "ps1", "foo.ipynb"))
         self._make_file(join(course_dir, "source", "foo", "ps1", "foo.txt"), "foo")
@@ -576,7 +576,7 @@ class TestNbGraderAutograde(BaseTestApp):
 
         self._copy_file(join("files", "test.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
         self._copy_file(join("files", "test.ipynb"), join(course_dir, "source", "ps1", "p2.ipynb"))
-        run_nbgrader(["assign", "ps1"])
+        run_nbgrader(["generate_assignment", "ps1"])
 
         self._copy_file(join("files", "test.ipynb"), join(course_dir, "submitted", "foo", "ps1", "p1.ipynb"))
         self._copy_file(join("files", "test.ipynb"), join(course_dir, "submitted", "foo", "ps1", "p2.ipynb"))
@@ -603,7 +603,7 @@ class TestNbGraderAutograde(BaseTestApp):
             fh.write("""c.CourseDirectory.db_students = [dict(id="foo"), dict(id="bar")]""")
 
         self._copy_file(join("files", "test.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
-        run_nbgrader(["assign", "ps1"])
+        run_nbgrader(["generate_assignment", "ps1"])
 
         self._copy_file(join("files", "test.ipynb"), join(course_dir, "submitted", "foo", "ps1", "p1.ipynb"))
         self._make_file(join(course_dir, "submitted", "foo", "ps1", "timestamp.txt"), "2015-02-02 15:58:23.948203 America/Los_Angeles")
@@ -630,7 +630,7 @@ class TestNbGraderAutograde(BaseTestApp):
 
         self._copy_file(join("files", "test.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
         self._copy_file(join("files", "test.ipynb"), join(course_dir, "source", "ps1", "p2.ipynb"))
-        run_nbgrader(["assign", "ps1"])
+        run_nbgrader(["generate_assignment", "ps1"])
 
         self._copy_file(join("files", "test.ipynb"), join(course_dir, "submitted", "foo", "ps1", "p1.ipynb"))
         self._copy_file(join("files", "test.ipynb"), join(course_dir, "submitted", "foo", "ps1", "p2.ipynb"))
@@ -670,7 +670,7 @@ class TestNbGraderAutograde(BaseTestApp):
         # test-hidden-tests.ipynb contains vizable solutions that pass
         # vizable tests, but fail on hidden tests
 
-        run_nbgrader(["assign", "ps1", "--db", db])
+        run_nbgrader(["generate_assignment", "ps1", "--db", db])
 
         # make sure hidden tests are removed in release
         with io.open(join(course_dir, "release", "ps1", "p1.ipynb"), mode='r', encoding='utf-8') as nb:
@@ -718,7 +718,7 @@ class TestNbGraderAutograde(BaseTestApp):
 
         self._empty_notebook(join(course_dir, "source", "ps1", "p1.ipynb"))
         self._empty_notebook(join(course_dir, "source", "ps1", "p2.ipynb"))
-        run_nbgrader(["assign", "ps1"])
+        run_nbgrader(["generate_assignment", "ps1"])
 
         self._empty_notebook(join(course_dir, "submitted", "bar", "ps1", "p1.ipynb"))
         self._copy_file(join("files", "test.ipynb"), join(course_dir, "submitted", "bar", "ps1", "p2.ipynb"))
@@ -736,7 +736,7 @@ class TestNbGraderAutograde(BaseTestApp):
 
         self._empty_notebook(join(course_dir, "source", "ps1", "p1.ipynb"))
         self._empty_notebook(join(course_dir, "source", "ps1", "p2.ipynb"))
-        run_nbgrader(["assign", "ps1"])
+        run_nbgrader(["generate_assignment", "ps1"])
 
         self._empty_notebook(join(course_dir, "submitted", "foo", "ps1", "p1.ipynb"))
         self._copy_file(join("files", "test.ipynb"), join(course_dir, "submitted", "foo", "ps1", "p2.ipynb"))
@@ -753,7 +753,7 @@ class TestNbGraderAutograde(BaseTestApp):
             fh.write("""c.ClearSolutions.code_stub = {'python': '## Answer', 'blah': '## Answer'}""")
 
         self._empty_notebook(join(course_dir, "source", "ps1", "p1.ipynb"))
-        run_nbgrader(["assign", "ps1"])
+        run_nbgrader(["generate_assignment", "ps1"])
 
         self._empty_notebook(join(course_dir, "submitted", "foo", "ps1", "p1.ipynb"), kernel="python")
         run_nbgrader(["autograde", "ps1"])
@@ -771,7 +771,7 @@ class TestNbGraderAutograde(BaseTestApp):
             fh.write("""c.ClearSolutions.code_stub = {'python': '## Answer', 'blah': '## Answer'}""")
 
         self._empty_notebook(join(course_dir, "source", "ps1", "p1.ipynb"), kernel="blah")
-        run_nbgrader(["assign", "ps1"])
+        run_nbgrader(["generate_assignment", "ps1"])
 
         self._empty_notebook(join(course_dir, "submitted", "foo", "ps1", "p1.ipynb"), kernel="python")
         run_nbgrader(["autograde", "ps1"], retcode=1)
@@ -783,7 +783,7 @@ class TestNbGraderAutograde(BaseTestApp):
             fh.write("""c.CourseDirectory.db_students = [dict(id="foo"), dict(id="bar")]""")
 
         self._empty_notebook(join(course_dir, "source", "ps1", "p1.ipynb"), kernel="python")
-        run_nbgrader(["assign", "ps1"])
+        run_nbgrader(["generate_assignment", "ps1"])
 
         self._empty_notebook(join(course_dir, "submitted", "foo", "ps1", "p1.ipynb"), kernel="blah")
         run_nbgrader(["autograde", "ps1"])
@@ -796,7 +796,7 @@ class TestNbGraderAutograde(BaseTestApp):
             fh.write("""c.CourseDirectory.db_students = [dict(id="foo")]""")
 
         self._copy_file(join("files", "test.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
-        run_nbgrader(["assign", "ps1"])
+        run_nbgrader(["generate_assignment", "ps1"])
 
         self._copy_file(join("files", "test-with-output.ipynb"), join(course_dir, "submitted", "foo", "ps1", "p1.ipynb"))
         with io.open(join(os.path.dirname(__file__), "files", "test-with-output.ipynb"), mode="r", encoding='utf-8') as fh:
@@ -851,7 +851,7 @@ class TestNbGraderAutograde(BaseTestApp):
             fh.write("""c.CourseDirectory.db_students = {}""".format(json.dumps(students)))
 
         self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
-        run_nbgrader(["assign", "ps1", "--db", db])
+        run_nbgrader(["generate_assignment", "ps1", "--db", db])
 
         for i in range(num_students):
             self._copy_file(join("files", "submitted-changed.ipynb"), join(course_dir, "submitted", student_fmt.format(i), "ps1", "p1.ipynb"))
@@ -865,7 +865,7 @@ class TestNbGraderAutograde(BaseTestApp):
             fh.write("""c.ExecutePreprocessor.timeout = 1""")
 
         self._copy_file(join("files", "infinite-loop.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
-        run_nbgrader(["assign", "ps1", "--db", db])
+        run_nbgrader(["generate_assignment", "ps1", "--db", db])
 
         self._copy_file(join("files", "infinite-loop.ipynb"), join(course_dir, "submitted", "foo", "ps1", "p1.ipynb"))
         run_nbgrader(["autograde", "ps1", "--db", db])
@@ -880,7 +880,7 @@ class TestNbGraderAutograde(BaseTestApp):
             fh.write("""c.CourseDirectory.db_students = [dict(id="foo")]\n""")
 
         self._copy_file(join("files", "infinite-loop-with-output.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
-        run_nbgrader(["assign", "ps1", "--db", db])
+        run_nbgrader(["generate_assignment", "ps1", "--db", db])
 
         self._copy_file(join("files", "infinite-loop-with-output.ipynb"), join(course_dir, "submitted", "foo", "ps1", "p1.ipynb"))
         run_nbgrader(["autograde", "ps1", "--db", db], retcode=1)
@@ -893,7 +893,7 @@ class TestNbGraderAutograde(BaseTestApp):
             fh.write("""c.CourseDirectory.db_students = [dict(id="foo"), dict(id="bar")]""")
 
         self._empty_notebook(join(course_dir, "source", "ps1", "p1.ipynb"))
-        run_nbgrader(["assign", "ps1"])
+        run_nbgrader(["generate_assignment", "ps1"])
 
         self._empty_notebook(join(course_dir, "submitted", "foo", "ps1", "p1.ipynb"))
         os.makedirs(join(course_dir, "submitted", "bar", "ps1"))
@@ -910,7 +910,7 @@ class TestNbGraderAutograde(BaseTestApp):
 
         self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
         self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "source", "ps1", "p2.ipynb"))
-        run_nbgrader(["assign", "ps1", "--db", db])
+        run_nbgrader(["generate_assignment", "ps1", "--db", db])
 
         self._copy_file(join("files", "submitted-changed.ipynb"), join(course_dir, "submitted", "foo", "ps1", "p1.ipynb"))
         run_nbgrader(["autograde", "ps1", "--db", db])

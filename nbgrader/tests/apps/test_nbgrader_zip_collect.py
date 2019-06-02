@@ -368,7 +368,7 @@ class TestNbGraderZipCollect(BaseTestApp):
                 """
             ))
 
-        run_nbgrader(["assign", "ps1"])
+        run_nbgrader(["generate_assignment", "ps1"])
         self._make_notebook(archive_dir,
             'ps1', 'hacker', '2016-01-30-15-30-10', 'myproblem1')
 
