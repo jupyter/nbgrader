@@ -21,7 +21,7 @@ class ExchangeList(Exchange):
         course_id = self.course_id if self.course_id else '*'
         assignment_id = self.coursedir.assignment_id if self.coursedir.assignment_id else '*'
         student_id = self.coursedir.student_id if self.coursedir.student_id else '*'
-        
+
         if self.inbound:
             pattern = os.path.join(self.root, course_id, 'inbound', '{}+{}+*'.format(student_id, assignment_id))
         elif self.cached:
@@ -88,8 +88,8 @@ class ExchangeList(Exchange):
                 nb_hash = notebook_hash(notebook)
                 _, notebookFilename = os.path.split(notebook)
                 notebookName, _ = os.path.splitext(notebookFilename)
-                feedbackpath = os.path.join(self.root, info['course_id'], 'feedback','{0}.html'.format(nb_hash))  
-                localFeedbackpath = os.path.join(self.coursedir.root, info['course_id'], 'feedback','{0}.html'.format(notebookName))  
+                feedbackpath = os.path.join(self.root, info['course_id'], 'feedback', '{0}.html'.format(nb_hash))  
+                localFeedbackpath = os.path.join(self.coursedir.root, info['course_id'], 'feedback', '{0}.html'.format(notebookName))  
                 hasLocalFeedback = os.path.isfile(localFeedbackpath)
                 # could check for new version here
                 nbInfo['hasLocalFeedback'] = hasLocalFeedback 

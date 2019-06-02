@@ -728,9 +728,9 @@ class TestNbGraderAPI(BaseTestApp):
         api.generate_feedback("ps1", "foo")
         result = api.release_feedback("ps1", "foo")
         assert result["success"]
-        assert os.path.isdir(join(exchange,"abc101", "feedback"))
-        assert os.path.exists(join(exchange,"abc101", "feedback", "65f5ff7800d0926ae6869e70f4da0b27.html"))
-        #add another assignment         
+        assert os.path.isdir(join(exchange, "abc101", "feedback"))
+        assert os.path.exists(join(exchange, "abc101", "feedback", "65f5ff7800d0926ae6869e70f4da0b27.html"))
+        # add another assignment         
         self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "source", "ps2", "p2.ipynb"))
         api.assign("ps2")
         self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "submitted", "foo", "ps2", "p2.ipynb"))
@@ -739,7 +739,7 @@ class TestNbGraderAPI(BaseTestApp):
         api.generate_feedback("ps2", "foo")
         api.release_feedback("ps2", "foo")
         assert result["success"]
-        assert os.path.exists(join(exchange,"abc101", "feedback", "a7efd7718119cc393418ad9a185b5b3b.html"))
+        assert os.path.exists(join(exchange, "abc101", "feedback", "a7efd7718119cc393418ad9a185b5b3b.html"))
 
     def test_fetch_feedback(self, api, course_dir, db, exchange):
         self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
@@ -756,8 +756,8 @@ class TestNbGraderAPI(BaseTestApp):
         result = api.fetch_feedback("ps1", "foo")
         assert result["success"]
         assert os.path.isdir(join("ps1", "feedback"))
-        assert os.path.exists(join("ps1", "feedback", timestamp,  "p1.html"))
-        #add another assignment         
+        assert os.path.exists(join("ps1", "feedback", timestamp, "p1.html"))
+        # add another assignment         
         self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "source", "ps2", "ps2.ipynb"))
         api.assign("ps2")
         inboundpath = join(exchange, "abc101", "inbound", "foo+ps2+{}".format(timestamp))
@@ -770,4 +770,4 @@ class TestNbGraderAPI(BaseTestApp):
         api.release_feedback("ps2", "foo")
         api.fetch_feedback("ps2", "foo")
         assert result["success"]
-        assert os.path.exists(join("ps2", "feedback", timestamp,  "ps2.html"))
+        assert os.path.exists(join("ps2", "feedback", timestamp, "ps2.html"))

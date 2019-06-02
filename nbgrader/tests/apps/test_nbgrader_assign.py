@@ -329,6 +329,3 @@ class TestNbGraderAssign(BaseTestApp):
             fh.write("""c.IncludeHeaderFooter.header = "source/header.ipynb"\n""")
         run_nbgrader(["assign", "ps1"])
         assert os.path.isfile(join(course_dir, "release", "ps1", "foo.ipynb"))
-
-
-

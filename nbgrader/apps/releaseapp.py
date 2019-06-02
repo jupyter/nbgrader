@@ -17,14 +17,15 @@ flags = {}
 flags.update(nbgrader_flags)
 flags.update({
     'force': (
-        {'ExchangeRelease' : {'force' : True}},
+        {'ExchangeRelease': {'force': True}},
         "Force overwrite of existing files in the exchange."
     ),
     'f': (
-        {'ExchangeRelease' : {'force' : True}},
+        {'ExchangeRelease': {'force': True}},
         "Force overwrite of existing files in the exchange."
     ),
 })
+
 
 class ReleaseApp(NbGrader):
 

@@ -278,5 +278,6 @@ class NbGraderApp(NbGrader):
         print("Python version {}".format(sys.version))
         print("nbgrader version {}".format(nbgrader.__version__))
 
+
 def main():
     NbGraderApp.launch_instance()

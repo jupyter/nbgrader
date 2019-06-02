@@ -17,7 +17,7 @@ flags = {}
 flags.update(nbgrader_flags)
 flags.update({
     'replace': (
-        {'ExchangeFetch' : {'replace_missing_files' : True}},
+        {'ExchangeFetch': {'replace_missing_files': True}},
         "replace missing files, even if the assignment has already been fetched"
     ),
 })

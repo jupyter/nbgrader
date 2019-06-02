@@ -14,6 +14,7 @@ from jupyter_core.paths import jupyter_data_dir
 from ..utils import check_directory, ignore_patterns
 from ..coursedir import CourseDirectory
 
+
 class ExchangeError(Exception):
     pass
 

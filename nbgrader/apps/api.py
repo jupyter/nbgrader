@@ -1076,10 +1076,9 @@ class NbGraderAPI(LoggingConfigurable):
             app = ExchangeFetchFeedback(coursedir=self.coursedir, parent=self)
             ret_dic = capture_log(app)
             # assignment tab needs a 'value' field with the info needed to repopulate
-            # the tables. Lister_rel gives the information for the "Downloaded assignments" part
-            # and lister_sub the info for the "Submitted assignments" part   
+            # the tables.
         with temp_attrs(self.coursedir, assignment_id='*', student_id=student_id):
             lister_rel = ExchangeList(inbound=False, cached=True, coursedir=self.coursedir, config=self.config)
-            assignments = lister_rel.start() 
+            assignments = lister_rel.start()
             ret_dic["value"] = sorted(assignments, key=lambda x: (x['course_id'], x['assignment_id']))
         return ret_dic
