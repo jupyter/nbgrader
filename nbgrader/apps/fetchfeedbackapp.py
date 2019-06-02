@@ -53,20 +53,6 @@ class FetchFeedbackApp(NbGrader):
         classes.extend([Exchange, ExchangeFetchFeedback])
         return classes
 
-    def _load_config(self, cfg, **kwargs):
-        if 'FetchApp' in cfg:
-            self.log.warning(
-                "Use ExchangeFetch in config, not FetchApp. Outdated config:\n%s",
-                '\n'.join(
-                    'FetchApp.{key} = {value!r}'.format(key=key, value=value)
-                    for key, value in cfg.FetchApp.items()
-                )
-            )
-            cfg.ExchangeFetchFeedback.merge(cfg.FetchFeedbackApp)
-            del cfg.FetchFeedbackApp
-
-        super(FetchFeedbackApp, self)._load_config(cfg, **kwargs)
-
     def start(self):
         super(FetchFeedbackApp, self).start()
 

@@ -49,20 +49,6 @@ class ReleaseFeedbackApp(NbGrader):
         classes.extend([Exchange, ExchangeReleaseFeedback])
         return classes
 
-    def _load_config(self, cfg, **kwargs):
-        if 'ReleaseFeedbackApp' in cfg:
-            self.log.warning(
-                "Use ExchangeReleaseFeedback in config, not ReleaseFeedbackApp. Outdated config:\n%s",
-                '\n'.join(
-                    'ReleaseFeedbackApp.{key} = {value!r}'.format(key=key, value=value)
-                    for key, value in cfg.ReleaseApp.items()
-                )
-            )
-            cfg.ExchangeReleaseFeedback.merge(cfg.ReleaseFeedbackApp)
-            del cfg.ReleaseFeedbackApp
-
-        super(ReleaseFeedbackApp, self)._load_config(cfg, **kwargs)
-
     def start(self):
         super(ReleaseFeedbackApp, self).start()
 
