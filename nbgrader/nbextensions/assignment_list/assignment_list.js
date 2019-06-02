@@ -242,7 +242,7 @@ define([
 	var submissions = [];
         for (var i=0; i<len; i++) {
             var element = $('<div/>');
-            var item = new Assignment(element, submissions, data[i], this.fetched_selector,
+            var item = new Assignment(element, data[i], this.fetched_selector,
 				      $.proxy(this.handle_load_list, this),
 				      $.proxy(this.handle_load_feedback_list, this),
 				      this.options);
@@ -254,6 +254,7 @@ define([
                 this.fetched_element.children('.list_placeholder').hide();
             } else if (data[i]['status'] === 'submitted') {
 		// Just collecting submissions here
+		submissions.push(...item.submissions);
             }
         }
 
@@ -351,10 +352,11 @@ define([
     };
 
 
-    var Assignment = function (element, submissions, data, parent,
+    var Assignment = function (element, data, parent,
 			       on_refresh, on_refresh_feedback,
 			       options) {
         this.element = $(element);
+	this.submissions = [];
         this.data = data;
         this.parent = parent;
         this.on_refresh = on_refresh;
@@ -362,7 +364,7 @@ define([
         this.options = options;
         this.base_url = options.base_url || utils.get_body_data("baseUrl");
         this.style();
-        this.make_row(submissions);
+        this.make_row();
     };
 
     Assignment.prototype.style = function () {
@@ -384,7 +386,7 @@ define([
         return id;
     };
 
-    Assignment.prototype.make_row = function (submissions) {
+    Assignment.prototype.make_row = function () {
         var row = $('<div/>').addClass('col-md-12');
 	var link = this.make_link();
         row.append(link);
@@ -403,7 +405,7 @@ define([
             if (this.data.hasFeedback) {
 		button = this.make_feedback_button();
 	    }
-	    submissions.push({
+	    this.submissions.push({
 		hasLocalFeedback: hasLocalFeedback,
 		hasFeedback: this.data.hasFeedback,
 		course_id: this.data.course_id,
