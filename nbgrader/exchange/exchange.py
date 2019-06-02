@@ -11,7 +11,7 @@ from traitlets.config import LoggingConfigurable
 from traitlets import Unicode, Bool, Instance, default, validate
 from jupyter_core.paths import jupyter_data_dir
 
-from ..utils import check_directory, ignore_patterns
+from ..utils import check_directory, ignore_patterns, self_owned
 from ..coursedir import CourseDirectory
 
 

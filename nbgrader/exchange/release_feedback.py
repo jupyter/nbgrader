@@ -12,7 +12,7 @@ from stat import (
 from traitlets import Bool
 
 from .exchange import Exchange
-from ..utils import self_owned, compute_checksum, notebook_hash
+from ..utils import compute_checksum, notebook_hash
 
 
 class ExchangeReleaseFeedback(Exchange):
