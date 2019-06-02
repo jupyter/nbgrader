@@ -90,6 +90,16 @@ def _load_notebook(browser, port, retries=5, name="blank"):
     # fix for the problem :/
     time.sleep(1)
 
+    # delete all cells
+    if name == "blank":
+        cells = browser.find_elements_by_css_selector(".cell")
+        for _ in range(len(cells)):
+            element = browser.find_elements_by_css_selector(".cell")[0]
+            element.click()
+            element.send_keys(Keys.ESCAPE)
+            element.send_keys("d")
+            element.send_keys("d")
+
 
 def _activate_toolbar(browser, name="Create%20Assignment"):
     def celltoolbar_exists(browser):
@@ -850,6 +860,50 @@ def test_schema_version(browser, port):
     _activate_toolbar(browser)
     _wait_for_modal(browser)
     _dismiss_modal(browser)
+
+
+@pytest.mark.nbextensions
+def test_invalid_nbgrader_cell_type(browser, port):
+    _load_notebook(browser, port)
+    _activate_toolbar(browser)
+
+    # make it a solution cell
+    _select_solution(browser)
+    assert _get_metadata(browser)['solution']
+    assert not _get_metadata(browser)['grade']
+    assert not _get_metadata(browser)['locked']
+
+    # wait for the id field to appear
+    _wait(browser).until(
+        EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".nbgrader-id")))
+
+    # set the id
+    assert _get_metadata(browser)['grade_id'].startswith("cell-")
+    _set_id(browser)
+    assert _get_metadata(browser)['grade_id'] == "foo"
+
+    # make sure the metadata is valid
+    _save_and_validate(browser)
+
+    # change the cell to a markdown cell
+    element = browser.find_element_by_tag_name("body")
+    element.send_keys(Keys.ESCAPE)
+    element.send_keys("m")
+
+    # make sure the toolbar appeared
+    def find_toolbar(browser):
+        try:
+            browser.find_elements_by_css_selector(".celltoolbar select")[0]
+        except IndexError:
+            return False
+        return True
+    _wait(browser).until(find_toolbar)
+
+    # check that then nbgrader metadata is consistent
+    assert not _get_metadata(browser)['solution']
+    assert not _get_metadata(browser)['grade']
+    assert not _get_metadata(browser)['locked']
+    assert _get_metadata(browser)['grade_id'] == "foo"
 
 
 ################################################################################
