@@ -335,18 +335,15 @@ There are now four authentication classes:
 
 **BaseAuthPlugin methods to override for custom authentication**        
 
-.. list-table::
-   :widths: 33 50
-   :header-rows: 1
+.. currentmodule:: nbgrader.auth
 
-   * - Method
-     - Description
-   * - ``get_student_courses``
-     - Gets the list of courses that the student is enrolled in.
-   * - ``add_student_to_course``
-     - Grants a student access to a given course.
-   * - ``remove_student_from_course``
-     - Removes a student's access to a given course.
+.. autoclass:: BaseAuthPlugin
+
+    .. automethod:: get_student_courses
+
+    .. automethod:: add_student_to_course
+
+    .. automethod:: remove_student_from_course
 
 
 
