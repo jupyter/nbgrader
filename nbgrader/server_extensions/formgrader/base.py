@@ -107,3 +107,12 @@ def check_xsrf(f):
         _ = self.xsrf_token
         return f(self, *args, **kwargs)
     return wrapper
+
+
+def check_notebook_dir(f):
+    @functools.wraps(f)
+    def wrapper(self, *args, **kwargs):
+        if self.settings['nbgrader_bad_setup']:
+            return self.write_error(500)
+        return f(self, *args, **kwargs)
+    return wrapper

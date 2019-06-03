@@ -19,7 +19,8 @@ flags.update(nbgrader_flags)
 flags.update({
     'create': (
         {'Autograde': {'create_student': True}},
-        "Create an entry for the student in the database, if one does not already exist."
+        "Deprecated: Create an entry for the student in the database, if one does not already exist. "
+        "This is now the default."
     ),
     'no-execute': (
         {
@@ -58,9 +59,8 @@ class AutogradeApp(NbGrader):
 
             autograded/{student_id}/{assignment_id}/{notebook_id}.ipynb
 
-        The student IDs must already exist in the database. If they do not, you
-        can tell `nbgrader autograde` to add them on the fly by passing the
-        --create flag.
+        The student IDs will be created in the database if they don't already
+        exist.
 
         Note that the assignment must also be present in the database. If it is
         not, you should first create it using `nbgrader assign`. Then, during

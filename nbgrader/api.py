@@ -454,6 +454,10 @@ class Student(Base):
     #: of each assignment.
     max_score = None
 
+    #: The LMS user ID, this is mainly for identifying students in your LMS system
+    #: and was added so teachers and TA's can easily send grades to a LMS such as Canvas and Blackboard.
+    lms_user_id = Column(String(128), nullable=True)
+
     def to_dict(self):
         """Convert the student object to a JSON-friendly dictionary
         representation.
@@ -465,7 +469,8 @@ class Student(Base):
             "last_name": self.last_name,
             "email": self.email,
             "score": self.score,
-            "max_score": self.max_score
+            "max_score": self.max_score,
+            "lms_user_id": self.lms_user_id
         }
 
     def __repr__(self):
@@ -2957,14 +2962,14 @@ class Gradebook(object):
             students = self.db.query(
                 Student.id, Student.first_name, Student.last_name,
                 Student.email, _scores,
-                func.sum(Assignment.max_score)
+                func.sum(Assignment.max_score), Student.lms_user_id
             ).outerjoin(scores, Student.id == scores.c.id)\
              .group_by(
                  Student.id, Student.first_name, Student.last_name,
-                 Student.email, _scores)\
+                 Student.email, _scores, Student.lms_user_id)\
              .all()
 
-            keys = ["id", "first_name", "last_name", "email", "score", "max_score"]
+            keys = ["id", "first_name", "last_name", "email", "score", "max_score", "lms_user_id"]
             return [dict(zip(keys, x)) for x in students]
 
         else:

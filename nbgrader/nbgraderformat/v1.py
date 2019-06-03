@@ -40,13 +40,6 @@ class MetadataValidatorV1(BaseMetadataValidator):
         else:
             meta['points'] = 0.0
 
-        allowed = set(self.schema["properties"].keys())
-        keys = set(meta.keys()) - allowed
-        if len(keys) > 0:
-            self.log.warning("extra keys detected in metadata, these will be removed: {}".format(keys))
-            for key in keys:
-                del meta[key]
-
         meta['schema_version'] = 1
 
         return cell
@@ -63,6 +56,7 @@ class MetadataValidatorV1(BaseMetadataValidator):
         if meta['schema_version'] == 0:
             cell = self._upgrade_v0_to_v1(cell)
 
+        self._remove_extra_keys(cell)
         return cell
 
     def validate_cell(self, cell):

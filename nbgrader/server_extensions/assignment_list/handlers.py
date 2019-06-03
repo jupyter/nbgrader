@@ -34,11 +34,6 @@ def chdir(dirname):
 
 class AssignmentList(LoggingConfigurable):
 
-    assignment_dir = Unicode('', help='Directory where the nbgrader commands should be run')
-    @default("assignment_dir")
-    def _assignment_dir_default(self):
-        return self.parent.notebook_dir
-
     def load_config(self):
         paths = jupyter_config_path()
         paths.insert(0, os.getcwd())
@@ -54,10 +49,24 @@ class AssignmentList(LoggingConfigurable):
 
         return full_config
 
+    @contextlib.contextmanager
+    def get_assignment_dir_config(self):
+        # first get the exchange assignment directory
+        with chdir(self.parent.notebook_dir):
+            config = self.load_config()
+
+        lister = ExchangeList(config=config)
+        assignment_dir = lister.assignment_dir
+
+        # now cd to the full assignment directory and load the config again
+        with chdir(assignment_dir):
+            for new_config in NbGrader._load_config_files("nbgrader_config", path=[os.getcwd()], log=self.log):
+                config.merge(new_config)
+            yield config
+
     def list_released_assignments(self, course_id=None):
-        with chdir(self.assignment_dir):
+        with self.get_assignment_dir_config() as config:
             try:
-                config = self.load_config()
                 if course_id:
                     config.CourseDirectory.course_id = course_id
 
@@ -79,9 +88,9 @@ class AssignmentList(LoggingConfigurable):
             else:
                 for assignment in assignments:
                     if assignment['status'] == 'fetched':
-                        assignment['path'] = os.path.relpath(assignment['path'], self.assignment_dir)
+                        assignment['path'] = os.path.relpath(assignment['path'], self.parent.notebook_dir)
                         for notebook in assignment['notebooks']:
-                            notebook['path'] = os.path.relpath(notebook['path'], self.assignment_dir)
+                            notebook['path'] = os.path.relpath(notebook['path'], self.parent.notebook_dir)
                 retvalue = {
                     "success": True,
                     "value": sorted(assignments, key=lambda x: (x['course_id'], x['assignment_id']))
@@ -90,9 +99,8 @@ class AssignmentList(LoggingConfigurable):
         return retvalue
 
     def list_submitted_assignments(self, course_id=None):
-        with chdir(self.assignment_dir):
+        with self.get_assignment_dir_config() as config:
             try:
-                config = self.load_config()
                 config.ExchangeList.cached = True
                 if course_id:
                     config.CourseDirectory.course_id = course_id
@@ -149,7 +157,7 @@ class AssignmentList(LoggingConfigurable):
         return retvalue
 
     def fetch_assignment(self, course_id, assignment_id):
-        with chdir(self.assignment_dir):
+        with self.get_assignment_dir_config() as config:
             try:
                 config = self.load_config()
                 config.CourseDirectory.course_id = course_id
@@ -178,7 +186,7 @@ class AssignmentList(LoggingConfigurable):
         return retvalue
 
     def submit_assignment(self, course_id, assignment_id):
-        with chdir(self.assignment_dir):
+        with self.get_assignment_dir_config() as config:
             try:
                 config = self.load_config()
                 config.CourseDirectory.course_id = course_id

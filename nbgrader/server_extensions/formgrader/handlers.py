@@ -4,13 +4,14 @@ import sys
 
 from tornado import web
 
-from .base import BaseHandler, check_xsrf
+from .base import BaseHandler, check_xsrf, check_notebook_dir
 from ...api import MissingEntry
 
 
 class ManageAssignmentsHandler(BaseHandler):
     @web.authenticated
     @check_xsrf
+    @check_notebook_dir
     def get(self):
         html = self.render(
             "manage_assignments.tpl",
@@ -26,6 +27,7 @@ class ManageAssignmentsHandler(BaseHandler):
 class ManageSubmissionsHandler(BaseHandler):
     @web.authenticated
     @check_xsrf
+    @check_notebook_dir
     def get(self, assignment_id):
         html = self.render(
             "manage_submissions.tpl",
@@ -38,6 +40,7 @@ class ManageSubmissionsHandler(BaseHandler):
 class GradebookAssignmentsHandler(BaseHandler):
     @web.authenticated
     @check_xsrf
+    @check_notebook_dir
     def get(self):
         html = self.render(
             "gradebook_assignments.tpl",
@@ -48,6 +51,7 @@ class GradebookAssignmentsHandler(BaseHandler):
 class GradebookNotebooksHandler(BaseHandler):
     @web.authenticated
     @check_xsrf
+    @check_notebook_dir
     def get(self, assignment_id):
         html = self.render(
             "gradebook_notebooks.tpl",
@@ -59,6 +63,7 @@ class GradebookNotebooksHandler(BaseHandler):
 class GradebookNotebookSubmissionsHandler(BaseHandler):
     @web.authenticated
     @check_xsrf
+    @check_notebook_dir
     def get(self, assignment_id, notebook_id):
         html = self.render(
             "gradebook_notebook_submissions.tpl",
@@ -72,6 +77,7 @@ class GradebookNotebookSubmissionsHandler(BaseHandler):
 class SubmissionHandler(BaseHandler):
     @web.authenticated
     @check_xsrf
+    @check_notebook_dir
     def get(self, submission_id):
         try:
             submission = self.gradebook.find_submission_notebook_by_id(submission_id)
@@ -183,6 +189,7 @@ class SubmissionNavigationHandler(BaseHandler):
 
     @web.authenticated
     @check_xsrf
+    @check_notebook_dir
     def get(self, submission_id, action):
         try:
             submission = self.gradebook.find_submission_notebook_by_id(submission_id)
@@ -217,6 +224,7 @@ class SubmissionFilesHandler(web.StaticFileHandler, BaseHandler):
 
     @web.authenticated
     @check_xsrf
+    @check_notebook_dir
     def get(self, *args, **kwargs):
         return super(SubmissionFilesHandler, self).get(*args, **kwargs)
 
@@ -224,6 +232,7 @@ class SubmissionFilesHandler(web.StaticFileHandler, BaseHandler):
 class ManageStudentsHandler(BaseHandler):
     @web.authenticated
     @check_xsrf
+    @check_notebook_dir
     def get(self):
         html = self.render(
             "manage_students.tpl",
@@ -234,6 +243,7 @@ class ManageStudentsHandler(BaseHandler):
 class ManageStudentsAssignmentsHandler(BaseHandler):
     @web.authenticated
     @check_xsrf
+    @check_notebook_dir
     def get(self, student_id):
         html = self.render(
             "manage_students_assignments.tpl",
@@ -246,6 +256,7 @@ class ManageStudentsAssignmentsHandler(BaseHandler):
 class ManageStudentNotebookSubmissionsHandler(BaseHandler):
     @web.authenticated
     @check_xsrf
+    @check_notebook_dir
     def get(self, student_id, assignment_id):
         html = self.render(
             "manage_students_notebook_submissions.tpl",

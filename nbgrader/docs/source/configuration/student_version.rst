@@ -9,7 +9,7 @@ Customizing how the student version of an assignment looks
     :doc:`/command_line_tools/nbgrader-assign`
         Command line options for ``nbgrader assign``
 
-    :doc:`config_options`
+    :doc:`nbgrader_config`
         Details on ``nbgrader_config.py``
 
 "Autograded answer" cells
@@ -80,7 +80,7 @@ Changing the defaults
 
 If you need to change these defaults (e.g., if your class doesn't use Python,
 or isn't taught in English), the values can be configured in the
-:doc:`nbgrader_config.py <config_options>` file. Most relevant is the
+:doc:`nbgrader_config.py <nbgrader_config>` file. Most relevant is the
 ``code_stub`` option to the ``ClearSolutions`` preprocessor, which is the part
 of nbgrader that actually clears the solutions when producing the student
 version of the notebook.
@@ -189,7 +189,7 @@ Changing the defaults
 
 If you need to change these defaults (e.g., if your class isn't taught in
 English), the values can be configured in the :doc:`nbgrader_config.py
-<config_options>` file. Most relevant are the options to the
+<nbgrader_config>` file. Most relevant are the options to the
 ``ClearHiddenTests`` preprocessor, which is the part of nbgrader that actually
 removes the tests when producing the student version of the notebook.
 

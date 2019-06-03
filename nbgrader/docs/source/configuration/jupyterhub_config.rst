@@ -9,8 +9,8 @@ Using nbgrader with JupyterHub
     :doc:`/user_guide/managing_assignment_files`
         Documentation for ``nbgrader release``, ``nbgrader fetch``, ``nbgrader submit``, and ``nbgrader collect``.
 
-    :doc:`config_options`
-        Details on ``nbgrader_config.py``
+    :doc:`nbgrader_config`
+        Details on how to setup the ``nbgrader_config.py`` file.
 
     :doc:`/user_guide/philosophy`
         More details on how the nbgrader hierarchy is structured.
@@ -41,6 +41,13 @@ integrate with JupyterHub so that all grading can occur on the same server.
 
     Starting in version 0.5.0 of nbgrader, the formgrader is no longer a
     standalone command. Rather, it is an extension of the Jupyter notebook.
+
+.. warning::
+
+    When using nbgrader with JupyterHub, it is strongly recommended to set a
+    logfile so that you can more easily debug problems. To do so, you can set
+    a config option, for example ``NbGrader.logfile = "/usr/local/share/jupyter/nbgrader.log"``.
+
 
 Example Use Case: One Class, One Grader
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

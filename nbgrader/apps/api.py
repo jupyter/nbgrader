@@ -746,6 +746,7 @@ class NbGraderAPI(LoggingConfigurable):
                     "last_name": None,
                     "first_name": None,
                     "email": None,
+                    "lms_user_id": None,
                     "score": 0.0,
                     "max_score": 0.0
                 }
@@ -775,6 +776,7 @@ class NbGraderAPI(LoggingConfigurable):
                 "last_name": None,
                 "first_name": None,
                 "email": None,
+                "lms_user_id": None,
                 "score": 0.0,
                 "max_score": 0.0
             })

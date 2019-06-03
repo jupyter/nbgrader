@@ -15,7 +15,7 @@ from .. import utils
 class Autograde(BaseConverter):
 
     create_student = Bool(
-        False,
+        True,
         help=dedent(
             """
             Whether to create the student at runtime if it does not

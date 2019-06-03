@@ -3,9 +3,9 @@ import datetime
 import time
 import stat
 
-from os.path import join, isfile
+from os.path import join, isfile, exists
 
-from ...utils import parse_utc
+from ...utils import parse_utc, get_username
 from .. import run_nbgrader
 from .base import BaseTestApp
 from .conftest import notwindows
@@ -76,7 +76,7 @@ class TestNbGraderSubmit(BaseTestApp):
 
         filename, = os.listdir(join(exchange, "abc101", "inbound"))
         username, assignment, timestamp1 = filename.split("+")[:3]
-        assert username == os.environ["USER"]
+        assert username == get_username()
         assert assignment == "ps1"
         assert parse_utc(timestamp1) > now
         assert isfile(join(exchange, "abc101", "inbound", filename, "p1.ipynb"))
@@ -86,7 +86,7 @@ class TestNbGraderSubmit(BaseTestApp):
 
         filename, = os.listdir(join(cache, "abc101"))
         username, assignment, timestamp1 = filename.split("+")[:3]
-        assert username == os.environ["USER"]
+        assert username == get_username()
         assert assignment == "ps1"
         assert parse_utc(timestamp1) > now
         assert isfile(join(cache, "abc101", filename, "p1.ipynb"))
@@ -100,7 +100,7 @@ class TestNbGraderSubmit(BaseTestApp):
         assert len(os.listdir(join(exchange, "abc101", "inbound"))) == 2
         filename = sorted(os.listdir(join(exchange, "abc101", "inbound")))[1]
         username, assignment, timestamp2 = filename.split("+")[:3]
-        assert username == os.environ["USER"]
+        assert username == get_username()
         assert assignment == "ps1"
         assert parse_utc(timestamp2) > parse_utc(timestamp1)
         assert isfile(join(exchange, "abc101", "inbound", filename, "p1.ipynb"))
@@ -111,7 +111,7 @@ class TestNbGraderSubmit(BaseTestApp):
         assert len(os.listdir(join(cache, "abc101"))) == 2
         filename = sorted(os.listdir(join(cache, "abc101")))[1]
         username, assignment, timestamp2 = filename.split("+")[:3]
-        assert username == os.environ["USER"]
+        assert username == get_username()
         assert assignment == "ps1"
         assert parse_utc(timestamp2) > parse_utc(timestamp1)
         assert isfile(join(cache, "abc101", filename, "p1.ipynb"))
@@ -134,7 +134,7 @@ class TestNbGraderSubmit(BaseTestApp):
     def test_submit_missing(self, exchange, cache, course_dir):
         self._release_and_fetch("ps1", exchange, cache, course_dir)
         self._move_file(join("ps1", "p1.ipynb"), join("ps1", "p2.ipynb"))
-        # Check don't fail on missting notebooks submitted without strict flag
+        # Check don't fail on missing notebooks submitted without strict flag
         self._submit("ps1", exchange, cache)
 
     def test_submit_missing_strict(self, exchange, cache, course_dir):
@@ -186,14 +186,14 @@ class TestNbGraderSubmit(BaseTestApp):
 
         filename, = os.listdir(join(exchange, "abc101", "inbound"))
         username, assignment, _ = filename.split("+")[:3]
-        assert username == os.environ["USER"]
+        assert username == get_username()
         assert assignment == "ps1"
         assert isfile(join(exchange, "abc101", "inbound", filename, "p1.ipynb"))
         assert isfile(join(exchange, "abc101", "inbound", filename, "timestamp.txt"))
 
         filename, = os.listdir(join(cache, "abc101"))
         username, assignment, _ = filename.split("+")[:3]
-        assert username == os.environ["USER"]
+        assert username == get_username()
         assert assignment == "ps1"
         assert isfile(join(cache, "abc101", filename, "p1.ipynb"))
         assert isfile(join(cache, "abc101", filename, "timestamp.txt"))
@@ -204,15 +204,39 @@ class TestNbGraderSubmit(BaseTestApp):
 
         filename, = os.listdir(join(exchange, "abc102", "inbound"))
         username, assignment, _ = filename.split("+")[:3]
-        assert username == os.environ["USER"]
+        assert username == get_username()
         assert assignment == "ps1"
         assert isfile(join(exchange, "abc102", "inbound", filename, "p1.ipynb"))
         assert isfile(join(exchange, "abc102", "inbound", filename, "timestamp.txt"))
 
         filename, = os.listdir(join(cache, "abc102"))
         username, assignment, _ = filename.split("+")[:3]
-        assert username == os.environ["USER"]
+        assert username == get_username()
         assert assignment == "ps1"
         assert isfile(join(cache, "abc102", filename, "p1.ipynb"))
         assert isfile(join(cache, "abc102", filename, "timestamp.txt"))
 
+    def test_submit_exclude(self, exchange, cache, course_dir):
+        self._release_and_fetch("ps1", exchange, cache, course_dir)
+        self._make_file(join("ps1", "foo.pyc"))
+        self._submit("ps1", exchange, cache)
+        filename, = os.listdir(join(exchange, "abc101", "inbound"))
+        assert not exists(join(exchange, "abc101", "inbound", filename, "foo.pyc"))
+
+    def test_submit_include(self, exchange, cache, course_dir):
+        self._release_and_fetch("ps1", exchange, cache, course_dir)
+        self._make_file(join("ps1", "foo.txt"))
+        self._submit("ps1", exchange, cache,
+                     flags=['--CourseDirectory.include=["*.ipynb"]'])
+        filename, = os.listdir(join(exchange, "abc101", "inbound"))
+        assert not exists(join(exchange, "abc101", "inbound", filename, "foo.txt"))
+
+    def test_submit_include(self, exchange, cache, course_dir):
+        self._release_and_fetch("ps1", exchange, cache, course_dir)
+        self._make_file(join("ps1", "small_file"), contents="x"*2000)
+        self._make_file(join("ps1", "large_file"), contents="x"*2001)
+        self._submit("ps1", exchange, cache,
+                     flags=['--CourseDirectory.max_file_size=2'])
+        filename, = os.listdir(join(exchange, "abc101", "inbound"))
+        assert exists(join(exchange, "abc101", "inbound", filename, "small_file"))
+        assert not exists(join(exchange, "abc101", "inbound", filename, "large_file"))

@@ -22,7 +22,7 @@ from ..preprocessors import (
 class Assign(BaseConverter):
 
     create_assignment = Bool(
-        False,
+        True,
         help=dedent(
             """
             Whether to create the assignment at runtime if it does not

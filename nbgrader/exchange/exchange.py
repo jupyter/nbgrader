@@ -11,16 +11,25 @@ from traitlets.config import LoggingConfigurable
 from traitlets import Unicode, Bool, Instance, Type, default, validate
 from jupyter_core.paths import jupyter_data_dir
 
-from ..utils import check_directory
+from ..utils import check_directory, ignore_patterns
 from ..coursedir import CourseDirectory
 from ..auth import Authenticator
-
 
 class ExchangeError(Exception):
     pass
 
 
 class Exchange(LoggingConfigurable):
+
+    assignment_dir = Unicode(
+        ".",
+        help=dedent(
+            """
+            Local path for storing student assignments.  Defaults to '.'
+            which is normally Jupyter's notebook_dir.
+            """
+        )
+    ).tag(config=True)
 
     timezone = Unicode(
         "UTC",
@@ -104,9 +113,18 @@ class Exchange(LoggingConfigurable):
         """Actually do the file transfer."""
         raise NotImplementedError
 
-    def do_copy(self, src, dest):
-        """Copy the src dir to the dest dir omitting the self.coursedir.ignore globs."""
-        shutil.copytree(src, dest, ignore=shutil.ignore_patterns(*self.coursedir.ignore))
+    def do_copy(self, src, dest, log=None):
+        """
+        Copy the src dir to the dest dir, omitting excluded
+        file/directories, non included files, and too large files, as
+        specified by the options coursedir.ignore, coursedir.include
+        and coursedir.max_file_size.
+        """
+        shutil.copytree(src, dest,
+                        ignore=ignore_patterns(exclude=self.coursedir.ignore,
+                                               include=self.coursedir.include,
+                                               max_file_size=self.coursedir.max_file_size,
+                                               log=self.log))
 
     def start(self):
         if sys.platform == 'win32':

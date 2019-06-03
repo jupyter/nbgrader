@@ -369,6 +369,20 @@ define([
         }
     };
 
+    var is_invalid = function (cell) {
+        if (is_task(cell)) {
+            return false;
+        } else if (is_solution(cell) && is_grade(cell)) {
+            return false;
+        } else if (is_solution(cell) && cell.cell_type !== "code") {
+            return true;
+        } else if (is_grade(cell) && cell.cell_type !== "code") {
+            return true;
+        } else {
+            return false;
+        }
+    };
+
     /**
      * Add a display class to the cell element, depending on the
      * nbgrader cell type.
@@ -384,7 +398,7 @@ define([
                 cell.element.addClass(nbgrader_cls);
             }
         }
-        
+
         if (is_task(cell) ){
           if (cell.element && !cell.element.hasClass("nbgrader_task")) {
                 cell.element.addClass("nbgrader_task");
@@ -406,6 +420,16 @@ define([
             }, 100);
 
         } else {
+
+            if (is_invalid(cell)) {
+                set_schema_version(cell);
+                set_solution(cell, false);
+                set_grade(cell, false);
+                set_locked(cell, false);
+                set_task(cell, false);
+                celltoolbar.rebuild();
+                return;
+            }
 
             var options_list = [];
             options_list.push(["-", ""]);
@@ -499,6 +523,9 @@ define([
         if (!is_grade(cell) && !is_solution(cell) && !is_locked(cell)) {
             return;
         }
+        if (is_invalid(cell)) {
+            return;
+        }
 
         var local_div = $('<div/>');
         var text = $('<input/>').attr('type', 'text');
@@ -523,7 +550,7 @@ define([
      * is worth.
      */
     var create_points_input = function (div, cell, celltoolbar) {
-        if (!is_graded(cell)) {
+        if (!is_graded(cell) || is_invalid(cell)) {
             return;
         }
 

@@ -9,6 +9,7 @@ import stat
 import logging
 import traceback
 import contextlib
+import fnmatch
 
 from setuptools.archive_util import unpack_archive
 from setuptools.archive_util import unpack_tarfile
@@ -213,6 +214,58 @@ def is_ignored(filename, ignore_globs=None):
         if filename in globs:
             return True
     return False
+
+def ignore_patterns(exclude=None, include=None, max_file_size=None, log=None):
+    """
+    Function that can be used as :func:`shutils.copytree` ignore parameter.
+
+    This is a generalization of :func:`shutils.ignore_patterns` that supports
+    include globs, exclude globs, max file size, and logging.
+
+    Arguments
+    ---------
+    exclude: list or None
+        A list of filename globs or None (the default)
+    include: list or None
+        A list of filename globs or None (the default)
+    max_file_size: int or float
+        The max file size, in kilobytes
+    log: logging.Logger or None (the default)
+
+    Returns
+    -------
+
+    A function taking a directory name and list of file/directory
+    names and returning the list of file/directory names to be
+    ignored.
+
+    A file/directory is ignored as soon as it is either excluded, or
+    not included explicitely, or too large.
+
+    If a logger is provided, a warning is logged for files too large
+    and a debug message for otherwise ignored files.
+    """
+    def ignore_patterns(directory, filelist):
+        ignored = []
+        for filename in filelist:
+            rationale = None
+            fullname = os.path.join(directory, filename)
+            if exclude and any(fnmatch.fnmatch(filename, glob) for glob in exclude):
+                if log:
+                    log.debug("Ignoring excluded file '{}' (see config option CourseDirectory.ignore)".format(fullname))
+                ignored.append(filename)
+            else:
+                if os.path.isfile(fullname):
+                    if include and not any(fnmatch.fnmatch(filename, glob) for glob in include):
+                        if log:
+                            log.debug("Ignoring non included file '{}' (see config option CourseDirectory.include)".format(fullname))
+                        ignored.append(filename)
+                    elif max_file_size and os.path.getsize(fullname) > 1000*max_file_size:
+                        if log:
+                            log.warning("Ignoring file too large '{}' (see config option CourseDirectory.max_file_size)".format(fullname))
+                        ignored.append(filename)
+        return ignored
+    return ignore_patterns
 
 
 def find_all_files(path, exclude=None):

@@ -24,7 +24,7 @@ class TestNbGraderAutograde(BaseTestApp):
         run_nbgrader(["autograde", "--help-all"])
 
     def test_missing_student(self, db, course_dir):
-        """Is an error thrown when the student is missing?"""
+        """Is a missing student automatically created?"""
         with open("nbgrader_config.py", "a") as fh:
             fh.write("""c.CourseDirectory.db_assignments = [dict(name='ps1', duedate='2015-02-02 14:58:23.948203 America/Los_Angeles')]\n""")
             fh.write("""c.CourseDirectory.db_students = [dict(id="foo"), dict(id="bar")]""")
@@ -33,10 +33,12 @@ class TestNbGraderAutograde(BaseTestApp):
         run_nbgrader(["assign", "ps1", "--db", db])
 
         self._copy_file(join("files", "submitted-changed.ipynb"), join(course_dir, "submitted", "baz", "ps1", "p1.ipynb"))
-        run_nbgrader(["autograde", "ps1", "--db", db], retcode=1)
 
-        # check that --create works
-        run_nbgrader(["autograde", "ps1", "--db", db, "--create"])
+        # If we explicitly disable creating students, autograde should fail
+        run_nbgrader(["autograde", "ps1", "--db", db, "--Autograde.create_student=False"], retcode=1)
+
+        # The default is now to create missing students (formerly --create)
+        run_nbgrader(["autograde", "ps1", "--db", db])
 
     def test_missing_assignment(self, db, course_dir):
         """Is an error thrown when the assignment is missing?"""

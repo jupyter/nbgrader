@@ -37,8 +37,9 @@ flags.update({
     ),
     'create': (
         {'Assign': {'create_assignment': True}},
-        "Create an entry for the assignment in the database, if one does not already exist."
-    ),  
+        "Deprecated: Create an entry for the assignment in the database, if one does not already exist. "
+        "This is now the default."
+    ),
     'force': (
         {'BaseConverter': {'force': True}},
         "Overwrite an assignment/submission if it already exists."
@@ -84,9 +85,8 @@ class AssignApp(NbGrader):
                were modified by the student (you can prevent this by passing the
                --no-db flag).
 
-               Additionally, the assignment must already be present in the
-               database. To create it while running `nbgrader assign` if it
-               doesn't already exist, pass the --create flag.
+               If the assignment is not already present in the database, it
+               will be automatically created when running `nbgrader assign`.
 
         `nbgrader assign` takes one argument (the name of the assignment), and
         looks for notebooks in the 'source' directory by default, according to
