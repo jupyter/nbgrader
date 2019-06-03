@@ -68,8 +68,36 @@ If you have multiple graders, then you can set up a `shared notebook server
 as a JupyterHub service. I recommend creating a separate grader account (such
 as ``grader-course101``) for this server to have access to. Then, install and
 enable the formgrader and Create Assignment extensions for this grader account
-(see :doc:`/user_guide/installation`). Your JupyterHub config would then look
-something like this:
+(see :doc:`/user_guide/installation`). 
+
+This table should clarify where to enable which extension when you have separate services for the formgraders.
+
+.. list-table::
+   :widths: 33 33 33 33
+   :header-rows: 1
+
+   * - 
+     - Students
+     - Instructors
+     - Formgraders
+   * - Create Assignment
+     - no
+     - no
+     - yes
+   * - Assignment List
+     - yes
+     - yes
+     - no
+   * - Formgrader
+     - no
+     - no
+     - yes
+   * - Course List
+     - no
+     - yes
+     - no
+
+Your JupyterHub should look something like this:
 
 .. code:: python
 
@@ -206,7 +234,7 @@ JupyterHub Authentication
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 .. versionadded:: 0.6.0
 
-With the advent of JupyterHubAuthPlugin students who don't have a specified course_id won't see all courses anymore, just the ones they have been added to. 
+With the advent of JupyterHubAuthPlugin students who don't have a specified course_id won't see all courses anymore, just the ones they have been added to. That means you can ommit the ``course_id`` from the students ``nbgrader_config.py``
 
 Requirements for using ``JupyterHubAuthPlugin``: 
 
