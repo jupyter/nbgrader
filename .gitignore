@@ -112,3 +112,6 @@ package-lock.json
 .goutputstream*
 
 
+fakecoursedir/
+venv2/
+testcourse/

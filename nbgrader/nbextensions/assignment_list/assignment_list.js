@@ -272,17 +272,24 @@ define([
 	    // Pre-process to see for each assignment, do any of them have
 	    // feedback to fetch:
 	    var assignment_has_feedback = {};
-            for (var i = 0; i < submissions.length; i++) {
-		var data = submissions[i];
-		if (data.hasFeedback) {
-		    assignment_has_feedback[data.assignment_id] = true;
-		}
+	    var assignment_feedback_to_fetch = {};
+        for (var i = 0; i < submissions.length; i++) {
+		    var data = submissions[i];
+		    if (data.hasFeedback) {
+		        assignment_has_feedback[data.assignment_id] = true;
+            }
+		    if (!data.allFeedbackDownloaded) {
+                console.log(data);
+                assignment_feedback_to_fetch[data.assignment_id] = true;
+            }
+            
 	    }
 	    var group = null;
 	    var element;
             this.submitted_element.empty();
             this.submitted_element.children('.list_placeholder').hide();
-	    console.log(submissions);
+            console.log(submissions);
+            console.log(assignment_feedback_to_fetch);
             for (var i = 0; i < submissions.length; i++) {
 		var data = submissions[i];
 		if (group !== data.assignment_id) {
@@ -290,7 +297,7 @@ define([
 		    var header = $('<div/>').addClass('col-md-12');
 		    header.append(data.link);
 		    header.append($('<span/>').addClass('item_course col-sm-2').text(data.course_id));
-		    if (assignment_has_feedback[data.assignment_id]) {
+		    if (assignment_has_feedback[data.assignment_id] && assignment_feedback_to_fetch[data.assignment_id]) {
 			header.append(data.button);
 		    }
 		    element = $('<div/>').addClass('list_item').addClass("row");
@@ -430,6 +437,7 @@ define([
 	    this.submissions.push({
 		localFeedbackPathDir: localFeedbackPathDir,
 		hasLocalFeedback: hasLocalFeedback,
+		allFeedbackDownloaded: this.data.allFeedbackDownloaded,
 		hasFeedback: this.data.hasFeedback,
 		course_id: this.data.course_id,
 		assignment_id: this.data.assignment_id,

@@ -80,6 +80,7 @@ class ExchangeList(Exchange):
 
             info['notebooks'] = []
             hasFeedback = False
+            allFeedbackDownloaded = True
             for notebook in sorted(glob.glob(os.path.join(info['path'], '*.ipynb'))):
                 nbInfo = {
                     'notebook_id': os.path.splitext(os.path.split(notebook)[1])[0],
@@ -100,15 +101,19 @@ class ExchangeList(Exchange):
                     hasLocalFeedback = os.path.isfile(localFeedbackPath)
                     # could check for new version here
                     nbInfo['hasLocalFeedback'] = hasLocalFeedback 
-                    if os.path.exists(feedbackpath):
+                    feedbackAvailable = os.path.exists(feedbackpath)
+                    if feedbackAvailable:
                         nbInfo['feedbackPath'] = feedbackpath 
                         hasFeedback = True
                     if hasLocalFeedback:
                         nbInfo['localFeedbackPath'] = localFeedbackPath
-                
+                    if feedbackAvailable and not hasLocalFeedback:
+                        allFeedbackDownloaded = False
+
                 info['notebooks'].append(nbInfo)
             
             info['hasFeedback'] = hasFeedback
+            info['allFeedbackDownloaded'] = allFeedbackDownloaded
             assignments.append(info)
 
         return assignments
