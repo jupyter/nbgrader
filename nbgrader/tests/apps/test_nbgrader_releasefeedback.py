@@ -5,6 +5,7 @@ from os.path import join, exists, isfile
 from ...utils import remove, notebook_hash
 from .. import run_nbgrader
 from .base import BaseTestApp
+from .conftest import notwindows
 
 
 class TestNbGraderReleaseFeedback(BaseTestApp):
@@ -13,6 +14,7 @@ class TestNbGraderReleaseFeedback(BaseTestApp):
         """Does the help display without error?"""
         run_nbgrader(["release_feedback", "--help-all"])
 
+    @notwindows
     def test_single_file(self, db, course_dir, exchange):
         """Can feedback be generated for an unchanged assignment?"""
         with open("nbgrader_config.py", "a") as fh:
@@ -26,13 +28,13 @@ class TestNbGraderReleaseFeedback(BaseTestApp):
         
         run_nbgrader(["autograde", "ps1", "--db", db])
         run_nbgrader(["feedback", "ps1", "--db", db])
-        run_nbgrader(["release_feedback", "ps1",  "--Exchange.root={}".format(exchange), '--course', 'abc101'])
+        run_nbgrader(["release_feedback", "ps1", "--Exchange.root={}".format(exchange), '--course', 'abc101'])
         nb_hash = notebook_hash(nb_path)
         assert exists(join(exchange, "abc101", "feedback", "{}.html".format(nb_hash)))
         # release feedback shoul overwrite without error
-        run_nbgrader(["release_feedback", "ps1",  "--Exchange.root={}".format(exchange), '--course', 'abc101'])
+        run_nbgrader(["release_feedback", "ps1", "--Exchange.root={}".format(exchange), '--course', 'abc101'])
         
-
+    @notwindows
     def test_permissions(self, db, course_dir, exchange):
         """Are permissions properly set?"""
         with open("nbgrader_config.py", "a") as fh:
@@ -47,13 +49,9 @@ class TestNbGraderReleaseFeedback(BaseTestApp):
         self._empty_notebook(join(course_dir, "submitted", "foo", "ps1", "foo.ipynb"))
         run_nbgrader(["autograde", "ps1", "--db", db])
         run_nbgrader(["feedback", "ps1", "--db", db])
-        run_nbgrader(["release_feedback", "ps1",  "--Exchange.root={}".format(exchange), '--course', 'abc101'])
+        run_nbgrader(["release_feedback", "ps1", "--Exchange.root={}".format(exchange), '--course', 'abc101'])
 
-        if sys.platform == 'win32':
-            perms = '711'  # not sure what it should be ....
-        else:
-            perms = '711'
+        perms = '711'
 
         feedback_dir = join(exchange, "abc101", "feedback")
         assert self._get_permissions(feedback_dir) == perms
-

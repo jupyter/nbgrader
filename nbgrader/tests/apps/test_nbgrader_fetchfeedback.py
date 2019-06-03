@@ -5,6 +5,7 @@ from os.path import join, exists, isfile
 from ...utils import remove, notebook_hash
 from .. import run_nbgrader
 from .base import BaseTestApp
+from .conftest import notwindows
 
 
 class TestNbGraderFetchFeedback(BaseTestApp):
@@ -12,7 +13,6 @@ class TestNbGraderFetchFeedback(BaseTestApp):
     def _assign(self, assignment, course_dir, db, course="abc101"):
         run_nbgrader([
             "assign", assignment,
-            #"--course", course,
             "--db", db
         ])
 
@@ -66,32 +66,28 @@ class TestNbGraderFetchFeedback(BaseTestApp):
 
         run_nbgrader(cmd, retcode=retcode)
     
+    @notwindows
     def test_help(self):
         """Does the help display without error?"""
         run_nbgrader(["fetch_feedback", "--help-all"])
 
+    @notwindows
     def test_single_file(self, db, course_dir, exchange, cache):
         self._copy_file(join("files", "test.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
         self._copy_file(join("files", "test.ipynb"), join(course_dir, "source", "ps1", "p2.ipynb"))
         with open("nbgrader_config.py", "a") as fh:
             fh.write("""c.CourseDirectory.db_assignments = [dict(name="ps1")]\n""")
-        #    fh.write("""c.CourseDirectory.db_students = [dict(id="foo")]\n""")
         self._assign("ps1", course_dir, db)
         self._release_and_fetch("ps1", exchange, cache, course_dir)
         self._submit("ps1", exchange, cache)
         self._collect("ps1", exchange)
-        #self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
-        #run_nbgrader(["assign", "ps1", "--db", db])
-        #nb_path = join(course_dir, "submitted", "foo", "ps1", "p1.ipynb")
-        #self._copy_file(join("files", "submitted-unchanged.ipynb"), nb_path)
-        run_nbgrader(["autograde", "ps1", "--create","--db", db])
+        run_nbgrader(["autograde", "ps1", "--create", "--db", db])
         run_nbgrader(["feedback", "ps1", "--db", db])
-        run_nbgrader(["release_feedback", "ps1",  "--Exchange.root={}".format(exchange), '--course', 'abc101'])
-        run_nbgrader(["fetch_feedback", "ps1",  "--Exchange.root={}".format(exchange), '--course', 'abc101'])
+        run_nbgrader(["release_feedback", "ps1", "--Exchange.root={}".format(exchange), '--course', 'abc101'])
+        run_nbgrader(["fetch_feedback", "ps1", "--Exchange.root={}".format(exchange), '--course', 'abc101'])
         assert os.path.isdir(join("ps1", "feedback"))
         username = os.environ["USER"]
-        timestamp = open(join(course_dir, "submitted", username , "ps1", "timestamp.txt")).read()
+        timestamp = open(join(course_dir, "submitted", username, "ps1", "timestamp.txt")).read()
         assert os.path.isdir(join("ps1", "feedback", timestamp))
         assert os.path.isfile(join("ps1", "feedback", timestamp, 'p1.html'))
         assert os.path.isfile(join("ps1", "feedback", timestamp, 'p1.html'))
-        
