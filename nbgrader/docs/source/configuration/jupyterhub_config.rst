@@ -70,7 +70,7 @@ as ``grader-course101``) for this server to have access to. Then, install and
 enable the formgrader and Create Assignment extensions for this grader account
 (see :doc:`/user_guide/installation`). 
 
-This table should clarify where to enable which extension when you have separate services for the formgraders.
+This table should clarify which extension to enable when you have separate services for the formgraders.
 
 .. list-table::
    :widths: 33 33 33 33
