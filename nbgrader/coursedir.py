@@ -206,6 +206,13 @@ class CourseDirectory(LoggingConfigurable):
     def _root_default(self):
         return os.getcwd()
 
+    @validate('root')
+    def _validate_root(self, proposal):
+        path = os.path.abspath(proposal['value'])
+        if path != proposal['value']:
+            self.log.warning("root '%s' is not absolute, standardizing it to '%s", proposal['value'], path)
+        return path
+
     ignore = List(
         [
             ".ipynb_checkpoints",

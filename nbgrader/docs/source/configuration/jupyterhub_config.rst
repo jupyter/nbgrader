@@ -9,8 +9,8 @@ Using nbgrader with JupyterHub
     :doc:`/user_guide/managing_assignment_files`
         Documentation for ``nbgrader release``, ``nbgrader fetch``, ``nbgrader submit``, and ``nbgrader collect``.
 
-    :doc:`config_options`
-        Details on ``nbgrader_config.py``
+    :doc:`nbgrader_config`
+        Details on how to setup the ``nbgrader_config.py`` file.
 
     :doc:`/user_guide/philosophy`
         More details on how the nbgrader hierarchy is structured.

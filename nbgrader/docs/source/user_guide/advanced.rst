@@ -121,3 +121,74 @@ Calling nbgrader apps from Python
 .. versionadded:: 0.5.0
     Much of nbgrader's high level functionality can now be accessed through
     an official :doc:`Python API </api/high_level_api>`.
+
+Grading in a docker container
+-----------------------------
+
+For security reasons, it may be advantageous to do the grading with a kernel
+running in isolation, e.g. in a docker container. We will assume that
+docker is already installed and an appropriate image has been downloaded.
+Otherwise, refer to the `docker documentation <https://docs.docker.com>`_
+for information on how to install and run docker.
+
+A convenient way to switch to a kernel running in a docker container is
+provided by ``envkernel`` which serves a double purpose. In a first step,
+it is writing a new kernelspec file. Later it ensures that the docker
+container is run and the kernel started.
+
+Presently, ``envkernel`` is only available from its `Github repository
+<https://github.com/NordicHPC/envkernel>`_ and can be installed directly
+from there into a virtual environment
+
+.. code:: bash
+
+    pip install https://github.com/NordicHPC/envkernel/archive/master.zip
+
+As an alternative, the script ``envkernel.py`` can be put in a different
+location, e.g. ``/opt/envkernel``, as long as it is accessible there also
+later during grading.
+
+Now, a new kernel can be installed by means of
+
+.. code:: bash
+
+    ./envkernel.py docker --name=NAME --display-name=DNAME DOCKER-IMAGE
+
+Here, ``NAME`` should be replaced by the name to be given to the kernel.
+After installation of the kernel, it will be displayed in the list of
+kernels when executing ``jupyter kernelspec list``.  ``DNAME`` should be
+replaced by the name under which the kernel shall be known in the Jupyter
+notebook GUI. After installation of the kernel, this name will be listed as
+a possible kernel when starting a new notebook. Finally, ``DOCKER-IMAGE``
+should be replaced by the name of the docker image in which the kernel is
+to be run, e.g. ``python:3``, ``continuumio/anaconda3``, or some other
+suitable image.
+
+The command given above will install the kernel in the system-wide location
+for Jupyter data files. If installation in the corresponding user directory
+is desired, the option ``--user`` should be added before the name of the
+docker image. By default, ``envkernel`` will install a Python kernel. For
+the installation of other kernels, see the `README
+<https://github.com/NordicHPC/envkernel/blob/master/README.md>`_ of
+``envkernel``.
+
+In order to run the grading process with the new kernel, one can specify
+its name in ``nbgrader_config.py``
+
+.. code:: python
+
+    c.ExecutePreprocessor.kernel_name = NAME
+
+where ``NAME`` should be replaced by the name chosen when running the
+``envkernel`` script. Alternatively, the name can be specified when running
+nbgrader from the command line
+
+.. code:: bash
+
+    nbgrader autograde --ExecutePreprocessor.kernel_name=NAME ASSIGNMENT_NAME
+
+In addition to docker, ``envkernel`` also supports singularity as a
+containerization system. For details on using ``envkernel`` with
+singularity, see the `README
+<https://github.com/NordicHPC/envkernel/blob/master/README.md>`_ of
+``envkernel``.
