@@ -57,8 +57,6 @@ class ExchangeFetchFeedback(Exchange):
             newName = noExt + '.html'
             htmlFile = os.path.join(destWithTimestamp, newName)
             shutil.copy(feedbackpath, htmlFile)
-        #else:
-        #    shutil.copytree(src, dest, ignore=shutil.ignore_patterns(*self.coursedir.ignore))
 
     def copy_files(self):
         self.log.info("Source: {}".format(self.src_path))
