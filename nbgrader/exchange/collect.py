@@ -1,13 +1,21 @@
 import os
 import glob
 import shutil
+import sys
 from collections import defaultdict
+from textwrap import dedent
 
 from traitlets import Bool
 
 from .exchange import Exchange
 from ..utils import check_mode, parse_utc
 
+# pwd is for matching unix names with student ide, so we shouldn't import it on
+# windows machines
+if sys.platform != 'win32':
+    import pwd
+else:
+    pwd = None
 
 def groupby(l, key=lambda x: x):
     d = defaultdict(list)
@@ -21,6 +29,11 @@ class ExchangeCollect(Exchange):
     update = Bool(
         False,
         help="Update existing submissions with ones that have newer timestamps."
+    ).tag(config=True)
+
+    check_owner = Bool(
+        default_value=True,
+        help="Whether to cross-check the student_id with the UNIX-owner of the submitted directory."
     ).tag(config=True)
 
     def _path_to_record(self, path):
@@ -69,6 +82,20 @@ class ExchangeCollect(Exchange):
         for rec in self.src_records:
             student_id = rec['username']
             src_path = os.path.join(self.inbound_path, rec['filename'])
+
+            # Cross check the student id with the owner of the submitted directory
+            if self.check_owner and pwd is not None: # check disabled under windows
+                try:
+                    owner = pwd.getpwuid(os.stat(src_path).st_uid).pw_name
+                except KeyError:
+                    owner = "unknown id"
+                if student_id != owner:
+                    self.log.warning(dedent(
+                        """
+                        {} claims to be submitted by {} but is owned by {}; cheating attempt?
+                        you may disable this warning by unsetting the option CollectApp.check_owner
+                        """).format(src_path, student_id, owner))
+
             dest_path = self.coursedir.format_path(self.coursedir.submitted_directory, student_id, self.coursedir.assignment_id)
             if not os.path.exists(os.path.dirname(dest_path)):
                 os.makedirs(os.path.dirname(dest_path))
