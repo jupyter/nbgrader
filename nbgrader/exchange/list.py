@@ -105,7 +105,8 @@ class ExchangeList(Exchange):
                         hasFeedback = True
                     if hasLocalFeedback:
                         nbInfo['localFeedbackPath'] = localFeedbackPath
-                    info['notebooks'].append(nbInfo)
+                
+                info['notebooks'].append(nbInfo)
             
             info['hasFeedback'] = hasFeedback
             assignments.append(info)

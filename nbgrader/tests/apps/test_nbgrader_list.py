@@ -9,6 +9,7 @@ from .conftest import notwindows
 
 from ...utils import get_username
 
+
 @notwindows
 class TestNbGraderList(BaseTestApp):
 
