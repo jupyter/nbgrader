@@ -282,6 +282,7 @@ define([
 	    var element;
             this.submitted_element.empty();
             this.submitted_element.children('.list_placeholder').hide();
+	    console.log(submissions);
             for (var i = 0; i < submissions.length; i++) {
 		var data = submissions[i];
 		if (group !== data.assignment_id) {
@@ -301,9 +302,15 @@ define([
 		group = data.assignment_id;
 		row.append($('<span/>').addClass('item_course col-sm-8').text(""));
 		if (data.hasLocalFeedback) {
-		    row.append($('<span/>').addClass('item_course col-sm-1').text("view"));
+		    var link = $('<a/>');
+		    var url = data.localFeedbackPathDir;
+		    var link = $('<a/>')
+			.attr("href", url)
+			.attr("target", "_blank")
+			.text("view");
+		    row.append($('<span/>').addClass('item_course col-sm-1').append(link));
 		} else if (data.hasFeedback) {
-		    row.append($('<span/>').addClass('item_course col-sm-1').text("available"));
+		    row.append($('<span/>').addClass('item_course col-sm-1').text("ready to fetch"));
 		} else {
 		    row.append($('<span/>').addClass('item_course col-sm-1').text(""));
 		}
@@ -400,9 +407,20 @@ define([
 	    // Do any of the notebooks for this submission have
 	    // local feedback? If, yes, then we can view them.
 	    var hasLocalFeedback = false;
+	    var localFeedbackPathDir = "";
 	    for (var i = 0; i < this.data.notebooks.length; i++) {
 		if (this.data.notebooks[i].hasLocalFeedback) {
 		    hasLocalFeedback = true;
+		    // Get the path of the feedback:
+		    localFeedbackPathDir = this.data.notebooks[i].localFeedbackPath;
+		    // Get the directory of the feedback:
+		    localFeedbackPathDir = localFeedbackPathDir.substring(0, localFeedbackPathDir.lastIndexOf("/"));
+		    // Get a URL to local feedback dir:
+		    localFeedbackPathDir = utils.url_path_join(
+			this.base_url,
+			'tree',
+			localFeedbackPathDir,
+		    );
 		}
 	    }
 	    var button = null;
@@ -410,6 +428,7 @@ define([
 		button = this.make_feedback_button();
 	    }
 	    this.submissions.push({
+		localFeedbackPathDir: localFeedbackPathDir,
 		hasLocalFeedback: hasLocalFeedback,
 		hasFeedback: this.data.hasFeedback,
 		course_id: this.data.course_id,
