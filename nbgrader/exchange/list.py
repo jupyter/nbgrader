@@ -85,20 +85,27 @@ class ExchangeList(Exchange):
                     'notebook_id': os.path.splitext(os.path.split(notebook)[1])[0],
                     'path': os.path.abspath(notebook)
                 }
-                nb_hash = notebook_hash(notebook)
-                _, notebookFilename = os.path.split(notebook)
-                notebookName, _ = os.path.splitext(notebookFilename)
-                feedbackpath = os.path.join(self.root, info['course_id'], 'feedback', '{0}.html'.format(nb_hash))  
-                localFeedbackpath = os.path.join(self.coursedir.root, info['course_id'], 'feedback', '{0}.html'.format(notebookName))  
-                hasLocalFeedback = os.path.isfile(localFeedbackpath)
-                # could check for new version here
-                nbInfo['hasLocalFeedback'] = hasLocalFeedback 
-                if os.path.exists(feedbackpath):
-                    nbInfo['feedbackPath'] = feedbackpath 
-                    hasFeedback = True
-                if hasLocalFeedback:
-                    nbInfo['localFeedbackPath'] = localFeedbackpath
-                info['notebooks'].append(nbInfo)
+                if info['status'] == 'submitted':
+                    nb_hash = notebook_hash(notebook)
+                    notebookDir, notebookFilename = os.path.split(notebook)
+                    notebookName, _ = os.path.splitext(notebookFilename)       
+                    feedbackpath = os.path.join(self.root, info['course_id'], 'feedback', '{0}.html'.format(nb_hash))  
+                    # notebookDir should have the course_did in it if we have multiple courses ...
+                    if self.path_includes_course:
+                        nbdir = os.path.join(info['course_id'], info['assignment_id'])
+                    else:
+                        nbdir = os.path.join(info['assignment_id'])
+                    self.dest_path = os.path.abspath(os.path.join('.', root))
+                    localFeedbackPath = os.path.join(nbdir, 'feedback', info['timestamp'], '{0}.html'.format(notebookName))  
+                    hasLocalFeedback = os.path.isfile(localFeedbackPath)
+                    # could check for new version here
+                    nbInfo['hasLocalFeedback'] = hasLocalFeedback 
+                    if os.path.exists(feedbackpath):
+                        nbInfo['feedbackPath'] = feedbackpath 
+                        hasFeedback = True
+                    if hasLocalFeedback:
+                        nbInfo['localFeedbackPath'] = localFeedbackPath
+                    info['notebooks'].append(nbInfo)
             
             info['hasFeedback'] = hasFeedback
             assignments.append(info)
