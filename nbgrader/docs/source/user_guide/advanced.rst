@@ -122,6 +122,8 @@ Calling nbgrader apps from Python
     Much of nbgrader's high level functionality can now be accessed through
     an official :doc:`Python API </api/high_level_api>`.
 
+.. _grading-in-docker:
+
 Grading in a docker container
 -----------------------------
 

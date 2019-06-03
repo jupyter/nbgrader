@@ -66,6 +66,13 @@ a file at ``/home/instructor/.jupyter/nbgrader_config.py`` with contents like:
     c = get_config()
     c.CourseDirectory.root = '/home/instructor/course101'
 
+The following figure describes the relationship between the instructor account,
+the student accounts, and the formgrader on JupterHub. In particular, note that
+in this case the formgrader is running directly on the instructor's account:
+
+.. image:: images/one_class_one_instructor.png
+
+.. _multiple-graders:
 
 Example Use Case: One Class, Multiple Graders
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -73,11 +80,16 @@ Example Use Case: One Class, Multiple Graders
 If you have multiple graders, then you can set up a `shared notebook server
 <https://github.com/jupyterhub/jupyterhub/tree/master/examples/service-notebook>`_
 as a JupyterHub service. I recommend creating a separate grader account (such
-as ``grader-course101``) for this server to have access to. Then, install and
-enable the formgrader and Create Assignment extensions for this grader account
-(see :doc:`/user_guide/installation`). 
+as ``grader-course101``) for this server to have access to.
 
-This table should clarify which extension to enable when you have separate services for the formgraders.
+The following figure describes the relationship between the instructor
+accounts, the student accounts, and the formgrader on JupterHub. In particular,
+note that in this case the formgrader is running as a separate service, which each instructor then has access to:
+
+.. image:: images/one_class_multiple_instructors.png
+
+You will additionally need to install and enable the various nbgrader extensions for different accounts (see
+:doc:`/user_guide/installation`). This table should clarify which extension to enable when you have separate services for the formgraders.
 
 .. list-table::
    :widths: 33 33 33 33
@@ -148,20 +160,26 @@ Similarly to the use case with just a single grader, there needs to then be a ``
     c = get_config()
     c.CourseDirectory.root = '/home/grader-course101/course101'
 
+
 Example Use Case: Multiple Classes
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-
-No Authentication
-^^^^^^^^^^^^^^^^^
 
 As in the case of multiple graders for a single class, if you have multiple
 classes on the same JupyterHub instance, then you will need to create multiple
 services (one for each course) and corresponding accounts for each service
 (with the nbgrader extensions enabled, see :doc:`/user_guide/installation`).
 For example, you could have users ``grader-course101`` and
-``grader-course123``. Your JupyterHub config would then look something like
-this:
+``grader-course123`` which access services called ``course101`` and ``course123``, respectively.
+
+The following figure describes the relationship between the instructor accounts
+and the formgraders on JupterHub (student accounts are not shown, but are the
+same as in :ref:`multiple-graders`). In particular, note that in
+this case each formgrader is running as a separate service, which some
+combination of instructors then have access to:
+
+.. image:: images/multiple_classes.png
+
+To configure such a setup, your JupyterHub config should look something like this:
 
 .. code:: python
 
@@ -235,15 +253,18 @@ custom ``nbgrader_config.py`` that will cause nbgrader to look for assignments
 in a subdirectory corresponding to the course name. See :ref:`multiple-classes`
 for details.
 
+Finally, you will need to enable and disable different combinations of the nbgrader extensions for different accounts. See the table in :ref:`multiple-graders` for details.
 
+.. _jupyterhub-auth:
 
 JupyterHub Authentication
 ^^^^^^^^^^^^^^^^^^^^^^^^^
+
 .. versionadded:: 0.6.0
 
 With the advent of JupyterHubAuthPlugin students who don't have a specified course_id won't see all courses anymore, just the ones they have been added to. That means you can ommit the ``course_id`` from the students ``nbgrader_config.py``
 
-Requirements for using ``JupyterHubAuthPlugin``: 
+Requirements for using ``JupyterHubAuthPlugin``:
 
 * Jupyterhub > 0.8
 * Activating the JupyterHubAuthPlugin requires you to add it as an authentication plugin class into the ``nbgrader_config.py`` for both the formgrader services and instructor accounts.
@@ -253,11 +274,10 @@ Requirements for using ``JupyterHubAuthPlugin``:
     from nbgrader.auth import JupyterHubAuthPlugin
     c = get_config()
     c.Authenticator.plugin_class = JupyterHubAuthPlugin
+
 * To differentiate student from instructor, their groups need to be named ``formgrade-{course_id}`` for instructors and ``nbgrader-{course_id}`` for students.
 * The course service needs to have an api_token set that is from a jupyterhub admin see: Creating an `api token <https://jupyterhub.readthedocs.io/en/stable/reference/rest.html#create-an-api-token>`_
 * The service user also needs to be added to the formgrade group (see the jupyterhub_config example below)
-
-
 
 As in the case of multiple graders for a single class, if you have multiple
 classes on the same JupyterHub instance, then you will need to create multiple
@@ -348,10 +368,10 @@ and ``/home/grader-course123/.jupyter/nbgrader_config.py`` would be:
     c = get_config()
     c.CourseDirectory.root = '/home/grader-course123/course123'
 
-  
 
 Custom Authentication
 ^^^^^^^^^^^^^^^^^^^^^
+
 .. versionadded:: 0.6.0
 
 To make your own custom authentication such as through an LTI you could start by making a method that inherits the Authenticator class, which is a plugin for different authentication methods.
@@ -367,8 +387,8 @@ There are now four authentication classes:
 * ``Authenticator``: Configurable for different plugins.
 
 
-
-**BaseAuthPlugin methods to override for custom authentication**        
+API
+---
 
 .. currentmodule:: nbgrader.auth
 
