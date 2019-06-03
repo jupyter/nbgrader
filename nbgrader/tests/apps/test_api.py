@@ -683,6 +683,7 @@ class TestNbGraderAPI(BaseTestApp):
         assert "Updating submission" in result["log"]
         assert os.path.exists(join(course_dir, "submitted", username, "ps1", "p1.ipynb"))
 
+    @notwindows
     def test_autograde(self, api, course_dir, db):
         self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
         api.assign("ps1")
@@ -719,6 +720,7 @@ class TestNbGraderAPI(BaseTestApp):
         result = api.generate_feedback("ps2", "foo")
         assert result["success"]
 
+    @notwindows
     def test_release_feedback(self, api, course_dir, db, exchange):
         self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
         api.assign("ps1")
@@ -741,6 +743,7 @@ class TestNbGraderAPI(BaseTestApp):
         assert result["success"]
         assert os.path.exists(join(exchange, "abc101", "feedback", "a7efd7718119cc393418ad9a185b5b3b.html"))
 
+    @notwindows
     def test_fetch_feedback(self, api, course_dir, db, exchange):
         self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
         api.assign("ps1")
