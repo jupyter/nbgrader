@@ -269,27 +269,10 @@ define([
 		// Sort by assignment_id, timestamp:
 		return compare(a, b, "assignment_id", -1) || compare(a, b, "timestamp", 1);
 	    });
-	    // Pre-process to see for each assignment, do any of them have
-	    // feedback to fetch:
-	    var assignment_has_feedback = {};
-	    var assignment_feedback_to_fetch = {};
-        for (var i = 0; i < submissions.length; i++) {
-		    var data = submissions[i];
-		    if (data.hasFeedback) {
-		        assignment_has_feedback[data.assignment_id] = true;
-            }
-		    if (!data.allFeedbackDownloaded) {
-                console.log(data);
-                assignment_feedback_to_fetch[data.assignment_id] = true;
-            }
-            
-	    }
 	    var group = null;
 	    var element;
             this.submitted_element.empty();
             this.submitted_element.children('.list_placeholder').hide();
-            console.log(submissions);
-            console.log(assignment_feedback_to_fetch);
             for (var i = 0; i < submissions.length; i++) {
 		var data = submissions[i];
 		if (group !== data.assignment_id) {
@@ -297,7 +280,7 @@ define([
 		    var header = $('<div/>').addClass('col-md-12');
 		    header.append(data.link);
 		    header.append($('<span/>').addClass('item_course col-sm-2').text(data.course_id));
-		    if (assignment_has_feedback[data.assignment_id] && assignment_feedback_to_fetch[data.assignment_id]) {
+		    if (data.button != null) {
 			header.append(data.button);
 		    }
 		    element = $('<div/>').addClass('list_item').addClass("row");
@@ -431,7 +414,7 @@ define([
 		}
 	    }
 	    var button = null;
-            if (this.data.hasFeedback) {
+            if (!this.data.allFeedbackDownloaded) {
 		button = this.make_feedback_button();
 	    }
 	    this.submissions.push({

@@ -983,7 +983,7 @@ class NbGraderAPI(LoggingConfigurable):
             return capture_log(app)
 
     def generate_feedback(self, assignment_id, student_id=None):
-        """Run ``nbgrader generate_feedback`` for a particular assignment and student.
+        """Run ``nbgrader feedback`` for a particular assignment and student.
 
         Arguments
         ---------
