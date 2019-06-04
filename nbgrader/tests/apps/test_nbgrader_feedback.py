@@ -277,3 +277,23 @@ class TestNbGraderFeedback(BaseTestApp):
         assert self._file_contents(join(course_dir, "feedback", "foo", "ps1", "timestamp.txt")) == "2015-02-02 16:58:23.948203 America/Los_Angeles"
         assert p1 != self._file_contents(join(course_dir, "feedback", "foo", "ps1", "p1.html"))
         assert p2 == self._file_contents(join(course_dir, "feedback", "foo", "ps1", "p2.html"))
+
+    def test_single_user(self, course_dir):
+        with open("nbgrader_config.py", "a") as fh:
+            fh.write("""c.CourseDirectory.db_assignments = [dict(name="ps1")]\n""")
+            fh.write("""c.CourseDirectory.db_students = [dict(id="foo")]\n""")
+        self._copy_file(join("files", "test.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
+        self._copy_file(join("files", "test.ipynb"), join(course_dir, "source", "ps1", "p2.ipynb"))
+        run_nbgrader(["assign", "ps1"])
+
+        self._copy_file(join("files", "test.ipynb"), join(course_dir, "submitted", "foo", "ps1", "p1.ipynb"))
+        self._copy_file(join("files", "test.ipynb"), join(course_dir, "submitted", "foo", "ps1", "p2.ipynb"))
+        self._copy_file(join("files", "test.ipynb"), join(course_dir, "submitted", "bar", "ps1", "p1.ipynb"))
+        self._copy_file(join("files", "test.ipynb"), join(course_dir, "submitted", "bar", "ps1", "p2.ipynb"))
+        run_nbgrader(["autograde", "ps1"])
+        run_nbgrader(["feedback", "ps1", "--student", "foo"])
+
+        assert exists(join(course_dir, "feedback", "foo", "ps1", "p1.html"))
+        assert exists(join(course_dir, "feedback", "foo", "ps1", "p2.html"))
+        assert not exists(join(course_dir, "feedback", "bar", "ps1", "p1.html"))
+        assert not exists(join(course_dir, "feedback", "bar", "ps1", "p2.html"))
