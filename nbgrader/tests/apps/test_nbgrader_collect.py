@@ -23,13 +23,17 @@ class TestNbGraderCollect(BaseTestApp):
             "--Exchange.root={}".format(exchange)
         ])
 
-    def _submit(self, assignment, exchange, cache):
-        run_nbgrader([
+    def _submit(self, assignment, exchange, cache, flags=None):
+        cmd = [
             "submit", assignment,
             "--course", "abc101",
             "--Exchange.cache={}".format(cache),
             "--Exchange.root={}".format(exchange)
-        ])
+        ]
+
+        if flags is not None:
+            cmd.extend(flags)
+        run_nbgrader(cmd)
 
     def _collect(self, assignment, exchange, flags=None, retcode=0):
         cmd = [
@@ -41,7 +45,7 @@ class TestNbGraderCollect(BaseTestApp):
         if flags is not None:
             cmd.extend(flags)
 
-        run_nbgrader(cmd, retcode=retcode)
+        return run_nbgrader(cmd, retcode=retcode)
 
     def _read_timestamp(self, root):
         with open(os.path.os.path.join(root, "timestamp.txt"), "r") as fh:
@@ -117,3 +121,15 @@ class TestNbGraderCollect(BaseTestApp):
 
         # make sure collect succeeds
         self._collect("ps1", exchange)
+
+    def test_owner_check(self, exchange, course_dir, cache):
+        self._release_and_fetch("ps1", exchange, course_dir)
+        self._submit("ps1", exchange, cache, flags=["--student=foobar_student",])
+
+        # By default, a warning is raised if the student id does not match the directory owner
+        out = self._collect("--assignment=ps1", exchange)
+        assert 'WARNING' in out
+
+        # This warning can be disabled
+        out = self._collect("--assignment=ps1", exchange, flags=["--ExchangeCollect.check_owner=False"])
+        assert 'WARNING' not in out
