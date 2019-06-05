@@ -15,4 +15,4 @@ class AssignApp(GenerateAssignmentApp):
             "generate_assignment` instead. This command will be removed in "
             "a future version of nbgrader.")
         warnings.warn(msg, DeprecationWarning)
-        self.log.warn(msg)
+        self.log.warning(msg)

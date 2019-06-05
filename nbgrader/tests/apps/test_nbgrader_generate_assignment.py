@@ -48,6 +48,14 @@ class TestNbGraderGenerateAssignment(BaseTestApp):
         run_nbgrader(["generate_assignment", "ps1"])
         assert os.path.isfile(join(course_dir, "release", "ps1", "foo.ipynb"))
 
+    def test_deprecation(self, course_dir, temp_cwd):
+        """Can a single file be assigned?"""
+        self._empty_notebook(join(course_dir, 'source', 'ps1', 'foo.ipynb'))
+        with open("nbgrader_config.py", "a") as fh:
+            fh.write("""c.CourseDirectory.db_assignments = [dict(name="ps1")]\n""")
+        run_nbgrader(["assign", "ps1"])
+        assert os.path.isfile(join(course_dir, "release", "ps1", "foo.ipynb"))
+
     def test_single_file_bad_assignment_name(self, course_dir, temp_cwd):
         """Test that an error is thrown when the assignment name is invalid."""
         self._empty_notebook(join(course_dir, 'source', 'foo+bar', 'foo.ipynb'))

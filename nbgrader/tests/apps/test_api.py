@@ -635,7 +635,17 @@ class TestNbGraderAPI(BaseTestApp):
             "flagged": False
         }
 
-    def test_assign(self, api, course_dir, db):
+    def test_deprecation(self, api, course_dir, db):
+        self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
+        result = api.generate_assignment("ps1")
+        assert result["success"]
+        assert os.path.exists(join(course_dir, "release", "ps1", "p1.ipynb"))
+
+        os.makedirs(join(course_dir, "source", "ps2"))
+        result = api.assign("ps2")
+        assert not result["success"]
+
+    def test_generate_assignment(self, api, course_dir, db):
         self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
         result = api.generate_assignment("ps1")
         assert result["success"]
