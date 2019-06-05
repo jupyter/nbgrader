@@ -1073,11 +1073,17 @@ class NbGraderAPI(LoggingConfigurable):
         """
         if student_id is not None:
             with temp_attrs(self.coursedir, assignment_id=assignment_id, student_id=student_id):
-                app = ExchangeReleaseFeedback(coursedir=self.coursedir, parent=self)
+                app = ExchangeReleaseFeedback(
+                    coursedir=self.coursedir,
+                    authentictor=self.authenticator,
+                    parent=self)
                 return capture_log(app)
         else:
             with temp_attrs(self.coursedir, assignment_id=assignment_id, student_id='*'):
-                app = ExchangeReleaseFeedback(coursedir=self.coursedir, parent=self)
+                app = ExchangeReleaseFeedback(
+                    coursedir=self.coursedir,
+                    authentictor=self.authenticator,
+                    parent=self)
                 return capture_log(app)
 
     def fetch_feedback(self, assignment_id, student_id):
@@ -1102,12 +1108,19 @@ class NbGraderAPI(LoggingConfigurable):
 
         """
         with temp_attrs(self.coursedir, assignment_id=assignment_id, student_id=student_id):
-            app = ExchangeFetchFeedback(coursedir=self.coursedir, parent=self)
+            app = ExchangeFetchFeedback(
+                coursedir=self.coursedir,
+                authentictor=self.authenticator,
+                parent=self)
             ret_dic = capture_log(app)
             # assignment tab needs a 'value' field with the info needed to repopulate
             # the tables.
         with temp_attrs(self.coursedir, assignment_id='*', student_id=student_id):
-            lister_rel = ExchangeList(inbound=False, cached=True, coursedir=self.coursedir, config=self.config)
+            lister_rel = ExchangeList(
+                inbound=False, cached=True,
+                coursedir=self.coursedir,
+                authenticator=self.authenticator,
+                config=self.config)
             assignments = lister_rel.start()
             ret_dic["value"] = sorted(assignments, key=lambda x: (x['course_id'], x['assignment_id']))
         return ret_dic
