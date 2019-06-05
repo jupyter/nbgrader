@@ -147,7 +147,7 @@ The full list of merged PRs includes:
 - PR #786: Update documentation for nbgrader as a webapp
 - PR #784: Fix race condition in validate extension tests
 - PR #782: Implement nbgrader as a webapp
-- PR #781: GenerateAssignment missing notebooks a score of zero and mark as not needing grading
+- PR #781: Assign missing notebooks a score of zero and mark as not needing grading
 - PR #780: Create a new high-level python API for nbgrader
 - PR #779: Update the year!
 - PR #778: Create and set permissions for exchange directory when using ``nbgrader release``
