@@ -193,7 +193,7 @@ class TestNbGraderGenerateAssignment(BaseTestApp):
         self._make_file(join(course_dir, 'source', 'ps1', 'foo.txt'), 'foo')
         with open("nbgrader_config.py", "a") as fh:
             fh.write("""c.CourseDirectory.db_assignments = [dict(name="ps1")]\n""")
-        run_nbgrader(["generate_assignment", "ps1", "--GenerateAssignmentApp.permissions=444"])
+        run_nbgrader(["generate_assignment", "ps1", "--GenerateAssignment.permissions=444"])
 
         assert os.path.isfile(join(course_dir, "release", "ps1", "foo.ipynb"))
         assert os.path.isfile(join(course_dir, "release", "ps1", "foo.txt"))

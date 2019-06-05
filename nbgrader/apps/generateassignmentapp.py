@@ -113,16 +113,16 @@ class GenerateAssignmentApp(NbGrader):
         return classes
 
     def _load_config(self, cfg, **kwargs):
-        if 'GenerateAssignmentApp' in cfg:
+        if 'AssignApp' in cfg:
             self.log.warning(
-                "Use GenerateAssignment in config, not GenerateAssignmentApp. Outdated config:\n%s",
+                "Use GenerateAssignment in config, not AssignApp. Outdated config:\n%s",
                 '\n'.join(
-                    'GenerateAssignmentApp.{key} = {value!r}'.format(key=key, value=value)
-                    for key, value in cfg.GenerateAssignmentApp.items()
+                    'AssignApp.{key} = {value!r}'.format(key=key, value=value)
+                    for key, value in cfg.AssignApp.items()
                 )
             )
-            cfg.GenerateAssignment.merge(cfg.GenerateAssignmentApp)
-            del cfg.GenerateAssignmentApp
+            cfg.GenerateAssignment.merge(cfg.AssignApp)
+            del cfg.AssignApp
 
         super(GenerateAssignmentApp, self)._load_config(cfg, **kwargs)
 

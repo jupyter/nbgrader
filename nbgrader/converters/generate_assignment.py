@@ -68,6 +68,20 @@ class GenerateAssignment(BaseConverter):
     # NB: ClearHiddenTests must come after ComputeChecksums and SaveCells.
     # ComputerChecksums must come again after ClearHiddenTests.
 
+    def _load_config(self, cfg, **kwargs):
+        if 'Assign' in cfg:
+            self.log.warning(
+                "Use GenerateAssignment in config, not Assign. Outdated config:\n%s",
+                '\n'.join(
+                    'Assign.{key} = {value!r}'.format(key=key, value=value)
+                    for key, value in cfg.GenerateAssignmentApp.items()
+                )
+            )
+            cfg.GenerateAssignment.merge(cfg.Assign)
+            del cfg.GenerateAssignmentApp
+
+        super(GenerateAssignment, self)._load_config(cfg, **kwargs)
+
     def __init__(self, coursedir=None, **kwargs):
         super(GenerateAssignment, self).__init__(coursedir=coursedir, **kwargs)
 
