@@ -6,7 +6,10 @@ The `nbgrader` project evolved from my experiences as an instructor and a
 student. This `excerpt from David Marr's book <https://www.dropbox.com/s/olrx40rzzvk1v1i/Marr%20-%20The%20Philosophy%20and%20the%20Approach.pdf?dl=0>`_, *Vision*,
 is one of the core readings of the class that inspired the creation of
 `nbgrader`. Dr. Marr was an originator of the field of computational
-neuroscience and has been extremely influential in the field of computational cognitive science as well. On behalf of the many individuals who contribute to `nbgrader`, I hope you find this project enhances your teaching and learning experiences.
+neuroscience and has been extremely influential in the field of computational
+cognitive science as well. On behalf of the many individuals who contribute
+to `nbgrader`, I hope you find this project enhances your teaching and
+learning experiences.
 
 -- *Jess Hamrick*, UC Berkeley
 
@@ -102,6 +105,25 @@ have submitted solutions to the assignment ``ps1``:
    ├── autograded/
    └── feedback/
 
+
+On the student side, the directory structure follows a similar structure:
+
+::
+
+   course101/
+   ├── ps1
+   │   ├── jupyter.png
+   │   ├── problem1.ipynb
+   │   ├── problem2.ipynb
+   │   └── feedback
+   │       ├── 2019-05-31-11-48-34
+   │       │   ├── problem1.html
+   │       │   └── problem2.html
+   │       └── 2019-05-30-19-23-45
+   │           ├── problem1.html
+   │           └── problem2.html
+   └── ps2
+
 Database of assignments
 ~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -132,4 +154,5 @@ would live at ``{course_directory}/nbgrader_config.py`` and might look like:
     c = get_config()
     c.Exchange.course_id = "course101"
 
-There are many additional options you can configure. See :doc:`/configuration/config_options` for a full list.
+There are many additional options you can configure. See
+:doc:`/configuration/config_options` for a full list.

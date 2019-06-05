@@ -216,6 +216,7 @@ def is_ignored(filename, ignore_globs=None):
             return True
     return False
 
+
 def ignore_patterns(exclude=None, include=None, max_file_size=None, log=None):
     """
     Function that can be used as :func:`shutils.copytree` ignore parameter.
@@ -491,3 +492,9 @@ def capture_log(app, fmt="[%(levelname)s] %(message)s"):
         app.log.removeHandler(handler)
 
     return result
+
+
+def notebook_hash(path):
+    m = hashlib.md5()
+    m.update(open(path, 'rb').read())
+    return m.hexdigest()

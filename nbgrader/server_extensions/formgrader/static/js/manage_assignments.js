@@ -27,6 +27,8 @@ var AssignmentUI = Backbone.View.extend({
         this.$release = this.$el.find(".release");
         this.$collect = this.$el.find(".collect");
         this.$num_submissions = this.$el.find(".num-submissions");
+        this.$generate_feedback = this.$el.find(".generate-feedback");
+        this.$release_feedback = this.$el.find(".release-feedback");
 
         this.listenTo(this.model, "change", this.render);
         this.listenTo(this.model, "request", this.animateSaving);
@@ -86,6 +88,8 @@ var AssignmentUI = Backbone.View.extend({
         this.$release.empty();
         this.$collect.empty();
         this.$num_submissions.empty();
+        this.$generate_feedback.empty();
+        this.$release_feedback.empty();
     },
 
     render: function () {
@@ -188,6 +192,27 @@ var AssignmentUI = Backbone.View.extend({
                 .attr("href", base_url + "/formgrader/manage_submissions/" + this.model.get("name"))
                 .text(num_submissions));
         }
+
+        // generate feedback
+        if (num_submissions > 0) {
+            this.$generate_feedback.append($("<a/>")
+		.attr("href", "#")
+                .click(_.bind(this.generate_feedback, this))
+		.append($("<span/>")
+		   .addClass("glyphicon glyphicon-comment")
+                   .attr("aria-hidden", "true")));
+        }
+
+        //  feedback
+        if (num_submissions > 0) {
+            this.$release_feedback.append($("<a/>")
+		.attr("href", "#")
+                .click(_.bind(this.release_feedback, this))
+		.append($("<span/>")
+		   .addClass("glyphicon glyphicon-envelope")
+                   .attr("aria-hidden", "true")));
+        }
+
     },
 
     assign: function () {
@@ -350,6 +375,78 @@ var AssignmentUI = Backbone.View.extend({
         }
     },
 
+    generate_feedback: function () {
+        this.clear();
+        this.$name.text("Please wait...");
+        $.post(base_url + "/formgrader/api/assignment/" + this.model.get("name") + "/generate_feedback")
+            .done(_.bind(this.generate_feedback_success, this))
+            .fail(_.bind(this.generate_feedback_failure, this));
+    },
+
+    generate_feedback_success: function (response) {
+        this.model.fetch();
+        response = JSON.parse(response);
+        if (response["success"]) {
+            createLogModal(
+                "success-modal",
+                "Success",
+                "Successfully generated feedback of '" + this.model.get("name") + "'.",
+                response["log"]);
+
+        } else {
+            createLogModal(
+                "error-modal",
+                "Error",
+                "There was an error generating feedback of '" + this.model.get("name") + "':",
+                response["log"],
+                response["error"]);
+        }
+    },
+
+    generate_feedback_failure: function () {
+        this.model.fetch();
+        createModal(
+            "error-modal",
+            "Error",
+            "There was an error generating feedback of '" + this.model.get("name") + "'.");
+    },
+
+    release_feedback: function () {
+        this.clear();
+        this.$name.text("Please wait...");
+        $.post(base_url + "/formgrader/api/assignment/" + this.model.get("name") + "/release_feedback")
+            .done(_.bind(this.release_feedback_success, this))
+            .fail(_.bind(this.release_feedback_failure, this));
+    },
+
+    release_feedback_success: function (response) {
+        this.model.fetch();
+        response = JSON.parse(response);
+        if (response["success"]) {
+            createLogModal(
+                "success-modal",
+                "Success",
+                "Successfully released feedback of '" + this.model.get("name") + "'.",
+                response["log"]);
+
+        } else {
+            createLogModal(
+                "error-modal",
+                "Error",
+                "There was an error releasing feedback of '" + this.model.get("name") + "':",
+                response["log"],
+                response["error"]);
+        }
+    },
+
+    release_feedback_failure: function () {
+        this.model.fetch();
+        createModal(
+            "error-modal",
+            "Error",
+            "There was an error releasing feedback of '" + this.model.get("name") + "'.");
+    },
+
     closeModal: function () {
         if (this.$modal) {
             this.$modal.modal('hide')
@@ -374,6 +471,8 @@ var insertRow = function (table) {
     row.append($("<td/>").addClass("text-center release"));
     row.append($("<td/>").addClass("text-center collect"));
     row.append($("<td/>").addClass("text-center num-submissions"));
+    row.append($("<td/>").addClass("text-center generate-feedback"));
+    row.append($("<td/>").addClass("text-center release-feedback"));
     table.append(row)
     return row;
 };

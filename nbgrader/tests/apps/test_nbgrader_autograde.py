@@ -680,7 +680,7 @@ class TestNbGraderAutograde(BaseTestApp):
         self._copy_file(
             join(course_dir, "release", "ps1", "p1.ipynb"),
             join(course_dir, "submitted", "foo", "ps1", "p1.ipynb")
-            )
+        )
 
         # make sure submitted validates, should only fail on hidden tests
         output = run_nbgrader([

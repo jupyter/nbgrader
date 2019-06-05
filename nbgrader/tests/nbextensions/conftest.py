@@ -55,6 +55,7 @@ def jupyter_config_dir(request):
 
     return jupyter_config_dir
 
+
 @pytest.fixture(scope="module")
 def jupyter_data_dir(request):
     jupyter_data_dir = tempfile.mkdtemp()

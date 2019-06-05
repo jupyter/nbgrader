@@ -2,6 +2,7 @@ import pytest
 import sys
 import os
 import shutil
+import filecmp
 
 from os.path import join
 from traitlets.config import Config
@@ -682,6 +683,7 @@ class TestNbGraderAPI(BaseTestApp):
         assert "Updating submission" in result["log"]
         assert os.path.exists(join(course_dir, "submitted", username, "ps1", "p1.ipynb"))
 
+    @notwindows
     def test_autograde(self, api, course_dir, db):
         self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
         api.assign("ps1")
@@ -697,3 +699,78 @@ class TestNbGraderAPI(BaseTestApp):
 
         result = api.autograde("ps1", "foo")
         assert result["success"]
+
+    def test_generate_feedback(self, api, course_dir, db):
+        self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
+        api.assign("ps1")
+        self._copy_file(join("files", "submitted-changed.ipynb"), join(course_dir, "submitted", "foo", "ps1", "p1.ipynb"))
+        api.autograde("ps1", "foo")
+        result = api.generate_feedback("ps1", "foo")
+        assert result["success"]
+        assert os.path.exists(join(course_dir, "feedback", "foo", "ps1", "p1.html"))
+        # should not work for an empty submission
+        os.makedirs(join(course_dir, "submitted", "foo", "ps2"))
+        result = api.generate_feedback("ps2", "foo")
+        assert not result["success"]
+        
+        self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "source", "ps2", "p2.ipynb"))
+        api.assign("ps2")
+        self._copy_file(join("files", "submitted-changed.ipynb"), join(course_dir, "submitted", "foo", "ps2", "p2.ipynb"))
+        api.autograde("ps2", "foo")
+        result = api.generate_feedback("ps2", "foo")
+        assert result["success"]
+
+    @notwindows
+    def test_release_feedback(self, api, course_dir, db, exchange):
+        self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
+        api.assign("ps1")
+        self._copy_file(join("files", "submitted-changed.ipynb"), join(course_dir, "submitted", "foo", "ps1", "p1.ipynb"))
+        self._copy_file(join("files", "timestamp.txt"), join(course_dir, "submitted", "foo", "ps1", "timestamp.txt"))
+        api.autograde("ps1", "foo")
+        api.generate_feedback("ps1", "foo")
+        result = api.release_feedback("ps1", "foo")
+        assert result["success"]
+        assert os.path.isdir(join(exchange, "abc101", "feedback"))
+        assert os.path.exists(join(exchange, "abc101", "feedback", "65f5ff7800d0926ae6869e70f4da0b27.html"))
+        # add another assignment         
+        self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "source", "ps2", "p2.ipynb"))
+        api.assign("ps2")
+        self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "submitted", "foo", "ps2", "p2.ipynb"))
+        self._copy_file(join("files", "timestamp.txt"), join(course_dir, "submitted", "foo", "ps2", "timestamp.txt"))
+        api.autograde("ps2", "foo")
+        api.generate_feedback("ps2", "foo")
+        api.release_feedback("ps2", "foo")
+        assert result["success"]
+        assert os.path.exists(join(exchange, "abc101", "feedback", "a7efd7718119cc393418ad9a185b5b3b.html"))
+
+    @notwindows
+    def test_fetch_feedback(self, api, course_dir, db, exchange):
+        self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
+        api.assign("ps1")
+        timestamp = open(os.path.join(os.path.dirname(__file__), "files", "timestamp.txt")).read()
+        inboundpath = join(exchange, "abc101", "inbound", "foo+ps1+{}".format(timestamp))
+        self._copy_file(join("files", "submitted-changed.ipynb"), join(inboundpath, "p1.ipynb"))
+        self._copy_file(join("files", "timestamp.txt"), join(inboundpath, "timestamp.txt"))
+        self._copy_file(join("files", "submitted-changed.ipynb"), join(course_dir, "submitted", "foo", "ps1", "p1.ipynb"))
+        self._copy_file(join("files", "timestamp.txt"), join(course_dir, "submitted", "foo", "ps1", "timestamp.txt"))
+        api.autograde("ps1", "foo")
+        api.generate_feedback("ps1", "foo")
+        api.release_feedback("ps1", "foo")
+        result = api.fetch_feedback("ps1", "foo")
+        assert result["success"]
+        assert os.path.isdir(join("ps1", "feedback"))
+        assert os.path.exists(join("ps1", "feedback", timestamp, "p1.html"))
+        # add another assignment         
+        self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "source", "ps2", "ps2.ipynb"))
+        api.assign("ps2")
+        inboundpath = join(exchange, "abc101", "inbound", "foo+ps2+{}".format(timestamp))
+        self._copy_file(join("files", "submitted-changed.ipynb"), join(inboundpath, "ps2.ipynb"))
+        self._copy_file(join("files", "timestamp.txt"), join(inboundpath, "timestamp.txt"))
+        self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "submitted", "foo", "ps2", "p2.ipynb"))
+        self._copy_file(join("files", "timestamp.txt"), join(course_dir, "submitted", "foo", "ps2", "timestamp.txt"))
+        api.autograde("ps2", "foo")
+        api.generate_feedback("ps2", "foo")
+        api.release_feedback("ps2", "foo")
+        api.fetch_feedback("ps2", "foo")
+        assert result["success"]
+        assert os.path.exists(join("ps2", "feedback", timestamp, "ps2.html"))
