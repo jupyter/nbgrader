@@ -21,7 +21,7 @@ Instructor commands
     nbgrader-validate
     nbgrader-update
     nbgrader-autograde
-    nbgrader-feedback
+    nbgrader-generate-feedback
     nbgrader-export
 
 The following commands are used to manage the database:

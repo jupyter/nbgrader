@@ -10,7 +10,7 @@ from traitlets.config import LoggingConfigurable, Config
 from traitlets import Instance, Enum, Unicode, observe
 
 from ..coursedir import CourseDirectory
-from ..converters import GenerateAssignment, Autograde, Feedback
+from ..converters import GenerateAssignment, Autograde, GenerateFeedback
 from ..exchange import ExchangeList, ExchangeRelease, ExchangeReleaseFeedback, ExchangeFetchFeedback, ExchangeCollect, ExchangeError, ExchangeSubmit
 from ..api import MissingEntry, Gradebook, Student, SubmittedAssignment
 from ..utils import parse_utc, temp_attrs, capture_log, as_timezone, to_numeric_tz
@@ -1021,7 +1021,7 @@ class NbGraderAPI(LoggingConfigurable):
             return capture_log(app)
 
     def generate_feedback(self, assignment_id, student_id=None):
-        """Run ``nbgrader feedback`` for a particular assignment and student.
+        """Run ``nbgrader generate_feedback`` for a particular assignment and student.
 
         Arguments
         ---------
@@ -1050,13 +1050,13 @@ class NbGraderAPI(LoggingConfigurable):
             with temp_attrs(self.coursedir,
                             assignment_id=assignment_id,
                             student_id=student_id):
-                app = Feedback(coursedir=self.coursedir, parent=self)
+                app = GenerateFeedback(coursedir=self.coursedir, parent=self)
                 app.update_config(c)
                 return capture_log(app)
         else:
             with temp_attrs(self.coursedir,
                             assignment_id=assignment_id):
-                app = Feedback(coursedir=self.coursedir, parent=self)
+                app = GenerateFeedback(coursedir=self.coursedir, parent=self)
                 app.update_config(c)
                 return capture_log(app)
 

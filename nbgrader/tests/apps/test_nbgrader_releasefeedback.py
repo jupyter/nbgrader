@@ -35,7 +35,7 @@ class TestNbGraderReleaseFeedback(BaseTestApp):
         self._copy_file(join("files", "timestamp.txt"), join(course_dir, "submitted", "foo", "ps1", "timestamp.txt"))
         
         run_nbgrader(["autograde", "ps1", "--db", db])
-        run_nbgrader(["feedback", "ps1", "--db", db])
+        run_nbgrader(["generate_feedback", "ps1", "--db", db])
         run_nbgrader(["release_feedback", "ps1", "--Exchange.root={}".format(exchange), '--course', 'abc101'])
         nb_hash = notebook_hash(nb_path)
         assert exists(join(exchange, "abc101", "feedback", "{}.html".format(nb_hash)))
@@ -58,7 +58,7 @@ class TestNbGraderReleaseFeedback(BaseTestApp):
         self._copy_file(join("files", "timestamp.txt"), join(course_dir, "submitted", "bar", "ps1", "timestamp.txt"))
         
         run_nbgrader(["autograde", "ps1", "--db", db])
-        run_nbgrader(["feedback", "ps1", "--db", db])
+        run_nbgrader(["generate_feedback", "ps1", "--db", db])
         run_nbgrader(["release_feedback", "ps1", "--Exchange.root={}".format(exchange), '--course', 'abc101', '--student', 'foo'])
         nb_hash = notebook_hash(nb_path)
         assert exists(join(exchange, "abc101", "feedback", "{}.html".format(nb_hash)))
@@ -81,7 +81,7 @@ class TestNbGraderReleaseFeedback(BaseTestApp):
 
         self._empty_notebook(join(course_dir, "submitted", "foo", "ps1", "foo.ipynb"))
         run_nbgrader(["autograde", "ps1", "--db", db])
-        run_nbgrader(["feedback", "ps1", "--db", db])
+        run_nbgrader(["generate_feedback", "ps1", "--db", db])
         run_nbgrader(["release_feedback", "ps1", "--Exchange.root={}".format(exchange), '--course', 'abc101'])
 
         perms = '711'
