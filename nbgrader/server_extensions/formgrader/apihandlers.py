@@ -276,6 +276,7 @@ class AutogradeHandler(BaseApiHandler):
 class GenerateAllFeedbackHandler(BaseApiHandler):
     @web.authenticated
     @check_xsrf
+    @check_notebook_dir
     def post(self, assignment_id):
         self.write(json.dumps(self.api.generate_feedback(assignment_id)))
 
@@ -283,6 +284,7 @@ class GenerateAllFeedbackHandler(BaseApiHandler):
 class ReleaseAllFeedbackHandler(BaseApiHandler):
     @web.authenticated
     @check_xsrf
+    @check_notebook_dir
     def post(self, assignment_id):
         self.write(json.dumps(self.api.release_feedback(assignment_id)))
 
@@ -290,6 +292,7 @@ class ReleaseAllFeedbackHandler(BaseApiHandler):
 class GenerateFeedbackHandler(BaseApiHandler):
     @web.authenticated
     @check_xsrf
+    @check_notebook_dir
     def post(self, assignment_id, student_id):
         self.write(json.dumps(self.api.generate_feedback(assignment_id, student_id)))
 
@@ -297,6 +300,7 @@ class GenerateFeedbackHandler(BaseApiHandler):
 class ReleaseFeedbackHandler(BaseApiHandler):
     @web.authenticated
     @check_xsrf
+    @check_notebook_dir
     def post(self, assignment_id, student_id):
         self.write(json.dumps(self.api.release_feedback(assignment_id, student_id)))
 
@@ -304,6 +308,7 @@ class ReleaseFeedbackHandler(BaseApiHandler):
 class FetchFeedbackHandler(BaseApiHandler):
     @web.authenticated
     @check_xsrf
+    @check_notebook_dir
     def post(self, assignment_id, student_id):
         ret_dict = {}
         ret_dict.update(self.api.fetch_feedback(assignment_id, student_id))
