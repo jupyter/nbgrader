@@ -5,12 +5,12 @@ import os
 import six
 import logging
 
-from traitlets.config import LoggingConfigurable
+from traitlets.config import LoggingConfigurable, Config
 from traitlets import Instance, Enum, Unicode, observe
 
 from ..coursedir import CourseDirectory
-from ..converters import Assign, Autograde
-from ..exchange import ExchangeList, ExchangeRelease, ExchangeCollect, ExchangeError, ExchangeSubmit
+from ..converters import Assign, Autograde, Feedback
+from ..exchange import ExchangeList, ExchangeRelease, ExchangeReleaseFeedback, ExchangeFetchFeedback, ExchangeCollect, ExchangeError, ExchangeSubmit
 from ..api import MissingEntry, Gradebook, Student, SubmittedAssignment
 from ..utils import parse_utc, temp_attrs, capture_log, as_timezone, to_numeric_tz
 from ..auth import Authenticator
@@ -1009,3 +1009,105 @@ class NbGraderAPI(LoggingConfigurable):
             app.force = force
             app.create_student = create
             return capture_log(app)
+
+    def generate_feedback(self, assignment_id, student_id=None):
+        """Run ``nbgrader feedback`` for a particular assignment and student.
+
+        Arguments
+        ---------
+        assignment_id: string
+            The name of the assignment
+        student_id: string
+            The name of the student (optional). If not provided, then generate
+            feedback from autograded submissions.
+
+        Returns
+        -------
+        result: dict
+            A dictionary with the following keys (error and log may or may not be present):
+
+            - success (bool): whether or not the operation completed successfully
+            - error (string): formatted traceback
+            - log (string): captured log output
+
+        """
+        # Because we may be using HTMLExporter.template_file in other
+        # parts of the the UI, we need to make sure that the template
+        # is explicitply 'feedback.tpl` here:
+        c = Config()
+        c.HTMLExporter.template_file = 'feedback.tpl'
+        if student_id is not None:
+            with temp_attrs(self.coursedir,
+                            assignment_id=assignment_id,
+                            student_id=student_id):
+                app = Feedback(coursedir=self.coursedir, parent=self)
+                app.update_config(c)
+                return capture_log(app)
+        else:
+            with temp_attrs(self.coursedir,
+                            assignment_id=assignment_id):
+                app = Feedback(coursedir=self.coursedir, parent=self)
+                app.update_config(c)
+                return capture_log(app)
+
+    def release_feedback(self, assignment_id, student_id=None):
+        """Run ``nbgrader release_feedback`` for a particular assignment/student.
+
+        Arguments
+        ---------
+        assignment_id: string
+            The name of the assignment
+        assignment_id: string
+            The name of the student (optional). If not provided, then release
+            all generated feedback.
+
+        Returns
+        -------
+        result: dict
+            A dictionary with the following keys (error and log may or may not be present):
+
+            - success (bool): whether or not the operation completed successfully
+            - error (string): formatted traceback
+            - log (string): captured log output
+
+        """
+        if student_id is not None:
+            with temp_attrs(self.coursedir, assignment_id=assignment_id, student_id=student_id):
+                app = ExchangeReleaseFeedback(coursedir=self.coursedir, parent=self)
+                return capture_log(app)
+        else:
+            with temp_attrs(self.coursedir, assignment_id=assignment_id, student_id='*'):
+                app = ExchangeReleaseFeedback(coursedir=self.coursedir, parent=self)
+                return capture_log(app)
+
+    def fetch_feedback(self, assignment_id, student_id):
+        """Run ``nbgrader fetch_feedback`` for a particular assignment/student.
+
+        Arguments
+        ---------
+        assignment_id: string
+            The name of the assignment
+        student_id: string
+            The name of the student.
+
+        Returns
+        -------
+        result: dict
+            A dictionary with the following keys (error and log may or may not be present):
+
+            - success (bool): whether or not the operation completed successfully
+            - error (string): formatted traceback
+            - log (string): captured log output
+            - value (list of dict): all submitted assignments
+
+        """
+        with temp_attrs(self.coursedir, assignment_id=assignment_id, student_id=student_id):
+            app = ExchangeFetchFeedback(coursedir=self.coursedir, parent=self)
+            ret_dic = capture_log(app)
+            # assignment tab needs a 'value' field with the info needed to repopulate
+            # the tables.
+        with temp_attrs(self.coursedir, assignment_id='*', student_id=student_id):
+            lister_rel = ExchangeList(inbound=False, cached=True, coursedir=self.coursedir, config=self.config)
+            assignments = lister_rel.start()
+            ret_dic["value"] = sorted(assignments, key=lambda x: (x['course_id'], x['assignment_id']))
+        return ret_dic

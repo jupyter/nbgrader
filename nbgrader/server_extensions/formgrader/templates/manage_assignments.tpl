@@ -89,16 +89,18 @@ for instructions.
   <th class="text-center no-sort">Release</th>
   <th class="text-center no-sort">Collect</th>
   <th class="text-center"># Submissions</th>
+  <th class="text-center no-sort">Generate Feedback</th>
+  <th class="text-center no-sort">Release Feedback</th>
 </tr>
 {%- endblock -%}
 
 {%- block table_body -%}
-<tr><td colspan="9">Loading, please wait...</td></tr>
+<tr><td colspan="11">Loading, please wait...</td></tr>
 {%- endblock -%}
 
 {%- block table_footer -%}
 <tr>
-  <td colspan="9">
+  <td colspan="11">
     <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
     <a href="#" onClick="createAssignmentModal();">Add new assignment...</a>
   </td>

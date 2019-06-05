@@ -2,9 +2,9 @@ import os
 import glob
 import shutil
 import re
-
+import hashlib
 from traitlets import Bool
-
+from ..utils import notebook_hash
 from .exchange import Exchange
 
 
@@ -60,37 +60,69 @@ class ExchangeList(Exchange):
         assignments = []
         if self.coursedir.student_id:
             courses = self.authenticator.get_student_courses(self.coursedir.student_id)
-            for path in self.assignments:
-                info = self.parse_assignment(path)
-                if courses is not None and info['course_id'] not in courses:
-                    continue
+        else:
+            courses = None
 
-                if self.path_includes_course:
-                    root = os.path.join(info['course_id'], info['assignment_id'])
-                else:
-                    root = info['assignment_id']
+        for path in self.assignments:
+            info = self.parse_assignment(path)
+            if courses is not None and info['course_id'] not in courses:
+                continue
 
-                if self.inbound or self.cached:
-                    info['status'] = 'submitted'
-                    info['path'] = path
-                elif os.path.exists(root):
-                    info['status'] = 'fetched'
-                    info['path'] = os.path.abspath(root)
-                else:
-                    info['status'] = 'released'
-                    info['path'] = path
+            if self.path_includes_course:
+                root = os.path.join(info['course_id'], info['assignment_id'])
+            else:
+                root = info['assignment_id']
 
-                if self.remove:
-                    info['status'] = 'removed'
+            if self.inbound or self.cached:
+                info['status'] = 'submitted'
+                info['path'] = path
+            elif os.path.exists(root):
+                info['status'] = 'fetched'
+                info['path'] = os.path.abspath(root)
+            else:
+                info['status'] = 'released'
+                info['path'] = path
 
-                info['notebooks'] = []
-                for notebook in sorted(glob.glob(os.path.join(info['path'], '*.ipynb'))):
-                    info['notebooks'].append({
-                        'notebook_id': os.path.splitext(os.path.split(notebook)[1])[0],
-                        'path': os.path.abspath(notebook)
-                    })
+            if self.remove:
+                info['status'] = 'removed'
 
-                assignments.append(info)
+            info['notebooks'] = []
+            hasFeedback = False
+            allFeedbackDownloaded = True
+            for notebook in sorted(glob.glob(os.path.join(info['path'], '*.ipynb'))):
+                nbInfo = {
+                    'notebook_id': os.path.splitext(os.path.split(notebook)[1])[0],
+                    'path': os.path.abspath(notebook)
+                }
+                if info['status'] == 'submitted':
+                    nb_hash = notebook_hash(notebook)
+                    notebookDir, notebookFilename = os.path.split(notebook)
+                    notebookName, _ = os.path.splitext(notebookFilename)
+                    feedbackpath = os.path.join(self.root, info['course_id'], 'feedback', '{0}.html'.format(nb_hash))
+                    # notebookDir should have the course_did in it if we have multiple courses ...
+                    if self.path_includes_course:
+                        nbdir = os.path.join(info['course_id'], info['assignment_id'])
+                    else:
+                        nbdir = os.path.join(info['assignment_id'])
+                    self.dest_path = os.path.abspath(os.path.join('.', root))
+                    localFeedbackPath = os.path.join(nbdir, 'feedback', info['timestamp'], '{0}.html'.format(notebookName))
+                    hasLocalFeedback = os.path.isfile(localFeedbackPath)
+                    # could check for new version here
+                    nbInfo['hasLocalFeedback'] = hasLocalFeedback
+                    feedbackAvailable = os.path.exists(feedbackpath)
+                    if feedbackAvailable:
+                        nbInfo['feedbackPath'] = feedbackpath
+                        hasFeedback = True
+                    if hasLocalFeedback:
+                        nbInfo['localFeedbackPath'] = localFeedbackPath
+                    if feedbackAvailable and not hasLocalFeedback:
+                        allFeedbackDownloaded = False
+
+                info['notebooks'].append(nbInfo)
+
+            info['hasFeedback'] = hasFeedback
+            info['allFeedbackDownloaded'] = allFeedbackDownloaded
+            assignments.append(info)
 
         return assignments
 

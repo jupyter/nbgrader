@@ -273,7 +273,7 @@ def test_submit_assignment(browser, port, class_files, tempdir):
     rows[0].find_element_by_css_selector(".item_status button").click()
 
     # wait for the submitted assignments list to update
-    rows = _wait_for_list(browser, "submitted", 1)
+    rows = _wait_for_list(browser, "submitted", 1 + 1)  # the new assignment list adds one line for each assignment and one for each submission
     assert rows[0].find_element_by_class_name("item_name").text == "ps.01"
     assert rows[0].find_element_by_class_name("item_course").text == "xyz 200"
 
@@ -283,12 +283,11 @@ def test_submit_assignment(browser, port, class_files, tempdir):
     rows[0].find_element_by_css_selector(".item_status button").click()
 
     # wait for the submitted assignments list to update
-    rows = _wait_for_list(browser, "submitted", 2)
+    # the new assignment list adds one line for each assignment and one for each submission
+    rows = _wait_for_list(browser, "submitted", 2 + 1) 
     rows.sort(key=_sort_rows)
-    assert rows[0].find_element_by_class_name("item_name").text == "ps.01"
-    assert rows[0].find_element_by_class_name("item_course").text == "xyz 200"
-    assert rows[1].find_element_by_class_name("item_name").text == "ps.01"
-    assert rows[1].find_element_by_class_name("item_course").text == "xyz 200"
+    assert rows[2].find_element_by_class_name("item_name").text == "ps.01"
+    assert rows[2].find_element_by_class_name("item_course").text == "xyz 200"
     assert rows[0].find_element_by_class_name("item_status").text != rows[1].find_element_by_class_name("item_status").text
 
 
@@ -314,14 +313,10 @@ def test_submit_assignment_missing_notebooks(browser, port, class_files, tempdir
     rows[0].find_element_by_css_selector(".item_status button").click()
 
     # wait for the submitted assignments list to update
-    rows = _wait_for_list(browser, "submitted", 3)
+    rows = _wait_for_list(browser, "submitted", 3 + 1)  # the new assignment list adds one line for each assignment and one for each submission
     rows.sort(key=_sort_rows)
-    assert rows[0].find_element_by_class_name("item_name").text == "ps.01"
-    assert rows[0].find_element_by_class_name("item_course").text == "xyz 200"
-    assert rows[1].find_element_by_class_name("item_name").text == "ps.01"
-    assert rows[1].find_element_by_class_name("item_course").text == "xyz 200"
-    assert rows[2].find_element_by_class_name("item_name").text == "ps.01"
-    assert rows[2].find_element_by_class_name("item_course").text == "xyz 200"
+    assert rows[3].find_element_by_class_name("item_name").text == "ps.01"
+    assert rows[3].find_element_by_class_name("item_course").text == "xyz 200"
     assert rows[0].find_element_by_class_name("item_status").text != rows[2].find_element_by_class_name("item_status").text
 
     # set strict flag
@@ -342,14 +337,10 @@ def test_submit_assignment_missing_notebooks(browser, port, class_files, tempdir
     _dismiss_modal(browser)
 
     # check submitted assignments list remains unchanged
-    rows = _wait_for_list(browser, "submitted", 3)
+    rows = _wait_for_list(browser, "submitted", 3 + 1)  # the new assignment list adds one line for each assignment and one for each submission
     rows.sort(key=_sort_rows)
-    assert rows[0].find_element_by_class_name("item_name").text == "ps.01"
-    assert rows[0].find_element_by_class_name("item_course").text == "xyz 200"
-    assert rows[1].find_element_by_class_name("item_name").text == "ps.01"
-    assert rows[1].find_element_by_class_name("item_course").text == "xyz 200"
-    assert rows[2].find_element_by_class_name("item_name").text == "ps.01"
-    assert rows[2].find_element_by_class_name("item_course").text == "xyz 200"
+    assert rows[3].find_element_by_class_name("item_name").text == "ps.01"
+    assert rows[3].find_element_by_class_name("item_course").text == "xyz 200"
     assert rows[0].find_element_by_class_name("item_status").text != rows[2].find_element_by_class_name("item_status").text
 
     # clean up for following tests: rename notebook back to origional name
@@ -400,10 +391,10 @@ def test_submit_other_assignment(browser, port, class_files, tempdir):
     rows[0].find_element_by_css_selector(".item_status button").click()
 
     # wait for the submitted assignments list to update
-    rows = _wait_for_list(browser, "submitted", 1)
+    rows = _wait_for_list(browser, "submitted", 1 + 1)  # the new assignment list adds one line for each assignment and one for each submission
     rows.sort(key=_sort_rows)
-    assert rows[0].find_element_by_class_name("item_name").text == "Problem Set 1"
-    assert rows[0].find_element_by_class_name("item_course").text == "abc101"
+    assert rows[1].find_element_by_class_name("item_name").text == "Problem Set 1"
+    assert rows[1].find_element_by_class_name("item_course").text == "abc101"
 
 
 @pytest.mark.nbextensions
@@ -496,4 +487,3 @@ def test_missing_exchange(exchange, browser, port, class_files, tempdir):
     rows = _wait_for_list(browser, "released", 1)
     assert rows[0].find_element_by_class_name("item_name").text == "Problem Set 1"
     assert rows[0].find_element_by_class_name("item_course").text == "abc101"
-

@@ -18,10 +18,12 @@ from . import (
     AutogradeApp,
     FormgradeApp,
     FeedbackApp,
+    ReleaseFeedbackApp,
     ValidateApp,
     ReleaseApp,
     CollectApp,
     FetchApp,
+    FetchFeedbackApp,
     SubmitApp,
     ListApp,
     ExtensionApp,
@@ -139,6 +141,15 @@ class NbGraderApp(NbGrader):
                 """
             ).strip()
         ),
+        release_feedback=(
+            ReleaseFeedbackApp,
+            dedent(
+                """
+                Release assignment feedback to students through the nbgrader exchange.
+                Intended for use by instructors only.
+                """
+            ).strip()
+        ),
         collect=(
             CollectApp,
             dedent(
@@ -163,6 +174,15 @@ class NbGraderApp(NbGrader):
             dedent(
                 """
                 Fetch an assignment from an instructor through the nbgrader exchange.
+                Intended for use by students only.
+                """
+            ).strip()
+        ),
+        fetch_feedback=(
+            FetchFeedbackApp,
+            dedent(
+                """
+                Fetch feedback for an assignment from an instructor through the nbgrader exchange.
                 Intended for use by students only.
                 """
             ).strip()
@@ -257,6 +277,7 @@ class NbGraderApp(NbGrader):
     def print_version(self):
         print("Python version {}".format(sys.version))
         print("nbgrader version {}".format(nbgrader.__version__))
+
 
 def main():
     NbGraderApp.launch_instance()

@@ -11,9 +11,10 @@ from traitlets.config import LoggingConfigurable
 from traitlets import Unicode, Bool, Instance, Type, default, validate
 from jupyter_core.paths import jupyter_data_dir
 
-from ..utils import check_directory, ignore_patterns
+from ..utils import check_directory, ignore_patterns, self_owned
 from ..coursedir import CourseDirectory
 from ..auth import Authenticator
+
 
 class ExchangeError(Exception):
     pass
@@ -151,3 +152,14 @@ class Exchange(LoggingConfigurable):
             self.log.error("Did you mean: %s", scores[-1][1])
 
         raise ExchangeError(msg)
+
+    def ensure_directory(self, path, mode):
+        """Ensure that the path exists, has the right mode and is self owned."""
+        if not os.path.isdir(path):
+            os.makedirs(path)
+            # For some reason, Python won't create a directory with a mode of 0o733
+            # so we have to create and then chmod.
+            os.chmod(path, mode)
+        else:
+            if not self_owned(path):
+                self.fail("You don't own the directory: {}".format(path))

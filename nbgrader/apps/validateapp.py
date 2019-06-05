@@ -17,6 +17,7 @@ flags = {
     )
 }
 
+
 class ValidateApp(NbGrader):
 
     name = u'nbgrader-validate'
