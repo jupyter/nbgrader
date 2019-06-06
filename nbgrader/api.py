@@ -1351,7 +1351,7 @@ class Gradebook(object):
             self.db.execute("INSERT INTO alembic_version (version_num) VALUES ('{}');".format(alembic_version))
             self.db.commit()
 
-        self.course_id = self.check_course(course_id)
+        self.course_id = self.check_course(course_id=course_id)
         self.authenticator = authenticator
 
     def __enter__(self):
@@ -1372,7 +1372,7 @@ class Gradebook(object):
         self.db.remove()
         self.engine.dispose()
 
-    def check_course(self, course_id, **kwargs):
+    def check_course(self, course_id="default_course", **kwargs):
         """Set the course id
 
         Parameters
@@ -1387,16 +1387,16 @@ class Gradebook(object):
         course : :class:`~nbgrader.api.Course`
 
         """
-
+        course = None
+        
         try:
             course = self.db.query(Course)\
                 .filter(Course.id==course_id)\
                 .one()
         except NoResultFound:
-            new_course = Course(id=course_id, **kwargs)
-            print(new_course)
-            # raise Exception(f"{course.id} - {course}")
-            course = self.db.add(new_course)
+            if course_id:
+                new_course = Course(id=course_id, **kwargs)
+                course = self.db.add(new_course)
 
         try:
             self.db.commit()
