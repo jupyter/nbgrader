@@ -30,7 +30,7 @@ def upgrade():
 
     if len(results) == 0:
         connection.execute(
-            f"INSERT INTO course (id) VALUES ('{default_course}')")
+            "INSERT INTO course (id) VALUES ('{}')".format(default_course))
 
     with op.batch_alter_table("assignment") as batch_op:
 
