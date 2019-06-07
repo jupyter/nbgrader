@@ -1,7 +1,7 @@
 """Added course table and relationships
 
 Revision ID: e43177bfe90b
-Revises: 167914646830
+Revises: 282d30a0218e
 Create Date: 2019-05-30 09:39:31.881296
 
 """
@@ -11,7 +11,7 @@ from nbgrader.api import Course
 
 # revision identifiers, used by Alembic.
 revision = 'e43177bfe90b'
-down_revision = '167914646830'
+down_revision = '282d30a0218e'
 branch_labels = None
 depends_on = None
 
