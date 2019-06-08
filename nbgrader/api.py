@@ -1351,7 +1351,8 @@ class Gradebook(object):
             self.db.execute("INSERT INTO alembic_version (version_num) VALUES ('{}');".format(alembic_version))
             self.db.commit()
 
-        self.course_id = self.check_course(course_id=course_id)
+        self.check_course(course_id=course_id)
+        self.course_id = course_id
         self.authenticator = authenticator
 
     def __enter__(self):
@@ -1566,7 +1567,7 @@ class Gradebook(object):
         if 'duedate' in kwargs:
             kwargs['duedate'] = utils.parse_utc(kwargs['duedate'])
         if 'course_id' not in kwargs:
-            kwargs['course_id'] = "default_course"
+            kwargs['course_id'] = self.course_id
         assignment = Assignment(name=name, **kwargs)
         self.db.add(assignment)
         try:
