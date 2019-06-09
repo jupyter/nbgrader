@@ -1406,16 +1406,6 @@ class Gradebook(object):
             raise InvalidEntry(*e.args)
         return course
 
-    # @property
-    # def course_id(self):
-    #     try:
-    #         course = self.db.query(Course)\
-    #             .filter(course_id=course_id)\
-    #             .one()
-    #         return course_id_record.id
-    #     except NoResultFound:
-    #         raise MissingEntry("No course id")
-
     #### Students
 
     @property
