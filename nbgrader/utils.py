@@ -14,7 +14,6 @@ import fnmatch
 from setuptools.archive_util import unpack_archive
 from setuptools.archive_util import unpack_tarfile
 from setuptools.archive_util import unpack_zipfile
-from contextlib import contextmanager
 from tornado.log import LogFormatter
 from dateutil.tz import gettz
 from datetime import datetime
@@ -429,7 +428,7 @@ def unzip(src, dest, zip_ext=None, create_own_folder=False, tree=False):
         new_files = find_archive_files(skip)
 
 
-@contextmanager
+@contextlib.contextmanager
 def temp_attrs(app, **newvals):
     oldvals = {}
     for k, v in newvals.items():

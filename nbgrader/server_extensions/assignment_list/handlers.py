@@ -17,6 +17,7 @@ from jupyter_core.paths import jupyter_config_path
 from ...apps import NbGrader
 from ...coursedir import CourseDirectory
 from ...exchange import ExchangeList, ExchangeFetch, ExchangeSubmit
+from ...auth import Authenticator
 from ... import __version__ as nbgrader_version
 
 
@@ -67,10 +68,14 @@ class AssignmentList(LoggingConfigurable):
         with self.get_assignment_dir_config() as config:
             try:
                 if course_id:
-                    config.Exchange.course_id = course_id
+                    config.CourseDirectory.course_id = course_id
 
                 coursedir = CourseDirectory(config=config)
-                lister = ExchangeList(coursedir=coursedir, config=config)
+                authenticator = Authenticator(config=config)
+                lister = ExchangeList(
+                    coursedir=coursedir,
+                    authenticator=authenticator,
+                    config=config)
                 assignments = lister.start()
 
             except:
@@ -98,10 +103,14 @@ class AssignmentList(LoggingConfigurable):
             try:
                 config.ExchangeList.cached = True
                 if course_id:
-                    config.Exchange.course_id = course_id
+                    config.CourseDirectory.course_id = course_id
 
                 coursedir = CourseDirectory(config=config)
-                lister = ExchangeList(coursedir=coursedir, config=config)
+                authenticator = Authenticator(config=config)
+                lister = ExchangeList(
+                    coursedir=coursedir,
+                    authenticator=authenticator,
+                    config=config)
                 assignments = lister.start()
 
             except:
@@ -150,11 +159,16 @@ class AssignmentList(LoggingConfigurable):
     def fetch_assignment(self, course_id, assignment_id):
         with self.get_assignment_dir_config() as config:
             try:
-                config.Exchange.course_id = course_id
+                config = self.load_config()
+                config.CourseDirectory.course_id = course_id
                 config.CourseDirectory.assignment_id = assignment_id
 
                 coursedir = CourseDirectory(config=config)
-                fetch = ExchangeFetch(coursedir=coursedir, config=config)
+                authenticator = Authenticator(config=config)
+                fetch = ExchangeFetch(
+                    coursedir=coursedir,
+                    authenticator=authenticator,
+                    config=config)
                 fetch.start()
 
             except:
@@ -174,11 +188,16 @@ class AssignmentList(LoggingConfigurable):
     def submit_assignment(self, course_id, assignment_id):
         with self.get_assignment_dir_config() as config:
             try:
-                config.Exchange.course_id = course_id
+                config = self.load_config()
+                config.CourseDirectory.course_id = course_id
                 config.CourseDirectory.assignment_id = assignment_id
 
                 coursedir = CourseDirectory(config=config)
-                submit = ExchangeSubmit(coursedir=coursedir, config=config)
+                authenticator = Authenticator(config=config)
+                submit = ExchangeSubmit(
+                    coursedir=coursedir,
+                    authenticator=authenticator,
+                    config=config)
                 submit.start()
 
             except:

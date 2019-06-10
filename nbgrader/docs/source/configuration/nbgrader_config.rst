@@ -22,7 +22,7 @@ To set a configuration option in the config file, you need to use the ``c``
 variable which actually stores the config. For example::
 
     c = get_config()
-    c.Exchange.course_id = "course101"
+    c.CourseDirectory.course_id = "course101"
 
 To get an example config file, you can run ``nbgrader generate_config``.
 

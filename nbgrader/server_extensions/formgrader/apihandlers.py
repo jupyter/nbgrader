@@ -8,6 +8,13 @@ from ...api import MissingEntry
 from ...exchange import ExchangeList
 
 
+class StatusHandler(BaseApiHandler):
+    @web.authenticated
+    @check_xsrf
+    def get(self):
+        self.write({"status": True})
+
+
 class GradeCollectionHandler(BaseApiHandler):
     @web.authenticated
     @check_xsrf
@@ -315,6 +322,8 @@ class FetchFeedbackHandler(BaseApiHandler):
         self.write(json.dumps(ret_dict))        
 
 default_handlers = [
+    (r"/formgrader/api/status", StatusHandler),
+
     (r"/formgrader/api/assignments", AssignmentCollectionHandler),
     (r"/formgrader/api/assignment/([^/]+)", AssignmentHandler),
     (r"/formgrader/api/assignment/([^/]+)/assign", AssignHandler),

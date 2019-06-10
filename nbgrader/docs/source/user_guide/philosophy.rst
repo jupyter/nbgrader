@@ -152,7 +152,7 @@ would live at ``{course_directory}/nbgrader_config.py`` and might look like:
 ::
 
     c = get_config()
-    c.Exchange.course_id = "course101"
+    c.CourseDirectory.course_id = "course101"
 
 There are many additional options you can configure. See
 :doc:`/configuration/config_options` for a full list.

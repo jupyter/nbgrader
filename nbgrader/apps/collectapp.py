@@ -10,7 +10,7 @@ aliases = {}
 aliases.update(nbgrader_aliases)
 aliases.update({
     "timezone": "Exchange.timezone",
-    "course": "Exchange.course_id",
+    "course": "CourseDirectory.course_id",
 })
 
 flags = {}
@@ -38,7 +38,7 @@ class CollectApp(NbGrader):
         It must be unique for each instructor/course combination. To set it in
         the config file add a line to the `nbgrader_config.py` file:
 
-            c.Exchange.course_id = 'phys101'
+            c.CourseDirectory.course_id = 'phys101'
 
         To pass the `course_id` at the command line, add `--course=phys101` to any
         of the below commands.
@@ -92,7 +92,10 @@ class CollectApp(NbGrader):
         elif self.coursedir.assignment_id == "":
             self.fail("Must provide assignment name:\nnbgrader <command> ASSIGNMENT [ --course COURSE ]")
 
-        collect = ExchangeCollect(coursedir=self.coursedir, parent=self)
+        collect = ExchangeCollect(
+            coursedir=self.coursedir,
+            authenticator=self.authenticator,
+            parent=self)
         try:
             collect.start()
         except ExchangeError:

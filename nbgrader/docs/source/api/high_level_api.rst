@@ -16,7 +16,7 @@ assignments. For example:
 
     # create a custom config object to specify options for nbgrader
     config = Config()
-    config.Exchange.course_id = "course101"
+    config.CourseDirectory.course_id = "course101"
 
     api = NbGraderAPI(config=config)
 

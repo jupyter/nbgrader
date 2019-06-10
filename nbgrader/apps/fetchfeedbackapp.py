@@ -10,7 +10,7 @@ aliases = {}
 aliases.update(nbgrader_aliases)
 aliases.update({
     "timezone": "Exchange.timezone",
-    "course": "Exchange.course_id",
+    "course": "CourseDirectory.course_id",
 })
 
 flags = {}
@@ -61,7 +61,10 @@ class FetchFeedbackApp(NbGrader):
             self.fail("Must provide assignment name:\nnbgrader <command> ASSIGNMENT [ --course COURSE ]")
 
         if self.coursedir.assignment_id != "":
-            fetch = ExchangeFetchFeedback(coursedir=self.coursedir, parent=self)
+            fetch = ExchangeFetchFeedback(
+                coursedir=self.coursedir,
+                authenticator=self.authenticator,
+                parent=self)
             try:
                 fetch.start()
             except ExchangeError:
@@ -71,7 +74,10 @@ class FetchFeedbackApp(NbGrader):
 
             for arg in self.extra_args:
                 self.coursedir.assignment_id = arg
-                fetch = ExchangeFetchFeedback(coursedir=self.coursedir, parent=self)
+                fetch = ExchangeFetchFeedback(
+                    coursedir=self.coursedir,
+                    authenticator=self.authenticator,
+                    parent=self)
                 try:
                     fetch.start()
                 except ExchangeError:

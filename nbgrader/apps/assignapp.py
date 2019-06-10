@@ -7,7 +7,9 @@ from traitlets import default
 from .baseapp import NbGrader, nbgrader_aliases, nbgrader_flags
 from ..converters import BaseConverter, Assign, NbGraderException
 
-aliases = {}
+aliases = {
+    'course': 'CourseDirectory.course_id'
+}
 aliases.update(nbgrader_aliases)
 del aliases['student']
 aliases.update({

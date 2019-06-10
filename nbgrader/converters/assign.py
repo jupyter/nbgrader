@@ -72,7 +72,7 @@ class Assign(BaseConverter):
         super(Assign, self).__init__(coursedir=coursedir, **kwargs)
 
     def _clean_old_notebooks(self, assignment_id, student_id):
-        with Gradebook(self.coursedir.db_url) as gb:
+        with Gradebook(self.coursedir.db_url, self.coursedir.course_id) as gb:
             assignment = gb.find_assignment(assignment_id)
             regexp = re.escape(os.path.sep).join([
                 self._format_source("(?P<assignment_id>.*)", "(?P<student_id>.*)", escape=True),
@@ -124,11 +124,11 @@ class Assign(BaseConverter):
                 if 'name' in assignment:
                     del assignment['name']
                 self.log.info("Updating/creating assignment '%s': %s", assignment_id, assignment)
-                with Gradebook(self.coursedir.db_url) as gb:
+                with Gradebook(self.coursedir.db_url, self.coursedir.course_id) as gb:
                     gb.update_or_create_assignment(assignment_id, **assignment)
 
             else:
-                with Gradebook(self.coursedir.db_url) as gb:
+                with Gradebook(self.coursedir.db_url, self.coursedir.course_id) as gb:
                     try:
                         gb.find_assignment(assignment_id)
                     except MissingEntry:

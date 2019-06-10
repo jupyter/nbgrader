@@ -13,12 +13,14 @@ from ..converters import Assign, Autograde, Feedback
 from ..exchange import ExchangeList, ExchangeRelease, ExchangeReleaseFeedback, ExchangeFetchFeedback, ExchangeCollect, ExchangeError, ExchangeSubmit
 from ..api import MissingEntry, Gradebook, Student, SubmittedAssignment
 from ..utils import parse_utc, temp_attrs, capture_log, as_timezone, to_numeric_tz
+from ..auth import Authenticator
 
 
 class NbGraderAPI(LoggingConfigurable):
     """A high-level API for using nbgrader."""
 
     coursedir = Instance(CourseDirectory, allow_none=True)
+    authenticator = Instance(Authenticator, allow_none=True)
 
     # The log level for the application
     log_level = Enum(
@@ -46,13 +48,16 @@ class NbGraderAPI(LoggingConfigurable):
             self.log_level = new
         self.log.setLevel(new)
 
-    def __init__(self, coursedir=None, **kwargs):
+    def __init__(self, coursedir=None, authenticator=None, **kwargs):
         """Initialize the API.
 
         Arguments
         ---------
         coursedir: :class:`nbgrader.coursedir.CourseDirectory`
             (Optional) A course directory object.
+        authenticator : :class:~`nbgrader.auth.BaseAuthenticator`
+            (Optional) An authenticator instance for communicating with an
+            external database.
         kwargs:
             Additional keyword arguments (e.g. ``parent``, ``config``)
 
@@ -65,9 +70,17 @@ class NbGraderAPI(LoggingConfigurable):
         else:
             self.coursedir = coursedir
 
+        if authenticator is None:
+            self.authenticator = Authenticator(parent=self)
+        else:
+            self.authenticator = authenticator
+
         if sys.platform != 'win32':
-            lister = ExchangeList(coursedir=self.coursedir, parent=self)
-            self.course_id = lister.course_id
+            lister = ExchangeList(
+                coursedir=self.coursedir,
+                authenticator=self.authenticator,
+                parent=self)
+            self.course_id = self.coursedir.course_id
             self.exchange = lister.root
 
             try:
@@ -95,7 +108,7 @@ class NbGraderAPI(LoggingConfigurable):
         :func:`~nbgrader.api.Gradebook.close`.
 
         """
-        return Gradebook(self.coursedir.db_url)
+        return Gradebook(self.coursedir.db_url, self.course_id)
 
     def get_source_assignments(self):
         """Get the names of all assignments in the `source` directory.
@@ -142,7 +155,10 @@ class NbGraderAPI(LoggingConfigurable):
 
         """
         if self.exchange_is_functional:
-            lister = ExchangeList(coursedir=self.coursedir, parent=self)
+            lister = ExchangeList(
+                coursedir=self.coursedir,
+                authenticator=self.authenticator,
+                parent=self)
             released = set([x['assignment_id'] for x in lister.start()])
         else:
             released = set([])
@@ -624,7 +640,10 @@ class NbGraderAPI(LoggingConfigurable):
         # should be here already so we don't need to filter for only
         # existing notebooks in that case.
         if self.exchange_is_functional:
-            app = ExchangeSubmit(coursedir=self.coursedir, parent=self)
+            app = ExchangeSubmit(
+                    coursedir=self.coursedir,
+                    authenticator=self.authenticator,
+                    parent=self)
             if app.strict:
                 return sorted(notebooks, key=lambda x: x.id)
 
@@ -896,7 +915,10 @@ class NbGraderAPI(LoggingConfigurable):
         """
         if sys.platform != 'win32':
             with temp_attrs(self.coursedir, assignment_id=assignment_id):
-                app = ExchangeList(coursedir=self.coursedir, parent=self)
+                app = ExchangeList(
+                    coursedir=self.coursedir,
+                    authenticator=self.authenticator,
+                    parent=self)
                 app.remove = True
                 return capture_log(app)
 
@@ -920,7 +942,10 @@ class NbGraderAPI(LoggingConfigurable):
         """
         if sys.platform != 'win32':
             with temp_attrs(self.coursedir, assignment_id=assignment_id):
-                app = ExchangeRelease(coursedir=self.coursedir, parent=self)
+                app = ExchangeRelease(
+                    coursedir=self.coursedir,
+                    authenticator=self.authenticator,
+                    parent=self)
                 return capture_log(app)
 
     def collect(self, assignment_id, update=True):
@@ -946,7 +971,10 @@ class NbGraderAPI(LoggingConfigurable):
         """
         if sys.platform != 'win32':
             with temp_attrs(self.coursedir, assignment_id=assignment_id):
-                app = ExchangeCollect(coursedir=self.coursedir, parent=self)
+                app = ExchangeCollect(
+                    coursedir=self.coursedir,
+                    authenticator=self.authenticator,
+                    parent=self)
                 app.update = update
                 return capture_log(app)
 
@@ -1045,11 +1073,17 @@ class NbGraderAPI(LoggingConfigurable):
         """
         if student_id is not None:
             with temp_attrs(self.coursedir, assignment_id=assignment_id, student_id=student_id):
-                app = ExchangeReleaseFeedback(coursedir=self.coursedir, parent=self)
+                app = ExchangeReleaseFeedback(
+                    coursedir=self.coursedir,
+                    authentictor=self.authenticator,
+                    parent=self)
                 return capture_log(app)
         else:
             with temp_attrs(self.coursedir, assignment_id=assignment_id, student_id='*'):
-                app = ExchangeReleaseFeedback(coursedir=self.coursedir, parent=self)
+                app = ExchangeReleaseFeedback(
+                    coursedir=self.coursedir,
+                    authentictor=self.authenticator,
+                    parent=self)
                 return capture_log(app)
 
     def fetch_feedback(self, assignment_id, student_id):
@@ -1074,12 +1108,19 @@ class NbGraderAPI(LoggingConfigurable):
 
         """
         with temp_attrs(self.coursedir, assignment_id=assignment_id, student_id=student_id):
-            app = ExchangeFetchFeedback(coursedir=self.coursedir, parent=self)
+            app = ExchangeFetchFeedback(
+                coursedir=self.coursedir,
+                authentictor=self.authenticator,
+                parent=self)
             ret_dic = capture_log(app)
             # assignment tab needs a 'value' field with the info needed to repopulate
             # the tables.
         with temp_attrs(self.coursedir, assignment_id='*', student_id=student_id):
-            lister_rel = ExchangeList(inbound=False, cached=True, coursedir=self.coursedir, config=self.config)
+            lister_rel = ExchangeList(
+                inbound=False, cached=True,
+                coursedir=self.coursedir,
+                authenticator=self.authenticator,
+                config=self.config)
             assignments = lister_rel.start()
             ret_dic["value"] = sorted(assignments, key=lambda x: (x['course_id'], x['assignment_id']))
         return ret_dic

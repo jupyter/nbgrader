@@ -18,7 +18,7 @@ class ExchangeList(Exchange):
         pass
 
     def init_dest(self):
-        course_id = self.course_id if self.course_id else '*'
+        course_id = self.coursedir.course_id if self.coursedir.course_id else '*'
         assignment_id = self.coursedir.assignment_id if self.coursedir.assignment_id else '*'
         student_id = self.coursedir.student_id if self.coursedir.student_id else '*'
 
@@ -58,8 +58,16 @@ class ExchangeList(Exchange):
 
     def parse_assignments(self):
         assignments = []
+        if self.coursedir.student_id:
+            courses = self.authenticator.get_student_courses(self.coursedir.student_id)
+        else:
+            courses = None
+
         for path in self.assignments:
             info = self.parse_assignment(path)
+            if courses is not None and info['course_id'] not in courses:
+                continue
+
             if self.path_includes_course:
                 root = os.path.join(info['course_id'], info['assignment_id'])
             else:
@@ -89,21 +97,21 @@ class ExchangeList(Exchange):
                 if info['status'] == 'submitted':
                     nb_hash = notebook_hash(notebook)
                     notebookDir, notebookFilename = os.path.split(notebook)
-                    notebookName, _ = os.path.splitext(notebookFilename)       
-                    feedbackpath = os.path.join(self.root, info['course_id'], 'feedback', '{0}.html'.format(nb_hash))  
+                    notebookName, _ = os.path.splitext(notebookFilename)
+                    feedbackpath = os.path.join(self.root, info['course_id'], 'feedback', '{0}.html'.format(nb_hash))
                     # notebookDir should have the course_did in it if we have multiple courses ...
                     if self.path_includes_course:
                         nbdir = os.path.join(info['course_id'], info['assignment_id'])
                     else:
                         nbdir = os.path.join(info['assignment_id'])
                     self.dest_path = os.path.abspath(os.path.join('.', root))
-                    localFeedbackPath = os.path.join(nbdir, 'feedback', info['timestamp'], '{0}.html'.format(notebookName))  
+                    localFeedbackPath = os.path.join(nbdir, 'feedback', info['timestamp'], '{0}.html'.format(notebookName))
                     hasLocalFeedback = os.path.isfile(localFeedbackPath)
                     # could check for new version here
-                    nbInfo['hasLocalFeedback'] = hasLocalFeedback 
+                    nbInfo['hasLocalFeedback'] = hasLocalFeedback
                     feedbackAvailable = os.path.exists(feedbackpath)
                     if feedbackAvailable:
-                        nbInfo['feedbackPath'] = feedbackpath 
+                        nbInfo['feedbackPath'] = feedbackpath
                         hasFeedback = True
                     if hasLocalFeedback:
                         nbInfo['localFeedbackPath'] = localFeedbackPath
@@ -111,7 +119,7 @@ class ExchangeList(Exchange):
                         allFeedbackDownloaded = False
 
                 info['notebooks'].append(nbInfo)
-            
+
             info['hasFeedback'] = hasFeedback
             info['allFeedbackDownloaded'] = allFeedbackDownloaded
             assignments.append(info)
@@ -121,7 +129,7 @@ class ExchangeList(Exchange):
     def list_files(self):
         """List files."""
         assignments = self.parse_assignments()
-            
+
         if self.inbound or self.cached:
             self.log.info("Submitted assignments:")
             for info in assignments:
