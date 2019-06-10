@@ -16,6 +16,14 @@ branch_labels = None
 depends_on = None
 
 
+def _get_or_create_table(*args):
+    try:
+        table = op.create_table(*args)
+    except sa.exc.OperationalError:
+        table = sa.sql.table(*args)
+    return table
+
+
 def upgrade():
     """
     To upgrade we need to split the grade_cell and solution_cell database
@@ -26,16 +34,15 @@ def upgrade():
     we drop the old tables and rename the temporary tables to the
     original names.
     """
-
-    new_grade_table = sa.sql.table(
+    new_grade_table = _get_or_create_table(
         'grade_cells',
         sa.Column('id', sa.VARCHAR(32), nullable=False),
         sa.Column('max_score', sa.Float(), nullable=False),
         sa.Column('cell_type', sa.VARCHAR(8), nullable=False),
     )
 
-    new_solution_table = sa.sql.table(
-        'solutions_cells',
+    new_solution_table = _get_or_create_table(
+        'solution_cells',
         sa.Column('id', sa.VARCHAR(32), nullable=False),
     )
 
@@ -59,7 +66,7 @@ def upgrade():
         sa.Column('notebook_id', sa.VARCHAR(32)),
     )
 
-    base_cell_table = sa.sql.table(
+    base_cell_table = _get_or_create_table(
         'base_cell',
         sa.Column('id', sa.VARCHAR(32), nullable=False),
         sa.Column('name', sa.VARCHAR(128), nullable=False),
@@ -69,44 +76,43 @@ def upgrade():
 
     connection = op.get_bind()
     results = connection.execute(sa.select([
-            old_grade_table.c.name,
-            old_grade_table.c.id,
-            old_grade_table.c.cell_type,
-            old_grade_table.c.notebook_id,
-            old_grade_table.c.max_score
-            ])).fetchall()
+        old_grade_table.c.name,
+        old_grade_table.c.id,
+        old_grade_table.c.cell_type,
+        old_grade_table.c.notebook_id,
+        old_grade_table.c.max_score
+        ])).fetchall()
 
     # copy info to the base_cell table
-    cells = [
+    base_grade_cells = [
         {
             'name': name,
             'id': cellid,
             'type': 'GradeCell',
             'notebook_id': notebook_id,
-        } for name, cellid, _, notebook_id, _ in results
-            ]
+        } for name, cellid, _, notebook_id, _ in results]
 
-    op.bulk_insert(base_cell_table, cells)
+    op.bulk_insert(base_cell_table, base_grade_cells)
 
     # copy the grade_cell specific info to the grade_cells temporary database
-    cells = [
+    grade_cells = [
         {
-         'id': cellid,
-         'type': celltype,
-         'max_score': max_score,
+            'id': cellid,
+            'type': celltype,
+            'max_score': max_score,
         } for _, cellid, celltype, _, max_score in results]
 
-    op.bulk_insert(new_grade_table, cells)
+    op.bulk_insert(new_grade_table, grade_cells)
 
     # now transfer the solution cells...
     results = connection.execute(sa.select([
-            old_solution_table.c.name,
-            old_solution_table.c.id,
-            old_solution_table.c.notebook_id,
-            ])).fetchall()
+        old_solution_table.c.name,
+        old_solution_table.c.id,
+        old_solution_table.c.notebook_id,
+        ])).fetchall()
 
     # copy info to the base_cell table
-    cells = [
+    base_solution_cells = [
         {
             'name': name,
             'id': cellid,
@@ -114,21 +120,20 @@ def upgrade():
             'notebook_id': notebook_id,
         } for name, cellid, notebook_id in results]
 
-    op.bulk_insert(base_cell_table, cells)
+    op.bulk_insert(base_cell_table, base_solution_cells)
 
-    # copy the solution_cell specific info to the grade_cells
+    # copy the solution_cell specific info to the solution_cells
     # temporary database
-    cells = [
+    solution_cells = [
         {
-         'id': cellid,
+            'id': cellid,
         } for _, cellid, _ in results]
 
-    op.bulk_insert(new_solution_table, cells)
+    op.bulk_insert(new_solution_table, solution_cells)
 
+    # drop the old tables
     op.drop_table(u'grade_cell')
     op.drop_table(u'solution_cell')
-    op.rename_table('solution_cells', 'solution_cell')
-    op.rename_table('grade_cells', 'grade_cell')
 
 
 def downgrade():

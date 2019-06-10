@@ -391,6 +391,20 @@ class TestNbGraderDb(BaseTestApp):
         # test upgrading with a current database
         run_nbgrader(["db", "upgrade"])
 
+    def test_upgrade_old_db_no_assign(self, course_dir):
+        # add assignment files
+        self._copy_file(join("files", "test.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
+        self._copy_file(join("files", "test.ipynb"), join(course_dir, "source", "ps1", "p2.ipynb"))
+
+        # replace the gradebook with an old version
+        self._copy_file(join("files", "gradebook.db"), join(course_dir, "gradebook.db"))
+
+        # upgrade the database
+        run_nbgrader(["db", "upgrade"])
+
+        # check that nbgrader assign passes
+        run_nbgrader(["assign", "ps1"])
+
     def test_upgrade_old_db(self, course_dir):
         # add assignment files
         self._copy_file(join("files", "test.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
