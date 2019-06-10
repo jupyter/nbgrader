@@ -132,23 +132,26 @@ def test_determine_grade_code_grade_and_solution():
     assert utils.determine_grade(cell) == (None, 10)
 
 def test_get_partial_grade():
+    # test single value in list
     test_data = { "data": { "text/plain": [ "0.6" ] } }
-    assert utils.get_partial_grade(test_data) == 0.6
+    assert utils.get_partial_grade(test_data,1.0) == 0.6
 
+    # test single value not in list
     test_data = { "data": { "text/plain": "6.0" } }
-    assert utils.get_partial_grade(test_data) == 6.0
+    assert utils.get_partial_grade(test_data,10.0) == 6.0
 
-    test_data = { "data": { "text/plain": [ "abcd" ] } }
-    with pytest.raises(ValueError):
-        utils.get_partial_grade(test_data)
+    # test string in list, should assume partial credit not intended
+    test_data = { "data": { "text/plain": [ "'this is a string'" ] } }
+    assert utils.get_partial_grade(test_data,2.0) == 2.0
 
-    test_data = { "data": { "text/plain": [ "0.6", "abcd" ] } }
+    # test returning too many points
+    test_data = { "data": { "text/plain": [ "2.0" ] } }
     with pytest.raises(ValueError):
-        utils.get_partial_grade(test_data)
+        utils.get_partial_grade(test_data, 1.0)
 
     test_data = { "fake_key": 4 }
     with pytest.raises(KeyError):
-        utils.get_partial_grade(test_data)
+        utils.get_partial_grade(test_data, 2.0)
 
 def test_determine_grade_code_partial_credit():
     # create grade cell with max_points == 5
@@ -163,7 +166,7 @@ def test_determine_grade_code_partial_credit():
         ]
     assert utils.determine_grade(cell) == (3,5)
 
-    # should return max_grade when partial_credit > max_grade
+    # should give error when partial_credit > max_grade
     cell.outputs = []
     test_data = {
         "text/plain": "5.5"
@@ -173,7 +176,8 @@ def test_determine_grade_code_partial_credit():
         execution_count=1,
         data=test_data)
         ]
-    assert utils.determine_grade(cell) == (5,5)
+    with pytest.raises(ValueError):
+        utils.determine_grade(cell)
 
     cell.outputs = []
     test_data = {
@@ -184,8 +188,7 @@ def test_determine_grade_code_partial_credit():
         execution_count=1,
         data=test_data)
         ]
-    with pytest.raises(ValueError):
-        utils.determine_grade(cell)
+    assert utils.determine_grade(cell) == (5,5)
 
 def test_determine_grade_markdown_grade_and_solution():
     cell = create_grade_and_solution_cell('test', "markdown", "foo", 10)

@@ -58,28 +58,39 @@ def is_locked(cell):
     else:
         return cell.metadata['nbgrader'].get('locked', False)
 
-def get_partial_grade(output):
-    # check that output["data"]["text/plain"] exists. It might be a list (in which
-    # check that is a single item) or might be a string. The value should be
-    # castable to a float that is greater than 0.
+def get_partial_grade(output, max_points, log=None):
+    # check that output["data"]["text/plain"] exists
     if not output["data"]["text/plain"]:
         raise KeyError("output ['data']['text/plain'] does not exist")
     grade = output["data"]["text/plain"]
+    warning_msg = """For autograder tests, expecting output to indicate
+    partial credit and be single value between 0.0 and max_points.
+    Currently treating other output as full credit, but future releases
+    may treat as error."""
+    # For partial credit, expecting grade to be a value between 0 and max_points
+    # A valid value for key output["data"]["text/plain"] can be a list or a string
     if (isinstance(grade,list)):
         if (len(grade)>1):
-            raise ValueError("partial credit cell must output single value")
-        else:
-            grade = grade[0]
+            if log:
+                log.warning(warning_msg)
+            return max_points
+        grade = grade[0]
     try:
         grade = float(grade)
-        if (grade > 0.0):
-            return grade
-        else:
-            raise ValueError("partial credit cell must return value greater than 0")
     except ValueError:
-        raise ValueError("partial credit cell must return value greater than 0")
+        if log:
+            log.warning(warning_msg)
+        return max_points
+    if (grade > 0.0):
+        if (grade > max_points):
+            raise ValueError("partial credit cannot be greater than maximum points for cell")
+        return grade
+    else:
+        if log:
+            log.warning(warning_msg)
+        return max_points
 
-def determine_grade(cell):
+def determine_grade(cell, log=None):
     if not is_grade(cell):
         raise ValueError("cell is not a grade cell")
 
@@ -104,11 +115,9 @@ def determine_grade(cell):
                 return 0, max_points
             # if not error, then check for option 2, partial credit
             if output.output_type == 'execute_result':
-                # is there a single result between 0 and 1?
-                partial_grade = get_partial_grade(output)
-                # return the partial credit, or the maximum points, whichever
-                # is less (i.e. will not return partial_grade > max_points)
-                return min(partial_grade,max_points), max_points
+                # is there a single result that can be cast to a float?
+                partial_grade = get_partial_grade(output, max_points, log)
+                return partial_grade, max_points
 
         # otherwise, assume all fine and return all the points
         return max_points, max_points

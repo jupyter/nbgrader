@@ -106,6 +106,7 @@ class Validator(LoggingConfigurable):
 
     def _extract_error(self, cell):
         errors = []
+
         if cell.cell_type == "code":
             for output in cell.outputs:
                 if output.output_type == "error":
@@ -235,12 +236,12 @@ class Validator(LoggingConfigurable):
 
             # if it's a grade cell, the check the grade
             if utils.is_grade(cell):
-                score, max_score = utils.determine_grade(cell)
+                score, max_score = utils.determine_grade(cell, self.log)
 
                 # it's a markdown cell, so we can't do anything
                 if score is None:
                     pass
-                elif score == 0:
+                elif score < max_score:
                     failed.append(cell)
             elif self.validate_all and cell.cell_type == 'code':
                 for output in cell.outputs:
@@ -258,12 +259,12 @@ class Validator(LoggingConfigurable):
 
             # if it's a grade cell, the check the grade
             if utils.is_grade(cell):
-                score, max_score = utils.determine_grade(cell)
+                score, max_score = utils.determine_grade(cell, self.log)
 
                 # it's a markdown cell, so we can't do anything
                 if score is None:
                     pass
-                elif score >= max_score:
+                elif score == max_score:
                     passed.append(cell)
 
         return passed
