@@ -433,6 +433,33 @@ def test_remove_notebook(assignment):
             assignment.find_notebook(nb.name, 'foo')
 
 
+def test_course_id_constructor():
+    gb = api.Gradebook("sqlite:///:memory:")
+    assert gb.db.query(api.Course).first().id == "default_course"
+
+def test_course_id_multiple_assignments():
+    course_one = "course-one"
+    course_two = "course-two"
+
+    gb_one = api.Gradebook("sqlite:///:memory:", course_id=course_one)
+    gb_two = api.Gradebook("sqlite:///:memory:", course_id=course_two)
+
+    assignment_one = gb_one.add_assignment('foo')
+    assignent_two = gb_two.add_assignment('bar')
+
+    assert assignment_one.course_id == course_one
+    assert assignent_two.course_id == course_two
+
+    assert len(gb_one.db.query(api.Course).all()) == 1
+    assert gb_one.db.query(api.Course).first().id == course_one
+    assert gb_one.db.query(api.Assignment).first().course_id == course_one
+    assert gb_one.db.query(api.Assignment).first().course == gb_one.db.query(api.Course).first() 
+
+    assert len(gb_two.db.query(api.Course).all()) == 1
+    assert gb_two.db.query(api.Course).first().id == course_two
+    assert gb_two.db.query(api.Assignment).first().course_id == course_two
+    assert gb_two.db.query(api.Assignment).first().course == gb_two.db.query(api.Course).first()
+
 # Test grade cells
 
 def test_add_grade_cell(gradebook):
