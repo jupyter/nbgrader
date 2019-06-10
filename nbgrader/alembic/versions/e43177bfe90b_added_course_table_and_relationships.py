@@ -16,11 +16,25 @@ branch_labels = None
 depends_on = None
 
 
+def _get_or_create_table(*args):
+    try:
+        table = op.create_table(*args)
+    except sa.exc.OperationalError:
+        table = sa.sql.table(*args)
+    return table
+
+
 def upgrade():
     """
     This migrations adds a course column to the assignment table
     and a matching foreign key into the course table
     """
+
+    new_course_table = _get_or_create_table(
+        'course',
+        sa.Column("id", sa.String(128), unique=True,
+                  primary_key=True, nullable=False),
+    )
 
     # If the course table is empty, create a default course
     connection = op.get_bind()
@@ -45,3 +59,5 @@ def downgrade():
 
         batch_op.drop_constraint('fk_course_assignment', type_='foreignkey')
         batch_op.drop_column('assignment', 'course_id')
+
+    op.drop_table('course')
