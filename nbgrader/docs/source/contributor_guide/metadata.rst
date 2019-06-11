@@ -4,7 +4,7 @@ JSON Metadata Format
 nbgrader relies on metadata stored in the JSON notebook source. When you create
 a notebook using the "Create Assignment" extension, this extension saves
 various keys into the metadata that it then relies on during the steps of
-``nbgrader assign``. The ``nbgrader assign`` command also adds new metadata to
+``nbgrader generate_assignment``. The ``nbgrader generate_assignment`` command also adds new metadata to
 the notebooks, which is used by ``nbgrader validate`` and ``nbgrader
 autograde``.
 
@@ -36,7 +36,7 @@ the following optional key:
 
 .. data:: cell_type
 
-    Added by ``nbgrader assign``.
+    Added by ``nbgrader generate_assignment``.
 
     This is the original cell type for the cell, which is used by ``nbgrader
     validate`` to determine whether the cell type has been changed by the
@@ -92,7 +92,7 @@ The metadata may contain the following keys:
 
 .. data:: checksum
 
-    Added by ``nbgrader assign``.
+    Added by ``nbgrader generate_assignment``.
 
     This is the checksum of the cell's contents that can then be used by
     ``nbgrader validate`` and ``nbgrader autograde`` to determine whether

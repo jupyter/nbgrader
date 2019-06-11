@@ -39,7 +39,7 @@ The **command line tools** offer an efficient way for the instructor to
 generate, assign, release, collect, and grade notebooks. Here are some of the
 commands:
 
-* `nbgrader assign`: create a student version of a notebook
+* `nbgrader generate_assignment`: create a student version of a notebook
 * `nbgrader release`: release a notebook to students
 * `nbgrader collect`: collect students' submissions
 * `nbgrader autograde`: autograde students' submissions

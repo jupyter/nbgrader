@@ -1,5 +1,6 @@
 from .baseapp import NbGrader
 from .assignapp import AssignApp
+from .generateassignmentapp import GenerateAssignmentApp
 from .autogradeapp import AutogradeApp
 from .feedbackapp import FeedbackApp
 from .formgradeapp import FormgradeApp
@@ -28,6 +29,7 @@ from .api import NbGraderAPI
 __all__ = [
     'NbGraderApp',
     'AssignApp',
+    'GenerateAssignmentApp',
     'AutogradeApp',
     'FeedbackApp',
     'FormgradeApp',

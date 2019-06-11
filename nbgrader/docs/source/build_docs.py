@@ -24,7 +24,7 @@ def autogen_command_line(root):
     )
 
     apps = [
-        'AssignApp',
+        'GenerateAssignmentApp',
         'AutogradeApp',
         'CollectApp',
         'DbAssignmentAddApp',

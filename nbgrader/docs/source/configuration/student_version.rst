@@ -4,10 +4,10 @@ Customizing how the student version of an assignment looks
 .. seealso::
 
     :doc:`/user_guide/creating_and_grading_assignments`
-        Documentation for ``nbgrader assign``, ``nbgrader autograde``, and ``nbgrader feedback``.
+        Documentation for ``nbgrader generate_assignment``, ``nbgrader autograde``, and ``nbgrader feedback``.
 
-    :doc:`/command_line_tools/nbgrader-assign`
-        Command line options for ``nbgrader assign``
+    :doc:`/command_line_tools/nbgrader-generate-assignment`
+        Command line options for ``nbgrader generate_assignment``
 
     :doc:`nbgrader_config`
         Details on ``nbgrader_config.py``
@@ -18,7 +18,7 @@ Customizing how the student version of an assignment looks
 Default behavior
 ^^^^^^^^^^^^^^^^
 
-By default, ``nbgrader assign`` will replace regions beginning with
+By default, ``nbgrader generate_assignment`` will replace regions beginning with
 ``BEGIN SOLUTION`` and ``END SOLUTION`` comment delimeters with:
 
 .. code:: python
@@ -132,7 +132,7 @@ can be configured through the ``ClearSolutions.text_stub`` option:
 Default behavior
 ^^^^^^^^^^^^^^^^
 
-By default, ``nbgrader assign`` will remove tests wrapped within the
+By default, ``nbgrader generate_assignment`` will remove tests wrapped within the
 ``BEGIN HIDDEN TESTS`` and ``END HIDDEN TESTS`` comment delimeters, for
 example:
 

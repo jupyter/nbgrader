@@ -4,12 +4,13 @@ import sys
 import os
 import six
 import logging
+import warnings
 
 from traitlets.config import LoggingConfigurable, Config
 from traitlets import Instance, Enum, Unicode, observe
 
 from ..coursedir import CourseDirectory
-from ..converters import Assign, Autograde, Feedback
+from ..converters import GenerateAssignment, Autograde, Feedback
 from ..exchange import ExchangeList, ExchangeRelease, ExchangeReleaseFeedback, ExchangeFetchFeedback, ExchangeCollect, ExchangeError, ExchangeSubmit
 from ..api import MissingEntry, Gradebook, Student, SubmittedAssignment
 from ..utils import parse_utc, temp_attrs, capture_log, as_timezone, to_numeric_tz
@@ -865,8 +866,17 @@ class NbGraderAPI(LoggingConfigurable):
         submissions.sort(key=lambda x: x["name"])
         return submissions
 
-    def assign(self, assignment_id, force=True, create=True):
-        """Run ``nbgrader assign`` for a particular assignment.
+    def assign(self, *args, **kwargs):
+        """Deprecated, please use `generate_assignment` instead."""
+        msg = (
+            "The `assign` method is deprecated, please use `generate_assignment` "
+            "instead. This method will be removed in a future version of nbgrader.")
+        warnings.warn(msg, DeprecationWarning)
+        self.log.warning(msg)
+        return self.generate_assignment(*args, **kwargs)
+
+    def generate_assignment(self, assignment_id, force=True, create=True):
+        """Run ``nbgrader generate_assignment`` for a particular assignment.
 
         Arguments
         ---------
@@ -890,7 +900,7 @@ class NbGraderAPI(LoggingConfigurable):
 
         """
         with temp_attrs(self.coursedir, assignment_id=assignment_id):
-            app = Assign(coursedir=self.coursedir, parent=self)
+            app = GenerateAssignment(coursedir=self.coursedir, parent=self)
             app.force = force
             app.create_assignment = create
             return capture_log(app)

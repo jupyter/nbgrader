@@ -69,13 +69,13 @@ class TestNbGraderUpdate(BaseTestApp):
             fh.write("""c.CourseDirectory.db_students = [dict(id="foo"), dict(id="bar")]""")
 
         self._copy_file(join("files", "test-v0.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
-        run_nbgrader(["assign", "ps1", "--db", db], retcode=1)
+        run_nbgrader(["generate_assignment", "ps1", "--db", db], retcode=1)
 
         # now update the metadata
         run_nbgrader(["update", course_dir])
 
         # now assign should suceed
-        run_nbgrader(["assign", "ps1", "--db", db])
+        run_nbgrader(["generate_assignment", "ps1", "--db", db])
 
     def test_update_autograde(self, db, course_dir):
         with open("nbgrader_config.py", "a") as fh:
@@ -83,7 +83,7 @@ class TestNbGraderUpdate(BaseTestApp):
             fh.write("""c.CourseDirectory.db_students = [dict(id="foo"), dict(id="bar")]""")
 
         self._copy_file(join("files", "test.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
-        run_nbgrader(["assign", "ps1", "--db", db])
+        run_nbgrader(["generate_assignment", "ps1", "--db", db])
 
         # autograde should fail on old metadata, too
         self._copy_file(join("files", "test-v0.ipynb"), join(course_dir, "submitted", "foo", "ps1", "p1.ipynb"))
@@ -101,7 +101,7 @@ class TestNbGraderUpdate(BaseTestApp):
             fh.write("""c.CourseDirectory.db_students = [dict(id="foo"), dict(id="bar")]""")
 
         self._copy_file(join("files", "test-v0.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
-        run_nbgrader(["assign", "ps1", "--db", db, "--CheckCellMetadata.enabled=False"])
+        run_nbgrader(["generate_assignment", "ps1", "--db", db, "--CheckCellMetadata.enabled=False"])
 
         # autograde should fail on old metadata, too
         self._copy_file(join(course_dir, "release", "ps1", "p1.ipynb"), join(course_dir, "submitted", "foo", "ps1", "p1.ipynb"))

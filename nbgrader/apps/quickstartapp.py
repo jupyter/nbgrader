@@ -170,7 +170,7 @@ class QuickStartApp(NbGrader):
                     %s
 
                 Once you have edited them to your satisfaction, you can create
-                the student version by running `nbgrader assign ps1` from the
+                the student version by running `nbgrader generate_assignment ps1` from the
                 '%s' directory.
 
                 For further details, please see the full nbgrader documentation at:

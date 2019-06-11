@@ -21,7 +21,7 @@ assignments. For example:
     api = NbGraderAPI(config=config)
 
     # assuming source/ps1 exists
-    api.assign("ps1")
+    api.generate_assignment("ps1")
 
 For details on how to configure the API, see :doc:`/configuration/config_options`.
 

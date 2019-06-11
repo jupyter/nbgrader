@@ -36,6 +36,6 @@ Using pytest to run a single test module
 -----------------------------------------
 If you want to choose an even more specific subset of tests, you should run
 ``pytest`` directly. For example, to run only the tests for
-``nbgrader assign``::
+``nbgrader generate_assignment``::
 
     pytest nbgrader/tests/apps/test_nbgrader_assign.py
