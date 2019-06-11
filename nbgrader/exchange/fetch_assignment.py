@@ -11,6 +11,20 @@ class ExchangeFetchAssignment(Exchange):
 
     replace_missing_files = Bool(False, help="Whether to replace missing files on fetch").tag(config=True)
 
+    def _load_config(self, cfg, **kwargs):
+        if 'ExchangeFetch' in cfg:
+            self.log.warning(
+                "Use ExchangeFetchAssignment in config, not ExchangeFetch. Outdated config:\n%s",
+                '\n'.join(
+                    'ExchangeFetch.{key} = {value!r}'.format(key=key, value=value)
+                    for key, value in cfg.ExchangeFetchAssignment.items()
+                )
+            )
+            cfg.ExchangeFetchAssignment.merge(cfg.ExchangeFetch)
+            del cfg.ExchangeFetchAssignment
+
+        super(ExchangeFetchAssignment, self)._load_config(cfg, **kwargs)
+
     def init_src(self):
         if self.coursedir.course_id == '':
             self.fail("No course id specified. Re-run with --course flag.")
