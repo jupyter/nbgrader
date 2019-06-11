@@ -107,13 +107,22 @@ class Validator(LoggingConfigurable):
     def _extract_error(self, cell):
         errors = []
 
+        # possibilities:
+        # 1. the cell returned an error in cell.outputs
+        # 2. grade cell returned score < max_points (i.e. partial credit)
+        # 3. the student did not provide a response
         if cell.cell_type == "code":
             for output in cell.outputs:
                 if output.output_type == "error":
                     errors.append("\n".join(output.traceback))
 
             if len(errors) == 0:
-                errors.append("You did not provide a response.")
+                if utils.is_grade(cell):
+                    score, max_score = utils.determine_grade(cell, self.log)
+                    if (score < max_score):
+                        errors.append("Partial credit; passed some but not all of the tests")
+                else:
+                    errors.append("You did not provide a response.")
 
         else:
             errors.append("You did not provide a response.")
