@@ -43,7 +43,7 @@ commands:
 * `nbgrader release`: release a notebook to students
 * `nbgrader collect`: collect students' submissions
 * `nbgrader autograde`: autograde students' submissions
-* `nbgrader feedback`: create feedback files from graded submissions
+* `nbgrader generate_feedback`: create feedback files from graded submissions
 * `nbgrader release_feedback`: release the feeback files to students
 
 The **command line** also offers students a way of working with notebooks:

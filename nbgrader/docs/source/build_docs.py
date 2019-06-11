@@ -36,7 +36,7 @@ def autogen_command_line(root):
         'DbStudentListApp',
         'DbStudentRemoveApp',
         'ExportApp',
-        'FeedbackApp',
+        'GenerateFeedbackApp',
         'FetchApp',
         'ListApp',
         'NbGraderApp',

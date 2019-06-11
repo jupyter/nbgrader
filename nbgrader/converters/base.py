@@ -36,9 +36,10 @@ class BaseConverter(LoggingConfigurable):
     permissions = Integer(
         help=dedent(
             """
-            Permissions to set on files output by nbgrader. The default is generally
-            read-only (444), with the exception of nbgrader generate_assignment and nbgrader feedback,
-            in which case the user also has write permission.
+            Permissions to set on files output by nbgrader. The default is
+            generally read-only (444), with the exception of nbgrader
+            generate_assignment and nbgrader generate_feedback, in which case
+            the user also has write permission.
             """
         )
     ).tag(config=True)

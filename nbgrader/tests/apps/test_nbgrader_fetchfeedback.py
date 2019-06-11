@@ -82,7 +82,7 @@ class TestNbGraderFetchFeedback(BaseTestApp):
         self._submit("ps1", exchange, cache)
         self._collect("ps1", exchange)
         run_nbgrader(["autograde", "ps1", "--create", "--db", db])
-        run_nbgrader(["feedback", "ps1", "--db", db])
+        run_nbgrader(["generate_feedback", "ps1", "--db", db])
         run_nbgrader(["release_feedback", "ps1", "--Exchange.root={}".format(exchange), '--course', 'abc101'])
         run_nbgrader(["fetch_feedback", "ps1", "--Exchange.root={}".format(exchange), '--course', 'abc101'])
         assert os.path.isdir(join("ps1", "feedback"))
