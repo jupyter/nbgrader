@@ -10,8 +10,5 @@
  },
  "devDependencies": {
   "bower": "*"
- },
- "dependencies": {
-  "phantomjs": "^2.1.7"
  }
 }
