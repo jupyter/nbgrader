@@ -933,7 +933,7 @@ class NbGraderAPI(LoggingConfigurable):
                 return capture_log(app)
 
     def release(self, *args, **kwargs):
-        """Deprecated, please use `generate_assignment` instead."""
+        """Deprecated, please use `release_assignment` instead."""
         msg = (
             "The `release` method is deprecated, please use `release_assignment` "
             "instead. This method will be removed in a future version of nbgrader.")
