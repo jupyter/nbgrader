@@ -7,6 +7,7 @@ from .generatefeedbackapp import GenerateFeedbackApp
 from .formgradeapp import FormgradeApp
 from .validateapp import ValidateApp
 from .releaseapp import ReleaseApp
+from .releaseassignmentapp import ReleaseAssignmentApp
 from .releasefeedbackapp import ReleaseFeedbackApp
 from .collectapp import CollectApp
 from .fetchapp import FetchApp
@@ -37,6 +38,7 @@ __all__ = [
     'FormgradeApp',
     'ValidateApp',
     'ReleaseApp',
+    'ReleaseAssignmentApp',
     'ReleaseFeedbackApp',
     'CollectApp',
     'FetchApp',

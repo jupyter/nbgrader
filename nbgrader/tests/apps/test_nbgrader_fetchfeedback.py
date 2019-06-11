@@ -18,7 +18,7 @@ class TestNbGraderFetchFeedback(BaseTestApp):
 
     def _release(self, assignment, exchange, cache, course_dir, course="abc101"):
         run_nbgrader([
-            "release", assignment,
+            "release_assignment", assignment,
             "--course", course,
             "--Exchange.cache={}".format(cache),
             "--Exchange.root={}".format(exchange)

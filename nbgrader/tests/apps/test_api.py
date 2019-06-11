@@ -50,7 +50,7 @@ class TestNbGraderAPI(BaseTestApp):
         assert api.get_released_assignments() == set([])
 
         self._copy_file(join("files", "test.ipynb"), join(course_dir, "release", "ps1", "p1.ipynb"))
-        run_nbgrader(["release", "ps1", "--course", "abc101", "--Exchange.root={}".format(exchange)])
+        run_nbgrader(["release_assignment", "ps1", "--course", "abc101", "--Exchange.root={}".format(exchange)])
         assert api.get_released_assignments() == {"ps1"}
 
         api.course_id = None
@@ -203,7 +203,7 @@ class TestNbGraderAPI(BaseTestApp):
 
         # check the values once the assignment has been released and unreleased
         if sys.platform != "win32":
-            run_nbgrader(["release", "ps1", "--course", "abc101", "--Exchange.root={}".format(exchange)])
+            run_nbgrader(["release_assignment", "ps1", "--course", "abc101", "--Exchange.root={}".format(exchange)])
             a = api.get_assignment("ps1")
             assert set(a.keys()) == keys
             target = default.copy()
@@ -656,14 +656,22 @@ class TestNbGraderAPI(BaseTestApp):
         assert not result["success"]
 
     @notwindows
-    def test_release_and_unrelease(self, api, course_dir, db, exchange):
+    def test_release_deprecated(self, api, course_dir, db, exchange):
         self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
         result = api.generate_assignment("ps1")
         result = api.release("ps1")
         assert result["success"]
         assert os.path.exists(join(exchange, "abc101", "outbound", "ps1", "p1.ipynb"))
 
-        result = api.release("ps1")
+    @notwindows
+    def test_release_and_unrelease(self, api, course_dir, db, exchange):
+        self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
+        result = api.assign("ps1")
+        result = api.release_assignment("ps1")
+        assert result["success"]
+        assert os.path.exists(join(exchange, "abc101", "outbound", "ps1", "p1.ipynb"))
+
+        result = api.release_assignment("ps1")
         assert not result["success"]
 
         result = api.unrelease("ps1")
@@ -674,7 +682,7 @@ class TestNbGraderAPI(BaseTestApp):
     def test_collect(self, api, course_dir, db, exchange):
         self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
         result = api.generate_assignment("ps1")
-        result = api.release("ps1")
+        result = api.release_assignment("ps1")
         result = api.collect("ps1")
         assert result["success"]
         assert "No submissions" in result["log"]

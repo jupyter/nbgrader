@@ -1,99 +1,13 @@
-import os
-import shutil
-from stat import (
-    S_IRUSR, S_IWUSR, S_IXUSR,
-    S_IRGRP, S_IWGRP, S_IXGRP,
-    S_IROTH, S_IWOTH, S_IXOTH,
-    S_ISGID, ST_MODE
-)
+import warnings
+from .release_assignment import ExchangeReleaseAssignment
 
-from traitlets import Bool
+class ExchangeRelease(ExchangeReleaseAssignment):
 
-from .exchange import Exchange
-from ..utils import self_owned
-
-
-class ExchangeRelease(Exchange):
-
-    force = Bool(False, help="Force overwrite existing files in the exchange.").tag(config=True)
-
-    def ensure_root(self):
-        perms = S_IRUSR|S_IWUSR|S_IXUSR|S_IRGRP|S_IWGRP|S_IXGRP|S_IROTH|S_IWOTH|S_IXOTH
-
-        # if root doesn't exist, create it and set permissions
-        if not os.path.exists(self.root):
-            self.log.warning("Creating exchange directory: {}".format(self.root))
-            try:
-                os.makedirs(self.root)
-                os.chmod(self.root, perms)
-            except PermissionError:
-                self.fail("Could not create {}, permission denied.".format(self.root))
-
-        else:
-            old_perms = oct(os.stat(self.root)[ST_MODE] & 0o777)
-            new_perms = oct(perms & 0o777)
-            if old_perms != new_perms:
-                self.log.warning(
-                    "Permissions for exchange directory ({}) are invalid, changing them from {} to {}".format(
-                        self.root, old_perms, new_perms))
-                try:
-                    os.chmod(self.root, perms)
-                except PermissionError:
-                    self.fail("Could not change permissions of {}, permission denied.".format(self.root))
-
-    def init_src(self):
-        self.src_path = self.coursedir.format_path(self.coursedir.release_directory, '.', self.coursedir.assignment_id)
-        if not os.path.isdir(self.src_path):
-            source = self.coursedir.format_path(self.coursedir.source_directory, '.', self.coursedir.assignment_id)
-            if os.path.isdir(source):
-                # Looks like the instructor forgot to assign
-                self.fail("Assignment found in '{}' but not '{}', run `nbgrader generate_assignment` first.".format(
-                    source, self.src_path))
-            else:
-                self._assignment_not_found(
-                    self.src_path,
-                    self.coursedir.format_path(self.coursedir.release_directory, '.', '*'))
-
-    def init_dest(self):
-        if self.coursedir.course_id == '':
-            self.fail("No course id specified. Re-run with --course flag.")
-
-        self.course_path = os.path.join(self.root, self.coursedir.course_id)
-        self.outbound_path = os.path.join(self.course_path, 'outbound')
-        self.inbound_path = os.path.join(self.course_path, 'inbound')
-        self.dest_path = os.path.join(self.outbound_path, self.coursedir.assignment_id)
-        # 0755
-        self.ensure_directory(
-            self.course_path,
-            S_IRUSR|S_IWUSR|S_IXUSR|S_IRGRP|S_IXGRP|S_IROTH|S_IXOTH
-        )
-        # 0755
-        self.ensure_directory(
-            self.outbound_path,
-            S_IRUSR|S_IWUSR|S_IXUSR|S_IRGRP|S_IXGRP|S_IROTH|S_IXOTH
-        )
-        # 0733 with set GID so student submission will have the instructors group
-        self.ensure_directory(
-            self.inbound_path,
-            S_ISGID|S_IRUSR|S_IWUSR|S_IXUSR|S_IWGRP|S_IXGRP|S_IWOTH|S_IXOTH
-        )
-
-    def copy_files(self):
-        if os.path.isdir(self.dest_path):
-            if self.force:
-                self.log.info("Overwriting files: {} {}".format(
-                    self.coursedir.course_id, self.coursedir.assignment_id
-                ))
-                shutil.rmtree(self.dest_path)
-            else:
-                self.fail("Destination already exists, add --force to overwrite: {} {}".format(
-                    self.coursedir.course_id, self.coursedir.assignment_id
-                ))
-        self.log.info("Source: {}".format(self.src_path))
-        self.log.info("Destination: {}".format(self.dest_path))
-        self.do_copy(self.src_path, self.dest_path)
-        self.set_perms(
-            self.dest_path,
-            fileperms=(S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH),
-            dirperms=(S_IRUSR|S_IWUSR|S_IXUSR|S_IRGRP|S_IXGRP|S_IROTH|S_IXOTH))
-        self.log.info("Released as: {} {}".format(self.coursedir.course_id, self.coursedir.assignment_id))
+    def __init__(self, *args, **kwargs):
+        super(ExchangeRelease, self).__init__(*args, **kwargs)
+        msg = (
+            "The ExchangeRelease class is now deprecated, please use "
+            "ExchangeReleaseAssignment instead. This class will be removed in "
+            "a future version of nbgrader.")
+        warnings.warn(msg, DeprecationWarning)
+        self.log.warning(msg)

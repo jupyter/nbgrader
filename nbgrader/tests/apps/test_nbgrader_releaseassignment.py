@@ -13,7 +13,7 @@ class TestNbGraderRelease(BaseTestApp):
 
     def _release(self, assignment, exchange, flags=None, retcode=0):
         cmd = [
-            "release", assignment,
+            "release_assignment", assignment,
             "--course", "abc101",
             "--Exchange.root={}".format(exchange)
         ]
@@ -25,12 +25,12 @@ class TestNbGraderRelease(BaseTestApp):
 
     def test_help(self):
         """Does the help display without error?"""
-        run_nbgrader(["release", "--help-all"])
+        run_nbgrader(["release_assignment", "--help-all"])
 
     def test_no_course_id(self, exchange):
         """Does releasing without a course id thrown an error?"""
         cmd = [
-            "release", "ps1",
+            "release_assignment", "ps1",
             "--Exchange.root={}".format(exchange)
         ]
         run_nbgrader(cmd, retcode=1)
@@ -38,6 +38,15 @@ class TestNbGraderRelease(BaseTestApp):
     def test_release(self, exchange, course_dir):
         self._copy_file(join("files", "test.ipynb"), join(course_dir, "release", "ps1", "p1.ipynb"))
         self._release("ps1", exchange)
+        assert os.path.isfile(join(exchange, "abc101", "outbound", "ps1", "p1.ipynb"))
+
+    def test_release_deprecated(self, exchange, course_dir):
+        self._copy_file(join("files", "test.ipynb"), join(course_dir, "release", "ps1", "p1.ipynb"))
+        run_nbgrader([
+            "release_assignment", "ps1",
+            "--course", "abc101",
+            "--Exchange.root={}".format(exchange)
+        ])
         assert os.path.isfile(join(exchange, "abc101", "outbound", "ps1", "p1.ipynb"))
 
     def test_force_release(self, exchange, course_dir):

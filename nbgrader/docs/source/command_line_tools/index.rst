@@ -43,7 +43,7 @@ The following commands are meant for instructors, but are only relevant when usi
 .. toctree::
     :maxdepth: 1
 
-    nbgrader-release
+    nbgrader-release-assignment
     nbgrader-release-feedback
     nbgrader-list
     nbgrader-collect

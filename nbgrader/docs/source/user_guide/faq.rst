@@ -151,7 +151,7 @@ formgrade``, ``nbgrader generate_feedback``, ``nbgrader validate``, and
 ``nbgrader export``.
 
 However, the parts of nbgrader corresponding to file management (the
-"Assignment List" extension, ``nbgrader release``, ``nbgrader fetch``,
+"Assignment List" extension, ``nbgrader release_assignment``, ``nbgrader fetch``,
 ``nbgrader submit``, ``nbgrader collect``, ``nbgrader list``) will *not* work
 under Windows.
 
