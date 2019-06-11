@@ -1122,7 +1122,7 @@ def test_release_assignment(browser, port, gradebook):
 @notwindows
 @pytest.mark.nbextensions
 def test_collect_assignment(browser, port, gradebook):
-    run_nbgrader(["fetch", "ps2"])
+    run_nbgrader(["fetch_assignment", "ps2"])
     run_nbgrader(["submit", "ps2"])
     rmtree("ps2")
 

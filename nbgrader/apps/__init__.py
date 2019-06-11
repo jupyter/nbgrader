@@ -11,6 +11,7 @@ from .releaseassignmentapp import ReleaseAssignmentApp
 from .releasefeedbackapp import ReleaseFeedbackApp
 from .collectapp import CollectApp
 from .fetchapp import FetchApp
+from .fetchassignmentapp import FetchAssignmentApp
 from .fetchfeedbackapp import FetchFeedbackApp
 from .submitapp import SubmitApp
 from .listapp import ListApp
@@ -42,6 +43,7 @@ __all__ = [
     'ReleaseFeedbackApp',
     'CollectApp',
     'FetchApp',
+    'FetchAssignmentApp',
     'FetchFeedbackApp',
     'SubmitApp',
     'ListApp',
@@ -61,6 +63,6 @@ __all__ = [
     'DbAssignmentListApp',
     'UpdateApp',
     'ZipCollectApp',
-    'GenerateConfigApp'
+    'GenerateConfigApp',
     'NbGraderAPI'
 ]

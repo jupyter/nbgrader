@@ -18,7 +18,7 @@ class TestNbGraderCollect(BaseTestApp):
             "--Exchange.root={}".format(exchange)
         ])
         run_nbgrader([
-            "fetch", assignment,
+            "fetch_assignment", assignment,
             "--course", "abc101",
             "--Exchange.root={}".format(exchange)
         ])
