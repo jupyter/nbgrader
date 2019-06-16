@@ -41,7 +41,7 @@ def autogen_command_line(root):
         'ListApp',
         'NbGraderApp',
         'QuickStartApp',
-        'ReleaseApp',
+        'ReleaseAssignmentApp',
         'SubmitApp',
         'UpdateApp',
         'ValidateApp',

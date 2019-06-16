@@ -16,7 +16,7 @@ class TestNbGraderList(BaseTestApp):
     def _release(self, assignment, exchange, cache, course_dir, course="abc101"):
         self._copy_file(os.path.join("files", "test.ipynb"), os.path.join(course_dir, "release", assignment, "p1.ipynb"))
         run_nbgrader([
-            "release", assignment,
+            "release_assignment", assignment,
             "--course", course,
             "--Exchange.cache={}".format(cache),
             "--Exchange.root={}".format(exchange)

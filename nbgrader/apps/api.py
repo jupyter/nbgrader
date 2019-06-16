@@ -11,7 +11,7 @@ from traitlets import Instance, Enum, Unicode, observe
 
 from ..coursedir import CourseDirectory
 from ..converters import GenerateAssignment, Autograde, GenerateFeedback
-from ..exchange import ExchangeList, ExchangeRelease, ExchangeReleaseFeedback, ExchangeFetchFeedback, ExchangeCollect, ExchangeError, ExchangeSubmit
+from ..exchange import ExchangeList, ExchangeReleaseAssignment, ExchangeReleaseFeedback, ExchangeFetchFeedback, ExchangeCollect, ExchangeError, ExchangeSubmit
 from ..api import MissingEntry, Gradebook, Student, SubmittedAssignment
 from ..utils import parse_utc, temp_attrs, capture_log, as_timezone, to_numeric_tz
 from ..auth import Authenticator
@@ -932,8 +932,17 @@ class NbGraderAPI(LoggingConfigurable):
                 app.remove = True
                 return capture_log(app)
 
-    def release(self, assignment_id):
-        """Run ``nbgrader release`` for a particular assignment.
+    def release(self, *args, **kwargs):
+        """Deprecated, please use `release_assignment` instead."""
+        msg = (
+            "The `release` method is deprecated, please use `release_assignment` "
+            "instead. This method will be removed in a future version of nbgrader.")
+        warnings.warn(msg, DeprecationWarning)
+        self.log.warning(msg)
+        return self.release_assignment(*args, **kwargs)
+
+    def release_assignment(self, assignment_id):
+        """Run ``nbgrader release_assignment`` for a particular assignment.
 
         Arguments
         ---------
@@ -952,7 +961,7 @@ class NbGraderAPI(LoggingConfigurable):
         """
         if sys.platform != 'win32':
             with temp_attrs(self.coursedir, assignment_id=assignment_id):
-                app = ExchangeRelease(
+                app = ExchangeReleaseAssignment(
                     coursedir=self.coursedir,
                     authenticator=self.authenticator,
                     parent=self)

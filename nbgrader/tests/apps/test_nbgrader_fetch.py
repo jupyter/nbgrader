@@ -15,7 +15,7 @@ class TestNbGraderFetch(BaseTestApp):
     def _release(self, assignment, exchange, course_dir, course="abc101"):
         self._copy_file(join("files", "test.ipynb"), join(course_dir, "release", assignment, "p1.ipynb"))
         run_nbgrader([
-            "release", assignment,
+            "release_assignment", assignment,
             "--course", course,
             "--Exchange.root={}".format(exchange)
         ])

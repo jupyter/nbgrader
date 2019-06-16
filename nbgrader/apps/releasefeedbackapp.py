@@ -67,4 +67,4 @@ class ReleaseFeedbackApp(NbGrader):
         try:
             release_feedback.start()
         except ExchangeError:
-            self.fail("nbgrader release feedback failed")
+            self.fail("nbgrader release_feedback failed")

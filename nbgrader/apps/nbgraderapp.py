@@ -23,6 +23,7 @@ from . import (
     ReleaseFeedbackApp,
     ValidateApp,
     ReleaseApp,
+    ReleaseAssignmentApp,
     CollectApp,
     FetchApp,
     FetchFeedbackApp,
@@ -152,6 +153,14 @@ class NbGraderApp(NbGrader):
         ),
         release=(
             ReleaseApp,
+            dedent(
+                """
+                DEPRECATED: use release_assignment instead.
+                """
+            ).strip()
+        ),
+        release_assignment=(
+            ReleaseAssignmentApp,
             dedent(
                 """
                 Release an assignment to students through the nbgrader exchange.
