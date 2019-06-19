@@ -687,7 +687,7 @@ class TestNbGraderAPI(BaseTestApp):
         assert result["success"]
         assert "No submissions" in result["log"]
 
-        run_nbgrader(["fetch", "ps1", "--course", "abc101", "--Exchange.root={}".format(exchange)])
+        run_nbgrader(["fetch_assignment", "ps1", "--course", "abc101", "--Exchange.root={}".format(exchange)])
         run_nbgrader(["submit", "ps1", "--course", "abc101", "--Exchange.root={}".format(exchange)])
         username = get_username()
         result = api.collect("ps1")

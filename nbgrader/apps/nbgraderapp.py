@@ -26,6 +26,7 @@ from . import (
     ReleaseAssignmentApp,
     CollectApp,
     FetchApp,
+    FetchAssignmentApp,
     FetchFeedbackApp,
     SubmitApp,
     ListApp,
@@ -198,6 +199,14 @@ class NbGraderApp(NbGrader):
         ),
         fetch=(
             FetchApp,
+            dedent(
+                """
+                DEPRECATED: use fetch_assignment instead.
+                """
+            ).strip()
+        ),
+        fetch_assignment=(
+            FetchAssignmentApp,
             dedent(
                 """
                 Fetch an assignment from an instructor through the nbgrader exchange.

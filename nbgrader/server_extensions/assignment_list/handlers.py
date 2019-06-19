@@ -16,7 +16,7 @@ from jupyter_core.paths import jupyter_config_path
 
 from ...apps import NbGrader
 from ...coursedir import CourseDirectory
-from ...exchange import ExchangeList, ExchangeFetch, ExchangeSubmit
+from ...exchange import ExchangeList, ExchangeFetchAssignment, ExchangeSubmit
 from ...auth import Authenticator
 from ... import __version__ as nbgrader_version
 
@@ -165,7 +165,7 @@ class AssignmentList(LoggingConfigurable):
 
                 coursedir = CourseDirectory(config=config)
                 authenticator = Authenticator(config=config)
-                fetch = ExchangeFetch(
+                fetch = ExchangeFetchAssignment(
                     coursedir=coursedir,
                     authenticator=authenticator,
                     config=config)

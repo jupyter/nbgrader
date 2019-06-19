@@ -24,7 +24,7 @@ class TestNbGraderList(BaseTestApp):
 
     def _fetch(self, assignment, exchange, cache, course="abc101", flags=None):
         cmd = [
-            "fetch", assignment,
+            "fetch_assignment", assignment,
             "--course", course,
             "--Exchange.cache={}".format(cache),
             "--Exchange.root={}".format(exchange)

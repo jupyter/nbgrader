@@ -22,7 +22,7 @@ class TestNbGraderFetch(BaseTestApp):
 
     def _fetch(self, assignment, exchange, flags=None, retcode=0, course="abc101"):
         cmd = [
-            "fetch", assignment,
+            "fetch_assignment", assignment,
             "--course", course,
             "--Exchange.root={}".format(exchange)
         ]
@@ -34,7 +34,7 @@ class TestNbGraderFetch(BaseTestApp):
 
     def _fetch_multi(self, assignments, exchange, flags=None, retcode=0, course="abc101"):
         cmd = [
-            "fetch",
+            "fetch_assignment",
             "--course", course,
             "--Exchange.root={}".format(exchange)
         ]
@@ -47,13 +47,13 @@ class TestNbGraderFetch(BaseTestApp):
 
     def test_help(self):
         """Does the help display without error?"""
-        run_nbgrader(["fetch", "--help-all"])
+        run_nbgrader(["fetch_assignment", "--help-all"])
 
     def test_no_course_id(self, exchange, course_dir):
         """Does releasing without a course id thrown an error?"""
         self._release("ps1", exchange, course_dir)
         cmd = [
-            "fetch", "ps1",
+            "fetch_assignment", "ps1",
             "--Exchange.root={}".format(exchange)
         ]
         run_nbgrader(cmd, retcode=1)
@@ -82,6 +82,15 @@ class TestNbGraderFetch(BaseTestApp):
         with io.open(join("ps1", "p1.ipynb"), mode="r", encoding='utf-8') as fh:
             contents2 = fh.read()
         assert contents1 == contents2
+
+    def test_deprecated(self, exchange, course_dir):
+        self._release("ps1", exchange, course_dir)
+        run_nbgrader([
+            "fetch", "ps1",
+            "--course", "abc101",
+            "--Exchange.root={}".format(exchange)
+        ])
+        assert os.path.isfile(join("ps1", "p1.ipynb"))
 
     def test_fetch_with_assignment_flag(self, exchange, course_dir):
         self._release("ps1", exchange, course_dir)

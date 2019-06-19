@@ -58,7 +58,7 @@ Note that these commands are meant for students, but are only relevant when usin
     :maxdepth: 1
 
     nbgrader-list
-    nbgrader-fetch
+    nbgrader-fetch-assignment
     nbgrader-fetch-feedback
     nbgrader-validate
     nbgrader-submit
