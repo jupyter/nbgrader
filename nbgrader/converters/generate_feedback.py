@@ -36,7 +36,7 @@ class GenerateFeedback(BaseConverter):
 
     @default("permissions")
     def _permissions_default(self):
-        return 644
+        return 664 if self.coursedir.groupshared else 644
 
     def _load_config(self, cfg, **kwargs):
         if 'Feedback' in cfg:
