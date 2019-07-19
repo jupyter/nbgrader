@@ -37,7 +37,7 @@ class ExchangeSubmit(Exchange):
         else:
             root = self.coursedir.assignment_id
             other_path = "*"
-        self.src_path = os.path.abspath(root)
+        self.src_path = os.path.abspath(os.path.join(self.assignment_dir, root))
         self.coursedir.assignment_id = os.path.split(self.src_path)[-1]
         if not os.path.isdir(self.src_path):
             self._assignment_not_found(self.src_path, os.path.abspath(other_path))

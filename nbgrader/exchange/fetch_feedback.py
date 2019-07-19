@@ -41,7 +41,7 @@ class ExchangeFetchFeedback(Exchange):
             root = os.path.join(self.coursedir.course_id, self.coursedir.assignment_id)
         else:
             root = self.coursedir.assignment_id
-        self.dest_path = os.path.abspath(os.path.join('.', root, 'feedback'))
+        self.dest_path = os.path.abspath(os.path.join(self.assignment_dir, root, 'feedback'))
 
     def do_copy(self, src, dest):
         self.log.info("Files to copy: {}".format(self.feedbackFiles))

@@ -69,9 +69,9 @@ class ExchangeList(Exchange):
                 continue
 
             if self.path_includes_course:
-                root = os.path.join(info['course_id'], info['assignment_id'])
+                root = os.path.join(self.assignment_dir, info['course_id'], info['assignment_id'])
             else:
-                root = info['assignment_id']
+                root = os.path.join(self.assignment_dir, info['assignment_id'])
 
             if self.inbound or self.cached:
                 info['status'] = 'submitted'
