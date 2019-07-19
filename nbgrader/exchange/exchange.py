@@ -131,16 +131,21 @@ class Exchange(LoggingConfigurable):
         if self.coursedir.groupshared:
             for dirname, _, filenames in os.walk(dest):
                 # dirs become ug+rwx
-                try:
-                    os.chmod(dirname, (os.stat(dirname).st_mode|0o2770) & 0o2777)
-                except PermissionError:
-                    pass
+                st_mode = os.stat(dirname).st_mode
+                if st_mode & 0o2770 != 0o2770:
+                    try:
+                        os.chmod(dirname, (st_mode|0o2770) & 0o2777)
+                    except PermissionError:
+                        self.log.warning("Could not update permissions of %s to make it groupshared", dirname)
+
                 for filename in filenames:
                     filename = os.path.join(dirname, filename)
-                    try:
-                        os.chmod(filename, (os.stat(filename).st_mode|0o660) & 0o777)
-                    except PermissionError:
-                        pass
+                    st_mode = os.stat(filename).st_mode
+                    if st_mode & 0o660 != 0o660:
+                        try:
+                            os.chmod(filename, (st_mode|0o660) & 0o777)
+                        except PermissionError:
+                            self.log.warning("Could not update permissions of %s to make it groupshared", filename)
 
     def start(self):
         if sys.platform == 'win32':

@@ -250,11 +250,12 @@ class BaseConverter(LoggingConfigurable):
             for filename in filenames:
                 os.chmod(os.path.join(dirname, filename), permissions)
             # If groupshared, set dir permissions - see comment below.
-            if self.coursedir.groupshared and os.stat(dirname).st_uid == os.getuid():
+            st_mode = os.stat(dirname).st_mode
+            if self.coursedir.groupshared and st_mode & 0o2770 != 0o2770:
                 try:
-                    os.chmod(dirname, (os.stat(dirname).st_mode|0o2770) & 0o2777)
+                    os.chmod(dirname, (st_mode|0o2770) & 0o2777)
                 except PermissionError:
-                    pass
+                    self.log.warning("Could not update permissions of %s to make it groupshared", dirname)
         # If groupshared, set write permissions on directories.  Directories
         # are created within ipython_genutils.path.ensure_dir_exists via
         # nbconvert.writer, (unless there are supplementary files) with a
@@ -264,10 +265,12 @@ class BaseConverter(LoggingConfigurable):
             # Root may be created in this step, and is not included above.
             rootdir = self.coursedir.format_path(self._output_directory, '.', '.')
             # Add 2770 to existing dir permissions (don't unconditionally override)
-            try:
-                os.chmod(rootdir, (os.stat(rootdir).st_mode|0o2770) & 0o2777)
-            except PermissionError:
-                pass
+            st_mode = os.stat(rootdir).st_mode
+            if st_mode & 0o2770 != 0o2770:
+                try:
+                    os.chmod(rootdir, (st_mode|0o2770) & 0o2777)
+                except PermissionError:
+                    self.log.warning("Could not update permissions of %s to make it groupshared", rootdir)
 
 
     def convert_single_notebook(self, notebook_filename):
