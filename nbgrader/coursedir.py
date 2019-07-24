@@ -55,6 +55,19 @@ class CourseDirectory(LoggingConfigurable):
             self.log.warning("student_id '%s' has trailing whitespace, stripping it away", proposal['value'])
         return proposal['value'].strip()
 
+    student_id_exclude = Unicode(
+        "",
+        help=dedent(
+            """
+            Comma-separated list of student IDs to exclude.  Counterpart of student_id.
+
+            This is useful when running commands on all students, but certain
+            students cause errors or otherwise must be left out.  Works at
+            least for autograde, generate_feedback, and release_feedback.
+            """
+        )
+    ).tag(config=True)
+
     assignment_id = Unicode(
         "",
         help=dedent(

@@ -172,6 +172,11 @@ class BaseConverter(LoggingConfigurable):
         initialization was successful).
 
         """
+        if self.coursedir.student_id_exclude:
+            exclude_ids = self.coursedir.student_id_exclude.split(',')
+            if student_id in exclude_ids:
+                return False
+
         dest = os.path.normpath(self._format_dest(assignment_id, student_id))
 
         # the destination doesn't exist, so we haven't processed it
