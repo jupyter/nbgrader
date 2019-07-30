@@ -526,11 +526,14 @@ class TestNbGraderAutograde(BaseTestApp):
         assert os.path.isfile(join(course_dir, "autograded", "foo", "ps1", "p1.ipynb"))
         assert not os.path.isfile(join(course_dir, "autograded", "foo", "ps1", "p1 copy.ipynb"))
 
-    def test_permissions(self, course_dir):
+    @pytest.mark.parametrize("groupshared", [False, True])
+    def test_permissions(self, course_dir, groupshared):
         """Are permissions properly set?"""
         with open("nbgrader_config.py", "a") as fh:
             fh.write("""c.CourseDirectory.db_assignments = [dict(name='ps1', duedate='2015-02-02 14:58:23.948203 America/Los_Angeles')]\n""")
-            fh.write("""c.CourseDirectory.db_students = [dict(id="foo"), dict(id="bar")]""")
+            fh.write("""c.CourseDirectory.db_students = [dict(id="foo"), dict(id="bar")]\n""")
+            if groupshared:
+                fh.write("""c.CourseDirectory.groupshared = True\n""")
 
         self._empty_notebook(join(course_dir, "source", "ps1", "foo.ipynb"))
         self._make_file(join(course_dir, "source", "ps1", "foo.txt"), "foo")
@@ -540,10 +543,26 @@ class TestNbGraderAutograde(BaseTestApp):
         self._make_file(join(course_dir, "source", "foo", "ps1", "foo.txt"), "foo")
         run_nbgrader(["autograde", "ps1"])
 
+        if not groupshared:
+            if sys.platform == 'win32':
+                perms = '444'
+            else:
+                perms = '444'
+        else:
+            if sys.platform == 'win32':
+                perms = '666'
+                dirperms = '777'
+            else:
+                perms = '664'
+                dirperms = '2775'
+
         assert os.path.isfile(join(course_dir, "autograded", "foo", "ps1", "foo.ipynb"))
         assert os.path.isfile(join(course_dir, "autograded", "foo", "ps1", "foo.txt"))
-        assert self._get_permissions(join(course_dir, "autograded", "foo", "ps1", "foo.ipynb")) == "444"
-        assert self._get_permissions(join(course_dir, "autograded", "foo", "ps1", "foo.txt")) == "444"
+        if groupshared:
+            # non-groupshared doesn't make guarantees about directory perms
+            assert self._get_permissions(join(course_dir, "autograded", "foo", "ps1")) == dirperms
+        assert self._get_permissions(join(course_dir, "autograded", "foo", "ps1", "foo.ipynb")) == perms
+        assert self._get_permissions(join(course_dir, "autograded", "foo", "ps1", "foo.txt")) == perms
 
     def test_custom_permissions(self, course_dir):
         """Are custom permissions properly set?"""

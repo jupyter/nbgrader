@@ -1,6 +1,7 @@
 import os
 import shutil
 import stat
+import pytest
 from os.path import join
 
 from .. import run_nbgrader
@@ -92,3 +93,14 @@ class TestNbGraderRelease(BaseTestApp):
         self._copy_file(join("files", "test.ipynb"), join(course_dir, "release", "ps1", "p1.ipynb"))
         self._release("--assignment=ps1", exchange)
         assert os.path.isfile(join(exchange, "abc101", "outbound", "ps1", "p1.ipynb"))
+
+    @notwindows
+    @pytest.mark.parametrize("groupshared", [False, True])
+    def test_permissions(self, exchange, course_dir, groupshared):
+        if groupshared:
+            with open("nbgrader_config.py", "a") as fh:
+                fh.write("""c.CourseDirectory.groupshared = True""")
+        self._copy_file(join("files", "test.ipynb"), join(course_dir, "release", "ps1", "p1.ipynb"))
+        self._release("--assignment=ps1", exchange)
+        assert self._get_permissions(join(exchange, "abc101", "outbound", "ps1")) == ("755" if not groupshared else "2775")
+        assert self._get_permissions(join(exchange, "abc101", "outbound", "ps1", "p1.ipynb")) == ("644" if not groupshared else "664")

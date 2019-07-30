@@ -1,5 +1,8 @@
 import os
 import time
+import pytest
+
+from os.path import join
 
 from .. import run_nbgrader
 from .base import BaseTestApp
@@ -133,3 +136,18 @@ class TestNbGraderCollect(BaseTestApp):
         # This warning can be disabled
         out = self._collect("--assignment=ps1", exchange, flags=["--ExchangeCollect.check_owner=False"])
         assert 'WARNING' not in out
+
+    @notwindows
+    @pytest.mark.parametrize("groupshared", [False, True])
+    def test_permissions(self, exchange, course_dir, cache, groupshared):
+        if groupshared:
+            with open("nbgrader_config.py", "a") as fh:
+                fh.write("""c.CourseDirectory.groupshared = True\n""")
+        self._release_and_fetch("ps1", exchange, course_dir)
+        self._submit("ps1", exchange, cache, flags=["--student=foobar_student",])
+
+        # By default, a warning is raised if the student id does not match the directory owner
+        self._collect("--assignment=ps1", exchange)
+        assert self._get_permissions(join(exchange, "abc101", "inbound")) == ("2733" if not groupshared else "2773")
+        assert self._get_permissions(join(course_dir, "submitted", "foobar_student", "ps1")) == ("777" if not groupshared else "2777")
+        assert self._get_permissions(join(course_dir, "submitted", "foobar_student", "ps1", "p1.ipynb")) == ("644" if not groupshared else "664")
