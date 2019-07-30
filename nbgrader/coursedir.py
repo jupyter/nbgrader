@@ -227,7 +227,9 @@ class CourseDirectory(LoggingConfigurable):
             and exchange directories group readable/writeable (g+rws, default
             g=nothing only ) by default.  This should only be used if you
             carefully set the primary groups of your notebook servers and fully
-            understand the unix permission model.
+            understand the unix permission model.  This changes the default
+            permissions from 444 (unwriteable) to 664 (writeable), so that
+            other instructors are able to delete/overwrite files.
             """
         )
     ).tag(config=True)
