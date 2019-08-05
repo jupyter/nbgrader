@@ -134,7 +134,7 @@ define([
             label = $(elems[i]).val();
             if (!valid.test(label)) {
                 modal_opts.title = "Invalid nbgrader cell ID";
-                modal_opts.body = "At least one cell has an invalid nbgrader ID. Cell IDs must contain at least one character, and may only container letters, numbers, hyphens, and/or underscores.";
+                modal_opts.body = "At least one cell has an invalid nbgrader ID. Cell IDs must contain at least one character, and may only contain letters, numbers, hyphens, and/or underscores.";
                 warning = dialog.modal(modal_opts);
                 break;
             } else if (label in set) {
