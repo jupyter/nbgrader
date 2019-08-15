@@ -61,7 +61,7 @@ def is_locked(cell):
         return cell.metadata['nbgrader'].get('locked', False)
 
 
-def is_validate_error(cell, lang = None, cutoff = 100):
+def is_validate_error(cell, lang = None):
     errors = []
     if lang == 'octave':
         for output in cell.outputs:
@@ -69,16 +69,14 @@ def is_validate_error(cell, lang = None, cutoff = 100):
                 if hasattr(output, "text"):
                     if re.match("error: ", output.text): 
                         errors.append(True)
-                        if len(errors) >= cutoff:
-                            return errors
+                        return errors
                     else:
                         errors.append(False)
     else:
         for output in cell.outputs:
             if output.output_type == 'error':
                 errors.append(True)
-                if len(errors) >= cutoff:
-                    return errors
+                return errors
             else:
                 errors.append(False)
     return errors
