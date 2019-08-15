@@ -67,7 +67,7 @@ def is_validate_error(cell, lang = None):
         for output in cell.outputs:
             if output.output_type == "stream": 
                 if hasattr(output, "text"):
-                    if re.match("error: ", output.text): 
+                    if match("error: ", output.text): 
                         errors.append(True)
                         return errors
                     else:
