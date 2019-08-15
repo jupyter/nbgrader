@@ -10,6 +10,7 @@ import logging
 import traceback
 import contextlib
 import fnmatch
+from re import match
 
 from setuptools.archive_util import unpack_archive
 from setuptools.archive_util import unpack_tarfile
@@ -60,7 +61,30 @@ def is_locked(cell):
         return cell.metadata['nbgrader'].get('locked', False)
 
 
-def determine_grade(cell):
+def is_validate_error(cell, lang = None, cutoff = 100):
+    errors = []
+    if lang == 'octave':
+        for output in cell.outputs:
+            if output.output_type == "stream": 
+                if hasattr(output, "text"):
+                    if re.match("error: ", output.text): 
+                        errors.append(True)
+                        if len(errors) >= cutoff:
+                            return errors
+                    else:
+                        errors.append(False)
+    else:
+        for output in cell.outputs:
+            if output.output_type == 'error':
+                errors.append(True)
+                if len(errors) >= cutoff:
+                    return errors
+            else:
+                errors.append(False)
+    return errors
+
+
+def determine_grade(cell, lang = None):
     if not is_grade(cell):
         raise ValueError("cell is not a grade cell")
 
@@ -75,9 +99,12 @@ def determine_grade(cell):
             return None, max_points
 
     elif cell.cell_type == 'code':
-        for output in cell.outputs:
-            if output.output_type == 'error':
+        if any(is_validate_error(cell, lang, 1)):
                 return 0, max_points
+        elif output.output_type == 'stream':
+            if hasattr(output, 'text'):
+                if re.match('error: ', output.text):
+                    return 0, max_points
         return max_points, max_points
 
     else:

@@ -1,5 +1,6 @@
 import sys
 import os
+import operator
 
 from traitlets.config import LoggingConfigurable
 from traitlets import List, Unicode, Integer, Bool
@@ -104,16 +105,16 @@ class Validator(LoggingConfigurable):
             new_lines.append(new_line)
         return "\n".join(new_lines)
 
-    def _extract_error(self, cell):
+    def _extract_error(self, cell, lang = None):
         errors = []
         if cell.cell_type == "code":
-            for output in cell.outputs:
-                if output.output_type == "error":
-                    errors.append("\n".join(output.traceback))
-
+            e_filter = utils.is_validate_error(cell, lang)
+            if lang == 'octave':
+                errors = ["\n".join(o.text) for (o,f) in zip(cell.outputs, e_filter) if f ]
+            else:
+                errors = ["\n".join(o.traceback) for (o,f) in zip(cell.outputs, e_filter) if f ]
             if len(errors) == 0:
                 errors.append("You did not provide a response.")
-
         else:
             errors.append("You did not provide a response.")
 
@@ -227,46 +228,29 @@ class Validator(LoggingConfigurable):
 
         return changed
 
-    def _get_failed_cells(self, nb):
-        failed = []
-        for cell in nb.cells:
-            if not (self.validate_all or utils.is_grade(cell) or utils.is_locked(cell)):
-                continue
-
-            # if it's a grade cell, the check the grade
-            if utils.is_grade(cell):
-                score, max_score = utils.determine_grade(cell)
-
-                # it's a markdown cell, so we can't do anything
-                if score is None:
-                    pass
-                elif score < max_score:
-                    failed.append(cell)
-            elif self.validate_all and cell.cell_type == 'code':
-                for output in cell.outputs:
-                    if output.output_type == 'error':
-                        failed.append(cell)
-                        break
-
-        return failed
-
-    def _get_passed_cells(self, nb):
-        passed = []
+    def _get_cells_op(self, nb, op):
+        cells = []
+        lang = nb.metadata.get('kernelspec',{}).get("language","python")
         for cell in nb.cells:
             if not (utils.is_grade(cell) or utils.is_locked(cell)):
                 continue
 
-            # if it's a grade cell, the check the grade
+            # if it's a grade cell, then check the grade
             if utils.is_grade(cell):
-                score, max_score = utils.determine_grade(cell)
+                score, max_score = utils.determine_grade(cell, lang)
 
                 # it's a markdown cell, so we can't do anything
                 if score is None:
                     pass
-                elif score >= max_score:
-                    passed.append(cell)
+                elif op(score, max_score):
+                    cells.append(cell)
 
-        return passed
+        return cells
+    def _get_failed_cells(self, nb):
+        return self._get_cells_op(nb, operator.lt)
+
+    def _get_passed_cells(self, nb):
+        return self._get_cells_op(nb, operator.ge)
 
     def _preprocess(self, nb):
         resources = {}
@@ -317,11 +301,12 @@ class Validator(LoggingConfigurable):
                 } for cell in passed]
 
         else:
+            lang = nb.metadata.get('kernelspec',{}).get("language","python") # This gets the kernel name even though it says python
             if len(failed) > 0:
                 results['failed'] = [{
                     "source": cell.source.strip(),
-                    "error": ansi2html(self._extract_error(cell)),
-                    "raw_error": self._extract_error(cell)
+                    "error": ansi2html(self._extract_error(cell, lang)),
+                    "raw_error": self._extract_error(cell, lang)
                 } for cell in failed]
 
         return results
