@@ -93,7 +93,7 @@ setup_args = dict(
         "python-dateutil",
         "jupyter",
         "notebook>=4.2",
-        "nbconvert>=4.2,<5.5",  # revert when https://github.com/jupyter/nbconvert/pull/1022 is fixed upstream
+        "nbconvert>=5.6",
         "nbformat",
         "traitlets",
         "jupyter_core",
