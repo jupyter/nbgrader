@@ -126,12 +126,36 @@ class Exchange(LoggingConfigurable):
                                                include=self.coursedir.include,
                                                max_file_size=self.coursedir.max_file_size,
                                                log=self.log))
+        # copytree copies access mode too - so we must add go+rw back to it if
+        # we are in groupshared.
+        if self.coursedir.groupshared:
+            for dirname, _, filenames in os.walk(dest):
+                # dirs become ug+rwx
+                st_mode = os.stat(dirname).st_mode
+                if st_mode & 0o2770 != 0o2770:
+                    try:
+                        os.chmod(dirname, (st_mode|0o2770) & 0o2777)
+                    except PermissionError:
+                        self.log.warning("Could not update permissions of %s to make it groupshared", dirname)
+
+                for filename in filenames:
+                    filename = os.path.join(dirname, filename)
+                    st_mode = os.stat(filename).st_mode
+                    if st_mode & 0o660 != 0o660:
+                        try:
+                            os.chmod(filename, (st_mode|0o660) & 0o777)
+                        except PermissionError:
+                            self.log.warning("Could not update permissions of %s to make it groupshared", filename)
 
     def start(self):
         if sys.platform == 'win32':
             self.fail("Sorry, the exchange is not available on Windows.")
 
-        self.ensure_root()
+        if not self.coursedir.groupshared:
+            # This just makes sure that directory is o+rwx.  In group shared
+            # case, it is up to admins to ensure that instructors can write
+            # there.
+            self.ensure_root()
         self.set_timestamp()
 
         self.init_src()
@@ -161,5 +185,5 @@ class Exchange(LoggingConfigurable):
             # so we have to create and then chmod.
             os.chmod(path, mode)
         else:
-            if not self_owned(path):
+            if not self.coursedir.groupshared and not self_owned(path):
                 self.fail("You don't own the directory: {}".format(path))

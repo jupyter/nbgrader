@@ -1,7 +1,7 @@
 import os
 import shutil
 import glob
-from stat import S_IRUSR, S_IWUSR, S_IXUSR, S_IXGRP, S_IXOTH
+from stat import S_IRUSR, S_IWUSR, S_IXUSR, S_IRGRP, S_IWGRP, S_IXGRP, S_IXOTH, S_ISGID
 
 from .exchange import Exchange
 from ..utils import notebook_hash
@@ -22,7 +22,7 @@ class ExchangeReleaseFeedback(Exchange):
         # 0755
         self.ensure_directory(
             self.outbound_feedback_path,
-            S_IRUSR | S_IWUSR | S_IXUSR | S_IXGRP | S_IXOTH
+            S_IRUSR | S_IWUSR | S_IXUSR | S_IXGRP | S_IXOTH | ((S_IRGRP|S_IWGRP|S_ISGID) if self.coursedir.groupshared else 0)
         )
 
     def copy_files(self):

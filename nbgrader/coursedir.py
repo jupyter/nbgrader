@@ -4,7 +4,7 @@ import re
 from textwrap import dedent
 
 from traitlets.config import LoggingConfigurable
-from traitlets import Integer, Unicode, List, default, validate, TraitError
+from traitlets import Integer, Bool, Unicode, List, default, validate, TraitError
 
 from .utils import full_split, parse_utc
 
@@ -215,6 +215,21 @@ class CourseDirectory(LoggingConfigurable):
             The root directory for the course files (that includes the `source`,
             `release`, `submitted`, `autograded`, etc. directories). Defaults to
             the current working directory.
+            """
+        )
+    ).tag(config=True)
+
+    groupshared = Bool(
+        False,
+        help=dedent(
+            """
+            Make all instructor files group writeable (g+ws, default g+r only)
+            and exchange directories group readable/writeable (g+rws, default
+            g=nothing only ) by default.  This should only be used if you
+            carefully set the primary groups of your notebook servers and fully
+            understand the unix permission model.  This changes the default
+            permissions from 444 (unwriteable) to 664 (writeable), so that
+            other instructors are able to delete/overwrite files.
             """
         )
     ).tag(config=True)

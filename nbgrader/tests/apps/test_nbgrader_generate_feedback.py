@@ -1,5 +1,6 @@
 import os
 import sys
+import pytest
 from os.path import join, exists, isfile
 
 from ...utils import remove
@@ -171,11 +172,14 @@ class TestNbGraderFeedback(BaseTestApp):
         assert isfile(join(course_dir, "feedback", "foo", "ps1", "data", "bar.txt"))
         assert not isfile(join(course_dir, "feedback", "foo", "ps1", "blah.pyc"))
 
-    def test_permissions(self, course_dir):
+    @pytest.mark.parametrize("groupshared", [False, True])
+    def test_permissions(self, course_dir, groupshared):
         """Are permissions properly set?"""
         with open("nbgrader_config.py", "a") as fh:
             fh.write("""c.CourseDirectory.db_assignments = [dict(name="ps1")]\n""")
             fh.write("""c.CourseDirectory.db_students = [dict(id="foo")]\n""")
+            if groupshared:
+                fh.write("""c.CourseDirectory.groupshared = True\n""")
         self._empty_notebook(join(course_dir, "source", "ps1", "foo.ipynb"))
         run_nbgrader(["generate_assignment", "ps1"])
 
@@ -183,12 +187,23 @@ class TestNbGraderFeedback(BaseTestApp):
         run_nbgrader(["autograde", "ps1"])
         run_nbgrader(["generate_feedback", "ps1"])
 
-        if sys.platform == 'win32':
-            perms = '666'
+        if not groupshared:
+            if sys.platform == 'win32':
+                perms = '666'
+            else:
+                perms = '644'
         else:
-            perms = '644'
+            if sys.platform == 'win32':
+                perms = '666'
+                dirperms = '777'
+            else:
+                perms = '664'
+                dirperms = '2775'
 
         assert isfile(join(course_dir, "feedback", "foo", "ps1", "foo.html"))
+        if groupshared:
+            # non-groupshared doesn't guarantee anything about directory perms
+            assert self._get_permissions(join(course_dir, "feedback", "foo", "ps1")) == dirperms
         assert self._get_permissions(join(course_dir, "feedback", "foo", "ps1", "foo.html")) == perms
 
     def test_custom_permissions(self, course_dir):

@@ -59,7 +59,11 @@ class BaseTestApp(object):
             fh.write(contents)
 
     def _get_permissions(self, filename):
-        return oct(os.stat(filename).st_mode)[-3:]
+        st_mode = os.stat(filename).st_mode
+        # If setgid is true, return four bytes.  For testing CourseDirectory.groupshared.
+        if st_mode & 0o2000:
+            return oct(st_mode)[-4:]
+        return oct(st_mode)[-3:]
 
     def _file_contents(self, path):
         with open(path, "r") as fh:

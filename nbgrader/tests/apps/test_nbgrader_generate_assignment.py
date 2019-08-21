@@ -169,21 +169,36 @@ class TestNbGraderGenerateAssignment(BaseTestApp):
         assert not os.path.isfile(join(course_dir, "release", "ps1", "foo.txt"))
         assert not os.path.isfile(join(course_dir, "release", "ps1", "blah.pyc"))
 
-    def test_permissions(self, course_dir):
+    @pytest.mark.parametrize("groupshared", [False, True])
+    def test_permissions(self, course_dir, groupshared):
         """Are permissions properly set?"""
         self._empty_notebook(join(course_dir, 'source', 'ps1', 'foo.ipynb'))
         self._make_file(join(course_dir, 'source', 'ps1', 'foo.txt'), 'foo')
         with open("nbgrader_config.py", "a") as fh:
             fh.write("""c.CourseDirectory.db_assignments = [dict(name="ps1")]\n""")
+            if groupshared:
+                fh.write("""c.CourseDirectory.groupshared = True\n""")
         run_nbgrader(["generate_assignment", "ps1"])
 
-        if sys.platform == 'win32':
-            perms = '666'
+        if not groupshared:
+            if sys.platform == 'win32':
+                perms = '666'
+            else:
+                perms = '644'
         else:
-            perms = '644'
+            if sys.platform == 'win32':
+                perms = '666'
+                dirperms = '777'
+            else:
+                perms = '664'
+                dirperms = '2775'
 
         assert os.path.isfile(join(course_dir, "release", "ps1", "foo.ipynb"))
         assert os.path.isfile(join(course_dir, "release", "ps1", "foo.txt"))
+        if groupshared:
+            # non-groupshared doesn't make guarantees about directory perms
+            assert self._get_permissions(join(course_dir, "release")) == dirperms
+            assert self._get_permissions(join(course_dir, "release", "ps1")) == dirperms
         assert self._get_permissions(join(course_dir, "release", "ps1", "foo.ipynb")) == perms
         assert self._get_permissions(join(course_dir, "release", "ps1", "foo.txt")) == perms
 

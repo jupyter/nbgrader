@@ -1,6 +1,7 @@
 import os
 import sys
 from os.path import join, exists, isfile
+import pytest
 
 from ...utils import remove, notebook_hash
 from .. import run_nbgrader
@@ -68,23 +69,34 @@ class TestNbGraderReleaseFeedback(BaseTestApp):
         run_nbgrader(["release_feedback", "ps1", "--Exchange.root={}".format(exchange), '--course', 'abc101'])
 
     @notwindows
-    def test_permissions(self, db, course_dir, exchange):
+    @pytest.mark.parametrize("groupshared", [False, True])
+    def test_permissions(self, db, course_dir, exchange, groupshared):
         """Are permissions properly set?"""
         with open("nbgrader_config.py", "a") as fh:
             fh.write("""c.CourseDirectory.db_assignments = [dict(name="ps1")]\n""")
             fh.write("""c.CourseDirectory.db_students = [dict(id="foo")]\n""")
+            if groupshared:
+                fh.write("""c.CourseDirectory.groupshared = True\n""")
         self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
         run_nbgrader(["assign", "ps1", "--db", db])
         nb_path = join(course_dir, "submitted", "foo", "ps1", "p1.ipynb")
         self._copy_file(join("files", "submitted-unchanged.ipynb"), nb_path)
         self._copy_file(join("files", "timestamp.txt"), join(course_dir, "submitted", "foo", "ps1", "timestamp.txt"))
+        nb_hash = notebook_hash(nb_path)
 
         self._empty_notebook(join(course_dir, "submitted", "foo", "ps1", "foo.ipynb"))
         run_nbgrader(["autograde", "ps1", "--db", db])
         run_nbgrader(["generate_feedback", "ps1", "--db", db])
         run_nbgrader(["release_feedback", "ps1", "--Exchange.root={}".format(exchange), '--course', 'abc101'])
 
-        perms = '711'
+        if groupshared:
+            perms = '664'
+            dirperms = '2771'
+        else:
+            perms = '644'
+            dirperms = '711'
 
         feedback_dir = join(exchange, "abc101", "feedback")
-        assert self._get_permissions(feedback_dir) == perms
+        assert self._get_permissions(feedback_dir) == dirperms
+        os.system("find %s -ls"%feedback_dir)
+        assert self._get_permissions(join(feedback_dir, nb_hash+".html")) == perms
