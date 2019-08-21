@@ -39,7 +39,7 @@ class SaveAutoGrades(NbGraderPreprocessor):
             self.student_id)
 
         # determine what the grade is
-        auto_score, _ = utils.determine_grade(cell)
+        auto_score, _ = utils.determine_grade(cell, self.log)
         grade.auto_score = auto_score
 
         # if there was previously a manual grade, or if there is no autograder

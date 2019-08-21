@@ -18,7 +18,6 @@ from tornado.log import LogFormatter
 from dateutil.tz import gettz
 from datetime import datetime
 
-
 # pwd is for unix passwords only, so we shouldn't import it on
 # windows machines
 if sys.platform != 'win32':
@@ -59,8 +58,39 @@ def is_locked(cell):
     else:
         return cell.metadata['nbgrader'].get('locked', False)
 
+def get_partial_grade(output, max_points, log=None):
+    # check that output["data"]["text/plain"] exists
+    if not output["data"]["text/plain"]:
+        raise KeyError("output ['data']['text/plain'] does not exist")
+    grade = output["data"]["text/plain"]
+    warning_msg = """For autograder tests, expecting output to indicate
+    partial credit and be single value between 0.0 and max_points.
+    Currently treating other output as full credit, but future releases
+    may treat as error."""
+    # For partial credit, expecting grade to be a value between 0 and max_points
+    # A valid value for key output["data"]["text/plain"] can be a list or a string
+    if (isinstance(grade,list)):
+        if (len(grade)>1):
+            if log:
+                log.warning(warning_msg)
+            return max_points
+        grade = grade[0]
+    try:
+        grade = float(grade)
+    except ValueError:
+        if log:
+            log.warning(warning_msg)
+        return max_points
+    if (grade > 0.0):
+        if (grade > max_points):
+            raise ValueError("partial credit cannot be greater than maximum points for cell")
+        return grade
+    else:
+        if log:
+            log.warning(warning_msg)
+        return max_points
 
-def determine_grade(cell):
+def determine_grade(cell, log=None):
     if not is_grade(cell):
         raise ValueError("cell is not a grade cell")
 
@@ -75,9 +105,21 @@ def determine_grade(cell):
             return None, max_points
 
     elif cell.cell_type == 'code':
+        # for code cells, we look at the output. There are three options:
+        # 1. output contains an error (no credit);
+        # 2. output is a value greater than 0 (partial credit);
+        # 3. output is something else, or nothing (full credit).
         for output in cell.outputs:
+            # option 1: error, return 0
             if output.output_type == 'error':
                 return 0, max_points
+            # if not error, then check for option 2, partial credit
+            if output.output_type == 'execute_result':
+                # is there a single result that can be cast to a float?
+                partial_grade = get_partial_grade(output, max_points, log)
+                return partial_grade, max_points
+
+        # otherwise, assume all fine and return all the points
         return max_points, max_points
 
     else:
