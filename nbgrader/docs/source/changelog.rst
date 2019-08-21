@@ -8,6 +8,11 @@ A summary of changes to nbgrader.
 0.5.x
 -----
 
+0.5.6
+~~~~~
+
+nbgrader version 0.5.6 is a small release that only unpins the version of IPython and Jupyter console.
+
 0.5.5
 ~~~~~
 
