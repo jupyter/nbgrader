@@ -102,9 +102,7 @@ setup_args = dict(
         "six>=1.9",
         "requests",
         "jsonschema",
-        "alembic",
-        "ipython<=6.2.1",
-        "jupyter-console<=5.2.0"
+        "alembic"
     ]
 )
 
