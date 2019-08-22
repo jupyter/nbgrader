@@ -69,9 +69,9 @@ class ExchangeList(Exchange):
                 continue
 
             if self.path_includes_course:
-                root = os.path.join(info['course_id'], info['assignment_id'])
+                root = os.path.join(self.assignment_dir, info['course_id'], info['assignment_id'])
             else:
-                root = info['assignment_id']
+                root = os.path.join(self.assignment_dir, info['assignment_id'])
 
             if self.inbound or self.cached:
                 info['status'] = 'submitted'
@@ -101,9 +101,9 @@ class ExchangeList(Exchange):
                     feedbackpath = os.path.join(self.root, info['course_id'], 'feedback', '{0}.html'.format(nb_hash))
                     # notebookDir should have the course_did in it if we have multiple courses ...
                     if self.path_includes_course:
-                        nbdir = os.path.join(info['course_id'], info['assignment_id'])
+                        nbdir = os.path.join(self.assignment_dir, info['course_id'], info['assignment_id'])
                     else:
-                        nbdir = os.path.join(info['assignment_id'])
+                        nbdir = os.path.join(self.assignment_dir, info['assignment_id'])
                     self.dest_path = os.path.abspath(os.path.join('.', root))
                     localFeedbackPath = os.path.join(nbdir, 'feedback', info['timestamp'], '{0}.html'.format(notebookName))
                     hasLocalFeedback = os.path.isfile(localFeedbackPath)
