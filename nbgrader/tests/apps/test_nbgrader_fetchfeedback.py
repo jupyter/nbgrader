@@ -10,9 +10,9 @@ from .conftest import notwindows
 
 class TestNbGraderFetchFeedback(BaseTestApp):
 
-    def _assign(self, assignment, course_dir, db, course="abc101"):
+    def _generate_assignment(self, assignment, course_dir, db, course="abc101"):
         run_nbgrader([
-            "assign", assignment,
+            "generate_assignment", assignment,
             "--db", db
         ])
 
@@ -77,14 +77,14 @@ class TestNbGraderFetchFeedback(BaseTestApp):
         self._copy_file(join("files", "test.ipynb"), join(course_dir, "source", "ps1", "p2.ipynb"))
         with open("nbgrader_config.py", "a") as fh:
             fh.write("""c.CourseDirectory.db_assignments = [dict(name="ps1")]\n""")
-        self._assign("ps1", course_dir, db)
+        self._generate_assignment("ps1", course_dir, db)
         self._release_and_fetch("ps1", exchange, cache, course_dir)
         self._submit("ps1", exchange, cache)
         self._collect("ps1", exchange)
         run_nbgrader(["autograde", "ps1", "--create", "--db", db])
         run_nbgrader(["generate_feedback", "ps1", "--db", db])
         run_nbgrader(["release_feedback", "ps1", "--Exchange.root={}".format(exchange), '--course', 'abc101'])
-        run_nbgrader(["fetch_feedback", "ps1", "--Exchange.root={}".format(exchange), '--course', 'abc101'])
+        run_nbgrader(["fetch_feedback", "ps1", "--Exchange.root={}".format(exchange), "--Exchange.cache={}".format(cache), '--course', 'abc101'])
         assert os.path.isdir(join("ps1", "feedback"))
         username = os.environ["USER"]
         timestamp = open(join(course_dir, "submitted", username, "ps1", "timestamp.txt")).read()
