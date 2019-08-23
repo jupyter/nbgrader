@@ -21,6 +21,7 @@ def api(request, course_dir, db, exchange):
     config = Config()
     config.CourseDirectory.course_id = "abc101"
     config.Exchange.root = exchange
+    config.Exchange.cache = exchange
     config.CourseDirectory.root = course_dir
     config.CourseDirectory.db_url = db
 
@@ -766,9 +767,9 @@ class TestNbGraderAPI(BaseTestApp):
         self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
         api.assign("ps1")
         timestamp = open(os.path.join(os.path.dirname(__file__), "files", "timestamp.txt")).read()
-        inboundpath = join(exchange, "abc101", "inbound", "foo+ps1+{}".format(timestamp))
-        self._copy_file(join("files", "submitted-changed.ipynb"), join(inboundpath, "p1.ipynb"))
-        self._copy_file(join("files", "timestamp.txt"), join(inboundpath, "timestamp.txt"))
+        cachepath = join(exchange, "abc101", "foo+ps1+{}".format(timestamp))
+        self._copy_file(join("files", "submitted-changed.ipynb"), join(cachepath, "p1.ipynb"))
+        self._copy_file(join("files", "timestamp.txt"), join(cachepath, "timestamp.txt"))
         self._copy_file(join("files", "submitted-changed.ipynb"), join(course_dir, "submitted", "foo", "ps1", "p1.ipynb"))
         self._copy_file(join("files", "timestamp.txt"), join(course_dir, "submitted", "foo", "ps1", "timestamp.txt"))
         api.autograde("ps1", "foo")
@@ -781,9 +782,9 @@ class TestNbGraderAPI(BaseTestApp):
         # add another assignment         
         self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "source", "ps2", "ps2.ipynb"))
         api.assign("ps2")
-        inboundpath = join(exchange, "abc101", "inbound", "foo+ps2+{}".format(timestamp))
-        self._copy_file(join("files", "submitted-changed.ipynb"), join(inboundpath, "ps2.ipynb"))
-        self._copy_file(join("files", "timestamp.txt"), join(inboundpath, "timestamp.txt"))
+        cachepath = join(exchange, "abc101", "foo+ps2+{}".format(timestamp))
+        self._copy_file(join("files", "submitted-changed.ipynb"), join(cachepath, "ps2.ipynb"))
+        self._copy_file(join("files", "timestamp.txt"), join(cachepath, "timestamp.txt"))
         self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "submitted", "foo", "ps2", "p2.ipynb"))
         self._copy_file(join("files", "timestamp.txt"), join(course_dir, "submitted", "foo", "ps2", "timestamp.txt"))
         api.autograde("ps2", "foo")
