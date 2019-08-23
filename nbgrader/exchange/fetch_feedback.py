@@ -15,11 +15,12 @@ class ExchangeFetchFeedback(Exchange):
         self.course_path = os.path.join(self.root, self.coursedir.course_id)
         self.outbound_path = os.path.join(self.course_path, 'feedback')
         self.src_path = os.path.join(self.outbound_path)
+        # Test if feedback outbound directory exists and is listable/transversable by us
         if not os.path.isdir(self.src_path):
             self._assignment_not_found(
                 self.src_path,
                 os.path.join(self.outbound_path, "*"))
-        if not check_mode(self.src_path, read=True, execute=True):
+        if not check_mode(self.src_path, execute=True):
             self.fail("You don't have read permissions for the directory: {}".format(self.src_path))
         # Find the assignment md5s from the cache
         # List all cache notebooks matching our assignment_id and student_id
