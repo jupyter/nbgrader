@@ -595,11 +595,7 @@ define([
             button.attr('disabled', 'disabled');
             var url = utils.url_path_join(
                 that.base_url,
-                'formgrader',
-                'api',
-                'assignment',
-                that.data.assignment_id,
-                that.data.student_id,
+                'assignments',
                 'fetch_feedback'
             );
             ajax(url, settings);
