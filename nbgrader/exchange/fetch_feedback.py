@@ -21,13 +21,17 @@ class ExchangeFetchFeedback(Exchange):
                 os.path.join(self.outbound_path, "*"))
         if not check_mode(self.src_path, read=True, execute=True):
             self.fail("You don't have read permissions for the directory: {}".format(self.src_path))
+        # Find the assignment md5s from the cache
+        # List all cache notebooks matching our assignment_id and student_id
         assignment_id = self.coursedir.assignment_id if self.coursedir.assignment_id else '*'
         student_id = self.coursedir.student_id if self.coursedir.student_id else '*'
-        pattern = os.path.join(self.root, self.coursedir.course_id, 'inbound', '{}+{}+*/*.ipynb'.format(student_id, assignment_id))
+        self.cache_path = os.path.join(self.cache, self.coursedir.course_id)
+        pattern = os.path.join(self.cache_path, '{}+{}+*/*.ipynb'.format(student_id, assignment_id))
         notebooks = glob.glob(pattern)
         self.log.info("pattern: {}".format(pattern))
         self.feedbackFiles = []
         self.log.info("notebooks: {}".format(notebooks))
+        # Find the md5s using nbhash, accumulate name, timestamp, and feedbackPath together
         for notebook in notebooks:
             directory, nbname = os.path.split(notebook)
             timestamp = directory.split('/')[-1].split('+')[2]
