@@ -5,6 +5,208 @@ Changelog
 
 A summary of changes to nbgrader.
 
+0.6.x
+-----
+
+0.6.0
+~~~~~
+
+nbgrader version 0.6.0 is a major release, involving over 100 PRs and 60 issues. This includes many bug fixes, small enhancements, and improved docs. The major new features include:
+
+- Better support for multiple classes with JupyterHub. In particular, a new "Course List" extension has been added which provides instructors access to separate formgrader instances for all the classes they can manage. Additionally, JupyterHub authentication is used to control which students have access to which assignments.
+- Better LMS integration (for example, adding a ``lms_user_id`` column in the ``Student`` table of the database).
+- Better support for feedback. In particular, there is now the ability to generate and return feedback to students through nbgrader with the ``generate_feedback`` and ``release_feedback`` commands, and the ability for students to fetch feedback with the ``fetch_feedback`` command. This functionality is also available through the formgrader and Assignment List extensions.
+- Instructions for how to do grading inside a Docker container, for increased protection against malicious code submitted by students.
+- A new type of nbgrader cell called a "task" cell which supports more open-ended solutions which may span multiple cells.
+
+**Important**: Users updating from 0.5.x to 0.6.0 should be aware that they
+will need to update their nbgrader database using ``nbgrader db upgrade``
+and will need to reinstall the nbgrader extensions (see
+:doc:`/user_guide/installation`).
+
+Please also note that some of the nbgrader commands have been renamed, for consistency with the new feedback commands:
+
+* ``nbgrader assign`` is now ``nbgrader generate_assignment``
+* ``nbgrader release`` is now ``nbgrader release_assignment``
+* ``nbgrader fetch`` is now ``nbgrader fetch_assignment``
+
+The full list of PRs is:
+
+- PR #1186: Remove student_id and change root to cache, permission check to only execute
+- PR #1184: Move the fetch feedback API from formgrader to assignment_list
+- PR #1180: Fix versions of pytest and nbconvert
+- PR #1179: Add CourseDir.student_id_exclude option to exclude students
+- PR #1169: Fix minor typo in js extension helper text
+- PR #1164: assignment_dir: Add into several missing places
+- PR #1152: Rename 'nbgrader fetch' to 'nbgrader fetch_assignment'
+- PR #1151: Rename 'nbgrader release' to 'nbgrader release_assignment'
+- PR #1147: Add test to ensure that db upgrade succeeds before running assign
+- PR #1145: Rename nbgrader feedback to nbgrader generate_feedback
+- PR #1140: A few more updates to the docs for multiple classes
+- PR #1139: Additional docs sanitization
+- PR #1138: Ensure that cell type changes result in valid nbgrader metadata
+- PR #1137: Rename "nbgrader assign" to "nbgrader generate_assignment"
+- PR #1135: section on grading in docker container
+- PR #1131: Better support for multiple classes
+- PR #1127: Better documentation of nbgrader_config.py
+- PR #1126: Remove the third party resources page
+- PR #1125: Check that the course directory is a subdirectory of the notebook dir
+- PR #1124: Only run nbextensions tests on oldest and newest versions of python
+- PR #1123: Ensure course directory root path has no trailing slashes
+- PR #1122: Fix incorrect usage of Exchange.course_id
+- PR #1121: Fix logfile
+- PR #1120: Integrate feedback distribution within nbgrader
+- PR #1119: added a sanatizing step to the doc creation.
+- PR #1118: Integrate course_id into the api and apps
+- PR #1116: Autograde & Assign: create missing students/assignments by default
+- PR #1115: Fix typo in tmp filename prefix in conftest.py
+- PR #1114: Documentation for multiple classes
+- PR #1113: Add a course list extension that shows all courses an instructor can manage
+- PR #1112: Locate all configurable classes for generate_config subcommand
+- PR #1111: Optional consistency check between owner and student_id upon collect
+- PR #1110: Systematic use of utils.get_username instead of $USER
+- PR #1109: naming the temporary directories in tests
+- PR #1108: Extended support for filtering files copied in the exchange
+- PR #1106: Remove testing of python 3.4
+- PR #1105: Remove extra keys in nbgrader metadata and better schema mismatch errors
+- PR #1102: Only build docs with one version of python
+- PR #1101: Add jupyter education book to third party resources
+- PR #1100: Run test in the `python` group in parallel using pytest-xdist
+- PR #1099: Add course table, add course_id column to assignment
+- PR #1098: Customizable student ID in `nbgrader submit`
+- PR #1094: Update license
+- PR #1093: Add authentication plugin support
+- PR #1090: partial credit for autograde test cells
+- PR #1088: Remove version requirement from urllib3
+- PR #1084: Fix miscellaneous bugs
+- PR #1080: compatibility with SQLAlchemy 1.3+
+- PR #1075: Give ExecutePreprocessor the Traitlets config during validation
+- PR #1071: student and assignment selection in exportapp implemented
+- PR #1064: Validate all cells
+- PR #1061: Set env var NBGRADER_VALIDATING when validating
+- PR #1054: Raise error when executed task fails
+- PR #1053: Remove changes to sitecustomize.py and dependency on invoke
+- PR #1051: Remove spellcheck and enchant dependency
+- PR #1040: Restrict access for students to different courses
+- PR #1036: Add a general lms user id column to the student table
+- PR #1032: fix: return info of reper function is wrong in api.py
+- PR #1029: Documentation fix to add info re: timeout errors.
+- PR #1028: Some improvements to the contributor list script
+- PR #1026: Mark test_same_part_navigation as flaky
+- PR #1025: Fixing failing tests, take 2
+- PR #1024: Fix deprecation warning with timezones
+- PR #1023: Ensure nbgrader list still works with random strings
+- PR #1021: Fix tests, all of which are failing :(
+- PR #1019: Make nbgrader quickstart work with existing directories
+- PR #1018: Add missing close > for url to display correctly
+- PR #1017: Fix all redirection
+- PR #1014: a mistake in comment
+- PR #1005: Add random string to submission filenames for better hiding
+- PR #1002: Change to notebook directory when validating (repeat of #880)
+- PR #1001: Allow setting a different assignment dir for students than the root notebook directory
+- PR #1000: Allow instructors to share files via shared group id
+- PR #994: Add link to jupyter in education map
+- PR #991: Fix broken documentation
+- PR #990: Include section on mocking (autograding resources)
+- PR #989: Update developer installation instructions
+- PR #984: Adding global graded tasks
+- PR #975: Fix the link to the activity magic
+- PR #972: Use mathjax macro for formgrader
+- PR #967: Added note in FAQ about changing cell ids
+- PR #964: Added "if __name__ == "__main__":"
+- PR #963: Add third party resources to the documentation
+- PR #962: Add grant_extension method to the gradebook
+- PR #959: Allow apps to use -f and --force
+- PR #958: Do some amount of fuzzy problem set name matching
+- PR #957: Remove underscores from task names
+- PR #955: Ignore .pytest_cache in .gitignore
+- PR #954: Fix bug in find_all_files that doesn't properly ignore directories
+- PR #953: update log.warn (deprecated) to log.warning
+- PR #948: Move config file generation to a separate app
+- PR #947: Exclude certain assignment files from being overwritten during autograding
+- PR #946: Fix failing tests
+- PR #937: Strip whitespace from assignment, student, and course ids
+- PR #936: Switch from PhamtomJS to Firefox
+- PR #934: Skip filtering notebooks when ExchangeSubmit.strict == True
+- PR #933: Fix failing tests
+- PR #932: Prevent assignments from being created with invalid names
+- PR #911: Update installation.rst
+- PR #909: Friendlier error messages when encountering a schema mismatch
+- PR #908: Better validation errors when cell type changes
+- PR #906: Resolves issues with UTF-8
+- PR #905: Update changelog and rebuild docs from 0.5.4
+- PR #900: Improve issue template to explain logic behind filling it out
+- PR #899: Help for csv import
+- PR #897: Give more details on how to use formgrader and jupyterhub
+- PR #892: Format code blocks in installation instructions
+- PR #886: Add nbval for non-Windows tests/CI
+- PR #877: Create issue_template.md
+- PR #871: Fix NbGraderAPI.timezone handling
+- PR #870: added java, matlab, and octave codestubs to clearsolutions.py
+- PR #853: Update changelog from 0.5.x releases
+- PR #838: Fetch multiple assignments in one command
+
+Huge thanks to the following users who submitted PRs or reported issues that were merged or fixed for the 0.6.0 release:
+
+- 00Kai0
+- Alexanderallenbrown
+- aliandra
+- amellinger
+- BertR
+- Carreau
+- cdvv7788
+- Ciemaar
+- consideRatio
+- damianavila
+- danielmaitre
+- DavidNemeskey
+- davidpwilliamson
+- davis68
+- ddbourgin
+- ddland
+- dechristo
+- destitutus
+- dsblank
+- edouardtheron
+- fenwickipedia
+- fm75
+- FranLucchini
+- gertingold
+- hcastilho
+- JanBobolz
+- jedbrown
+- jhamrick
+- jnak12
+- kcranston
+- kthyng
+- lgpage
+- liffiton
+- mikezawitkowski
+- mozebdi
+- mpacer
+- nabriis
+- nthiery
+- perllaghu
+- rgerkin
+- rkdarst
+- Ruin0x11
+- rwest
+- ryanlovett
+- samhinshaw
+- Sefriol
+- sigurdurb
+- slel
+- soldis
+- swarnava
+- takluyver
+- thotypous
+- vahtras
+- VETURISRIRAM
+- vidartf
+- willingc
+- yangkky
+- zonca
+
 0.5.x
 -----
 
