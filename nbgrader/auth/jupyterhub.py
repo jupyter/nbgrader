@@ -99,6 +99,12 @@ class JupyterHubAuthPlugin(BaseAuthPlugin):
         return list(courses)
 
     def add_student_to_course(self, student_id, course_id):
+        if not course_id:
+            self.log.error(
+                "Could not add student to course because the course_id has not "
+                "been provided. Has it been set in the nbgrader_config.py?")
+            return
+
         try:
             group_name = "nbgrader-{}".format(course_id)
             jup_groups = _query_jupyterhub_api(
@@ -138,6 +144,12 @@ class JupyterHubAuthPlugin(BaseAuthPlugin):
             self.log.error("Make sure you set a valid admin_user 'api_token' in your config file before starting the service")
 
     def remove_student_from_course(self, student_id, course_id):
+        if not course_id:
+            self.log.error(
+                "Could not remove student from course because the course_id has "
+                "not been provided. Has it been set in the nbgrader_config.py?")
+            return
+
         try:
             group_name = "nbgrader-{}".format(course_id)
             _query_jupyterhub_api(

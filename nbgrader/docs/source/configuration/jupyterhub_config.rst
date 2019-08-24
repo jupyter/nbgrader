@@ -33,21 +33,11 @@ integrate with JupyterHub so that all grading can occur on the same server.
 
 .. warning::
 
-    The way that the formgrader integrates with JupyterHub changed between
-    versions 0.4 and 0.5 in a backwards-incompatible way. However, this means
-    that the formgrader should be much easier to use with JupyterHub!
-
-.. warning::
-
-    Starting in version 0.5.0 of nbgrader, the formgrader is no longer a
-    standalone command. Rather, it is an extension of the Jupyter notebook.
-
-.. warning::
-
     When using nbgrader with JupyterHub, it is strongly recommended to set a
     logfile so that you can more easily debug problems. To do so, you can set
     a config option, for example ``NbGrader.logfile = "/usr/local/share/jupyter/nbgrader.log"``.
 
+Each of these use cases also has a corresponding demo in the `demos folder <https://github.com/jupyter/nbgrader/tree/master/demos>`_ of the GitHub repository.
 
 Example Use Case: One Class, One Grader
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -138,7 +128,8 @@ Your JupyterHub should look something like this:
     }
 
     # Start the notebook server as a service. The port can be whatever you want
-    # and the group has to match the name of the group defined above.
+    # and the group has to match the name of the group defined above. The name
+    # of the service MUST match the name of your course.
     c.JupyterHub.services = [
         {
             'name': 'course101',
@@ -160,6 +151,16 @@ Similarly to the use case with just a single grader, there needs to then be a ``
     c = get_config()
     c.CourseDirectory.root = '/home/grader-course101/course101'
 
+You will additionally need to add a global nbgrader config file (for example,
+in ``/etc/jupyter/nbgrader_config.py``) which specifies the course id:
+
+.. code:: python
+
+    c = get_config()
+    c.CourseDirectory.course_id = 'course101'
+
+This course id MUST match the name of the service that is running the formgrader.
+
 
 Example Use Case: Multiple Classes
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -179,82 +180,6 @@ combination of instructors then have access to:
 
 .. image:: images/multiple_classes.png
 
-To configure such a setup, your JupyterHub config should look something like this:
-
-.. code:: python
-
-    c = get_config()
-
-    # Our user list
-    c.Authenticator.whitelist = [
-        'instructor1',
-        'instructor2',
-        'student1',
-    ]
-
-    # instructor1 and instructor2 have access to different shared servers:
-    c.JupyterHub.load_groups = {
-        'formgrader-course101': [
-            'instructor1'
-        ],
-        'formgrader-course123': [
-            'instructor2'
-        ]
-    }
-
-    # Start the notebook server as a service. The port can be whatever you want
-    # and the group has to match the name of the group defined above.
-    c.JupyterHub.services = [
-        {
-            'name': 'course101',
-            'url': 'http://127.0.0.1:9999',
-            'command': [
-                'jupyterhub-singleuser',
-                '--group=formgrader-course101',
-                '--debug',
-            ],
-            'user': 'grader-course101',
-            'cwd': '/home/grader-course101'
-        },
-        {
-            'name': 'course123',
-            'url': 'http://127.0.0.1:9998',
-            'command': [
-                'jupyterhub-singleuser',
-                '--group=formgrader-course123',
-                '--debug',
-            ],
-            'user': 'grader-course123',
-            'cwd': '/home/grader-course123'
-        },
-    ]
-
-There also needs to be a ``nbgrader_config.py`` file in the root of each grader
-account, which points to the directory where the class files are, e.g. in
-``/home/grader-course101/.jupyter/nbgrader_config.py`` would be:
-
-.. code:: python
-
-    c = get_config()
-    c.CourseDirectory.root = '/home/grader-course101/course101'
-
-and ``/home/grader-course123/.jupyter/nbgrader_config.py`` would be:
-
-.. code:: python
-
-    c = get_config()
-    c.CourseDirectory.root = '/home/grader-course123/course123'
-
-You will also need to do some additional configuration on the student side. If
-each student is enrolled in exactly one course, then you will need to provide
-them a custom ``nbgrader_config.py`` which specifies that course. Alternately,
-if students may be enrolled in multiple courses, you need to provide them a
-custom ``nbgrader_config.py`` that will cause nbgrader to look for assignments
-in a subdirectory corresponding to the course name. See :ref:`multiple-classes`
-for details.
-
-Finally, you will need to enable and disable different combinations of the nbgrader extensions for different accounts. See the table in :ref:`multiple-graders` for details.
-
 .. _jupyterhub-auth:
 
 JupyterHub Authentication
@@ -262,22 +187,9 @@ JupyterHub Authentication
 
 .. versionadded:: 0.6.0
 
-With the advent of JupyterHubAuthPlugin students who don't have a specified course_id won't see all courses anymore, just the ones they have been added to. That means you can ommit the ``course_id`` from the students ``nbgrader_config.py``
+With the advent of JupyterHubAuthPlugin, nbgrader will ask JupyterHub which students are enrolled in which courses and only show them assignments from those respective courses (note that the ``JupyterHubAuthPlugin`` requires JupyterHub version 0.8 or higher). Similarly, nbgrader will ask JupyterHub which instructors have access to which courses and only show them formgrader links for those courses.
 
-Requirements for using ``JupyterHubAuthPlugin``:
-
-* Jupyterhub > 0.8
-* Activating the JupyterHubAuthPlugin requires you to add it as an authentication plugin class into the ``nbgrader_config.py`` for both the formgrader services and instructor accounts.
-
-.. code:: python
-
-    from nbgrader.auth import JupyterHubAuthPlugin
-    c = get_config()
-    c.Authenticator.plugin_class = JupyterHubAuthPlugin
-
-* To differentiate student from instructor, their groups need to be named ``formgrade-{course_id}`` for instructors and ``nbgrader-{course_id}`` for students.
-* The course service needs to have an api_token set that is from a jupyterhub admin see: Creating an `api token <https://jupyterhub.readthedocs.io/en/stable/reference/rest.html#create-an-api-token>`_
-* The service user also needs to be added to the formgrade group (see the jupyterhub_config example below)
+On the JupyterHub side of things, to differentiate student from instructor, groups need to be named ``formgrade-{course_id}`` for instructors and and grader accounts, and ``nbgrader-{course_id}`` for students. The course service additionally needs to have an API token set that is from a JupyterHub admin (see `JupyterHub documentation <https://jupyterhub.readthedocs.io/en/stable/reference/rest.html#create-an-api-token>`_).
 
 As in the case of multiple graders for a single class, if you have multiple
 classes on the same JupyterHub instance, then you will need to create multiple
@@ -349,17 +261,35 @@ this:
     ]
 
 
-Note: As you can see the ``nbgrader-{course_id}`` group is an empty list, adding students to the jupyterhub group is automatically done when the instructor adds them to the course database with the ``nbgrader db student add`` command or through the formgrader.
+Note: As you can see the ``nbgrader-{course_id}`` group is an empty list.
+Adding students to the JupyterHub group is automatically done when the
+instructor adds them to the course database with the ``nbgrader db student
+add`` command or through the formgrader.
 
+On the nbgrader side of things, activating the JupyterHubAuthPlugin requires
+you to add it as an authentication plugin class into the ``nbgrader_config.py``
+for all accounts. This is easiest to do by putting it in a global location such
+as ``/etc/jupyter/nbgrader_config.py``. You also need to configure nbgrader to
+look for assignments in a subdirectory corresponding to the course name (see
+:ref:`multiple-classes`). For example:
 
-There also needs to be a ``nbgrader_config.py`` file in the root of each grader
-account, which points to the directory where the class files are, e.g. in
+.. code:: python
+
+    from nbgrader.auth import JupyterHubAuthPlugin
+    c = get_config()
+    c.Exchange.path_includes_course = True
+    c.Authenticator.plugin_class = JupyterHubAuthPlugin
+
+There also needs to be a separate ``nbgrader_config.py`` file in the root of
+each grader account, which points to the directory where the class files are
+and which specifies what the course id is, e.g.
 ``/home/grader-course101/.jupyter/nbgrader_config.py`` would be:
 
 .. code:: python
 
     c = get_config()
     c.CourseDirectory.root = '/home/grader-course101/course101'
+    c.CourseDirectory.course_id = 'course101'
 
 and ``/home/grader-course123/.jupyter/nbgrader_config.py`` would be:
 
@@ -367,7 +297,11 @@ and ``/home/grader-course123/.jupyter/nbgrader_config.py`` would be:
 
     c = get_config()
     c.CourseDirectory.root = '/home/grader-course123/course123'
+    c.CourseDirectory.course_id = 'course123'
 
+Finally, you will again need to enable and disable different combinations of
+the nbgrader extensions for different accounts. See the table in
+:ref:`multiple-graders` for details.
 
 Custom Authentication
 ^^^^^^^^^^^^^^^^^^^^^
@@ -380,10 +314,8 @@ There are now four authentication classes:
 
 
 * ``BaseAuthPlugin``: Inherit this class when implementing your own plugin, thought of as a way to enable LTI use cases. This class is never called directly.
-* ``NoAuthPlugin``: The default old behaviour. Using this plugin will allow any user to any course if he does not have a course_id in his nbgrader_config. This is still the default behaviour so no need to specify it in ``etc/jupyter/nbgrader_config.py``
-
-* ``JupyterHubAuthPlugin``: Uses the Jupyterhub groups part of the Jupyterhub API for authentication.
-
+* ``NoAuthPlugin``: The default old behaviour. Using this plugin will allow any user to any course if they do not have a course_id in their nbgrader_config. This is still the default behaviour so no need to specify it in ``/etc/jupyter/nbgrader_config.py``
+* ``JupyterHubAuthPlugin``: Uses the Jupyterhub groups part of the JupyterHub API for authentication.
 * ``Authenticator``: Configurable for different plugins.
 
 
@@ -399,7 +331,3 @@ API
     .. automethod:: add_student_to_course
 
     .. automethod:: remove_student_from_course
-
-
-
-
