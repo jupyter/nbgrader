@@ -20,9 +20,11 @@ nbgrader version 0.6.0 is a major release, involving over 100 PRs and 60 issues.
 - A new type of nbgrader cell called a "task" cell which supports more open-ended solutions which may span multiple cells.
 
 **Important**: Users updating from 0.5.x to 0.6.0 should be aware that they
-will need to update their nbgrader database using ``nbgrader db upgrade``
-and will need to reinstall the nbgrader extensions (see
-:doc:`/user_guide/installation`).
+will need to do the following (please make sure to back up your files before doing so, just in case anything goes wrong!):
+
+* Update their nbgrader database using ``nbgrader db upgrade``.
+* Update the metadata in their assignments using ``nbgrader update``.
+* Reinstall the nbgrader extensions (see :doc:`/user_guide/installation`).
 
 Please also note that some of the nbgrader commands have been renamed, for consistency with the new feedback commands:
 
@@ -32,8 +34,11 @@ Please also note that some of the nbgrader commands have been renamed, for consi
 
 The full list of PRs is:
 
+- PR #1191: Allow access to formgrader when not using JuptyerHub auth
+- PR #1190: Add JupyterHub demos
 - PR #1186: Remove student_id and change root to cache, permission check to only execute
 - PR #1184: Move the fetch feedback API from formgrader to assignment_list
+- PR #1183: Feedback: update fetch_feedback command line help
 - PR #1180: Fix versions of pytest and nbconvert
 - PR #1179: Add CourseDir.student_id_exclude option to exclude students
 - PR #1169: Fix minor typo in js extension helper text
