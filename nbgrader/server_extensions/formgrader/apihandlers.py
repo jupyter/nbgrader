@@ -312,15 +312,6 @@ class ReleaseFeedbackHandler(BaseApiHandler):
         self.write(json.dumps(self.api.release_feedback(assignment_id, student_id)))
 
 
-class FetchFeedbackHandler(BaseApiHandler):
-    @web.authenticated
-    @check_xsrf
-    @check_notebook_dir
-    def post(self, assignment_id, student_id):
-        ret_dict = {}
-        ret_dict.update(self.api.fetch_feedback(assignment_id, student_id))
-        self.write(json.dumps(ret_dict))        
-
 default_handlers = [
     (r"/formgrader/api/status", StatusHandler),
 
@@ -334,7 +325,6 @@ default_handlers = [
     (r"/formgrader/api/assignment/([^/]+)/release_feedback", ReleaseAllFeedbackHandler),
     (r"/formgrader/api/assignment/([^/]+)/([^/]+)/generate_feedback", GenerateFeedbackHandler),
     (r"/formgrader/api/assignment/([^/]+)/([^/]+)/release_feedback", ReleaseFeedbackHandler),
-    (r"/formgrader/api/assignment/([^/]+)/([^/]+)/fetch_feedback", FetchFeedbackHandler),
 
     (r"/formgrader/api/notebooks/([^/]+)", NotebookCollectionHandler),
 

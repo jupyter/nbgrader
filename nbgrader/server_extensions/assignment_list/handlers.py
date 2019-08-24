@@ -16,7 +16,7 @@ from jupyter_core.paths import jupyter_config_path
 
 from ...apps import NbGrader
 from ...coursedir import CourseDirectory
-from ...exchange import ExchangeList, ExchangeFetchAssignment, ExchangeSubmit
+from ...exchange import ExchangeList, ExchangeFetchAssignment, ExchangeFetchFeedback, ExchangeSubmit
 from ...auth import Authenticator
 from ... import __version__ as nbgrader_version
 
@@ -185,6 +185,37 @@ class AssignmentList(LoggingConfigurable):
 
         return retvalue
 
+
+    def fetch_feedback(self, course_id, assignment_id):
+        with self.get_assignment_dir_config() as config:
+            try:
+                config = self.load_config()
+                config.CourseDirectory.course_id = course_id
+                config.CourseDirectory.assignment_id = assignment_id
+
+                coursedir = CourseDirectory(config=config)
+                authenticator = Authenticator(config=config)
+                fetch = ExchangeFetchFeedback(
+                    coursedir=coursedir,
+                    authenticator=authenticator,
+                    config=config)
+                fetch.start()
+
+            except:
+                self.log.error(traceback.format_exc())
+                retvalue = {
+                    "success": False,
+                    "value": traceback.format_exc()
+                }
+
+            else:
+                retvalue = {
+                    "success": True
+                }
+
+        return retvalue
+
+
     def submit_assignment(self, course_id, assignment_id):
         with self.get_assignment_dir_config() as config:
             try:
@@ -247,6 +278,11 @@ class AssignmentActionHandler(BaseAssignmentHandler):
                 self.finish(json.dumps(self.manager.list_assignments(course_id=course_id)))
             else:
                 self.finish(json.dumps(output))
+        elif action == 'fetch_feedback':
+            assignment_id = self.get_argument('assignment_id')
+            course_id = self.get_argument('course_id')
+            self.manager.fetch_feedback(course_id, assignment_id)
+            self.finish(json.dumps(self.manager.list_assignments(course_id=course_id)))
 
 
 class CourseListHandler(BaseAssignmentHandler):
@@ -286,7 +322,7 @@ class NbGraderVersionHandler(BaseAssignmentHandler):
 #-----------------------------------------------------------------------------
 
 
-_assignment_action_regex = r"(?P<action>fetch|submit)"
+_assignment_action_regex = r"(?P<action>fetch|submit|fetch_feedback)"
 
 default_handlers = [
     (r"/assignments", AssignmentListHandler),
