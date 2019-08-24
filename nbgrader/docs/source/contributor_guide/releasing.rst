@@ -41,6 +41,7 @@ The version number needs to be changed in the following files:
 
 - ``nbgrader/_version.py``
 - ``nbgrader/nbextensions/assignment_list/main.js``
+- ``nbgrader/nbextensions/course_list/main.js``
 - ``nbgrader/nbextensions/validate_assignment/main.js``
 
 Rebuild the documentation
@@ -141,4 +142,5 @@ was ``0.3.0``, then the new version should be ``0.4.0.dev0``. Remember that the 
 
 - ``nbgrader/_version.py``
 - ``nbgrader/nbextensions/assignment_list/main.js``
+- ``nbgrader/nbextensions/course_list/main.js``
 - ``nbgrader/nbextensions/validate_assignment/main.js``
