@@ -104,5 +104,8 @@ create_course () {
 
     cd "${HOME}"
     ${runas} nbgrader quickstart "${course}"
+    cd "${course}"
+    ${runas} nbgrader generate_assignment ps1
+    ${runas} nbgrader release_assignment ps1
     cd "${currdir}"
 }
