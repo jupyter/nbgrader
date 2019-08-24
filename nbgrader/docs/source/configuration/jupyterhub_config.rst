@@ -187,10 +187,9 @@ JupyterHub Authentication
 
 .. versionadded:: 0.6.0
 
-With the advent of JupyterHubAuthPlugin students who don't have a specified course_id will only see the courses they have been added to. This means that you can omit the ``course_id`` from the students' ``nbgrader_config.py`` and allow JupyterHub to handle it (note that the ``JupyterHubAuthPlugin`` requires JupyterHub version 0.8 or higher.
+With the advent of JupyterHubAuthPlugin, nbgrader will ask JupyterHub which students are enrolled in which courses and only show them assignments from those respective courses (note that the ``JupyterHubAuthPlugin`` requires JupyterHub version 0.8 or higher). Similarly, nbgrader will ask JupyterHub which instructors have access to which courses and only show them formgrader links for those courses.
 
-On the JupyterHub side of things, to differentiate student from instructor, their groups need to be named ``formgrade-{course_id}`` for instructors and ``nbgrader-{course_id}`` for students. The course service additionally needs to have an API token set that is from a JupyterHub admin (see: Creating an `api token <https://jupyterhub.readthedocs.io/en/stable/reference/rest.html#create-an-api-token>`_).
-Finally, the service user also needs to be added to the formgrade group (see the ``jupyterhub_config.py`` example below)
+On the JupyterHub side of things, to differentiate student from instructor, groups need to be named ``formgrade-{course_id}`` for instructors and and grader accounts, and ``nbgrader-{course_id}`` for students. The course service additionally needs to have an API token set that is from a JupyterHub admin (see `JupyterHub documentation <https://jupyterhub.readthedocs.io/en/stable/reference/rest.html#create-an-api-token>`_).
 
 As in the case of multiple graders for a single class, if you have multiple
 classes on the same JupyterHub instance, then you will need to create multiple
@@ -262,8 +261,8 @@ this:
     ]
 
 
-Note: As you can see the ``nbgrader-{course_id}`` group is an empty list,
-adding students to the jupyterhub group is automatically done when the
+Note: As you can see the ``nbgrader-{course_id}`` group is an empty list.
+Adding students to the JupyterHub group is automatically done when the
 instructor adds them to the course database with the ``nbgrader db student
 add`` command or through the formgrader.
 
@@ -283,7 +282,7 @@ look for assignments in a subdirectory corresponding to the course name (see
 
 There also needs to be a separate ``nbgrader_config.py`` file in the root of
 each grader account, which points to the directory where the class files are,
-e.g. in ``/home/grader-course101/.jupyter/nbgrader_config.py`` would be:
+e.g. ``/home/grader-course101/.jupyter/nbgrader_config.py`` would be:
 
 .. code:: python
 
