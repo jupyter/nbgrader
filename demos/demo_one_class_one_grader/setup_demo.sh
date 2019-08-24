@@ -3,7 +3,7 @@
 set -e
 
 setup_demo () {
-    # Setup JupyterHub
+    # Setup JupyterHub config.
     setup_jupyterhub "${1}"
 
     # Create users.
@@ -18,9 +18,7 @@ setup_demo () {
     enable_create_assignment instructor1
     enable_formgrader instructor1
     enable_assignment_list instructor1
-    enable_validate_assignment instructor1
 
     # Enable extensions for student.
     enable_assignment_list student1
-    enable_validate_assignment student1
 }

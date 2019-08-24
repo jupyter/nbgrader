@@ -36,6 +36,7 @@ install_nbgrader () {
 
     # Clone nbgrader.
     if [ ! -d "${nbgrader_root}" ]; then
+        mkdir "${nbgrader_root}"
         cd "${nbgrader_root}"
         git clone https://github.com/jupyter/nbgrader .
     fi
@@ -53,6 +54,10 @@ install_nbgrader () {
     jupyter nbextension install --symlink --sys-prefix --py nbgrader --overwrite
     jupyter nbextension disable --sys-prefix --py nbgrader
     jupyter serverextension disable --sys-prefix --py nbgrader
+
+    # Everybody gets the validate extension, however.
+    jupyter nbextension enable --sys-prefix validate_assignment/main --section=notebook
+    jupyter serverextension enable --sys-prefix nbgrader.server_extensions.validate_assignment
 
     # Reset exchange.
     rm -rf "${exchange_root}"

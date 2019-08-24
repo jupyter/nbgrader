@@ -95,15 +95,6 @@ enable_course_list () {
     ${runas} jupyter serverextension enable --user nbgrader.server_extensions.course_list
 }
 
-enable_validate_assignment () {
-    USER="${1}"
-    HOME="/home/${USER}"
-    local runas="sudo -u ${USER}"
-
-    ${runas} jupyter nbextension enable --user validate_assignment/main --section=notebook
-    ${runas} jupyter serverextension enable --user nbgrader.server_extensions.validate_assignment
-}
-
 create_course () {
     USER="${1}"
     HOME="/home/${USER}"
