@@ -19,7 +19,8 @@ from jupyter_core.paths import jupyter_config_path
 from ...apps import NbGrader
 from ...auth import Authenticator
 from ...auth.jupyterhub import (JupyterhubEnvironmentError, get_jupyterhub_api_url,
-    get_jupyterhub_authorization, get_jupyterhub_url)
+    get_jupyterhub_authorization, get_jupyterhub_url, get_jupyterhub_user)
+from ...coursedir import CourseDirectory
 from ... import __version__ as nbgrader_version
 
 
@@ -90,6 +91,37 @@ class CourseListHandler(IPythonHandler):
         raise gen.Return([])
 
     @gen.coroutine
+    def check_for_noauth_jupyterhub_formgraders(self, config):
+        try:
+            get_jupyterhub_user()
+        except JupyterhubEnvironmentError:
+            # Not running on JupyterHub.
+            raise gen.Return([])
+
+        # We are running on JupyterHub, so maybe there's a formgrader
+        # service. Check if we have a course id and if so guess the path to the
+        # formgrader.
+        coursedir = CourseDirectory(config=config)
+        if not coursedir.course_id:
+            raise gen.Return([])
+
+        url = self.get_base_url() + "/services/" + coursedir.course_id + "/formgrader"
+        auth = get_jupyterhub_authorization()
+        http_client = AsyncHTTPClient()
+        try:
+            yield http_client.fetch(url, headers=auth)
+        except:
+            self.log.error("Formgrader not available at URL: %s", url)
+            raise gen.Return([])
+
+        courses = [{
+            'course_id': coursedir.course_id,
+            'url': url,
+            'kind': 'jupyterhub'
+        }]
+        raise gen.Return(courses)
+
+    @gen.coroutine
     def check_for_jupyterhub_formgraders(self, config):
         # first get the list of courses from the authenticator
         auth = Authenticator(config=config)
@@ -99,10 +131,12 @@ class CourseListHandler(IPythonHandler):
             # not running on JupyterHub, or otherwise don't have access
             raise gen.Return([])
 
-        # If course_names is None, that probably means we're not running with
-        # JupyterHub.
+        # If course_names is None, that means either we're not running with
+        # JupyterHub, or we just have a single class for all students and
+        # instructors.
         if course_names is None:
-            raise gen.Return([])
+            courses = yield self.check_for_noauth_jupyterhub_formgraders(config)
+            raise gen.Return(courses)
 
         base_url = get_jupyterhub_api_url()
         url = base_url + "/services"
