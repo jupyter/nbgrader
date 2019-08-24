@@ -39,13 +39,13 @@ class FetchAssignmentApp(NbGrader):
 
         To fetch an assignment by name into the current directory:
 
-            nbgrader fetch assignment1
+            nbgrader fetch_assignment assignment1
 
         To fetch an assignment for a specific course, you must first know the
         `course_id` for your course.  If you don't know it, ask your instructor.
         Then, simply include the argument with the '--course' flag.
 
-            nbgrader fetch assignment1 --course=phys101
+            nbgrader fetch_assignment assignment1 --course=phys101
 
         This will create an new directory named `assignment1` where you can work
         on the assignment. When you are done, use the `nbgrader submit` command
@@ -77,7 +77,7 @@ class FetchAssignmentApp(NbGrader):
 
         # set assignment and course
         if len(self.extra_args) == 0 and self.coursedir.assignment_id == "":
-            self.fail("Must provide assignment name:\nnbgrader <command> ASSIGNMENT [ --course COURSE ]")
+            self.fail("Must provide assignment name:\nnbgrader fetch_assignment ASSIGNMENT [ --course COURSE ]")
 
         if self.coursedir.assignment_id != "":
             fetch = ExchangeFetchAssignment(
@@ -87,7 +87,7 @@ class FetchAssignmentApp(NbGrader):
             try:
                 fetch.start()
             except ExchangeError:
-                self.fail("nbgrader fetch failed")
+                self.fail("nbgrader fetch_assignment failed")
         else:
             failed = False
 
@@ -103,4 +103,4 @@ class FetchAssignmentApp(NbGrader):
                     failed = True
 
             if failed:
-                self.fail("nbgrader fetch failed")
+                self.fail("nbgrader fetch_assignment failed")

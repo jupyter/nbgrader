@@ -34,7 +34,7 @@ class FetchFeedbackApp(NbGrader):
 
         To fetch an assignment by name into the current directory:
 
-             nbgrader fetch_feedback assignment1
+            nbgrader fetch_feedback assignment1
 
         To fetch the assignment for a specific course (or if your course_id is
         not set in a configuration file already), you must first know the
@@ -61,7 +61,7 @@ class FetchFeedbackApp(NbGrader):
 
         # set assignment and course
         if len(self.extra_args) == 0 and self.coursedir.assignment_id == "":
-            self.fail("Must provide assignment name:\nnbgrader <command> ASSIGNMENT [ --course COURSE ]")
+            self.fail("Must provide assignment name:\nnbgrader fetch_feedback ASSIGNMENT [ --course COURSE ]")
 
         if self.coursedir.assignment_id != "":
             fetch = ExchangeFetchFeedback(
@@ -71,7 +71,7 @@ class FetchFeedbackApp(NbGrader):
             try:
                 fetch.start()
             except ExchangeError:
-                self.fail("nbgrader fetch failed")
+                self.fail("nbgrader fetch_feedback failed")
         else:
             failed = False
 
@@ -87,4 +87,4 @@ class FetchFeedbackApp(NbGrader):
                     failed = True
 
             if failed:
-                self.fail("nbgrader fetchfeedback failed")
+                self.fail("nbgrader fetch_feedback failed")

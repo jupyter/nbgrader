@@ -7,7 +7,7 @@ Using nbgrader with JupyterHub
         Documentation for ``nbgrader generate_assignment``, ``nbgrader autograde``, ``nbgrader formgrade``, and ``nbgrader generate_feedback``.
 
     :doc:`/user_guide/managing_assignment_files`
-        Documentation for ``nbgrader release_assignment``, ``nbgrader fetch``, ``nbgrader submit``, and ``nbgrader collect``.
+        Documentation for ``nbgrader release_assignment``, ``nbgrader fetch_assignment``, ``nbgrader submit``, and ``nbgrader collect``.
 
     :doc:`nbgrader_config`
         Details on how to setup the ``nbgrader_config.py`` file.
@@ -25,7 +25,7 @@ that optimize and enrich the instructors' and students' experience of sharing
 the same system. By integrating with JupyterHub, nbgrader streamlines the
 process of releasing and collecting assignments for the instructor and of
 fetching and submitting assignments for the student. In addition to using the
-``nbgrader release_assignment``, ``nbgrader fetch``, ``nbgrader submit``, and ``nbgrader
+``nbgrader release_assignment``, ``nbgrader fetch_assignment``, ``nbgrader submit``, and ``nbgrader
 collect`` commands (see :doc:`/user_guide/managing_assignment_files`) with a
 shared server setup like JupyterHub, the formgrader (see
 :doc:`/user_guide/creating_and_grading_assignments`) can be configured to
