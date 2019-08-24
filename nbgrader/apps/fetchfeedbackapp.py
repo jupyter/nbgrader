@@ -34,7 +34,7 @@ class FetchFeedbackApp(NbGrader):
 
         To fetch an assignment by name into the current directory:
 
-            nbgrader fetch assignment1
+             nbgrader fetch_feedback assignment1
 
         To fetch the assignment for a specific course (or if your course_id is
         not set in a configuration file already), you must first know the
