@@ -281,13 +281,15 @@ look for assignments in a subdirectory corresponding to the course name (see
     c.Authenticator.plugin_class = JupyterHubAuthPlugin
 
 There also needs to be a separate ``nbgrader_config.py`` file in the root of
-each grader account, which points to the directory where the class files are,
-e.g. ``/home/grader-course101/.jupyter/nbgrader_config.py`` would be:
+each grader account, which points to the directory where the class files are
+and which specifies what the course id is, e.g.
+``/home/grader-course101/.jupyter/nbgrader_config.py`` would be:
 
 .. code:: python
 
     c = get_config()
     c.CourseDirectory.root = '/home/grader-course101/course101'
+    c.CourseDirectory.course_id = 'course101'
 
 and ``/home/grader-course123/.jupyter/nbgrader_config.py`` would be:
 
@@ -295,8 +297,11 @@ and ``/home/grader-course123/.jupyter/nbgrader_config.py`` would be:
 
     c = get_config()
     c.CourseDirectory.root = '/home/grader-course123/course123'
+    c.CourseDirectory.course_id = 'course123'
 
-Finally, you will again need to enable and disable different combinations of the nbgrader extensions for different accounts. See the table in :ref:`multiple-graders` for details.
+Finally, you will again need to enable and disable different combinations of
+the nbgrader extensions for different accounts. See the table in
+:ref:`multiple-graders` for details.
 
 Custom Authentication
 ^^^^^^^^^^^^^^^^^^^^^

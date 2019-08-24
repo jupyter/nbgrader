@@ -99,7 +99,7 @@ class ExchangeList(Exchange):
                     notebookDir, notebookFilename = os.path.split(notebook)
                     notebookName, _ = os.path.splitext(notebookFilename)
                     feedbackpath = os.path.join(self.root, info['course_id'], 'feedback', '{0}.html'.format(nb_hash))
-                    # notebookDir should have the course_did in it if we have multiple courses ...
+                    # notebookDir should have the course_id in it if we have multiple courses ...
                     if self.path_includes_course:
                         nbdir = os.path.join(self.assignment_dir, info['course_id'], info['assignment_id'])
                     else:
