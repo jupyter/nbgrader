@@ -69,6 +69,33 @@ class TestNbGraderReleaseFeedback(BaseTestApp):
         run_nbgrader(["release_feedback", "ps1", "--Exchange.root={}".format(exchange), '--course', 'abc101'])
 
     @notwindows
+    def test_student_id_exclude(self, db, course_dir, exchange):
+        """Does --CourseDirectory.student_id_exclude=X exclude students?"""
+        with open("nbgrader_config.py", "a") as fh:
+            fh.write("""c.CourseDirectory.db_assignments = [dict(name="ps1")]\n""")
+            fh.write("""c.CourseDirectory.db_students = [dict(id="foo"), dict(id="bar"), dict(id="baz")]\n""")
+        self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
+        run_nbgrader(["assign", "ps1", "--db", db])
+        nb_path = join(course_dir, "submitted", "foo", "ps1", "p1.ipynb")
+        self._copy_file(join("files", "submitted-unchanged.ipynb"), nb_path)
+        self._copy_file(join("files", "timestamp.txt"), join(course_dir, "submitted", "foo", "ps1", "timestamp.txt"))
+        nb_path2 = join(course_dir, "submitted", "bar", "ps1", "p1.ipynb")
+        self._copy_file(join("files", "submitted-changed.ipynb"), nb_path2)
+        self._copy_file(join("files", "timestamp.txt"), join(course_dir, "submitted", "bar", "ps1", "timestamp.txt"))
+
+        run_nbgrader(["autograde", "ps1", "--db", db])
+        run_nbgrader(["generate_feedback", "ps1", "--db", db])
+        run_nbgrader(["release_feedback", "ps1", "--Exchange.root={}".format(exchange), '--course', 'abc101',
+                      "--CourseDirectory.student_id_exclude=bar,baz"]) # baz doesn't exist, test still OK though
+        nb_hash = notebook_hash(nb_path) # foo
+        assert exists(join(exchange, "abc101", "feedback", "{}.html".format(nb_hash)))
+        nb_hash2 = notebook_hash(nb_path2) # bar
+        assert not exists(join(exchange, "abc101", "feedback", "{}.html".format(nb_hash2)))
+        # release feedback should overwrite without error
+        run_nbgrader(["release_feedback", "ps1", "--Exchange.root={}".format(exchange), '--course', 'abc101'])
+
+
+    @notwindows
     @pytest.mark.parametrize("groupshared", [False, True])
     def test_permissions(self, db, course_dir, exchange, groupshared):
         """Are permissions properly set?"""

@@ -31,12 +31,18 @@ class ExchangeReleaseFeedback(Exchange):
         self.log.info("student_id: {}".format(student_id))
         html_files = glob.glob(os.path.join(self.src_path, student_id, self.coursedir.assignment_id, '*.html'))
         self.log.info("html_files: {}".format(html_files))
+        if self.coursedir.student_id_exclude:
+            exclude_students = set(self.coursedir.student_id_exclude.split(','))
+        else:
+            exclude_students = set()
         for html_file in html_files:
             assignment_dir, file_name = os.path.split(html_file)
             timestamp = open(os.path.join(assignment_dir, 'timestamp.txt')).read()
             self.log.info("timestamp {}".format(timestamp))
-            user = assignment_dir.split('/')[-2]
-            submissionDir = os.path.join(self.src_path, '../submitted/', '{0}/{1}'.format(user, self.coursedir.assignment_id))
+            student_id = assignment_dir.split('/')[-2]
+            if student_id in exclude_students:
+                continue
+            submissionDir = os.path.join(self.src_path, '../submitted/', '{0}/{1}'.format(student_id, self.coursedir.assignment_id))
             fname, _ = os.path.splitext(file_name.replace('.html', ''))
             self.log.info("found html file {}".format(fname))
             nbfile = "{0}/{1}.ipynb".format(submissionDir, fname)
