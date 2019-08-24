@@ -17,11 +17,11 @@ from .conftest import notwindows, windows
 
 
 @pytest.fixture
-def api(request, course_dir, db, exchange):
+def api(request, course_dir, db, exchange, cache):
     config = Config()
     config.CourseDirectory.course_id = "abc101"
     config.Exchange.root = exchange
-    config.Exchange.cache = exchange
+    config.Exchange.cache = cache
     config.CourseDirectory.root = course_dir
     config.CourseDirectory.db_url = db
 
@@ -763,11 +763,11 @@ class TestNbGraderAPI(BaseTestApp):
         assert os.path.exists(join(exchange, "abc101", "feedback", "a7efd7718119cc393418ad9a185b5b3b.html"))
 
     @notwindows
-    def test_fetch_feedback(self, api, course_dir, db, exchange):
+    def test_fetch_feedback(self, api, course_dir, db, cache):
         self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
         api.generate_assignment("ps1")
         timestamp = open(os.path.join(os.path.dirname(__file__), "files", "timestamp.txt")).read()
-        cachepath = join(exchange, "abc101", "foo+ps1+{}".format(timestamp))
+        cachepath = join(cache, "abc101", "foo+ps1+{}".format(timestamp))
         self._copy_file(join("files", "submitted-changed.ipynb"), join(cachepath, "p1.ipynb"))
         self._copy_file(join("files", "timestamp.txt"), join(cachepath, "timestamp.txt"))
         self._copy_file(join("files", "submitted-changed.ipynb"), join(course_dir, "submitted", "foo", "ps1", "p1.ipynb"))
@@ -782,7 +782,7 @@ class TestNbGraderAPI(BaseTestApp):
         # add another assignment         
         self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "source", "ps2", "ps2.ipynb"))
         api.generate_assignment("ps2")
-        cachepath = join(exchange, "abc101", "foo+ps2+{}".format(timestamp))
+        cachepath = join(cache, "abc101", "foo+ps2+{}".format(timestamp))
         self._copy_file(join("files", "submitted-changed.ipynb"), join(cachepath, "ps2.ipynb"))
         self._copy_file(join("files", "timestamp.txt"), join(cachepath, "timestamp.txt"))
         self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "submitted", "foo", "ps2", "p2.ipynb"))
