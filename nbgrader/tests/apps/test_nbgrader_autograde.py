@@ -10,7 +10,7 @@ from os.path import join
 from textwrap import dedent
 from nbformat import current_nbformat
 
-from ...api import Gradebook
+from ...api import Gradebook, MissingEntry
 from ...utils import remove
 from ...nbgraderformat import reads
 from .. import run_nbgrader
@@ -93,6 +93,34 @@ class TestNbGraderAutograde(BaseTestApp):
             comment2 = gb.find_comment("quux", "p1", "ps1", "bar")
             assert comment1.comment == None
             assert comment2.comment == None
+
+    def test_student_id_exclude(self, db, course_dir):
+        """Does --CourseDirectory.student_id_exclude=X exclude students?"""
+        with open("nbgrader_config.py", "a") as fh:
+            fh.write("""c.CourseDirectory.db_assignments = [dict(name='ps1', duedate='2015-02-02 14:58:23.948203 America/Los_Angeles')]\n""")
+            fh.write("""c.CourseDirectory.db_students = [dict(id="foo"), dict(id="bar"), dict(id="baz")]""")
+
+        self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
+        run_nbgrader(["generate_assignment", "ps1", "--db", db])
+
+        self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "submitted", "foo", "ps1", "p1.ipynb"))
+        self._copy_file(join("files", "submitted-changed.ipynb"), join(course_dir, "submitted", "bar", "ps1", "p1.ipynb"))
+        self._copy_file(join("files", "submitted-changed.ipynb"), join(course_dir, "submitted", "baz", "ps1", "p1.ipynb"))
+        run_nbgrader(["autograde", "ps1", "--db", db, '--CourseDirectory.student_id_exclude=bar,baz'])
+
+        assert os.path.isfile(join(course_dir, "autograded", "foo", "ps1", "p1.ipynb"))
+        assert not os.path.isfile(join(course_dir, "autograded", "bar", "ps1", "p1.ipynb"))
+        assert not os.path.isfile(join(course_dir, "autograded", "baz", "ps1", "p1.ipynb"))
+
+        with Gradebook(db) as gb:
+            notebook = gb.find_submission_notebook("p1", "ps1", "foo")
+            assert notebook.score == 1
+
+            with pytest.raises(MissingEntry):
+                notebook = gb.find_submission_notebook("p1", "ps1", "bar")
+            with pytest.raises(MissingEntry):
+                notebook = gb.find_submission_notebook("p1", "ps1", "baz")
+
 
     def test_grade_timestamp(self, db, course_dir):
         """Is a timestamp correctly read in?"""

@@ -42,6 +42,27 @@ class TestNbGraderFeedback(BaseTestApp):
 
         assert exists(join(course_dir, "feedback", "foo", "ps1", "p1.html"))
 
+    def test_student_id_exclude(self, db, course_dir):
+        """Does --CourseDirectory.student_id_exclude=X exclude students?"""
+        with open("nbgrader_config.py", "a") as fh:
+            fh.write("""c.CourseDirectory.db_assignments = [dict(name="ps1")]\n""")
+            fh.write("""c.CourseDirectory.db_students = [dict(id="foo"), dict(id="bar"), dict(id="baz")]\n""")
+        self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
+        run_nbgrader(["assign", "ps1", "--db", db])
+
+        for student in ["foo", "bar", "baz"]:
+            self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "submitted", student, "ps1", "p1.ipynb"))
+        run_nbgrader(["autograde", "ps1", "--db", db])
+        run_nbgrader(["generate_feedback", "ps1", "--db", db, "--CourseDirectory.student_id_exclude=bar,baz"])
+
+        for student in ["foo", "bar", "baz"]:
+            assert exists(join(course_dir, "autograded", "foo", "ps1", "p1.ipynb"))
+
+        assert exists(join(course_dir, "feedback", "foo", "ps1", "p1.html"))
+        assert not exists(join(course_dir, "feedback", "bar", "ps1", "p1.html"))
+        assert not exists(join(course_dir, "feedback", "baz", "ps1", "p1.html"))
+
+
     def test_force(self, db, course_dir):
         """Ensure the force option works properly"""
         with open("nbgrader_config.py", "a") as fh:
