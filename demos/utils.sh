@@ -100,7 +100,9 @@ create_course () {
     HOME="/home/${USER}"
     local course="${2}"
     local runas="sudo -u ${USER}"
+    local currdir="$(pwd)"
 
     cd "${HOME}"
     ${runas} nbgrader quickstart "${course}"
+    cd "${currdir}"
 }
