@@ -26,25 +26,28 @@ class FetchFeedbackApp(NbGrader):
     flags = flags
 
     examples = """
-        Fetch feedback for an assignment that an instructor has released. MORE INFO NEEDED
+        Fetch feedback for an assignment, if an instructor has released it.
         For the usage of students.
 
-        You can run this command from any directory, but usually, you will have a
-        directory where you are keeping your course assignments.
+        You can run this command from any directory, but usually, you will run
+        it from the directory where you are keeping your course assignments.
 
         To fetch an assignment by name into the current directory:
 
-            nbgrader fetch assignment1
+             nbgrader fetch_feedback assignment1
 
-        To fetch an assignment for a specific course, you must first know the
-        `course_id` for your course.  If you don't know it, ask your instructor.
-        Then, simply include the argument with the '--course' flag.
+        To fetch the assignment for a specific course (or if your course_id is
+        not set in a configuration file already), you must first know the
+        `course_id` for your course.  If you don't know it, ask your
+        instructor.  Then, simply include the argument with the '--course'
+        flag:
 
-            nbgrader fetch assignment1 --course=phys101
+            nbgrader fetch_feedback assignment1 --course=phys101
 
-        This will create an new directory named `assignment1` where you can work
-        on the assignment. When you are done, use the `nbgrader submit` command
-        to turn in the assignment.
+        This will create a new `feedback` directory within the corresponding
+        assignment directory with the feedback inside.  There can be multiple
+        feedbacks if you submitted multiple times and the instructor generated
+        it multiple times.
         """
 
     @default("classes")
