@@ -667,7 +667,7 @@ class TestNbGraderAPI(BaseTestApp):
     @notwindows
     def test_release_and_unrelease(self, api, course_dir, db, exchange):
         self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
-        result = api.assign("ps1")
+        result = api.generate_assignment("ps1")
         result = api.release_assignment("ps1")
         assert result["success"]
         assert os.path.exists(join(exchange, "abc101", "outbound", "ps1", "p1.ipynb"))
@@ -721,7 +721,7 @@ class TestNbGraderAPI(BaseTestApp):
 
     def test_generate_feedback(self, api, course_dir, db):
         self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
-        api.assign("ps1")
+        api.generate_assignment("ps1")
         self._copy_file(join("files", "submitted-changed.ipynb"), join(course_dir, "submitted", "foo", "ps1", "p1.ipynb"))
         api.autograde("ps1", "foo")
         result = api.generate_feedback("ps1", "foo")
@@ -733,7 +733,7 @@ class TestNbGraderAPI(BaseTestApp):
         assert not result["success"]
         
         self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "source", "ps2", "p2.ipynb"))
-        api.assign("ps2")
+        api.generate_assignment("ps2")
         self._copy_file(join("files", "submitted-changed.ipynb"), join(course_dir, "submitted", "foo", "ps2", "p2.ipynb"))
         api.autograde("ps2", "foo")
         result = api.generate_feedback("ps2", "foo")
@@ -742,7 +742,7 @@ class TestNbGraderAPI(BaseTestApp):
     @notwindows
     def test_release_feedback(self, api, course_dir, db, exchange):
         self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
-        api.assign("ps1")
+        api.generate_assignment("ps1")
         self._copy_file(join("files", "submitted-changed.ipynb"), join(course_dir, "submitted", "foo", "ps1", "p1.ipynb"))
         self._copy_file(join("files", "timestamp.txt"), join(course_dir, "submitted", "foo", "ps1", "timestamp.txt"))
         api.autograde("ps1", "foo")
@@ -753,7 +753,7 @@ class TestNbGraderAPI(BaseTestApp):
         assert os.path.exists(join(exchange, "abc101", "feedback", "65f5ff7800d0926ae6869e70f4da0b27.html"))
         # add another assignment         
         self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "source", "ps2", "p2.ipynb"))
-        api.assign("ps2")
+        api.generate_assignment("ps2")
         self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "submitted", "foo", "ps2", "p2.ipynb"))
         self._copy_file(join("files", "timestamp.txt"), join(course_dir, "submitted", "foo", "ps2", "timestamp.txt"))
         api.autograde("ps2", "foo")
@@ -765,7 +765,7 @@ class TestNbGraderAPI(BaseTestApp):
     @notwindows
     def test_fetch_feedback(self, api, course_dir, db, exchange):
         self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
-        api.assign("ps1")
+        api.generate_assignment("ps1")
         timestamp = open(os.path.join(os.path.dirname(__file__), "files", "timestamp.txt")).read()
         cachepath = join(exchange, "abc101", "foo+ps1+{}".format(timestamp))
         self._copy_file(join("files", "submitted-changed.ipynb"), join(cachepath, "p1.ipynb"))
@@ -781,7 +781,7 @@ class TestNbGraderAPI(BaseTestApp):
         assert os.path.exists(join("ps1", "feedback", timestamp, "p1.html"))
         # add another assignment         
         self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "source", "ps2", "ps2.ipynb"))
-        api.assign("ps2")
+        api.generate_assignment("ps2")
         cachepath = join(exchange, "abc101", "foo+ps2+{}".format(timestamp))
         self._copy_file(join("files", "submitted-changed.ipynb"), join(cachepath, "ps2.ipynb"))
         self._copy_file(join("files", "timestamp.txt"), join(cachepath, "timestamp.txt"))
