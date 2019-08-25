@@ -18,12 +18,12 @@ class ExchangeReleaseAssignment(Exchange):
     force = Bool(False, help="Force overwrite existing files in the exchange.").tag(config=True)
 
     def _load_config(self, cfg, **kwargs):
-        if 'ExchangeReleaseAssignment' in cfg:
+        if 'ExchangeRelease' in cfg:
             self.log.warning(
                 "Use ExchangeReleaseAssignment in config, not ExchangeRelease. Outdated config:\n%s",
                 '\n'.join(
                     'ExchangeRelease.{key} = {value!r}'.format(key=key, value=value)
-                    for key, value in cfg.GenerateFeedbackApp.items()
+                    for key, value in cfg.ExchangeRelease.items()
                 )
             )
             cfg.ExchangeReleaseAssignment.merge(cfg.ExchangeRelease)
