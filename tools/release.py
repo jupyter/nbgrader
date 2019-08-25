@@ -35,27 +35,3 @@ with open("README", "w") as fh:
 
 # Build the source distribution package
 run(["python", "setup.py", "sdist"])
-
-# Get the version number
-version = run(["python", "setup.py", "--version"], capture=True).rstrip()
-
-# Get the current directory
-currdir = os.getcwd()
-
-# Create a temporary conda environment
-tempdir = tempfile.mkdtemp()
-condadir = os.path.join(tempdir, "conda")
-run(["conda", "create", "-y", "-p", condadir, "python=3"])
-env = os.environ.copy()
-env['PATH'] = "{}:{}".format(os.path.join(condadir, "bin"), env['PATH'])
-
-# Install nbgrader into the temporary conda environment and run the tests
-try:
-    os.chdir(tempdir)
-    run(["pip", "install", "-r", os.path.join(currdir, "dev-requirements.txt")], env=env)
-    run(["pip", "install", os.path.join(currdir, "dist", "nbgrader-{}.tar.gz".format(version))], env=env)
-    run(["python", "-m", "nbgrader.tests", "-v", "-x"], env=env)
-
-finally:
-    os.chdir(currdir)
-    shutil.rmtree(tempdir)

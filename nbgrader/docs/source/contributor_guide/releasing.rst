@@ -51,7 +51,7 @@ Regenerate all the documentation for this release by running::
 
     python tasks.py docs
 
-Make sure the linkcheck and spellcheck pass, and commit the results.
+Make sure the linkcheck passes, and commit the results.
 
 Make a PR
 ---------
@@ -82,14 +82,11 @@ directory::
     ./tools/release.py
 
 This will do a few things, including converting the README file to rst (so it
-will display correctly on PyPI), building the source distribution, installing
-the source distribution into a temporary conda environment, and running tests
-in that environment.
+will display correctly on PyPI) and building the source distribution.
+Afterwards, you can upload the package to PyPI with::
 
-Once you have verified that the tests pass, you can upload the package to PyPI
-with::
-
-    python setup.py sdist upload
+    pip install -U twine
+    python -m twine upload dist/*
 
 Create a git tag and possibly branch
 ------------------------------------
@@ -116,23 +113,12 @@ Build and release the conda packages
 ------------------------------------
 
 The conda recipe has been moved to a separate repository ("feedstock") and now
-publishes ``nbgrader`` to the ``conda-forge`` channel automatically via CI.
-
-Releasing a new ``nbgrader`` version on conda requires the updating of the
-``version`` and ``sha256`` ``jinja2`` variables in the ``recipe/meta.yaml``
-file in the `nbgrader-feedstock
-<https://github.com/conda-forge/nbgrader-feedstock>`__ repository via a pull
-request.
-
-The ``version`` variable must correspond to the git tag created above and the
-``sha256`` variable is the sha256 hash for the source code ``.tar.gz`` file
-downloaded from the given git tag/release on GitHub. This sha256 hash can be
-obtained via running ``openssl``, for example::
-
-    openssl sha256 v0.3.0.tar.gz
-
-Note: For more information and/or contributing to nbgrader recipe please see
-the `nbgrader-feedstock <https://github.com/conda-forge/nbgrader-feedstock>`__.
+publishes ``nbgrader`` to the ``conda-forge`` channel automatically via CI. The
+conda forge buildbot should detect once you've created a tag and will
+automatically create a PR for the new release within a short period of time
+(might be up to an hour). Wait for this PR to happen, and then follow the
+instructions in the `nbgrader-feedstock
+<https://github.com/conda-forge/nbgrader-feedstock>`__.
 
 Change to development version
 -----------------------------
