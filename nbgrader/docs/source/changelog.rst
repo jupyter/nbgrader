@@ -192,6 +192,7 @@ Huge thanks to the following users who submitted PRs or reported issues that wer
 - nabriis
 - nthiery
 - perllaghu
+- QuantumEntangledAndy
 - rgerkin
 - rkdarst
 - Ruin0x11
