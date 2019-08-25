@@ -72,7 +72,8 @@ database. You can access the timestamps through the API, like so:
             print("Submission from '{}' is {} seconds late".format(
                 submission.student_id, submission.total_seconds_late))
 
-Note that if you use the release/fetch/submit/collect commands (see
+Note that if you use the release_assignment/fetch_assignment/submit/collect
+commands (see
 :doc:`managing_assignment_files`), the ``timestamp.txt`` files will be included
 automatically.
 
@@ -125,11 +126,11 @@ want to set the following config options in your students'
     c.Authenticator.plugin_class = JupyterHubAuthPlugin
 
 The first option (``Exchange.path_includes_course``) will tell the transfer
-apps (i.e. ``nbgrader fetch``, ``nbgrader submit``, and ``nbgrader list``) to
-assume that the paths for assignments include the course name, such as
-``./course101/ps1`` rather than just ``./ps1`` (which is the default).
-Then, when using the "Assignment List" extension, students will be able to
-switch between different classes.
+apps (i.e. ``nbgrader fetch_assignment``, ``nbgrader submit``, and ``nbgrader
+list``) to assume that the paths for assignments include the course name, such
+as ``./course101/ps1`` rather than just ``./ps1`` (which is the default). Then,
+when using the "Assignment List" extension, students will be able to switch
+between different classes.
 
 The second option (``Authenticator.plugin_class``) tells nbgrader to ask JupyterHub which courses the student is enrolled in. It does require a bit more setup than simply editing the ``nbgrader_config.py`` file, however. Please see :ref:`jupyterhub-auth` for details.
 
@@ -151,9 +152,10 @@ formgrade``, ``nbgrader generate_feedback``, ``nbgrader validate``, and
 ``nbgrader export``.
 
 However, the parts of nbgrader corresponding to file management (the
-"Assignment List" extension, ``nbgrader release_assignment``, ``nbgrader fetch``,
-``nbgrader submit``, ``nbgrader collect``, ``nbgrader list``) will *not* work
-under Windows.
+"Assignment List" extension, ``nbgrader release_assignment``, ``nbgrader
+fetch_assignment``, ``nbgrader submit``, ``nbgrader collect``, ``nbgrader
+list``, ``nbgrader release_feedback``, ``nbgrader fetch_feedback``) will *not*
+work under Windows.
 
 What happens if I do some manual grading, and then rerun the autograder?
 ------------------------------------------------------------------------

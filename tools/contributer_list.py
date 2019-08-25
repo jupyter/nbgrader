@@ -9,6 +9,7 @@ Usage:
 
 import sys
 from gh_api import (
+    get_milestone,
     get_milestones,
     get_milestone_id,
     get_issues_list,
@@ -19,7 +20,8 @@ if __name__ == "__main__":
     if len(sys.argv) < 2:
         milestones = get_milestones("jupyter/nbgrader", auth=True)
     else:
-        milestones = sys.argv[1:]
+        milestones = [get_milestone("jupyter/nbgrader", milestone_id, auth=True)
+                      for milestone_id in sys.argv[1:]]
 
     users = set()
     for milestone in milestones:
@@ -43,5 +45,5 @@ if __name__ == "__main__":
     print("The following users have submitted issues and/or PRs:")
     print("-----------------------------------------------------")
     for user in sorted(users.keys()):
-        print("{}".format(users[user]))
+        print("- {}".format(users[user]))
     print("-----------------------------------------------------")

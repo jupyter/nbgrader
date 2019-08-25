@@ -24,7 +24,6 @@ def autogen_command_line(root):
     )
 
     apps = [
-        'GenerateAssignmentApp',
         'AutogradeApp',
         'CollectApp',
         'DbAssignmentAddApp',
@@ -36,17 +35,20 @@ def autogen_command_line(root):
         'DbStudentListApp',
         'DbStudentRemoveApp',
         'ExportApp',
-        'GenerateFeedbackApp',
         'FetchAssignmentApp',
+        'FetchFeedbackApp',
+        'GenerateAssignmentApp',
+        'GenerateConfigApp',
+        'GenerateFeedbackApp',
         'ListApp',
         'NbGraderApp',
         'QuickStartApp',
         'ReleaseAssignmentApp',
+        'ReleaseFeedbackApp',
         'SubmitApp',
         'UpdateApp',
         'ValidateApp',
         'ZipCollectApp',
-        'GenerateConfigApp'
     ]
 
     print('Generating command line documentation')
