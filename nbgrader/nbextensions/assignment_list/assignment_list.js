@@ -225,26 +225,15 @@ define([
         }
     };
 
-    AssignmentList.prototype.handle_load_feedback_list = function (data, status, xhr) {
-        if (data.success) {
-            // update_fetched_only:
-            this.load_list_success(data.value, true);
-        } else {
-            this.show_error(data.value);
-        }
-    };
+    AssignmentList.prototype.load_list_success = function (data) {
+        this.clear_list();
 
-    AssignmentList.prototype.load_list_success = function (data, update_fetched_only) {
-        if (update_fetched_only == null) {
-            this.clear_list();
-        }
         var len = data.length;
         var submissions = [];
         for (var i=0; i<len; i++) {
             var element = $('<div/>');
             var item = new Assignment(element, data[i], this.fetched_selector,
                                       $.proxy(this.handle_load_list, this),
-                                      $.proxy(this.handle_load_feedback_list, this),
                                       this.options);
             if (data[i]['status'] === 'released') {
                 this.released_element.append(element);
@@ -310,9 +299,6 @@ define([
             }
         }
 
-        if (update_fetched_only != null) {
-            return;
-        }
         // Add collapse arrows.
         $('.assignment-notebooks-link').each(function(index, el) {
             var $link = $(el);
@@ -353,15 +339,12 @@ define([
     };
 
 
-    var Assignment = function (element, data, parent,
-                               on_refresh, on_refresh_feedback,
-                               options) {
+    var Assignment = function (element, data, parent, on_refresh, options) {
         this.element = $(element);
         this.submissions = [];
         this.data = data;
         this.parent = parent;
         this.on_refresh = on_refresh;
-        this.on_refresh_feedback = on_refresh_feedback;
         this.options = options;
         this.base_url = options.base_url || utils.get_body_data("baseUrl");
         this.style();
@@ -585,7 +568,7 @@ define([
                 },
                 type : "POST",
                 dataType : "json",
-                success : $.proxy(that.on_refresh_feedback, that),
+                success : $.proxy(that.on_refresh, that),
                 error : function (xhr, status, error) {
                     container.empty().text("Error fetching feedback.");
                     utils.log_ajax_error(xhr, status, error);
