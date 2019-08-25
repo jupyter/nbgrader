@@ -82,12 +82,8 @@ directory::
     ./tools/release.py
 
 This will do a few things, including converting the README file to rst (so it
-will display correctly on PyPI), building the source distribution, installing
-the source distribution into a temporary conda environment, and running tests
-in that environment.
-
-Once you have verified that the tests pass, you can upload the package to PyPI
-with::
+will display correctly on PyPI) and building the source distribution.
+Afterwards, you can upload the package to PyPI with::
 
     pip install -U twine
     python -m twine upload dist/*
