@@ -52,6 +52,7 @@ env['PATH'] = "{}:{}".format(os.path.join(condadir, "bin"), env['PATH'])
 # Install nbgrader into the temporary conda environment and run the tests
 try:
     os.chdir(tempdir)
+    shutil.copy(os.path.join(currdir, "pytest.ini"), tempdir)
     run(["pip", "install", "-r", os.path.join(currdir, "dev-requirements.txt")], env=env)
     run(["pip", "install", os.path.join(currdir, "dist", "nbgrader-{}.tar.gz".format(version))], env=env)
     run(["python", "-m", "nbgrader.tests", "-v", "-x"], env=env)
