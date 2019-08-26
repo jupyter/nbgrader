@@ -121,9 +121,14 @@ class AssignmentList(LoggingConfigurable):
                 }
 
             else:
+                for assignment in assignments:
+                    assignment["submissions"] = sorted(
+                        assignment["submissions"],
+                        key=lambda x: x["timestamp"])
+                assignments = sorted(assignments, key=lambda x: x["assignment_id"])
                 retvalue = {
                     "success": True,
-                    "value": sorted(assignments, key=lambda x: x['timestamp'], reverse=True)
+                    "value": assignments
                 }
 
         return retvalue
