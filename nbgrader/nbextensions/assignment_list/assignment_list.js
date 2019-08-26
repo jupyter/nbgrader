@@ -229,7 +229,6 @@ define([
         this.clear_list();
 
         var len = data.length;
-        var submissions = [];
         for (var i=0; i<len; i++) {
             var element = $('<div/>');
             var item = new Assignment(element, data[i], this.fetched_selector,
@@ -242,60 +241,8 @@ define([
                 this.fetched_element.append(element);
                 this.fetched_element.children('.list_placeholder').hide();
             } else if (data[i]['status'] === 'submitted') {
-                // Just collecting submissions here
-                submissions.push(...item.submissions);
-            }
-        }
-
-        // Add submissions here:
-        if (submissions.length > 0) {
-            var compare = function (a, b, field, reverse) {
-                if (a[field] > b[field]) return reverse * -1;
-                else if (a[field] < b[field]) return reverse * 1;
-                else return 0;
-            }
-            submissions.sort(function (a, b) {
-                // Sort by assignment_id, timestamp:
-                return compare(a, b, "assignment_id", -1) || compare(a, b, "timestamp", 1);
-            });
-            var group = null;
-            var element;
-            this.submitted_element.empty();
-            this.submitted_element.children('.list_placeholder').hide();
-            for (var i = 0; i < submissions.length; i++) {
-                var data = submissions[i];
-                if (group !== data.assignment_id) {
-                    // insert a header row
-                    var header = $('<div/>').addClass('col-md-12');
-                    header.append(data.link);
-                    header.append($('<span/>').addClass('item_course col-sm-2').text(data.course_id));
-                    if (data.button != null) {
-                        header.append(data.button);
-                    }
-                    element = $('<div/>').addClass('list_item').addClass("row");
-                    element.append(header);
-                    this.submitted_element.append(element);
-                }
-                element = $('<div/>').addClass('list_item').addClass("row");
-                var row = $('<div/>').addClass('col-md-12');
-                group = data.assignment_id;
-                row.append($('<span/>').addClass('item_course col-sm-8').text(""));
-                if (data.hasLocalFeedback) {
-                    var link = $('<a/>');
-                    var url = data.localFeedbackPathDir;
-                    var link = $('<a/>')
-                        .attr("href", url)
-                        .attr("target", "_blank")
-                        .text("view");
-                    row.append($('<span/>').addClass('item_course col-sm-1').append(link));
-                } else if (data.hasFeedback) {
-                    row.append($('<span/>').addClass('item_course col-sm-1').text("ready to fetch"));
-                } else {
-                    row.append($('<span/>').addClass('item_course col-sm-1').text(""));
-                }
-                row.append($('<span/>').addClass('item_status col-sm-3').text(data.timestamp));
-                element.append(row);
                 this.submitted_element.append(element);
+                this.submitted_element.children('.list_placeholder').hide();
             }
         }
 
@@ -341,7 +288,6 @@ define([
 
     var Assignment = function (element, data, parent, on_refresh, options) {
         this.element = $(element);
-        this.submissions = [];
         this.data = data;
         this.parent = parent;
         this.on_refresh = on_refresh;
@@ -375,57 +321,29 @@ define([
         var link = this.make_link();
         row.append(link);
         row.append($('<span/>').addClass('item_course col-sm-2').text(this.data.course_id));
-        if (this.data.status === 'submitted') {
-            // This is called in the submitted section:
-            // Do any of the notebooks for this submission have
-            // local feedback? If, yes, then we can view them.
-            var hasLocalFeedback = false;
-            var localFeedbackPathDir = "";
-            for (var i = 0; i < this.data.notebooks.length; i++) {
-                if (this.data.notebooks[i].hasLocalFeedback) {
-                    hasLocalFeedback = true;
-                    // Get the path of the feedback:
-                    localFeedbackPathDir = this.data.notebooks[i].localFeedbackPath;
-                    // Get the directory of the feedback:
-                    localFeedbackPathDir = localFeedbackPathDir.substring(0, localFeedbackPathDir.lastIndexOf("/"));
-                    // Get a URL to local feedback dir:
-                    localFeedbackPathDir = utils.url_path_join(
-                        this.base_url,
-                        'tree',
-                        localFeedbackPathDir,
-                    );
-                }
-            }
-            var button = null;
-            if (!this.data.allFeedbackDownloaded) {
-                button = this.make_feedback_button();
-            }
-            this.submissions.push({
-                localFeedbackPathDir: localFeedbackPathDir,
-                hasLocalFeedback: hasLocalFeedback,
-                allFeedbackDownloaded: this.data.allFeedbackDownloaded,
-                hasFeedback: this.data.hasFeedback,
-                course_id: this.data.course_id,
-                assignment_id: this.data.assignment_id,
-                student_id: this.data.student_id,
-                timestamp: this.data.timestamp,
-                link: link,
-                button: button,
-            });
-        } else {
-            // This is called in the fetched and released section:
-            row.append(this.make_button());
-            this.element.empty().append(row);
-        }
 
-        if (this.data.status === 'fetched') {
-            var id = this.escape_id();
-            var children = $('<div/>')
+        var id, children, element, child;
+        if (this.data.status === 'submitted') {
+            id = this.escape_id() + "-submissions";
+            children = $('<div/>')
+                .attr("id", id)
+                .addClass("panel-collapse list_container assignment-notebooks")
+                .attr("role", "tabpanel");
+
+            children.append($('<div/>').addClass('list_item row'));
+            for (var i=0; i<this.data.submissions.length; i++) {
+                element = $('<div/>');
+                child = new Submission(element, this.data.submissions[i], this.options);
+                children.append(element);
+            }
+
+        } else if (this.data.status === 'fetched') {
+            id = this.escape_id();
+            children = $('<div/>')
                 .attr("id", id)
                 .addClass("panel-collapse collapse list_container assignment-notebooks")
                 .attr("role", "tabpanel");
 
-            var element, child;
             children.append($('<div/>').addClass('list_item row'));
             for (var i=0; i<this.data.notebooks.length; i++) {
                 element = $('<div/>');
@@ -434,9 +352,10 @@ define([
                 child = new Notebook(element, this.data.notebooks[i], this.options);
                 children.append(element);
             }
-
-            this.element.append(children);
         }
+
+        row.append(this.make_button());
+        this.element.empty().append(row).append(children);
     };
 
     Assignment.prototype.make_link = function () {
@@ -548,42 +467,73 @@ define([
                 );
                 ajax(url, settings);
             });
+
+        } else if (this.data.status == 'submitted') {
+            button.text("Fetch Feedback");
+            button.click(function (e) {
+                var settings = {
+                    cache : false,
+                    data : {
+                        course_id: that.data.course_id,
+                        assignment_id: that.data.assignment_id
+                    },
+                    type : "POST",
+                    dataType : "json",
+                    success : $.proxy(that.on_refresh, that),
+                    error : function (xhr, status, error) {
+                        container.empty().text("Error fetching feedback.");
+                        utils.log_ajax_error(xhr, status, error);
+                    }
+                };
+                button.text('Fetching Feedback...');
+                button.attr('disabled', 'disabled');
+                var url = utils.url_path_join(
+                    that.base_url,
+                    'assignments',
+                    'fetch_feedback'
+                );
+                ajax(url, settings);
+            });
         }
 
         return container;
     };
 
-    Assignment.prototype.make_feedback_button = function () {
-        var that = this;
-        var container = $('<span/>').addClass('item_status col-sm-4');
-        var button = $('<button/>').addClass("btn btn-primary btn-xs");
-        container.append(button);
-        button.text("Fetch Feedback");
-        button.click(function (e) {
-            var settings = {
-                cache : false,
-                data : {
-                    course_id: that.data.course_id,
-                    assignment_id: that.data.assignment_id
-                },
-                type : "POST",
-                dataType : "json",
-                success : $.proxy(that.on_refresh, that),
-                error : function (xhr, status, error) {
-                    container.empty().text("Error fetching feedback.");
-                    utils.log_ajax_error(xhr, status, error);
-                }
-            };
-            button.text('Fetching Feedback...');
-            button.attr('disabled', 'disabled');
+
+    var Submission = function (element, data, options) {
+        this.element = $(element);
+        this.data = data;
+        this.options = options;
+        this.base_url = options.base_url || utils.get_body_data("baseUrl");
+        this.style();
+        this.make_row();
+    };
+
+    Submission.prototype.style = function () {
+        this.element.addClass('list_item').addClass("row");
+    };
+
+    Submission.prototype.make_row = function () {
+        var container = $('<div/>').addClass('col-md-12');
+        var status = $('<span/>').addClass('item_name col-sm-6');
+        status.append($("<span/>").text(this.data.timestamp));
+        if (this.data.has_local_feedback) {
             var url = utils.url_path_join(
-                that.base_url,
-                'assignments',
-                'fetch_feedback'
-            );
-            ajax(url, settings);
-        });
-        return container;
+                this.base_url, 'tree', this.data.local_feedback_path)
+            var link = $('<a/>')
+                .attr("href", url)
+                .attr("target", "_blank")
+                .text(" (view feedback)");
+            status.append(link);
+        } else if (this.data.has_exchange_feedback) {
+            status.append($("<span/>").text(" (feedback available to fetch)"));
+        } else {
+            status.append($("<span/>").text(""));
+        }
+        container.append(status);
+        container.append($('<span/>').addClass('item_course col-sm-2'));
+        container.append($('<span/>').addClass('item_status col-sm-4'));
+        this.element.append(container);
     };
 
     var Notebook = function (element, data, options) {
@@ -721,6 +671,7 @@ define([
         'CourseList': CourseList,
         'AssignmentList': AssignmentList,
         'Assignment': Assignment,
+        'Submission': Submission,
         'Notebook': Notebook
     };
 });

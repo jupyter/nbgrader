@@ -18,6 +18,24 @@ class TestNbGraderList(BaseTestApp):
         run_nbgrader([
             "release_assignment", assignment,
             "--course", course,
+            "--CourseDirectory.root={}".format(course_dir),
+            "--Exchange.cache={}".format(cache),
+            "--Exchange.root={}".format(exchange)
+        ])
+
+    def _release_full(self, assignment, exchange, cache, course_dir, course="abc101"):
+        self._copy_file(os.path.join("files", "test.ipynb"), os.path.join(course_dir, "source", assignment, "p1.ipynb"))
+        run_nbgrader([
+            "generate_assignment", assignment,
+            "--course", course,
+            "--CourseDirectory.root={}".format(course_dir),
+            "--Exchange.cache={}".format(cache),
+            "--Exchange.root={}".format(exchange)
+        ])
+        run_nbgrader([
+            "release_assignment", assignment,
+            "--course", course,
+            "--CourseDirectory.root={}".format(course_dir),
             "--Exchange.cache={}".format(cache),
             "--Exchange.root={}".format(exchange)
         ])
@@ -38,6 +56,50 @@ class TestNbGraderList(BaseTestApp):
     def _submit(self, assignment, exchange, cache, course="abc101", flags=None):
         cmd = [
             "submit", assignment,
+            "--course", course,
+            "--Exchange.cache={}".format(cache),
+            "--Exchange.root={}".format(exchange)
+        ]
+
+        if flags is not None:
+            cmd.extend(flags)
+
+        run_nbgrader(cmd)
+
+    def _make_feedback(self, assignment, exchange, cache, course_dir, course="abc101"):
+        run_nbgrader([
+            "collect", assignment,
+            "--update",
+            "--course", course,
+            "--CourseDirectory.root={}".format(course_dir),
+            "--Exchange.cache={}".format(cache),
+            "--Exchange.root={}".format(exchange)
+        ])
+        run_nbgrader([
+            "autograde", assignment,
+            "--course", course,
+            "--CourseDirectory.root={}".format(course_dir),
+            "--Exchange.cache={}".format(cache),
+            "--Exchange.root={}".format(exchange)
+        ])
+        run_nbgrader([
+            "generate_feedback", assignment,
+            "--course", course,
+            "--CourseDirectory.root={}".format(course_dir),
+            "--Exchange.cache={}".format(cache),
+            "--Exchange.root={}".format(exchange)
+        ])
+        run_nbgrader([
+            "release_feedback", assignment,
+            "--course", course,
+            "--CourseDirectory.root={}".format(course_dir),
+            "--Exchange.cache={}".format(cache),
+            "--Exchange.root={}".format(exchange)
+        ])
+
+    def _fetch_feedback(self, assignment, exchange, cache, course="abc101", flags=None):
+        cmd = [
+            "fetch_feedback", assignment,
             "--course", course,
             "--Exchange.cache={}".format(cache),
             "--Exchange.root={}".format(exchange)
@@ -156,7 +218,7 @@ class TestNbGraderList(BaseTestApp):
         assert self._list(exchange, cache, "ps1", flags=["--inbound"]) == dedent(
             """
             [ListApp | INFO] Submitted assignments:
-            [ListApp | INFO] abc101 {} ps1 {}
+            [ListApp | INFO] abc101 {} ps1 {} (no feedback available)
             """.format(get_username(), timestamp)
         ).lstrip()
 
@@ -167,8 +229,8 @@ class TestNbGraderList(BaseTestApp):
         assert self._list(exchange, cache, "ps1", flags=["--inbound"]) == dedent(
             """
             [ListApp | INFO] Submitted assignments:
-            [ListApp | INFO] abc101 {} ps1 {}
-            [ListApp | INFO] abc101 {} ps1 {}
+            [ListApp | INFO] abc101 {} ps1 {} (no feedback available)
+            [ListApp | INFO] abc101 {} ps1 {} (no feedback available)
             """.format(get_username(), timestamps[0], get_username(), timestamps[1])
         ).lstrip()
 
@@ -188,7 +250,7 @@ class TestNbGraderList(BaseTestApp):
         assert self._list(exchange, cache, "ps1", flags=["--inbound"]) == dedent(
             """
             [ListApp | INFO] Submitted assignments:
-            [ListApp | INFO] abc101 {} ps1 {}
+            [ListApp | INFO] abc101 {} ps1 {} (no feedback available)
             """.format(get_username(), timestamp)
         ).lstrip()
 
@@ -199,8 +261,8 @@ class TestNbGraderList(BaseTestApp):
         assert self._list(exchange, cache, "ps1", flags=["--inbound"]) == dedent(
             """
             [ListApp | INFO] Submitted assignments:
-            [ListApp | INFO] abc101 {} ps1 {}
-            [ListApp | INFO] abc101 {} ps1 {}
+            [ListApp | INFO] abc101 {} ps1 {} (no feedback available)
+            [ListApp | INFO] abc101 {} ps1 {} (no feedback available)
             """.format(get_username(), timestamps[0], get_username(), timestamps[1])
         ).lstrip()
 
@@ -220,7 +282,7 @@ class TestNbGraderList(BaseTestApp):
         assert self._list(exchange, cache, "ps1", flags=["--cached"]) == dedent(
             """
             [ListApp | INFO] Submitted assignments:
-            [ListApp | INFO] abc101 {} ps1 {}
+            [ListApp | INFO] abc101 {} ps1 {} (no feedback available)
             """.format(get_username(), timestamp)
         ).lstrip()
 
@@ -232,8 +294,8 @@ class TestNbGraderList(BaseTestApp):
         assert self._list(exchange, cache, "ps1", flags=["--cached"]) == dedent(
             """
             [ListApp | INFO] Submitted assignments:
-            [ListApp | INFO] abc101 {} ps1 {}
-            [ListApp | INFO] abc101 {} ps1 {}
+            [ListApp | INFO] abc101 {} ps1 {} (no feedback available)
+            [ListApp | INFO] abc101 {} ps1 {} (no feedback available)
             """.format(get_username(), timestamps[0], get_username(), timestamps[1])
         ).lstrip()
 
@@ -252,7 +314,7 @@ class TestNbGraderList(BaseTestApp):
         assert self._list(exchange, cache, flags=["--inbound"]) == dedent(
             """
             [ListApp | INFO] Submitted assignments:
-            [ListApp | INFO] abc101 {} ps2 {}
+            [ListApp | INFO] abc101 {} ps2 {} (no feedback available)
             """.format(get_username(), timestamps[1])
         ).lstrip()
         assert len(os.listdir(os.path.join(exchange, "abc101", "inbound"))) == 1
@@ -280,7 +342,7 @@ class TestNbGraderList(BaseTestApp):
         assert self._list(exchange, cache, flags=["--cached"]) == dedent(
             """
             [ListApp | INFO] Submitted assignments:
-            [ListApp | INFO] abc101 {} ps2 {}
+            [ListApp | INFO] abc101 {} ps2 {} (no feedback available)
             """.format(get_username(), timestamps[1])
         ).lstrip()
         assert len(os.listdir(os.path.join(cache, "abc101"))) == 1
@@ -307,6 +369,108 @@ class TestNbGraderList(BaseTestApp):
         assert self._list(exchange, cache, "ps1", flags=["--inbound"]) == dedent(
             """
             [ListApp | INFO] Submitted assignments:
-            [ListApp | INFO] abc101 {} ps1 {}
+            [ListApp | INFO] abc101 {} ps1 {} (no feedback available)
             """.format(get_username(), timestamp)
+        ).lstrip()
+
+    def test_list_feedback_inbound(self, exchange, cache, course_dir):
+        self._release_full("ps1", exchange, cache, course_dir)
+        self._fetch("ps1", exchange, cache)
+        self._submit("ps1", exchange, cache)
+        self._make_feedback("ps1", exchange, cache, course_dir)
+        time.sleep(1)
+        self._submit("ps1", exchange, cache)
+
+        filenames = sorted(os.listdir(os.path.join(exchange, "abc101", "inbound")))
+        timestamps = [x.split("+")[2] for x in filenames]
+        assert self._list(exchange, cache, "ps1", flags=["--inbound"]) == dedent(
+            """
+            [ListApp | INFO] Submitted assignments:
+            [ListApp | INFO] abc101 {} ps1 {} (feedback ready to be fetched)
+            [ListApp | INFO] abc101 {} ps1 {} (no feedback available)
+            """.format(get_username(), timestamps[0], get_username(), timestamps[1])
+        ).lstrip()
+
+        self._fetch_feedback("ps1", exchange, cache)
+        filenames = sorted(os.listdir(os.path.join(exchange, "abc101", "inbound")))
+        timestamps = [x.split("+")[2] for x in filenames]
+        assert self._list(exchange, cache, "ps1", flags=["--inbound"]) == dedent(
+            """
+            [ListApp | INFO] Submitted assignments:
+            [ListApp | INFO] abc101 {} ps1 {} (feedback already fetched)
+            [ListApp | INFO] abc101 {} ps1 {} (no feedback available)
+            """.format(get_username(), timestamps[0], get_username(), timestamps[1])
+        ).lstrip()
+
+        self._make_feedback("ps1", exchange, cache, course_dir)
+        filenames = sorted(os.listdir(os.path.join(exchange, "abc101", "inbound")))
+        timestamps = [x.split("+")[2] for x in filenames]
+        assert self._list(exchange, cache, "ps1", flags=["--inbound"]) == dedent(
+            """
+            [ListApp | INFO] Submitted assignments:
+            [ListApp | INFO] abc101 {} ps1 {} (feedback already fetched)
+            [ListApp | INFO] abc101 {} ps1 {} (feedback ready to be fetched)
+            """.format(get_username(), timestamps[0], get_username(), timestamps[1])
+        ).lstrip()
+
+        self._fetch_feedback("ps1", exchange, cache)
+        filenames = sorted(os.listdir(os.path.join(exchange, "abc101", "inbound")))
+        timestamps = [x.split("+")[2] for x in filenames]
+        assert self._list(exchange, cache, "ps1", flags=["--inbound"]) == dedent(
+            """
+            [ListApp | INFO] Submitted assignments:
+            [ListApp | INFO] abc101 {} ps1 {} (feedback already fetched)
+            [ListApp | INFO] abc101 {} ps1 {} (feedback already fetched)
+            """.format(get_username(), timestamps[0], get_username(), timestamps[1])
+        ).lstrip()
+
+    def test_list_feedback_cached(self, exchange, cache, course_dir):
+        self._release_full("ps1", exchange, cache, course_dir)
+        self._fetch("ps1", exchange, cache)
+        self._submit("ps1", exchange, cache)
+        self._make_feedback("ps1", exchange, cache, course_dir)
+        time.sleep(1)
+        self._submit("ps1", exchange, cache)
+
+        filenames = sorted(os.listdir(os.path.join(exchange, "abc101", "inbound")))
+        timestamps = [x.split("+")[2] for x in filenames]
+        assert self._list(exchange, cache, "ps1", flags=["--cached"]) == dedent(
+            """
+            [ListApp | INFO] Submitted assignments:
+            [ListApp | INFO] abc101 {} ps1 {} (feedback ready to be fetched)
+            [ListApp | INFO] abc101 {} ps1 {} (no feedback available)
+            """.format(get_username(), timestamps[0], get_username(), timestamps[1])
+        ).lstrip()
+
+        self._fetch_feedback("ps1", exchange, cache)
+        filenames = sorted(os.listdir(os.path.join(exchange, "abc101", "inbound")))
+        timestamps = [x.split("+")[2] for x in filenames]
+        assert self._list(exchange, cache, "ps1", flags=["--cached"]) == dedent(
+            """
+            [ListApp | INFO] Submitted assignments:
+            [ListApp | INFO] abc101 {} ps1 {} (feedback already fetched)
+            [ListApp | INFO] abc101 {} ps1 {} (no feedback available)
+            """.format(get_username(), timestamps[0], get_username(), timestamps[1])
+        ).lstrip()
+
+        self._make_feedback("ps1", exchange, cache, course_dir)
+        filenames = sorted(os.listdir(os.path.join(exchange, "abc101", "inbound")))
+        timestamps = [x.split("+")[2] for x in filenames]
+        assert self._list(exchange, cache, "ps1", flags=["--cached"]) == dedent(
+            """
+            [ListApp | INFO] Submitted assignments:
+            [ListApp | INFO] abc101 {} ps1 {} (feedback already fetched)
+            [ListApp | INFO] abc101 {} ps1 {} (feedback ready to be fetched)
+            """.format(get_username(), timestamps[0], get_username(), timestamps[1])
+        ).lstrip()
+
+        self._fetch_feedback("ps1", exchange, cache)
+        filenames = sorted(os.listdir(os.path.join(exchange, "abc101", "inbound")))
+        timestamps = [x.split("+")[2] for x in filenames]
+        assert self._list(exchange, cache, "ps1", flags=["--cached"]) == dedent(
+            """
+            [ListApp | INFO] Submitted assignments:
+            [ListApp | INFO] abc101 {} ps1 {} (feedback already fetched)
+            [ListApp | INFO] abc101 {} ps1 {} (feedback already fetched)
+            """.format(get_username(), timestamps[0], get_username(), timestamps[1])
         ).lstrip()

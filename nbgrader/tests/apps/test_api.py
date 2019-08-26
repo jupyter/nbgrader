@@ -731,7 +731,7 @@ class TestNbGraderAPI(BaseTestApp):
         os.makedirs(join(course_dir, "submitted", "foo", "ps2"))
         result = api.generate_feedback("ps2", "foo")
         assert not result["success"]
-        
+
         self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "source", "ps2", "p2.ipynb"))
         api.generate_assignment("ps2")
         self._copy_file(join("files", "submitted-changed.ipynb"), join(course_dir, "submitted", "foo", "ps2", "p2.ipynb"))
@@ -750,17 +750,17 @@ class TestNbGraderAPI(BaseTestApp):
         result = api.release_feedback("ps1", "foo")
         assert result["success"]
         assert os.path.isdir(join(exchange, "abc101", "feedback"))
-        assert os.path.exists(join(exchange, "abc101", "feedback", "65f5ff7800d0926ae6869e70f4da0b27.html"))
-        # add another assignment         
+        assert os.path.exists(join(exchange, "abc101", "feedback", "c600ef68c434c3d136bb5e68ea874169.html"))
+        # add another assignment
         self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "source", "ps2", "p2.ipynb"))
         api.generate_assignment("ps2")
         self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "submitted", "foo", "ps2", "p2.ipynb"))
         self._copy_file(join("files", "timestamp.txt"), join(course_dir, "submitted", "foo", "ps2", "timestamp.txt"))
         api.autograde("ps2", "foo")
         api.generate_feedback("ps2", "foo")
-        api.release_feedback("ps2", "foo")
+        result = api.release_feedback("ps2", "foo")
         assert result["success"]
-        assert os.path.exists(join(exchange, "abc101", "feedback", "a7efd7718119cc393418ad9a185b5b3b.html"))
+        assert os.path.exists(join(exchange, "abc101", "feedback", "e190e1f234b633832f2069f4f8a3a680.html"))
 
     @notwindows
     def test_fetch_feedback(self, api, course_dir, db, cache):
@@ -779,17 +779,17 @@ class TestNbGraderAPI(BaseTestApp):
         assert result["success"]
         assert os.path.isdir(join("ps1", "feedback"))
         assert os.path.exists(join("ps1", "feedback", timestamp, "p1.html"))
-        # add another assignment         
-        self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "source", "ps2", "ps2.ipynb"))
+        # add another assignment
+        self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "source", "ps2", "p2.ipynb"))
         api.generate_assignment("ps2")
         cachepath = join(cache, "abc101", "foo+ps2+{}".format(timestamp))
-        self._copy_file(join("files", "submitted-changed.ipynb"), join(cachepath, "ps2.ipynb"))
+        self._copy_file(join("files", "submitted-unchanged.ipynb"), join(cachepath, "p2.ipynb"))
         self._copy_file(join("files", "timestamp.txt"), join(cachepath, "timestamp.txt"))
         self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "submitted", "foo", "ps2", "p2.ipynb"))
         self._copy_file(join("files", "timestamp.txt"), join(course_dir, "submitted", "foo", "ps2", "timestamp.txt"))
         api.autograde("ps2", "foo")
         api.generate_feedback("ps2", "foo")
         api.release_feedback("ps2", "foo")
-        api.fetch_feedback("ps2", "foo")
+        result = api.fetch_feedback("ps2", "foo")
         assert result["success"]
-        assert os.path.exists(join("ps2", "feedback", timestamp, "ps2.html"))
+        assert os.path.exists(join("ps2", "feedback", timestamp, "p2.html"))
