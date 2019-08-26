@@ -2,9 +2,16 @@ import os
 import glob
 import shutil
 import re
+import hashlib
 from traitlets import Bool
 from ..utils import notebook_hash, make_unique_key
 from .exchange import Exchange
+
+
+def _checksum(path):
+    m = hashlib.md5()
+    m.update(open(path, 'rb').read())
+    return m.hexdigest()
 
 
 class ExchangeList(Exchange):
@@ -46,7 +53,7 @@ class ExchangeList(Exchange):
     def format_inbound_assignment(self, info):
         msg = "{course_id} {student_id} {assignment_id} {timestamp}".format(**info)
         if info['status'] == 'submitted':
-            if info['has_local_feedback']:
+            if info['has_local_feedback'] and not info['feedback_updated']:
                 msg += " (feedback already fetched)"
             elif info['has_exchange_feedback']:
                 msg += " (feedback ready to be fetched)"
@@ -110,6 +117,7 @@ class ExchangeList(Exchange):
                 nb_info['has_local_feedback'] = False
                 nb_info['has_exchange_feedback'] = False
                 nb_info['local_feedback_path'] = None
+                nb_info['feedback_updated'] = False
 
                 # Check whether feedback has been fetched already.
                 local_feedback_dir = os.path.join(
@@ -117,6 +125,10 @@ class ExchangeList(Exchange):
                 local_feedback_path = os.path.join(
                     local_feedback_dir, '{0}.html'.format(nb_info['notebook_id']))
                 has_local_feedback = os.path.isfile(local_feedback_path)
+                if has_local_feedback:
+                    local_feedback_checksum = _checksum(local_feedback_path)
+                else:
+                    local_feedback_checksum = None
 
                 # Also look to see if there is feedback available to fetch.
                 unique_key = make_unique_key(
@@ -136,23 +148,32 @@ class ExchangeList(Exchange):
                     exchange_feedback_path = os.path.join(
                         self.root, info['course_id'], 'feedback', '{0}.html'.format(nb_hash))
                     has_exchange_feedback = os.path.isfile(exchange_feedback_path)
+                if has_exchange_feedback:
+                    exchange_feedback_checksum = _checksum(exchange_feedback_path)
+                else:
+                    exchange_feedback_checksum = None
 
                 nb_info['has_local_feedback'] = has_local_feedback
                 nb_info['has_exchange_feedback'] = has_exchange_feedback
                 if has_local_feedback:
                     nb_info['local_feedback_path'] = local_feedback_path
+                if has_local_feedback and has_exchange_feedback:
+                    nb_info['feedback_updated'] = exchange_feedback_checksum != local_feedback_checksum
                 info['notebooks'].append(nb_info)
 
             if info['status'] == 'submitted':
                 if info['notebooks']:
                     has_local_feedback = all([nb['has_local_feedback'] for nb in info['notebooks']])
                     has_exchange_feedback = all([nb['has_exchange_feedback'] for nb in info['notebooks']])
+                    feedback_updated = any([nb['feedback_updated'] for nb in info['notebooks']])
                 else:
                     has_local_feedback = False
                     has_exchange_feedback = False
+                    feedback_updated = False
 
                 info['has_local_feedback'] = has_local_feedback
                 info['has_exchange_feedback'] = has_exchange_feedback
+                info['feedback_updated'] = feedback_updated
                 if has_local_feedback:
                     info['local_feedback_path'] = os.path.join(
                         assignment_dir, 'feedback', info['timestamp'])
