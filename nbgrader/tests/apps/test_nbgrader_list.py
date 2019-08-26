@@ -402,13 +402,25 @@ class TestNbGraderList(BaseTestApp):
             """.format(get_username(), timestamps[0], get_username(), timestamps[1])
         ).lstrip()
 
+        exchange_path = os.path.join(exchange, "abc101", "feedback")
+        feedback_file, = os.listdir(exchange_path)
+        with open(os.path.join(exchange_path, feedback_file), "a") as fh:
+            fh.write("blahblahblah")
+        assert self._list(exchange, cache, "ps1", flags=["--inbound"]) == dedent(
+            """
+            [ListApp | INFO] Submitted assignments:
+            [ListApp | INFO] abc101 {} ps1 {} (feedback ready to be fetched)
+            [ListApp | INFO] abc101 {} ps1 {} (no feedback available)
+            """.format(get_username(), timestamps[0], get_username(), timestamps[1])
+        ).lstrip()
+
         self._make_feedback("ps1", exchange, cache, course_dir)
         filenames = sorted(os.listdir(os.path.join(exchange, "abc101", "inbound")))
         timestamps = [x.split("+")[2] for x in filenames]
         assert self._list(exchange, cache, "ps1", flags=["--inbound"]) == dedent(
             """
             [ListApp | INFO] Submitted assignments:
-            [ListApp | INFO] abc101 {} ps1 {} (feedback already fetched)
+            [ListApp | INFO] abc101 {} ps1 {} (feedback ready to be fetched)
             [ListApp | INFO] abc101 {} ps1 {} (feedback ready to be fetched)
             """.format(get_username(), timestamps[0], get_username(), timestamps[1])
         ).lstrip()
@@ -453,13 +465,25 @@ class TestNbGraderList(BaseTestApp):
             """.format(get_username(), timestamps[0], get_username(), timestamps[1])
         ).lstrip()
 
+        exchange_path = os.path.join(exchange, "abc101", "feedback")
+        feedback_file, = os.listdir(exchange_path)
+        with open(os.path.join(exchange_path, feedback_file), "a") as fh:
+            fh.write("blahblahblah")
+        assert self._list(exchange, cache, "ps1", flags=["--cached"]) == dedent(
+            """
+            [ListApp | INFO] Submitted assignments:
+            [ListApp | INFO] abc101 {} ps1 {} (feedback ready to be fetched)
+            [ListApp | INFO] abc101 {} ps1 {} (no feedback available)
+            """.format(get_username(), timestamps[0], get_username(), timestamps[1])
+        ).lstrip()
+
         self._make_feedback("ps1", exchange, cache, course_dir)
         filenames = sorted(os.listdir(os.path.join(exchange, "abc101", "inbound")))
         timestamps = [x.split("+")[2] for x in filenames]
         assert self._list(exchange, cache, "ps1", flags=["--cached"]) == dedent(
             """
             [ListApp | INFO] Submitted assignments:
-            [ListApp | INFO] abc101 {} ps1 {} (feedback already fetched)
+            [ListApp | INFO] abc101 {} ps1 {} (feedback ready to be fetched)
             [ListApp | INFO] abc101 {} ps1 {} (feedback ready to be fetched)
             """.format(get_username(), timestamps[0], get_username(), timestamps[1])
         ).lstrip()
