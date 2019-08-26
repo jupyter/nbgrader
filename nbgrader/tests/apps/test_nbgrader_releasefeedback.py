@@ -3,7 +3,7 @@ import sys
 from os.path import join, exists, isfile
 import pytest
 
-from ...utils import remove, notebook_hash
+from ...utils import notebook_hash, make_unique_key
 from .. import run_nbgrader
 from .base import BaseTestApp
 from .conftest import notwindows
@@ -34,13 +34,14 @@ class TestNbGraderReleaseFeedback(BaseTestApp):
         nb_path = join(course_dir, "submitted", "foo", "ps1", "p1.ipynb")
         self._copy_file(join("files", "submitted-unchanged.ipynb"), nb_path)
         self._copy_file(join("files", "timestamp.txt"), join(course_dir, "submitted", "foo", "ps1", "timestamp.txt"))
-        
+
         run_nbgrader(["autograde", "ps1", "--db", db])
         run_nbgrader(["generate_feedback", "ps1", "--db", db])
         run_nbgrader(["release_feedback", "ps1", "--Exchange.root={}".format(exchange), '--course', 'abc101'])
-        nb_hash = notebook_hash(nb_path)
+        unique_key = make_unique_key("abc101", "ps1", "p1", "foo", "2019-05-30 11:44:01.911849 UTC")
+        nb_hash = notebook_hash(nb_path, unique_key)
         assert exists(join(exchange, "abc101", "feedback", "{}.html".format(nb_hash)))
-        # release feedback shoul overwrite without error
+        # release feedback should overwrite without error
         run_nbgrader(["release_feedback", "ps1", "--Exchange.root={}".format(exchange), '--course', 'abc101'])
 
     @notwindows
@@ -57,15 +58,17 @@ class TestNbGraderReleaseFeedback(BaseTestApp):
         nb_path2 = join(course_dir, "submitted", "bar", "ps1", "p1.ipynb")
         self._copy_file(join("files", "submitted-changed.ipynb"), nb_path2)
         self._copy_file(join("files", "timestamp.txt"), join(course_dir, "submitted", "bar", "ps1", "timestamp.txt"))
-        
+
         run_nbgrader(["autograde", "ps1", "--db", db])
         run_nbgrader(["generate_feedback", "ps1", "--db", db])
         run_nbgrader(["release_feedback", "ps1", "--Exchange.root={}".format(exchange), '--course', 'abc101', '--student', 'foo'])
-        nb_hash = notebook_hash(nb_path)
+        unique_key = make_unique_key("abc101", "ps1", "p1", "foo", "2019-05-30 11:44:01.911849 UTC")
+        nb_hash = notebook_hash(nb_path, unique_key)
         assert exists(join(exchange, "abc101", "feedback", "{}.html".format(nb_hash)))
-        nb_hash2 = notebook_hash(nb_path2)
+        unique_key2 = make_unique_key("abc101", "ps1", "p1", "bar", "2019-05-30 11:44:01.911849 UTC")
+        nb_hash2 = notebook_hash(nb_path2, unique_key2)
         assert not exists(join(exchange, "abc101", "feedback", "{}.html".format(nb_hash2)))
-        # release feedback shoul overwrite without error
+        # release feedback should overwrite without error
         run_nbgrader(["release_feedback", "ps1", "--Exchange.root={}".format(exchange), '--course', 'abc101'])
 
     @notwindows
@@ -87,9 +90,11 @@ class TestNbGraderReleaseFeedback(BaseTestApp):
         run_nbgrader(["generate_feedback", "ps1", "--db", db])
         run_nbgrader(["release_feedback", "ps1", "--Exchange.root={}".format(exchange), '--course', 'abc101',
                       "--CourseDirectory.student_id_exclude=bar,baz"]) # baz doesn't exist, test still OK though
-        nb_hash = notebook_hash(nb_path) # foo
+        unique_key = make_unique_key("abc101", "ps1", "p1", "foo", "2019-05-30 11:44:01.911849 UTC")
+        nb_hash = notebook_hash(nb_path, unique_key) # foo
         assert exists(join(exchange, "abc101", "feedback", "{}.html".format(nb_hash)))
-        nb_hash2 = notebook_hash(nb_path2) # bar
+        unique_key2 = make_unique_key("abc101", "ps1", "p1", "bar", "2019-05-30 11:44:01.911849 UTC")
+        nb_hash2 = notebook_hash(nb_path2, unique_key2) # bar
         assert not exists(join(exchange, "abc101", "feedback", "{}.html".format(nb_hash2)))
         # release feedback should overwrite without error
         run_nbgrader(["release_feedback", "ps1", "--Exchange.root={}".format(exchange), '--course', 'abc101'])
@@ -109,7 +114,8 @@ class TestNbGraderReleaseFeedback(BaseTestApp):
         nb_path = join(course_dir, "submitted", "foo", "ps1", "p1.ipynb")
         self._copy_file(join("files", "submitted-unchanged.ipynb"), nb_path)
         self._copy_file(join("files", "timestamp.txt"), join(course_dir, "submitted", "foo", "ps1", "timestamp.txt"))
-        nb_hash = notebook_hash(nb_path)
+        unique_key = make_unique_key("abc101", "ps1", "p1", "foo", "2019-05-30 11:44:01.911849 UTC")
+        nb_hash = notebook_hash(nb_path, unique_key)
 
         self._empty_notebook(join(course_dir, "submitted", "foo", "ps1", "foo.ipynb"))
         run_nbgrader(["autograde", "ps1", "--db", db])

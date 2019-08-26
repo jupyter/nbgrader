@@ -535,7 +535,14 @@ def capture_log(app, fmt="[%(levelname)s] %(message)s"):
     return result
 
 
-def notebook_hash(path):
+def notebook_hash(path, unique_key=None):
     m = hashlib.md5()
     m.update(open(path, 'rb').read())
+    if unique_key:
+        m.update(to_bytes(unique_key))
     return m.hexdigest()
+
+
+def make_unique_key(course_id, assignment_id, notebook_id, student_id, timestamp):
+    return "+".join([
+        course_id, assignment_id, notebook_id, student_id, timestamp])

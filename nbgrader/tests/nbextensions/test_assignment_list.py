@@ -273,9 +273,12 @@ def test_submit_assignment(browser, port, class_files, tempdir):
     rows[0].find_element_by_css_selector(".item_status button").click()
 
     # wait for the submitted assignments list to update
-    rows = _wait_for_list(browser, "submitted", 1 + 1)  # the new assignment list adds one line for each assignment and one for each submission
+    rows = _wait_for_list(browser, "submitted", 1)
     assert rows[0].find_element_by_class_name("item_name").text == "ps.01"
     assert rows[0].find_element_by_class_name("item_course").text == "xyz 200"
+    rows = browser.find_elements_by_css_selector("#nbgrader-xyz_200-ps01-submissions > .list_item")
+    rows = rows[1:]  # first row is empty
+    assert len(rows) == 1
 
     # submit it again
     time.sleep(1)
@@ -283,13 +286,15 @@ def test_submit_assignment(browser, port, class_files, tempdir):
     rows[0].find_element_by_css_selector(".item_status button").click()
 
     # wait for the submitted assignments list to update
-    # the new assignment list adds one line for each assignment and one for each submission
-    rows = _wait_for_list(browser, "submitted", 2 + 1) 
-    rows.sort(key=_sort_rows)
-    assert rows[2].find_element_by_class_name("item_name").text == "ps.01"
-    assert rows[2].find_element_by_class_name("item_course").text == "xyz 200"
-    assert rows[0].find_element_by_class_name("item_status").text != rows[1].find_element_by_class_name("item_status").text
-
+    rows = _wait_for_list(browser, "submitted", 1)
+    assert rows[0].find_element_by_class_name("item_name").text == "ps.01"
+    assert rows[0].find_element_by_class_name("item_course").text == "xyz 200"
+    rows = browser.find_elements_by_css_selector("#nbgrader-xyz_200-ps01-submissions > .list_item")
+    rows = rows[1:]  # first row is empty
+    assert len(rows) == 2
+    timestamp1 = rows[0].find_element_by_css_selector(".item_name").text
+    timestamp2 = rows[1].find_element_by_css_selector(".item_name").text
+    assert timestamp1 != timestamp2
 
 @pytest.mark.nbextensions
 @notwindows
@@ -313,11 +318,17 @@ def test_submit_assignment_missing_notebooks(browser, port, class_files, tempdir
     rows[0].find_element_by_css_selector(".item_status button").click()
 
     # wait for the submitted assignments list to update
-    rows = _wait_for_list(browser, "submitted", 3 + 1)  # the new assignment list adds one line for each assignment and one for each submission
-    rows.sort(key=_sort_rows)
-    assert rows[3].find_element_by_class_name("item_name").text == "ps.01"
-    assert rows[3].find_element_by_class_name("item_course").text == "xyz 200"
-    assert rows[0].find_element_by_class_name("item_status").text != rows[2].find_element_by_class_name("item_status").text
+    rows = _wait_for_list(browser, "submitted", 1)
+    assert rows[0].find_element_by_class_name("item_name").text == "ps.01"
+    assert rows[0].find_element_by_class_name("item_course").text == "xyz 200"
+    rows = browser.find_elements_by_css_selector("#nbgrader-xyz_200-ps01-submissions > .list_item")
+    rows = rows[1:]  # first row is empty
+    assert len(rows) == 3
+    timestamp1 = rows[0].find_element_by_css_selector(".item_name").text
+    timestamp2 = rows[1].find_element_by_css_selector(".item_name").text
+    timestamp3 = rows[2].find_element_by_css_selector(".item_name").text
+    assert timestamp1 != timestamp2
+    assert timestamp2 != timestamp3
 
     # set strict flag
     with open('nbgrader_config.py', 'a') as config:
@@ -337,13 +348,14 @@ def test_submit_assignment_missing_notebooks(browser, port, class_files, tempdir
     _dismiss_modal(browser)
 
     # check submitted assignments list remains unchanged
-    rows = _wait_for_list(browser, "submitted", 3 + 1)  # the new assignment list adds one line for each assignment and one for each submission
-    rows.sort(key=_sort_rows)
-    assert rows[3].find_element_by_class_name("item_name").text == "ps.01"
-    assert rows[3].find_element_by_class_name("item_course").text == "xyz 200"
-    assert rows[0].find_element_by_class_name("item_status").text != rows[2].find_element_by_class_name("item_status").text
+    rows = _wait_for_list(browser, "submitted", 1)
+    assert rows[0].find_element_by_class_name("item_name").text == "ps.01"
+    assert rows[0].find_element_by_class_name("item_course").text == "xyz 200"
+    rows = browser.find_elements_by_css_selector("#nbgrader-xyz_200-ps01-submissions > .list_item")
+    rows = rows[1:]  # first row is empty
+    assert len(rows) == 3
 
-    # clean up for following tests: rename notebook back to origional name
+    # clean up for following tests: rename notebook back to original name
     assert os.path.exists(os.path.join(tempdir, "ps.01"))
     if os.path.isfile(os.path.join(tempdir, "ps.01", "my problem 1.ipynb")):
         os.rename(
@@ -391,10 +403,12 @@ def test_submit_other_assignment(browser, port, class_files, tempdir):
     rows[0].find_element_by_css_selector(".item_status button").click()
 
     # wait for the submitted assignments list to update
-    rows = _wait_for_list(browser, "submitted", 1 + 1)  # the new assignment list adds one line for each assignment and one for each submission
-    rows.sort(key=_sort_rows)
-    assert rows[1].find_element_by_class_name("item_name").text == "Problem Set 1"
-    assert rows[1].find_element_by_class_name("item_course").text == "abc101"
+    rows = _wait_for_list(browser, "submitted", 1)
+    assert rows[0].find_element_by_class_name("item_name").text == "Problem Set 1"
+    assert rows[0].find_element_by_class_name("item_course").text == "abc101"
+    rows = browser.find_elements_by_css_selector("#nbgrader-abc101-Problem_Set_1-submissions > .list_item")
+    rows = rows[1:]  # first row is empty
+    assert len(rows) == 1
 
 
 @pytest.mark.nbextensions
