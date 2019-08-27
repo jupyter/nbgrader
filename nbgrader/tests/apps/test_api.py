@@ -724,9 +724,32 @@ class TestNbGraderAPI(BaseTestApp):
         api.generate_assignment("ps1")
         self._copy_file(join("files", "submitted-changed.ipynb"), join(course_dir, "submitted", "foo", "ps1", "p1.ipynb"))
         api.autograde("ps1", "foo")
+
         result = api.generate_feedback("ps1", "foo")
         assert result["success"]
         assert os.path.exists(join(course_dir, "feedback", "foo", "ps1", "p1.html"))
+        contents = open(join(course_dir, "feedback", "foo", "ps1", "p1.html"), "r").read()
+
+        # update the grade
+        with api.gradebook as gb:
+            nb = gb.find_submission_notebook("p1", "ps1", "foo")
+            nb.grades[0].manual_score = 123
+            gb.db.commit()
+
+        # contents shouldn't have changed, because force=False
+        result = api.generate_feedback("ps1", "foo", force=False)
+        assert result["success"]
+        assert os.path.exists(join(course_dir, "feedback", "foo", "ps1", "p1.html"))
+        new_contents = open(join(course_dir, "feedback", "foo", "ps1", "p1.html"), "r").read()
+        assert new_contents == contents
+
+        # contents should now have changed, because force=True
+        result = api.generate_feedback("ps1", "foo", force=True)
+        assert result["success"]
+        assert os.path.exists(join(course_dir, "feedback", "foo", "ps1", "p1.html"))
+        new_contents = open(join(course_dir, "feedback", "foo", "ps1", "p1.html"), "r").read()
+        assert new_contents != contents
+
         # should not work for an empty submission
         os.makedirs(join(course_dir, "submitted", "foo", "ps2"))
         result = api.generate_feedback("ps2", "foo")

@@ -1029,7 +1029,7 @@ class NbGraderAPI(LoggingConfigurable):
             app.create_student = create
             return capture_log(app)
 
-    def generate_feedback(self, assignment_id, student_id=None):
+    def generate_feedback(self, assignment_id, student_id=None, force=True):
         """Run ``nbgrader generate_feedback`` for a particular assignment and student.
 
         Arguments
@@ -1039,6 +1039,8 @@ class NbGraderAPI(LoggingConfigurable):
         student_id: string
             The name of the student (optional). If not provided, then generate
             feedback from autograded submissions.
+        force: bool
+            Whether to force generating feedback, even if it already exists.
 
         Returns
         -------
@@ -1061,12 +1063,14 @@ class NbGraderAPI(LoggingConfigurable):
                             student_id=student_id):
                 app = GenerateFeedback(coursedir=self.coursedir, parent=self)
                 app.update_config(c)
+                app.force = force
                 return capture_log(app)
         else:
             with temp_attrs(self.coursedir,
                             assignment_id=assignment_id):
                 app = GenerateFeedback(coursedir=self.coursedir, parent=self)
                 app.update_config(c)
+                app.force = force
                 return capture_log(app)
 
     def release_feedback(self, assignment_id, student_id=None):
