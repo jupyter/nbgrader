@@ -4,11 +4,12 @@ import glob
 import re
 from stat import S_IRUSR, S_IWUSR, S_IXUSR, S_IRGRP, S_IWGRP, S_IXGRP, S_IXOTH, S_ISGID
 
+from nbgrader import exchange
 from .exchange import Exchange
-from ..utils import notebook_hash, make_unique_key
+from nbgrader.utils import notebook_hash, make_unique_key
 
 
-class ExchangeReleaseFeedback(Exchange):
+class ExchangeReleaseFeedback(Exchange, exchange.ExchangeReleaseFeedback):
 
     def init_src(self):
         student_id = self.coursedir.student_id if self.coursedir.student_id else '*'

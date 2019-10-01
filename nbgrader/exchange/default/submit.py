@@ -9,26 +9,12 @@ from stat import (
 from textwrap import dedent
 from traitlets import Bool
 
+from nbgrader import exchange
 from .exchange import Exchange
-from ..utils import get_username, check_mode, find_all_notebooks
+from nbgrader.utils import get_username, check_mode, find_all_notebooks
 
 
-class ExchangeSubmit(Exchange):
-
-    strict = Bool(
-        False,
-        help=dedent(
-            "Whether or not to submit the assignment if there are missing "
-            "notebooks from the released assignment notebooks."
-        )
-    ).tag(config=True)
-
-    add_random_string = Bool(
-        True,
-        help=dedent(
-            "Whether to add a random string on the end of the submission."
-        )
-    ).tag(config=True)
+class ExchangeSubmit(Exchange, exchange.ExchangeSubmit):
 
     def init_src(self):
         if self.path_includes_course:

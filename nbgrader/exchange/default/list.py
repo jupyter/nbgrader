@@ -4,7 +4,9 @@ import shutil
 import re
 import hashlib
 from traitlets import Bool
-from ..utils import notebook_hash, make_unique_key
+
+from nbgrader import exchange
+from nbgrader.utils import notebook_hash, make_unique_key
 from .exchange import Exchange
 
 
@@ -14,11 +16,7 @@ def _checksum(path):
     return m.hexdigest()
 
 
-class ExchangeList(Exchange):
-
-    inbound = Bool(False, help="List inbound files rather than outbound.").tag(config=True)
-    cached = Bool(False, help="List assignments in submission cache.").tag(config=True)
-    remove = Bool(False, help="Remove, rather than list files.").tag(config=True)
+class ExchangeList(Exchange, exchange.ExchangeList):
 
     def init_src(self):
         pass
