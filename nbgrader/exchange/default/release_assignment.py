@@ -9,13 +9,11 @@ from stat import (
 
 from traitlets import Bool
 
-from .exchange import Exchange
-from ..utils import self_owned
+from nbgrader import exchange
+from nbgrader.exchange.default import Exchange
 
 
-class ExchangeReleaseAssignment(Exchange):
-
-    force = Bool(False, help="Force overwrite existing files in the exchange.").tag(config=True)
+class ExchangeReleaseAssignment(Exchange, exchange.ExchangeReleaseAssignment):
 
     def _load_config(self, cfg, **kwargs):
         if 'ExchangeRelease' in cfg:

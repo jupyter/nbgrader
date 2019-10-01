@@ -3,13 +3,12 @@ import shutil
 
 from traitlets import Bool
 
-from .exchange import Exchange
-from ..utils import check_mode
+from nbgrader import exchange
+from nbgrader.exchange.default import Exchange
+from nbgrader.utils import check_mode
 
 
-class ExchangeFetchAssignment(Exchange):
-
-    replace_missing_files = Bool(False, help="Whether to replace missing files on fetch").tag(config=True)
+class ExchangeFetchAssignment(Exchange, exchange.ExchangeFetchAssignment):
 
     def _load_config(self, cfg, **kwargs):
         if 'ExchangeFetch' in cfg:

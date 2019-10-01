@@ -8,7 +8,9 @@ from textwrap import dedent
 from traitlets import Bool
 
 from .exchange import Exchange
-from ..utils import check_mode, parse_utc
+from nbgrader.exchange import ExchangeCollect
+
+from nbgrader.utils import check_mode, parse_utc
 
 # pwd is for matching unix names with student ide, so we shouldn't import it on
 # windows machines
@@ -24,17 +26,7 @@ def groupby(l, key=lambda x: x):
     return d
 
 
-class ExchangeCollect(Exchange):
-
-    update = Bool(
-        False,
-        help="Update existing submissions with ones that have newer timestamps."
-    ).tag(config=True)
-
-    check_owner = Bool(
-        default_value=True,
-        help="Whether to cross-check the student_id with the UNIX-owner of the submitted directory."
-    ).tag(config=True)
+class ExchangeCollect(Exchange, ExchangeCollect):
 
     def _path_to_record(self, path):
         filename = os.path.split(path)[1]
