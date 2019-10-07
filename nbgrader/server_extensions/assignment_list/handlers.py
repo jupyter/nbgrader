@@ -40,7 +40,7 @@ class AssignmentList(LoggingConfigurable):
 
         config_found = False
         full_config = Config()
-        for config in NbGrader._load_config_files("nbgrader_config", path=paths, log=self.log):
+        for config, filename in NbGrader._load_config_files("nbgrader_config", path=paths, log=self.log):
             full_config.merge(config)
             config_found = True
 
@@ -60,7 +60,7 @@ class AssignmentList(LoggingConfigurable):
 
         # now cd to the full assignment directory and load the config again
         with chdir(assignment_dir):
-            for new_config in NbGrader._load_config_files("nbgrader_config", path=[os.getcwd()], log=self.log):
+            for new_config, filename in NbGrader._load_config_files("nbgrader_config", path=[os.getcwd()], log=self.log):
                 config.merge(new_config)
             yield config
 
