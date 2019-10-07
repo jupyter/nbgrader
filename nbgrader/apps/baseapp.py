@@ -16,6 +16,7 @@ from traitlets import Unicode, List, Bool, Instance, default
 from traitlets.config.application import catch_config_error
 from traitlets.config.loader import Config
 
+from nbgrader.exchange import ExchangeFactory
 from ..coursedir import CourseDirectory
 from ..auth import Authenticator
 from .. import preprocessors
@@ -109,6 +110,7 @@ class NbGrader(JupyterApp):
 
     coursedir = Instance(CourseDirectory, allow_none=True)
     authenticator = Instance(Authenticator, allow_none=True)
+    exchange = Instance(ExchangeFactory, allow_none=True)
     verbose_crash = Bool(False)
 
     # The classes added here determine how configuration will be documented
@@ -116,7 +118,7 @@ class NbGrader(JupyterApp):
 
     @default("classes")
     def _classes_default(self):
-        return [NbGrader, CourseDirectory]
+        return [ExchangeFactory, NbGrader, CourseDirectory]
 
     def all_configurable_classes(self):
         """Get a list of all configurable classes for nbgrader
@@ -346,3 +348,5 @@ class NbGrader(JupyterApp):
     def start(self):
         super(NbGrader, self).start()
         self.authenticator = Authenticator(parent=self)
+        self.exchange = ExchangeFactory(parent=self)
+

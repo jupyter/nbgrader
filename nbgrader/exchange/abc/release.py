@@ -1,10 +1,9 @@
 import warnings
-from abc import ABC
 
 from .release_assignment import ExchangeReleaseAssignment
 
 
-class ExchangeRelease(ExchangeReleaseAssignment, ABC):
+class ExchangeRelease(ExchangeReleaseAssignment):
 
     def __init__(self, *args, **kwargs):
         super(ExchangeRelease, self).__init__(*args, **kwargs)

@@ -60,7 +60,7 @@ class ReleaseFeedbackApp(NbGrader):
         elif self.coursedir.assignment_id == "":
             self.fail("Must provide assignment name:\nnbgrader <command> ASSIGNMENT [ --course COURSE ]")
 
-        release_feedback = ExchangeReleaseFeedback(
+        release_feedback = self.exchange.ReleaseFeedback(
             coursedir=self.coursedir,
             authenticator=self.authenticator,
             parent=self)

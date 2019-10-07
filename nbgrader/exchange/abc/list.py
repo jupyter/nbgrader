@@ -1,6 +1,5 @@
 
 import hashlib
-from abc import ABC
 
 from traitlets import Bool
 from .exchange import Exchange
@@ -12,7 +11,7 @@ def _checksum(path):
     return m.hexdigest()
 
 
-class ExchangeList(Exchange, ABC):
+class ExchangeList(Exchange):
 
     inbound = Bool(False, help="List inbound files rather than outbound.").tag(config=True)
     cached = Bool(False, help="List assignments in submission cache.").tag(config=True)
