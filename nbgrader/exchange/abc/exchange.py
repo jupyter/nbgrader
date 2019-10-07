@@ -1,7 +1,6 @@
 import os
 import datetime
 import sys
-from abc import ABC, abstractmethod
 
 from textwrap import dedent
 
@@ -19,7 +18,7 @@ class ExchangeError(Exception):
     pass
 
 
-class Exchange(LoggingConfigurable, ABC):
+class Exchange(LoggingConfigurable):
 
     assignment_dir = Unicode(
         ".",
@@ -101,17 +100,14 @@ class Exchange(LoggingConfigurable, ABC):
         if not check_directory(self.root, write=True, execute=True):
             self.fail("Unwritable directory, please contact your instructor: {}".format(self.root))
 
-    @abstractmethod
     def init_src(self):
         """Compute and check the source paths for the transfer."""
         raise NotImplementedError
 
-    @abstractmethod
     def init_dest(self):
         """Compute and check the destination paths for the transfer."""
         raise NotImplementedError
 
-    @abstractmethod
     def copy_files(self):
         """Actually do the file transfer."""
         raise NotImplementedError

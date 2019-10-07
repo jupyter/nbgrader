@@ -1,9 +1,9 @@
 import warnings
-from abc import ABC
 
 from .fetch_assignment import ExchangeFetchAssignment
 
-class ExchangeFetch(ExchangeFetchAssignment, ABC):
+
+class ExchangeFetch(ExchangeFetchAssignment):
 
     def __init__(self, *args, **kwargs):
         super(ExchangeFetch, self).__init__(*args, **kwargs)

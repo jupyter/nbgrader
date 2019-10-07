@@ -6,12 +6,12 @@ import six
 import logging
 import warnings
 
-from traitlets.config import LoggingConfigurable, Config
+from traitlets.config import LoggingConfigurable, Config, get_config
 from traitlets import Instance, Enum, Unicode, observe
 
 from ..coursedir import CourseDirectory
 from ..converters import GenerateAssignment, Autograde, GenerateFeedback
-from ..exchange import ExchangeList, ExchangeReleaseAssignment, ExchangeReleaseFeedback, ExchangeFetchFeedback, ExchangeCollect, ExchangeError, ExchangeSubmit
+from ..exchange import ExchangeFactory, ExchangeError # ExchangeList, ExchangeReleaseAssignment, ExchangeReleaseFeedback, ExchangeFetchFeedback, ExchangeCollect, ExchangeError, ExchangeSubmit
 from ..api import MissingEntry, Gradebook, Student, SubmittedAssignment
 from ..utils import parse_utc, temp_attrs, capture_log, as_timezone, to_numeric_tz
 from ..auth import Authenticator
@@ -22,6 +22,7 @@ class NbGraderAPI(LoggingConfigurable):
 
     coursedir = Instance(CourseDirectory, allow_none=True)
     authenticator = Instance(Authenticator, allow_none=True)
+    exchange = Instance(ExchangeFactory, allow_none=True)
 
     # The log level for the application
     log_level = Enum(
@@ -49,7 +50,7 @@ class NbGraderAPI(LoggingConfigurable):
             self.log_level = new
         self.log.setLevel(new)
 
-    def __init__(self, coursedir=None, authenticator=None, **kwargs):
+    def __init__(self, coursedir=None, authenticator=None, exchange=None, **kwargs):
         """Initialize the API.
 
         Arguments
@@ -76,13 +77,18 @@ class NbGraderAPI(LoggingConfigurable):
         else:
             self.authenticator = authenticator
 
+        if exchange is None:
+            self.exchange = ExchangeFactory(parent=self)
+        else:
+            self.exchange = exchange
+
         if sys.platform != 'win32':
-            lister = ExchangeList(
+            lister = self.exchange.List(
                 coursedir=self.coursedir,
                 authenticator=self.authenticator,
                 parent=self)
             self.course_id = self.coursedir.course_id
-            self.exchange = lister.root
+            self.exchange_root = lister.root
 
             try:
                 lister.start()
@@ -93,7 +99,7 @@ class NbGraderAPI(LoggingConfigurable):
 
         else:
             self.course_id = ''
-            self.exchange = ''
+            self.exchange_root = ''
             self.exchange_missing = True
 
     @property
@@ -156,7 +162,7 @@ class NbGraderAPI(LoggingConfigurable):
 
         """
         if self.exchange_is_functional:
-            lister = ExchangeList(
+            lister = self.exchange.List(
                 coursedir=self.coursedir,
                 authenticator=self.authenticator,
                 parent=self)
@@ -641,7 +647,7 @@ class NbGraderAPI(LoggingConfigurable):
         # should be here already so we don't need to filter for only
         # existing notebooks in that case.
         if self.exchange_is_functional:
-            app = ExchangeSubmit(
+            app = self.exchange.Submit(
                     coursedir=self.coursedir,
                     authenticator=self.authenticator,
                     parent=self)
@@ -925,7 +931,7 @@ class NbGraderAPI(LoggingConfigurable):
         """
         if sys.platform != 'win32':
             with temp_attrs(self.coursedir, assignment_id=assignment_id):
-                app = ExchangeList(
+                app = self.exchange.List(
                     coursedir=self.coursedir,
                     authenticator=self.authenticator,
                     parent=self)
@@ -961,7 +967,7 @@ class NbGraderAPI(LoggingConfigurable):
         """
         if sys.platform != 'win32':
             with temp_attrs(self.coursedir, assignment_id=assignment_id):
-                app = ExchangeReleaseAssignment(
+                app = self.exchange.ReleaseAssignment(
                     coursedir=self.coursedir,
                     authenticator=self.authenticator,
                     parent=self)
@@ -990,7 +996,7 @@ class NbGraderAPI(LoggingConfigurable):
         """
         if sys.platform != 'win32':
             with temp_attrs(self.coursedir, assignment_id=assignment_id):
-                app = ExchangeCollect(
+                app = self.exchange.Collect(
                     coursedir=self.coursedir,
                     authenticator=self.authenticator,
                     parent=self)
@@ -1096,14 +1102,14 @@ class NbGraderAPI(LoggingConfigurable):
         """
         if student_id is not None:
             with temp_attrs(self.coursedir, assignment_id=assignment_id, student_id=student_id):
-                app = ExchangeReleaseFeedback(
+                app = self.exchange.ReleaseFeedback(
                     coursedir=self.coursedir,
                     authentictor=self.authenticator,
                     parent=self)
                 return capture_log(app)
         else:
             with temp_attrs(self.coursedir, assignment_id=assignment_id, student_id='*'):
-                app = ExchangeReleaseFeedback(
+                app = self.exchange.ReleaseFeedback(
                     coursedir=self.coursedir,
                     authentictor=self.authenticator,
                     parent=self)
@@ -1131,7 +1137,7 @@ class NbGraderAPI(LoggingConfigurable):
 
         """
         with temp_attrs(self.coursedir, assignment_id=assignment_id, student_id=student_id):
-            app = ExchangeFetchFeedback(
+            app = self.exchange.FetchFeedback(
                 coursedir=self.coursedir,
                 authentictor=self.authenticator,
                 parent=self)
@@ -1139,7 +1145,7 @@ class NbGraderAPI(LoggingConfigurable):
             # assignment tab needs a 'value' field with the info needed to repopulate
             # the tables.
         with temp_attrs(self.coursedir, assignment_id='*', student_id=student_id):
-            lister_rel = ExchangeList(
+            lister_rel = self.exchange.List(
                 inbound=False, cached=True,
                 coursedir=self.coursedir,
                 authenticator=self.authenticator,

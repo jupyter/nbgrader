@@ -1,7 +1,5 @@
-from abc import ABC
-
 from .exchange import Exchange
 
 
-class ExchangeFetchFeedback(Exchange, ABC):
+class ExchangeFetchFeedback(Exchange):
     pass

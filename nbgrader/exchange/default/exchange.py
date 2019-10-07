@@ -19,11 +19,6 @@ from nbgrader.auth import Authenticator
 
 class Exchange(exchange.Exchange):
 
-    def __init__(self, coursedir=None, authenticator=None, **kwargs):
-        self.coursedir = coursedir
-        self.authenticator = authenticator
-        super(Exchange, self).__init__(**kwargs)
-
     def fail(self, msg):
         self.log.fatal(msg)
         raise ExchangeError(msg)
