@@ -10,14 +10,14 @@ from dateutil.tz import gettz
 from traitlets import Unicode, Bool, Instance, default
 from jupyter_core.paths import jupyter_data_dir
 
-from nbgrader import exchange
+from nbgrader.exchange.abc import Exchange as ABCExchange
 from nbgrader.exchange import ExchangeError
 from nbgrader.utils import check_directory, ignore_patterns, self_owned
 from nbgrader.coursedir import CourseDirectory
 from nbgrader.auth import Authenticator
 
 
-class Exchange(exchange.Exchange):
+class Exchange(ABCExchange):
 
     def fail(self, msg):
         self.log.fatal(msg)

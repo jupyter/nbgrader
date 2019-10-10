@@ -1,10 +1,10 @@
 import warnings
 
-from nbgrader import exchange
+from nbgrader.exchange.abc import ExchangeFetch as ABCExchangeFetch
 from .fetch_assignment import ExchangeFetchAssignment
 
 
-class ExchangeFetch(ExchangeFetchAssignment, exchange.ExchangeFetch):
+class ExchangeFetch(ExchangeFetchAssignment, ABCExchangeFetch):
 
     def __init__(self, *args, **kwargs):
         super(ExchangeFetch, self).__init__(*args, **kwargs)

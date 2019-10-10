@@ -3,12 +3,12 @@ import shutil
 
 from traitlets import Bool
 
-from nbgrader import exchange
+from nbgrader.exchange.abc import ExchangeFetchAssignment as ABCExchangeFetchAssignment
 from nbgrader.exchange.default import Exchange
 from nbgrader.utils import check_mode
 
 
-class ExchangeFetchAssignment(Exchange, exchange.ExchangeFetchAssignment):
+class ExchangeFetchAssignment(Exchange, ABCExchangeFetchAssignment):
 
     def _load_config(self, cfg, **kwargs):
         if 'ExchangeFetch' in cfg:
