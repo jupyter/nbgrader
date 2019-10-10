@@ -1,10 +1,10 @@
 import warnings
 
-from nbgrader import exchange
+from nbgrader.exchange.abc import ExchangeRelease as ABCExchangeRelease
 from .release_assignment import ExchangeReleaseAssignment
 
 
-class ExchangeRelease(ExchangeReleaseAssignment, exchange.ExchangeRelease):
+class ExchangeRelease(ExchangeReleaseAssignment, ABCExchangeRelease):
 
     def __init__(self, *args, **kwargs):
         super(ExchangeRelease, self).__init__(*args, **kwargs)

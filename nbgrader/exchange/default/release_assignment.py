@@ -9,11 +9,11 @@ from stat import (
 
 from traitlets import Bool
 
-from nbgrader import exchange
+from nbgrader.exchange.abc import ExchangeReleaseAssignment as ABCExchangeReleaseAssignment
 from nbgrader.exchange.default import Exchange
 
 
-class ExchangeReleaseAssignment(Exchange, exchange.ExchangeReleaseAssignment):
+class ExchangeReleaseAssignment(Exchange, ABCExchangeReleaseAssignment):
 
     def _load_config(self, cfg, **kwargs):
         if 'ExchangeRelease' in cfg:

@@ -9,12 +9,12 @@ from stat import (
 from textwrap import dedent
 from traitlets import Bool
 
-from nbgrader import exchange
+from nbgrader.exchange.abc import ExchangeSubmit as ABCExchangeSubmit
 from .exchange import Exchange
 from nbgrader.utils import get_username, check_mode, find_all_notebooks
 
 
-class ExchangeSubmit(Exchange, exchange.ExchangeSubmit):
+class ExchangeSubmit(Exchange, ABCExchangeSubmit):
 
     def init_src(self):
         if self.path_includes_course:

@@ -2,13 +2,13 @@ import os
 import shutil
 import glob
 
-from nbgrader import exchange
+from nbgrader.exchange.abc import ExchangeFetchFeedback as ABCExchangeFetchFeedback
 from nbgrader.exchange.default import Exchange
 
 from nbgrader.utils import check_mode, notebook_hash, make_unique_key, get_username
 
 
-class ExchangeFetchFeedback(Exchange, exchange.ExchangeFetchFeedback):
+class ExchangeFetchFeedback(Exchange, ABCExchangeFetchFeedback):
 
     def init_src(self):
         if self.coursedir.course_id == '':

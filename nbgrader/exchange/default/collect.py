@@ -7,8 +7,8 @@ from textwrap import dedent
 
 from traitlets import Bool
 
+from nbgrader.exchange.abc import ExchangeCollect as ABCExchangeCollect
 from .exchange import Exchange
-from nbgrader.exchange import ExchangeCollect
 
 from nbgrader.utils import check_mode, parse_utc
 
@@ -26,7 +26,7 @@ def groupby(l, key=lambda x: x):
     return d
 
 
-class ExchangeCollect(Exchange, ExchangeCollect):
+class ExchangeCollect(Exchange, ABCExchangeCollect):
 
     def _path_to_record(self, path):
         filename = os.path.split(path)[1]

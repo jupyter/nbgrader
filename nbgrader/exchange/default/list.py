@@ -5,7 +5,7 @@ import re
 import hashlib
 from traitlets import Bool
 
-from nbgrader import exchange
+from nbgrader.exchange.abc import ExchangeList as ABCExchangeList
 from nbgrader.utils import notebook_hash, make_unique_key
 from .exchange import Exchange
 
@@ -16,7 +16,7 @@ def _checksum(path):
     return m.hexdigest()
 
 
-class ExchangeList(Exchange, exchange.ExchangeList):
+class ExchangeList(Exchange, ABCExchangeList):
 
     def init_src(self):
         pass
