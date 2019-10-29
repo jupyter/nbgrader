@@ -244,16 +244,6 @@ class NbGrader(JupyterApp):
             cfg.CourseDirectory.course_id = cfg.Exchange.course_id
             del cfg.Exchange.course_id
 
-        # check for dateutil parse errors
-        if "timestamp_format" in cfg.Exchange:
-            try:
-                from dateutil.parse import parse
-                import datetime
-                ts = datetime.datetime.now().strftime(cfg.Exchange.timestamp_format)
-                ts = parse(ts)
-            except ValueError:
-                self.fail("Invalid timestamp_format: {} - could not be parsed by dateutil".format(cfg.Exchange.timestamp_format))
-
         exchange_options = [
             ("timezone", "timezone"),
             ("timestamp_format", "timestamp_format"),
@@ -277,6 +267,16 @@ class NbGrader(JupyterApp):
             )
             cfg.Exchange.merge(cfg.TransferApp)
             del cfg.TransferApp
+
+        # check for dateutil parse errors
+        if "timestamp_format" in cfg.Exchange:
+            try:
+                from dateutil.parse import parse
+                import datetime
+                ts = datetime.datetime.now().strftime(cfg.Exchange.timestamp_format)
+                ts = parse(ts)
+            except ValueError:
+                self.fail("Invalid timestamp_format: {} - could not be parsed by dateutil".format(cfg.Exchange.timestamp_format))
 
         if 'BaseNbConvertApp' in cfg:
             self.log.warning(
