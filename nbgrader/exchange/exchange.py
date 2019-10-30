@@ -42,6 +42,17 @@ class Exchange(LoggingConfigurable):
         help="Format string for timestamps"
     ).tag(config=True)
 
+    @validate('timestamp_format')
+    def _valid_timestamp_format(self, proposal):
+        try:
+            from dateutil.parse import parse
+            import datetime
+            ts = datetime.datetime.now().strftime(proposal['value'])
+            ts = parse(ts)
+        except ValueError:
+            raise TraitError('Invalid timestamp_format: {} - could not be parsed by dateutil'.format(proposal['value']))
+        return proposal['value']
+    
     root = Unicode(
         "/srv/nbgrader/exchange",
         help="The nbgrader exchange directory writable to everyone. MUST be preexisting."
