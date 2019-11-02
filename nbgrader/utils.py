@@ -1,8 +1,8 @@
 import os
+import io
 import hashlib
 import dateutil.parser
 import glob
-import six
 import sys
 import shutil
 import stat
@@ -127,15 +127,8 @@ def determine_grade(cell, log=None):
 
 
 def to_bytes(string):
-    """A python 2/3 compatible function for converting a string to bytes.
-    In Python 2, this just returns the 8-bit string. In Python 3, this first
-    encodes the string to utf-8.
-
-    """
-    if sys.version_info[0] == 3 or (sys.version_info[0] == 2 and isinstance(string, unicode)):
-        return bytes(string.encode('utf-8'))
-    else:
-        return bytes(string)
+    """A helper function for converting a string to bytes with utf-8 encoding."""
+    return bytes(string.encode('utf-8'))
 
 
 def compute_checksum(cell):
@@ -163,7 +156,7 @@ def parse_utc(ts):
     """Parses a timestamp into datetime format, converting it to UTC if necessary."""
     if ts is None:
         return None
-    if isinstance(ts, six.string_types):
+    if isinstance(ts, str):
         parts = ts.split(" ")
         if len(parts) == 3:
             ts = " ".join(parts[:2] + ["TZ"])
@@ -504,7 +497,7 @@ def capture_log(app, fmt="[%(levelname)s] %(message)s"):
         - log (string): captured log output
 
     """
-    log_buff = six.StringIO()
+    log_buff = io.StringIO()
     handler = logging.StreamHandler(log_buff)
     formatter = LogFormatter(fmt="[%(levelname)s] %(message)s")
     handler.setFormatter(formatter)

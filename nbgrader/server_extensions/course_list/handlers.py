@@ -9,7 +9,7 @@ from tornado import web
 from tornado.httpclient import AsyncHTTPClient, HTTPClientError
 from tornado import gen
 from textwrap import dedent
-from six.moves import urllib
+from urllib.parse import urlparse
 
 from notebook.utils import url_path_join as ujoin
 from notebook.base.handlers import IPythonHandler
@@ -39,8 +39,8 @@ class CourseListHandler(IPythonHandler):
         return self.settings['assignment_dir']
 
     def get_base_url(self):
-        parts = list(urllib.parse.urlsplit(self.request.full_url()))
-        base_url = parts[0] + "://" + parts[1]
+        parts = urlparse(self.request.full_url())
+        base_url = parts.scheme + "://" + parts.netloc
         return base_url.rstrip("/")
 
     def load_config(self):
