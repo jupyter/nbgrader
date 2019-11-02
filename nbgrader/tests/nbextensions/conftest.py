@@ -185,7 +185,8 @@ def _make_browser(tempdir):
 
     options = webdriver.firefox.options.Options()
     options.add_argument('-headless')
-    browser = webdriver.Firefox(options=options)
+    browser = webdriver.Firefox(
+        options=options, service_log_path=os.path.devnull)
     browser.set_page_load_timeout(30)
     browser.set_script_timeout(30)
 
