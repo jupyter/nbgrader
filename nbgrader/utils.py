@@ -127,15 +127,8 @@ def determine_grade(cell, log=None):
 
 
 def to_bytes(string):
-    """A python 2/3 compatible function for converting a string to bytes.
-    In Python 2, this just returns the 8-bit string. In Python 3, this first
-    encodes the string to utf-8.
-
-    """
-    if sys.version_info[0] == 3 or (sys.version_info[0] == 2 and isinstance(string, unicode)):
-        return bytes(string.encode('utf-8'))
-    else:
-        return bytes(string)
+    """A helper function for converting a string to bytes with utf-8 encoding."""
+    return bytes(string.encode('utf-8'))
 
 
 def compute_checksum(cell):
