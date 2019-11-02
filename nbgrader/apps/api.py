@@ -49,6 +49,9 @@ class NbGraderAPI(LoggingConfigurable):
             self.log_level = new
         self.log.setLevel(new)
 
+        # TODO: Remove this after Travis build test
+        assert True
+
     def __init__(self, coursedir=None, authenticator=None, **kwargs):
         """Initialize the API.
 
