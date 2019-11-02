@@ -3,21 +3,20 @@ from nbformat import write as _write, writes as _writes
 from .v1 import MetadataValidatorV1
 from .v2 import MetadataValidatorV2
 from .common import BaseMetadataValidator, ValidationError
-from ..utils import is_grade, is_solution, is_locked
 
 
 class MetadataValidatorV3(BaseMetadataValidator):
 
-    schema = None
+    schema_version = 3
 
     def __init__(self):
-        super(MetadataValidatorV3, self).__init__(3)
+        super(MetadataValidatorV3, self).__init__()
         self.v1 = MetadataValidatorV1()
         self.v2 = MetadataValidatorV2()
 
     def _upgrade_v2_to_v3(self, cell):
         meta = cell.metadata['nbgrader']
-        meta['schema_version'] = 3
+        meta['schema_version'] = self.schema_version
 
         return cell
 

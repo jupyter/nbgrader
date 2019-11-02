@@ -1,15 +1,13 @@
-import warnings
-
 from nbformat import read as _read, reads as _reads
 from nbformat import write as _write, writes as _writes
 from .common import BaseMetadataValidator, ValidationError
 
 class MetadataValidatorV1(BaseMetadataValidator):
 
-    schema = None
+    schema_version = 1
 
     def __init__(self):
-        super(MetadataValidatorV1, self).__init__(1)
+        super(MetadataValidatorV1, self).__init__()
 
     def _upgrade_v0_to_v1(self, cell):
         meta = cell.metadata['nbgrader']
@@ -40,7 +38,7 @@ class MetadataValidatorV1(BaseMetadataValidator):
         else:
             meta['points'] = 0.0
 
-        meta['schema_version'] = 1
+        meta['schema_version'] = self.schema_version
 
         return cell
 
@@ -48,13 +46,14 @@ class MetadataValidatorV1(BaseMetadataValidator):
         if 'nbgrader' not in cell.metadata:
             return cell
 
-        meta = cell.metadata['nbgrader']
+        if 'schema_version' not in cell.metadata['nbgrader']:
+            cell.metadata['nbgrader']['schema_version'] = 0
 
-        if 'schema_version' not in meta:
-            meta['schema_version'] = 0
-
-        if meta['schema_version'] == 0:
+        if cell.metadata['nbgrader']['schema_version'] == 0:
             cell = self._upgrade_v0_to_v1(cell)
+
+        if 'nbgrader' not in cell.metadata:
+            return cell
 
         self._remove_extra_keys(cell)
         return cell

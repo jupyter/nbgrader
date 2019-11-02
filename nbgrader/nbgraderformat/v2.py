@@ -2,15 +2,14 @@ from nbformat import read as _read, reads as _reads
 from nbformat import write as _write, writes as _writes
 from .v1 import MetadataValidatorV1
 from .common import BaseMetadataValidator, ValidationError
-from ..utils import is_grade, is_solution, is_locked
 
 
 class MetadataValidatorV2(BaseMetadataValidator):
 
-    schema = None
+    schema_version = 2
 
     def __init__(self):
-        super(MetadataValidatorV2, self).__init__(2)
+        super(MetadataValidatorV2, self).__init__()
         self.v1 = MetadataValidatorV1()
 
     def _upgrade_v1_to_v2(self, cell):
@@ -21,7 +20,7 @@ class MetadataValidatorV2(BaseMetadataValidator):
             self.log.warning("Cell does not have a stored cell type! Adding default cell type.")
             meta['cell_type'] = cell.cell_type
 
-        meta['schema_version'] = 2
+        meta['schema_version'] = self.schema_version
 
         return cell
 
