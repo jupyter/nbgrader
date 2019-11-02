@@ -1,7 +1,16 @@
-from ...nbgraderformat.v2 import MetadataValidatorV2
+import os
+import pytest
+import tempfile
+from nbformat import current_nbformat, read
+from nbformat.v4 import new_notebook
+from ...nbgraderformat.common import SchemaMismatchError, ValidationError
+from ...nbgraderformat.v2 import (
+    MetadataValidatorV2, read_v2, reads_v2, write_v2, writes_v2)
 from .. import (
+    create_code_cell,
     create_grade_cell,
-    create_solution_cell)
+    create_solution_cell,
+    create_regular_cell)
 
 
 def test_set_false():
@@ -97,3 +106,152 @@ def test_cell_type():
     cell.metadata.nbgrader["cell_type"] = "code"
     MetadataValidatorV2().upgrade_cell_metadata(cell)
     assert cell.metadata.nbgrader['cell_type'] == "code"
+
+
+def test_read():
+    currdir = os.path.split(__file__)[0]
+    path = os.path.join(currdir, "..", "apps", "files", "test-v2.ipynb")
+    read_v2(path, current_nbformat)
+
+
+def test_reads():
+    currdir = os.path.split(__file__)[0]
+    path = os.path.join(currdir, "..", "apps", "files", "test-v2.ipynb")
+    contents = open(path, "r").read()
+    reads_v2(contents, current_nbformat)
+
+
+def test_write():
+    currdir = os.path.split(__file__)[0]
+    path = os.path.join(currdir, "..", "apps", "files", "test-v2.ipynb")
+    nb = read_v2(path, current_nbformat)
+    with tempfile.TemporaryFile(mode="w") as fh:
+        write_v2(nb, fh)
+
+
+def test_writes():
+    currdir = os.path.split(__file__)[0]
+    path = os.path.join(currdir, "..", "apps", "files", "test-v2.ipynb")
+    nb = read_v2(path, current_nbformat)
+    writes_v2(nb)
+
+
+def test_too_old():
+    currdir = os.path.split(__file__)[0]
+    path = os.path.join(currdir, "..", "apps", "files", "test-v0.ipynb")
+    with pytest.raises(SchemaMismatchError):
+        read_v2(path, current_nbformat)
+
+
+def test_too_new():
+    currdir = os.path.split(__file__)[0]
+    path = os.path.join(currdir, "..", "apps", "files", "test.ipynb")
+    with pytest.raises(SchemaMismatchError):
+        read_v2(path, current_nbformat)
+
+
+def test_upgrade_notebook_metadata():
+    currdir = os.path.split(__file__)[0]
+    path = os.path.join(currdir, "..", "apps", "files", "test-v0.ipynb")
+    with open(path, "r") as fh:
+        nb = read(fh, current_nbformat)
+    nb = MetadataValidatorV2().upgrade_notebook_metadata(nb)
+
+
+def test_upgrade_cell_metadata():
+    cell = create_grade_cell("", "code", "foo", 5, 0)
+    MetadataValidatorV2().upgrade_cell_metadata(cell)
+
+    cell = create_grade_cell("", "code", "foo", 5, 2)
+    MetadataValidatorV2().upgrade_cell_metadata(cell)
+
+    cell = create_grade_cell("", "code", "foo", 5, 3)
+    MetadataValidatorV2().upgrade_cell_metadata(cell)
+
+
+def test_regular_cells():
+    validator = MetadataValidatorV2()
+
+    # code cell without nbgrader metadata
+    cell = create_code_cell()
+    validator.validate_cell(cell)
+    validator.upgrade_cell_metadata(cell)
+
+    # code cell with metadata, but not an nbgrader cell
+    cell = create_regular_cell("", "code", schema_version=2)
+    del cell.metadata.nbgrader["task"]
+    validator.validate_cell(cell)
+
+    nb = new_notebook()
+    cell1 = create_code_cell()
+    cell2 = create_regular_cell("", "code", schema_version=2)
+    del cell2.metadata.nbgrader["task"]
+    nb.cells = [cell1, cell2]
+    validator.validate_nb(nb)
+
+
+def test_invalid_metadata():
+    validator = MetadataValidatorV2()
+
+    # make sure the default cell works ok
+    cell = create_grade_cell("", "code", "foo", 5, 2)
+    del cell.metadata.nbgrader["task"]
+    validator.validate_cell(cell)
+
+    # missing grade_id
+    cell = create_grade_cell("", "code", "foo", 5, 2)
+    del cell.metadata.nbgrader["task"]
+    del cell.metadata.nbgrader["grade_id"]
+    with pytest.raises(ValidationError):
+        validator.validate_cell(cell)
+
+    # grade_id is empty
+    cell = create_grade_cell("", "code", "", 5, 2)
+    del cell.metadata.nbgrader["task"]
+    with pytest.raises(ValidationError):
+        validator.validate_cell(cell)
+
+    # missing points
+    cell = create_grade_cell("", "code", "foo", 5, 2)
+    del cell.metadata.nbgrader["task"]
+    del cell.metadata.nbgrader["points"]
+    with pytest.raises(ValidationError):
+        validator.validate_cell(cell)
+
+    # markdown grade cell not marked as a solution cell
+    cell = create_grade_cell("", "markdown", "foo", 5, 2)
+    del cell.metadata.nbgrader["task"]
+    with pytest.raises(ValidationError):
+        validator.validate_cell(cell)
+
+    # markdown solution cell not marked as a grade cell
+    cell = create_solution_cell("", "markdown", "foo", 2)
+    del cell.metadata.nbgrader["task"]
+    with pytest.raises(ValidationError):
+        validator.validate_cell(cell)
+
+
+def test_duplicate_cells():
+    validator = MetadataValidatorV2()
+    nb = new_notebook()
+    cell1 = create_grade_cell("", "code", "foo", 5, 2)
+    del cell1.metadata.nbgrader["task"]
+    cell2 = create_grade_cell("", "code", "foo", 5, 2)
+    del cell2.metadata.nbgrader["task"]
+    nb.cells = [cell1, cell2]
+    with pytest.raises(ValidationError):
+        validator.validate_nb(nb)
+
+
+def test_celltype_changed(caplog):
+    cell = create_solution_cell("", "code", "foo", 2)
+    del cell.metadata.nbgrader["task"]
+    cell.metadata.nbgrader["cell_type"] = "code"
+    MetadataValidatorV2().validate_cell(cell)
+    assert "Cell type has changed from markdown to code!" not in caplog.text
+
+    cell = create_solution_cell("", "code", "foo", 2)
+    del cell.metadata.nbgrader["task"]
+    cell.metadata.nbgrader["cell_type"] = "markdown"
+    MetadataValidatorV2().validate_cell(cell)
+    assert "Cell type has changed from markdown to code!" in caplog.text
