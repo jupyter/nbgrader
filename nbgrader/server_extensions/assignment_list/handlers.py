@@ -16,7 +16,7 @@ from jupyter_core.paths import jupyter_config_path
 
 from ...apps import NbGrader
 from ...coursedir import CourseDirectory
-from ...exchange import ExchangeList, ExchangeFetchAssignment, ExchangeFetchFeedback, ExchangeSubmit
+from ...exchange import ExchangeList, ExchangeFetchAssignment, ExchangeFetchFeedback, ExchangeSubmit, ExchangeError
 from ...auth import Authenticator
 from ... import __version__ as nbgrader_version
 
@@ -76,13 +76,23 @@ class AssignmentList(LoggingConfigurable):
                     config=config)
                 assignments = lister.start()
 
-            except:
+            except Exception as e:
                 self.log.error(traceback.format_exc())
-                retvalue = {
-                    "success": False,
-                    "value": traceback.format_exc()
-                }
-
+                if isinstance(e, ExchangeError):
+                    retvalue = {
+                        "success": False,
+                        "value": """The exchange directory does not exist and could
+                                    not be created. The "release" and "collect" functionality will not be available.
+                                    Please see the documentation on
+                                    http://nbgrader.readthedocs.io/en/stable/user_guide/managing_assignment_files.html#setting-up-the-exchange
+                                    for instructions.
+                                """
+                    }
+                else:
+                    retvalue = {
+                        "success": False,
+                        "value": traceback.format_exc()
+                    }
             else:
                 for assignment in assignments:
                     if assignment['status'] == 'fetched':
@@ -111,13 +121,23 @@ class AssignmentList(LoggingConfigurable):
                     config=config)
                 assignments = lister.start()
 
-            except:
+            except Exception as e:
                 self.log.error(traceback.format_exc())
-                retvalue = {
-                    "success": False,
-                    "value": traceback.format_exc()
-                }
-
+                if isinstance(e, ExchangeError):
+                    retvalue = {
+                        "success": False,
+                        "value": """The exchange directory does not exist and could
+                                    not be created. The "release" and "collect" functionality will not be available.
+                                    Please see the documentation on
+                                    http://nbgrader.readthedocs.io/en/stable/user_guide/managing_assignment_files.html#setting-up-the-exchange
+                                    for instructions.
+                                """
+                    }
+                else:
+                    retvalue = {
+                        "success": False,
+                        "value": traceback.format_exc()
+                    }
             else:
                 for assignment in assignments:
                     assignment["submissions"] = sorted(
