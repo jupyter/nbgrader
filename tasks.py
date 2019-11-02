@@ -80,7 +80,7 @@ def _run_tests(mark, skip, junitxml, paralell=False):
 def tests(args):
     if args.group == 'python':
         _run_tests(
-            mark="not nbextensions", skip=args.skip, junitxml=args.junitxml, paralell=True)
+            mark="not nbextensions", skip=args.skip, junitxml=args.junitxml)
 
     elif args.group == 'nbextensions':
         _run_tests(mark="nbextensions", skip=args.skip, junitxml=args.junitxml)
