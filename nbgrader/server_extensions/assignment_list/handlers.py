@@ -38,16 +38,11 @@ class AssignmentList(LoggingConfigurable):
         paths = jupyter_config_path()
         paths.insert(0, os.getcwd())
 
-        config_found = False
-        full_config = Config()
-        for config in NbGrader._load_config_files("nbgrader_config", path=paths, log=self.log):
-            full_config.merge(config)
-            config_found = True
+        app = NbGrader()
+        app.config_file_paths.append(paths)
+        app.load_config_file()
 
-        if not config_found:
-            self.log.warning("No nbgrader_config.py file found. Rerun with DEBUG log level to see where nbgrader is looking.")
-
-        return full_config
+        return app.config
 
     @contextlib.contextmanager
     def get_assignment_dir_config(self):
@@ -60,9 +55,12 @@ class AssignmentList(LoggingConfigurable):
 
         # now cd to the full assignment directory and load the config again
         with chdir(assignment_dir):
-            for new_config in NbGrader._load_config_files("nbgrader_config", path=[os.getcwd()], log=self.log):
-                config.merge(new_config)
-            yield config
+
+            app = NbGrader()
+            app.config_file_paths.append(os.getcwd())
+            app.load_config_file()
+
+            yield app.config
 
     def list_released_assignments(self, course_id=None):
         with self.get_assignment_dir_config() as config:
