@@ -6,6 +6,7 @@ coverage
 selenium
 sphinx
 sphinx_rtd_theme
+sphinx-autodoc-typehints
 codecov
 nbval
 requests-mock
