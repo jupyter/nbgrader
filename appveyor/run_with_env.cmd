@@ -2,10 +2,6 @@
 :: variables to use the MSVC 2010 C++ compilers from GRMSDKX_EN_DVD.iso of:
 :: MS Windows SDK for Windows 7 and .NET Framework 4 (SDK v7.1)
 ::
-:: To build extensions for 64 bit Python 2, we need to configure environment
-:: variables to use the MSVC 2008 C++ compilers from GRMSDKX_EN_DVD.iso of:
-:: MS Windows SDK for Windows 7 and .NET Framework 3.5 (SDK v7.0)
-::
 :: 32 bit builds, and 64-bit builds for 3.5 and beyond, do not require specific
 :: environment configurations.
 ::

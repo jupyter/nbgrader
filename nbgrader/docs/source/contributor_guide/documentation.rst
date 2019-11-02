@@ -13,7 +13,7 @@ Editing source files
   Some of the rst files also use `Sphinx autodoc <http://www.sphinx-doc.org/en/master/usage/extensions/autodoc.html>`_.
 
 * Jupyter Notebooks: The Jupyter notebooks are written in Python and should be written so that
-  they are compatible with both Python 2 and Python 3. If you need
+  they are compatible with Python 3. If you need
   to reference another part of the documentation from a notebook, you will need
   to put that reference in a **raw** cell in the notebook, **not** a markdown
   cell.

@@ -110,4 +110,5 @@ gradebook.db
 .vscode/
 package-lock.json
 .goutputstream*
+.idea
 
