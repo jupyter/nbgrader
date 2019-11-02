@@ -23,12 +23,9 @@ strategy:
       testgroup: 'nbextensions'
 
 steps:
-- task: NuGetToolInstaller@0
-  displayName: 'Use latest available Nuget'
-
 - script: |
-    nuget install Selenium.WebDriver.GeckoDriver
-  displayName: 'Install GeckoDriver'
+    env | sort
+  displayName: 'Show environment variables'
 
 - task: UsePythonVersion@0
   inputs:
