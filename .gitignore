@@ -111,3 +111,4 @@ gradebook.db
 package-lock.json
 .goutputstream*
 
+.testmondata

@@ -57,6 +57,7 @@ def _run_tests(mark, skip, junitxml, paralell=False):
         cmd.extend(['--junitxml', junitxml])
     cmd.append('-v')
     cmd.append('-x')
+    cmd.append('--testmon')
     if paralell:
         cmd.extend(['--numprocesses', 'auto'])
     cmd.extend(['--reruns', '4'])
