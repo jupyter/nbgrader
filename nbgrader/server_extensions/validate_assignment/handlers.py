@@ -31,16 +31,11 @@ class ValidateAssignmentHandler(IPythonHandler):
         paths = jupyter_config_path()
         paths.insert(0, os.getcwd())
 
-        config_found = False
-        full_config = Config()
-        for config in NbGrader._load_config_files("nbgrader_config", path=paths, log=self.log):
-            full_config.merge(config)
-            config_found = True
+        app = NbGrader()
+        app.config_file_paths.append(paths)
+        app.load_config_file()
 
-        if not config_found:
-            self.log.warning("No nbgrader_config.py file found. Rerun with DEBUG log level to see where nbgrader is looking.")
-
-        return full_config
+        return app.config
 
     def validate_notebook(self, path):
         fullpath = os.path.join(self.notebook_dir, path)
