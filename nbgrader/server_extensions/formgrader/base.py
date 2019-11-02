@@ -35,7 +35,7 @@ class BaseHandler(IPythonHandler):
         gb = self.settings['nbgrader_gradebook']
         if gb is None:
             self.log.debug("creating gradebook")
-            gb = Gradebook(self.db_url)
+            gb = Gradebook(self.db_url, self.coursedir.course_id)
             self.settings['nbgrader_gradebook'] = gb
         return gb
 
