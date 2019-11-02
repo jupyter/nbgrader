@@ -8,6 +8,7 @@ import shutil
 
 from contextlib import contextmanager
 from subprocess import check_call
+from typing import Iterator
 
 _here = os.path.abspath(os.path.dirname(__file__))
 
@@ -15,7 +16,7 @@ ALEMBIC_INI_TEMPLATE_PATH = os.path.join(_here, 'alembic.ini')
 ALEMBIC_DIR = os.path.join(_here, 'alembic')
 
 
-def write_alembic_ini(alembic_ini='alembic.ini', db_url='sqlite:///gradebook.db'):
+def write_alembic_ini(alembic_ini: str = 'alembic.ini', db_url: str = 'sqlite:///gradebook.db') -> None:
     """Write a complete alembic.ini from our template.
     Parameters
     ----------
@@ -37,17 +38,17 @@ def write_alembic_ini(alembic_ini='alembic.ini', db_url='sqlite:///gradebook.db'
 
 
 @contextmanager
-def _temp_alembic_ini(db_url):
+def _temp_alembic_ini(db_url: str) -> Iterator[str]:
     """Context manager for temporary JupyterHub alembic directory
     Temporarily write an alembic.ini file for use with alembic migration scripts.
     Context manager yields alembic.ini path.
     Parameters
     ----------
-    db_url: str
+    db_url:
         The SQLAlchemy database url, e.g. `sqlite:///gradebook.db`.
     Returns
     -------
-    alembic_ini: str
+    alembic_ini:
         The path to the temporary alembic.ini that we have created.
         This file will be cleaned up on exit from the context manager.
     """

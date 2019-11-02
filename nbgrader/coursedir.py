@@ -7,6 +7,9 @@ from traitlets.config import LoggingConfigurable
 from traitlets import Integer, Bool, Unicode, List, default, validate, TraitError
 
 from .utils import full_split, parse_utc
+from traitlets.utils.bunch import Bunch
+import datetime
+from typing import Optional
 
 
 class CourseDirectory(LoggingConfigurable):
@@ -50,7 +53,7 @@ class CourseDirectory(LoggingConfigurable):
     ).tag(config=True)
 
     @validate('student_id')
-    def _validate_student_id(self, proposal):
+    def _validate_student_id(self, proposal: Bunch) -> str:
         if proposal['value'].strip() != proposal['value']:
             self.log.warning("student_id '%s' has trailing whitespace, stripping it away", proposal['value'])
         return proposal['value'].strip()
@@ -80,7 +83,7 @@ class CourseDirectory(LoggingConfigurable):
     ).tag(config=True)
 
     @validate('assignment_id')
-    def _validate_assignment_id(self, proposal):
+    def _validate_assignment_id(self, proposal: Bunch) -> str:
         if '+' in proposal['value']:
             raise TraitError('Assignment names should not contain the following characters: +')
         if proposal['value'].strip() != proposal['value']:
@@ -98,7 +101,7 @@ class CourseDirectory(LoggingConfigurable):
     ).tag(config=True)
 
     @validate('notebook_id')
-    def _validate_notebook_id(self, proposal):
+    def _validate_notebook_id(self, proposal: Bunch) -> str:
         if proposal['value'].strip() != proposal['value']:
             self.log.warning("notebook_id '%s' has trailing whitespace, stripping it away", proposal['value'])
         return proposal['value'].strip()
@@ -248,11 +251,11 @@ class CourseDirectory(LoggingConfigurable):
     ).tag(config=True)
 
     @default("root")
-    def _root_default(self):
+    def _root_default(self) -> str:
         return os.getcwd()
 
     @validate('root')
-    def _validate_root(self, proposal):
+    def _validate_root(self, proposal: Bunch) -> str:
         path = os.path.abspath(proposal['value'])
         if path != proposal['value']:
             self.log.warning("root '%s' is not absolute, standardizing it to '%s", proposal['value'], path)
@@ -298,7 +301,7 @@ class CourseDirectory(LoggingConfigurable):
         )
     ).tag(config=True)
 
-    def format_path(self, nbgrader_step, student_id, assignment_id, escape=False):
+    def format_path(self, nbgrader_step: str, student_id: str, assignment_id: str, escape: bool = False) -> str:
         kwargs = dict(
             nbgrader_step=nbgrader_step,
             student_id=student_id,
@@ -314,7 +317,7 @@ class CourseDirectory(LoggingConfigurable):
 
         return path
 
-    def get_existing_timestamp(self, dest_path):
+    def get_existing_timestamp(self, dest_path: str) -> Optional[datetime.datetime]:
         """Get the timestamp, as a datetime object, of an existing submission."""
         timestamp_path = os.path.join(dest_path, 'timestamp.txt')
         if os.path.exists(timestamp_path):
