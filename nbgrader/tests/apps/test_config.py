@@ -6,7 +6,7 @@ from .conftest import notwindows
 class TestCourseDirectory(BaseTestApp):
 
     @notwindows
-    def test_submit_rectoryget_source_assignments(self):
+    def test_format_path(self):
         config = Config()
         config.Exchange.course_id = "abc101"
         config.CourseDirectory.root = "/root"
