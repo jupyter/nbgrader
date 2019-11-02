@@ -77,8 +77,8 @@ class AssignmentList(LoggingConfigurable):
                 assignments = lister.start()
 
             except Exception as e:
+                self.log.error(traceback.format_exc())
                 if isinstance(e, ExchangeError):
-                    self.log.error(traceback.format_exc())
                     retvalue = {
                         "success": False,
                         "value": """The exchange directory does not exist and could
@@ -122,8 +122,8 @@ class AssignmentList(LoggingConfigurable):
                 assignments = lister.start()
 
             except Exception as e:
+                self.log.error(traceback.format_exc())
                 if isinstance(e, ExchangeError):
-                    self.log.error(traceback.format_exc())
                     retvalue = {
                         "success": False,
                         "value": """The exchange directory does not exist and could
