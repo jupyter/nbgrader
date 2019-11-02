@@ -10,12 +10,12 @@ pool:
   vmImage: 'windows-latest'
 strategy:
   matrix:
-    Python35:
-      python.version: '3.5'
     Python36:
       python.version: '3.6'
-    Python37:
-      python.version: '3.7'
+      testgroup: 'python'
+    Python36Extensions:
+      python.version: '3.6'
+      testgroup: 'nbextensions'
 
 steps:
 - task: UsePythonVersion@0
@@ -35,6 +35,5 @@ steps:
   displayName: 'Install extensions'
 
 - script: |
-    python tasks.py tests --group=python
-    python tasks.py tests --group=nbextensions
+    python tasks.py tests --group=$(testgroup)
   displayName: 'Run tests'
