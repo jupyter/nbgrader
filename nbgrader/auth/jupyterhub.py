@@ -19,10 +19,6 @@ def get_jupyterhub_user():
         raise JupyterhubEnvironmentError("JUPYTERHUB_USER env is required to run the exchange features of nbgrader.")
 
 
-def get_jupyterhub_url():
-    return os.environ.get('JUPYTERHUB_BASE_URL') or 'http://127.0.0.1:8000'
-
-
 def get_jupyterhub_api_url():
     return os.environ.get('JUPYTERHUB_API_URL') or 'http://127.0.0.1:8081/hub/api'
 
@@ -89,13 +85,11 @@ class JupyterHubAuthPlugin(BaseAuthPlugin):
             self.log.error("Make sure you start your service with a valid admin_user 'api_token' in your Jupyterhub config")
             raise
         courses = set()
-        try:
-            for group in response['groups']:
-                if group.startswith('nbgrader-') or group.startswith('formgrade-'):
-                    courses.add(group.split('-', 1)[1])
-        except KeyError:
-            print("KeyError: See Jupyterhub API: " + str(response))
-            self.log.error("KeyError: See Jupyterhub API: " + str(response))
+        for group in response['groups']:
+            if group.startswith('nbgrader-') or group.startswith('formgrade-'):
+                course = group.split('-', 1)[1]
+                if course:
+                    courses.add(course)
         return list(courses)
 
     def add_student_to_course(self, student_id, course_id):

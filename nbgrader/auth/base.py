@@ -4,7 +4,7 @@ from traitlets.config import LoggingConfigurable
 
 class BaseAuthPlugin(LoggingConfigurable):
 
-    def get_student_courses(self, student_id):
+    def get_student_courses(self, student_id):  # pragma: no cover
         """Gets the list of courses that the student is enrolled in.
 
         Arguments
@@ -22,7 +22,7 @@ class BaseAuthPlugin(LoggingConfigurable):
         """
         raise NotImplementedError
 
-    def add_student_to_course(self, student_id, course_id):
+    def add_student_to_course(self, student_id, course_id):  # pragma: no cover
         """Grants a student access to a given course.
 
         Arguments
@@ -35,7 +35,7 @@ class BaseAuthPlugin(LoggingConfigurable):
         """
         raise NotImplementedError
 
-    def remove_student_from_course(self, student_id, course_id):
+    def remove_student_from_course(self, student_id, course_id):  # pragma: no cover
         """Removes a student's access to a given course.
 
         Arguments
