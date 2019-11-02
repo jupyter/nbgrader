@@ -24,6 +24,10 @@ strategy:
 
 steps:
 - script: |
+    echo ##vso[task.prependpath]$(GeckoWebDriver)
+  displayName: 'Add gecko driver to PATH'
+
+- script: |
     env | sort
   displayName: 'Show environment variables'
 
