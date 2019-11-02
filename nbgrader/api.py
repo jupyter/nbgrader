@@ -19,7 +19,6 @@ from sqlalchemy import select, func, exists, case, literal_column, union_all
 from sqlalchemy.ext.declarative import declared_attr
 from uuid import uuid4
 from .dbutil import _temp_alembic_ini
-from datetime import datetime
 from typing import List, Any, Optional, Union
 from .auth import Authenticator
 
@@ -574,7 +573,7 @@ class SubmittedAssignment(Base):
     late_submission_penalty = None
 
     @property
-    def duedate(self) -> datetime:
+    def duedate(self) -> datetime.datetime:
         """The duedate of this student's assignment, which includes any extension
         given, if applicable, and which is just the regular assignment duedate
         otherwise.
