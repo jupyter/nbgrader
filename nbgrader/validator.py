@@ -9,6 +9,8 @@ from nbconvert.filters import ansi2html, strip_ansi
 
 from .preprocessors import Execute, ClearOutput, CheckCellMetadata
 from . import utils
+from nbformat.notebooknode import NotebookNode
+import typing
 
 
 class Validator(LoggingConfigurable):
@@ -94,7 +96,7 @@ class Validator(LoggingConfigurable):
 
     stream = sys.stdout
 
-    def _indent(self, val):
+    def _indent(self, val: str) -> str:
         lines = val.split("\n")
         new_lines = []
         for line in lines:
@@ -104,7 +106,7 @@ class Validator(LoggingConfigurable):
             new_lines.append(new_line)
         return "\n".join(new_lines)
 
-    def _extract_error(self, cell):
+    def _extract_error(self, cell: NotebookNode) -> str:
         errors = []
 
         # possibilities:
@@ -129,7 +131,7 @@ class Validator(LoggingConfigurable):
 
         return "\n".join(errors)
 
-    def _print_type_changed(self, old_type, new_type, source):
+    def _print_type_changed(self, old_type: str, new_type: str, source: str) -> None:
         self.stream.write("\n" + "=" * self.width + "\n")
         self.stream.write(
             "The following {} cell has changed to a {} cell:\n\n".format(
@@ -141,7 +143,7 @@ class Validator(LoggingConfigurable):
         self.stream.write("The following cell has changed:\n\n")
         self.stream.write(self._indent(source) + "\n\n")
 
-    def _print_error(self, source, error):
+    def _print_error(self, source: str, error: str) -> None:
         self.stream.write("\n" + "=" * self.width + "\n")
         self.stream.write("The following cell failed:\n\n")
         self.stream.write(self._indent(source) + "\n\n")
@@ -153,7 +155,7 @@ class Validator(LoggingConfigurable):
         self.stream.write("The following cell passed:\n\n")
         self.stream.write(self._indent(source) + "\n\n")
 
-    def _print_num_type_changed(self, num_changed):
+    def _print_num_type_changed(self, num_changed: int) -> None:
         if num_changed == 0:
             return
 
@@ -165,7 +167,7 @@ class Validator(LoggingConfigurable):
                 )
             )
 
-    def _print_num_changed(self, num_changed):
+    def _print_num_changed(self, num_changed: int) -> None:
         if num_changed == 0:
             return
 
@@ -177,7 +179,7 @@ class Validator(LoggingConfigurable):
                 )
             )
 
-    def _print_num_failed(self, num_failed):
+    def _print_num_failed(self, num_failed: int) -> None:
         if num_failed == 0:
             self.stream.write("Success! Your notebook passes all the tests.\n")
 
@@ -201,7 +203,7 @@ class Validator(LoggingConfigurable):
                 )
             )
 
-    def _get_type_changed_cells(self, nb):
+    def _get_type_changed_cells(self, nb: NotebookNode) -> typing.List[NotebookNode]:
         changed = []
 
         for cell in nb.cells:
@@ -217,7 +219,7 @@ class Validator(LoggingConfigurable):
 
         return changed
 
-    def _get_changed_cells(self, nb):
+    def _get_changed_cells(self, nb: NotebookNode) -> typing.List:
         changed = []
         for cell in nb.cells:
             if not (utils.is_grade(cell) or utils.is_locked(cell)):
@@ -237,7 +239,7 @@ class Validator(LoggingConfigurable):
 
         return changed
 
-    def _get_failed_cells(self, nb):
+    def _get_failed_cells(self, nb: NotebookNode) -> typing.List[NotebookNode]:
         failed = []
         for cell in nb.cells:
             if not (self.validate_all or utils.is_grade(cell) or utils.is_locked(cell)):
@@ -260,7 +262,7 @@ class Validator(LoggingConfigurable):
 
         return failed
 
-    def _get_passed_cells(self, nb):
+    def _get_passed_cells(self, nb: NotebookNode) -> typing.List[NotebookNode]:
         passed = []
         for cell in nb.cells:
             if not (utils.is_grade(cell) or utils.is_locked(cell)):
@@ -278,7 +280,7 @@ class Validator(LoggingConfigurable):
 
         return passed
 
-    def _preprocess(self, nb):
+    def _preprocess(self, nb: NotebookNode) -> NotebookNode:
         resources = {}
         with utils.setenv(NBGRADER_VALIDATING='1'):
             for preprocessor in self.preprocessors:
@@ -290,7 +292,7 @@ class Validator(LoggingConfigurable):
                 nb, resources = pp.preprocess(nb, resources)
         return nb
 
-    def validate(self, filename):
+    def validate(self, filename: str) -> typing.Dict[str, typing.List[typing.Dict[str, str]]]:
         self.log.info("Validating '{}'".format(os.path.abspath(filename)))
         basename = os.path.basename(filename)
         dirname = os.path.dirname(filename)
@@ -336,7 +338,7 @@ class Validator(LoggingConfigurable):
 
         return results
 
-    def validate_and_print(self, filename):
+    def validate_and_print(self, filename: str) -> None:
         results = self.validate(filename)
         type_changed = results.get('type_changed', [])
         changed = results.get('changed', [])
