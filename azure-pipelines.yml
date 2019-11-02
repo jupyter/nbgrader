@@ -23,6 +23,13 @@ strategy:
       testgroup: 'nbextensions'
 
 steps:
+- task: NuGetToolInstaller@0
+  displayName: 'Use latest available Nuget'
+
+- script: |
+    nuget install Selenium.WebDriver.GeckoDriver
+  displayName: 'Install GeckoDriver'
+
 - task: UsePythonVersion@0
   inputs:
     versionSpec: '$(python.version)'
@@ -32,6 +39,7 @@ steps:
     python -m pip install --upgrade pip
     pip install -r dev-requirements.txt .
   displayName: 'Install dependencies'
+
 
 - script: |
     jupyter nbextension install --sys-prefix --py nbgrader
