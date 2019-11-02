@@ -2,7 +2,6 @@ import glob
 import re
 import sys
 import os
-import six
 import logging
 import warnings
 
@@ -44,7 +43,7 @@ class NbGraderAPI(LoggingConfigurable):
     def _log_level_changed(self, change):
         """Adjust the log level when log_level is set."""
         new = change.new
-        if isinstance(new, six.string_types):
+        if isinstance(new, str):
             new = getattr(logging, new)
             self.log_level = new
         self.log.setLevel(new)

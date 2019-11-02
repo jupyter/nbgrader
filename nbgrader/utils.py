@@ -1,8 +1,8 @@
 import os
+import io
 import hashlib
 import dateutil.parser
 import glob
-import six
 import sys
 import shutil
 import stat
@@ -163,7 +163,7 @@ def parse_utc(ts):
     """Parses a timestamp into datetime format, converting it to UTC if necessary."""
     if ts is None:
         return None
-    if isinstance(ts, six.string_types):
+    if isinstance(ts, str):
         parts = ts.split(" ")
         if len(parts) == 3:
             ts = " ".join(parts[:2] + ["TZ"])
@@ -504,7 +504,7 @@ def capture_log(app, fmt="[%(levelname)s] %(message)s"):
         - log (string): captured log output
 
     """
-    log_buff = six.StringIO()
+    log_buff = io.StringIO()
     handler = logging.StreamHandler(log_buff)
     formatter = LogFormatter(fmt="[%(levelname)s] %(message)s")
     handler.setFormatter(formatter)

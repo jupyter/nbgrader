@@ -7,7 +7,7 @@ import logging
 import warnings
 import socket
 
-from six import StringIO
+from io import StringIO
 from nbformat.v4 import new_code_cell, new_markdown_cell
 from jupyter_core.application import NoStart
 from nbconvert.filters import strip_ansi

@@ -1,6 +1,5 @@
 import pytest
-import json
-import six
+import io
 import os
 
 from textwrap import dedent
@@ -18,7 +17,7 @@ def validator():
 
 @pytest.fixture
 def stream():
-    return six.StringIO()
+    return io.StringIO()
 
 
 class TestValidator(object):

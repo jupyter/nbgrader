@@ -1,7 +1,6 @@
 # coding: utf-8
 
 import os
-import six
 import sys
 import shutil
 import datetime
@@ -319,7 +318,7 @@ class ZipCollectApp(NbGrader):
                         "submission file name."
                         "".format(self.collector_plugin.__name__, key)
                     )
-                if not isinstance(info[key], six.string_types):
+                if not isinstance(info[key], str):
                     self.fail(
                         "Expected collector {} to provide a string for {} from "
                         "the submission file name."
@@ -349,7 +348,7 @@ class ZipCollectApp(NbGrader):
             if 'timestamp' in info.keys():
                 timestamp = info['timestamp']
 
-            if isinstance(timestamp, six.string_types):
+            if isinstance(timestamp, str):
                 if not timestamp:
                     self.log.warning("Empty timestamp string provided.")
                     timestamp = None
