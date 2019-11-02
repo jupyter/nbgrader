@@ -64,9 +64,9 @@ class TestNbGraderUpdate(BaseTestApp):
         run_nbgrader(["validate", "p1.ipynb"], retcode=1)
 
     def test_update_assign(self, db, course_dir):
-        with open("nbgrader_config.py", "a") as fh:
-            fh.write("""c.CourseDirectory.db_assignments = [dict(name='ps1', duedate='2015-02-02 14:58:23.948203 America/Los_Angeles')]\n""")
-            fh.write("""c.CourseDirectory.db_students = [dict(id="foo"), dict(id="bar")]""")
+        run_nbgrader(["db", "assignment", "add", "ps1", "--db", db])
+        run_nbgrader(["db", "student", "add", "foo", "--db", db])
+        run_nbgrader(["db", "student", "add", "bar", "--db", db])
 
         self._copy_file(join("files", "test-v0.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
         run_nbgrader(["generate_assignment", "ps1", "--db", db], retcode=1)
@@ -78,9 +78,9 @@ class TestNbGraderUpdate(BaseTestApp):
         run_nbgrader(["generate_assignment", "ps1", "--db", db])
 
     def test_update_autograde(self, db, course_dir):
-        with open("nbgrader_config.py", "a") as fh:
-            fh.write("""c.CourseDirectory.db_assignments = [dict(name='ps1', duedate='2015-02-02 14:58:23.948203 America/Los_Angeles')]\n""")
-            fh.write("""c.CourseDirectory.db_students = [dict(id="foo"), dict(id="bar")]""")
+        run_nbgrader(["db", "assignment", "add", "ps1", "--db", db])
+        run_nbgrader(["db", "student", "add", "foo", "--db", db])
+        run_nbgrader(["db", "student", "add", "bar", "--db", db])
 
         self._copy_file(join("files", "test.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
         run_nbgrader(["generate_assignment", "ps1", "--db", db])
@@ -96,9 +96,9 @@ class TestNbGraderUpdate(BaseTestApp):
         run_nbgrader(["autograde", "ps1", "--db", db])
 
     def test_update_autograde_old_assign(self, db, course_dir):
-        with open("nbgrader_config.py", "a") as fh:
-            fh.write("""c.CourseDirectory.db_assignments = [dict(name='ps1', duedate='2015-02-02 14:58:23.948203 America/Los_Angeles')]\n""")
-            fh.write("""c.CourseDirectory.db_students = [dict(id="foo"), dict(id="bar")]""")
+        run_nbgrader(["db", "assignment", "add", "ps1", "--db", db])
+        run_nbgrader(["db", "student", "add", "foo", "--db", db])
+        run_nbgrader(["db", "student", "add", "bar", "--db", db])
 
         self._copy_file(join("files", "test-v0.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
         run_nbgrader(["generate_assignment", "ps1", "--db", db, "--CheckCellMetadata.enabled=False"])

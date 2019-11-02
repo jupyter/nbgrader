@@ -26,9 +26,10 @@ class TestNbGraderReleaseFeedback(BaseTestApp):
     @notwindows
     def test_single_file(self, db, course_dir, exchange):
         """Can feedback be generated for an unchanged assignment?"""
-        with open("nbgrader_config.py", "a") as fh:
-            fh.write("""c.CourseDirectory.db_assignments = [dict(name="ps1")]\n""")
-            fh.write("""c.CourseDirectory.db_students = [dict(id="foo")]\n""")
+        run_nbgrader(["db", "assignment", "add", "ps1", "--db", db, "--duedate",
+                      "2015-02-02 14:58:23.948203 America/Los_Angeles"])
+        run_nbgrader(["db", "student", "add", "foo", "--db", db])
+        run_nbgrader(["db", "student", "add", "bar", "--db", db])
         self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
         run_nbgrader(["assign", "ps1", "--db", db])
         nb_path = join(course_dir, "submitted", "foo", "ps1", "p1.ipynb")
@@ -47,9 +48,10 @@ class TestNbGraderReleaseFeedback(BaseTestApp):
     @notwindows
     def test_single_student(self, db, course_dir, exchange):
         """Can feedback be generated for an unchanged assignment?"""
-        with open("nbgrader_config.py", "a") as fh:
-            fh.write("""c.CourseDirectory.db_assignments = [dict(name="ps1")]\n""")
-            fh.write("""c.CourseDirectory.db_students = [dict(id="foo")]\n""")
+        run_nbgrader(["db", "assignment", "add", "ps1", "--db", db, "--duedate",
+                      "2015-02-02 14:58:23.948203 America/Los_Angeles"])
+        run_nbgrader(["db", "student", "add", "foo", "--db", db])
+        run_nbgrader(["db", "student", "add", "bar", "--db", db])
         self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
         run_nbgrader(["assign", "ps1", "--db", db])
         nb_path = join(course_dir, "submitted", "foo", "ps1", "p1.ipynb")
@@ -74,9 +76,10 @@ class TestNbGraderReleaseFeedback(BaseTestApp):
     @notwindows
     def test_student_id_exclude(self, db, course_dir, exchange):
         """Does --CourseDirectory.student_id_exclude=X exclude students?"""
-        with open("nbgrader_config.py", "a") as fh:
-            fh.write("""c.CourseDirectory.db_assignments = [dict(name="ps1")]\n""")
-            fh.write("""c.CourseDirectory.db_students = [dict(id="foo"), dict(id="bar"), dict(id="baz")]\n""")
+        run_nbgrader(["db", "assignment", "add", "ps1", "--db", db])
+        run_nbgrader(["db", "student", "add", "foo", "--db", db])
+        run_nbgrader(["db", "student", "add", "bar", "--db", db])
+        run_nbgrader(["db", "student", "add", "baz", "--db", db])
         self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
         run_nbgrader(["assign", "ps1", "--db", db])
         nb_path = join(course_dir, "submitted", "foo", "ps1", "p1.ipynb")
@@ -104,9 +107,9 @@ class TestNbGraderReleaseFeedback(BaseTestApp):
     @pytest.mark.parametrize("groupshared", [False, True])
     def test_permissions(self, db, course_dir, exchange, groupshared):
         """Are permissions properly set?"""
+        run_nbgrader(["db", "assignment", "add", "ps1"])
+        run_nbgrader(["db", "student", "add", "foo", "--db", db])
         with open("nbgrader_config.py", "a") as fh:
-            fh.write("""c.CourseDirectory.db_assignments = [dict(name="ps1")]\n""")
-            fh.write("""c.CourseDirectory.db_students = [dict(id="foo")]\n""")
             if groupshared:
                 fh.write("""c.CourseDirectory.groupshared = True\n""")
         self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))

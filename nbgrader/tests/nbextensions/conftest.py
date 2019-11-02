@@ -16,7 +16,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import NoAlertPresentException
 from textwrap import dedent
 
-from .. import copy_coverage_files, get_free_ports
+from .. import copy_coverage_files, get_free_ports, run_nbgrader
 from ...utils import rmtree
 
 
@@ -112,12 +112,6 @@ def _make_nbserver(course_id, port, tempdir, jupyter_config_dir, jupyter_data_di
             """
             c = get_config()
             c.Execute.execute_retries = 4
-            c.CourseDirectory.db_assignments = [dict(name="Problem Set 1"), dict(name="ps.01")]
-            c.CourseDirectory.db_students = [
-                dict(id="Bitdiddle", first_name="Ben", last_name="B"),
-                dict(id="Hacker", first_name="Alyssa", last_name="H"),
-                dict(id="Reasoner", first_name="Louis", last_name="R")
-            ]
             """
         ))
 
@@ -129,6 +123,12 @@ def _make_nbserver(course_id, port, tempdir, jupyter_config_dir, jupyter_data_di
                 c.CourseDirectory.course_id = "{}"
                 """.format(exchange, cache, course_id)
             ))
+
+    run_nbgrader(["db", "assignment", "add", "Problem Set 1"])
+    run_nbgrader(["db", "assignment", "add", "ps.01"])
+    run_nbgrader(["db", "student", "add", "Bitdiddle", "--first-name", "Ben", "--last-name", "B"])
+    run_nbgrader(["db", "student", "add", "Hacker", "--first-name", "Alyssa", "--last-name", "H"])
+    run_nbgrader(["db", "student", "add", "Reasoner", "--first-name", "Louis", "--last-name", "R"])
 
     if startup_fn:
         startup_fn(env)

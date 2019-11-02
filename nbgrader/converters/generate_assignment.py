@@ -129,10 +129,6 @@ class GenerateAssignment(BaseConverter):
         # doesn't exist
         if not self.no_database:
             assignment = {}
-            for a in self.coursedir.db_assignments:
-                if a['name'] == assignment_id:
-                    assignment = a.copy()
-                    break
 
             if assignment or self.create_assignment:
                 if 'name' in assignment:

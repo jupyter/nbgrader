@@ -72,10 +72,6 @@ class Autograde(BaseConverter):
         # try to get the student from the database, and throw an error if it
         # doesn't exist
         student = {}
-        for s in self.coursedir.db_students:
-            if s['id'] == student_id:
-                student = s.copy()
-                break
 
         if student or self.create_student:
             if 'id' in student:
