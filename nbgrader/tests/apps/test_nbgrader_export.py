@@ -13,11 +13,12 @@ class TestNbGraderExport(BaseTestApp):
         run_nbgrader(["export", "--help-all"])
 
     def test_export(self, db, course_dir):
-        with open("nbgrader_config.py", "a") as fh:
-            fh.write("""c.CourseDirectory.db_assignments = [
-                dict(name='ps1', duedate='2015-02-02 14:58:23.948203 America/Los_Angeles'),
-                dict(name='ps2', duedate='2015-02-02 14:58:23.948203 America/Los_Angeles')]\n""")
-            fh.write("""c.CourseDirectory.db_students = [dict(id="foo"), dict(id="bar")]""")
+        run_nbgrader(["db", "assignment", "add", "ps1", "--db", db, "--duedate",
+                      "2015-02-02 14:58:23.948203 America/Los_Angeles"])
+        run_nbgrader(["db", "assignment", "add", "ps2", "--db", db, "--duedate",
+                      "2015-02-02 14:58:23.948203 America/Los_Angeles"])
+        run_nbgrader(["db", "student", "add", "foo", "--db", db])
+        run_nbgrader(["db", "student", "add", "bar", "--db", db])
 
         self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
         self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "source", "ps2", "p1.ipynb"))
