@@ -75,9 +75,13 @@ class CourseListHandler(IPythonHandler):
             self.log.error(traceback.format_exc())
             raise gen.Return([])
 
+        coursedir = CourseDirectory(config=config)
+        if not coursedir.course_id:
+            gen.Return([])
+
         if status:
             raise gen.Return([{
-                'course_id': config.CourseDirectory.course_id,
+                'course_id': coursedir.course_id,
                 'url': base_url + '/formgrader',
                 'kind': 'local'
             }])
@@ -96,6 +100,7 @@ class CourseListHandler(IPythonHandler):
         # We are running on JupyterHub, so maybe there's a formgrader
         # service. Check if we have a course id and if so guess the path to the
         # formgrader.
+
         coursedir = CourseDirectory(config=config)
         if not coursedir.course_id:
             raise gen.Return([])
@@ -169,6 +174,9 @@ class CourseListHandler(IPythonHandler):
                 courses = []
                 local_courses = yield self.check_for_local_formgrader(config)
                 jhub_courses = yield self.check_for_jupyterhub_formgraders(config)
+
+                import pdb; pdb.set_trace()
+
                 courses.extend(local_courses)
                 courses.extend(jhub_courses)
 
