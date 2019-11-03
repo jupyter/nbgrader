@@ -2,6 +2,7 @@ language: python
 python:
   - 3.5
   - 3.6
+  - 3.7
   - nightly
 env:
   global:
@@ -14,9 +15,13 @@ matrix:
   exclude:
   - python: 3.5
     env: GROUP=docs
+  - python: 3.6
+    env: GROUP=docs
   - python: nightly
     env: GROUP=docs
   - python: 3.5
+    env: GROUP=nbextensions
+  - python: 3.6
     env: GROUP=nbextensions
   - python: nightly
     env: GROUP=nbextensions
