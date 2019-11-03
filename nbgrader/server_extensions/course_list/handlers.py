@@ -6,7 +6,7 @@ import json
 import traceback
 
 from tornado import web
-from tornado.httpclient import AsyncHTTPClient, HTTPClientError
+from tornado.httpclient import AsyncHTTPClient, HTTPError
 from tornado import gen
 from textwrap import dedent
 from urllib.parse import urlparse
@@ -62,7 +62,7 @@ class CourseListHandler(IPythonHandler):
         http_client = AsyncHTTPClient()
         try:
             response = yield http_client.fetch(url, headers=header)
-        except HTTPClientError:
+        except HTTPError:
             # local formgrader isn't running
             self.log.warning("Local formgrader does not seem to be running")
             raise gen.Return([])
