@@ -76,8 +76,6 @@ class CourseListHandler(IPythonHandler):
             raise gen.Return([])
 
         coursedir = CourseDirectory(config=config)
-        if not coursedir.course_id:
-            gen.Return([])
 
         if status:
             raise gen.Return([{
