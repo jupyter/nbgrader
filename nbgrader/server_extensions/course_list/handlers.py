@@ -175,8 +175,6 @@ class CourseListHandler(IPythonHandler):
                 local_courses = yield self.check_for_local_formgrader(config)
                 jhub_courses = yield self.check_for_jupyterhub_formgraders(config)
 
-                import pdb; pdb.set_trace()
-
                 courses.extend(local_courses)
                 courses.extend(jhub_courses)
 
