@@ -13,13 +13,12 @@ from six.moves import urllib
 
 from notebook.utils import url_path_join as ujoin
 from notebook.base.handlers import IPythonHandler
-from traitlets.config import Config
 from jupyter_core.paths import jupyter_config_path
 
 from ...apps import NbGrader
 from ...auth import Authenticator
 from ...auth.jupyterhub import (JupyterhubEnvironmentError, get_jupyterhub_api_url,
-    get_jupyterhub_authorization, get_jupyterhub_url, get_jupyterhub_user)
+                                get_jupyterhub_authorization, get_jupyterhub_user)
 from ...coursedir import CourseDirectory
 from ... import __version__ as nbgrader_version
 
