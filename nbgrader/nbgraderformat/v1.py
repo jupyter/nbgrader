@@ -8,7 +8,7 @@ class MetadataValidatorV1(BaseMetadataValidator):
     schema_version = 1
 
     def __init__(self) -> None:
-        super(MetadataValidatorV1, self).__init__()
+        super().__init__()
 
     def _upgrade_v0_to_v1(self, cell):
         meta = cell.metadata['nbgrader']
