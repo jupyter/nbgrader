@@ -2,11 +2,12 @@ from nbformat import read as _read, reads as _reads
 from nbformat import write as _write, writes as _writes
 from .common import BaseMetadataValidator, ValidationError
 
+
 class MetadataValidatorV1(BaseMetadataValidator):
 
     schema_version = 1
 
-    def __init__(self):
+    def __init__(self) -> None:
         super(MetadataValidatorV1, self).__init__()
 
     def _upgrade_v0_to_v1(self, cell):

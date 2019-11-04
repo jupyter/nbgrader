@@ -3,13 +3,14 @@ from nbformat import write as _write, writes as _writes
 from .v1 import MetadataValidatorV1
 from .v2 import MetadataValidatorV2
 from .common import BaseMetadataValidator, ValidationError
+from nbformat.notebooknode import NotebookNode
 
 
 class MetadataValidatorV3(BaseMetadataValidator):
 
     schema_version = 3
 
-    def __init__(self):
+    def __init__(self) -> None:
         super(MetadataValidatorV3, self).__init__()
         self.v1 = MetadataValidatorV1()
         self.v2 = MetadataValidatorV2()
@@ -41,7 +42,7 @@ class MetadataValidatorV3(BaseMetadataValidator):
         self._remove_extra_keys(cell)
         return cell
 
-    def validate_cell(self, cell):
+    def validate_cell(self, cell: NotebookNode) -> None:
         super(MetadataValidatorV3, self).validate_cell(cell)
 
         if 'nbgrader' not in cell.metadata:
@@ -86,7 +87,7 @@ class MetadataValidatorV3(BaseMetadataValidator):
                 raise ValidationError(
                     "Task cells have to be markdown: {}".format(cell.source))
 
-    def validate_nb(self, nb):
+    def validate_nb(self, nb: NotebookNode) -> None:
         super(MetadataValidatorV3, self).validate_nb(nb)
 
         ids = set([])

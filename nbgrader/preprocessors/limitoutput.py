@@ -1,6 +1,10 @@
 from . import NbGraderPreprocessor
 
 from traitlets import Integer
+from nbformat.notebooknode import NotebookNode
+from nbconvert.exporters.exporter import ResourcesDict
+from typing import Tuple
+
 
 class LimitOutput(NbGraderPreprocessor):
     """Preprocessor for limiting cell output"""
@@ -15,7 +19,7 @@ class LimitOutput(NbGraderPreprocessor):
         help="maximum number of traceback lines (-1 means no limit)"
     ).tag(config=True)
 
-    def _limit_stream_output(self, cell):
+    def _limit_stream_output(self, cell: NotebookNode) -> NotebookNode:
         if self.max_lines == -1 or cell.cell_type != "code":
             return cell
 
@@ -39,7 +43,7 @@ class LimitOutput(NbGraderPreprocessor):
         cell.outputs = new_outputs
         return cell
 
-    def _limit_traceback(self, cell):
+    def _limit_traceback(self, cell: NotebookNode) -> NotebookNode:
         if self.max_traceback == -1 or cell.cell_type != "code":
             return cell
 
@@ -55,7 +59,11 @@ class LimitOutput(NbGraderPreprocessor):
 
         return cell
 
-    def preprocess_cell(self, cell, resources, cell_index):
+    def preprocess_cell(self,
+                        cell: NotebookNode,
+                        resources: ResourcesDict,
+                        cell_index: int
+                        ) -> Tuple[NotebookNode, ResourcesDict]:
         cell = self._limit_stream_output(cell)
         cell = self._limit_traceback(cell)
         return cell, resources

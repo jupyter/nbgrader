@@ -7,6 +7,9 @@ from traitlets import Unicode
 
 from . import NbGraderPreprocessor
 from ..nbgraderformat import read as read_nb
+from nbconvert.exporters.exporter import ResourcesDict
+from nbformat.notebooknode import NotebookNode
+from typing import Tuple
 
 
 class IncludeHeaderFooter(NbGraderPreprocessor):
@@ -15,7 +18,7 @@ class IncludeHeaderFooter(NbGraderPreprocessor):
     header = Unicode("", help="Path to header notebook, relative to the root of the course directory").tag(config=True)
     footer = Unicode("", help="Path to footer notebook, relative to the root of the course directory").tag(config=True)
 
-    def preprocess(self, nb, resources):
+    def preprocess(self, nb: NotebookNode, resources: ResourcesDict) -> Tuple[NotebookNode, ResourcesDict]:
         """Concatenates the cells from the header and footer notebooks to the
         given cells.
 
@@ -42,5 +45,9 @@ class IncludeHeaderFooter(NbGraderPreprocessor):
 
         return nb, resources
 
-    def preprocess_cell(self, cell, resources, cell_index):
+    def preprocess_cell(self,
+                        cell: NotebookNode,
+                        resources: ResourcesDict,
+                        cell_index: int
+                        ) -> Tuple[NotebookNode, ResourcesDict]:
         return cell, resources

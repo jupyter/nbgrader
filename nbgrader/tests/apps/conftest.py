@@ -6,16 +6,18 @@ import sys
 
 from textwrap import dedent
 
+from _pytest.fixtures import SubRequest
+
 from ...api import Gradebook
 from ...utils import rmtree
 
 
 @pytest.fixture
-def db(request):
+def db(request: SubRequest) -> str:
     path = tempfile.mkdtemp(prefix='tmp-dbdir-')
     dbpath = os.path.join(path, "nbgrader_test.db")
 
-    def fin():
+    def fin() -> None:
         rmtree(path)
     request.addfinalizer(fin)
 
@@ -23,10 +25,10 @@ def db(request):
 
 
 @pytest.fixture
-def course_dir(request):
+def course_dir(request: SubRequest) -> str:
     path = tempfile.mkdtemp(prefix='tmp-coursedir-')
 
-    def fin():
+    def fin() -> None:
         rmtree(path)
     request.addfinalizer(fin)
 
@@ -34,7 +36,7 @@ def course_dir(request):
 
 
 @pytest.fixture
-def temp_cwd(request, course_dir):
+def temp_cwd(request: SubRequest, course_dir: str) -> str:
     orig_dir = os.getcwd()
     path = tempfile.mkdtemp(prefix='tmp-cwd-')
     os.chdir(path)
@@ -47,7 +49,7 @@ def temp_cwd(request, course_dir):
             """.format(course_dir)
         ))
 
-    def fin():
+    def fin() -> None:
         os.chdir(orig_dir)
         rmtree(path)
     request.addfinalizer(fin)

@@ -1,10 +1,14 @@
 import re
 
 from traitlets import Dict, Unicode, Bool, observe
+from traitlets.config.loader import Config
 from textwrap import dedent
 
 from .. import utils
 from . import NbGraderPreprocessor
+from typing import Any, Tuple
+from nbformat.notebooknode import NotebookNode
+from nbconvert.exporters.exporter import ResourcesDict
 
 
 class ClearSolutions(NbGraderPreprocessor):
@@ -45,7 +49,7 @@ class ClearSolutions(NbGraderPreprocessor):
         )
     ).tag(config=True)
 
-    def _load_config(self, cfg, **kwargs):
+    def _load_config(self, cfg: Config, **kwargs: Any) -> None:
         if 'code_stub' in cfg.ClearSolutions:
             if not isinstance(cfg.ClearSolutions.code_stub, dict):
                 self.log.warning(
@@ -65,7 +69,7 @@ class ClearSolutions(NbGraderPreprocessor):
 
         super(ClearSolutions, self)._load_config(cfg, **kwargs)
 
-    def _replace_solution_region(self, cell, language):
+    def _replace_solution_region(self, cell: NotebookNode, language: str) -> bool:
         """Find a region in the cell that is delimeted by
         `self.begin_solution_delimeter` and `self.end_solution_delimeter` (e.g.
         ### BEGIN SOLUTION and ### END SOLUTION). Replace that region either
@@ -122,7 +126,7 @@ class ClearSolutions(NbGraderPreprocessor):
 
         return replaced_solution
 
-    def preprocess(self, nb, resources):
+    def preprocess(self, nb: NotebookNode, resources: ResourcesDict) -> Tuple[NotebookNode, ResourcesDict]:
         language = nb.metadata.get("kernelspec", {}).get("language", "python")
         if language not in self.code_stub:
             raise ValueError(
@@ -135,7 +139,11 @@ class ClearSolutions(NbGraderPreprocessor):
             del nb.metadata['celltoolbar']
         return nb, resources
 
-    def preprocess_cell(self, cell, resources, cell_index):
+    def preprocess_cell(self,
+                        cell: NotebookNode,
+                        resources: ResourcesDict,
+                        cell_index: int
+                        ) -> Tuple[NotebookNode, ResourcesDict]:
         # replace solution regions with the relevant stubs
         language = resources["language"]
         replaced_solution = self._replace_solution_region(cell, language)

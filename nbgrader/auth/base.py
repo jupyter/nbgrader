@@ -1,5 +1,6 @@
 from traitlets import Instance, Type
 from traitlets.config import LoggingConfigurable
+from typing import Any
 
 
 class BaseAuthPlugin(LoggingConfigurable):
@@ -67,7 +68,6 @@ class NoAuthPlugin(BaseAuthPlugin):
         pass
 
 
-
 class Authenticator(LoggingConfigurable):
 
     plugin_class = Type(
@@ -78,8 +78,8 @@ class Authenticator(LoggingConfigurable):
 
     plugin = Instance(BaseAuthPlugin).tag(config=False)
 
-    def __init__(self, *args, **kwargs):
-        super(Authenticator, self).__init__(*args, **kwargs)
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        super().__init__(*args, **kwargs)
         self.log.debug("Using authenticator: %s", self.plugin_class.__name__)
         self.plugin = self.plugin_class(parent=self)
 
@@ -121,7 +121,7 @@ class Authenticator(LoggingConfigurable):
             return True
         return course_id in courses
 
-    def add_student_to_course(self, student_id, course_id):
+    def add_student_to_course(self, student_id: str, course_id: str) -> Any:
         """Grants a student access to a given course.
 
         Arguments

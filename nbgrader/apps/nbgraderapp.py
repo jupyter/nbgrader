@@ -38,6 +38,8 @@ from . import (
     ZipCollectApp,
     GenerateConfigApp
 )
+from traitlets.traitlets import MetaHasTraits
+from typing import List
 
 aliases = {}
 aliases.update(nbgrader_aliases)
@@ -294,14 +296,14 @@ class NbGraderApp(NbGrader):
     )
 
     @default("classes")
-    def _classes_default(self):
+    def _classes_default(self) -> List[MetaHasTraits]:
         return self.all_configurable_classes()
 
     @catch_config_error
-    def initialize(self, argv=None):
+    def initialize(self, argv: List[str] = None) -> None:
         super(NbGraderApp, self).initialize(argv)
 
-    def start(self):
+    def start(self) -> None:
         # check: is there a subapp given?
         if self.subapp is None:
             print("No command given (run with --help for options). List of subcommands:\n")

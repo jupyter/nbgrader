@@ -8,7 +8,7 @@ class MetadataValidatorV2(BaseMetadataValidator):
 
     schema_version = 2
 
-    def __init__(self):
+    def __init__(self) -> None:
         super(MetadataValidatorV2, self).__init__()
         self.v1 = MetadataValidatorV1()
 

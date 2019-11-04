@@ -2,6 +2,7 @@ from textwrap import dedent
 from traitlets import Enum
 
 from .base import BasePlugin
+from typing import Optional
 
 
 class LateSubmissionPlugin(BasePlugin):
@@ -19,7 +20,7 @@ class LateSubmissionPlugin(BasePlugin):
         ),
     ).tag(config=True)
 
-    def late_submission_penalty(self, student_id, score, total_seconds_late):
+    def late_submission_penalty(self, student_id: str, score: float, total_seconds_late: float) -> Optional[float]:
         """
         Return the late submission penalty based on the predefined method.
 

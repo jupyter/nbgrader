@@ -3,12 +3,15 @@ import json
 from .. import utils
 from ..api import Gradebook, MissingEntry
 from . import NbGraderPreprocessor
+from nbformat.notebooknode import NotebookNode
+from nbconvert.exporters.exporter import ResourcesDict
+from typing import Tuple
 
 
 class SaveCells(NbGraderPreprocessor):
     """A preprocessor to save information about grade and solution cells."""
 
-    def _create_notebook(self, nb):
+    def _create_notebook(self, nb: NotebookNode) -> None:
         notebook_info = None
 
         try:
@@ -69,7 +72,7 @@ class SaveCells(NbGraderPreprocessor):
             source_cell = self.gradebook.update_or_create_source_cell(name, self.notebook_id, self.assignment_id, **info)
             self.log.debug("Recorded source cell %s into the gradebook", source_cell)
 
-    def preprocess(self, nb, resources):
+    def preprocess(self, nb: NotebookNode, resources: ResourcesDict) -> Tuple[NotebookNode, ResourcesDict]:
         # pull information from the resources
         self.notebook_id = resources['nbgrader']['notebook']
         self.assignment_id = resources['nbgrader']['assignment']
@@ -97,7 +100,7 @@ class SaveCells(NbGraderPreprocessor):
 
         return nb, resources
 
-    def _create_grade_cell(self, cell):
+    def _create_grade_cell(self, cell: NotebookNode) -> None:
         grade_id = cell.metadata.nbgrader['grade_id']
 
         try:
@@ -115,7 +118,7 @@ class SaveCells(NbGraderPreprocessor):
 
         self.new_grade_cells[grade_id] = grade_cell
 
-    def _create_solution_cell(self, cell):
+    def _create_solution_cell(self, cell: NotebookNode) -> None:
         grade_id = cell.metadata.nbgrader['grade_id']
 
         try:
@@ -145,7 +148,7 @@ class SaveCells(NbGraderPreprocessor):
 
         self.new_task_cells[grade_id] = task_cell
 
-    def _create_source_cell(self, cell):
+    def _create_source_cell(self, cell: NotebookNode) -> None:
         grade_id = cell.metadata.nbgrader['grade_id']
 
         try:
@@ -165,7 +168,11 @@ class SaveCells(NbGraderPreprocessor):
 
         self.new_source_cells[grade_id] = source_cell
 
-    def preprocess_cell(self, cell, resources, cell_index):
+    def preprocess_cell(self,
+                        cell: NotebookNode,
+                        resources: ResourcesDict,
+                        cell_index: int
+                        ) -> Tuple[NotebookNode, ResourcesDict]:
 
         if utils.is_grade(cell):
             self._create_grade_cell(cell)
