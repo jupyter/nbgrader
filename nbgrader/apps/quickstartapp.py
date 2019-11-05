@@ -129,6 +129,19 @@ class QuickStartApp(NbGrader):
         os.chdir(currdir)
         with open(os.path.join(course_path, "nbgrader_config.py"), "r") as fh:
             config = fh.read()
+
+        subprocess.call([sys.executable, "-m", "nbgrader", "db", "assignment", "add", "ps1"], stdout=subprocess.PIPE,
+                        stderr=subprocess.STDOUT)
+        subprocess.call([sys.executable, "-m", "nbgrader", "db", "student", "add", "bitdiddle", "--first-name", "Ben",
+                         "--last-name", "Bitdiddle"],
+                        stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        subprocess.call([sys.executable, "-m", "nbgrader", "db", "student", "add", "hacker", "--first-name", "Alyssa",
+                         "--last-name", "Hacker"],
+                        stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        subprocess.call([sys.executable, "-m", "nbgrader", "db", "student", "add", "reasoner", "--first-name", "Louis",
+                         "--last-name", "Reasoner"],
+                        stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+
         with open(os.path.join(course_path, "nbgrader_config.py"), "w") as fh:
             fh.write("c = get_config()\n\n")
             fh.write("#" * 79 + "\n")
@@ -139,17 +152,6 @@ class QuickStartApp(NbGrader):
                 # You only need this if you are running nbgrader on a shared
                 # server set up.
                 c.CourseDirectory.course_id = "{}"
-
-                # Update this list with other assignments you want
-                c.CourseDirectory.db_assignments = [dict(name="ps1")]
-
-                # Change the students in this list with that actual students in
-                # your course
-                c.CourseDirectory.db_students = [
-                    dict(id="bitdiddle", first_name="Ben", last_name="Bitdiddle"),
-                    dict(id="hacker", first_name="Alyssa", last_name="Hacker"),
-                    dict(id="reasoner", first_name="Louis", last_name="Reasoner")
-                ]
 
                 c.IncludeHeaderFooter.header = "source/header.ipynb"
                 """

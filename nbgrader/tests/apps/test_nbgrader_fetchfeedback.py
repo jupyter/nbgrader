@@ -75,8 +75,8 @@ class TestNbGraderFetchFeedback(BaseTestApp):
     def test_single_file(self, db, course_dir, exchange, cache):
         self._copy_file(join("files", "test.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
         self._copy_file(join("files", "test.ipynb"), join(course_dir, "source", "ps1", "p2.ipynb"))
-        with open("nbgrader_config.py", "a") as fh:
-            fh.write("""c.CourseDirectory.db_assignments = [dict(name="ps1")]\n""")
+        run_nbgrader(["db", "assignment", "add", "ps1", "--db", db, "--duedate",
+                      "2015-02-02 14:58:23.948203 America/Los_Angeles"])
         self._generate_assignment("ps1", course_dir, db)
         self._release_and_fetch("ps1", exchange, cache, course_dir)
         self._submit("ps1", exchange, cache)

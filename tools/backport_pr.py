@@ -27,10 +27,7 @@ import re
 import sys
 
 from subprocess import Popen, PIPE, check_call, check_output
-try:
-    from urllib.request import urlopen
-except ImportError:
-    from urllib import urlopen
+from urllib.request import urlopen
 
 from gh_api import (
     get_pull_request,

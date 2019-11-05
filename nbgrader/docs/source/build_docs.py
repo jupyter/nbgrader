@@ -1,9 +1,9 @@
 import os
+import io
 import glob
 import re
 import shutil
 import sys
-import six
 import nbgrader.apps
 
 from textwrap import dedent
@@ -56,7 +56,7 @@ def autogen_command_line(root):
 
     for app in apps:
         cls = getattr(nbgrader.apps, app)
-        buf = sys.stdout = six.StringIO()
+        buf = sys.stdout = io.StringIO()
         cls().print_help(True)
         buf.flush()
         helpstr = buf.getvalue()

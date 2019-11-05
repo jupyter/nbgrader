@@ -358,10 +358,10 @@ class TestNbGraderZipCollect(BaseTestApp):
         submitted_dir = join(course_dir, "submitted")
         self._empty_notebook(join(course_dir, 'source', 'ps1', 'problem1.ipynb'))
 
+        run_nbgrader(["db", "assignment", "add", "ps1"])
         with open("nbgrader_config.py", "a") as fh:
             fh.write(dedent(
                 """
-                c.CourseDirectory.db_assignments = [dict(name="ps1")]
                 c.FileNameCollectorPlugin.named_regexp = (
                     r".+_(?P<student_id>\w+)_attempt_(?P<timestamp>[0-9\-]+)_(?P<file_id>\w+)"
                 )
