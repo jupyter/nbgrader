@@ -7,28 +7,50 @@ import glob
 from textwrap import dedent
 
 from dateutil.tz import gettz
-from traitlets import Unicode, Bool, Instance, default
+from traitlets import Unicode, Bool, default
 from jupyter_core.paths import jupyter_data_dir
 
 from nbgrader.exchange.abc import Exchange as ABCExchange
 from nbgrader.exchange import ExchangeError
 from nbgrader.utils import check_directory, ignore_patterns, self_owned
-from nbgrader.coursedir import CourseDirectory
-from nbgrader.auth import Authenticator
 
 
 class Exchange(ABCExchange):
+    assignment_dir = Unicode(
+        ".",
+        help=dedent(
+            """
+            Local path for storing student assignments.  Defaults to '.'
+            which is normally Jupyter's notebook_dir.
+            """
+        )
+    ).tag(config=True)
 
-    def fail(self, msg):
-        self.log.fatal(msg)
-        raise ExchangeError(msg)
+    root = Unicode(
+        "/srv/nbgrader/exchange",
+        help="The nbgrader exchange directory writable to everyone. MUST be preexisting."
+    ).tag(config=True)
 
-    def set_timestamp(self):
-        """Set the timestap using the configured timezone."""
-        tz = gettz(self.timezone)
-        if tz is None:
-            self.fail("Invalid timezone: {}".format(self.timezone))
-        self.timestamp = datetime.datetime.now(tz).strftime(self.timestamp_format)
+    cache = Unicode(
+        "",
+        help="Local cache directory for nbgrader submit and nbgrader list. Defaults to $JUPYTER_DATA_DIR/nbgrader_cache"
+    ).tag(config=True)
+
+    @default("cache")
+    def _cache_default(self):
+        return os.path.join(jupyter_data_dir(), 'nbgrader_cache')
+
+    path_includes_course = Bool(
+        False,
+        help=dedent(
+            """
+            Whether the path for fetching/submitting  assignments should be
+            prefixed with the course name. If this is `False`, then the path
+            will be something like `./ps1`. If this is `True`, then the path
+            will be something like `./course123/ps1`.
+            """
+        )
+    ).tag(config=True)
 
     def set_perms(self, dest, fileperms, dirperms):
         all_dirs = []
@@ -93,17 +115,13 @@ class Exchange(ABCExchange):
     def start(self):
         if sys.platform == 'win32':
             self.fail("Sorry, the exchange is not available on Windows.")
-
         if not self.coursedir.groupshared:
             # This just makes sure that directory is o+rwx.  In group shared
             # case, it is up to admins to ensure that instructors can write
             # there.
             self.ensure_root()
-        self.set_timestamp()
 
-        self.init_src()
-        self.init_dest()
-        self.copy_files()
+        super(Exchange, self).start()
 
     def _assignment_not_found(self, src_path, other_path):
         msg = "Assignment not found at: {}".format(src_path)

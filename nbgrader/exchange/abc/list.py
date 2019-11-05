@@ -34,14 +34,3 @@ class ExchangeList(Exchange):
 
     def remove_files(self):
         pass
-
-    def start(self):
-        if self.inbound and self.cached:
-            self.fail("Options --inbound and --cached are incompatible.")
-
-        super(ExchangeList, self).start()
-
-        if self.remove:
-            return self.remove_files()
-        else:
-            return self.list_files()
