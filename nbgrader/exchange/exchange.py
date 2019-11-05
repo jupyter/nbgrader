@@ -7,8 +7,9 @@ import glob
 from textwrap import dedent
 
 from dateutil.tz import gettz
+from dateutil.parse import parse
 from traitlets.config import LoggingConfigurable
-from traitlets import Unicode, Bool, Instance, Type, default, validate
+from traitlets import Unicode, Bool, Instance, Type, default, validate, TraitError
 from jupyter_core.paths import jupyter_data_dir
 
 from ..utils import check_directory, ignore_patterns, self_owned
@@ -45,8 +46,6 @@ class Exchange(LoggingConfigurable):
     @validate('timestamp_format')
     def _valid_timestamp_format(self, proposal):
         try:
-            from dateutil.parse import parse
-            import datetime
             ts = datetime.datetime.now().strftime(proposal['value'])
             ts = parse(ts)
         except ValueError:
