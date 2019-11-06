@@ -24,7 +24,7 @@ def get_jupyterhub_api_url() -> str:
     return os.environ.get('JUPYTERHUB_API_URL') or 'http://127.0.0.1:8081/hub/api'
 
 
-def get_jupyterhub_authorization():
+def get_jupyterhub_authorization() -> dict:
     if os.getenv('JUPYTERHUB_API_TOKEN'):
         api_token = os.environ['JUPYTERHUB_API_TOKEN']
     else:
@@ -72,7 +72,7 @@ def _query_jupyterhub_api(method: str, api_path: str, post_data: Optional[dict] 
 
 class JupyterHubAuthPlugin(BaseAuthPlugin):
 
-    def get_student_courses(self, student_id):
+    def get_student_courses(self, student_id: str) -> Optional[list]:
         if student_id == "*":
             student_id = "{authenticated_user}"
         response = None
@@ -138,7 +138,7 @@ class JupyterHubAuthPlugin(BaseAuthPlugin):
             self.log.error(err_msg + str(e))
             self.log.error("Make sure you set a valid admin_user 'api_token' in your config file before starting the service")
 
-    def remove_student_from_course(self, student_id, course_id):
+    def remove_student_from_course(self, student_id: str, course_id: str) -> None:
         if not course_id:
             self.log.error(
                 "Could not remove student from course because the course_id has "
