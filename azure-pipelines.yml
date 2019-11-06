@@ -18,8 +18,11 @@ strategy:
     Python36:
       python.version: '3.6'
       testgroup: 'python'
-    Python36Extensions:
-      python.version: '3.6'
+    Python37:
+      python.version: '3.7'
+      testgroup: 'python'
+    Python37Extensions:
+      python.version: '3.7'
       testgroup: 'nbextensions'
 
 steps:
