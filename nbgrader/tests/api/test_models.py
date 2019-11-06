@@ -673,13 +673,20 @@ def test_query_needs_manual_grade_manualgraded(submissions):
 def test_query_max_score(submissions):
     db = submissions[0]
 
-    assert [5, 10] == sorted([x[0] for x in db.query(api.GradeCell.max_score).all()])
-    assert [5, 5, 10, 10] == sorted([x[1] for x in db.query(api.Grade.id, api.Grade.max_score).all()])
-    assert [15] == sorted([x[1] for x in db.query(api.Notebook.id, api.Notebook.max_score).all()])
-    assert [15, 15] == sorted([x[1] for x in db.query(api.SubmittedNotebook.id, api.SubmittedNotebook.max_score).all()])
-    assert [15] == sorted([x[1] for x in db.query(api.Assignment.id, api.Assignment.max_score).all()])
-    assert [15, 15] == sorted([x[1] for x in db.query(api.SubmittedAssignment.id, api.SubmittedAssignment.max_score).all()])
-    assert [15, 15] == sorted([x[1] for x in db.query(api.Student.id, api.Student.max_score).all()])
+    assert [5, 10] == sorted([x[1] for x in db.query(
+        api.GradeCell.id, api.GradeCell.max_score).group_by(api.GradeCell.id).all()])
+    assert [5, 5, 10, 10] == sorted([x[1] for x in db.query(
+        api.Grade.id, api.Grade.max_score).group_by(api.Grade.id).all()])
+    assert [15] == sorted([x[1] for x in db.query(
+        api.Notebook.id, api.Notebook.max_score).group_by(api.Notebook.id).all()])
+    assert [15, 15] == sorted([x[1] for x in db.query(
+        api.SubmittedNotebook.id, api.SubmittedNotebook.max_score).group_by(api.SubmittedNotebook.id).all()])
+    assert [15] == sorted([x[1] for x in db.query(
+        api.Assignment.id, api.Assignment.max_score).group_by(api.Assignment.id).all()])
+    assert [15, 15] == sorted([x[1] for x in db.query(
+        api.SubmittedAssignment.id, api.SubmittedAssignment.max_score).group_by(api.SubmittedAssignment.id).all()])
+    assert [15, 15] == sorted([x[1] for x in db.query
+        (api.Student.id, api.Student.max_score).group_by(api.Student.id).all()])
 
 
 def test_query_score_ungraded(submissions):
