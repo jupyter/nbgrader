@@ -14,7 +14,7 @@ from traitlets import Unicode, default
 from traitlets.config import LoggingConfigurable, Config
 from jupyter_core.paths import jupyter_config_path
 
-from ...exchange import ExchangeFactory
+from ...exchange import ExchangeFactory, ExchangeError
 from ...apps import NbGrader
 from ...coursedir import CourseDirectory
 from ...auth import Authenticator
