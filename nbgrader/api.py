@@ -838,6 +838,7 @@ class Grade(Base):
             return self.max_score_taskcell
         else:
             return self.max_score_gradecell
+
     #: Whether the autograded score is a result of failed autograder tests. This
     #: is True if the autograder score is zero and the cell type is "code", and
     #: otherwise False.
@@ -2951,7 +2952,13 @@ class Gradebook(object):
             A list of dictionaries, one per student
 
         """
-        total_score, = self.db.query(func.sum(Assignment.max_score)).one()
+        max_scores = self.db.query(
+            Assignment.id,
+            func.sum(Assignment.max_score).label("max_score")
+        ).group_by(Assignment.id).subquery()
+        _max_scores = func.coalesce(max_scores.c.max_score, 0.0)
+        total_score, = self.db.query(func.sum(_max_scores)).one()
+
         if len(self.assignments) > 0 and total_score > 0:
             # subquery the scores
             scores = self.db.query(
