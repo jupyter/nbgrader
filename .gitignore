@@ -101,9 +101,7 @@ gh_api.sqlite
 MANIFEST
 README
 .pytest_cache
-
 venv/
-
 gradebook.db
 .buildconfig
 *~
@@ -111,4 +109,4 @@ gradebook.db
 package-lock.json
 .goutputstream*
 .idea
-
+.mypy_cache
