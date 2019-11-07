@@ -5,7 +5,7 @@ from ..api import Gradebook, MissingEntry
 from . import NbGraderPreprocessor
 from nbconvert.exporters.exporter import ResourcesDict
 from nbformat.notebooknode import NotebookNode
-from typing import Tuple
+from typing import Tuple, Any
 
 
 class OverwriteCells(NbGraderPreprocessor):
@@ -25,7 +25,7 @@ class OverwriteCells(NbGraderPreprocessor):
 
         return nb, resources
 
-    def update_cell_type(self, cell, cell_type):
+    def update_cell_type(self, cell: NotebookNode, cell_type: str) -> None:
         if cell.cell_type == cell_type:
             return
         elif cell_type == 'code':
@@ -41,7 +41,7 @@ class OverwriteCells(NbGraderPreprocessor):
                 del cell['execution_count']
             validate(cell, 'markdown_cell')
 
-    def report_change(self, name, attr, old, new):
+    def report_change(self, name: str, attr: str, old: Any, new: Any) -> None:
         self.log.warning(
             "Attribute '%s' for cell %s has changed! (should be: %s, got: %s)", attr, name, old, new)
 

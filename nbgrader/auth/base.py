@@ -10,7 +10,7 @@ class BaseAuthPlugin(LoggingConfigurable):
 
         Arguments
         ---------
-        student_id: string
+        student_id:
             The unique id of the student.
 
         Returns
@@ -28,9 +28,9 @@ class BaseAuthPlugin(LoggingConfigurable):
 
         Arguments
         ---------
-        student_id: string
+        student_id:
             The unique id of the student.
-        course_id: string
+        course_id:
             The unique id of the course.
 
         """
@@ -41,9 +41,9 @@ class BaseAuthPlugin(LoggingConfigurable):
 
         Arguments
         ---------
-        student_id: string
+        student_id:
             The unique id of the student.
-        course_id: string
+        course_id:
             The unique id of the course.
 
         """
@@ -88,7 +88,7 @@ class Authenticator(LoggingConfigurable):
 
         Arguments
         ---------
-        student_id: string
+        student_id:
             The unique id of the student.
 
         Returns
@@ -106,9 +106,9 @@ class Authenticator(LoggingConfigurable):
 
         Arguments
         ---------
-        student_id: string
+        student_id:
             The unique id of the student.
-        course_id: string
+        course_id:
             The unique id of the course.
 
         Returns
@@ -126,9 +126,9 @@ class Authenticator(LoggingConfigurable):
 
         Arguments
         ---------
-        student_id: string
+        student_id:
             The unique id of the student.
-        course_id: string
+        course_id:
             The unique id of the course.
 
         """
@@ -139,9 +139,9 @@ class Authenticator(LoggingConfigurable):
 
         Arguments
         ---------
-        student_id: string
+        student_id:
             The unique id of the student.
-        course_id: string
+        course_id:
             The unique id of the course.
 
         """

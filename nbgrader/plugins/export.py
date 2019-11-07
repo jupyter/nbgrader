@@ -1,7 +1,7 @@
 from traitlets import Unicode, List
 
 from .base import BasePlugin
-from ..api import MissingEntry
+from ..api import MissingEntry, Gradebook
 
 
 class ExportPlugin(BasePlugin):
@@ -9,13 +9,13 @@ class ExportPlugin(BasePlugin):
 
     to = Unicode("", help="destination to export to").tag(config=True)
 
-    student = List([],
-        help="list of students to export").tag(config=True)
+    student = List(
+        [], help="list of students to export").tag(config=True)
 
-    assignment = List([],
-        help="list of assignments to export").tag(config=True)
+    assignment = List(
+        [], help="list of assignments to export").tag(config=True)
 
-    def export(self, gradebook):
+    def export(self, gradebook: Gradebook) -> None:
         """Export grades to another format.
 
         This method MUST be implemented by subclasses. Users should be able to
@@ -25,7 +25,7 @@ class ExportPlugin(BasePlugin):
 
         Arguments
         ---------
-        gradebook: :class:`nbgrader.api.Gradebook`
+        gradebook:
             An instance of the gradebook
 
         """
@@ -35,7 +35,7 @@ class ExportPlugin(BasePlugin):
 class CsvExportPlugin(ExportPlugin):
     """CSV exporter plugin."""
 
-    def export(self, gradebook):
+    def export(self, gradebook: Gradebook) -> None:
         if self.to == "":
             dest = "grades.csv"
         else:
