@@ -8,6 +8,38 @@ A summary of changes to nbgrader.
 0.6.x
 -----
 
+0.6.1
+~~~~~
+
+nbgrader version 0.6.1 is a bugfix release. The following PRs were merged:
+
+- PR #1280: Fix inappropriate use of sum with newer sqlite
+- PR #1278: Fix course list hanging when exchange has not been created
+- PR #1272: Improve test coverage in auth folder
+- PR #1270: Add requirements for readthedocs
+- PR #1267: Improve the error message on the assignments page
+- PR #1260: Set up CI with Azure Pipelines
+- PR #1245: Move away from using the internal Traitles API to load default configuration.
+- PR #1243: Fix project name typo
+- PR #1228: Fix formgrader API
+- PR #1227: Bump pytest required version to 4.5 for custom marker support
+- PR #1208: Improve coverage of nbgraderformat
+- PR #1205: Check for newer feedback in nbgrader list
+- PR #1204: Force generate feedback by default in API
+- PR #1200: Associate feedback files with unique submission attempts
+- PR #1197: Do not duplicate assignments when fetching feedback
+- PR #1196: Fix config warning in ExchangeReleaseAssignment
+- PR #1194: Update releasing instructions
+
+Thanks to the following users who submitted PRs or reported issues that were merged or fixed for the 0.6.1 release:
+
+- BertR
+- enisnazif
+- jhamrick
+- kinow
+- nthiery
+- sir-dio
+
 0.6.0
 ~~~~~
 
