@@ -7,7 +7,7 @@ import glob
 from textwrap import dedent
 
 from dateutil.tz import gettz
-from dateutil.parse import parse
+from dateutil.parser import parse
 from traitlets.config import LoggingConfigurable
 from traitlets import Unicode, Bool, Instance, Type, default, validate, TraitError
 from jupyter_core.paths import jupyter_data_dir
