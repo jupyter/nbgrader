@@ -7,8 +7,9 @@ import glob
 from textwrap import dedent
 
 from dateutil.tz import gettz
+from dateutil.parser import parse
 from traitlets.config import LoggingConfigurable
-from traitlets import Unicode, Bool, Instance, Type, default, validate
+from traitlets import Unicode, Bool, Instance, Type, default, validate, TraitError
 from jupyter_core.paths import jupyter_data_dir
 
 from ..utils import check_directory, ignore_patterns, self_owned
@@ -42,6 +43,15 @@ class Exchange(LoggingConfigurable):
         help="Format string for timestamps"
     ).tag(config=True)
 
+    @validate('timestamp_format')
+    def _valid_timestamp_format(self, proposal):
+        try:
+            ts = datetime.datetime.now().strftime(proposal['value'])
+            ts = parse(ts)
+        except ValueError:
+            raise TraitError('Invalid timestamp_format: {} - could not be parsed by dateutil'.format(proposal['value']))
+        return proposal['value']
+    
     root = Unicode(
         "/srv/nbgrader/exchange",
         help="The nbgrader exchange directory writable to everyone. MUST be preexisting."
