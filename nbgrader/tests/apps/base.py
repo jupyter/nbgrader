@@ -31,7 +31,7 @@ class BaseTestApp(object):
         with io.open(full_dest, mode='w', encoding='utf-8') as f:
             write_nb(nb, f, 4)
 
-    def _copy_file(self, src, dest):
+    def _copy_file(self, src: str, dest: str) -> None:
         full_src = os.path.join(os.path.dirname(__file__), src)
         full_dest = os.path.abspath(dest)
         if not os.path.exists(os.path.dirname(full_dest)):
@@ -49,7 +49,7 @@ class BaseTestApp(object):
             remove(full_dest)
         shutil.move(full_src, full_dest)
 
-    def _make_file(self, path, contents=""):
+    def _make_file(self, path: str, contents: str = "") -> None:
         full_dest = os.path.abspath(path)
         if not os.path.exists(os.path.dirname(full_dest)):
             os.makedirs(os.path.dirname(full_dest))

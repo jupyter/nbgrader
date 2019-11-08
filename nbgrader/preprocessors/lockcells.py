@@ -2,6 +2,9 @@ from traitlets import Bool
 
 from .. import utils
 from . import NbGraderPreprocessor
+from nbconvert.exporters.exporter import ResourcesDict
+from nbformat.notebooknode import NotebookNode
+from typing import Tuple
 
 class LockCells(NbGraderPreprocessor):
     """A preprocessor for making cells undeletable."""
@@ -27,7 +30,11 @@ class LockCells(NbGraderPreprocessor):
     ).tag(config=True)
 
 
-    def preprocess_cell(self, cell, resources, cell_index):
+    def preprocess_cell(self,
+                        cell: NotebookNode,
+                        resources: ResourcesDict,
+                        cell_index: int
+                        ) -> Tuple[NotebookNode, ResourcesDict]:
         if (self.lock_solution_cells or self.lock_grade_cells) and utils.is_solution(cell) and utils.is_grade(cell):
             cell.metadata['deletable'] = False
         elif self.lock_solution_cells and utils.is_solution(cell):

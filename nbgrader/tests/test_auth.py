@@ -5,13 +5,14 @@ from traitlets.config import Config
 
 from ..auth import Authenticator, JupyterHubAuthPlugin
 from ..auth.jupyterhub import JupyterhubEnvironmentError, JupyterhubApiError
+from _pytest.fixtures import SubRequest
 
 
 @pytest.fixture
-def env(request):
+def env(request: SubRequest) -> dict:
     old_env = os.environ.copy()
 
-    def fin():
+    def fin() -> None:
         os.environ = old_env
     request.addfinalizer(fin)
 
@@ -19,7 +20,7 @@ def env(request):
 
 
 @pytest.fixture
-def jupyterhub_auth():
+def jupyterhub_auth() -> Authenticator:
     config = Config()
     config.Authenticator.plugin_class = JupyterHubAuthPlugin
     auth = Authenticator(config=config)
@@ -107,7 +108,7 @@ def test_jupyterhub_add_student_to_course_no_token(jupyterhub_auth):
         jupyterhub_auth.add_student_to_course('foo', 'course123')
 
 
-def test_jupyterhub_add_student_to_course_no_user(env, jupyterhub_auth):
+def test_jupyterhub_add_student_to_course_no_user(env: dict, jupyterhub_auth: Authenticator) -> None:
     # should still fail, because the user hasn't been set
     env['JUPYTERHUB_API_TOKEN'] = 'abcd1234'
     with pytest.raises(JupyterhubEnvironmentError):

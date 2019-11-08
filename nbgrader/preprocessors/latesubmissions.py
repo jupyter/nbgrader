@@ -1,11 +1,13 @@
 from traitlets import Instance
 from traitlets import Type
 
-from .. import utils
-from ..api import Gradebook
+from ..api import Gradebook, SubmittedNotebook
 from ..plugins import BasePlugin
 from ..plugins import LateSubmissionPlugin
 from . import NbGraderPreprocessor
+from nbconvert.exporters.exporter import ResourcesDict
+from nbformat.notebooknode import NotebookNode
+from typing import Tuple
 
 
 class AssignLatePenalties(NbGraderPreprocessor):
@@ -19,10 +21,10 @@ class AssignLatePenalties(NbGraderPreprocessor):
 
     plugin_inst = Instance(BasePlugin).tag(config=False)
 
-    def init_plugin(self):
+    def init_plugin(self) -> None:
         self.plugin_inst = self.plugin_class(parent=self)
 
-    def _check_late_penalty(self, notebook, penalty):
+    def _check_late_penalty(self, notebook: SubmittedNotebook, penalty: float) -> float:
         msg = "(Penalty {}) Adjusting late submission penalty from {} to {}."
         if penalty < 0:
             self.log.warning(msg.format("< 0", penalty, 0))
@@ -34,7 +36,7 @@ class AssignLatePenalties(NbGraderPreprocessor):
 
         return penalty
 
-    def preprocess(self, nb, resources):
+    def preprocess(self, nb: NotebookNode, resources: ResourcesDict) -> Tuple[NotebookNode, ResourcesDict]:
         # pull information from the resources
         self.notebook_id = resources['nbgrader']['notebook']
         self.assignment_id = resources['nbgrader']['assignment']
@@ -74,5 +76,9 @@ class AssignLatePenalties(NbGraderPreprocessor):
 
         return nb, resources
 
-    def preprocess_cell(self, cell, resources, cell_index):
+    def preprocess_cell(self,
+                        cell: NotebookNode,
+                        resources: ResourcesDict,
+                        cell_index: int
+                        ) -> Tuple[NotebookNode, ResourcesDict]:
         return cell, resources

@@ -8,15 +8,17 @@ from nbformat.v4 import new_output
 from ..validator import Validator
 from . import (
     create_code_cell, create_text_cell)
+from io import StringIO
+from nbgrader.validator import Validator
 
 
 @pytest.fixture
-def validator():
+def validator() -> Validator:
     return Validator()
 
 
 @pytest.fixture
-def stream():
+def stream() -> StringIO:
     return io.StringIO()
 
 
@@ -191,7 +193,7 @@ class TestValidator(object):
         validator._print_num_type_changed(1)
         assert stream.getvalue().startswith("THE TYPES OF 1 CELL(S) HAVE CHANGED!")
 
-    def test_print_num_changed_0(self, validator, stream):
+    def test_print_num_changed_0(self, validator: Validator, stream: StringIO) -> None:
         validator.stream = stream
         validator._print_num_changed(0)
         assert stream.getvalue() == ""
@@ -298,7 +300,7 @@ class TestValidator(object):
         validator.validate_and_print(filename)
         assert stream.getvalue().split("\n")[0] == "THE CONTENTS OF 2 TEST CELL(S) HAVE CHANGED! This might mean that even though the tests"
 
-    def test_locked_cell_changed_ignore_checksums(self, validator, stream):
+    def test_locked_cell_changed_ignore_checksums(self, validator: Validator, stream: StringIO) -> None:
         """Does the validate pass if a locked cell has changed but we're ignoring checksums?"""
         filename = os.path.join(os.path.dirname(__file__), "preprocessors", "files", "submitted-locked-cell-changed.ipynb")
         validator.stream = stream
@@ -441,7 +443,7 @@ class TestValidator(object):
         assert len(output["passed"]) == 1
         assert output["passed"][0]["source"] == 'print("Success!")'
 
-    def test_answer_cell_type_changed(self, validator, stream):
+    def test_answer_cell_type_changed(self, validator: Validator, stream: StringIO) -> None:
         """Does the validate fail if the type of a answer cell has changed?"""
         filename = os.path.join(os.path.dirname(__file__), "preprocessors", "files", "submitted-answer-cell-type-changed.ipynb")
         validator.stream = stream

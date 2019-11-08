@@ -4,20 +4,22 @@ from datetime import datetime, timedelta
 from ... import api
 from ... import utils
 from ...api import InvalidEntry, MissingEntry
+from _pytest.fixtures import SubRequest
+from nbgrader.api import Gradebook
 
 
 @pytest.fixture
-def gradebook(request):
+def gradebook(request: SubRequest) -> Gradebook:
     gb = api.Gradebook("sqlite:///:memory:")
 
-    def fin():
+    def fin() -> None:
         gb.close()
     request.addfinalizer(fin)
     return gb
 
 
 @pytest.fixture
-def assignment(gradebook):
+def assignment(gradebook: Gradebook) -> Gradebook:
     gradebook.add_assignment('foo')
     gradebook.add_notebook('p1', 'foo')
     gradebook.add_grade_cell('test1', 'p1', 'foo', max_score=1, cell_type='code')
@@ -87,7 +89,7 @@ def FiveAssignments(gradebook):
 
 
 @pytest.fixture
-def assignmentWithTask(gradebook):
+def assignmentWithTask(gradebook: Gradebook) -> Gradebook:
     for f in ['foo', 'foo2']:
         gradebook.add_assignment(f)
         for n in ['p1', 'p2']:
@@ -108,7 +110,7 @@ def assignmentWithTask(gradebook):
 
 
 @pytest.fixture
-def assignmentWithSubmissionNoMarks(assignmentWithTask):
+def assignmentWithSubmissionNoMarks(assignmentWithTask: Gradebook) -> Gradebook:
     assignmentWithTask.add_student('hacker123')
     assignmentWithTask.add_student('bitdiddle')
     assignmentWithTask.add_student('louisreasoner')
@@ -129,7 +131,7 @@ possiblegrades = [
 
 
 @pytest.fixture(params=possiblegrades)
-def assignmentWithSubmissionWithMarks(assignmentWithSubmissionNoMarks, request):
+def assignmentWithSubmissionWithMarks(assignmentWithSubmissionNoMarks: Gradebook, request: SubRequest) -> Gradebook:
     a = assignmentWithSubmissionNoMarks
     g1 = a.find_grade("grade_code1", "p1", "foo", "bitdiddle")
     g2 = a.find_grade("grade_code2", "p1", "foo", "bitdiddle")
@@ -197,7 +199,7 @@ def assignmentTwoStudents(assignmentWithTask, request):
     return a
 
 
-def test_init(gradebook):
+def test_init(gradebook: Gradebook) -> None:
     assert gradebook.students == []
     assert gradebook.assignments == []
 
@@ -386,7 +388,7 @@ def test_find_notebook(gradebook):
     assert gradebook.find_notebook('p2', 'foo') == n2
 
 
-def test_find_nonexistant_notebook(gradebook):
+def test_find_nonexistant_notebook(gradebook: Gradebook) -> None:
     # check that it doesn't find it when there is nothing in the db
     with pytest.raises(MissingEntry):
         gradebook.find_notebook('p1', 'foo')
@@ -584,7 +586,7 @@ def test_find_nonexistant_solution_cell(gradebook):
         gradebook.find_solution_cell('test1', 'p1', 'foo')
 
 
-def test_update_or_create_solution_cell(gradebook):
+def test_update_or_create_solution_cell(gradebook: Gradebook) -> None:
     # first test creating it
     gradebook.add_assignment('foo')
     gradebook.add_notebook('p1', 'foo')
@@ -868,7 +870,7 @@ def test_average_assignment_score(assignment):
     assert assignment.average_assignment_written_score('foo') == 1.5
 
 
-def test_average_notebook_score(assignment):
+def test_average_notebook_score(assignment: Gradebook) -> None:
     assert assignment.average_notebook_score('p1', 'foo') == 0
     assert assignment.average_notebook_code_score('p1', 'foo') == 0
     assert assignment.average_notebook_written_score('p1', 'foo') == 0
@@ -1123,7 +1125,7 @@ def test_grade_cell_maxscore(gradebook):
     assert n1.max_score == 4035
 
 
-def test_grades_include_taskcells(assignmentWithSubmissionWithMarks):
+def test_grades_include_taskcells(assignmentWithSubmissionWithMarks: Gradebook) -> None:
     s = assignmentWithSubmissionWithMarks.find_submission('foo', 'hacker123')
     for n in s.notebooks:
         grades = n.grades
@@ -1156,7 +1158,7 @@ def test_find_grade_by_id(assignmentWithSubmissionWithMarks):
             assignmentWithSubmissionWithMarks.find_grade_by_id('12345')
 
 
-def test_find_comment(assignmentWithSubmissionWithMarks):
+def test_find_comment(assignmentWithSubmissionWithMarks: Gradebook) -> None:
     s = assignmentWithSubmissionWithMarks.find_submission('foo', 'hacker123')
     for n in s.notebooks:
         comments = n.comments
@@ -1217,7 +1219,7 @@ def test_average_notebook_no_score(assignmentWithSubmissionNoMarks):
     assert assignmentWithSubmissionNoMarks.average_notebook_task_score('p1', 'foo') == 0.0
 
 
-def test_average_notebook_with_score(assignmentWithSubmissionWithMarks):
+def test_average_notebook_with_score(assignmentWithSubmissionWithMarks: Gradebook) -> None:
     assert assignmentWithSubmissionWithMarks.average_notebook_score('p1', 'foo') == sum(assignmentWithSubmissionWithMarks.usedgrades) / 2.0
     assert assignmentWithSubmissionWithMarks.average_notebook_code_score('p1', 'foo') == sum(assignmentWithSubmissionWithMarks.usedgrades_code) / 2.0
     assert assignmentWithSubmissionWithMarks.average_notebook_written_score('p1', 'foo') == sum(assignmentWithSubmissionWithMarks.usedgrades_written) / 2.0

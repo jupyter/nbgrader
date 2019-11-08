@@ -1,12 +1,15 @@
 from .. import utils
 from ..api import Gradebook
 from . import NbGraderPreprocessor
+from nbconvert.exporters.exporter import ResourcesDict
+from nbformat.notebooknode import NotebookNode
+from typing import Tuple
 
 
 class SaveAutoGrades(NbGraderPreprocessor):
     """Preprocessor for saving out the autograder grades into a database"""
 
-    def preprocess(self, nb, resources):
+    def preprocess(self, nb: NotebookNode, resources: ResourcesDict) -> Tuple[NotebookNode, ResourcesDict]:
         # pull information from the resources
         self.notebook_id = resources['nbgrader']['notebook']
         self.assignment_id = resources['nbgrader']['assignment']
@@ -22,7 +25,7 @@ class SaveAutoGrades(NbGraderPreprocessor):
 
         return nb, resources
 
-    def _add_score(self, cell, resources):
+    def _add_score(self, cell: NotebookNode, resources: ResourcesDict) -> None:
         """Graders can override the autograder grades, and may need to
         manually grade written solutions anyway. This function adds
         score information to the database if it doesn't exist. It does
@@ -51,7 +54,7 @@ class SaveAutoGrades(NbGraderPreprocessor):
 
         self.gradebook.db.commit()
 
-    def _add_comment(self, cell, resources):
+    def _add_comment(self, cell: NotebookNode, resources: ResourcesDict) -> None:
         comment = self.gradebook.find_comment(
             cell.metadata['nbgrader']['grade_id'],
             self.notebook_id,
@@ -64,7 +67,11 @@ class SaveAutoGrades(NbGraderPreprocessor):
 
         self.gradebook.db.commit()
 
-    def preprocess_cell(self, cell, resources, cell_index):
+    def preprocess_cell(self,
+                        cell: NotebookNode,
+                        resources: ResourcesDict,
+                        cell_index: int
+                        ) -> Tuple[NotebookNode, ResourcesDict]:
         # if it's a grade cell, the add a grade
         if utils.is_grade(cell):
             self._add_score(cell, resources)

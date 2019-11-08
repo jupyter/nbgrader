@@ -2,6 +2,7 @@ import os
 import requests
 
 from .base import BaseAuthPlugin
+from typing import Optional
 
 
 class JupyterhubEnvironmentError(Exception):
@@ -12,18 +13,18 @@ class JupyterhubApiError(Exception):
     pass
 
 
-def get_jupyterhub_user():
+def get_jupyterhub_user() -> str:
     if os.getenv('JUPYTERHUB_USER'):
         return os.environ['JUPYTERHUB_USER']
     else:
         raise JupyterhubEnvironmentError("JUPYTERHUB_USER env is required to run the exchange features of nbgrader.")
 
 
-def get_jupyterhub_api_url():
+def get_jupyterhub_api_url() -> str:
     return os.environ.get('JUPYTERHUB_API_URL') or 'http://127.0.0.1:8081/hub/api'
 
 
-def get_jupyterhub_authorization():
+def get_jupyterhub_authorization() -> dict:
     if os.getenv('JUPYTERHUB_API_TOKEN'):
         api_token = os.environ['JUPYTERHUB_API_TOKEN']
     else:
@@ -33,23 +34,23 @@ def get_jupyterhub_authorization():
     }
 
 
-def _query_jupyterhub_api(method, api_path, post_data=None):
+def _query_jupyterhub_api(method: str, api_path: str, post_data: Optional[dict] = None) -> dict:
     """Query Jupyterhub api
 
     Detects Jupyterhub environment variables and makes a call to the Hub API
 
     Parameters
     ----------
-    method : string
+    method:
         HTTP method, e.g. GET or POST
-    api_path : string
+    api_path:
         relative path, for example /users/
-    post_data : dict
+    post_data:
         JSON arguments for the API call
 
     Returns
     -------
-    response : dict
+    response:
         JSON response converted to dictionary
 
     """
@@ -71,7 +72,7 @@ def _query_jupyterhub_api(method, api_path, post_data=None):
 
 class JupyterHubAuthPlugin(BaseAuthPlugin):
 
-    def get_student_courses(self, student_id):
+    def get_student_courses(self, student_id: str) -> Optional[list]:
         if student_id == "*":
             student_id = "{authenticated_user}"
         response = None
@@ -92,7 +93,7 @@ class JupyterHubAuthPlugin(BaseAuthPlugin):
                     courses.add(course)
         return list(courses)
 
-    def add_student_to_course(self, student_id, course_id):
+    def add_student_to_course(self, student_id: str, course_id: str) -> None:
         if not course_id:
             self.log.error(
                 "Could not add student to course because the course_id has not "
@@ -137,7 +138,7 @@ class JupyterHubAuthPlugin(BaseAuthPlugin):
             self.log.error(err_msg + str(e))
             self.log.error("Make sure you set a valid admin_user 'api_token' in your config file before starting the service")
 
-    def remove_student_from_course(self, student_id, course_id):
+    def remove_student_from_course(self, student_id: str, course_id: str) -> None:
         if not course_id:
             self.log.error(
                 "Could not remove student from course because the course_id has "

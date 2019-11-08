@@ -6,6 +6,9 @@ from traitlets import default
 
 from .baseapp import NbGrader, nbgrader_aliases, nbgrader_flags
 from ..converters import BaseConverter, Autograde, NbGraderException
+from traitlets.traitlets import MetaHasTraits
+from traitlets.config.loader import Config
+from typing import List
 
 aliases = {
     'course': 'CourseDirectory.course_id'
@@ -95,12 +98,12 @@ class AutogradeApp(NbGrader):
         """
 
     @default("classes")
-    def _classes_default(self):
+    def _classes_default(self) -> List[MetaHasTraits]:
         classes = super(AutogradeApp, self)._classes_default()
         classes.extend([BaseConverter, Autograde])
         return classes
 
-    def _load_config(self, cfg, **kwargs):
+    def _load_config(self, cfg: Config, **kwargs: dict) -> None:
         if 'AutogradeApp' in cfg:
             self.log.warning(
                 "Use Autograde in config, not AutogradeApp. Outdated config:\n%s",
@@ -114,8 +117,8 @@ class AutogradeApp(NbGrader):
 
         super(AutogradeApp, self)._load_config(cfg, **kwargs)
 
-    def start(self):
-        super(AutogradeApp, self).start()
+    def start(self) -> None:
+        super().start()
 
         if len(self.extra_args) > 1:
             self.fail("Only one argument (the assignment id) may be specified")
