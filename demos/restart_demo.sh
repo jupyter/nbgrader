@@ -23,9 +23,11 @@ source utils.sh
 
 install_dependencies () {
     echo "Installing dependencies..."
-    pip install -U pip
-    pip install -U jupyter
-    pip install -U jupyterhub
+    apt install -y npm
+    npm install -g configurable-http-proxy
+    apt install -y python3-pip
+    pip3 install -U jupyter
+    pip3 install -U jupyterhub
 }
 
 install_nbgrader () {
@@ -47,7 +49,7 @@ install_nbgrader () {
     git pull
 
     # Install requirements and nbgrader.
-    pip install -U -r requirements.txt -e .
+    pip3 install -U -r requirements.txt -e .
 
     # Install global extensions, and disable them globally. We will re-enable
     # specific ones for different user accounts in each demo.
