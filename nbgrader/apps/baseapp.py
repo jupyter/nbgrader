@@ -156,6 +156,12 @@ class NbGrader(JupyterApp):
             if hasattr(ex, "class_traits") and ex.class_traits(config=True):
                 classes.append(ex)
 
+        # include all the default exchange actions
+        for ex_name in exchange.default.__all__:
+            ex = getattr(exchange, ex_name)
+            if hasattr(ex, "class_traits") and ex.class_traits(config=True):
+                classes.append(ex)
+
         # include all the converters
         for ex_name in converters.__all__:
             ex = getattr(converters, ex_name)
