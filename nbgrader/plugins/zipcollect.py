@@ -4,6 +4,7 @@ import shutil
 
 from textwrap import dedent
 from traitlets import Bool, List, Unicode
+from typing import Optional
 
 from .base import BasePlugin
 from ..utils import unzip
@@ -31,7 +32,7 @@ class ExtractorPlugin(BasePlugin):
         )
     ).tag(config=True)
 
-    def extract(self, archive_path, extracted_path):
+    def extract(self, archive_path: str, extracted_path: str) -> None:
         """Extract archive (zip) files and submission files in the
         `archive_directory`. Files are extracted to the `extracted_directory`.
         Non-archive (zip) files found in the `archive_directory` are copied to
@@ -42,9 +43,9 @@ class ExtractorPlugin(BasePlugin):
 
         Arguments
         ---------
-        archive_path: str
+        archive_path:
             Absolute path to the `archive_directory`.
-        extracted_path: str
+        extracted_path:
             Absolute path to the `extracted_directory`.
         """
         if not os.listdir(archive_path):
@@ -100,7 +101,7 @@ class FileNameCollectorPlugin(BasePlugin):
     named_regexp = Unicode(
         default_value='',
         help=dedent(
-            """
+            r"""
             This regular expression is applied to each submission filename and
             MUST be supplied by the instructor. This regular expression MUST
             provide the `(?P<student_id>...)` and `(?P<file_id>...)` named
@@ -131,7 +132,7 @@ class FileNameCollectorPlugin(BasePlugin):
         )
     ).tag(config=True)
 
-    def _match(self, filename):
+    def _match(self, filename: str) -> Optional[dict]:
         """Match the named group regular expression to the beginning of the
         filename and return the match groupdict or None if no match.
         """
@@ -157,7 +158,7 @@ class FileNameCollectorPlugin(BasePlugin):
         )
         return gd
 
-    def collect(self, submitted_file):
+    def collect(self, submitted_file: str) -> Optional[dict]:
         """This is the main function called by the
         :class:`~nbgrader.apps.zipcollectapp.ZipCollectApp` for each submitted
         file. Note this function must also return a dictionary or None for
@@ -165,12 +166,12 @@ class FileNameCollectorPlugin(BasePlugin):
 
         Arguments
         ---------
-        submitted_file: str
+        submitted_file:
             Each submitted file in the ``extracted_directory`` (absolute path).
 
         Returns
         -------
-        groupdict: dict
+        groupdict:
             Collected data from the filename or None if the file should be
             skipped. Collected data is a dict of the form::
 

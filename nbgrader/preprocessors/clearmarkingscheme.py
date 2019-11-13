@@ -5,6 +5,9 @@ from textwrap import dedent
 
 from . import NbGraderPreprocessor
 from .. import utils
+from nbformat.notebooknode import NotebookNode
+from nbconvert.exporters.exporter import ResourcesDict
+from typing import Tuple
 
 
 class ClearMarkScheme(NbGraderPreprocessor):
@@ -32,7 +35,7 @@ class ClearMarkScheme(NbGraderPreprocessor):
         )
     ).tag(config=True)
 
-    def _remove_mark_scheme_region(self, cell):
+    def _remove_mark_scheme_region(self, cell: NotebookNode) -> bool:
         """Find a region in the cell that is delimeted by
         `self.begin_mark_scheme_delimeter` and `self.end_mark_scheme_delimeter` (e.g.  ###
         BEGIN MARK SCHEME and ### END MARK SCHEME). Remove that region
@@ -78,13 +81,17 @@ class ClearMarkScheme(NbGraderPreprocessor):
 
         return removed_ms
 
-    def preprocess(self, nb, resources):
+    def preprocess(self, nb: NotebookNode, resources: ResourcesDict) -> Tuple[NotebookNode, ResourcesDict]:
         nb, resources = super(ClearMarkScheme, self).preprocess(nb, resources)
         if 'celltoolbar' in nb.metadata:
             del nb.metadata['celltoolbar']
         return nb, resources
 
-    def preprocess_cell(self, cell, resources, cell_index):
+    def preprocess_cell(self,
+                        cell: NotebookNode,
+                        resources: ResourcesDict,
+                        cell_index: int
+                        ) -> Tuple[NotebookNode, ResourcesDict]:
         # remove hidden test regions
         removed_ms = self._remove_mark_scheme_region(cell)
 

@@ -23,6 +23,10 @@ from .. import preprocessors
 from .. import plugins
 from .. import exchange
 from .. import converters
+from traitlets.traitlets import MetaHasTraits
+from typing import List as TypingList
+from io import StringIO
+from typing import Any
 
 
 nbgrader_aliases = {
@@ -63,15 +67,15 @@ class NbGrader(JupyterApp):
     _log_formatter_cls = LogFormatter
 
     @default("log_level")
-    def _log_level_default(self):
+    def _log_level_default(self) -> int:
         return logging.INFO
 
     @default("log_datefmt")
-    def _log_datefmt_default(self):
+    def _log_datefmt_default(self) -> str:
         return "%Y-%m-%d %H:%M:%S"
 
     @default("log_format")
-    def _log_format_default(self):
+    def _log_format_default(self) -> str:
         return "%(color)s[%(name)s | %(levelname)s]%(end_color)s %(message)s"
 
     logfile = Unicode(
@@ -84,7 +88,11 @@ class NbGrader(JupyterApp):
         )
     ).tag(config=True)
 
-    def init_logging(self, handler_class, handler_args, color=True, subapps=False):
+    def init_logging(self,
+                     handler_class: type,
+                     handler_args: TypingList[StringIO],
+                     color: bool = True,
+                     subapps: bool = False) -> None:
         handler = handler_class(*handler_args)
 
         if color:
@@ -102,7 +110,7 @@ class NbGrader(JupyterApp):
         if subapps and self.subapp:
             self.subapp.init_logging(handler_class, handler_args, color=color, subapps=subapps)
 
-    def deinit_logging(self):
+    def deinit_logging(self) -> None:
         if len(self.log.handlers) > 1:
             for handler in self.log.handlers[1:]:
                 handler.close()
@@ -117,10 +125,10 @@ class NbGrader(JupyterApp):
     classes = List()
 
     @default("classes")
-    def _classes_default(self):
+    def _classes_default(self) -> TypingList[MetaHasTraits]:
         return [ExchangeFactory, NbGrader, CourseDirectory]
 
-    def all_configurable_classes(self):
+    def all_configurable_classes(self) -> TypingList[MetaHasTraits]:
         """Get a list of all configurable classes for nbgrader
         """
         # Call explicitly the method on this class, to avoid infinite recursion
@@ -171,10 +179,10 @@ class NbGrader(JupyterApp):
         return classes
 
     @default("config_file_name")
-    def _config_file_name_default(self):
+    def _config_file_name_default(self) -> str:
         return u'nbgrader_config'
 
-    def _load_config(self, cfg, **kwargs):
+    def _load_config(self, cfg: Config, **kwargs: Any) -> None:
         if 'NbGraderConfig' in cfg:
             self.log.warning(
                 "Use NbGrader in config, not NbGraderConfig. Outdated config:\n%s",
@@ -294,14 +302,14 @@ class NbGrader(JupyterApp):
         self.log.error(msg, *args)
         sys.exit(1)
 
-    def build_extra_config(self):
+    def build_extra_config(self) -> Config:
         return Config()
 
     def excepthook(self, etype, evalue, tb):
         format_excepthook(etype, evalue, tb)
 
     @catch_config_error
-    def initialize(self, argv=None):
+    def initialize(self, argv: TypingList[str] = None) -> None:
         self.update_config(self.build_extra_config())
         self.init_syspath()
         self.coursedir = CourseDirectory(parent=self)
@@ -313,11 +321,11 @@ class NbGrader(JupyterApp):
         if self.logfile:
             self.init_logging(logging.FileHandler, [self.logfile], color=False)
 
-    def init_syspath(self):
+    def init_syspath(self) -> None:
         """Add the cwd to the sys.path ($PYTHONPATH)"""
         sys.path.insert(0, os.getcwd())
 
-    def reset(self):
+    def reset(self) -> None:
         # stop logging
         self.deinit_logging()
 
@@ -333,7 +341,7 @@ class NbGrader(JupyterApp):
         for key, (app, desc) in self.subcommands.items():
             print("    {}\n{}\n".format(key, desc))
 
-    def load_config_file(self, **kwargs):
+    def load_config_file(self, **kwargs: Any) -> None:
         """Load the config file.
         By default, errors in loading config are handled, and a warning
         printed on screen. For testing, the suppress_errors option is set
@@ -349,7 +357,7 @@ class NbGrader(JupyterApp):
 
         super(NbGrader, self).load_config_file(**kwargs)
 
-    def start(self):
+    def start(self) -> None:
         super(NbGrader, self).start()
         self.authenticator = Authenticator(parent=self)
         self.exchange = ExchangeFactory(parent=self)

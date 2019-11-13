@@ -1,15 +1,16 @@
 from traitlets import Instance, Type
 from traitlets.config import LoggingConfigurable
+from typing import Any, Optional
 
 
 class BaseAuthPlugin(LoggingConfigurable):
 
-    def get_student_courses(self, student_id):  # pragma: no cover
+    def get_student_courses(self, student_id: str) -> Optional[list]:  # pragma: no cover
         """Gets the list of courses that the student is enrolled in.
 
         Arguments
         ---------
-        student_id: string
+        student_id:
             The unique id of the student.
 
         Returns
@@ -22,27 +23,27 @@ class BaseAuthPlugin(LoggingConfigurable):
         """
         raise NotImplementedError
 
-    def add_student_to_course(self, student_id, course_id):  # pragma: no cover
+    def add_student_to_course(self, student_id: str, course_id: str) -> None:  # pragma: no cover
         """Grants a student access to a given course.
 
         Arguments
         ---------
-        student_id: string
+        student_id:
             The unique id of the student.
-        course_id: string
+        course_id:
             The unique id of the course.
 
         """
         raise NotImplementedError
 
-    def remove_student_from_course(self, student_id, course_id):  # pragma: no cover
+    def remove_student_from_course(self, student_id: str, course_id: str) -> None:  # pragma: no cover
         """Removes a student's access to a given course.
 
         Arguments
         ---------
-        student_id: string
+        student_id:
             The unique id of the student.
-        course_id: string
+        course_id:
             The unique id of the course.
 
         """
@@ -51,21 +52,20 @@ class BaseAuthPlugin(LoggingConfigurable):
 
 class NoAuthPlugin(BaseAuthPlugin):
 
-    def get_student_courses(self, student_id):
+    def get_student_courses(self, student_id: str) -> Optional[list]:
         # None means that the student has access to any course that might exist
         # on the system.
         return None
 
-    def add_student_to_course(self, student_id, course_id):
+    def add_student_to_course(self, student_id: str, course_id: str) -> None:
         # Nothing to do, we don't keep track of which students are in which
         # courses in the default setting.
         pass
 
-    def remove_student_from_course(self, student_id, course_id):
+    def remove_student_from_course(self, student_id: str, course_id: str) -> None:
         # Nothing to do, we don't keep track of which students are in which
         # courses in the default setting.
         pass
-
 
 
 class Authenticator(LoggingConfigurable):
@@ -78,17 +78,17 @@ class Authenticator(LoggingConfigurable):
 
     plugin = Instance(BaseAuthPlugin).tag(config=False)
 
-    def __init__(self, *args, **kwargs):
-        super(Authenticator, self).__init__(*args, **kwargs)
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        super().__init__(*args, **kwargs)
         self.log.debug("Using authenticator: %s", self.plugin_class.__name__)
         self.plugin = self.plugin_class(parent=self)
 
-    def get_student_courses(self, student_id):
+    def get_student_courses(self, student_id: str) -> Optional[list]:
         """Gets the list of courses that the student is enrolled in.
 
         Arguments
         ---------
-        student_id: string
+        student_id:
             The unique id of the student.
 
         Returns
@@ -101,14 +101,14 @@ class Authenticator(LoggingConfigurable):
         """
         return self.plugin.get_student_courses(student_id)
 
-    def has_access(self, student_id, course_id):
+    def has_access(self, student_id: str, course_id: str) -> bool:
         """Checks whether a student has access to a particular course.
 
         Arguments
         ---------
-        student_id: string
+        student_id:
             The unique id of the student.
-        course_id: string
+        course_id:
             The unique id of the course.
 
         Returns
@@ -121,27 +121,27 @@ class Authenticator(LoggingConfigurable):
             return True
         return course_id in courses
 
-    def add_student_to_course(self, student_id, course_id):
+    def add_student_to_course(self, student_id: str, course_id: str) -> None:
         """Grants a student access to a given course.
 
         Arguments
         ---------
-        student_id: string
+        student_id:
             The unique id of the student.
-        course_id: string
+        course_id:
             The unique id of the course.
 
         """
-        return self.plugin.add_student_to_course(student_id, course_id)
+        self.plugin.add_student_to_course(student_id, course_id)
 
-    def remove_student_from_course(self, student_id, course_id):
+    def remove_student_from_course(self, student_id: str, course_id: str) -> None:
         """Removes a student's access to a given course.
 
         Arguments
         ---------
-        student_id: string
+        student_id:
             The unique id of the student.
-        course_id: string
+        course_id:
             The unique id of the course.
 
         """

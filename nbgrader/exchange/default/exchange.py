@@ -6,7 +6,6 @@ import glob
 
 from textwrap import dedent
 
-from dateutil.tz import gettz
 from traitlets import Unicode, Bool, default
 from jupyter_core.paths import jupyter_data_dir
 

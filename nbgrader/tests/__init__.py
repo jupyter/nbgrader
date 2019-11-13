@@ -16,6 +16,7 @@ from ..utils import compute_checksum
 from ..apps.nbgraderapp import NbGraderApp
 from ..validator import Validator
 from ..nbgraderformat import SCHEMA_VERSION
+from typing import List, Optional
 
 
 def create_code_cell():
@@ -184,7 +185,7 @@ def run_command(command, retcode=0, coverage=True, **kwargs):
     return output
 
 
-def run_nbgrader(args, retcode=0, env=None, stdout=False):
+def run_nbgrader(args: List[str], retcode: int = 0, env: Optional[dict] = None, stdout: bool = False) -> str:
     # store os.environ
     old_env = os.environ.copy()
     if env:

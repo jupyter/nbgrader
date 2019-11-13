@@ -122,7 +122,7 @@ class TestNbGraderAutograde(BaseTestApp):
             with pytest.raises(MissingEntry):
                 notebook = gb.find_submission_notebook("p1", "ps1", "baz")
 
-    def test_grade_timestamp(self, db, course_dir):
+    def test_grade_timestamp(self, db: str, course_dir: str) -> None:
         """Is a timestamp correctly read in?"""
         run_nbgrader(["db", "assignment", "add", "ps1", "--db", db, "--duedate",
                       "2015-02-02 14:58:23.948203 America/Los_Angeles"])
@@ -154,7 +154,7 @@ class TestNbGraderAutograde(BaseTestApp):
         # make sure it still works to run it a second time
         run_nbgrader(["autograde", "ps1", "--db", db])
 
-    def test_grade_empty_timestamp(self, db, course_dir):
+    def test_grade_empty_timestamp(self, db: str, course_dir: str) -> None:
         """Issue #580 - Does the autograder handle empty or invalid timestamp
         strings"""
         run_nbgrader(["db", "assignment", "add", "ps1", "--db", db, "--duedate",
@@ -182,7 +182,7 @@ class TestNbGraderAutograde(BaseTestApp):
         self._make_file(join(course_dir, "submitted", "bar", "ps1", "timestamp.txt"), invalid_timestamp)
         run_nbgrader(["autograde", "ps1", "--db", db], retcode=1)
 
-    def test_late_submission_penalty_none(self, db, course_dir):
+    def test_late_submission_penalty_none(self, db: str, course_dir: str) -> None:
         """Does 'none' method do nothing?"""
         run_nbgrader(["db", "assignment", "add", "ps1", "--db", db, "--duedate",
                       "2015-02-02 14:58:23.948203 America/Los_Angeles"])
@@ -222,7 +222,7 @@ class TestNbGraderAutograde(BaseTestApp):
             assert submission.total_seconds_late > 0
             assert nb.late_submission_penalty == None
 
-    def test_late_submission_penalty_zero(self, db, course_dir):
+    def test_late_submission_penalty_zero(self, db: str, course_dir: str) -> None:
         """Does 'zero' method assign notebook.score as penalty if late?"""
         run_nbgrader(["db", "assignment", "add", "ps1", "--db", db, "--duedate",
                       "2015-02-02 14:58:23.948203 America/Los_Angeles"])
@@ -276,7 +276,7 @@ class TestNbGraderAutograde(BaseTestApp):
             assert submission.total_seconds_late == 0
             assert nb.late_submission_penalty == None
 
-    def test_late_submission_penalty_plugin(self, db, course_dir):
+    def test_late_submission_penalty_plugin(self, db: str, course_dir: str) -> None:
         """Does plugin set 1 point per hour late penalty?"""
 
         plugin = dedent("""
@@ -333,7 +333,7 @@ class TestNbGraderAutograde(BaseTestApp):
             assert submission.total_seconds_late > 0
             assert nb.late_submission_penalty == 1
 
-    def test_force(self, db, course_dir):
+    def test_force(self, db: str, course_dir: str) -> None:
         """Ensure the force option works properly"""
         run_nbgrader(["db", "assignment", "add", "ps1", "--db", db, "--duedate",
                       "2015-02-02 14:58:23.948203 America/Los_Angeles"])
@@ -374,7 +374,7 @@ class TestNbGraderAutograde(BaseTestApp):
         assert os.path.isfile(join(course_dir, "autograded", "foo", "ps1", "data", "bar.txt"))
         assert not os.path.isfile(join(course_dir, "autograded", "foo", "ps1", "blah.pyc"))
 
-    def test_force_f(self, db, course_dir):
+    def test_force_f(self, db: str, course_dir: str) -> None:
         """Ensure the force option works properly"""
         run_nbgrader(["db", "assignment", "add", "ps1", "--db", db, "--duedate",
                       "2015-02-02 14:58:23.948203 America/Los_Angeles"])
@@ -415,7 +415,7 @@ class TestNbGraderAutograde(BaseTestApp):
         assert os.path.isfile(join(course_dir, "autograded", "foo", "ps1", "data", "bar.txt"))
         assert not os.path.isfile(join(course_dir, "autograded", "foo", "ps1", "blah.pyc"))
 
-    def test_filter_notebook(self, db, course_dir):
+    def test_filter_notebook(self, db: str, course_dir: str) -> None:
         """Does autograding filter by notebook properly?"""
         run_nbgrader(["db", "assignment", "add", "ps1", "--db", db, "--duedate",
                       "2015-02-02 14:58:23.948203 America/Los_Angeles"])
@@ -466,7 +466,7 @@ class TestNbGraderAutograde(BaseTestApp):
         assert os.path.isfile(join(course_dir, "autograded", "foo", "ps1", "data", "bar.txt"))
         assert not os.path.isfile(join(course_dir, "autograded", "foo", "ps1", "blah.pyc"))
 
-    def test_grade_overwrite_files(self, db, course_dir):
+    def test_grade_overwrite_files(self, db: str, course_dir: str) -> None:
         """Are dependent files properly linked and overwritten?"""
         run_nbgrader(["db", "assignment", "add", "ps1", "--db", db, "--duedate",
                       "2015-02-02 14:58:23.948203 America/Los_Angeles"])
@@ -503,7 +503,7 @@ class TestNbGraderAutograde(BaseTestApp):
             contents = fh.read()
         assert contents == "print('this is different!')\n"
 
-    def test_grade_overwrite_files_subdirs(self, db, course_dir):
+    def test_grade_overwrite_files_subdirs(self, db: str, course_dir: str) -> None:
         """Are dependent files properly linked and overwritten?"""
         run_nbgrader(["db", "assignment", "add", "ps1", "--db", db, "--duedate",
                       "2015-02-02 14:58:23.948203 America/Los_Angeles"])
@@ -540,7 +540,7 @@ class TestNbGraderAutograde(BaseTestApp):
             contents = fh.read()
         assert contents == "print('this is different!')\n"
 
-    def test_side_effects(self, db, course_dir):
+    def test_side_effects(self, db: str, course_dir: str) -> None:
         run_nbgrader(["db", "assignment", "add", "ps1", "--db", db, "--duedate",
                       "2015-02-02 14:58:23.948203 America/Los_Angeles"])
         run_nbgrader(["db", "student", "add", "foo", "--db", db])

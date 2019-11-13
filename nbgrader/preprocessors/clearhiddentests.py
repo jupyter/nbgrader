@@ -5,6 +5,9 @@ from textwrap import dedent
 
 from . import NbGraderPreprocessor
 from .. import utils
+from nbformat.notebooknode import NotebookNode
+from nbconvert.exporters.exporter import ResourcesDict
+from typing import Tuple
 
 
 class ClearHiddenTests(NbGraderPreprocessor):
@@ -32,7 +35,7 @@ class ClearHiddenTests(NbGraderPreprocessor):
         )
     ).tag(config=True)
 
-    def _remove_hidden_test_region(self, cell):
+    def _remove_hidden_test_region(self, cell: NotebookNode) -> bool:
         """Find a region in the cell that is delimeted by
         `self.begin_test_delimeter` and `self.end_test_delimeter` (e.g.  ###
         BEGIN HIDDEN TESTS and ### END HIDDEN TESTS). Remove that region
@@ -78,13 +81,17 @@ class ClearHiddenTests(NbGraderPreprocessor):
 
         return removed_test
 
-    def preprocess(self, nb, resources):
+    def preprocess(self, nb: NotebookNode, resources: ResourcesDict) -> Tuple[NotebookNode, ResourcesDict]:
         nb, resources = super(ClearHiddenTests, self).preprocess(nb, resources)
         if 'celltoolbar' in nb.metadata:
             del nb.metadata['celltoolbar']
         return nb, resources
 
-    def preprocess_cell(self, cell, resources, cell_index):
+    def preprocess_cell(self,
+                        cell: NotebookNode,
+                        resources: ResourcesDict,
+                        cell_index: int
+                        ) -> Tuple[NotebookNode, ResourcesDict]:
         # remove hidden test regions
         removed_test = self._remove_hidden_test_region(cell)
 

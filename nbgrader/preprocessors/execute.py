@@ -3,6 +3,10 @@ from traitlets import Bool, List, Integer
 from textwrap import dedent
 
 from . import NbGraderPreprocessor
+from nbconvert.exporters.exporter import ResourcesDict
+from nbformat.notebooknode import NotebookNode
+from typing import Any, Optional, Tuple
+
 
 class UnresponsiveKernelError(Exception):
     pass
@@ -29,7 +33,11 @@ class Execute(NbGraderPreprocessor, ExecutePreprocessor):
         """)
     ).tag(config=True)
 
-    def preprocess(self, nb, resources, retries=None):
+    def preprocess(self,
+                   nb: NotebookNode,
+                   resources: ResourcesDict,
+                   retries: Optional[Any] = None
+                   ) -> Tuple[NotebookNode, ResourcesDict]:
         kernel_name = nb.metadata.get('kernelspec', {}).get('name', 'python')
         if self.extra_arguments == [] and kernel_name == "python":
             self.extra_arguments = ["--HistoryManager.hist_file=:memory:"]

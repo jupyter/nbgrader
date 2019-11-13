@@ -1,26 +1,29 @@
 from nbformat import read as _read, reads as _reads
 from nbformat import write as _write, writes as _writes
+from nbformat.notebooknode import NotebookNode
+import typing
 from .v1 import MetadataValidatorV1
 from .v2 import MetadataValidatorV2
 from .common import BaseMetadataValidator, ValidationError
+from nbformat.notebooknode import NotebookNode
 
 
 class MetadataValidatorV3(BaseMetadataValidator):
 
     schema_version = 3
 
-    def __init__(self):
-        super(MetadataValidatorV3, self).__init__()
+    def __init__(self) -> None:
+        super().__init__()
         self.v1 = MetadataValidatorV1()
         self.v2 = MetadataValidatorV2()
 
-    def _upgrade_v2_to_v3(self, cell):
+    def _upgrade_v2_to_v3(self, cell: NotebookNode) -> NotebookNode:
         meta = cell.metadata['nbgrader']
         meta['schema_version'] = self.schema_version
 
         return cell
 
-    def upgrade_cell_metadata(self, cell):
+    def upgrade_cell_metadata(self, cell: NotebookNode) -> NotebookNode:
         if 'nbgrader' not in cell.metadata:
             return cell
 
@@ -41,7 +44,7 @@ class MetadataValidatorV3(BaseMetadataValidator):
         self._remove_extra_keys(cell)
         return cell
 
-    def validate_cell(self, cell):
+    def validate_cell(self, cell: NotebookNode) -> None:
         super(MetadataValidatorV3, self).validate_cell(cell)
 
         if 'nbgrader' not in cell.metadata:
@@ -86,7 +89,7 @@ class MetadataValidatorV3(BaseMetadataValidator):
                 raise ValidationError(
                     "Task cells have to be markdown: {}".format(cell.source))
 
-    def validate_nb(self, nb):
+    def validate_nb(self, nb: NotebookNode) -> None:
         super(MetadataValidatorV3, self).validate_nb(nb)
 
         ids = set([])
@@ -108,23 +111,23 @@ class MetadataValidatorV3(BaseMetadataValidator):
             ids.add(grade_id)
 
 
-def read_v3(source, as_version, **kwargs):
+def read_v3(source: typing.io.TextIO, as_version: int, **kwargs: typing.Any) -> NotebookNode:
     nb = _read(source, as_version, **kwargs)
     MetadataValidatorV3().validate_nb(nb)
     return nb
 
 
-def write_v3(nb, fp, **kwargs):
+def write_v3(nb: NotebookNode, fp: typing.io.TextIO, **kwargs: typing.Any) -> None:
     MetadataValidatorV3().validate_nb(nb)
-    return _write(nb, fp, **kwargs)
+    _write(nb, fp, **kwargs)
 
 
-def reads_v3(source, as_version, **kwargs):
+def reads_v3(source: str, as_version: int, **kwargs: typing.Any) -> NotebookNode:
     nb = _reads(source, as_version, **kwargs)
     MetadataValidatorV3().validate_nb(nb)
     return nb
 
 
-def writes_v3(nb, **kwargs):
+def writes_v3(nb: NotebookNode, **kwargs: typing.Any) -> None:
     MetadataValidatorV3().validate_nb(nb)
-    return _writes(nb, **kwargs)
+    _writes(nb, **kwargs)

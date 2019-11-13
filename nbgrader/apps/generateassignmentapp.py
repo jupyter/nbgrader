@@ -6,6 +6,9 @@ from traitlets import default
 
 from .baseapp import NbGrader, nbgrader_aliases, nbgrader_flags
 from ..converters import BaseConverter, GenerateAssignment, NbGraderException
+from traitlets.traitlets import MetaHasTraits
+from typing import List, Any
+from traitlets.config.loader import Config
 
 aliases = {
     'course': 'CourseDirectory.course_id'
@@ -107,12 +110,12 @@ class GenerateAssignmentApp(NbGrader):
         """
 
     @default("classes")
-    def _classes_default(self):
+    def _classes_default(self) -> List[MetaHasTraits]:
         classes = super(GenerateAssignmentApp, self)._classes_default()
         classes.extend([BaseConverter, GenerateAssignment])
         return classes
 
-    def _load_config(self, cfg, **kwargs):
+    def _load_config(self, cfg: Config, **kwargs: Any) -> None:
         if 'AssignApp' in cfg:
             self.log.warning(
                 "Use GenerateAssignment in config, not AssignApp. Outdated config:\n%s",
@@ -124,10 +127,10 @@ class GenerateAssignmentApp(NbGrader):
             cfg.GenerateAssignment.merge(cfg.AssignApp)
             del cfg.AssignApp
 
-        super(GenerateAssignmentApp, self)._load_config(cfg, **kwargs)
+        super()._load_config(cfg, **kwargs)
 
-    def start(self):
-        super(GenerateAssignmentApp, self).start()
+    def start(self) -> None:
+        super().start()
 
         if len(self.extra_args) > 1:
             self.fail("Only one argument (the assignment id) may be specified")

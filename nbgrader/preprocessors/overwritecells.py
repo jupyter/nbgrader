@@ -3,12 +3,15 @@ from nbformat.v4.nbbase import validate
 from .. import utils
 from ..api import Gradebook, MissingEntry
 from . import NbGraderPreprocessor
+from nbconvert.exporters.exporter import ResourcesDict
+from nbformat.notebooknode import NotebookNode
+from typing import Tuple, Any
 
 
 class OverwriteCells(NbGraderPreprocessor):
     """A preprocessor to overwrite information about grade and solution cells."""
 
-    def preprocess(self, nb, resources):
+    def preprocess(self, nb: NotebookNode, resources: ResourcesDict) -> Tuple[NotebookNode, ResourcesDict]:
         # pull information from the resources
         self.notebook_id = resources['nbgrader']['notebook']
         self.assignment_id = resources['nbgrader']['assignment']
@@ -22,7 +25,7 @@ class OverwriteCells(NbGraderPreprocessor):
 
         return nb, resources
 
-    def update_cell_type(self, cell, cell_type):
+    def update_cell_type(self, cell: NotebookNode, cell_type: str) -> None:
         if cell.cell_type == cell_type:
             return
         elif cell_type == 'code':
@@ -38,11 +41,15 @@ class OverwriteCells(NbGraderPreprocessor):
                 del cell['execution_count']
             validate(cell, 'markdown_cell')
 
-    def report_change(self, name, attr, old, new):
+    def report_change(self, name: str, attr: str, old: Any, new: Any) -> None:
         self.log.warning(
             "Attribute '%s' for cell %s has changed! (should be: %s, got: %s)", attr, name, old, new)
 
-    def preprocess_cell(self, cell, resources, cell_index):
+    def preprocess_cell(self,
+                        cell: NotebookNode,
+                        resources: ResourcesDict,
+                        cell_index: int
+                        ) -> Tuple[NotebookNode, ResourcesDict]:
         grade_id = cell.metadata.get('nbgrader', {}).get('grade_id', None)
         if grade_id is None:
             return cell, resources

@@ -1,5 +1,9 @@
 from traitlets import List
 
+from nbconvert.exporters.exporter import ResourcesDict
+from nbformat.notebooknode import NotebookNode
+from typing import Optional, Any, Tuple
+
 from .. import utils
 from ..api import Gradebook
 from . import NbGraderPreprocessor
@@ -10,7 +14,10 @@ class GetGrades(NbGraderPreprocessor):
 
     display_data_priority = List(['text/html', 'application/pdf', 'text/latex', 'image/svg+xml', 'image/png', 'image/jpeg', 'text/plain'], config=True)
 
-    def preprocess(self, nb, resources):
+    def preprocess(self,
+                   nb: NotebookNode,
+                   resources: ResourcesDict,
+                   ) -> Tuple[NotebookNode, ResourcesDict]:
         # pull information from the resources
         self.notebook_id = resources['nbgrader']['notebook']
         self.assignment_id = resources['nbgrader']['assignment']
@@ -37,7 +44,7 @@ class GetGrades(NbGraderPreprocessor):
 
         return nb, resources
 
-    def _get_comment(self, cell, resources):
+    def _get_comment(self, cell: NotebookNode, resources: ResourcesDict) -> None:
         """Graders can optionally add comments to the student's solutions, so
         add the comment information into the database if it doesn't
         already exist. It should NOT overwrite existing comments that
@@ -55,7 +62,7 @@ class GetGrades(NbGraderPreprocessor):
         # save it in the notebook
         cell.metadata.nbgrader['comment'] = comment.comment
 
-    def _get_score(self, cell, resources):
+    def _get_score(self, cell: NotebookNode, resources: ResourcesDict) -> None:
         grade = self.gradebook.find_grade(
             cell.metadata['nbgrader']['grade_id'],
             self.notebook_id,
@@ -65,7 +72,10 @@ class GetGrades(NbGraderPreprocessor):
         cell.metadata.nbgrader['score'] = grade.score
         cell.metadata.nbgrader['points'] = grade.max_score
 
-    def preprocess_cell(self, cell, resources, cell_index):
+    def preprocess_cell(self,
+                        cell: NotebookNode,
+                        resources: ResourcesDict, cell_index: int,
+                        ) -> Tuple[NotebookNode, ResourcesDict]:
         # if it's a solution cell, then add a comment
         if utils.is_solution(cell):
             self._get_comment(cell, resources)

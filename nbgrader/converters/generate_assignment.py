@@ -17,6 +17,9 @@ from ..preprocessors import (
     ClearHiddenTests,
     ClearMarkScheme,
 )
+from traitlets.config.loader import Config
+from typing import Any
+from ..coursedir import CourseDirectory
 
 
 class GenerateAssignment(BaseConverter):
@@ -41,15 +44,15 @@ class GenerateAssignment(BaseConverter):
     ).tag(config=True)
 
     @default("permissions")
-    def _permissions_default(self):
+    def _permissions_default(self) -> int:
         return 664 if self.coursedir.groupshared else 644
 
     @property
-    def _input_directory(self):
+    def _input_directory(self) -> str:
         return self.coursedir.source_directory
 
     @property
-    def _output_directory(self):
+    def _output_directory(self) -> str:
         return self.coursedir.release_directory
 
     preprocessors = List([
@@ -68,7 +71,7 @@ class GenerateAssignment(BaseConverter):
     # NB: ClearHiddenTests must come after ComputeChecksums and SaveCells.
     # ComputerChecksums must come again after ClearHiddenTests.
 
-    def _load_config(self, cfg, **kwargs):
+    def _load_config(self, cfg: Config, **kwargs: Any) -> None:
         if 'Assign' in cfg:
             self.log.warning(
                 "Use GenerateAssignment in config, not Assign. Outdated config:\n%s",
@@ -82,10 +85,10 @@ class GenerateAssignment(BaseConverter):
 
         super(GenerateAssignment, self)._load_config(cfg, **kwargs)
 
-    def __init__(self, coursedir=None, **kwargs):
+    def __init__(self, coursedir: CourseDirectory = None, **kwargs: Any) -> None:
         super(GenerateAssignment, self).__init__(coursedir=coursedir, **kwargs)
 
-    def _clean_old_notebooks(self, assignment_id, student_id):
+    def _clean_old_notebooks(self, assignment_id: str, student_id: str) -> None:
         with Gradebook(self.coursedir.db_url, self.coursedir.course_id) as gb:
             assignment = gb.find_assignment(assignment_id)
             regexp = re.escape(os.path.sep).join([
@@ -122,7 +125,7 @@ class GenerateAssignment(BaseConverter):
                 self.log.warning("Removing notebook '%s' from the gradebook", notebook_id)
                 gb.remove_notebook(notebook_id, assignment_id)
 
-    def init_assignment(self, assignment_id, student_id):
+    def init_assignment(self, assignment_id: str, student_id: str) -> None:
         super(GenerateAssignment, self).init_assignment(assignment_id, student_id)
 
         # try to get the assignment from the database, and throw an error if it
@@ -151,7 +154,7 @@ class GenerateAssignment(BaseConverter):
             if self.coursedir.notebook_id == "*":
                 self._clean_old_notebooks(assignment_id, student_id)
 
-    def start(self):
+    def start(self) -> None:
         old_student_id = self.coursedir.student_id
         self.coursedir.student_id = '.'
         try:
