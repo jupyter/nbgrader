@@ -3,7 +3,7 @@ div.nbgrader-points, div.nbgrader-id {
 }
 
 input.nbgrader-points-input {
-    width: 3.5em;
+    width: 8em;
     height: 22px;
     text-align: right;
     line-height: 10px;
@@ -17,12 +17,12 @@ input.nbgrader-id-input {
 }
 
 #nbgrader-total-points {
-    width: 3em;
-    height: 24px;
-    text-align: right;
-    line-height: 10px;
     margin-left: 0.3em;
     margin-right: 0.3em;
+    padding-left: 0.3em;
+    padding-right: 0.3em;
+    display: inline-block;
+    border: 1px solid black;
 }
 
 div.nbgrader-highlight div.celltoolbar {
@@ -41,6 +41,7 @@ div.nbgrader-highlight div.text_cell_render, div.nbgrader-highlight div.input_ar
     cf https://github.com/jupyter/nbgrader/issues/394.
     manual workaround while #370 is not released. */
     display: -webkit-flex;
+    height: auto;
 }
 
 div.lock-cell-container {

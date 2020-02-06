@@ -46,10 +46,9 @@ define([
                 elem = $("<div />").attr("id", "nbgrader-total-points-group");
                 elem.addClass("btn-group");
                 elem.append($("<span />").text("Total points:"));
-                elem.append($("<input />")
-                            .attr("disabled", "disabled")
-                            .attr("type", "number")
-                            .attr("id", "nbgrader-total-points"));
+                elem.append($("<div />")
+                            .attr("id", "nbgrader-total-points")
+                            .html("0"));
                 $("#maintoolbar-container").append(elem);
             }
             elem.show();
@@ -104,7 +103,8 @@ define([
                 total_points += to_float(cells[i].metadata.nbgrader.points);
             }
         }
-        $("#nbgrader-total-points").attr("value", total_points);
+        var pretty_points = total_points.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,');
+        $("#nbgrader-total-points").html(pretty_points);
     };
 
     var validate_ids = function() {

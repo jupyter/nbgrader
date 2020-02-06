@@ -215,7 +215,7 @@ def _get_metadata(browser):
 
 def _get_total_points(browser):
     element = browser.find_element_by_id("nbgrader-total-points")
-    return float(element.get_attribute("value"))
+    return float(element.text)
 
 
 def _save(browser):
