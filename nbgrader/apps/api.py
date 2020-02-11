@@ -87,7 +87,11 @@ class NbGraderAPI(LoggingConfigurable):
                 authenticator=self.authenticator,
                 parent=self)
             self.course_id = self.coursedir.course_id
-            self.exchange_root = lister.root
+            if hasattr(lister, "root"):
+                self.exchange_root = lister.root
+            else:
+                # For non-fs based exchanges
+                self.exchange_root = ''
 
             try:
                 lister.start()
