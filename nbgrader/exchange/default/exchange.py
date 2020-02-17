@@ -15,16 +15,6 @@ from nbgrader.utils import check_directory, ignore_patterns, self_owned
 
 
 class Exchange(ABCExchange):
-    assignment_dir = Unicode(
-        ".",
-        help=dedent(
-            """
-            Local path for storing student assignments.  Defaults to '.'
-            which is normally Jupyter's notebook_dir.
-            """
-        )
-    ).tag(config=True)
-
     root = Unicode(
         "/srv/nbgrader/exchange",
         help="The nbgrader exchange directory writable to everyone. MUST be preexisting."

@@ -20,6 +20,16 @@ class ExchangeError(Exception):
 
 
 class Exchange(LoggingConfigurable):
+    assignment_dir = Unicode(
+        ".",
+        help=dedent(
+            """
+            Local path for storing student assignments.  Defaults to '.'
+            which is normally Jupyter's notebook_dir.
+            """
+        )
+    ).tag(config=True)
+
     timezone = Unicode(
         "UTC",
         help="Timezone for recording timestamps"
