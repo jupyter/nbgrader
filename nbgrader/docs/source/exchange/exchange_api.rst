@@ -1,12 +1,5 @@
-Exchange API
-============
-
-A simplistic overview
----------------------
-
-``Assignments`` are ``created``, ``generated``, ``released``, ``fetched``, ``submitted``, ``collected``, ``graded``. Then ``feedback`` can be ``generated``, ``released``, and ``fetched``.
-
-The exchange is responsible for recieving *released* assignments, allowing those assignments to be *fetched*, accepting *submissions*, and allowing those submissions to be *collected*. It also allows *feedback* to be transferred.
+How nbgrader server_extenstions call the exchange
+=================================================
 
 
 Defined directories
@@ -14,11 +7,11 @@ Defined directories
 
 ``CourseDirectory`` defines the following directories (and their defaults):
 
-- ``source_directory`` - Where new assignments that are created by instructors are put (``source``)
-- ``release_directory`` - Where assignments that have been processed for release are copied to (``release``)
-- ``submitted_directory`` - Where student submissions are copied to, when an instructor *collects* (``submitted``)
-- ``autograded_directory`` - Where student submissions are copied to, having been *autograded* (``autograded``)
-- ``feedback_directory`` - Where feedback is copied to, when Instructors *generate feedback* (``feedback``)
+- ``source_directory`` - Where new assignments that are created by instructors are put (defaults to ``source``)
+- ``release_directory`` - Where assignments that have been processed for release are copied to (defaults to ``release``)
+- ``submitted_directory`` - Where student submissions are copied to, when an instructor *collects* (defaults to ``submitted``)
+- ``autograded_directory`` - Where student submissions are copied to, having been *autograded* (defaults to ``autograded``)
+- ``feedback_directory`` - Where feedback is copied to, when Instructors *generate feedback* (defaults to ``feedback``)
 
 Also, taken from the nbgrader help::
 
@@ -34,62 +27,6 @@ Also, taken from the nbgrader help::
     is the ID of the student, 'assignment_id' is the name of the assignment,
     and 'notebook_id' is the name of the notebook (excluding the extension).
 
-Calling exchange classes
-~~~~~~~~~~~~~~~~~~~~~~~~
-
-Exchange functions are called three ways:
-
-1. From the command line - eg: ``nbgrader release_assignment assignment1``.
-2. From **formgrader** server_extension, which generally calls the methods defined in ``nbgrader/apps/{foo}app.py``.
-3. From the **assignment_list** server_extension, which generally calls the methods directly.
-
-The classes
------------
-
-The exchange package is organised as follows::
-
-    exchange/
-    ├── abc/
-    │   ├── collect.py
-    │   ├── ...
-    │   └── submit.py
-    ├── default/
-    │   ├── collect.py
-    │   ├── ...
-    │   └── submit.py
-    └── exchange_factory.py
-    
-The exchange.abc package contain all the Abstract Base Classes that custom exchange packages need to implement.
-The exchange.default package is a default filesystem based implementation. The exchange_factory.py file contains
-the defintion for the ExchangeFactory class that is used to create instances of the exchange classes.
-
-The nbgrader exchange uses the followng classes::
-
-    Exchange
-    ExchangeError
-    ExchangeCollect
-    ExchangeFetch
-    ExchangeFetchAssignment
-    ExchangeFetchFeedback
-    ExchangeList
-    ExchangeRelease
-    ExchangeReleaseAssignment
-    ExchangeReleaseFeedback
-    ExchangeSubmit
-    
-Of these ExchangeFetch and ExchangeRelease have both been deprecated and not configurable through the ExchangeFactory class.
-
-To configure a custom exchange, you simply set the relevant field in the ExchangeFactory class through traitlets configuration service, e.g. c.ExchangeFactory.list = custom.package.MyExchangeList.
-The fields in the ExchangeFactory are::
-
-    exchange - The base Exchange class that all other classes inherit from
-    fetch_assignment - The ExchangeFetchAssignment class
-    fetch_feedback - The ExchangeFetchFeedback class
-    release_assignment - The ExchangeReleaseAssignment class
-    release_feedback - The ExchangeReleaseFeedback class
-    list - The ExchangeList class
-    submit - The ExchangeSubmit class
-    collect - The ExchangeCollect class
 
 ``Exchange``
 ~~~~~~~~~~~~
