@@ -20,7 +20,7 @@ flags.update({
         {'ExchangeCollect' : {'update': True}},
         "Update existing submissions with ones that have newer timestamps."
     ),
-    'before_duedate': (
+    'before-duedate': (
         {'ExchangeCollect' : {'before_duedate': True}},
         "Collect the last submission before due date or the last submission if no submission before due date."
     ),
