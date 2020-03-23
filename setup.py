@@ -100,7 +100,7 @@ setup_args = dict(
         "requests",
         "jsonschema",
         "alembic",
-        "fuzzywuzzy"
+        "rapidfuzz"
     ]
 )
 

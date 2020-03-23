@@ -8,6 +8,7 @@ from textwrap import dedent
 
 from dateutil.tz import gettz
 from dateutil.parser import parse
+from rapidfuzz import fuzz
 from traitlets.config import LoggingConfigurable
 from traitlets import Unicode, Bool, Instance, Type, default, validate, TraitError
 from jupyter_core.paths import jupyter_data_dir
@@ -177,11 +178,6 @@ class Exchange(LoggingConfigurable):
         self.log.fatal(msg)
         found = glob.glob(other_path)
         if found:
-            # Normally it is a bad idea to put imports in the middle of
-            # a function, but we do this here because otherwise fuzzywuzzy
-            # prints an annoying message about python-Levenshtein every
-            # time nbgrader is run.
-            from fuzzywuzzy import fuzz
             scores = sorted([(fuzz.ratio(self.src_path, x), x) for x in found])
             self.log.error("Did you mean: %s", scores[-1][1])
 
