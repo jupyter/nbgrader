@@ -1,3 +1,4 @@
+import datetime
 import os
 import time
 import pytest
@@ -7,6 +8,7 @@ from os.path import join
 from .. import run_nbgrader
 from .base import BaseTestApp
 from .conftest import notwindows
+from ...api import Gradebook
 from ...utils import parse_utc, get_username
 
 
@@ -151,3 +153,45 @@ class TestNbGraderCollect(BaseTestApp):
         assert self._get_permissions(join(exchange, "abc101", "inbound")) == ("2733" if not groupshared else "2773")
         assert self._get_permissions(join(course_dir, "submitted", "foobar_student", "ps1")) == ("777" if not groupshared else "2777")
         assert self._get_permissions(join(course_dir, "submitted", "foobar_student", "ps1", "p1.ipynb")) == ("644" if not groupshared else "664")
+
+    @pytest.mark.parametrize('before_duedate',
+                              ['yes', 'no', 'nofirst'])
+    def test_collect_before_due_date(self, exchange, course_dir, cache, db, before_duedate):
+        """Test --before-duedate flag.
+
+        Test is parameterized so we test both with it and without the flag.
+
+        'yes': test with --before-duedate
+        'no': test without
+        'nofirst': test with --before-duedate but no assignment before duedate
+
+        """
+        # Release assignment
+        self._release_and_fetch("ps1", exchange, course_dir)
+
+        # Submit something, wait, submit again.  Due date is between.
+        if before_duedate != 'nofirst':
+            # We don't submit first assignment.
+            self._submit("ps1", exchange, cache)
+            time.sleep(.05)
+        time_duedate = datetime.datetime.utcnow()
+        time.sleep(.05)
+        self._submit("ps1", exchange, cache)
+
+        # Set the due date
+        with Gradebook(db) as gb:
+            gb.update_or_create_assignment('ps1', duedate=time_duedate)
+
+        # Collect
+        flags = ['--db', db]
+        if before_duedate != 'no':
+            flags.append('--before-duedate')
+        self._collect("ps1", exchange, flags=flags)
+
+        root = os.path.os.path.join(os.path.join(course_dir, "submitted", get_username(), "ps1"))
+        timestamp = self._read_timestamp(root)
+        # Test both ways: with --before-duedate flag and without
+        if before_duedate == 'yes':
+            assert timestamp < time_duedate
+        else: # 'no', 'nofirst'
+            assert timestamp > time_duedate
