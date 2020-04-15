@@ -50,15 +50,15 @@ class AssignmentList(LoggingConfigurable):
         with chdir(self.parent.notebook_dir):
             config = self.load_config()
 
-        lister = ExchangeList(config=config)
-        assignment_dir = lister.assignment_dir
+            lister = ExchangeList(config=config)
+            assignment_dir = lister.assignment_dir
 
-        # now cd to the full assignment directory and load the config again
-        with chdir(assignment_dir):
+            # now cd to the full assignment directory and load the config again
+            with chdir(assignment_dir):
 
-            app = NbGrader()
-            app.config_file_paths.append(os.getcwd())
-            app.load_config_file()
+                app = NbGrader()
+                app.config_file_paths.append(os.getcwd())
+                app.load_config_file()
 
             yield app.config
 
