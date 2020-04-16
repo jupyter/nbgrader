@@ -143,6 +143,12 @@ class AssignmentList(LoggingConfigurable):
                     assignment["submissions"] = sorted(
                         assignment["submissions"],
                         key=lambda x: x["timestamp"])
+                    for submission in assignment["submissions"]:
+                        if submission['has_local_feedback']:
+                            submission['local_feedback_path'] = os.path.relpath(submission['local_feedback_path'], self.parent.notebook_dir)
+                            for notebook in submission['notebooks']:
+                                if notebook['has_local_feedback']:
+                                    notebook['local_feedback_path'] = os.path.relpath(notebook['local_feedback_path'], self.parent.notebook_dir)
                 assignments = sorted(assignments, key=lambda x: x["assignment_id"])
                 retvalue = {
                     "success": True,
