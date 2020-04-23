@@ -1,0 +1,4 @@
+.nbgrader-Cell:not(.nbgrader-mod-active) .nbgrader-CellHeader .jp-InputPrompt {
+  opacity: var(--jp-cell-prompt-not-active-opacity);
+  color: var(--jp-cell-prompt-not-active-font-color);
+}
