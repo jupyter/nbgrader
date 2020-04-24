@@ -15,7 +15,9 @@ import {
 
 import {
   IObservableJSON,
-  IObservableMap
+  IObservableList,
+  IObservableMap,
+  IObservableUndoableList
 } from '@jupyterlab/observables';
 
 import {
@@ -123,13 +125,11 @@ class CellWidget extends BoxPanel {
     cell.model.metadata.changed.connect(this.getMetadataChangedHandler());
   }
 
-  getCellStateChangedListener(prompt: HTMLElement): (model: ICellModel, changedArgs:
-                                  IChangedArgs<any, any, string>) => void {
+  getCellStateChangedListener(srcPrompt: HTMLElement, destPrompt: HTMLElement):
+    (model: ICellModel, changedArgs: IChangedArgs<any, any, string>) => void {
     return (model: ICellModel, changedArgs: IChangedArgs<any, any, string>) => {
       if (changedArgs.name == 'executionCount') {
-        const promptValue = changedArgs.newValue == null ? '' :
-          changedArgs.newValue;
-        prompt.innerText = `[${promptValue}]:`;
+        destPrompt.innerText = srcPrompt.innerText;
       }
     }
   }
@@ -144,7 +144,7 @@ class CellWidget extends BoxPanel {
   getMetadataChangedHandler(): (metadata: IObservableJSON, changedArgs:
                                 IObservableMap.IChangedArgs<ReadonlyPartialJSONValue>) => void {
     return (metadata: IObservableJSON, changedArgs: IObservableMap.IChangedArgs<ReadonlyPartialJSONValue>) => {
-      // TODO
+      this.updateValues(metadata);
     }
   }
 
@@ -222,11 +222,8 @@ class CellWidget extends BoxPanel {
     element.style.width = 'max-content';
     const promptNode =  this.cell.promptNode.cloneNode(true) as HTMLElement;
     element.appendChild(promptNode);
-    this.cell.model.stateChanged.connect((model: ICellModel, args:
-                                          IChangedArgs<any>) => {
-                                           console.log(args);
-                                         });
-    this.cell.model.stateChanged.connect(this.getCellStateChangedListener(promptNode));
+    this.cell.model.stateChanged.connect(this.getCellStateChangedListener(
+      this.cell.promptNode, promptNode));
     return element;
   }
 
@@ -267,7 +264,7 @@ class CellWidget extends BoxPanel {
       fragment.appendChild(option);
     }
     select.appendChild(fragment);
-    element.innerHTML = 'Type';
+    element.innerHTML = 'Type: ';
     element.appendChild(select);
     return element;
   }
@@ -334,6 +331,7 @@ class CellWidget extends BoxPanel {
     const nbgraderData = nbgraderValue == null ? null : nbgraderValue.valueOf() as NbgraderData;
     if (nbgraderData == null) {
       this.setTask('');
+      this.setGradeId('');
       this.setGradeIdVisible(false);
       this.setPointsVisible(false);
       return;
@@ -353,8 +351,8 @@ class CellWidget extends BoxPanel {
     } else if (nbgraderData.solution && this.cell.model.type === "code") {
       this.setTask('solution');
       this.setGradeId(nbgraderData.grade_id);
-      this.setGradeIdVisible(false);
-      this.setPointsVisible(true);
+      this.setGradeIdVisible(true);
+      this.setPointsVisible(false);
     } else if (nbgraderData.grade && this.cell.model.type === "code") {
       this.setTask('tests');
       this.setGradeId(nbgraderData.grade_id);
@@ -364,9 +362,8 @@ class CellWidget extends BoxPanel {
     } else if (nbgraderData.locked) {
       this.setTask('readonly');
       this.setGradeId(nbgraderData.grade_id);
-      this.setPoints(nbgraderData.points);
       this.setGradeIdVisible(true);
-      this.setPointsVisible(true);
+      this.setPointsVisible(false);
     } else {
       this.setTask('');
       this.setGradeId('');
@@ -388,12 +385,70 @@ class NotebookWidget extends BoxPanel {
     this._activeCell = panel.content.activeCell;
     this.addClass('Assignment-Widget');
     this.addCellListener(panel);
+    this.addCellListListener(panel);
     this.initCellWidgets(panel.content);
     panel.disposed.connect(this.getNotebookDisposedListener());
   }
 
   addCellListener(panel: NotebookPanel) {
     panel.content.activeCellChanged.connect(this.getActiveCellListener());
+  }
+
+  addCellListListener(panel: NotebookPanel) {
+    panel.model.cells.changed.connect(
+      (sender: IObservableUndoableList<ICellModel>,
+       args: IObservableList.IChangedArgs<ICellModel>) => {
+         switch (args.type) {
+           case 'add': {
+             const cell = this._findCellInArray(args.newValues[0], panel.content.widgets);
+             this.addCellWidget(cell, args.newIndex);
+             break;
+           }
+           case 'move': {
+             const cell = panel.content.widgets[args.newIndex];
+             this.moveCellWidget(cell, args.newIndex);
+             break;
+           }
+           case 'remove': {
+             const cell = this._findDeadCell(this.cellWidgets.keys());
+             if (cell != null) {
+               this.removeCellWidget(cell);
+             }
+             else {
+               console.warn('nbgrader: Unable to find newly deleted cell.');
+             }
+             break;
+           }
+         }
+    });
+  }
+
+  addCellWidget(cell: Cell, index = undefined as number): CellWidget {
+    const cellWidget = new CellWidget(cell);
+    this.cellWidgets.set(cell, cellWidget);
+    if (index == null) {
+      this.addWidget(cellWidget);
+    }
+    else {
+      this.insertWidget(index, cellWidget);
+    }
+    return cellWidget;
+  }
+
+  _findCellInArray(model: ICellModel, cells: readonly Cell[]): Cell {
+    return cells.find(
+      (value: Cell, index: number, obj: readonly Cell[]) => {
+        return value.model === model;
+      });
+  }
+
+  _findDeadCell(cells: IterableIterator<Cell>): Cell {
+    for (const cell of cells) {
+      if (cell.model == null) {
+        return cell;
+      }
+    }
+    return undefined;
   }
 
   getActiveCellListener(): (notebook: Notebook, cell: Cell) => void {
@@ -416,10 +471,22 @@ class NotebookWidget extends BoxPanel {
 
   initCellWidgets(notebook: Notebook) {
     for (const cell of notebook.widgets) {
-      const cellWidget = new CellWidget(cell);
-      this.cellWidgets.set(cell, cellWidget);
-      this.addWidget(cellWidget);
+      const cellWidget = this.addCellWidget(cell);
       cellWidget.setActive(notebook.activeCell === cell);
     }
+  }
+
+  moveCellWidget(cell: Cell, index: number) {
+    const cellWidget = this.cellWidgets.get(cell);
+    this.insertWidget(index, cellWidget);
+  }
+
+  removeCellWidget(cell: Cell) {
+    const cellWidget = this.cellWidgets.get(cell);
+    if (cellWidget == null) {
+      return;
+    }
+    this.cellWidgets.delete(cell);
+    cellWidget.dispose();
   }
 }
