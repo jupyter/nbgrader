@@ -1,4 +1,102 @@
-.nbgrader-Cell:not(.nbgrader-mod-active) .nbgrader-CellHeader .jp-InputPrompt {
+.nbgrader-CellWidget:not(.nbgrader-mod-active) .nbgrader-CellHeader .jp-InputPrompt {
   opacity: var(--jp-cell-prompt-not-active-opacity);
   color: var(--jp-cell-prompt-not-active-font-color);
+}
+
+.nbgrader-CreateAssignmentWidget {
+  background: var(--jp-layout-color1);
+  color: var(--jp-ui-font-color1);
+}
+
+.nbgrader-NotebookWidget {
+  overflow: auto;
+  height: 100%;
+}
+
+.nbgrader-CellWidget {
+  margin-top: 12px;
+  height: auto;
+  border-style: solid;
+  border-width: 0 0 var(--jp-border-width) 0;
+  border-color: var(--jp-border-color2);
+}
+
+.nbgrader-CellWidget:last-child {
+  border-width: 0;
+}
+
+.nbgrader-CellWidget>div {
+  padding: 0 12px 0 6px;
+  border-style: solid;
+  border-width: 0 0 0 6px;
+  border-color: #0000;
+}
+
+.nbgrader-CellWidget.nbgrader-mod-active>div {
+  border-color: var(--jp-brand-color1);
+}
+
+.nbgrader-CellWidget input {
+  background: var(--jp-input-background);
+  font-size: var(--jp-ui-font-size1);
+  font-family: var(--jp-content-font-family);
+  color: var(--jp-ui-font-color0);
+  border: var(--jp-border-width) solid var(--jp-border-color1);
+  flex: 1 1 auto;
+  padding: 0 8px 0 8px;
+  outline: none;
+}
+
+.nbgrader-CellWidget .jp-select-wrapper {
+  display: inline-flex;
+  font-size: var(--jp-ui-font-size1);
+  margin-bottom: 0;
+}
+
+.nbgrader-CellWidget .jp-select-wrapper select.jp-mod-styled {
+  font-size: var(--jp-ui-font-size1);
+}
+
+.nbgrader-CellWidget .nbgrader-mod-uneditable {
+  visibility: hidden;
+}
+
+.nbgrader-CellWidget select {
+  padding-right: 25px;
+}
+
+.nbgrader-CellWidget select:hover {
+  cursor: pointer;
+}
+
+.nbgrader-CellHeader, .nbgrader-CellType, .nbgrader-CellPoints, .nbgrader-CellId {
+  margin-bottom: 12px;
+}
+
+.nbgrader-CellWidget>label {
+  font-size: var(--jp-ui-font-size1);
+}
+
+.nbgrader-CellHeader>.jp-InputPrompt {
+  border-width: 0;
+  padding-left: 0;
+  text-align: left;
+}
+/*
+.nbgrader-CellWidget select, .nbgrader-CellWidget input {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
+*/
+.nbgrader-CellPoints input {
+    width: 3.5em;
+    height: 22px;
+    text-align: right;
+    line-height: 10px;
+}
+
+.nbgrader-CellId input {
+    height: 22px;
+    text-align: left;
 }

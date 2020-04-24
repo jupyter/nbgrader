@@ -31,6 +31,8 @@ function activate_extension(app: JupyterFrontEnd, tracker: INotebookTracker) {
   const createAssignmentWidget = new CreateAssignmentWidget(tracker);
   panel.addWidget(createAssignmentWidget);
   panel.id = 'nbgrader-create_assignemnt';
+  panel.title.label = 'Create Assignment';
+  panel.title.caption = 'nbgrader Create Assignment';
   app.shell.add(panel, 'right');
   console.log('Extension "create_assignment" activated.');
 }

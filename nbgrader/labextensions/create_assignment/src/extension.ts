@@ -1,4 +1,8 @@
 import {
+  Styling
+} from '@jupyterlab/apputils';
+
+import {
   Cell,
   ICellModel
 } from '@jupyterlab/cells';
@@ -25,17 +29,23 @@ import {
 } from '@lumino/coreutils';
 
 import {
-  BoxPanel
+  Panel
 } from '@lumino/widgets';
 
-const CSS_CELL = 'nbgrader-Cell';
-const CSS_HEADER = 'nbgrader-CellHeader';
+const CSS_CELL_HEADER = 'nbgrader-CellHeader';
+const CSS_CELL_ID = 'nbgrader-CellId';
+const CSS_CELL_POINTS = 'nbgrader-CellPoints';
+const CSS_CELL_TYPE = 'nbgrader-CellType';
+const CSS_CELL_WIDGET = 'nbgrader-CellWidget';
+const CSS_CREATE_ASSIGNMENT_WIDGET = 'nbgrader-CreateAssignmentWidget';
 const CSS_MOD_ACTIVE = 'nbgrader-mod-active';
+const CSS_MOD_UNEDITABLE = 'nbgrader-mod-uneditable';
+const CSS_NOTEBOOK_WIDGET = 'nbgrader-NotebookWidget';
 
 /**
  * A widget which shows the "Create Assignment" widgets for the active notebook.
  */
-export class CreateAssignmentWidget extends BoxPanel {
+export class CreateAssignmentWidget extends Panel {
   activeNotebook: NotebookPanel;
   assignmentWidgets = new Map<NotebookPanel, NotebookWidget>();
   notebookTracker: INotebookTracker;
@@ -43,7 +53,7 @@ export class CreateAssignmentWidget extends BoxPanel {
   constructor(tracker: INotebookTracker) {
     super();
     this.notebookTracker = tracker;
-    this.addClass('Create-Assignment-Widget');
+    this.addClass(CSS_CREATE_ASSIGNMENT_WIDGET);
     this.addNotebookListeners(tracker);
     this.activeNotebook = null;
   }
@@ -103,7 +113,7 @@ class NbgraderData {
 /**
  * Shows a cell's assignment data.
  */
-class CellWidget extends BoxPanel {
+class CellWidget extends Panel {
   cell: Cell;
   _task: HTMLDivElement;
   _gradeId: HTMLDivElement;
@@ -118,6 +128,7 @@ class CellWidget extends BoxPanel {
     this.addMetadataListener(cell);
     this.initLayout();
     this.initMetadata(cell);
+    this.addClass(CSS_CELL_WIDGET);
   }
 
   async addMetadataListener(cell: Cell) {
@@ -163,6 +174,7 @@ class CellWidget extends BoxPanel {
   }
 
   initLayout() {
+    const bodyElement = document.createElement('div');
     const headerElement = this.newHeaderElement();
     const taskElement = this.newTaskElement();
     const idElement = this.newIdElement();
@@ -172,14 +184,14 @@ class CellWidget extends BoxPanel {
     for (const element of elements) {
       fragment.appendChild(element);
     }
-    this.node.appendChild(fragment);
+    bodyElement.appendChild(fragment);
+    this.node.appendChild(bodyElement);
     this._task = taskElement;
     this._gradeId = idElement;
     this._points = pointsElement;
     this._taskInput = taskElement.getElementsByTagName('select')[0];
     this._gradeIdInput = idElement.getElementsByTagName('input')[0];
     this._pointsInput = pointsElement.getElementsByTagName('input')[0];
-    this.addClass(CSS_CELL);
   }
 
   async initMetadata(cell: Cell) {
@@ -218,8 +230,7 @@ class CellWidget extends BoxPanel {
 
   newHeaderElement(): HTMLDivElement {
     const element = document.createElement('div');
-    element.className = CSS_HEADER;
-    element.style.width = 'max-content';
+    element.className = CSS_CELL_HEADER;
     const promptNode =  this.cell.promptNode.cloneNode(true) as HTMLElement;
     element.appendChild(promptNode);
     this.cell.model.stateChanged.connect(this.getCellStateChangedListener(
@@ -229,24 +240,33 @@ class CellWidget extends BoxPanel {
 
   newIdElement(): HTMLDivElement {
     const element = document.createElement('div');
+    element.className = CSS_CELL_ID;
+    const label = document.createElement('label');
+    label.textContent = 'ID: ';
     const input = document.createElement('input');
     input.type = 'text';
-    element.innerHTML = 'ID: '
-    element.appendChild(input);
+    label.appendChild(input);
+    element.appendChild(label);
     return element;
   }
 
   newPointsElement(): HTMLDivElement {
     const element = document.createElement('div');
+    element.className = CSS_CELL_POINTS;
+    const label = document.createElement('label');
+    label.textContent = 'Points: ';
     const input = document.createElement('input');
     input.type = 'number';
-    element.innerHTML = 'Points: ';
-    element.appendChild(input);
+    label.appendChild(input);
+    element.appendChild(label);
     return element;
   }
 
   newTaskElement(): HTMLDivElement {
     const element = document.createElement('div');
+    element.className = CSS_CELL_TYPE;
+    const label = document.createElement('label');
+    label.textContent = 'Type: ';
     const select = document.createElement('select');
     const options = new Map<string, string>([
       ['', '-'],
@@ -264,8 +284,9 @@ class CellWidget extends BoxPanel {
       fragment.appendChild(option);
     }
     select.appendChild(fragment);
-    element.innerHTML = 'Type: ';
-    element.appendChild(select);
+    const selectWrap = Styling.wrapSelect(select);
+    label.appendChild(selectWrap);
+    element.appendChild(label);
     return element;
   }
 
@@ -292,20 +313,25 @@ class CellWidget extends BoxPanel {
     this._gradeIdInput.value = value;
   }
 
-  setElementVisible(element: HTMLElement, visible: boolean) {
-    element.style.visibility = visible ? 'visible' : 'hidden';
+  setElementEditable(element: HTMLElement, visible: boolean) {
+    if (visible) {
+      element.classList.remove(CSS_MOD_UNEDITABLE);
+    }
+    else {
+      element.classList.add(CSS_MOD_UNEDITABLE);
+    }
   }
 
-  setGradeIdVisible(visible: boolean) {
-    this.setElementVisible(this._gradeId, visible);
+  setGradeIdEditable(visible: boolean) {
+    this.setElementEditable(this._gradeId, visible);
   }
 
   setPoints(value: number) {
     this._pointsInput.value = value.toString();
   }
 
-  setPointsVisible(visible: boolean) {
-    this.setElementVisible(this._points, visible);
+  setPointsEditable(visible: boolean) {
+    this.setElementEditable(this._points, visible);
   }
 
   setTask(value: string) {
@@ -332,43 +358,43 @@ class CellWidget extends BoxPanel {
     if (nbgraderData == null) {
       this.setTask('');
       this.setGradeId('');
-      this.setGradeIdVisible(false);
-      this.setPointsVisible(false);
+      this.setGradeIdEditable(false);
+      this.setPointsEditable(false);
       return;
     }
     if (nbgraderData.task) {
       this.setTask('task');
       this.setGradeId(nbgraderData.grade_id);
       this.setPoints(nbgraderData.points);
-      this.setGradeIdVisible(true);
-      this.setPointsVisible(true);
+      this.setGradeIdEditable(true);
+      this.setPointsEditable(true);
     } else if (nbgraderData.solution && nbgraderData.grade) {
       this.setTask('manual');
       this.setGradeId(nbgraderData.grade_id);
       this.setPoints(nbgraderData.points);
-      this.setGradeIdVisible(true);
-      this.setPointsVisible(true);
+      this.setGradeIdEditable(true);
+      this.setPointsEditable(true);
     } else if (nbgraderData.solution && this.cell.model.type === "code") {
       this.setTask('solution');
       this.setGradeId(nbgraderData.grade_id);
-      this.setGradeIdVisible(true);
-      this.setPointsVisible(false);
+      this.setGradeIdEditable(true);
+      this.setPointsEditable(false);
     } else if (nbgraderData.grade && this.cell.model.type === "code") {
       this.setTask('tests');
       this.setGradeId(nbgraderData.grade_id);
       this.setPoints(nbgraderData.points);
-      this.setGradeIdVisible(true);
-      this.setPointsVisible(true);
+      this.setGradeIdEditable(true);
+      this.setPointsEditable(true);
     } else if (nbgraderData.locked) {
       this.setTask('readonly');
       this.setGradeId(nbgraderData.grade_id);
-      this.setGradeIdVisible(true);
-      this.setPointsVisible(false);
+      this.setGradeIdEditable(true);
+      this.setPointsEditable(false);
     } else {
       this.setTask('');
       this.setGradeId('');
-      this.setGradeIdVisible(false);
-      this.setPointsVisible(false);
+      this.setGradeIdEditable(false);
+      this.setPointsEditable(false);
     }
   }
 }
@@ -376,18 +402,19 @@ class CellWidget extends BoxPanel {
 /**
  * Contains a notebook's "Create Assignment" UI.
  */
-class NotebookWidget extends BoxPanel {
+class NotebookWidget extends Panel {
   _activeCell = null as Cell;
   cellWidgets = new Map<Cell, CellWidget>();
 
   constructor(panel: NotebookPanel) {
     super();
     this._activeCell = panel.content.activeCell;
-    this.addClass('Assignment-Widget');
+    this.addClass(CSS_NOTEBOOK_WIDGET);
     this.addCellListener(panel);
     this.addCellListListener(panel);
     this.initCellWidgets(panel.content);
     panel.disposed.connect(this.getNotebookDisposedListener());
+    this.layout.fitPolicy = 'set-no-constraint';
   }
 
   addCellListener(panel: NotebookPanel) {
@@ -425,6 +452,8 @@ class NotebookWidget extends BoxPanel {
 
   addCellWidget(cell: Cell, index = undefined as number): CellWidget {
     const cellWidget = new CellWidget(cell);
+    cellWidget.layout.fitPolicy = 'set-no-constraint';
+    console.log(cellWidget.layout.fitPolicy);
     this.cellWidgets.set(cell, cellWidget);
     if (index == null) {
       this.addWidget(cellWidget);
