@@ -32,6 +32,11 @@ import {
   Panel
 } from '@lumino/widgets';
 
+import {
+  CellModel,
+  ToolData
+} from './model';
+
 const CSS_CELL_HEADER = 'nbgrader-CellHeader';
 const CSS_CELL_ID = 'nbgrader-CellId';
 const CSS_CELL_POINTS = 'nbgrader-CellPoints';
@@ -98,19 +103,6 @@ export class CreateAssignmentWidget extends Panel {
 }
 
 /**
- * Dummy class for representing the nbgrader cell metadata.
- */
-class NbgraderData {
-  grade: boolean;
-  grade_id: string;
-  locked: boolean;
-  points: number;
-  schema_version: number;
-  solution: boolean;
-  task: boolean;
-}
-
-/**
  * Shows a cell's assignment data.
  */
 class CellWidget extends Panel {
@@ -145,32 +137,13 @@ class CellWidget extends Panel {
     }
   }
 
-  getGradeId(nbgraderData: NbgraderData): string {
-    if (nbgraderData == null || nbgraderData.grade_id == null) {
-      return 'cell-' + this._randomString(16);
-    }
-    return nbgraderData.grade_id;
-  }
-
   getMetadataChangedHandler(): (metadata: IObservableJSON, changedArgs:
                                 IObservableMap.IChangedArgs<ReadonlyPartialJSONValue>) => void {
     return (metadata: IObservableJSON, changedArgs: IObservableMap.IChangedArgs<ReadonlyPartialJSONValue>) => {
-      this.updateValues(metadata);
+      const nbgraderData = CellModel.getNbgraderData(metadata);
+      const toolData = CellModel.newToolData(nbgraderData, this.cell.model.type);
+      this.updateValues(toolData);
     }
-  }
-
-  getPoints(nbgraderData: NbgraderData): number {
-    if (nbgraderData == null) {
-      return 0;
-    }
-    return this._to_float(nbgraderData.points);
-  }
-
-  getSchemeaVersion(nbgraderData: NbgraderData): number {
-    if (nbgraderData === null) {
-      return 0;
-    }
-    return nbgraderData.schema_version;
   }
 
   initLayout() {
@@ -199,33 +172,9 @@ class CellWidget extends Panel {
     if (cell.model == null) {
       return;
     }
-    this.updateValues(cell.model.metadata);
-  }
-
-  isGrade(nbgraderData: NbgraderData): boolean {
-    return nbgraderData != null && nbgraderData.grade == true;
-  }
-
-  isGraded(nbgraderData: NbgraderData): boolean {
-    return this.isGrade(nbgraderData) || this.isTask(nbgraderData);
-  }
-
-  isInvalid(nbgraderData: NbgraderData): boolean {
-    return !this.isTask(nbgraderData) && this.cell.model.type !== 'code' &&
-      (this.isSolution(nbgraderData) != this.isGrade(nbgraderData));
-  }
-
-  isLocked(nbgraderData: NbgraderData): boolean {
-    return !this.isSolution(nbgraderData) && (this.isGraded(nbgraderData) ||
-                                             nbgraderData.locked == true);
-  }
-
-  isSolution(nbgraderData: NbgraderData): boolean {
-    return nbgraderData != null && nbgraderData.solution == true;
-  }
-
-  isTask(nbgraderData: NbgraderData): boolean {
-    return nbgraderData != null && nbgraderData.task == true;
+    const nbgraderData = CellModel.getNbgraderData(cell.model.metadata);
+    const toolData = CellModel.newToolData(nbgraderData, this.cell.model.type);
+    this.updateValues(toolData);
   }
 
   newHeaderElement(): HTMLDivElement {
@@ -290,16 +239,6 @@ class CellWidget extends Panel {
     return element;
   }
 
-  _randomString(length: number): string {
-    var result = '';
-    var chars = 'abcdef0123456789';
-    var i;
-    for (i = 0; i < length; i++) {
-      result += chars[Math.floor(Math.random() * chars.length)];
-    }
-    return result;
-  }
-
   setActive(active: boolean) {
     if (active) {
       this.addClass(CSS_MOD_ACTIVE);
@@ -338,63 +277,21 @@ class CellWidget extends Panel {
     this._taskInput.value = value;
   }
 
-  _to_float(val: any): number {
-    if (val == null || val == '') {
-      return 0;
-    }
-    const valType = typeof(val);
-    if (valType == 'string') {
-      return parseFloat(val);
-    }
-    else if (valType == 'number') {
-      return val;
-    }
-    return 0;
-  }
-
-  updateValues(metadata: IObservableJSON) {
-    const nbgraderValue = metadata.get('nbgrader');
-    const nbgraderData = nbgraderValue == null ? null : nbgraderValue.valueOf() as NbgraderData;
-    if (nbgraderData == null) {
-      this.setTask('');
-      this.setGradeId('');
+  updateValues(data: ToolData) {
+    this.setTask(data.type);
+    if (data.id == null) {
       this.setGradeIdEditable(false);
-      this.setPointsEditable(false);
-      return;
     }
-    if (nbgraderData.task) {
-      this.setTask('task');
-      this.setGradeId(nbgraderData.grade_id);
-      this.setPoints(nbgraderData.points);
+    else {
+      this.setGradeId(data.id);
       this.setGradeIdEditable(true);
-      this.setPointsEditable(true);
-    } else if (nbgraderData.solution && nbgraderData.grade) {
-      this.setTask('manual');
-      this.setGradeId(nbgraderData.grade_id);
-      this.setPoints(nbgraderData.points);
-      this.setGradeIdEditable(true);
-      this.setPointsEditable(true);
-    } else if (nbgraderData.solution && this.cell.model.type === "code") {
-      this.setTask('solution');
-      this.setGradeId(nbgraderData.grade_id);
-      this.setGradeIdEditable(true);
+    }
+    if (data.points == null) {
       this.setPointsEditable(false);
-    } else if (nbgraderData.grade && this.cell.model.type === "code") {
-      this.setTask('tests');
-      this.setGradeId(nbgraderData.grade_id);
-      this.setPoints(nbgraderData.points);
-      this.setGradeIdEditable(true);
+    }
+    else {
+      this.setPoints(data.points);
       this.setPointsEditable(true);
-    } else if (nbgraderData.locked) {
-      this.setTask('readonly');
-      this.setGradeId(nbgraderData.grade_id);
-      this.setGradeIdEditable(true);
-      this.setPointsEditable(false);
-    } else {
-      this.setTask('');
-      this.setGradeId('');
-      this.setGradeIdEditable(false);
-      this.setPointsEditable(false);
     }
   }
 }
