@@ -382,6 +382,20 @@ class NotebookWidget extends Panel {
              }
              break;
            }
+           case 'set': {
+             // Existing notebook cell changed. Update the corresponding widget.
+             const oldCell = this._findDeadCell(this.cellWidgets.keys());
+             if (oldCell != null) {
+               const newCell = this._findCellInArray(args.newValues[0],
+                                                     panel.content.widgets);
+               this.cellWidgets.get(oldCell).dispose();
+               this.cellWidgets.delete(oldCell);
+               const cellWidget = new CellWidget(newCell);
+               cellWidget.setActive(this._activeCell === newCell);
+               this.insertWidget(args.newIndex, cellWidget);
+               this.cellWidgets.set(newCell, cellWidget);
+             }
+           }
          }
     });
   }
@@ -417,10 +431,16 @@ class NotebookWidget extends Panel {
   getActiveCellListener(): (notebook: Notebook, cell: Cell) => void {
     return (notebook: Notebook, cell: Cell) => {
       if (this._activeCell != null) {
-        this.cellWidgets.get(this._activeCell).setActive(false);
+        const activeWidget = this.cellWidgets.get(this._activeCell);
+        if (activeWidget != null) {
+          activeWidget.setActive(false);
+        }
       }
       if (cell != null) {
-        this.cellWidgets.get(cell).setActive(true);
+        const activeWidget = this.cellWidgets.get(cell);
+        if (activeWidget != null) {
+          activeWidget.setActive(true);
+        }
       }
       this._activeCell = cell;
     }
