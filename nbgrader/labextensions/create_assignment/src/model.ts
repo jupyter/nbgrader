@@ -10,6 +10,7 @@ import {
 } from '@lumino/coreutils';
 
 const NBGRADER_KEY = 'nbgrader';
+const NBGRADER_SCHEMA_VERSION = 3;
 
 /**
  * A namespace for conversions between {@link NbgraderData} and
@@ -38,22 +39,17 @@ export namespace CellModel {
    * @returns The converted data, or null if the nbgrader cell type is not set.
    */
   export function newNbgraderData(data: ToolData): NbgraderData {
-    const nbgraderData = new NbgraderData();
-    // TODO
-    switch (data.type) {
-      case '':
-        return null;
-      case 'manual':
-        break;
-      case 'task':
-        break;
-      case 'solution':
-        break;
-      case 'tests':
-        break;
-      case 'readonly':
-        break;
+    if (data.type === '') {
+      return null;
     }
+    const nbgraderData = new NbgraderData();
+    nbgraderData.grade = PrivateToolData.getGrade(data);
+    nbgraderData.grade_id = PrivateToolData.getGradeId(data);
+    nbgraderData.locked = PrivateToolData.getLocked(data);
+    nbgraderData.points = PrivateToolData.getPoints(data);
+    nbgraderData.schema_version = PrivateToolData.getSchemeaVersion();
+    nbgraderData.solution = PrivateToolData.getSolution(data);
+    nbgraderData.task = PrivateToolData.getTask(data);
     return nbgraderData;
   }
 
@@ -67,25 +63,26 @@ export namespace CellModel {
       ToolData {
     const toolData = new ToolData;
 
-    if (Private.isInvalid(data, cellType)) {
+    if (PrivateNbgraderData.isInvalid(data, cellType)) {
       toolData.type = '';
       return toolData;
     }
-    toolData.type = Private.getType(data, cellType);
+    toolData.type = PrivateNbgraderData.getType(data, cellType);
     if (toolData.type === '') {
       return toolData;
     }
 
-    if (Private.isGrade(data) || Private.isSolution(data) ||
-        Private.isLocked(data)) {
-      toolData.id = Private.getGradeId(data);
+    if (PrivateNbgraderData.isGrade(data)
+        || PrivateNbgraderData.isSolution(data)
+        || PrivateNbgraderData.isLocked(data)) {
+      toolData.id = PrivateNbgraderData.getGradeId(data);
     }
 
-    if (Private.isGraded(data)) {
-      toolData.points = Private.getPoints(data);
+    if (PrivateNbgraderData.isGraded(data)) {
+      toolData.points = PrivateNbgraderData.getPoints(data);
     }
 
-    toolData.locked = Private.isLocked(data);
+    toolData.locked = PrivateNbgraderData.isLocked(data);
 
     return toolData;
   }
@@ -102,15 +99,21 @@ export namespace CellModel {
       if (cellMetadata.has(NBGRADER_KEY)) {
         cellMetadata.delete(NBGRADER_KEY);
       }
+      return;
     }
-    cellMetadata.set(NBGRADER_KEY, data.toJson());
+    const currentDataJson = cellMetadata.get(NBGRADER_KEY);
+    const currentData = currentDataJson == null ? null :
+        currentDataJson.valueOf() as NbgraderData;
+    if (currentData != data) {
+      cellMetadata.set(NBGRADER_KEY, data.toJson());
+    }
   }
 }
 
-namespace Private {
+namespace PrivateNbgraderData {
   export function getGradeId(nbgraderData: NbgraderData): string {
     if (nbgraderData == null || nbgraderData.grade_id == null) {
-      return 'cell-' + Private._randomString(16);
+      return '';
     }
     return nbgraderData.grade_id;
   }
@@ -119,7 +122,7 @@ namespace Private {
     if (nbgraderData == null) {
       return 0;
     }
-    return Private._to_float(nbgraderData.points);
+    return PrivateNbgraderData._to_float(nbgraderData.points);
   }
 
   export function getSchemeaVersion(nbgraderData: NbgraderData): number {
@@ -131,15 +134,18 @@ namespace Private {
 
   export function getType(nbgraderData: NbgraderData,
                           cellType: nbformat.CellType): CellType {
-    if (Private.isTask(nbgraderData)) {
+    if (PrivateNbgraderData.isTask(nbgraderData)) {
       return 'task';
-    } else if (Private.isSolution(nbgraderData) && isGrade(nbgraderData)) {
+    } else if (PrivateNbgraderData.isSolution(nbgraderData)
+               && isGrade(nbgraderData)) {
       return 'manual';
-    } else if (Private.isSolution(nbgraderData) && cellType === 'code') {
+    } else if (PrivateNbgraderData.isSolution(nbgraderData)
+               && cellType === 'code') {
       return 'solution';
-    } else if (Private.isGrade(nbgraderData) && cellType === 'code') {
+    } else if (PrivateNbgraderData.isGrade(nbgraderData)
+               && cellType === 'code') {
       return 'tests';
-    } else if (Private.isLocked(nbgraderData)) {
+    } else if (PrivateNbgraderData.isLocked(nbgraderData)) {
       return 'readonly';
     } else {
       return '';
@@ -151,18 +157,21 @@ namespace Private {
   }
 
   export function isGraded(nbgraderData: NbgraderData): boolean {
-    return Private.isGrade(nbgraderData) || Private.isTask(nbgraderData);
+    return PrivateNbgraderData.isGrade(nbgraderData)
+        || PrivateNbgraderData.isTask(nbgraderData);
   }
 
   export function isInvalid(nbgraderData: NbgraderData,
                             cellType: nbformat.CellType): boolean {
-    return !Private.isTask(nbgraderData) && cellType !== 'code'
-        && (Private.isSolution(nbgraderData) != Private.isGrade(nbgraderData));
+    return !PrivateNbgraderData.isTask(nbgraderData) && cellType !== 'code'
+        && (PrivateNbgraderData.isSolution(nbgraderData)
+            != PrivateNbgraderData.isGrade(nbgraderData));
   }
 
   export function isLocked(nbgraderData: NbgraderData): boolean {
-    return !Private.isSolution(nbgraderData) && (Private.isGraded(nbgraderData)
-        || (nbgraderData != null && nbgraderData.locked === true));
+    return !PrivateNbgraderData.isSolution(nbgraderData)
+        && (PrivateNbgraderData.isGraded(nbgraderData)
+            || (nbgraderData != null && nbgraderData.locked === true));
   }
 
   export function isSolution(nbgraderData: NbgraderData): boolean {
@@ -171,16 +180,6 @@ namespace Private {
 
   export function isTask(nbgraderData: NbgraderData): boolean {
     return nbgraderData != null && nbgraderData.task === true;
-  }
-
-  export function _randomString(length: number): string {
-    var result = '';
-    var chars = 'abcdef0123456789';
-    var i;
-    for (i = 0; i < length; i++) {
-      result += chars[Math.floor(Math.random() * chars.length)];
-    }
-    return result;
   }
 
   export function _to_float(val: any): number {
@@ -195,6 +194,46 @@ namespace Private {
       return val;
     }
     return 0;
+  }
+}
+
+namespace PrivateToolData {
+  export function getGrade(data: ToolData): boolean {
+    return data.type === 'manual' || data.type === 'tests';
+  }
+
+  export function getGradeId(data: ToolData): string {
+    return data.id == null ? '' : data.id;
+  }
+
+  export function getLocked(data: ToolData): boolean {
+    if (PrivateToolData.getSolution(data)) {
+      return false;
+    }
+    if (PrivateToolData.getGrade(data)) {
+      return true;
+    }
+    return data.type === 'task' || data.type === 'tests'
+        || data.type === 'readonly';
+  }
+
+  export function getPoints(data: ToolData): number {
+    if (!PrivateToolData.getGrade(data) && !PrivateToolData.getTask(data)) {
+      return undefined;
+    }
+    return data.points >= 0 ? data.points : 0;
+  }
+
+  export function getSchemeaVersion(): number {
+    return NBGRADER_SCHEMA_VERSION;
+  }
+
+  export function getSolution(data: ToolData): boolean {
+    return data.type === 'manual' || data.type === 'solution';
+  }
+
+  export function getTask(data: ToolData): boolean {
+    return data.type === 'task';
   }
 }
 

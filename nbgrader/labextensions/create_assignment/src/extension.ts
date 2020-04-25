@@ -34,6 +34,7 @@ import {
 
 import {
   CellModel,
+  CellType,
   ToolData
 } from './model';
 
@@ -119,6 +120,7 @@ class CellWidget extends Panel {
     this.cell = cell;
     this.addMetadataListener(cell);
     this.initLayout();
+    this.initInputListeners();
     this.initMetadata(cell);
     this.addClass(CSS_CELL_WIDGET);
   }
@@ -144,6 +146,31 @@ class CellWidget extends Panel {
       const toolData = CellModel.newToolData(nbgraderData, this.cell.model.type);
       this.updateValues(toolData);
     }
+  }
+
+  getOnInputChanged(): () => void {
+    return () => {
+      const toolData = new ToolData();
+      toolData.type = this._taskInput.value as CellType;
+      if (!this._gradeId.classList.contains(CSS_MOD_UNEDITABLE)) {
+        toolData.id = this._gradeIdInput.value;
+      }
+      else {
+        toolData.id = 'cell-' + this._randomString(16);
+        this._gradeIdInput.value = toolData.id;
+      }
+      if (!this._points.classList.contains(CSS_MOD_UNEDITABLE)) {
+        toolData.points = this._pointsInput.valueAsNumber;
+      }
+      const data = CellModel.newNbgraderData(toolData);
+      CellModel.setNbgraderData(data, this.cell.model.metadata);
+    }
+  }
+
+  initInputListeners(): void {
+    this._taskInput.onchange = this.getOnInputChanged();
+    this._gradeIdInput.onchange = this.getOnInputChanged();
+    this._pointsInput.onchange = this.getOnInputChanged();
   }
 
   initLayout() {
@@ -206,6 +233,7 @@ class CellWidget extends Panel {
     label.textContent = 'Points: ';
     const input = document.createElement('input');
     input.type = 'number';
+    input.min = '0';
     label.appendChild(input);
     element.appendChild(label);
     return element;
@@ -281,6 +309,7 @@ class CellWidget extends Panel {
     this.setTask(data.type);
     if (data.id == null) {
       this.setGradeIdEditable(false);
+      this.setGradeId('');
     }
     else {
       this.setGradeId(data.id);
@@ -288,11 +317,22 @@ class CellWidget extends Panel {
     }
     if (data.points == null) {
       this.setPointsEditable(false);
+      this.setPoints(0);
     }
     else {
       this.setPoints(data.points);
       this.setPointsEditable(true);
     }
+  }
+
+  private _randomString(length: number): string {
+    var result = '';
+    var chars = 'abcdef0123456789';
+    var i;
+    for (i = 0; i < length; i++) {
+      result += chars[Math.floor(Math.random() * chars.length)];
+    }
+    return result;
   }
 }
 
