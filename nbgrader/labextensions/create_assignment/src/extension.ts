@@ -253,6 +253,10 @@ class CellWidget extends Panel {
       ['tests', 'Autograded task'],
       ['readonly', 'Read-only']
     ]);
+    if (this.cell.model.type !== 'code') {
+      options.delete('solution');
+      options.delete('tests');
+    }
     const fragment = document.createDocumentFragment();
     for (const optionEntry of options.entries()) {
       const option = document.createElement('option');
