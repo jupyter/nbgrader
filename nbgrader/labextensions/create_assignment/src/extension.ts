@@ -311,7 +311,6 @@ class NotebookWidget extends Panel {
     this.addCellListListener(panel);
     this.initCellWidgets(panel.content);
     panel.disposed.connect(this.getNotebookDisposedListener());
-    this.layout.fitPolicy = 'set-no-constraint';
   }
 
   addCellListener(panel: NotebookPanel) {
@@ -349,8 +348,6 @@ class NotebookWidget extends Panel {
 
   addCellWidget(cell: Cell, index = undefined as number): CellWidget {
     const cellWidget = new CellWidget(cell);
-    cellWidget.layout.fitPolicy = 'set-no-constraint';
-    console.log(cellWidget.layout.fitPolicy);
     this.cellWidgets.set(cell, cellWidget);
     if (index == null) {
       this.addWidget(cellWidget);
