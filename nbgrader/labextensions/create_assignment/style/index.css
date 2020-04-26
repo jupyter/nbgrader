@@ -77,18 +77,30 @@
   font-size: var(--jp-ui-font-size1);
 }
 
+.nbgrader-CellHeader {
+  display: grid;
+  grid-template-columns: auto max-content;
+}
+
 .nbgrader-CellHeader>.jp-InputPrompt {
   border-width: 0;
   padding-left: 0;
   text-align: left;
 }
-/*
-.nbgrader-CellWidget select, .nbgrader-CellWidget input {
-  appearance: none;
-  -webkit-appearance: none;
-  -moz-appearance: none;
+
+.nbgrader-CellHeader>.nbgrader-LockButton {
+  margin: auto 0;
+  cursor: default;
 }
-*/
+
+.nbgrader-LockButton {
+  opacity: 0;
+}
+
+.nbgrader-LockButton.nbgrader-mod-locked {
+  opacity: 1;
+}
+
 .nbgrader-CellPoints input {
     width: 3.5em;
     height: 22px;

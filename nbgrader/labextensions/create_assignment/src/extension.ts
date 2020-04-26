@@ -44,7 +44,9 @@ const CSS_CELL_POINTS = 'nbgrader-CellPoints';
 const CSS_CELL_TYPE = 'nbgrader-CellType';
 const CSS_CELL_WIDGET = 'nbgrader-CellWidget';
 const CSS_CREATE_ASSIGNMENT_WIDGET = 'nbgrader-CreateAssignmentWidget';
+const CSS_LOCK_BUTTON = 'nbgrader-LockButton';
 const CSS_MOD_ACTIVE = 'nbgrader-mod-active';
+const CSS_MOD_LOCKED = 'nbgrader-mod-locked';
 const CSS_MOD_UNEDITABLE = 'nbgrader-mod-uneditable';
 const CSS_NOTEBOOK_WIDGET = 'nbgrader-NotebookWidget';
 
@@ -108,6 +110,7 @@ export class CreateAssignmentWidget extends Panel {
  */
 class CellWidget extends Panel {
   cell: Cell;
+  _lock: HTMLAnchorElement;
   _task: HTMLDivElement;
   _gradeId: HTMLDivElement;
   _points: HTMLDivElement;
@@ -186,6 +189,7 @@ class CellWidget extends Panel {
     }
     bodyElement.appendChild(fragment);
     this.node.appendChild(bodyElement);
+    this._lock = headerElement.getElementsByTagName('a')[0];
     this._task = taskElement;
     this._gradeId = idElement;
     this._points = pointsElement;
@@ -211,6 +215,13 @@ class CellWidget extends Panel {
     element.appendChild(promptNode);
     this.cell.model.stateChanged.connect(this.getCellStateChangedListener(
       this.cell.promptNode, promptNode));
+    const lockElement = document.createElement('a');
+    lockElement.className = CSS_LOCK_BUTTON;
+    const listElement = document.createElement('li');
+    listElement.className = 'fa fa-lock';
+    listElement.title = 'Student changes will be overwritten';
+    lockElement.appendChild(listElement);
+    element.appendChild(lockElement);
     return element;
   }
 
@@ -326,6 +337,12 @@ class CellWidget extends Panel {
     else {
       this.setPoints(data.points);
       this.setPointsEditable(true);
+    }
+    if (data.locked) {
+      this._lock.classList.add(CSS_MOD_LOCKED);
+    }
+    else {
+      this._lock.classList.remove(CSS_MOD_LOCKED);
     }
   }
 
