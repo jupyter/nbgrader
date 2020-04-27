@@ -31,16 +31,15 @@ class NbGraderVersionHandler(APIHandler):
 
         self.finish(json.dumps(result))
 
-class RouteHandler(APIHandler):
-    # The following decorator should be present on all verb methods (head, get, post, 
-    # patch, put, delete, options) to ensure only authorized user can request the 
-    # Jupyter server
-    @tornado.web.authenticated
-    def get(self):
-        self.finish(json.dumps({
-            "data": "This is /validate_assignment/get_example endpoint!"
-        }))
+class ValidateAssignmentHandler(APIHandler):
 
+    def validate_notebook(self, path):
+        return { 'success': True, 'message': 'TODO' }
+
+    @tornado.web.authenticated
+    def post(self):
+        output = self.validate_notebook(self.get_argument('path'))
+        self.finish(json.dumps(output))
 
 def setup_handlers(web_app):
     host_pattern = ".*$"
@@ -48,7 +47,8 @@ def setup_handlers(web_app):
     base_url = web_app.settings["base_url"]
     route_pattern = url_path_join(base_url, "validate_assignment", "get_example")
     handlers = [
-        # (route_pattern, RouteHandler),
+        (url_path_join(base_url, "validate_assignment", "assignments/validate"),
+         ValidateAssignmentHandler),
         (url_path_join(base_url, "validate_assignment", "nbgrader_version"),
          NbGraderVersionHandler),
     ]

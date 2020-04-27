@@ -39,63 +39,49 @@ class ButtonExtension implements DocumentRegistry.IWidgetExtension<NotebookPanel
    */
   createNew(panel: NotebookPanel, context: DocumentRegistry.IContext<INotebookModel>): IDisposable {
     let callback = () => {
-      // examples/notebook/src/commands.ts:79
-      panel.context.save();
-      // TODO
-      // button.title = "Saving...";
-      // tests/test-docregistry/src/context.spec.ts:98
-      const notebookSaved = (sender: DocumentRegistry.IContext<INotebookModel>,
-                             args: DocumentRegistry.SaveState) => {
-        if (args == "completed") {
-          requestAPI<any>('nbgrader_version?version=' + nbgrader_version)
-            .then(data => {
-              if (data.success) {
-                showDialog({
-                  title: "My Dialog",
-                  body: JSON.stringify(data),
-                  buttons: [Dialog.okButton()],
-                  focusNodeSelector: 'input'
-                });
-              } else {
-                error_dialog(data.message);
+      requestAPI<any>('nbgrader_version?version=' + nbgrader_version)
+        .then(data => {
+          if (data.success) {
+            // TODO: button.title = "Saving...";
+            // tests/test-docregistry/src/context.spec.ts:98
+            const notebookSaved = (
+              sender: DocumentRegistry.IContext<INotebookModel>,
+              args: DocumentRegistry.SaveState) => {
+              if (args == "completed") {
+                panel.context.saveState.disconnect(notebookSaved);
+                // TODO: button.title = 'Validating...'
+                // TODO: btn.attr('disabled', 'disabled');
+                requestAPI<any>('assignments/validate?path=TODO_UNKNOWN_PATH')
+                  .then(data => {
+                    error_dialog("TODO1");
+                    /*
+                    showDialog({
+                      title: "My Dialog",
+                      body: JSON.stringify(data),
+                      buttons: [Dialog.okButton()],
+                      focusNodeSelector: 'input'
+                    });
+                    */
+                  })
+                  .catch(reason => {
+                    error_dialog(`TODO2: ${reason}`);
+                  });
+              } else if (args == "failed") {
+                panel.context.saveState.disconnect(notebookSaved);
+                error_dialog("Cannot save notebook");
               }
-            })
-            .catch(reason => {
-              // The validate_assignment server extension appears to be missing
-              error_dialog(`Cannot connect to backend: ${reason}`);
-            });
-          // TODO
-          /*
-          var settings = {
-              cache : false,
-              data : { path: Jupyter.notebook.notebook_path },
-              type : "POST",
-              dataType : "json",
-              success : function (data, status, xhr) {
-                  btn.text('Validate');
-                  btn.removeAttr('disabled');
-                  validate(data, btn);
-              },
-              error : function (xhr, status, error) {
-                  utils.log_ajax_error(xhr, status, error);
-              }
-          };
-          btn.text('Validating...');
-          btn.attr('disabled', 'disabled');
-          var url = utils.url_path_join(
-              Jupyter.notebook.base_url,
-              'assignments',
-              'validate'
-          );
-          ajax(url, settings);
-          */
-          panel.context.saveState.disconnect(notebookSaved);
-        } else if (args == "failed") {
-          error_dialog("Cannot save notebook");
-          panel.context.saveState.disconnect(notebookSaved);
-        }
-      };
-      panel.context.saveState.connect(notebookSaved);
+            };
+            panel.context.saveState.connect(notebookSaved);
+            // examples/notebook/src/commands.ts:79
+            panel.context.save();
+          } else {
+            error_dialog(data.message);
+          }
+        })
+        .catch(reason => {
+          // The validate_assignment server extension appears to be missing
+          error_dialog(`Cannot connect to backend: ${reason}`);
+        });
     };
     let button = new ToolbarButton({
       className: 'validate-button',
