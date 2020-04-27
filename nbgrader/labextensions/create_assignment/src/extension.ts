@@ -29,6 +29,11 @@ import {
 } from '@lumino/coreutils';
 
 import {
+  ISignal,
+  Signal
+} from '@lumino/signaling';
+
+import {
   Panel
 } from '@lumino/widgets';
 
@@ -110,6 +115,7 @@ export class CreateAssignmentWidget extends Panel {
  */
 class CellWidget extends Panel {
   cell: Cell;
+  _click = new Signal<this, void>(this);
   _lock: HTMLAnchorElement;
   _task: HTMLDivElement;
   _gradeId: HTMLDivElement;
@@ -123,6 +129,7 @@ class CellWidget extends Panel {
     this.cell = cell;
     this.addMetadataListener(cell);
     this.initLayout();
+    this.initClickListener();
     this.initInputListeners();
     this.initMetadata(cell);
     this.addClass(CSS_CELL_WIDGET);
@@ -131,6 +138,10 @@ class CellWidget extends Panel {
   async addMetadataListener(cell: Cell) {
     await cell.ready;
     cell.model.metadata.changed.connect(this.getMetadataChangedHandler());
+  }
+
+  get click(): ISignal<this, void> {
+    return this._click;
   }
 
   getCellStateChangedListener(srcPrompt: HTMLElement, destPrompt: HTMLElement):
@@ -168,6 +179,12 @@ class CellWidget extends Panel {
       const data = CellModel.newNbgraderData(toolData);
       CellModel.setNbgraderData(data, this.cell.model.metadata);
     }
+  }
+
+  initClickListener(): void {
+    this.node.addEventListener('click', () => {
+      this._click.emit();
+    });
   }
 
   initInputListeners(): void {
@@ -362,11 +379,13 @@ class CellWidget extends Panel {
  */
 class NotebookWidget extends Panel {
   _activeCell = null as Cell;
+  _notebookPanel: NotebookPanel;
   cellWidgets = new Map<Cell, CellWidget>();
 
   constructor(panel: NotebookPanel) {
     super();
     this._activeCell = panel.content.activeCell;
+    this._notebookPanel = panel;
     this.addClass(CSS_NOTEBOOK_WIDGET);
     this.addCellListener(panel);
     this.addCellListListener(panel);
@@ -411,13 +430,11 @@ class NotebookWidget extends Panel {
                                                      panel.content.widgets);
                this.cellWidgets.get(oldCell).dispose();
                this.cellWidgets.delete(oldCell);
-               const cellWidget = new CellWidget(newCell);
+               const cellWidget = this.addCellWidget(newCell, args.newIndex);
                if (this._activeCell === newCell) {
                  cellWidget.setActive(this._activeCell === newCell);
                  this._scrollIntoViewNearest(cellWidget);
                }
-               this.insertWidget(args.newIndex, cellWidget);
-               this.cellWidgets.set(newCell, cellWidget);
              }
            }
          }
@@ -433,6 +450,7 @@ class NotebookWidget extends Panel {
     else {
       this.insertWidget(index, cellWidget);
     }
+    cellWidget.click.connect(this.getActiveCellWidgetListener());
     return cellWidget;
   }
 
@@ -468,6 +486,14 @@ class NotebookWidget extends Panel {
         }
       }
       this._activeCell = cell;
+    }
+  }
+
+  getActiveCellWidgetListener():
+      (cellWidget: CellWidget) => void {
+    return (cellWidget: CellWidget) => {
+      const i = this._notebookPanel.content.widgets.indexOf(cellWidget.cell);
+      this._notebookPanel.content.activeCellIndex = i;
     }
   }
 
