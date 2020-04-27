@@ -45,7 +45,6 @@ def setup_handlers(web_app):
     host_pattern = ".*$"
     
     base_url = web_app.settings["base_url"]
-    route_pattern = url_path_join(base_url, "validate_assignment", "get_example")
     handlers = [
         (url_path_join(base_url, "validate_assignment", "assignments/validate"),
          ValidateAssignmentHandler),
