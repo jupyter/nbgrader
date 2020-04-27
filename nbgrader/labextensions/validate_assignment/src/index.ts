@@ -21,6 +21,15 @@ import {
 
 import { requestAPI } from './validateassignment';
 
+function error_dialog(body: string): void {
+  showDialog({
+    title: "Validation failed",
+    body: body,
+    buttons: [Dialog.okButton()],
+    focusNodeSelector: 'input'
+  });
+}
+
 export
 class ButtonExtension implements DocumentRegistry.IWidgetExtension<NotebookPanel, INotebookModel> {
   /**
@@ -36,6 +45,15 @@ class ButtonExtension implements DocumentRegistry.IWidgetExtension<NotebookPanel
       const notebookSaved = (sender: DocumentRegistry.IContext<INotebookModel>,
                              args: DocumentRegistry.SaveState) => {
         if (args == "completed") {
+          requestAPI<any>('get_example')
+            .then(data => {
+              console.log(data);
+              error_dialog('Success');
+            })
+            .catch(reason => {
+              // The validate_assignment server extension appears to be missing
+              error_dialog(`Cannot connect to backend: ${reason}`);
+            });
           // TODO
           /*
           var settings = {
@@ -69,12 +87,7 @@ class ButtonExtension implements DocumentRegistry.IWidgetExtension<NotebookPanel
           });
           panel.context.saveState.disconnect(notebookSaved);
         } else if (args == "failed") {
-          showDialog({
-            title: "Validation failed",
-            body: "Cannot save notebook",
-            buttons: [Dialog.okButton()],
-            focusNodeSelector: 'input'
-          });
+          error_dialog("Cannot save notebook");
           panel.context.saveState.disconnect(notebookSaved);
         }
       };
@@ -116,16 +129,6 @@ const extension: JupyterFrontEndPlugin<void> = {
   activate: (app: JupyterFrontEnd) => {
     console.log('JupyterLab extension validate-assignment is activated!');
     app.docRegistry.addWidgetExtension('Notebook', new ButtonExtension());
-
-    requestAPI<any>('get_example')
-      .then(data => {
-        console.log(data);
-      })
-      .catch(reason => {
-        console.error(
-          `The validate_assignment server extension appears to be missing.\n${reason}`
-        );
-      });
   }
 };
 
