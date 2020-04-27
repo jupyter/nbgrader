@@ -58,6 +58,10 @@ sudo mount -t tmpfs tmpfs ~/.cache/yarn
 jupyter labextension uninstall validate-assignment
 ```
 
+#### Uninstall by removing files
+The installed extensions may be in `~/.local/share/jupyter/lab`. This directory
+ is discovered by `strace jupyter labextension list`. 
+
 ### Note
 https://jupyterlab.readthedocs.io/en/stable/developer/notebook.html#how-to-extend-the-notebook-plugin
 `npm install --save @jupyterlab/notebook @jupyterlab/application @jupyterlab/apputils @jupyterlab/docregistry @lumino/disposable`
