@@ -34,7 +34,7 @@ class NbGraderVersionHandler(APIHandler):
 class ValidateAssignmentHandler(APIHandler):
 
     def validate_notebook(self, path):
-        return { 'success': True, 'message': 'TODO' }
+        return { 'success': True, 'message': 'TODO:' + path }
 
     @tornado.web.authenticated
     def post(self):

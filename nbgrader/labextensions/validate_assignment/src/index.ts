@@ -51,21 +51,18 @@ class ButtonExtension implements DocumentRegistry.IWidgetExtension<NotebookPanel
                 panel.context.saveState.disconnect(notebookSaved);
                 // TODO: button.title = 'Validating...'
                 // TODO: btn.attr('disabled', 'disabled');
-                requestAPI<any>('assignments/validate?path=TODO_UNKNOWN_PATH',
-                  { method: 'POST' })
+                requestAPI<any>('assignments/validate?path=TODO_UNKNOWN_PATH1',
+                  { method: 'POST', body: "path=TODO_UNKNOWN_PATH2" })
                   .then(data => {
-                    error_dialog("TODO1");
-                    /*
                     showDialog({
                       title: "My Dialog",
                       body: JSON.stringify(data),
                       buttons: [Dialog.okButton()],
                       focusNodeSelector: 'input'
                     });
-                    */
                   })
                   .catch(reason => {
-                    error_dialog(`TODO2: ${reason}`);
+                    error_dialog(`Cannot validate: ${reason}`);
                   });
               } else if (args == "failed") {
                 panel.context.saveState.disconnect(notebookSaved);
@@ -81,7 +78,7 @@ class ButtonExtension implements DocumentRegistry.IWidgetExtension<NotebookPanel
         })
         .catch(reason => {
           // The validate_assignment server extension appears to be missing
-          error_dialog(`Cannot connect to backend: ${reason}`);
+          error_dialog(`Cannot check version: ${reason}`);
         });
     };
     let button = new ToolbarButton({
