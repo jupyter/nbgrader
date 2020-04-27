@@ -30,6 +30,8 @@ function error_dialog(body: string): void {
   });
 }
 
+var nbgrader_version = "0.7.0.dev"; // TODO: hardcoded value
+
 export
 class ButtonExtension implements DocumentRegistry.IWidgetExtension<NotebookPanel, INotebookModel> {
   /**
@@ -45,15 +47,18 @@ class ButtonExtension implements DocumentRegistry.IWidgetExtension<NotebookPanel
       const notebookSaved = (sender: DocumentRegistry.IContext<INotebookModel>,
                              args: DocumentRegistry.SaveState) => {
         if (args == "completed") {
-          requestAPI<any>('get_example')
+          requestAPI<any>('nbgrader_version?version=' + nbgrader_version)
             .then(data => {
-              console.log(data);
-              showDialog({
-                title: "My Dialog",
-                body: JSON.stringify(data),
-                buttons: [Dialog.okButton()],
-                focusNodeSelector: 'input'
-              });
+              if (data.success) {
+                showDialog({
+                  title: "My Dialog",
+                  body: JSON.stringify(data),
+                  buttons: [Dialog.okButton()],
+                  focusNodeSelector: 'input'
+                });
+              } else {
+                error_dialog(data.message);
+              }
             })
             .catch(reason => {
               // The validate_assignment server extension appears to be missing
