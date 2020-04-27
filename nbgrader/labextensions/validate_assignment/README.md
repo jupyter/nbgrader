@@ -20,6 +20,11 @@ The `jlpm` command is JupyterLab's pinned version of
 # Clone the repo to your local environment
 # Move to validate_assignment directory
 
+# Install server extension
+pip install -e .
+# Register server extension
+jupyter serverextension enable --py validate_assignment
+
 # Install dependencies
 jlpm
 # Build Typescript source

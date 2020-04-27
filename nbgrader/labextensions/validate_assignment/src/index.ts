@@ -48,7 +48,12 @@ class ButtonExtension implements DocumentRegistry.IWidgetExtension<NotebookPanel
           requestAPI<any>('get_example')
             .then(data => {
               console.log(data);
-              error_dialog('Success');
+              showDialog({
+                title: "My Dialog",
+                body: JSON.stringify(data),
+                buttons: [Dialog.okButton()],
+                focusNodeSelector: 'input'
+              });
             })
             .catch(reason => {
               // The validate_assignment server extension appears to be missing
@@ -79,12 +84,6 @@ class ButtonExtension implements DocumentRegistry.IWidgetExtension<NotebookPanel
           );
           ajax(url, settings);
           */
-          showDialog({
-            title: "My Dialog",
-            body: "Hello",
-            buttons: [Dialog.okButton()],
-            focusNodeSelector: 'input'
-          });
           panel.context.saveState.disconnect(notebookSaved);
         } else if (args == "failed") {
           error_dialog("Cannot save notebook");
