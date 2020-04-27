@@ -412,7 +412,10 @@ class NotebookWidget extends Panel {
                this.cellWidgets.get(oldCell).dispose();
                this.cellWidgets.delete(oldCell);
                const cellWidget = new CellWidget(newCell);
-               cellWidget.setActive(this._activeCell === newCell);
+               if (this._activeCell === newCell) {
+                 cellWidget.setActive(this._activeCell === newCell);
+                 this._scrollIntoViewNearest(cellWidget);
+               }
                this.insertWidget(args.newIndex, cellWidget);
                this.cellWidgets.set(newCell, cellWidget);
              }
@@ -461,6 +464,7 @@ class NotebookWidget extends Panel {
         const activeWidget = this.cellWidgets.get(cell);
         if (activeWidget != null) {
           activeWidget.setActive(true);
+          this._scrollIntoViewNearest(activeWidget);
         }
       }
       this._activeCell = cell;
@@ -492,5 +496,23 @@ class NotebookWidget extends Panel {
     }
     this.cellWidgets.delete(cell);
     cellWidget.dispose();
+  }
+
+  private _scrollIntoViewNearest(widget: CellWidget) {
+    const parentTop = this.node.scrollTop;
+    const parentBottom = parentTop + this.node.clientHeight;
+    const widgetTop = widget.node.offsetTop;
+    const widgetBottom = widgetTop + widget.node.clientHeight;
+    if (widgetTop < parentTop) {
+      widget.node.scrollIntoView(true);
+    }
+    else if (widgetBottom > parentBottom) {
+      if (widgetBottom - widgetTop > parentBottom - parentTop) {
+        widget.node.scrollIntoView(true);
+      }
+      else {
+        widget.node.scrollIntoView(false);
+      }
+    }
   }
 }
