@@ -51,7 +51,8 @@ class ButtonExtension implements DocumentRegistry.IWidgetExtension<NotebookPanel
                 panel.context.saveState.disconnect(notebookSaved);
                 // TODO: button.title = 'Validating...'
                 // TODO: btn.attr('disabled', 'disabled');
-                requestAPI<any>('assignments/validate?path=TODO_UNKNOWN_PATH')
+                requestAPI<any>('assignments/validate?path=TODO_UNKNOWN_PATH',
+                  { method: 'POST' })
                   .then(data => {
                     error_dialog("TODO1");
                     /*
