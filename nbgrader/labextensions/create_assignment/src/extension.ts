@@ -14,6 +14,11 @@ import {
 } from '@jupyterlab/coreutils';
 
 import {
+  DocumentRegistry
+} from '@jupyterlab/docregistry';
+
+import {
+  INotebookModel,
   INotebookTracker,
   Notebook,
   NotebookPanel
@@ -395,6 +400,7 @@ class NotebookWidget extends Panel {
     this.addCellListListener(panel);
     this.initCellWidgets(panel.content);
     this.validateSchemaVersion();
+    this.addValidateIdsListener();
     panel.disposed.connect(this.getNotebookDisposedListener());
   }
 
@@ -457,6 +463,17 @@ class NotebookWidget extends Panel {
     }
     cellWidget.click.connect(this.getActiveCellWidgetListener());
     return cellWidget;
+  }
+
+  addValidateIdsListener(): void {
+    this._notebookPanel.context.saveState.connect(
+      (context: DocumentRegistry.IContext<INotebookModel>,
+       args: DocumentRegistry.SaveState) => {
+         if (args != 'started') {
+           return;
+         }
+         this.validateIds();
+      });
   }
 
   _findCellInArray(model: ICellModel, cells: readonly Cell[]): Cell {
@@ -529,6 +546,28 @@ class NotebookWidget extends Panel {
     cellWidget.dispose();
   }
 
+  validateIds(): void {
+    const set = new Set<string>();
+    const valid = /^[a-zA-Z0-9_\-]+$/;
+    const iter = this._notebookPanel.model.cells.iter();
+    for (let cellModel = iter.next(); cellModel != null;
+         cellModel = iter.next()) {
+      const data = CellModel.getNbgraderData(cellModel.metadata)
+      const id = data == null ? null : data.grade_id;
+      if (!valid.test(id)) {
+        this.warnInvalidId(true, false, id);
+        return;
+      }
+      else if (set.has(id)) {
+        this.warnInvalidId(false, true, id);
+        return;
+      }
+      else {
+        set.add(id);
+      }
+    }
+  }
+
   validateSchemaVersion(): void {
     const iter = this._notebookPanel.model.cells.iter();
     for (let cellModel = iter.next(); cellModel != null;
@@ -539,6 +578,29 @@ class NotebookWidget extends Panel {
         this.warnSchemaVersion(version);
         return;
       }
+    }
+  }
+
+  warnInvalidId(badFormat: boolean, duplicateId: boolean, id: string) {
+    const options = {
+      buttons: [Dialog.okButton()],
+      title: undefined as string,
+      body: undefined as string
+    };
+    if (badFormat) {
+      options.title = 'Invalid nbgrader cell ID';
+      options.body = 'At least one cell has an invalid nbgrader ID. Cell IDs ' +
+          'must contain at least one character, and may only contain ' +
+          'letters, numbers, hyphens, and/or underscores.';
+      showDialog(options);
+      return;
+    }
+    else if (duplicateId) {
+      options.title = 'Duplicate nbgrader cell ID';
+      options.body = `The nbgrader ID "${id}" has been used for more than ` +
+          `one cell. Please make sure all grade cells have unique ids.`;
+      showDialog(options);
+      return;
     }
   }
 
