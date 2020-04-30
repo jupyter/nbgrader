@@ -1,4 +1,6 @@
 import {
+  Dialog,
+  showDialog,
   Styling
 } from '@jupyterlab/apputils';
 
@@ -34,12 +36,14 @@ import {
 } from '@lumino/signaling';
 
 import {
-  Panel
+  Panel,
+  Widget
 } from '@lumino/widgets';
 
 import {
   CellModel,
   CellType,
+  NBGRADER_SCHEMA_VERSION,
   ToolData
 } from './model';
 
@@ -390,6 +394,7 @@ class NotebookWidget extends Panel {
     this.addCellListener(panel);
     this.addCellListListener(panel);
     this.initCellWidgets(panel.content);
+    this.validateSchemaVersion();
     panel.disposed.connect(this.getNotebookDisposedListener());
   }
 
@@ -522,6 +527,40 @@ class NotebookWidget extends Panel {
     }
     this.cellWidgets.delete(cell);
     cellWidget.dispose();
+  }
+
+  validateSchemaVersion(): void {
+    const iter = this._notebookPanel.model.cells.iter();
+    for (let cellModel = iter.next(); cellModel != null;
+         cellModel = iter.next()) {
+      const data = CellModel.getNbgraderData(cellModel.metadata)
+      const version = data == null ? null : data.schema_version;
+      if (version != null && version < NBGRADER_SCHEMA_VERSION) {
+        this.warnSchemaVersion(version);
+        return;
+      }
+    }
+  }
+
+  warnSchemaVersion(schemaVersion: number): void {
+    const version = schemaVersion.toString();
+    const notebookPath = this._notebookPanel.sessionContext.path;
+    const body = document.createElement('p');
+    const code = document.createElement('code');
+    const bodyWidget = new Widget({node: body});
+    const options = {
+      title: 'Outdated schema version',
+      body: bodyWidget,
+      buttons: [Dialog.okButton()]
+    }
+    body.innerText =
+        `At least one cell has an old version (${version}) of the ` +
+        'nbgrader metadata. Please back up this notebook and then ' +
+        'update the metadata on the command ' +
+        'line using the following command: ';
+    code.innerText = `nbgrader update ${notebookPath}`;
+    body.appendChild(code);
+    showDialog(options);
   }
 
   private _scrollIntoViewNearest(widget: CellWidget) {
