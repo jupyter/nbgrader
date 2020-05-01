@@ -62,14 +62,18 @@ const CSS_LOCK_BUTTON = 'nbgrader-LockButton';
 const CSS_MOD_ACTIVE = 'nbgrader-mod-active';
 const CSS_MOD_LOCKED = 'nbgrader-mod-locked';
 const CSS_MOD_UNEDITABLE = 'nbgrader-mod-uneditable';
+const CSS_NOTEBOOK_HEADER_WIDGET = 'nbgrader-NotebookHeaderWidget';
+const CSS_NOTEBOOK_PANEL_WIDGET = 'nbgrader-NotebookPanelWidget';
+const CSS_NOTEBOOK_POINTS = 'nbgrader-NotebookPoints';
 const CSS_NOTEBOOK_WIDGET = 'nbgrader-NotebookWidget';
+const CSS_TOTAL_POINTS_INPUT = 'nbgrader-TotalPointsInput';
 
 /**
  * A widget which shows the "Create Assignment" widgets for the active notebook.
  */
 export class CreateAssignmentWidget extends Panel {
   activeNotebook: NotebookPanel;
-  assignmentWidgets = new Map<NotebookPanel, NotebookWidget>();
+  notebookPanelWidgets = new Map<NotebookPanel, NotebookPanelWidget>();
   notebookTracker: INotebookTracker;
 
   constructor(tracker: INotebookTracker) {
@@ -88,13 +92,13 @@ export class CreateAssignmentWidget extends Panel {
   getCurrentNotebookListener(): (tracker: INotebookTracker, panel: NotebookPanel) => void {
     return (tracker: INotebookTracker, panel: NotebookPanel) => {
       if (this.activeNotebook != null) {
-        const widget = this.assignmentWidgets.get(this.activeNotebook);
+        const widget = this.notebookPanelWidgets.get(this.activeNotebook);
         if (widget != null) {
           widget.hide();
         }
       }
       if (panel != null) {
-        const widget = this.assignmentWidgets.get(panel)
+        const widget = this.notebookPanelWidgets.get(panel)
         if (widget != null) {
           widget.show();
         }
@@ -106,14 +110,14 @@ export class CreateAssignmentWidget extends Panel {
   getNotebookAddedListener(): (tracker: INotebookTracker, panel: NotebookPanel) => void {
     return async (tracker: INotebookTracker, panel: NotebookPanel) => {
       await panel.revealed
-      const notebookWidget = new NotebookWidget(panel);
-      this.addWidget(notebookWidget);
-      this.assignmentWidgets.set(panel, notebookWidget);
-      notebookWidget.disposed.connect(() => {
-        this.assignmentWidgets.delete(panel);
+      const notebookPanelWidget = new NotebookPanelWidget(panel);
+      this.addWidget(notebookPanelWidget);
+      this.notebookPanelWidgets.set(panel, notebookPanelWidget);
+      notebookPanelWidget.disposed.connect(() => {
+        this.notebookPanelWidgets.delete(panel);
       })
       if (tracker.currentWidget != panel) {
-        notebookWidget.hide();
+        notebookPanelWidget.hide();
       }
     }
   }
@@ -384,11 +388,53 @@ class CellWidget extends Panel {
 }
 
 /**
- * Contains a notebook's "Create Assignment" UI.
+ * The header of a notebook's Create Assignment widget.
+ *
+ * Displays the total points in the notebook.
+ */
+class NotebookHeaderWidget extends Widget {
+  _pointsInput: HTMLInputElement;
+
+  constructor() {
+    super();
+    this.addClass(CSS_NOTEBOOK_HEADER_WIDGET);
+    this.initLayout();
+  }
+
+  initLayout(): void {
+    const totalPoints = this.newTotalPointsElement();
+    this.node.appendChild(totalPoints);
+    this._pointsInput = totalPoints.getElementsByTagName('input')[0];
+  }
+
+  newTotalPointsElement(): HTMLDivElement {
+    const element = document.createElement('div');
+    element.className = CSS_NOTEBOOK_POINTS;
+    const label = document.createElement('label');
+    label.innerText = 'Total points:';
+    const input = document.createElement('input');
+    input.className = CSS_TOTAL_POINTS_INPUT;
+    input.type = 'number';
+    input.disabled = true;
+    label.appendChild(input);
+    element.appendChild(label);
+    return element;
+  }
+
+  set totalPoints(points: number) {
+    if (this._pointsInput != null) {
+      this._pointsInput.value = points.toString();
+    }
+  }
+}
+
+/**
+ * Contains a list of {@link CellWidget}s for a notebook.
  */
 class NotebookWidget extends Panel {
   _activeCell = null as Cell;
   _notebookPanel: NotebookPanel;
+  cellMetadataChanged = new Signal<this, CellWidget>(this);
   cellWidgets = new Map<Cell, CellWidget>();
 
   constructor(panel: NotebookPanel) {
@@ -462,6 +508,7 @@ class NotebookWidget extends Panel {
       this.insertWidget(index, cellWidget);
     }
     cellWidget.click.connect(this.getActiveCellWidgetListener());
+    cell.model.metadata.changed.connect(this.getMetadataChangedHandler(cellWidget));
     return cellWidget;
   }
 
@@ -532,9 +579,22 @@ class NotebookWidget extends Panel {
     }
   }
 
+  getMetadataChangedHandler(cellWidget: CellWidget):
+      (metadata: IObservableJSON,
+       args: IObservableMap.IChangedArgs<ReadonlyPartialJSONValue>) => void {
+    return (metadata: IObservableJSON,
+            args: IObservableMap.IChangedArgs<ReadonlyPartialJSONValue>) => {
+      this.cellMetadataChanged.emit(cellWidget);
+    }
+  }
+
   moveCellWidget(cell: Cell, index: number) {
     const cellWidget = this.cellWidgets.get(cell);
     this.insertWidget(index, cellWidget);
+  }
+
+  get notebookPanel(): NotebookPanel {
+    return this._notebookPanel;
   }
 
   removeCellWidget(cell: Cell) {
@@ -641,5 +701,54 @@ class NotebookWidget extends Panel {
         widget.node.scrollIntoView(false);
       }
     }
+  }
+}
+
+/**
+ * Contains a notebook's "Create Assignment" UI.
+ */
+class NotebookPanelWidget extends Panel {
+  _notebookHeaderWidget: NotebookHeaderWidget;
+  _notebookWidget: NotebookWidget;
+
+  constructor(panel: NotebookPanel) {
+    super();
+    this.addClass(CSS_NOTEBOOK_PANEL_WIDGET);
+    this.initLayout(panel);
+    this.setUpTotalPoints();
+  }
+
+  calcTotalPoints(): number {
+    let totalPoints = 0;
+    const iter = this._notebookWidget.notebookPanel.model.cells.iter();
+    for (let cellModel = iter.next(); cellModel != null;
+         cellModel = iter.next()) {
+      const data = CellModel.getNbgraderData(cellModel.metadata);
+      const points = (data == null || data.points == null) ? 0 : data.points;
+      totalPoints += points;
+    }
+    return totalPoints;
+  }
+
+  initLayout(panel: NotebookPanel): void {
+    this._notebookHeaderWidget = new NotebookHeaderWidget();
+    this._notebookWidget = new NotebookWidget(panel);
+    this.addWidget(this._notebookHeaderWidget);
+    this.addWidget(this._notebookWidget);
+  }
+
+  setUpTotalPoints(): void {
+    this._notebookHeaderWidget.totalPoints = this.calcTotalPoints();
+    this._notebookWidget.notebookPanel.model.cells.changed.connect(
+      (cellModels: IObservableUndoableList<ICellModel>,
+       args: IObservableList.IChangedArgs<ICellModel>) => {
+         if (args.type != 'move') {
+           this._notebookHeaderWidget.totalPoints = this.calcTotalPoints();
+         }
+       });
+    this._notebookWidget.cellMetadataChanged.connect(
+       (notebookWidget: NotebookWidget, cellWidget: CellWidget) => {
+         this._notebookHeaderWidget.totalPoints = this.calcTotalPoints();
+       });
   }
 }

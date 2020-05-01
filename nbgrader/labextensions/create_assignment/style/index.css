@@ -8,6 +8,40 @@
   color: var(--jp-ui-font-color1);
 }
 
+.nbgrader-NotebookPanelWidget {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.nbgrader-NotebookHeaderWidget {
+  padding-top: 12px;
+  border-bottom: solid var(--jp-border-color1) var(--jp-border-width);
+  box-shadow: var(--jp-toolbar-box-shadow);
+}
+
+.nbgrader-NotebookHeaderWidget>* {
+  padding: 0 12px;
+}
+
+.nbgrader-TotalPointsInput {
+  width: 3em;
+  height: 24px;
+  text-align: right;
+  line-height: 10px;
+  margin-left: 0.3em;
+  margin-right: 0.3em;
+
+  background: var(--jp-input-background);
+  font-size: var(--jp-ui-font-size1);
+  font-family: var(--jp-content-font-family);
+  color: var(--jp-ui-font-color0);
+  border: var(--jp-border-width) solid var(--jp-border-color1);
+  flex: 1 1 auto;
+  padding: 0 8px 0 8px;
+  outline: none;
+}
+
 .nbgrader-NotebookWidget {
   overflow: auto;
   height: 100%;
@@ -69,7 +103,7 @@
   cursor: pointer;
 }
 
-.nbgrader-CellHeader, .nbgrader-CellType, .nbgrader-CellPoints, .nbgrader-CellId {
+.nbgrader-NotebookPoints, .nbgrader-CellHeader, .nbgrader-CellType, .nbgrader-CellPoints, .nbgrader-CellId {
   margin-bottom: 12px;
 }
 
