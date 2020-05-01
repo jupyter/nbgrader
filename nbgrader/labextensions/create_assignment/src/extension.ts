@@ -744,7 +744,8 @@ class NotebookPanelWidget extends Panel {
     for (let cellModel = iter.next(); cellModel != null;
          cellModel = iter.next()) {
       const data = CellModel.getNbgraderData(cellModel.metadata);
-      const points = (data == null || data.points == null) ? 0 : data.points;
+      const points = (data == null || data.points == null
+                      || !CellModel.isGraded(data)) ? 0 : data.points;
       totalPoints += points;
     }
     return totalPoints;
