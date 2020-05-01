@@ -114,6 +114,11 @@
 .nbgrader-CellHeader {
   display: grid;
   grid-template-columns: auto max-content;
+  border-bottom: solid var(--jp-border-width) var(--jp-border-color0);
+}
+
+.nbgrader-mod-highlight .nbgrader-CellHeader {
+  border-bottom-color: var(--jp-brand-color1);
 }
 
 .nbgrader-CellHeader>.jp-InputPrompt {
@@ -123,7 +128,7 @@
 }
 
 .nbgrader-CellHeader>.nbgrader-LockButton {
-  margin: auto 0;
+  margin: auto 0 0 0;
   cursor: default;
 }
 

@@ -60,6 +60,7 @@ const CSS_CELL_WIDGET = 'nbgrader-CellWidget';
 const CSS_CREATE_ASSIGNMENT_WIDGET = 'nbgrader-CreateAssignmentWidget';
 const CSS_LOCK_BUTTON = 'nbgrader-LockButton';
 const CSS_MOD_ACTIVE = 'nbgrader-mod-active';
+const CSS_MOD_HIGHLIGHT = 'nbgrader-mod-highlight';
 const CSS_MOD_LOCKED = 'nbgrader-mod-locked';
 const CSS_MOD_UNEDITABLE = 'nbgrader-mod-uneditable';
 const CSS_NOTEBOOK_HEADER_WIDGET = 'nbgrader-NotebookHeaderWidget';
@@ -194,6 +195,14 @@ class CellWidget extends Panel {
     }
   }
 
+  getOnTaskInputChanged(): () => void {
+    const onInputChanged = this.getOnInputChanged();
+    return () => {
+      onInputChanged();
+      this.updateDisplayClass();
+    }
+  }
+
   initClickListener(): void {
     this.node.addEventListener('click', () => {
       this._click.emit();
@@ -201,7 +210,7 @@ class CellWidget extends Panel {
   }
 
   initInputListeners(): void {
-    this._taskInput.onchange = this.getOnInputChanged();
+    this._taskInput.onchange = this.getOnTaskInputChanged();
     this._gradeIdInput.onchange = this.getOnInputChanged();
     this._pointsInput.onchange = this.getOnInputChanged();
   }
@@ -235,6 +244,7 @@ class CellWidget extends Panel {
     }
     const nbgraderData = CellModel.getNbgraderData(cell.model.metadata);
     const toolData = CellModel.newToolData(nbgraderData, this.cell.model.type);
+    this.updateDisplayClass();
     this.updateValues(toolData);
   }
 
@@ -348,6 +358,16 @@ class CellWidget extends Panel {
 
   setTask(value: string) {
     this._taskInput.value = value;
+  }
+
+  updateDisplayClass(): void {
+    const data = CellModel.getNbgraderData(this.cell.model.metadata);
+    if (CellModel.isRelevantToNbgrader(data)) {
+      this.addClass(CSS_MOD_HIGHLIGHT);
+    }
+    else {
+      this.removeClass(CSS_MOD_HIGHLIGHT);
+    }
   }
 
   updateValues(data: ToolData) {

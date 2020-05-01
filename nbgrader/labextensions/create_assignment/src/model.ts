@@ -34,6 +34,22 @@ export namespace CellModel {
   }
 
   /**
+   * @returns True if the cell is gradable.
+   */
+  export function isGraded(data: NbgraderData): boolean {
+    return PrivateNbgraderData.isGraded(data);
+  }
+
+  /**
+   * @returns True if the cell relevant to nbgrader. A cell is relevant if it is
+   * gradable or contains autograder tests.
+   */
+  export function isRelevantToNbgrader(data: NbgraderData): boolean {
+    return PrivateNbgraderData.isGraded(data)
+        || PrivateNbgraderData.isSolution(data);
+  }
+
+  /**
    * Converts {@link ToolData} to {@link NbgraderData}.
    *
    * @returns The converted data, or null if the nbgrader cell type is not set.
