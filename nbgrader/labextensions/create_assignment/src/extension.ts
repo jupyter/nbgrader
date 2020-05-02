@@ -244,6 +244,7 @@ class CellWidget extends Panel {
     }
     const nbgraderData = CellModel.getNbgraderData(cell.model.metadata);
     const toolData = CellModel.newToolData(nbgraderData, this.cell.model.type);
+    CellModel.clearCellType(cell.model.metadata);
     this.updateDisplayClass();
     this.updateValues(toolData);
   }

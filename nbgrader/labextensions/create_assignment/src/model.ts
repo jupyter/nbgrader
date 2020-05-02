@@ -18,6 +18,20 @@ export const NBGRADER_SCHEMA_VERSION = 3;
  */
 export namespace CellModel {
   /**
+   * Removes the "cell_type" property from the nbgrader data.
+   */
+  export function clearCellType(cellMetadata: IObservableJSON): void {
+    const data = cellMetadata.get(NBGRADER_KEY) as JSONObject;
+    if (data == null) {
+      return;
+    }
+    if ('cell_type' in data) {
+      data['cell_type'] = undefined;
+    }
+    cellMetadata.set(NBGRADER_KEY, data);
+  }
+
+  /**
    * Read the nbgrader data from a cell's metadata.
    *
    * @returns The nbgrader data, or null if it doesn't exist.
