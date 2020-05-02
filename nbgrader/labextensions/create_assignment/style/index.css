@@ -1,8 +1,3 @@
-.nbgrader-CellWidget:not(.nbgrader-mod-active) .nbgrader-CellHeader .jp-InputPrompt {
-  opacity: var(--jp-cell-prompt-not-active-opacity);
-  color: var(--jp-cell-prompt-not-active-font-color);
-}
-
 .nbgrader-CreateAssignmentWidget {
   background: var(--jp-layout-color1);
   color: var(--jp-ui-font-color1);
@@ -114,21 +109,32 @@
 .nbgrader-CellHeader {
   display: grid;
   grid-template-columns: auto max-content;
-  border-bottom: solid var(--jp-border-width) var(--jp-border-color0);
+  background-color: #EEE;
+  padding: 0 0.5em;
 }
 
 .nbgrader-mod-highlight .nbgrader-CellHeader {
-  border-bottom-color: var(--jp-brand-color1);
+  background-color: #337AB7;
 }
 
 .nbgrader-CellHeader>.jp-InputPrompt {
   border-width: 0;
   padding-left: 0;
   text-align: left;
+  margin: auto 0;
+}
+
+.nbgrader-CellHeader>* {
+  color: black;
+}
+
+.nbgrader-mod-highlight .nbgrader-CellHeader>* {
+  color: white;
 }
 
 .nbgrader-CellHeader>.nbgrader-LockButton {
-  margin: auto 0 0 0;
+  margin: auto 0;
+  padding: 0.25em;
   cursor: default;
 }
 
