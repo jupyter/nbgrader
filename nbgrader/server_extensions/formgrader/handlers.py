@@ -19,7 +19,7 @@ class ManageAssignmentsHandler(BaseHandler):
             base_url=self.base_url,
             windows=(sys.prefix == 'win32'),
             course_id=self.api.course_id,
-            exchange=self.api.exchange,
+            exchange=self.api.exchange_root,
             exchange_missing=self.api.exchange_missing)
         self.write(html)
 

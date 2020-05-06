@@ -1,8 +1,6 @@
 import os
 import shutil
 
-from traitlets import Bool
-
 from nbgrader.exchange.abc import ExchangeFetchAssignment as ABCExchangeFetchAssignment
 from nbgrader.exchange.default import Exchange
 from nbgrader.utils import check_mode

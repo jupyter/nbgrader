@@ -5,16 +5,23 @@ from stat import (
     S_IRGRP, S_IWGRP, S_IXGRP,
     S_IROTH, S_IWOTH, S_IXOTH
 )
-
 from textwrap import dedent
-from traitlets import Bool
 
 from nbgrader.exchange.abc import ExchangeSubmit as ABCExchangeSubmit
+from traitlets import Bool
+
 from .exchange import Exchange
 from nbgrader.utils import get_username, check_mode, find_all_notebooks
 
 
 class ExchangeSubmit(Exchange, ABCExchangeSubmit):
+
+    add_random_string = Bool(
+        True,
+        help=dedent(
+            "Whether to add a random string on the end of the submission."
+        )
+    ).tag(config=True)
 
     def init_src(self):
         if self.path_includes_course:

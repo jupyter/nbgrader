@@ -59,6 +59,9 @@ class NbGraderAPI(LoggingConfigurable):
         authenticator : :class:~`nbgrader.auth.BaseAuthenticator`
             (Optional) An authenticator instance for communicating with an
             external database.
+        exchange : :class:~`nbgrader.exchange.ExchangeFactory`
+            (Optional) A factory for creating the exchange classes used
+            for distributing assignments and feedback.
         kwargs:
             Additional keyword arguments (e.g. ``parent``, ``config``)
 

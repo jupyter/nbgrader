@@ -5,8 +5,6 @@ import sys
 from collections import defaultdict
 from textwrap import dedent
 
-from traitlets import Bool
-
 from nbgrader.exchange.abc import ExchangeCollect as ABCExchangeCollect
 from .exchange import Exchange
 
@@ -18,6 +16,7 @@ if sys.platform != 'win32':
     import pwd
 else:
     pwd = None
+
 
 def groupby(l, key=lambda x: x):
     d = defaultdict(list)

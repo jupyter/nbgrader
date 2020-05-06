@@ -12,7 +12,6 @@ from datetime import datetime
 
 from . import NbGrader
 from ..api import Gradebook, MissingEntry, Student, Assignment
-from ..exchange import ExchangeList
 from .. import dbutil
 
 aliases = {

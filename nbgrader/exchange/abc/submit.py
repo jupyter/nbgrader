@@ -14,16 +14,3 @@ class ExchangeSubmit(Exchange):
         )
     ).tag(config=True)
 
-    add_random_string = Bool(
-        True,
-        help=dedent(
-            "Whether to add a random string on the end of the submission."
-        )
-    ).tag(config=True)
-
-    def init_release(self):
-        pass
-
-    def check_filename_diff(self):
-        pass
-

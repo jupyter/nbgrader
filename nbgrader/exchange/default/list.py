@@ -3,7 +3,6 @@ import glob
 import shutil
 import re
 import hashlib
-from traitlets import Bool
 
 from nbgrader.exchange.abc import ExchangeList as ABCExchangeList
 from nbgrader.utils import notebook_hash, make_unique_key
@@ -16,7 +15,7 @@ def _checksum(path):
     return m.hexdigest()
 
 
-class ExchangeList(Exchange, ABCExchangeList):
+class ExchangeList(ABCExchangeList, Exchange):
 
     def init_src(self):
         pass
@@ -238,14 +237,3 @@ class ExchangeList(Exchange, ABCExchangeList):
             shutil.rmtree(assignment)
 
         return assignments
-
-    def start(self):
-        if self.inbound and self.cached:
-            self.fail("Options --inbound and --cached are incompatible.")
-
-        super(ExchangeList, self).start()
-
-        if self.remove:
-            return self.remove_files()
-        else:
-            return self.list_files()

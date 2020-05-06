@@ -1,16 +1,12 @@
-import os
 import datetime
-import sys
 
 from textwrap import dedent
 
 from dateutil.tz import gettz
 from dateutil.parser import parse
 from traitlets.config import LoggingConfigurable
-from traitlets import Unicode, Bool, Instance, Type, default, validate, TraitError
-from jupyter_core.paths import jupyter_data_dir
+from traitlets import Unicode, Instance, validate, TraitError
 
-from nbgrader.utils import check_directory, ignore_patterns, self_owned
 from nbgrader.coursedir import CourseDirectory
 from nbgrader.auth import Authenticator
 

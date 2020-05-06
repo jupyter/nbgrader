@@ -110,7 +110,7 @@ class Exchange(ABCExchange):
             # there.
             self.ensure_root()
 
-        super(Exchange, self).start()
+        return super(Exchange, self).start()
 
     def _assignment_not_found(self, src_path, other_path):
         msg = "Assignment not found at: {}".format(src_path)

@@ -5,7 +5,6 @@ from tornado import web
 
 from .base import BaseApiHandler, check_xsrf, check_notebook_dir
 from ...api import MissingEntry
-from ...exchange import ExchangeList
 
 
 class StatusHandler(BaseApiHandler):

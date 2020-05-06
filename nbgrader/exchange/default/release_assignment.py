@@ -7,7 +7,6 @@ from stat import (
     S_ISGID, ST_MODE
 )
 
-from traitlets import Bool
 
 from nbgrader.exchange.abc import ExchangeReleaseAssignment as ABCExchangeReleaseAssignment
 from nbgrader.exchange.default import Exchange

@@ -306,7 +306,7 @@ When writing your own Exchange
 - nbgrader functionality requires a file called ``timestamp.txt`` to be in the submission, containing the timestamp of that submission. The creation of this file is the responsibility of this class.
 - Whilst nothing is done *as yet*, the default exchange checks the names of submitted notebooks, and logs differences.
 - Submissions need to record ``student_id``, as well as ``course_id`` & ``assignment_id``
-- The default exchange copies files to both an ``inbound`` and ``cache`` store. This may be significant considering ``ExchangeList``
+- The default exchange copies files to both an ``inbound`` and ``cache`` store.
 
 ExchangeList Date Return structure
 ----------------------------------

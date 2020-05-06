@@ -21,7 +21,7 @@ The exchange package is organised as follows::
     │   └── submit.py
     └── exchange_factory.py
 
-The ``exchange.abc`` package contain all the Abstract Base Classes that custom exchange packages need to implement.
+The ``exchange.abc`` package contains all the Abstract Base Classes that custom exchange packages need to implement.
 The ``exchange.default`` package is a default filesystem based implementation. The exchange_factory.py file contains
 the defintion for the ExchangeFactory class that is used to create instances of the exchange classes.
 
