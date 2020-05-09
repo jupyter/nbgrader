@@ -24,6 +24,12 @@ strategy:
     Python37Extensions:
       python.version: '3.7'
       testgroup: 'nbextensions'
+    Python38:
+      python.version: '3.8'
+      testgroup: 'python'
+    Python38Extensions:
+      python.version: '3.8'
+      testgroup: 'nbextensions'   
 
 steps:
 - script: |
