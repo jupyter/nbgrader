@@ -4,6 +4,12 @@ from notebook.base.handlers import APIHandler
 from notebook.utils import url_path_join
 import tornado
 
+
+from ....exchange import ExchangeFactory
+
+
+lister = ExchangeFactory(config=None).List(coursedir='hi', authenticator='ji', config=None)assignments = lister.start()
+
 class RouteHandler(APIHandler):
     # The following decorator should be present on all verb methods (head, get, post, 
     # patch, put, delete, options) to ensure only authorized user can request the 
