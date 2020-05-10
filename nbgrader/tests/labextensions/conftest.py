@@ -100,6 +100,8 @@ def _make_nbserver(course_id, port, tempdir, jupyter_config_dir,
     env['JUPYTER_CONFIG_DIR'] = jupyter_config_dir
     env['JUPYTER_DATA_DIR'] = jupyter_data_dir
     env['HOME'] = tempdir
+    labextensions_dir = (Path(__file__).resolve().parent.parent.parent
+                         / 'labextensions')
 
     sp.check_call([sys.executable, "-m", "jupyter", "nbextension", "install",
                    "--user", "--py", "nbgrader"], env=env)
@@ -107,6 +109,9 @@ def _make_nbserver(course_id, port, tempdir, jupyter_config_dir,
                    "--user", "--py", "nbgrader"], env=env)
     sp.check_call([sys.executable, "-m", "jupyter", "serverextension",
                    "enable", "--user", "--py", "nbgrader"], env=env)
+    sp.check_call([sys.executable, "-m", "jupyter", "labextension", "install",
+                   str(labextensions_dir / "create_assignment")],
+                  env=env)
 
     # create nbgrader_config.py file
     with open('nbgrader_config.py', 'w') as fh:
