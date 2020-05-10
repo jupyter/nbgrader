@@ -60,7 +60,7 @@ def _run_tests(mark, skip, junitxml, paralell=False):
     if paralell:
         cmd.extend(['--numprocesses', 'auto'])
     cmd.extend(['--reruns', '4'])
-    cmd.extend(['--mypy'])
+#    cmd.extend(['--mypy'])
 
     marks = []
     if mark is not None:
