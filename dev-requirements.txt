@@ -11,3 +11,5 @@ sphinx-autodoc-typehints
 codecov
 nbval
 requests-mock
+wheel
+
