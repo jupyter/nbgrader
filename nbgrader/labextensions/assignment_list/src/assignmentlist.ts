@@ -406,11 +406,9 @@ AssignmentList.prototype.handle_load_list = function (data) {
 AssignmentList.prototype.load_list = async function (course: string, callback: any) {
   this.callback = callback;
   this.clear_list(true);
-  var params = {course_id: course}
   try {
-    const data = await requestAPI<any>('assignments', { 
+    const data = await requestAPI<any>('assignments?course_id=' + course, { 
       method: 'GET', // FIX ME NEED TO PASS IN THE COURSE ID
-      headers : params,
     });
     console.log(data);
     this.handle_load_list(data)
