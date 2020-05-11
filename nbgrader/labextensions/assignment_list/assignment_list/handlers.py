@@ -1,16 +1,268 @@
 import json
-
+import os
+import contextlib
+import traceback
 from notebook.base.handlers import APIHandler
 from notebook.utils import url_path_join
 import tornado
+from traitlets.config import LoggingConfigurable, Config
+from jupyter_core.paths import jupyter_config_path
+from nbgrader.exchange import ExchangeFactory, ExchangeError
+from nbgrader.apps import NbGrader
+from nbgrader.coursedir import CourseDirectory
+from nbgrader.auth import Authenticator
+
+@contextlib.contextmanager
+def chdir(dirname):
+    currdir = os.getcwd()
+    os.chdir(dirname)
+    yield
+    os.chdir(currdir)
+
+class AssignmentList(LoggingConfigurable):
+
+    def load_config(self):
+        paths = jupyter_config_path()
+        paths.insert(0, os.getcwd())
+
+        app = NbGrader()
+        app.config_file_paths.append(paths)
+        app.load_config_file()
+
+        return app.config
+
+    @contextlib.contextmanager
+    def get_assignment_dir_config(self):
+        # first get the exchange assignment directory
+        with chdir(self.parent.notebook_dir):
+            config = self.load_config()
+
+        lister = ExchangeFactory(config=config).List(config=config)
+        assignment_dir = lister.assignment_dir
+
+        # now cd to the full assignment directory and load the config again
+        with chdir(assignment_dir):
+
+            app = NbGrader()
+            app.config_file_paths.append(os.getcwd())
+            app.load_config_file()
+
+            yield app.config
+
+    def list_released_assignments(self, course_id=None):
+        with self.get_assignment_dir_config() as config:
+            try:
+                if course_id:
+                    config.CourseDirectory.course_id = course_id
+
+                coursedir = CourseDirectory(config=config)
+                authenticator = Authenticator(config=config)
+                lister = ExchangeFactory(config=config).List(
+                    coursedir=coursedir,
+                    authenticator=authenticator,
+                    config=config)
+                assignments = lister.start()
+
+            except Exception as e:
+                self.log.error(traceback.format_exc())
+                if isinstance(e, ExchangeError):
+                    retvalue = {
+                        "success": False,
+                        "value": """The exchange directory does not exist and could
+                                    not be created. The "release" and "collect" functionality will not be available.
+                                    Please see the documentation on
+                                    http://nbgrader.readthedocs.io/en/stable/user_guide/managing_assignment_files.html#setting-up-the-exchange
+                                    for instructions.
+                                """
+                    }
+                else:
+                    retvalue = {
+                        "success": False,
+                        "value": traceback.format_exc()
+                    }
+            else:
+                for assignment in assignments:
+                    if assignment['status'] == 'fetched':
+                        assignment['path'] = os.path.relpath(assignment['path'], self.parent.notebook_dir)
+                        for notebook in assignment['notebooks']:
+                            notebook['path'] = os.path.relpath(notebook['path'], self.parent.notebook_dir)
+                retvalue = {
+                    "success": True,
+                    "value": sorted(assignments, key=lambda x: (x['course_id'], x['assignment_id']))
+                }
+
+        return retvalue
+
+    def list_submitted_assignments(self, course_id=None):
+        with self.get_assignment_dir_config() as config:
+            try:
+                config.ExchangeList.cached = True
+                if course_id:
+                    config.CourseDirectory.course_id = course_id
+
+                coursedir = CourseDirectory(config=config)
+                authenticator = Authenticator(config=config)
+                lister = ExchangeFactory(config=config).List(
+                    coursedir=coursedir,
+                    authenticator=authenticator,
+                    config=config)
+                assignments = lister.start()
+
+            except Exception as e:
+                self.log.error(traceback.format_exc())
+                if isinstance(e, ExchangeError):
+                    retvalue = {
+                        "success": False,
+                        "value": """The exchange directory does not exist and could
+                                    not be created. The "release" and "collect" functionality will not be available.
+                                    Please see the documentation on
+                                    http://nbgrader.readthedocs.io/en/stable/user_guide/managing_assignment_files.html#setting-up-the-exchange
+                                    for instructions.
+                                """
+                    }
+                else:
+                    retvalue = {
+                        "success": False,
+                        "value": traceback.format_exc()
+                    }
+            else:
+                for assignment in assignments:
+                    assignment["submissions"] = sorted(
+                        assignment["submissions"],
+                        key=lambda x: x["timestamp"])
+                assignments = sorted(assignments, key=lambda x: x["assignment_id"])
+                retvalue = {
+                    "success": True,
+                    "value": assignments
+                }
+
+        return retvalue
+
+    def list_assignments(self, course_id=None):
+        released = self.list_released_assignments(course_id=course_id)
+        if not released['success']:
+            return released
+
+        submitted = self.list_submitted_assignments(course_id=course_id)
+        if not submitted['success']:
+            return submitted
+
+        retvalue = {
+            "success": True,
+            "value": released["value"] + submitted["value"]
+        }
+
+        return retvalue
+
+    def list_courses(self):
+        assignments = self.list_assignments()
+        if not assignments["success"]:
+            return assignments
+
+        retvalue = {
+            "success": True,
+            "value": sorted(list(set([x["course_id"] for x in assignments["value"]])))
+        }
+
+        return retvalue
+
+    def fetch_assignment(self, course_id, assignment_id):
+        with self.get_assignment_dir_config() as config:
+            try:
+                config = self.load_config()
+                config.CourseDirectory.course_id = course_id
+                config.CourseDirectory.assignment_id = assignment_id
+
+                coursedir = CourseDirectory(config=config)
+                authenticator = Authenticator(config=config)
+                fetch = ExchangeFactory(config=config).FetchAssignment(
+                    coursedir=coursedir,
+                    authenticator=authenticator,
+                    config=config)
+                fetch.start()
+
+            except:
+                self.log.error(traceback.format_exc())
+                retvalue = {
+                    "success": False,
+                    "value": traceback.format_exc()
+                }
+
+            else:
+                retvalue = {
+                    "success": True
+                }
+
+        return retvalue
 
 
-from ....exchange import ExchangeFactory
+    def fetch_feedback(self, course_id, assignment_id):
+        with self.get_assignment_dir_config() as config:
+            try:
+                config = self.load_config()
+                config.CourseDirectory.course_id = course_id
+                config.CourseDirectory.assignment_id = assignment_id
+
+                coursedir = CourseDirectory(config=config)
+                authenticator = Authenticator(config=config)
+                fetch = ExchangeFactory(config=config).FetchFeedback(
+                    coursedir=coursedir,
+                    authenticator=authenticator,
+                    config=config)
+                fetch.start()
+
+            except:
+                self.log.error(traceback.format_exc())
+                retvalue = {
+                    "success": False,
+                    "value": traceback.format_exc()
+                }
+
+            else:
+                retvalue = {
+                    "success": True
+                }
+
+        return retvalue
 
 
-lister = ExchangeFactory(config=None).List(coursedir='hi', authenticator='ji', config=None)assignments = lister.start()
+    def submit_assignment(self, course_id, assignment_id):
+        with self.get_assignment_dir_config() as config:
+            try:
+                config = self.load_config()
+                config.CourseDirectory.course_id = course_id
+                config.CourseDirectory.assignment_id = assignment_id
 
-class RouteHandler(APIHandler):
+                coursedir = CourseDirectory(config=config)
+                authenticator = Authenticator(config=config)
+                submit = ExchangeFactory(config=config).Submit(
+                    coursedir=coursedir,
+                    authenticator=authenticator,
+                    config=config)
+                submit.start()
+
+            except:
+                self.log.error(traceback.format_exc())
+                retvalue = {
+                    "success": False,
+                    "value": traceback.format_exc()
+                }
+
+            else:
+                retvalue = {
+                    "success": True
+                }
+
+        return retvalue
+
+class BaseAssignmentHandler(APIHandler):
+
+    @property
+    def manager(self):
+        return self.settings['assignment_list']
+
+
+class RouteHandler(BaseAssignmentHandler):
     # The following decorator should be present on all verb methods (head, get, post, 
     # patch, put, delete, options) to ensure only authorized user can request the 
     # Jupyter server
@@ -20,47 +272,55 @@ class RouteHandler(APIHandler):
             "data": "This is /assignment_list/get_example endpoint!"
         }))
 
-class CouseListHandler(APIHandler):
+class CouseListHandler(BaseAssignmentHandler):
     # The following decorator should be present on all verb methods (head, get, post, 
     # patch, put, delete, options) to ensure only authorized user can request the 
     # Jupyter server
     @tornado.web.authenticated
     def get(self):
-        self.finish(json.dumps({"success": True, "value": ["math", "english", "history"]}))
+        self.finish(json.dumps(self.manager.list_courses()))
 
-class AssignmentListHandler(APIHandler):
+class AssignmentListHandler(BaseAssignmentHandler):
 
     @tornado.web.authenticated
     def get(self):
-        course_id = self.request.headers.get("course_id")
-        self.finish(json.dumps({"success": True, "value": [{"course_id": "math", "assignment_id": "a1", "status": "released", "path": "/srv/nbgrader/exchange/math/outbound/a1", "notebooks": [{"notebook_id": "f1", "path": "/srv/nbgrader/exchange/math/outbound/a1/f1.ipynb"}]}, {"course_id": "math", "assignment_id": "a2", "status": "released", "path": "/srv/nbgrader/exchange/math/outbound/a2", "notebooks": [{"notebook_id": "f2", "path": "/srv/nbgrader/exchange/math/outbound/a2/f2.ipynb"}]}, {"course_id": "math", "assignment_id": "ps1", "status": "released", "path": "/srv/nbgrader/exchange/math/outbound/ps1", "notebooks": [{"notebook_id": "problem1", "path": "/srv/nbgrader/exchange/math/outbound/ps1/problem1.ipynb"}, {"notebook_id": "problem2", "path": "/srv/nbgrader/exchange/math/outbound/ps1/problem2.ipynb"}]}]}))
-
-class AssignmentActionHandler(APIHandler):
+        course_id = self.get_argument('course_id')
+        self.finish(json.dumps(self.manager.list_assignments(course_id=course_id)))
+class AssignmentActionHandler(BaseAssignmentHandler):
 
     @tornado.web.authenticated
     def post(self, action):
         input_data = self.get_json_body()
         if action == 'fetch':
             assignment_id = input_data['assignment_id']
-            if assignment_id == 'a2':
-                self.finish({"success": True, "value": [{"course_id": "math", "assignment_id": "a1", "status": "fetched", "path": "a1", "notebooks": [{"notebook_id": "f1", "path": "a1/f1.ipynb"}]}, {"course_id": "math", "assignment_id": "a2", "status": "fetched", "path": "a2", "notebooks": [{"notebook_id": "f2", "path": "a2/f2.ipynb"}]}, {"course_id": "math", "assignment_id": "ps1", "status": "released", "path": "/srv/nbgrader/exchange/math/outbound/ps1", "notebooks": [{"notebook_id": "problem1", "path": "/srv/nbgrader/exchange/math/outbound/ps1/problem1.ipynb"}, {"notebook_id": "problem2", "path": "/srv/nbgrader/exchange/math/outbound/ps1/problem2.ipynb"}]}, {"course_id": "math", "student_id": "math-instructor", "assignment_id": "a1", "status": "submitted", "submissions": [{"course_id": "math", "student_id": "math-instructor", "assignment_id": "a1", "timestamp": "2020-04-29 21:58:53.988500 UTC", "status": "submitted", "path": "/home/math-instructor/.local/share/jupyter/nbgrader_cache/math/math-instructor+a1+2020-04-29 21:58:53.988500 UTC", "notebooks": [{"notebook_id": "f1", "path": "/home/math-instructor/.local/share/jupyter/nbgrader_cache/math/math-instructor+a1+2020-04-29 21:58:53.988500 UTC/f1.ipynb", "has_local_feedback": True, "has_exchange_feedback": True, "local_feedback_path": "./a1/feedback/2020-04-29 21:58:53.988500 UTC/f1.html", "feedback_updated": False}], "has_local_feedback": True, "has_exchange_feedback": True, "feedback_updated": False, "local_feedback_path": "./a1/feedback/2020-04-29 21:58:53.988500 UTC"}]}]})
-            else:
-                self.finish({"success": True, "value": [{"course_id": "math", "assignment_id": "a1", "status": "fetched", "path": "a1", "notebooks": [{"notebook_id": "f1", "path": "a1/f1.ipynb"}]}, {"course_id": "math", "assignment_id": "a2", "status": "released", "path": "/srv/nbgrader/exchange/math/outbound/a2", "notebooks": [{"notebook_id": "f2", "path": "/srv/nbgrader/exchange/math/outbound/a2/f2.ipynb"}]}, {"course_id": "math", "assignment_id": "ps1", "status": "released", "path": "/srv/nbgrader/exchange/math/outbound/ps1", "notebooks": [{"notebook_id": "problem1", "path": "/srv/nbgrader/exchange/math/outbound/ps1/problem1.ipynb"}, {"notebook_id": "problem2", "path": "/srv/nbgrader/exchange/math/outbound/ps1/problem2.ipynb"}]}]})
+            course_id = input_data['course_id']
+            self.manager.fetch_assignment(course_id, assignment_id)
+            self.finish(json.dumps(self.manager.list_assignments(course_id=course_id)))
         elif action == 'submit':
-            self.finish({"success": True, "value": [{"course_id": "math", "assignment_id": "a1", "status": "fetched", "path": "a1", "notebooks": [{"notebook_id": "f1", "path": "a1/f1.ipynb"}]}, {"course_id": "math", "assignment_id": "a2", "status": "released", "path": "/srv/nbgrader/exchange/math/outbound/a2", "notebooks": [{"notebook_id": "f2", "path": "/srv/nbgrader/exchange/math/outbound/a2/f2.ipynb"}]}, {"course_id": "math", "assignment_id": "ps1", "status": "released", "path": "/srv/nbgrader/exchange/math/outbound/ps1", "notebooks": [{"notebook_id": "problem1", "path": "/srv/nbgrader/exchange/math/outbound/ps1/problem1.ipynb"}, {"notebook_id": "problem2", "path": "/srv/nbgrader/exchange/math/outbound/ps1/problem2.ipynb"}]}, {"course_id": "math", "student_id": "math-instructor", "assignment_id": "a1", "status": "submitted", "submissions": [{"course_id": "math", "student_id": "math-instructor", "assignment_id": "a1", "timestamp": "2020-04-29 21:58:53.988500 UTC", "status": "submitted", "path": "/home/math-instructor/.local/share/jupyter/nbgrader_cache/math/math-instructor+a1+2020-04-29 21:58:53.988500 UTC", "notebooks": [{"notebook_id": "f1", "path": "/home/math-instructor/.local/share/jupyter/nbgrader_cache/math/math-instructor+a1+2020-04-29 21:58:53.988500 UTC/f1.ipynb", "has_local_feedback": False, "has_exchange_feedback": False, "local_feedback_path": None, "feedback_updated": False}], "has_local_feedback": False, "has_exchange_feedback": False, "feedback_updated": False, "local_feedback_path": None}]}]})
+            assignment_id = input_data['assignment_id']
+            course_id = input_data['course_id']
+            output = self.manager.submit_assignment(course_id, assignment_id)
+            if output['success']:
+                self.finish(json.dumps(self.manager.list_assignments(course_id=course_id)))
+            else:
+                self.finish(json.dumps(output))
         elif action == 'fetch_feedback':
-            self.finish({"success": True, "value": [{"course_id": "math", "assignment_id": "a1", "status": "fetched", "path": "a1", "notebooks": [{"notebook_id": "f1", "path": "a1/f1.ipynb"}]}, {"course_id": "math", "assignment_id": "a2", "status": "released", "path": "/srv/nbgrader/exchange/math/outbound/a2", "notebooks": [{"notebook_id": "f2", "path": "/srv/nbgrader/exchange/math/outbound/a2/f2.ipynb"}]}, {"course_id": "math", "assignment_id": "ps1", "status": "released", "path": "/srv/nbgrader/exchange/math/outbound/ps1", "notebooks": [{"notebook_id": "problem1", "path": "/srv/nbgrader/exchange/math/outbound/ps1/problem1.ipynb"}, {"notebook_id": "problem2", "path": "/srv/nbgrader/exchange/math/outbound/ps1/problem2.ipynb"}]}, {"course_id": "math", "student_id": "math-instructor", "assignment_id": "a1", "status": "submitted", "submissions": [{"course_id": "math", "student_id": "math-instructor", "assignment_id": "a1", "timestamp": "2020-04-29 21:58:53.988500 UTC", "status": "submitted", "path": "/home/math-instructor/.local/share/jupyter/nbgrader_cache/math/math-instructor+a1+2020-04-29 21:58:53.988500 UTC", "notebooks": [{"notebook_id": "f1", "path": "/home/math-instructor/.local/share/jupyter/nbgrader_cache/math/math-instructor+a1+2020-04-29 21:58:53.988500 UTC/f1.ipynb", "has_local_feedback": True, "has_exchange_feedback": True, "local_feedback_path": "./a1/feedback/2020-04-29 21:58:53.988500 UTC/f1.html", "feedback_updated": False}], "has_local_feedback": True, "has_exchange_feedback": True, "feedback_updated": False, "local_feedback_path": "./a1/feedback/2020-04-29 21:58:53.988500 UTC"}]}]})
+            assignment_id = self.get_argument('assignment_id')
+            course_id = self.get_argument('course_id')
+            self.manager.fetch_feedback(course_id, assignment_id)
+            self.finish(json.dumps(self.manager.list_assignments(course_id=course_id)))
         elif action == 'validate':
             self.finish({"success": True, "value": {}})
 
-def setup_handlers(web_app):
+def setup_handlers(lab_app):
     host_pattern = ".*$"
     _assignment_action_regex = r"(?P<action>fetch|submit|validate|fetch_feedback)"
-    
-    base_url = web_app.settings["base_url"]
-    route_pattern = url_path_join(base_url, "assignment_list", "get_example")
-    courses_pattern = url_path_join(base_url, "assignment_list", "courses")
-    assignments_pattern = url_path_join(base_url, "assignment_list", "assignments")
-    assignments_action_pattern = url_path_join(base_url, "assignment_list", (r"/assignments/%s" % _assignment_action_regex))
+    url = 'assignment_list'
+    lab_app.web_app.settings[url] = AssignmentList(parent=lab_app)
+    base_url = lab_app.web_app.settings["base_url"]
+    route_pattern = url_path_join(base_url, url, "get_example")
+    courses_pattern = url_path_join(base_url, url, "courses")
+    assignments_pattern = url_path_join(base_url, url, "assignments")
+    assignments_action_pattern = url_path_join(base_url, url, (r"/assignments/%s" % _assignment_action_regex))
     handlers = [(route_pattern, RouteHandler), (courses_pattern, CouseListHandler), (assignments_pattern, AssignmentListHandler), (assignments_action_pattern, AssignmentActionHandler)]
-    web_app.add_handlers(host_pattern, handlers)
+    lab_app.web_app.add_handlers(host_pattern, handlers)
