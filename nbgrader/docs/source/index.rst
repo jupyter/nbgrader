@@ -37,6 +37,7 @@ For additional resources on using Jupyter in educational contexts, see the `jupy
     configuration/config_options
     command_line_tools/index
     configuration/jupyterhub_config
+    exchange/index
     plugins/index
 
 .. toctree::

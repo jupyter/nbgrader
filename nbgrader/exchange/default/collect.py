@@ -6,11 +6,12 @@ from collections import defaultdict
 from textwrap import dedent
 import datetime
 
-from traitlets import Bool
-
+from nbgrader.exchange.abc import ExchangeCollect as ABCExchangeCollect
 from .exchange import Exchange
-from ..api import Gradebook, MissingEntry
-from ..utils import check_mode, parse_utc
+
+from nbgrader.utils import check_mode, parse_utc
+from ...api import Gradebook, MissingEntry
+from ...utils import check_mode, parse_utc
 
 # pwd is for matching unix names with student ide, so we shouldn't import it on
 # windows machines
@@ -19,6 +20,7 @@ if sys.platform != 'win32':
 else:
     pwd = None
 
+
 def groupby(l, key=lambda x: x):
     d = defaultdict(list)
     for item in l:
@@ -26,22 +28,7 @@ def groupby(l, key=lambda x: x):
     return d
 
 
-class ExchangeCollect(Exchange):
-
-    update = Bool(
-        False,
-        help="Update existing submissions with ones that have newer timestamps."
-    ).tag(config=True)
-
-    before_duedate = Bool(
-        False,
-        help="Collect the last submission before due date or the last submission if no submission before due date."
-    ).tag(config=True)
-
-    check_owner = Bool(
-        default_value=True,
-        help="Whether to cross-check the student_id with the UNIX-owner of the submitted directory."
-    ).tag(config=True)
+class ExchangeCollect(Exchange, ABCExchangeCollect):
 
     def _path_to_record(self, path):
         filename = os.path.split(path)[1]

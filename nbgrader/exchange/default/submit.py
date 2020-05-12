@@ -5,23 +5,16 @@ from stat import (
     S_IRGRP, S_IWGRP, S_IXGRP,
     S_IROTH, S_IWOTH, S_IXOTH
 )
-
 from textwrap import dedent
+
+from nbgrader.exchange.abc import ExchangeSubmit as ABCExchangeSubmit
 from traitlets import Bool
 
 from .exchange import Exchange
-from ..utils import get_username, check_mode, find_all_notebooks
+from nbgrader.utils import get_username, check_mode, find_all_notebooks
 
 
-class ExchangeSubmit(Exchange):
-
-    strict = Bool(
-        False,
-        help=dedent(
-            "Whether or not to submit the assignment if there are missing "
-            "notebooks from the released assignment notebooks."
-        )
-    ).tag(config=True)
+class ExchangeSubmit(Exchange, ABCExchangeSubmit):
 
     add_random_string = Bool(
         True,

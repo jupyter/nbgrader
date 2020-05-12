@@ -64,7 +64,7 @@ class FetchFeedbackApp(NbGrader):
             self.fail("Must provide assignment name:\nnbgrader fetch_feedback ASSIGNMENT [ --course COURSE ]")
 
         if self.coursedir.assignment_id != "":
-            fetch = ExchangeFetchFeedback(
+            fetch = self.exchange.FetchFeedback(
                 coursedir=self.coursedir,
                 authenticator=self.authenticator,
                 parent=self)
@@ -77,7 +77,7 @@ class FetchFeedbackApp(NbGrader):
 
             for arg in self.extra_args:
                 self.coursedir.assignment_id = arg
-                fetch = ExchangeFetchFeedback(
+                fetch = self.exchange.FetchFeedback(
                     coursedir=self.coursedir,
                     authenticator=self.authenticator,
                     parent=self)

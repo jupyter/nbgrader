@@ -12,7 +12,6 @@ from datetime import datetime
 
 from . import NbGrader
 from ..api import Gradebook, MissingEntry, Student, Assignment
-from ..exchange import ExchangeList
 from .. import dbutil
 
 aliases = {
@@ -36,7 +35,6 @@ class DbBaseApp(NbGrader):
 
     def start(self):
         if sys.platform != 'win32':
-            lister = ExchangeList(coursedir=self.coursedir, parent=self)
             self.course_id = self.coursedir.course_id
         else:
             self.course_id = ''

@@ -16,6 +16,7 @@ from traitlets import Unicode, List, Bool, Instance, default
 from traitlets.config.application import catch_config_error
 from traitlets.config.loader import Config
 
+from nbgrader.exchange import ExchangeFactory
 from ..coursedir import CourseDirectory
 from ..auth import Authenticator
 from .. import preprocessors
@@ -117,6 +118,7 @@ class NbGrader(JupyterApp):
 
     coursedir = Instance(CourseDirectory, allow_none=True)
     authenticator = Instance(Authenticator, allow_none=True)
+    exchange = Instance(ExchangeFactory, allow_none=True)
     verbose_crash = Bool(False)
 
     # The classes added here determine how configuration will be documented
@@ -124,7 +126,7 @@ class NbGrader(JupyterApp):
 
     @default("classes")
     def _classes_default(self) -> TypingList[MetaHasTraits]:
-        return [NbGrader, CourseDirectory]
+        return [ExchangeFactory, NbGrader, CourseDirectory]
 
     def all_configurable_classes(self) -> TypingList[MetaHasTraits]:
         """Get a list of all configurable classes for nbgrader
@@ -158,6 +160,12 @@ class NbGrader(JupyterApp):
 
         # include all the exchange actions
         for ex_name in exchange.__all__:
+            ex = getattr(exchange, ex_name)
+            if hasattr(ex, "class_traits") and ex.class_traits(config=True):
+                classes.append(ex)
+
+        # include all the default exchange actions
+        for ex_name in exchange.default.__all__:
             ex = getattr(exchange, ex_name)
             if hasattr(ex, "class_traits") and ex.class_traits(config=True):
                 classes.append(ex)
@@ -352,3 +360,5 @@ class NbGrader(JupyterApp):
     def start(self) -> None:
         super(NbGrader, self).start()
         self.authenticator = Authenticator(parent=self)
+        self.exchange = ExchangeFactory(parent=self)
+

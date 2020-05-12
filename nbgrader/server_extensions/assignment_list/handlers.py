@@ -14,9 +14,9 @@ from traitlets import Unicode, default
 from traitlets.config import LoggingConfigurable, Config
 from jupyter_core.paths import jupyter_config_path
 
+from ...exchange import ExchangeFactory, ExchangeError
 from ...apps import NbGrader
 from ...coursedir import CourseDirectory
-from ...exchange import ExchangeList, ExchangeFetchAssignment, ExchangeFetchFeedback, ExchangeSubmit, ExchangeError
 from ...auth import Authenticator
 from ... import __version__ as nbgrader_version
 
@@ -50,7 +50,7 @@ class AssignmentList(LoggingConfigurable):
         with chdir(self.parent.notebook_dir):
             config = self.load_config()
 
-        lister = ExchangeList(config=config)
+        lister = ExchangeFactory(config=config).List(config=config)
         assignment_dir = lister.assignment_dir
 
         # now cd to the full assignment directory and load the config again
@@ -70,7 +70,7 @@ class AssignmentList(LoggingConfigurable):
 
                 coursedir = CourseDirectory(config=config)
                 authenticator = Authenticator(config=config)
-                lister = ExchangeList(
+                lister = ExchangeFactory(config=config).List(
                     coursedir=coursedir,
                     authenticator=authenticator,
                     config=config)
@@ -115,7 +115,7 @@ class AssignmentList(LoggingConfigurable):
 
                 coursedir = CourseDirectory(config=config)
                 authenticator = Authenticator(config=config)
-                lister = ExchangeList(
+                lister = ExchangeFactory(config=config).List(
                     coursedir=coursedir,
                     authenticator=authenticator,
                     config=config)
@@ -188,7 +188,7 @@ class AssignmentList(LoggingConfigurable):
 
                 coursedir = CourseDirectory(config=config)
                 authenticator = Authenticator(config=config)
-                fetch = ExchangeFetchAssignment(
+                fetch = ExchangeFactory(config=config).FetchAssignment(
                     coursedir=coursedir,
                     authenticator=authenticator,
                     config=config)
@@ -218,7 +218,7 @@ class AssignmentList(LoggingConfigurable):
 
                 coursedir = CourseDirectory(config=config)
                 authenticator = Authenticator(config=config)
-                fetch = ExchangeFetchFeedback(
+                fetch = ExchangeFactory(config=config).FetchFeedback(
                     coursedir=coursedir,
                     authenticator=authenticator,
                     config=config)
@@ -248,7 +248,7 @@ class AssignmentList(LoggingConfigurable):
 
                 coursedir = CourseDirectory(config=config)
                 authenticator = Authenticator(config=config)
-                submit = ExchangeSubmit(
+                submit = ExchangeFactory(config=config).Submit(
                     coursedir=coursedir,
                     authenticator=authenticator,
                     config=config)

@@ -6,53 +6,17 @@ import glob
 
 from textwrap import dedent
 
-from dateutil.tz import gettz
-from dateutil.parser import parse
+
 from rapidfuzz import fuzz
-from traitlets.config import LoggingConfigurable
-from traitlets import Unicode, Bool, Instance, Type, default, validate, TraitError
+from traitlets import Unicode, Bool, default
 from jupyter_core.paths import jupyter_data_dir
 
-from ..utils import check_directory, ignore_patterns, self_owned
-from ..coursedir import CourseDirectory
-from ..auth import Authenticator
+from nbgrader.exchange.abc import Exchange as ABCExchange
+from nbgrader.exchange import ExchangeError
+from nbgrader.utils import check_directory, ignore_patterns, self_owned
 
 
-class ExchangeError(Exception):
-    pass
-
-
-class Exchange(LoggingConfigurable):
-
-    assignment_dir = Unicode(
-        ".",
-        help=dedent(
-            """
-            Local path for storing student assignments.  Defaults to '.'
-            which is normally Jupyter's notebook_dir.
-            """
-        )
-    ).tag(config=True)
-
-    timezone = Unicode(
-        "UTC",
-        help="Timezone for recording timestamps"
-    ).tag(config=True)
-
-    timestamp_format = Unicode(
-        "%Y-%m-%d %H:%M:%S.%f %Z",
-        help="Format string for timestamps"
-    ).tag(config=True)
-
-    @validate('timestamp_format')
-    def _valid_timestamp_format(self, proposal):
-        try:
-            ts = datetime.datetime.now().strftime(proposal['value'])
-            ts = parse(ts)
-        except ValueError:
-            raise TraitError('Invalid timestamp_format: {} - could not be parsed by dateutil'.format(proposal['value']))
-        return proposal['value']
-    
+class Exchange(ABCExchange):
     root = Unicode(
         "/srv/nbgrader/exchange",
         help="The nbgrader exchange directory writable to everyone. MUST be preexisting."
@@ -78,25 +42,6 @@ class Exchange(LoggingConfigurable):
             """
         )
     ).tag(config=True)
-
-    coursedir = Instance(CourseDirectory, allow_none=True)
-    authenticator = Instance(Authenticator, allow_none=True)
-
-    def __init__(self, coursedir=None, authenticator=None, **kwargs):
-        self.coursedir = coursedir
-        self.authenticator = authenticator
-        super(Exchange, self).__init__(**kwargs)
-
-    def fail(self, msg):
-        self.log.fatal(msg)
-        raise ExchangeError(msg)
-
-    def set_timestamp(self):
-        """Set the timestap using the configured timezone."""
-        tz = gettz(self.timezone)
-        if tz is None:
-            self.fail("Invalid timezone: {}".format(self.timezone))
-        self.timestamp = datetime.datetime.now(tz).strftime(self.timestamp_format)
 
     def set_perms(self, dest, fileperms, dirperms):
         all_dirs = []
@@ -161,17 +106,13 @@ class Exchange(LoggingConfigurable):
     def start(self):
         if sys.platform == 'win32':
             self.fail("Sorry, the exchange is not available on Windows.")
-
         if not self.coursedir.groupshared:
             # This just makes sure that directory is o+rwx.  In group shared
             # case, it is up to admins to ensure that instructors can write
             # there.
             self.ensure_root()
-        self.set_timestamp()
 
-        self.init_src()
-        self.init_dest()
-        self.copy_files()
+        return super(Exchange, self).start()
 
     def _assignment_not_found(self, src_path, other_path):
         msg = "Assignment not found at: {}".format(src_path)

@@ -80,7 +80,7 @@ class FetchAssignmentApp(NbGrader):
             self.fail("Must provide assignment name:\nnbgrader fetch_assignment ASSIGNMENT [ --course COURSE ]")
 
         if self.coursedir.assignment_id != "":
-            fetch = ExchangeFetchAssignment(
+            fetch = self.exchange.FetchAssignment(
                 coursedir=self.coursedir,
                 authenticator=self.authenticator,
                 parent=self)
@@ -93,7 +93,7 @@ class FetchAssignmentApp(NbGrader):
 
             for arg in self.extra_args:
                 self.coursedir.assignment_id = arg
-                fetch = ExchangeFetchAssignment(
+                fetch = self.exchange.FetchAssignment(
                     coursedir=self.coursedir,
                     authenticator=self.authenticator,
                     parent=self)

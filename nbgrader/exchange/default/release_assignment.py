@@ -7,15 +7,12 @@ from stat import (
     S_ISGID, ST_MODE
 )
 
-from traitlets import Bool
 
-from .exchange import Exchange
-from ..utils import self_owned
+from nbgrader.exchange.abc import ExchangeReleaseAssignment as ABCExchangeReleaseAssignment
+from nbgrader.exchange.default import Exchange
 
 
-class ExchangeReleaseAssignment(Exchange):
-
-    force = Bool(False, help="Force overwrite existing files in the exchange.").tag(config=True)
+class ExchangeReleaseAssignment(Exchange, ABCExchangeReleaseAssignment):
 
     def _load_config(self, cfg, **kwargs):
         if 'ExchangeRelease' in cfg:
