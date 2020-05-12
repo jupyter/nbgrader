@@ -2,7 +2,7 @@ pytest>=4.5
 pytest-cov
 pytest-rerunfailures
 pytest-xdist
-pytest-mypy==0.4.2
+#pytest-mypy
 coverage
 selenium
 sphinx
@@ -11,3 +11,5 @@ sphinx-autodoc-typehints
 codecov
 nbval
 requests-mock
+wheel
+

@@ -4,11 +4,14 @@ import shutil
 import sys
 from collections import defaultdict
 from textwrap import dedent
+import datetime
 
 from nbgrader.exchange.abc import ExchangeCollect as ABCExchangeCollect
 from .exchange import Exchange
 
 from nbgrader.utils import check_mode, parse_utc
+from ...api import Gradebook, MissingEntry
+from ...utils import check_mode, parse_utc
 
 # pwd is for matching unix names with student ide, so we shouldn't import it on
 # windows machines
@@ -54,7 +57,24 @@ class ExchangeCollect(Exchange, ABCExchangeCollect):
         pattern = os.path.join(self.inbound_path, '{}+{}+*'.format(student_id, self.coursedir.assignment_id))
         records = [self._path_to_record(f) for f in glob.glob(pattern)]
         usergroups = groupby(records, lambda item: item['username'])
-        self.src_records = [self._sort_by_timestamp(v)[0] for v in usergroups.values()]
+
+        with Gradebook(self.coursedir.db_url, self.coursedir.course_id) as gb:
+            try:
+                assignment = gb.find_assignment(self.coursedir.assignment_id)
+                self.duedate = assignment.duedate
+            except MissingEntry:
+                self.duedate = None
+        if self.duedate is None or not self.before_duedate:
+            self.src_records = [self._sort_by_timestamp(v)[0] for v in usergroups.values()]
+        else:
+            self.src_records = []
+            for v in usergroups.values():
+                records = self._sort_by_timestamp(v)
+                records_before_duedate = [record for record in records if record['timestamp'] <= self.duedate]
+                if records_before_duedate:
+                    self.src_records.append(records_before_duedate[0])
+                else:
+                    self.src_records.append(records[0])
 
     def init_dest(self):
         pass
@@ -99,6 +119,10 @@ class ExchangeCollect(Exchange, ABCExchangeCollect):
                 if self.update and (existing_timestamp is None or new_timestamp > existing_timestamp):
                     copy = True
                     updating = True
+                elif self.before_duedate and existing_timestamp != new_timestamp:
+                    copy = True
+                    updating = True
+
             else:
                 copy = True
 

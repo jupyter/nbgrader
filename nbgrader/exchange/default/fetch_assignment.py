@@ -14,11 +14,11 @@ class ExchangeFetchAssignment(Exchange, ABCExchangeFetchAssignment):
                 "Use ExchangeFetchAssignment in config, not ExchangeFetch. Outdated config:\n%s",
                 '\n'.join(
                     'ExchangeFetch.{key} = {value!r}'.format(key=key, value=value)
-                    for key, value in cfg.ExchangeFetchAssignment.items()
+                    for key, value in cfg.ExchangeFetch.items()
                 )
             )
             cfg.ExchangeFetchAssignment.merge(cfg.ExchangeFetch)
-            del cfg.ExchangeFetchAssignment
+            del cfg.ExchangeFetch
 
         super(ExchangeFetchAssignment, self)._load_config(cfg, **kwargs)
 
