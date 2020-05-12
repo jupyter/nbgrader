@@ -121,7 +121,7 @@ Your JupyterHub should look something like this:
 
     # instructor1 and instructor2 have access to a shared server:
     c.JupyterHub.load_groups = {
-        'formgrader-course101': [
+        'formgrade-course101': [
             'instructor1',
             'instructor2'
         ]
@@ -136,7 +136,7 @@ Your JupyterHub should look something like this:
             'url': 'http://127.0.0.1:9999',
             'command': [
                 'jupyterhub-singleuser',
-                '--group=formgrader-course101',
+                '--group=formgrade-course101',
                 '--debug',
             ],
             'user': 'grader-course101',
