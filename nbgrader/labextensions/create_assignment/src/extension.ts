@@ -74,18 +74,44 @@ const CSS_TOTAL_POINTS_INPUT = 'nbgrader-TotalPointsInput';
  */
 export class CreateAssignmentWidget extends Panel {
   private activeNotebook: NotebookPanel;
+  private currentNotebookListener: (tracker: INotebookTracker,
+                                    panel: NotebookPanel) => void;
+  private notebookAddedListener: (tracker: INotebookTracker,
+                                  panel: NotebookPanel) => void;
   private notebookPanelWidgets = new Map<NotebookPanel, NotebookPanelWidget>();
+  private notebookTracker: INotebookTracker;
 
   constructor(tracker: INotebookTracker) {
     super();
     this.addClass(CSS_CREATE_ASSIGNMENT_WIDGET);
     this.addNotebookListeners(tracker);
     this.activeNotebook = null;
+    this.notebookTracker = tracker;
   }
 
   private addNotebookListeners(tracker: INotebookTracker): void {
-    tracker.widgetAdded.connect(this.getNotebookAddedListener());
-    tracker.currentChanged.connect(this.getCurrentNotebookListener());
+    this.notebookAddedListener = this.getNotebookAddedListener();
+    this.currentNotebookListener = this.getCurrentNotebookListener();
+    tracker.widgetAdded.connect(this.notebookAddedListener);
+    tracker.currentChanged.connect(this.currentNotebookListener);
+  }
+
+  dispose(): void {
+    if (this.isDisposed) {
+      return;
+    }
+    if (this.notebookPanelWidgets != null) {
+      for (const widget of this.notebookPanelWidgets) {
+        widget[1].dispose();
+      }
+    }
+    if (this.notebookTracker != null) {
+      this.removeNotebookListeners(this.notebookTracker);
+    }
+    this.activeNotebook = null;
+    this.notebookPanelWidgets = null;
+    this.notebookTracker = null;
+    super.dispose();
   }
 
   private getCurrentNotebookListener(): (tracker: INotebookTracker,
@@ -122,6 +148,13 @@ export class CreateAssignmentWidget extends Panel {
       }
     }
   }
+
+  private removeNotebookListeners(tracker: INotebookTracker): void {
+    tracker.widgetAdded.disconnect(this.notebookAddedListener);
+    tracker.currentChanged.disconnect(this.currentNotebookListener);
+    this.notebookAddedListener = null;
+    this.currentNotebookListener = null;
+  }
 }
 
 /**
@@ -130,6 +163,11 @@ export class CreateAssignmentWidget extends Panel {
 class CellWidget extends Panel {
   private _cell: Cell;
   private _click = new Signal<this, void>(this);
+  private metadataChangedHandler:
+      (metadata: IObservableJSON,
+       changedArgs: IObservableMap.IChangedArgs<ReadonlyPartialJSONValue>) =>
+      void;
+  private onclick: (this: HTMLElement, ev: MouseEvent) => any;
   private lock: HTMLAnchorElement;
   private gradeId: HTMLDivElement;
   private points: HTMLDivElement;
@@ -150,7 +188,8 @@ class CellWidget extends Panel {
 
   private async addMetadataListener(cell: Cell) {
     await cell.ready;
-    cell.model.metadata.changed.connect(this.getMetadataChangedHandler());
+    this.metadataChangedHandler = this.getMetadataChangedHandler();
+    cell.model.metadata.changed.connect(this.metadataChangedHandler);
   }
 
   /**
@@ -165,6 +204,39 @@ class CellWidget extends Panel {
    */
   get click(): ISignal<this, void> {
     return this._click;
+  }
+
+  dispose(): void {
+    if (this.isDisposed) {
+      return;
+    }
+    if (this.metadataChangedHandler != null) {
+      this.cell?.model?.metadata?.changed?.disconnect(
+          this.metadataChangedHandler);
+    }
+    if (this.onclick != null) {
+      this.node?.removeEventListener('click', this.onclick);
+    }
+    if (this.taskInput != null) {
+      this.taskInput.onchange = null;
+    }
+    if (this.gradeIdInput != null) {
+      this.gradeIdInput.onchange = null;
+    }
+    if (this.pointsInput != null) {
+      this.pointsInput.onchange = null;
+    }
+    this._cell = null;
+    this._click = null;
+    this.metadataChangedHandler = null;
+    this.onclick = null;
+    this.lock = null;
+    this.gradeId = null;
+    this.points = null;
+    this.taskInput = null;
+    this.gradeIdInput = null;
+    this.pointsInput = null;
+    super.dispose();
   }
 
   private getCellStateChangedListener(
@@ -217,9 +289,10 @@ class CellWidget extends Panel {
   }
 
   private initClickListener(): void {
-    this.node.addEventListener('click', () => {
+    this.onclick = () => {
       this._click.emit();
-    });
+    };
+    this.node.addEventListener('click', this.onclick);
   }
 
   private initInputListeners(): void {
@@ -437,6 +510,14 @@ class NotebookHeaderWidget extends Widget {
     this.initLayout();
   }
 
+  dispose(): void {
+    if (this.isDisposed) {
+      return;
+    }
+    this.pointsInput = null;
+    super.dispose();
+  }
+
   private initLayout(): void {
     const totalPoints = this.newTotalPointsElement();
     this.node.appendChild(totalPoints);
@@ -472,13 +553,27 @@ class NotebookHeaderWidget extends Widget {
  */
 class NotebookWidget extends Panel {
   private activeCell = null as Cell;
-  private _notebookPanel: NotebookPanel;
+  private activeCellWidgetListener: (cellWidget: CellWidget) => void;
+  private cellListener: (notebook: Notebook, cell: Cell) => void;
+  private cellListListener:
+      (sender: IObservableUndoableList<ICellModel>,
+       args: IObservableList.IChangedArgs<ICellModel>) => void;
   private _cellMetadataChanged = new Signal<this, CellWidget>(this);
   private cellWidgets = new Map<Cell, CellWidget>();
+  private metadataChangedHandlers = new Map<
+      CellWidget,
+      (metadata: IObservableJSON,
+       args: IObservableMap.IChangedArgs<ReadonlyPartialJSONValue>) => void>();
+  private notebookDisposedListener: (panel: NotebookPanel) => void;
+  private _notebookPanel: NotebookPanel;
+  private validateIdsListener:
+      (context: DocumentRegistry.IContext<INotebookModel>,
+       args: DocumentRegistry.SaveState) => void;
 
   constructor(panel: NotebookPanel) {
     super();
     this.activeCell = panel.content.activeCell;
+    this.activeCellWidgetListener = this.getActiveCellWidgetListener();
     this._notebookPanel = panel;
     this.addClass(CSS_NOTEBOOK_WIDGET);
     this.addCellListener(panel);
@@ -486,15 +581,16 @@ class NotebookWidget extends Panel {
     this.initCellWidgets(panel.content);
     this.validateSchemaVersion();
     this.addValidateIdsListener();
-    panel.disposed.connect(this.getNotebookDisposedListener());
+    this.addNotebookDisposedListener(panel);
   }
 
   private addCellListener(panel: NotebookPanel) {
-    panel.content.activeCellChanged.connect(this.getActiveCellListener());
+    this.cellListener = this.getActiveCellListener();
+    panel.content.activeCellChanged.connect(this.cellListener);
   }
 
   private addCellListListener(panel: NotebookPanel) {
-    panel.model.cells.changed.connect(
+    this.cellListListener =
       (sender: IObservableUndoableList<ICellModel>,
        args: IObservableList.IChangedArgs<ICellModel>) => {
          switch (args.type) {
@@ -535,7 +631,8 @@ class NotebookWidget extends Panel {
              }
            }
          }
-    });
+    };
+    panel.model.cells.changed.connect(this.cellListListener);
   }
 
   private addCellWidget(cell: Cell, index = undefined as number): CellWidget {
@@ -547,21 +644,28 @@ class NotebookWidget extends Panel {
     else {
       this.insertWidget(index, cellWidget);
     }
-    cellWidget.click.connect(this.getActiveCellWidgetListener());
-    cell.model.metadata.changed.connect(
-        this.getMetadataChangedHandler(cellWidget));
+    cellWidget.click.connect(this.activeCellWidgetListener);
+    const metadataChangedHandler = this.getMetadataChangedHandler(cellWidget);
+    cell.model.metadata.changed.connect(metadataChangedHandler);
+    this.metadataChangedHandlers.set(cellWidget, metadataChangedHandler);
     return cellWidget;
   }
 
+  private addNotebookDisposedListener(panel: NotebookPanel): void {
+    this.notebookDisposedListener = this.getNotebookDisposedListener();
+    panel.disposed.connect(this.notebookDisposedListener);
+  }
+
   private addValidateIdsListener(): void {
-    this.notebookPanel.context.saveState.connect(
+    this.validateIdsListener =
       (context: DocumentRegistry.IContext<INotebookModel>,
        args: DocumentRegistry.SaveState) => {
          if (args != 'started') {
            return;
          }
          this.validateIds();
-      });
+      };
+    this.notebookPanel.context.saveState.connect(this.validateIdsListener);
   }
 
   /**
@@ -569,6 +673,44 @@ class NotebookWidget extends Panel {
    */
   get cellMetadataChanged(): Signal<this, CellWidget> {
     return this._cellMetadataChanged;
+  }
+
+  dispose(): void {
+    if (this.isDisposed) {
+      return;
+    }
+    if (this.cellWidgets != null) {
+      for (const widgets of this.cellWidgets) {
+        this.removeCellWidget(widgets[0]);
+      }
+    }
+    if (this.cellListener != null) {
+      this.notebookPanel?.content?.activeCellChanged?.disconnect(
+          this.cellListener);
+    }
+    if (this.cellListListener != null) {
+      this.notebookPanel?.model?.cells?.changed?.disconnect(
+          this.cellListListener);
+    }
+    if (this.validateIdsListener != null) {
+      this.notebookPanel?.context?.saveState?.disconnect(
+          this.validateIdsListener);
+    }
+    if (this.notebookDisposedListener != null) {
+      this.notebookPanel?.disposed?.disconnect(this.notebookDisposedListener);
+    }
+    this.notebookPanel?.dispose();
+    this.activeCell = null;
+    this.activeCellWidgetListener = null;
+    this.cellListener = null;
+    this.cellListListener = null;
+    this._cellMetadataChanged = null;
+    this.cellWidgets = null;
+    this.metadataChangedHandlers = null;
+    this.notebookDisposedListener = null;
+    this._notebookPanel = null;
+    this.validateIdsListener = null;
+    super.dispose();
   }
 
   private findCellInArray(model: ICellModel, cells: readonly Cell[]): Cell {
@@ -648,9 +790,19 @@ class NotebookWidget extends Panel {
   }
 
   private removeCellWidget(cell: Cell): void {
+    if (this.cellWidgets == null) {
+      return;
+    }
     const cellWidget = this.cellWidgets.get(cell);
     if (cellWidget == null) {
       return;
+    }
+    if (this.activeCellWidgetListener != null) {
+      cellWidget.click?.disconnect(this.activeCellWidgetListener);
+    }
+    const handler = this.metadataChangedHandlers?.get(cellWidget);
+    if (handler != null) {
+      cell.model?.metadata?.changed?.disconnect(handler);
     }
     this.cellWidgets.delete(cell);
     cellWidget.dispose();
@@ -759,6 +911,11 @@ class NotebookWidget extends Panel {
  * Contains a notebook's "Create Assignment" UI.
  */
 class NotebookPanelWidget extends Panel {
+  private cellListListener:
+      (cellModels: IObservableUndoableList<ICellModel>,
+       args: IObservableList.IChangedArgs<ICellModel>) => void;
+  private cellModelListener:
+      (notebookWidget: NotebookWidget, cellWidget: CellWidget) => void;
   private notebookHeaderWidget: NotebookHeaderWidget;
   private notebookWidget: NotebookWidget;
 
@@ -782,6 +939,27 @@ class NotebookPanelWidget extends Panel {
     return totalPoints;
   }
 
+  dispose(): void {
+    if (this.isDisposed) {
+      return;
+    }
+    if (this.cellListListener != null) {
+      this.notebookWidget?.notebookPanel?.model?.cells?.changed?.disconnect(
+          this.cellListListener);
+    }
+    if (this.cellModelListener != null) {
+      this.notebookWidget?.cellMetadataChanged?.disconnect(
+          this.cellModelListener);
+    }
+    this.notebookHeaderWidget?.dispose();
+    this.notebookWidget?.dispose();
+    this.cellListListener = null;
+    this.cellModelListener = null;
+    this.notebookHeaderWidget = null;
+    this.notebookWidget = null;
+    super.dispose();
+  }
+
   private initLayout(panel: NotebookPanel): void {
     this.notebookHeaderWidget = new NotebookHeaderWidget();
     this.notebookWidget = new NotebookWidget(panel);
@@ -791,16 +969,19 @@ class NotebookPanelWidget extends Panel {
 
   private setUpTotalPoints(): void {
     this.notebookHeaderWidget.totalPoints = this.calcTotalPoints();
+    this.cellListListener =
+        (cellModels: IObservableUndoableList<ICellModel>,
+         args: IObservableList.IChangedArgs<ICellModel>) => {
+           if (args.type != 'move') {
+             this.notebookHeaderWidget.totalPoints = this.calcTotalPoints();
+           }
+         };
+    this.cellModelListener =
+        (notebookWidget: NotebookWidget, cellWidget: CellWidget) => {
+          this.notebookHeaderWidget.totalPoints = this.calcTotalPoints();
+        };
     this.notebookWidget.notebookPanel.model.cells.changed.connect(
-      (cellModels: IObservableUndoableList<ICellModel>,
-       args: IObservableList.IChangedArgs<ICellModel>) => {
-         if (args.type != 'move') {
-           this.notebookHeaderWidget.totalPoints = this.calcTotalPoints();
-         }
-       });
-    this.notebookWidget.cellMetadataChanged.connect(
-       (notebookWidget: NotebookWidget, cellWidget: CellWidget) => {
-         this.notebookHeaderWidget.totalPoints = this.calcTotalPoints();
-       });
+        this.cellListListener);
+    this.notebookWidget.cellMetadataChanged.connect(this.cellModelListener);
   }
 }
