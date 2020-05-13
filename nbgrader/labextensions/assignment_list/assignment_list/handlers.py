@@ -5,12 +5,15 @@ import traceback
 from notebook.base.handlers import APIHandler
 from notebook.utils import url_path_join
 import tornado
+from textwrap import dedent
 from traitlets.config import LoggingConfigurable, Config
 from jupyter_core.paths import jupyter_config_path
 from nbgrader.exchange import ExchangeFactory, ExchangeError
 from nbgrader.apps import NbGrader
 from nbgrader.coursedir import CourseDirectory
 from nbgrader.auth import Authenticator
+from nbgrader import __version__ as nbgrader_version
+
 
 @contextlib.contextmanager
 def chdir(dirname):
@@ -18,6 +21,7 @@ def chdir(dirname):
     os.chdir(dirname)
     yield
     os.chdir(currdir)
+
 
 class AssignmentList(LoggingConfigurable):
 
@@ -30,6 +34,7 @@ class AssignmentList(LoggingConfigurable):
         app.load_config_file()
 
         return app.config
+
 
     @contextlib.contextmanager
     def get_assignment_dir_config(self):
@@ -48,6 +53,7 @@ class AssignmentList(LoggingConfigurable):
             app.load_config_file()
 
             yield app.config
+
 
     def list_released_assignments(self, course_id=None):
         with self.get_assignment_dir_config() as config:
@@ -92,6 +98,7 @@ class AssignmentList(LoggingConfigurable):
                 }
 
         return retvalue
+
 
     def list_submitted_assignments(self, course_id=None):
         with self.get_assignment_dir_config() as config:
@@ -138,6 +145,7 @@ class AssignmentList(LoggingConfigurable):
 
         return retvalue
 
+
     def list_assignments(self, course_id=None):
         released = self.list_released_assignments(course_id=course_id)
         if not released['success']:
@@ -154,6 +162,7 @@ class AssignmentList(LoggingConfigurable):
 
         return retvalue
 
+
     def list_courses(self):
         assignments = self.list_assignments()
         if not assignments["success"]:
@@ -165,6 +174,7 @@ class AssignmentList(LoggingConfigurable):
         }
 
         return retvalue
+
 
     def fetch_assignment(self, course_id, assignment_id):
         with self.get_assignment_dir_config() as config:
@@ -255,6 +265,7 @@ class AssignmentList(LoggingConfigurable):
 
         return retvalue
 
+
 class BaseAssignmentHandler(APIHandler):
 
     @property
@@ -272,6 +283,7 @@ class RouteHandler(BaseAssignmentHandler):
             "data": "This is /assignment_list/get_example endpoint!"
         }))
 
+
 class CouseListHandler(BaseAssignmentHandler):
     # The following decorator should be present on all verb methods (head, get, post, 
     # patch, put, delete, options) to ensure only authorized user can request the 
@@ -280,12 +292,15 @@ class CouseListHandler(BaseAssignmentHandler):
     def get(self):
         self.finish(json.dumps(self.manager.list_courses()))
 
+
 class AssignmentListHandler(BaseAssignmentHandler):
 
     @tornado.web.authenticated
     def get(self):
         course_id = self.get_argument('course_id')
         self.finish(json.dumps(self.manager.list_assignments(course_id=course_id)))
+
+
 class AssignmentActionHandler(BaseAssignmentHandler):
 
     @tornado.web.authenticated
@@ -305,12 +320,37 @@ class AssignmentActionHandler(BaseAssignmentHandler):
             else:
                 self.finish(json.dumps(output))
         elif action == 'fetch_feedback':
-            assignment_id = self.get_argument('assignment_id')
-            course_id = self.get_argument('course_id')
+            assignment_id = input_data['assignment_id']
+            course_id = input_data['course_id']
             self.manager.fetch_feedback(course_id, assignment_id)
             self.finish(json.dumps(self.manager.list_assignments(course_id=course_id)))
         elif action == 'validate':
             self.finish({"success": True, "value": {}})
+
+
+class NbGraderVersionHandler(BaseAssignmentHandler):
+    @tornado.web.authenticated
+    def get(self):
+        ui_version = self.get_argument('version')
+        if ui_version != nbgrader_version:
+            msg = dedent(
+                """
+                The version of the Assignment List nbextension does not match
+                the server extension; the nbextension version is {} while the
+                server version is {}. This can happen if you have recently
+                upgraded nbgrader, and may cause this extension to not work
+                correctly. To fix the problem, please see the nbgrader
+                installation instructions:
+                http://nbgrader.readthedocs.io/en/stable/user_guide/installation.html
+                """.format(ui_version, nbgrader_version)
+            ).strip().replace("\n", " ")
+            self.log.error(msg)
+            result = {"success": False, "message": msg}
+        else:
+            result = {"success": True}
+
+        self.finish(json.dumps(result))
+
 
 def setup_handlers(lab_app):
     host_pattern = ".*$"
@@ -322,5 +362,6 @@ def setup_handlers(lab_app):
     courses_pattern = url_path_join(base_url, url, "courses")
     assignments_pattern = url_path_join(base_url, url, "assignments")
     assignments_action_pattern = url_path_join(base_url, url, (r"/assignments/%s" % _assignment_action_regex))
-    handlers = [(route_pattern, RouteHandler), (courses_pattern, CouseListHandler), (assignments_pattern, AssignmentListHandler), (assignments_action_pattern, AssignmentActionHandler)]
+    check_nbgrader_pattern = url_path_join(base_url, url, "/nbgrader_version")
+    handlers = [(route_pattern, RouteHandler), (courses_pattern, CouseListHandler), (assignments_pattern, AssignmentListHandler), (assignments_action_pattern, AssignmentActionHandler), (check_nbgrader_pattern, NbGraderVersionHandler)]
     lab_app.web_app.add_handlers(host_pattern, handlers)
