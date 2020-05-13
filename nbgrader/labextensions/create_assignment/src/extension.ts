@@ -140,9 +140,12 @@ export class CreateAssignmentWidget extends Panel {
       const notebookPanelWidget = new NotebookPanelWidget(panel);
       this.addWidget(notebookPanelWidget);
       this.notebookPanelWidgets.set(panel, notebookPanelWidget);
+      panel.disposed.connect(() => {
+        notebookPanelWidget.dispose();
+      });
       notebookPanelWidget.disposed.connect(() => {
         this.notebookPanelWidgets.delete(panel);
-      })
+      });
       if (tracker.currentWidget != panel) {
         notebookPanelWidget.hide();
       }
