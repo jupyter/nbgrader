@@ -18,8 +18,8 @@ import { requestAPI, CourseList, AssignmentList } from './assignmentlist';
 
 
 
-
 class AssignmentListWidget extends Widget {
+  
   constructor() {
     super();
     console.log('Initializing the assignments list widget');
@@ -107,28 +107,18 @@ class AssignmentListWidget extends Widget {
       '  </div>   ',
       '</div>',
     ].join('\n'));
-
+    
     this.node.insertAdjacentHTML('beforeend', assignment_html);
+    let base_url = PageConfig.getBaseUrl();
     let options = new Map();
-    options.set('base_url','');
+    options.set('base_url',base_url);
     var assignment_l = new AssignmentList(this,
       'released_assignments_list',
       'fetched_assignments_list',
       'submitted_assignments_list',
       options);
-
-      console.log(assignment_l.fetched_selector);
-
-      /* 
-          base_url: Jupyter.notebook_list.base_url,
-          notebook_path: Jupyter.notebook_list.notebook_path,
-      }*/
-
-
-    let base_url = PageConfig.getBaseUrl();
-    //let service_url = base_url + 'proxy/' + port;
  
-    let course_list = new CourseList(this,
+    new CourseList(this,
       'course_list',
       'course_list_default',
       'course_list_dropdown',
@@ -136,14 +126,29 @@ class AssignmentListWidget extends Widget {
       assignment_l,
       options
     );
-    /*      {
-        base_url: Jupyter.notebook_list.base_url,
-      }*/
-    console.log(course_list.course_list_selector);
-    console.log('CLASS BASE URL: ' + course_list.base_url);
-    console.log('BASE URL: ' + base_url);
+    
+    this.checkNbGraderVersion();
 
   }
+
+  checkNbGraderVersion() {
+    var nbgrader_version = "0.7.0.dev-SOME_CHANGE";
+    var warning = this.node.getElementsByClassName('version_error')[0] as HTMLDivElement;
+    warning.hidden=false;
+    requestAPI<any>('nbgrader_version?version='+nbgrader_version)
+    .then(response => {
+        if (!response['success']) {
+          warning.innerText = response['message'];
+          warning.style.display = 'block'
+        }
+    })
+    .catch(reason => {
+        console.error(
+          `Error on GET /assignment_list/nbgrader_version.\n${reason}`
+        );
+    });
+  }
+
 }
 
 
