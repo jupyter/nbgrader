@@ -838,7 +838,8 @@ class NotebookWidget extends Panel {
     for (let cellModel = iter.next(); cellModel != null;
          cellModel = iter.next()) {
       const data = CellModel.getNbgraderData(cellModel.metadata)
-      const version = data == null ? null : data.schema_version;
+      let version = data == null ? null : data.schema_version;
+      version = version === undefined ? 0 : version;
       if (version != null && version < NBGRADER_SCHEMA_VERSION) {
         this.warnSchemaVersion(version);
         return;
