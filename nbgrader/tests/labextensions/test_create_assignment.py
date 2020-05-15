@@ -112,11 +112,19 @@ def _get_metadata(browser: WebDriver):
     cell_metadata_selector = '.jp-MetadataEditorTool .CodeMirror-code'
     inspector_panel_selector = '#jp-left-stack .jp-PropertyInspector'
     inspector_tab_selector = '.jp-SideBar [data-id="jp-property-inspector"]'
+    slide_type_selector = '.jp-PropertyInspector ' \
+                          '.jp-NotebookTools-tool.jp-KeySelector select'
 
     inspector_panel_element = _get_element(browser, inspector_panel_selector)
     if not inspector_panel_element.is_displayed():
         # Open the property inspector.
         _click_when_available(browser, By.CSS_SELECTOR, inspector_tab_selector)
+
+    # A hack to update the metadata.
+    select_type_element = Select(browser.find_element_by_css_selector(
+            slide_type_selector))
+    select_type_element.select_by_index(1)
+    select_type_element.select_by_index(0)
 
     editor_element = _get_element(browser, cell_metadata_selector)
     if not editor_element.is_displayed():
@@ -354,7 +362,7 @@ def _wait_for_modal(browser: WebDriver, title=None):
     element = _wait(browser).until(condition)
     if title is not None:
         header_class = 'jp-Dialog-header'
-        header_text = element.find_element_by_id(header_class).text
+        header_text = element.find_element_by_class_name(header_class).text
         assert title == header_text
 
 
