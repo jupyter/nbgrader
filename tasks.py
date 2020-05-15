@@ -85,6 +85,9 @@ def tests(args):
     elif args.group == 'nbextensions':
         _run_tests(mark="nbextensions", skip=args.skip, junitxml=args.junitxml)
 
+    elif args.group =='labextensions':
+        _run_tests(mark="labextensions", skip=args.skip, junitxml=args.junitxml)
+
     elif args.group == 'docs':
         docs(args)
 
