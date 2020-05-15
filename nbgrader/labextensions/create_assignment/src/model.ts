@@ -18,6 +18,28 @@ export const NBGRADER_SCHEMA_VERSION = 3;
  */
 export namespace CellModel {
   /**
+   * Cleans invalid nbgrader data if necessary.
+   *
+   * @returns Whether cleaning occurred.
+   */
+  export function cleanNbgraderData(cellMetadata: IObservableJSON,
+                                    cellType: nbformat.CellType): boolean {
+    const data = CellModel.getNbgraderData(cellMetadata);
+    if (data == null || !PrivateNbgraderData.isInvalid(data, cellType)) {
+      return false;
+    }
+
+    data.schema_version = NBGRADER_SCHEMA_VERSION;
+    data.solution = false;
+    data.grade = false;
+    data.locked = false;
+    data.task = false;
+    CellModel.setNbgraderData(data, cellMetadata);
+
+    return true;
+  }
+
+  /**
    * Removes the "cell_type" property from the nbgrader data.
    */
   export function clearCellType(cellMetadata: IObservableJSON): void {

@@ -202,6 +202,10 @@ class CellWidget extends Panel {
     return this._cell;
   }
 
+  private cleanNbgraderData(cell: Cell): void {
+    CellModel.cleanNbgraderData(cell.model.metadata, cell.model.type);
+  }
+
   /**
    * A signal for when this widget receives a click event.
    */
@@ -272,7 +276,14 @@ class CellWidget extends Panel {
         toolData.id = this.gradeIdInput.value;
       }
       else {
-        toolData.id = 'cell-' + this.randomString(16);
+        const nbgraderData = CellModel.getNbgraderData(
+            this.cell.model.metadata);
+        if (nbgraderData?.grade_id == null) {
+          toolData.id = 'cell-' + this.randomString(16);
+        }
+        else {
+          toolData.id = nbgraderData.grade_id;
+        }
         this.gradeIdInput.value = toolData.id;
       }
       if (!this.points.classList.contains(CSS_MOD_UNEDITABLE)) {
@@ -330,6 +341,7 @@ class CellWidget extends Panel {
     if (cell.model == null) {
       return;
     }
+    this.cleanNbgraderData(cell);
     const nbgraderData = CellModel.getNbgraderData(cell.model.metadata);
     const toolData = CellModel.newToolData(nbgraderData, this.cell.model.type);
     CellModel.clearCellType(cell.model.metadata);
