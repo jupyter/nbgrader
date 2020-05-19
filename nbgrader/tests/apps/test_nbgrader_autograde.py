@@ -57,6 +57,48 @@ class TestNbGraderAutograde(BaseTestApp):
         run_nbgrader(["db", "assignment", "add", "ps1", "--db", db, "--duedate", "2015-02-02 14:58:23.948203 America/Los_Angeles"])
         run_nbgrader(["db", "student", "add", "foo", "--db", db])
         run_nbgrader(["db", "student", "add", "bar", "--db", db])
+
+        self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
+        run_nbgrader(["generate_assignment", "ps1", "--db", db])
+
+        self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "submitted", "foo", "ps1", "p1.ipynb"))
+        self._copy_file(join("files", "submitted-changed.ipynb"), join(course_dir, "submitted", "bar", "ps1", "p1.ipynb"))
+        run_nbgrader(["autograde", "ps1", "--db", db])
+
+        assert os.path.isfile(join(course_dir, "autograded", "foo", "ps1", "p1.ipynb"))
+        assert not os.path.isfile(join(course_dir, "autograded", "foo", "ps1", "timestamp.txt"))
+        assert os.path.isfile(join(course_dir, "autograded", "bar", "ps1", "p1.ipynb"))
+        assert not os.path.isfile(join(course_dir, "autograded", "bar", "ps1", "timestamp.txt"))
+
+        with Gradebook(db) as gb:
+            notebook = gb.find_submission_notebook("p1", "ps1", "foo")
+            assert notebook.score == 1
+            assert notebook.max_score == 7
+            assert notebook.needs_manual_grade == False
+
+            comment1 = gb.find_comment("set_a", "p1", "ps1", "foo")
+            comment2 = gb.find_comment("baz", "p1", "ps1", "foo")
+            comment3 = gb.find_comment("quux", "p1", "ps1", "foo")
+            assert comment1.comment == "No response."
+            assert comment2.comment == "No response."
+            assert comment3.comment == "No response."
+
+            notebook = gb.find_submission_notebook("p1", "ps1", "bar")
+            assert notebook.score == 2
+            assert notebook.max_score == 7
+            assert notebook.needs_manual_grade == True
+
+            comment1 = gb.find_comment("set_a", "p1", "ps1", "bar")
+            comment2 = gb.find_comment("baz", "p1", "ps1", "bar")
+            comment2 = gb.find_comment("quux", "p1", "ps1", "bar")
+            assert comment1.comment == None
+            assert comment2.comment == None
+
+    def test_showtraceback_exploit(self, db, course_dir):
+        """Can students exploit showtraceback to hide errors from all future cell outputs to receive free points for incorrect cells?"""
+        run_nbgrader(["db", "assignment", "add", "ps1", "--db", db, "--duedate", "2015-02-02 14:58:23.948203 America/Los_Angeles"])
+        run_nbgrader(["db", "student", "add", "foo", "--db", db])
+        run_nbgrader(["db", "student", "add", "bar", "--db", db])
         run_nbgrader(["db", "student", "add", "spam", "--db", db])
         run_nbgrader(["db", "student", "add", "eggs", "--db", db])
 
@@ -84,45 +126,20 @@ class TestNbGraderAutograde(BaseTestApp):
             assert notebook.max_score == 7
             assert notebook.needs_manual_grade == False
 
-            comment1 = gb.find_comment("set_a", "p1", "ps1", "foo")
-            comment2 = gb.find_comment("baz", "p1", "ps1", "foo")
-            comment3 = gb.find_comment("quux", "p1", "ps1", "foo")
-            assert comment1.comment == "No response."
-            assert comment2.comment == "No response."
-            assert comment3.comment == "No response."
-
             notebook = gb.find_submission_notebook("p1", "ps1", "bar")
             assert notebook.score == 2
             assert notebook.max_score == 7
             assert notebook.needs_manual_grade == True
-
-            comment1 = gb.find_comment("set_a", "p1", "ps1", "bar")
-            comment2 = gb.find_comment("baz", "p1", "ps1", "bar")
-            comment2 = gb.find_comment("quux", "p1", "ps1", "bar")
-            assert comment1.comment == None
-            assert comment2.comment == None
 
             notebook = gb.find_submission_notebook("p1", "ps1", "spam")
             assert notebook.score == 1
             assert notebook.max_score == 7
             assert notebook.needs_manual_grade == True
 
-            comment1 = gb.find_comment("set_a", "p1", "ps1", "spam")
-            comment2 = gb.find_comment("baz", "p1", "ps1", "spam")
-            comment2 = gb.find_comment("quux", "p1", "ps1", "spam")
-            assert comment1.comment == None
-            assert comment2.comment == None
-
             notebook = gb.find_submission_notebook("p1", "ps1", "eggs")
             assert notebook.score == 1
             assert notebook.max_score == 7
             assert notebook.needs_manual_grade == True
-
-            comment1 = gb.find_comment("set_a", "p1", "ps1", "eggs")
-            comment2 = gb.find_comment("baz", "p1", "ps1", "eggs")
-            comment2 = gb.find_comment("quux", "p1", "ps1", "eggs")
-            assert comment1.comment == None
-            assert comment2.comment == None
 
     def test_student_id_exclude(self, db, course_dir):
         """Does --CourseDirectory.student_id_exclude=X exclude students?"""
