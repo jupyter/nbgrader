@@ -11,15 +11,22 @@ import { ServerConnection } from '@jupyterlab/services';
  */
 export async function requestAPI<T>(
   endPoint = '',
-  init: RequestInit = {}
+  init: RequestInit = {},
+  params: Map<string, string> = undefined
 ): Promise<T> {
+  const searchParams = new URLSearchParams();
+  if (params != null) {
+    for (const entry of params.entries()) {
+      searchParams.append(entry[0], entry[1]);
+    }
+  }
+
   // Make request to Jupyter API
   const settings = ServerConnection.makeSettings();
   const requestUrl = URLExt.join(
     settings.baseUrl,
-    'validate_assignment', // API Namespace
     endPoint
-  );
+  ) + '?' + searchParams.toString();
 
   let response: Response;
   try {
