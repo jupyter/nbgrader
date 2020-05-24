@@ -112,6 +112,11 @@ def _make_nbserver(course_id, port, tempdir, jupyter_config_dir,
     sp.check_call([sys.executable, "-m", "jupyter", "labextension", "install",
                    str(labextensions_dir / "create_assignment")],
                   env=env)
+    sp.check_call([sys.executable, "-m", "jupyter", "serverextension",
+               "enable", "--user", "--py", "assignment_list"], env=env)
+    sp.check_call([sys.executable, "-m", "jupyter", "labextension", "install",
+               str(labextensions_dir / "assignment_list")],
+              env=env)
 
     # create nbgrader_config.py file
     with open('nbgrader_config.py', 'w') as fh:
