@@ -17,23 +17,39 @@ import {
 import { requestAPI, CourseList, AssignmentList } from './assignmentlist';
 
 
-
 class AssignmentListWidget extends Widget {
   
   constructor() {
     super();
+    var h = document.getElementsByTagName('head')[0] as HTMLHeadElement;
     console.log('Initializing the assignments list widget');
+    var l = document.createElement('link') as HTMLLinkElement;
+    l.rel = 'stylesheet';
+    l.href = 'https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css'
+    l.type = 'text/css'
+    
+    var s1 = document.createElement('script') as HTMLScriptElement;
+    s1.src = 'https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js'
+    s1.type = 'text/javascript'
+    s1.crossOrigin = 'anonymous'
+    s1.async = false;
+    var s2 = document.createElement('script') as HTMLScriptElement;
+    s2.src = 'https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js'
+    s2.type = 'text/javascript'
+    s2.async=false;
+  
+    h.append(l)
+    h.append(s1)
+    h.append(s2)
+
     var assignment_html = ([
-      '<head>',
-      '  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">',
-      '</head>',
       '<div id="assignments" class="tab-pane">',
       '  <div id="assignments_toolbar" class="row list_toolbar">',
       '    <div class="col-sm-8 no-padding">',
       '      <span id="assignments_list_info" class="toolbar_info">Released, downloaded, and submitted assignments for course:</span>',
-      '      <div id="course_drop_down" class="btn-group btn-group-xs">',
+      '      <div class="btn-group btn-group-xs">',
       '        <button type="button" class="btn btn-default" id="course_list_default">Loading, please wait...</button>',
-      '        <button type="button" class="btn btn-default dropdown-toggle" id="course_list_dropdown" data-toggle="dropdown" disabled="disabled">',
+      '        <button type="button" class="btn btn-default dropdown-toggle" id="course_list_dropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" disabled="disabled">',
       '          <span class="caret"></span>',
       '          <span class="sr-only">Toggle Dropdown</span>',
       '        </button>',
@@ -105,10 +121,12 @@ class AssignmentListWidget extends Widget {
       '      </div>',
       '    </div>',
       '  </div>   ',
-      '</div>',
-    ].join('\n'));
+      '</div>'
+  ].join('\n'));
+    var html = document.createElement('div') as HTMLDivElement;
+    html.innerHTML=assignment_html;
+    this.node.append(html);
     
-    this.node.insertAdjacentHTML('beforeend', assignment_html);
     let base_url = PageConfig.getBaseUrl();
     let options = new Map();
     options.set('base_url',base_url);
@@ -132,10 +150,10 @@ class AssignmentListWidget extends Widget {
   }
 
   checkNbGraderVersion() {
-    var nbgrader_version = "0.7.0.dev-SOME_CHANGE";
+    //var nbgrader_version = ;
     var warning = this.node.getElementsByClassName('version_error')[0] as HTMLDivElement;
     warning.hidden=false;
-    requestAPI<any>('nbgrader_version?version='+nbgrader_version)
+    requestAPI<any>('nbgrader_version?version='+"0.7.0.dev")
     .then(response => {
         if (!response['success']) {
           warning.innerText = response['message'];
@@ -202,15 +220,6 @@ const extension: JupyterFrontEndPlugin<void> = {
       command,
       name: () => 'al'
     });
-
-    // GET request
-    try {
-      const data = await requestAPI<any>('get_example');
-      console.log(data);
-    } catch (reason) {
-      console.error(`Error on GET /assignment_list/hello.\n${reason}`);
-    }
-
 
     
   }

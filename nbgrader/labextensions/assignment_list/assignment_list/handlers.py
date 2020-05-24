@@ -324,8 +324,6 @@ class AssignmentActionHandler(BaseAssignmentHandler):
             course_id = input_data['course_id']
             self.manager.fetch_feedback(course_id, assignment_id)
             self.finish(json.dumps(self.manager.list_assignments(course_id=course_id)))
-        elif action == 'validate':
-            self.finish({"success": True, "value": {}})
 
 
 class NbGraderVersionHandler(BaseAssignmentHandler):

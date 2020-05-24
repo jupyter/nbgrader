@@ -86,6 +86,7 @@
 
 #submission-message pre,
 #validation-message pre {
+    padding-bottom: 100px;
     margin-left: 1em;
     margin-right: 1em;
 }
