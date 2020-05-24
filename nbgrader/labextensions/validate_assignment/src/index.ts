@@ -38,83 +38,118 @@ var nbgrader_version = "0.7.0.dev"; // TODO: hardcoded value
 
 export
 class ButtonExtension implements DocumentRegistry.IWidgetExtension<NotebookPanel, INotebookModel> {
+  private _buttonCallback = this.newButtonCallback();
+  private _versionCheckCallback = this.newVersionCheckCallback();
+  private _saveCallback = this.newSaveCallback();
   private button: ToolbarButton;
+  private panel: NotebookPanel;
 
   /**
    * Create a new extension object.
    */
   createNew(panel: NotebookPanel, context: DocumentRegistry.IContext<INotebookModel>): IDisposable {
-    let callback = () => {
-      requestAPI<any>('nbgrader_version', undefined, new Map([['version', nbgrader_version]]))
-        .then(data => {
-          if (data.success) {
-            // tests/test-docregistry/src/context.spec.ts:98
-            this.setButtonDisabled();
-            this.setButtonLabel('Saving...');
-            const notebookSaved = (
-              sender: DocumentRegistry.IContext<INotebookModel>,
-              args: DocumentRegistry.SaveState) => {
-              if (args == "completed") {
-                panel.context.saveState.disconnect(notebookSaved);
-                this.setButtonLabel('Validating...');
-                const notebook_path = panel.context.path
-                requestAPI<any>('assignments/validate',
-                  { method: 'POST' },
-                  new Map([['path', notebook_path]]) )
-                  .then(data => {
-                    this.validate(data);
-                    this.setButtonLabel();
-                    this.setButtonDisabled(false);
-                  })
-                  .catch(reason => {
-                    error_dialog(`Cannot validate: ${reason}`);
-                    this.setButtonLabel();
-                    this.setButtonDisabled(false);
-                  });
-              } else if (args == "failed") {
-                panel.context.saveState.disconnect(notebookSaved);
-                error_dialog("Cannot save notebook");
-                this.setButtonLabel();
-                this.setButtonDisabled(false);
-              }
-            };
-            panel.context.saveState.connect(notebookSaved);
-            // examples/notebook/src/commands.ts:79
-            panel.context.save();
-          } else {
-            error_dialog(data.message, 'Version Mismatch');
-          }
-        })
-        .catch(reason => {
-          // The validate_assignment server extension appears to be missing
-          error_dialog(`Cannot check version: ${reason}`);
-        });
-    };
-    let button = new ToolbarButton({
+    this.panel = panel;
+    this.button = new ToolbarButton({
       className: 'validate-button',
       // iconClass: 'fa fa-fast-forward',
       label: 'Validate',
-      onClick: callback,
+      onClick: this.buttonCallback,
       tooltip: 'Validate Assignment'
     });
-    this.button = button
 
     let children = panel.toolbar.children();
     let index = 0;
     for (let i = 0; ; i++) {
-        let widget = children.next();
-        if (widget == undefined) {
-            break;
-        }
-        if (widget.node.classList.contains("jp-Toolbar-spacer")) {
-            index = i;
-            break;
-        }
+      let widget = children.next();
+      if (widget == undefined) {
+        break;
+      }
+      if (widget.node.classList.contains("jp-Toolbar-spacer")) {
+        index = i;
+        break;
+      }
     }
-    panel.toolbar.insertItem(index, 'runAll', button);
+    panel.toolbar.insertItem(index, 'runAll', this.button);
     return new DisposableDelegate(() => {
-      button.dispose();
+      this.button.dispose();
     });
+  }
+
+  private get buttonCallback() {
+    return this._buttonCallback;
+  }
+
+  private get saveCallback() {
+    return this._saveCallback;
+  }
+
+  private get versionCheckCallback() {
+    return this._versionCheckCallback;
+  }
+
+  private newSaveCallback() {
+    return (sender: DocumentRegistry.IContext<INotebookModel>,
+            args: DocumentRegistry.SaveState) => {
+      if (args !== 'completed' && args !== 'failed') {
+        return;
+      }
+
+      this.panel.context.saveState.disconnect(this.saveCallback);
+
+      if (args !== "completed") {
+        error_dialog("Cannot save notebook");
+        this.setButtonLabel();
+        this.setButtonDisabled(false);
+        return;
+      }
+
+      this.setButtonLabel('Validating...');
+      const notebook_path = this.panel.context.path
+      requestAPI<any>(
+          'assignments/validate',
+          { method: 'POST' },
+          new Map([['path', notebook_path]])
+      ).then(data => {
+        this.validate(data);
+        this.setButtonLabel();
+        this.setButtonDisabled(false);
+      }).catch(reason => {
+        error_dialog(`Cannot validate: ${reason}`);
+        this.setButtonLabel();
+        this.setButtonDisabled(false);
+      });
+    }
+  }
+
+  private newVersionCheckCallback() {
+    return (data: any) => {
+      if (data.success !== true) {
+        error_dialog(data.message, 'Version Mismatch');
+        return;
+      }
+
+      // tests/test-docregistry/src/context.spec.ts:98
+      this.setButtonDisabled();
+      this.setButtonLabel('Saving...');
+      this.panel.context.saveState.connect(this.saveCallback);
+      // examples/notebook/src/commands.ts:79
+      this.panel.context.save();
+    }
+  }
+
+  private newButtonCallback() {
+    return () => {
+      requestAPI<any>(
+          'nbgrader_version',
+          undefined,
+          new Map([['version', nbgrader_version]])
+      ).then(
+          this.versionCheckCallback
+      ).catch(reason => {
+        // The validate_assignment server extension appears to be missing
+        error_dialog(`Cannot check version: ${reason}`);
+      });
+    }
   }
 
   private setButtonDisabled(disabled: boolean = true): void {
