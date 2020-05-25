@@ -10,13 +10,13 @@ import sys
 import signal
 import glob
 
+
 from selenium import webdriver
 from selenium.common.exceptions import NoAlertPresentException
 from textwrap import dedent
 
 from .. import copy_coverage_files, get_free_ports
 from ...utils import rmtree
-
 
 @pytest.fixture(scope="module")
 def tempdir(request):
@@ -102,13 +102,14 @@ def _make_nbserver(course_id, port, tempdir, jupyter_config_dir,
     env['HOME'] = tempdir
     labextensions_dir = (Path(__file__).resolve().parent.parent.parent
                          / 'labextensions')
-
+    
     sp.check_call([sys.executable, "-m", "jupyter", "nbextension", "install",
                    "--user", "--py", "nbgrader"], env=env)
     sp.check_call([sys.executable, "-m", "jupyter", "nbextension", "enable",
                    "--user", "--py", "nbgrader"], env=env)
     sp.check_call([sys.executable, "-m", "jupyter", "serverextension",
                    "enable", "--user", "--py", "nbgrader"], env=env)
+    
     sp.check_call([sys.executable, "-m", "jupyter", "labextension", "install",
                    str(labextensions_dir / "create_assignment")],
                   env=env)
@@ -119,7 +120,11 @@ def _make_nbserver(course_id, port, tempdir, jupyter_config_dir,
               env=env)
     sp.check_call([sys.executable, "-m", "jupyter", "labextension", "install",
                    str(labextensions_dir / "validate_assignment")], env=env)
-
+    sp.check_call([sys.executable, "-m", "jupyter", "serverextension",
+            "enable", "--user", "--py", "course_list"], env=env)
+    sp.check_call([sys.executable, "-m", "jupyter", "labextension", "install",
+                str(labextensions_dir / "course_list")], env=env)
+    
     # create nbgrader_config.py file
     with open('nbgrader_config.py', 'w') as fh:
         fh.write(dedent(
