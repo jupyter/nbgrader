@@ -36,6 +36,10 @@ import {
 } from '@lumino/coreutils';
 
 import {
+  Message
+} from '@lumino/messaging';
+
+import {
   ISignal,
   Signal
 } from '@lumino/signaling';
@@ -76,8 +80,6 @@ export class CreateAssignmentWidget extends Panel {
   private activeNotebook: NotebookPanel;
   private currentNotebookListener: (tracker: INotebookTracker,
                                     panel: NotebookPanel) => void;
-  private notebookAddedListener: (tracker: INotebookTracker,
-                                  panel: NotebookPanel) => void;
   private notebookPanelWidgets = new Map<NotebookPanel, NotebookPanelWidget>();
   private notebookTracker: INotebookTracker;
 
@@ -90,10 +92,26 @@ export class CreateAssignmentWidget extends Panel {
   }
 
   private addNotebookListeners(tracker: INotebookTracker): void {
-    this.notebookAddedListener = this.getNotebookAddedListener();
     this.currentNotebookListener = this.getCurrentNotebookListener();
-    tracker.widgetAdded.connect(this.notebookAddedListener);
     tracker.currentChanged.connect(this.currentNotebookListener);
+  }
+
+  private async addNotebookWidget(tracker: INotebookTracker,
+                                  panel: NotebookPanel) {
+    await panel.revealed
+    const notebookPanelWidget = new NotebookPanelWidget(panel);
+    this.addWidget(notebookPanelWidget);
+    this.notebookPanelWidgets.set(panel, notebookPanelWidget);
+    panel.disposed.connect(() => {
+      notebookPanelWidget.dispose();
+    });
+    notebookPanelWidget.disposed.connect(() => {
+      this.notebookPanelWidgets.delete(panel);
+    });
+    if (tracker.currentWidget != panel) {
+      notebookPanelWidget.hide();
+    }
+    return panel.revealed;
   }
 
   dispose(): void {
@@ -116,7 +134,7 @@ export class CreateAssignmentWidget extends Panel {
 
   private getCurrentNotebookListener(): (tracker: INotebookTracker,
                                          panel: NotebookPanel) => void {
-    return (tracker: INotebookTracker, panel: NotebookPanel) => {
+    return async (tracker: INotebookTracker, panel: NotebookPanel) => {
       if (this.activeNotebook != null) {
         const widget = this.notebookPanelWidgets.get(this.activeNotebook);
         if (widget != null) {
@@ -124,6 +142,9 @@ export class CreateAssignmentWidget extends Panel {
         }
       }
       if (panel != null) {
+        if (this.isVisible && this.notebookPanelWidgets.get(panel) == null) {
+          await this.addNotebookWidget(tracker, panel);
+        }
         const widget = this.notebookPanelWidgets.get(panel)
         if (widget != null) {
           widget.show();
@@ -133,29 +154,19 @@ export class CreateAssignmentWidget extends Panel {
     }
   }
 
-  private getNotebookAddedListener(): (tracker: INotebookTracker,
-                                       panel: NotebookPanel) => void {
-    return async (tracker: INotebookTracker, panel: NotebookPanel) => {
-      await panel.revealed
-      const notebookPanelWidget = new NotebookPanelWidget(panel);
-      this.addWidget(notebookPanelWidget);
-      this.notebookPanelWidgets.set(panel, notebookPanelWidget);
-      panel.disposed.connect(() => {
-        notebookPanelWidget.dispose();
-      });
-      notebookPanelWidget.disposed.connect(() => {
-        this.notebookPanelWidgets.delete(panel);
-      });
-      if (tracker.currentWidget != panel) {
-        notebookPanelWidget.hide();
-      }
+  protected onBeforeShow(msg: Message): void {
+    super.onBeforeShow(msg);
+    const notebookWidget = this.notebookPanelWidgets.get(this.activeNotebook);
+    if (notebookWidget == null) {
+      this.addNotebookWidget(this.notebookTracker, this.activeNotebook);
+    }
+    else {
+      notebookWidget.show();
     }
   }
 
   private removeNotebookListeners(tracker: INotebookTracker): void {
-    tracker.widgetAdded.disconnect(this.notebookAddedListener);
     tracker.currentChanged.disconnect(this.currentNotebookListener);
-    this.notebookAddedListener = null;
     this.currentNotebookListener = null;
   }
 }
