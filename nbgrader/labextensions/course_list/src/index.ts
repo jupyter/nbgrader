@@ -66,7 +66,7 @@ class CourseListWidget extends Widget {
     }
 
     checkNbGraderVersion() {
-        let nbgrader_version = '0.7.0.dev-INTENTIONAL-VER-CHANGE-FOR-TESTING';
+        let nbgrader_version = '0.7.0.dev';
         requestAPI<any>('nbgrader_version?version='+nbgrader_version)
             .then(response => {
                 if (!response['success']) {
