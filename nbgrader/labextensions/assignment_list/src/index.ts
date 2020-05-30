@@ -210,7 +210,7 @@ const extension: JupyterFrontEndPlugin<void> = {
     });
 
     // Add the command to the palette
-    palette.addItem({command, category: 'Assignment List'});
+    palette.addItem({command, category: 'nbgrader'});
 
     // Track and restore the widget state
     let tracker = new WidgetTracker<MainAreaWidget<AssignmentListWidget>>({
