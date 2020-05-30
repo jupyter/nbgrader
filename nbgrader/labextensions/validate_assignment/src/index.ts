@@ -36,43 +36,21 @@ function error_dialog(body: string, title: string = 'Validation failed'): void {
 
 var nbgrader_version = "0.7.0.dev"; // TODO: hardcoded value
 
-export
-class ButtonExtension implements DocumentRegistry.IWidgetExtension<NotebookPanel, INotebookModel> {
+class ValidateButton extends ToolbarButton {
   private _buttonCallback = this.newButtonCallback();
   private _versionCheckCallback = this.newVersionCheckCallback();
   private _saveCallback = this.newSaveCallback();
-  private button: ToolbarButton;
   private panel: NotebookPanel;
 
-  /**
-   * Create a new extension object.
-   */
-  createNew(panel: NotebookPanel, context: DocumentRegistry.IContext<INotebookModel>): IDisposable {
-    this.panel = panel;
-    this.button = new ToolbarButton({
+  constructor(panel: NotebookPanel) {
+    super({
       className: 'validate-button',
       // iconClass: 'fa fa-fast-forward',
       label: 'Validate',
-      onClick: this.buttonCallback,
+      onClick: () => {this.buttonCallback();},
       tooltip: 'Validate Assignment'
     });
-
-    let children = panel.toolbar.children();
-    let index = 0;
-    for (let i = 0; ; i++) {
-      let widget = children.next();
-      if (widget == undefined) {
-        break;
-      }
-      if (widget.node.classList.contains("jp-Toolbar-spacer")) {
-        index = i;
-        break;
-      }
-    }
-    panel.toolbar.insertItem(index, 'runAll', this.button);
-    return new DisposableDelegate(() => {
-      this.button.dispose();
-    });
+    this.panel = panel;
   }
 
   private get buttonCallback() {
@@ -85,6 +63,14 @@ class ButtonExtension implements DocumentRegistry.IWidgetExtension<NotebookPanel
 
   private get versionCheckCallback() {
     return this._versionCheckCallback;
+  }
+
+  dispose() {
+    if (this.isDisposed) {
+      return;
+    }
+    this.panel = null;
+    super.dispose()
   }
 
   private newSaveCallback() {
@@ -153,7 +139,7 @@ class ButtonExtension implements DocumentRegistry.IWidgetExtension<NotebookPanel
   }
 
   private setButtonDisabled(disabled: boolean = true): void {
-    const button = this.button.node.getElementsByTagName('button')[0];
+    const button = this.node.getElementsByTagName('button')[0];
     if (disabled) {
       button.setAttribute('disabled', 'disabled');
     } else {
@@ -162,7 +148,7 @@ class ButtonExtension implements DocumentRegistry.IWidgetExtension<NotebookPanel
   }
 
   private setButtonLabel(label: string = 'Validate'): void {
-    const labelElement = this.button.node.getElementsByClassName(
+    const labelElement = this.node.getElementsByClassName(
         'jp-ToolbarButtonComponent-label')[0] as HTMLElement;
     labelElement.innerText = label;
   }
@@ -256,6 +242,33 @@ class ButtonExtension implements DocumentRegistry.IWidgetExtension<NotebookPanel
       body: new Widget({node: body}),
       buttons: [Dialog.okButton()],
       focusNodeSelector: 'input'
+    });
+  }
+}
+
+export
+class ButtonExtension implements DocumentRegistry.IWidgetExtension<NotebookPanel, INotebookModel> {
+  /**
+   * Create a new extension object.
+   */
+  createNew(panel: NotebookPanel, context: DocumentRegistry.IContext<INotebookModel>): IDisposable {
+    const button = new ValidateButton(panel);
+
+    let children = panel.toolbar.children();
+    let index = 0;
+    for (let i = 0; ; i++) {
+      let widget = children.next();
+      if (widget == undefined) {
+        break;
+      }
+      if (widget.node.classList.contains("jp-Toolbar-spacer")) {
+        index = i;
+        break;
+      }
+    }
+    panel.toolbar.insertItem(index, 'runAll', button);
+    return new DisposableDelegate(() => {
+      button.dispose();
     });
   }
 }
