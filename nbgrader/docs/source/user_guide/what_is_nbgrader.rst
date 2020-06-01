@@ -6,13 +6,18 @@ standpoint.  It is needed not just for developers, but also for
 administrators which need to build advanced deployments, possibly
 customizing various components in the process.
 
+A companion (and minor prerequisite) to this is the `Jupyter
+conceptual introduction
+<https://jupyterhub.readthedocs.io/en/latest/getting-started/what-is-jupyterhub.html>`
+(once it is released).
+
 
 
 Nbgrader format
 ---------------
 
-Nbgrader uses the standard Jupyter notebook format, ``.ipynb``.  This
-is the primary power of nbgrader: since it uses a standard format
+Nbgrader uses the **standard Jupyter notebook format**, ``.ipynb``.
+This is the primary power of nbgrader: since it uses a standard format
 that's used for other types of computation.  Since it is not special
 to nbgrader, it is immediately usable on other systems (running on
 your own computer, uploading to Google Colab, using anything from the
@@ -35,13 +40,18 @@ itself - which is given to the student - so one can't prevent the
 student from editing the notebook file to change this.  More on the
 effects of this later.
 
-The standard notebook format is also one of the downsides, compared to
-other learning management systems (depending on if you consider this a
-disadvantage...).  Because this is not a "captive system" that
-segments users from the data they are working on, you can't easily
-limit access to the underlying operating system or notebook file.
-However, if you design your course considering this, we hope you'll
-see that this is an advantage.
+The standard Jupyter stack and notebook format is also one of the
+downsides, compared to other learning management systems (depending on
+if you consider this a disadvantage...).  Because this is not a
+"captive system" that segments users from the data they are working
+on, you can't easily limit access to the underlying operating system
+or notebook file.  For example, it is very difficult to prevent access
+to the actual ``.ipynb`` source file, if you wanted to do that.  The
+student *actually* has access to the computational environment
+(subject to the limits of the JupyterHub/spawner you set up, which
+*can* limit students to their own environment).  However, if you
+design your course considering this, we hope you'll see that this is
+an advantage.
 
 
 
@@ -74,12 +84,16 @@ The ``{nbgrader_step}`` indicates the progress of the notebook:
   the executed notebook, points, and comments from manual grading.
   This can be returned to the students.
 
-
 But, there is a database in **gradebook.db** which stores students and
 grades.  Less obviously, it stores the assignments and the contents of
 hidden or immutable cells, such as the contents of the hidden tests
 or read-only cells.  This is used to restore these cells when students
 return them.
+
+Most operations primarily look at the filesystem to see the current
+state, so that it is easy to understand and manipulate the
+internals.  The gradebook is a sort of secondary source of information
+most of the time.
 
 
 nbgrader generate_assignment
@@ -159,6 +173,10 @@ It is structured as:
   * Organized as ``outbound/{assignment_id}/{notebook}.ipynb``.  Other
     data files can be distributed along with the notebook.
 
+  * Files are copied from ``{course_dir}/release/`` to
+    ``{exchange_dir}/outbound/`` by the ``nbgrader release_assignment``
+    command.
+
 * ``inbound/``, containing assignments the student is submitting.  It
   should be writeable, but not listable, by students (``-wx`` UNIX
   permissions).
@@ -169,6 +187,10 @@ It is structured as:
     assignment.  The protection of them is within the random string,
     which is described below.
 
+  * Files are copied from ``{exchange_dir}/inbound/`` to
+    ``{course_dir}/submitted/`` by the ``nbgrader fetch_assignment``
+    command.
+
 * ``feedback/``, containing feedback to the students.  This should
   be traversable by students, but not listable (``--x``).  The
   files inside should be readable (``r--``).
@@ -178,6 +200,9 @@ It is structured as:
     key which is known to the student but not to other students, so
     that they can identify their notebook and retrieve it.
 
+  * Files are copied from ``{course_dir}/feedback/`` to
+    ``{exchange_dir}/feedback/`` by the ``nbgrader release_feedback``
+    command.
 
 The filesystem exchange relies on certain UNIX filesystem semantics:
 if a user has write and execute permissions on a directory, they can
@@ -213,6 +238,11 @@ true decoupling of the student environment from the course management.
 More generally, as part of that work, a **pluggable exchange** concept
 is being developed, so that the exchange is a class which can be
 replaced by custom implementations.
+
+
+
+Student directories
+-------------------
 
 
 
@@ -298,11 +328,23 @@ or perhaps other fancy things like uploading directly.
 Feedback
 --------
 
-Feedback is a HTML file (like a rendering of the notebook using
-nbconvert).  However, it adds in points and feedback.
+Feedback is a HTML file, basically like a rendering of the notebook
+using nbconvert.  However, it adds in points and feedback.
 
-Historically, feedback was just made, and it was up to the teacher to
-distribute it somehow (for example, uploading to the course management
-system or scripting copying it into users home directories).  Now,
-using the exchange, there can be automatically distributed.  This is
-described above.
+Historically, feedback was just generated, and it was up to the
+teacher to distribute it somehow (for example, uploading to the course
+management system or scripting copying it into users home
+directories).  Now, using the exchange, there can be automatically
+distributed.  This is described above.
+
+
+Web extensions
+--------------
+
+TODO
+
+
+See also
+--------
+
+TODO
