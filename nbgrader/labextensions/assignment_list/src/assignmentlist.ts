@@ -26,7 +26,6 @@ export class AssignmentList{
   list_error_ids = ['released_assignments_list_error','fetched_assignments_list_error', 'submitted_assignments_list_error'];
 
   constructor(widget: Widget, released_selector: string, fetched_selector: string, submitted_selector: string, options: Map<string, string>){ 
-    //super();
   this.released_selector = released_selector;
   this.fetched_selector = fetched_selector;
   this.submitted_selector = submitted_selector;
@@ -36,7 +35,6 @@ export class AssignmentList{
   this.fetched_element = div_elments.namedItem(fetched_selector);
   this.submitted_element = div_elments.namedItem(submitted_selector);
 
-  //options = options || {};
   this.options = options;
   this.base_url = options.get('base_url') || PageConfig.getBaseUrl();
 
@@ -168,7 +166,6 @@ export class AssignmentList{
       const data = await requestAPI<any>('assignments?course_id=' + course, { 
         method: 'GET',
       });
-      console.log(data);
       this.handle_load_list(data)
     } catch (reason) {
       console.error(`Error on GET /assignment_list/assignments.\n${reason}`);
@@ -275,7 +272,6 @@ class Assignment {
           });
           
           that.on_refresh(reply);
-          console.log(reply);
         } catch (reason) {
           remove_children(container);
           container.innerText = 'Error fetching assignment.';
@@ -305,7 +301,6 @@ class Assignment {
               that.on_refresh(reply);
             }
   
-            console.log(reply);
           } catch (reason) {
             remove_children(container);
             container.innerText = 'Error submitting assignment.';
@@ -331,7 +326,6 @@ class Assignment {
   
           that.on_refresh(reply);
   
-          console.log(reply);
         } catch (reason) {
           remove_children(container);
           container.innerText = 'Error fetching feedback.';
@@ -507,7 +501,6 @@ class Notebook{
         button.removeAttribute('disabled')
         that.validate(reply, button);
 
-        console.log(reply);
       } catch (reason) {
         remove_children(container);
         container.innerText = 'Error validating assignment.';
@@ -715,7 +708,6 @@ private async load_list() {
 
   try {
     const data = await requestAPI<any>('courses');
-    console.log(data);
     this.handle_load_list(data)
   } catch (reason) {
     console.error(`Error on GET /assignment_list/courses.\n${reason}`);

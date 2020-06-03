@@ -150,7 +150,6 @@ class AssignmentListWidget extends Widget {
   }
 
   checkNbGraderVersion() {
-    //var nbgrader_version = ;
     var warning = this.node.getElementsByClassName('version_error')[0] as HTMLDivElement;
     warning.hidden=false;
     requestAPI<any>('nbgrader_version?version='+"0.7.0.dev")
