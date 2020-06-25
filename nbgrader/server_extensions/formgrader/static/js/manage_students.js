@@ -33,8 +33,10 @@ var StudentUI = Backbone.View.extend({
 
     openModal: function () {
         var body = $("<table/>").addClass("table table-striped form-table");
+        var tablebody = $("<tbody/>");
+        body.append(tablebody);
         var id = $("<tr/>");
-        body.append(id);
+        tablebody.append(id);
         id.append($("<td/>").addClass("align-middle").text("Student ID"));
         id.append($("<td/>").append($("<input/>")
             .addClass("modal-id")
@@ -42,17 +44,17 @@ var StudentUI = Backbone.View.extend({
             .attr("disabled", "disabled")));
 
         var first_name = $("<tr/>");
-        body.append(first_name);
+        tablebody.append(first_name);
         first_name.append($("<td/>").addClass("align-middle").text("First name (optional)"));
         first_name.append($("<td/>").append($("<input/>").addClass("modal-first-name").attr("type", "text")));
 
         var last_name = $("<tr/>");
-        body.append(last_name);
+        tablebody.append(last_name);
         last_name.append($("<td/>").addClass("align-middle").text("Last name (optional)"));
         last_name.append($("<td/>").append($("<input/>").addClass("modal-last-name").attr("type", "text")));
 
         var email = $("<tr/>");
-        body.append(email);
+        tablebody.append(email);
         email.append($("<td/>").addClass("align-middle").text("Email (optional)"));
         email.append($("<td/>").append($("<input/>").addClass("modal-email").attr("type", "text")));
 
@@ -220,23 +222,25 @@ var createStudentModal = function () {
     };
 
     var body = $("<table/>").addClass("table table-striped form-table");
+    var tablebody = $("<tbody/>");
+    body.append(tablebody);
     var id = $("<tr/>");
-    body.append(id);
+    tablebody.append(id);
     id.append($("<td/>").addClass("align-middle").text("Student ID"));
     id.append($("<td/>").append($("<input/>").addClass("id").attr("type", "text")));
 
     var first_name = $("<tr/>");
-    body.append(first_name);
+    tablebody.append(first_name);
     first_name.append($("<td/>").addClass("align-middle").text("First name (optional)"));
     first_name.append($("<td/>").append($("<input/>").addClass("first-name").attr("type", "text")));
 
     var last_name = $("<tr/>");
-    body.append(last_name);
+    tablebody.append(last_name);
     last_name.append($("<td/>").addClass("align-middle").text("Last name (optional)"));
     last_name.append($("<td/>").append($("<input/>").addClass("last-name").attr("type", "text")));
 
     var email = $("<tr/>");
-    body.append(email);
+    tablebody.append(email);
     email.append($("<td/>").addClass("align-middle").text("Email (optional)"));
     email.append($("<td/>").append($("<input/>").addClass("email").attr("type", "text")));
 
