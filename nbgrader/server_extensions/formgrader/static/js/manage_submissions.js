@@ -296,6 +296,6 @@ var loadSubmissions = function () {
 
 var models = undefined;
 var views = [];
-$(window).load(function () {
+$(window).on('load', function () {
     loadSubmissions();
 });

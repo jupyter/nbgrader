@@ -328,6 +328,6 @@ FormGrader.prototype.flag = function () {
 };
 
 var formgrader = new FormGrader(base_url, submission_id);
-$(window).load(function () {
+$(window).on('load', function () {
     formgrader.init()
 });
