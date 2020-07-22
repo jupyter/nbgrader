@@ -11,7 +11,7 @@ define(function(require) {
                 $('<a>')
                 .attr('href', base_url + 'formgrader')
                 .attr('target', '_blank')
-                .text('Formgrader')
+                .text('Grader Console')
             )
         );
     }

@@ -1,3 +1,12 @@
+var get_jhub_base_url = () =>  window.location.protocol + "//" + window.location.host + "/hub";
+
+var get_course_id_from_url = () => {
+    // the url at this point should be like: /services/<course-id>/formgrader
+    var parts = window.location.pathname.split('/');
+    // parts = ["", "services", "<course-id>", "formgrader"]
+    return parts[2];
+}
+
 var Assignment = Backbone.Model.extend({
     idAttribute: 'name',
     urlRoot: base_url + "/formgrader/api/assignment"
@@ -29,6 +38,7 @@ var AssignmentUI = Backbone.View.extend({
         this.$num_submissions = this.$el.find(".num-submissions");
         this.$generate_feedback = this.$el.find(".generate-feedback");
         this.$release_feedback = this.$el.find(".release-feedback");
+        this.$submit_grades = this.$el.find(".submit-grades");
 
         this.listenTo(this.model, "change", this.render);
         this.listenTo(this.model, "request", this.animateSaving);
@@ -90,6 +100,7 @@ var AssignmentUI = Backbone.View.extend({
         this.$num_submissions.empty();
         this.$generate_feedback.empty();
         this.$release_feedback.empty();
+        this.$submit_grades.empty();
     },
 
     render: function () {
@@ -212,7 +223,15 @@ var AssignmentUI = Backbone.View.extend({
 		   .addClass("glyphicon glyphicon-envelope")
                    .attr("aria-hidden", "true")));
         }
-
+        //  grades submission
+        if (num_submissions > 0) {
+            this.$submit_grades.append($("<a/>")
+            .attr("href", "#")
+                    .click(_.bind(this.submit_grades, this))
+            .append($("<span/>")
+            .addClass("glyphicon glyphicon-send")
+                    .attr("aria-hidden", "true")));
+        }
     },
 
     assign: function () {
@@ -411,6 +430,42 @@ var AssignmentUI = Backbone.View.extend({
             "There was an error generating feedback of '" + this.model.get("name") + "'.");
     },
 
+    submit_grades: function () {
+        this.clear();
+        this.$name.text("Please wait...");
+        $.post(get_jhub_base_url() + "/submit-grades/" + get_course_id_from_url() + "/" + this.model.get("name"))
+            .done(_.bind(this.submit_grades_success, this))
+            .fail(_.bind(this.submit_grades_failure, this));
+    },
+
+    submit_grades_success: function (response) {
+        this.model.fetch();
+        response = JSON.parse(response);
+        if (response["success"]) {
+            createLogModal(
+                "success-modal",
+                "Success",
+                "Successfully submitted grades of '" + this.model.get("name") + "'.",
+                response["log"]);
+
+        } else {
+            createLogModal(
+                "error-modal",
+                "Error",
+                "There was an error submitting grades of '" + this.model.get("name") + "':",
+                response["log"],
+                response["error"]);
+        }
+    },
+
+    submit_grades_failure: function () {
+        this.model.fetch();
+        createModal(
+            "error-modal",
+            "Error",
+            "There was an error submitting grades of '" + this.model.get("name") + "'.");
+    },
+
     release_feedback: function () {
         this.clear();
         this.$name.text("Please wait...");
@@ -473,6 +528,7 @@ var insertRow = function (table) {
     row.append($("<td/>").addClass("text-center num-submissions"));
     row.append($("<td/>").addClass("text-center generate-feedback"));
     row.append($("<td/>").addClass("text-center release-feedback"));
+    row.append($("<td/>").addClass("text-center submit-grades"));
     table.append(row)
     return row;
 };
@@ -527,6 +583,8 @@ var createAssignmentModal = function () {
 
     var body = $("<p/>")
     body.append($("<p id='create-error' class='alert alert-danger' style='display: none'/>"));
+    body.append($("<p id='create-error' class='alert alert-warning'/>").text("Please add an assignment name that only lower case characters. Refrain from using spaces and special characters. This name should be the same as the assignment name registered with the assignment name in your LMS."));
+    
     var table = $("<table/>").addClass("table table-striped form-table");
     body.append(table)
     var name = $("<tr/>");
