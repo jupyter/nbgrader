@@ -104,7 +104,6 @@ def aftersuccess(args):
 
 def js(args):
     run('npm install')
-    run('./node_modules/.bin/bower install --config.interactive=false')
     if args.clean:
         run('git clean -fdX nbgrader/server_extensions/formgrader/static/components')
 
