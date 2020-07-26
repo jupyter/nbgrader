@@ -21,8 +21,7 @@ To install npm on Linux with apt-get, use::
     apt-get install node
     apt-get install npm
 
-Modify the ``bower.json`` file in the root of the nbgrader
-repository and then run::
+Once you have successfully install ``npm`` run::
 
     python tasks.py js
 
