@@ -1,28 +1,22 @@
 {
   "name": "nbgrader-deps",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "nbgrader nodejs dependencies",
   "author": "Jupyter Developers",
-  "license": "BSD",
+  "license": "BSD-3-Clause",
   "repository": {
     "type": "git",
     "url": "https://github.com/jupyter/nbgrader.git"
   },
-  "devDependencies": {
-    "bower": "*"
-  },
   "dependencies": {
-    "@bower_components/autosize": "git://github.com/jackmoore/autosize.git#~3.0.8",
-    "@bower_components/backbone": "git://github.com/components/backbone.git#~1.1.2",
-    "@bower_components/bootstrap": "git://github.com/components/bootstrap.git#~3.3",
-    "@bower_components/datatables.net": "DataTables/Dist-DataTables",
-    "@bower_components/datatables.net-bs": "DataTables/Dist-DataTables-Bootstrap",
-    "@bower_components/jquery": "git://github.com/components/jquery.git",
-    "@bower_components/jquery-color": "git://github.com/jquery/jquery-color.git",
-    "@bower_components/underscore": "git://github.com/components/underscore.git#~1.7"
-  },
-  "engines": {
-    "yarn": ">= 1.0.0"
+    "@bower_components/autosize": "git://github.com/jackmoore/autosize.git#4.0.2",
+    "@bower_components/backbone": "git://github.com/components/backbone.git#1.2.0",
+    "@bower_components/bootstrap": "git://github.com/components/bootstrap.git#3.3",
+    "@bower_components/datatables.net": "DataTables/Dist-DataTables#1.10.21",
+    "@bower_components/datatables.net-bs": "DataTables/Dist-DataTables-Bootstrap#1.10.21",
+    "@bower_components/jquery": "git://github.com/components/jquery.git#3.4.1",
+    "@bower_components/jquery-color": "git://github.com/jquery/jquery-color.git#2.2.0",
+    "@bower_components/underscore": "git://github.com/components/underscore.git#1.8.3"
   },
   "scripts": {
     "postinstall": "node -e \"try { require('fs').symlinkSync(require('path').resolve('node_modules/@bower_components'), 'nbgrader/server_extensions/formgrader/static/components', 'junction') } catch (e) { }\""
