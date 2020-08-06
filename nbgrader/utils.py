@@ -115,7 +115,7 @@ def determine_grade(cell: NotebookNode, log: Logger = None) -> Tuple[Optional[fl
         # 3. output is something else, or nothing (full credit).
         for output in cell.outputs:
             # option 1: error, return 0
-            if output.output_type == 'error':
+            if output.output_type == 'error' or output.output_type == "stream" and output.name == "stderr":
                 return 0, max_points
             # if not error, then check for option 2, partial credit
             if output.output_type == 'execute_result':
