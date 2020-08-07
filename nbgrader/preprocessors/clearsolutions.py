@@ -17,7 +17,7 @@ class ClearSolutions(NbGraderPreprocessor):
         dict(python="# YOUR CODE HERE\nraise NotImplementedError()",
              matlab="% YOUR CODE HERE\nerror('No Answer Given!')",
              octave="% YOUR CODE HERE\nerror('No Answer Given!')",
-             sas="/* YOUR CODE HERE */\n %notImplemented;"
+             sas="/* YOUR CODE HERE */\n %notImplemented;",
              java="// YOUR CODE HERE"),
         help="The code snippet that will replace code solutions"
     ).tag(config=True)
