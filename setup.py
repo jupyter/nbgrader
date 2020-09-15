@@ -91,7 +91,7 @@ setup_args = dict(
         "python-dateutil",
         "jupyter",
         "notebook>=4.2",
-        "nbconvert>=5.6",
+        "nbconvert==5.6.1",
         "nbformat",
         "traitlets",
         "jupyter_core",
