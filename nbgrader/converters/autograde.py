@@ -56,14 +56,14 @@ class Autograde(BaseConverter):
         OverwriteKernelspec,
         OverwriteCells,
         CheckCellMetadata
-    ])
+    ]).tag(config=True)
     autograde_preprocessors = List([
         Execute,
         LimitOutput,
         SaveAutoGrades,
         AssignLatePenalties,
         CheckCellMetadata
-    ])
+    ]).tag(config=True)
 
     preprocessors = List([])
 
