@@ -33,6 +33,14 @@ class TestValidator(object):
         ))
         return cell
 
+    def _add_error_2(self, cell):
+        cell.outputs.append(new_output(
+            "stream",
+            name="stderr",
+            text="Error Message"
+        ))
+        return cell
+
     def test_indent(self, validator):
         # test normal indenting
         assert validator._indent("Hello, world!") == "    Hello, world!"
@@ -138,6 +146,31 @@ class TestValidator(object):
             """
         )
 
+        assert stream.getvalue() == expected
+
+    def test_print_error_code_cell_error_2(self, validator, stream):
+        cell = self._add_error_2(create_code_cell())
+        validator.stream = stream
+        validator.width = 20
+        validator._print_error(cell.source.strip(), validator._extract_error(cell))
+
+        expected = dedent(
+            """
+            ====================
+            The following cell failed:
+    
+                print("someth...
+                ### BEGIN SOL...
+                print("hello"...
+                ### END SOLUT...
+    
+            The error was:
+    
+                Error Message
+    
+            """
+        )
+        print(stream.getvalue())
         assert stream.getvalue() == expected
 
     def test_print_error_markdown_cell(self, validator, stream):
