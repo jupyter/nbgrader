@@ -15,7 +15,7 @@ defaults:
     shell: bash
 
 jobs:
-  test_jupyterhub:
+  test_nbgrader:
     runs-on: ${{ matrix.os }}
     timeout-minutes: 10
 
@@ -32,6 +32,8 @@ jobs:
         group: ["docs", "nbextensions", "python"]
         python: ["3.6", "3.7", "3.8", "3.9"]
         exclude:
+          - os: windows-latest
+            group: docs
           - python: "3.6"
             group: docs
           - python: "3.7"
@@ -61,6 +63,10 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python }}
+      - name: Run pre-commit
+        if: ${{ matrix.group == "docs" }}
+        run: |
+          apt install pandoc
       - name: Install Python dependencies
         run: |
           pip install -U pip wheel setuptools
