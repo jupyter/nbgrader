@@ -64,7 +64,7 @@ jobs:
         with:
           python-version: ${{ matrix.python }}
       - name: Run pre-commit
-        if: ${{ matrix.group == "docs" }}
+        if: matrix.group == 'docs'
         run: |
           apt install pandoc
       - name: Install Python dependencies
