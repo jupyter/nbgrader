@@ -17,9 +17,13 @@ depends_on = None
 
 
 def _get_or_create_table(*args):
-    try:
+    ctx = op.get_context()
+    con = op.get_bind()
+    table_exists = ctx.dialect.has_table(con.engine, args[0])
+
+    if not table_exists:
         table = op.create_table(*args)
-    except sa.exc.OperationalError:
+    else:
         table = sa.sql.table(*args)
     return table
 
