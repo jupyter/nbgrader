@@ -70,7 +70,6 @@ class GenerateSolutionApp(NbGrader):
         classes.extend([BaseConverter, GenerateSolution])
         return classes
 
-
     def start(self) -> None:
         super().start()
 

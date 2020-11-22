@@ -31,7 +31,7 @@ class TestNbGraderGenerateSolution(BaseTestApp):
         run_nbgrader(["generate_solution", "foo", "bar"], retcode=1)
 
     def test_no_assignment(self, course_dir):
-        """Is an assignment does not exists it fails"""
+        """If an assignment does not exists it fails"""
         self._empty_notebook(join(course_dir, 'source', 'ps1', 'foo.ipynb'))
         run_nbgrader(["generate_solution", "ps1"], retcode=1)
 

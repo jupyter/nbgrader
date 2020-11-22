@@ -56,6 +56,16 @@ class GenerateSolution(BaseConverter):
     def __init__(self, coursedir: CourseDirectory = None, **kwargs: Any) -> None:
         super(GenerateSolution, self).__init__(coursedir=coursedir, **kwargs)
 
+    def init_assignment(self, assignment_id: str, student_id: str) -> None:
+        super(GenerateSolution, self).init_assignment(assignment_id, student_id)
+        with Gradebook(self.coursedir.db_url, self.coursedir.course_id) as gb:
+            try:
+                gb.find_assignment(assignment_id)
+            except MissingEntry:
+                msg = "No assignment with ID '%s' exists in the database" % assignment_id
+                self.log.error(msg)
+                raise NbGraderException(msg)
+
     def start(self) -> None:
         old_student_id = self.coursedir.student_id
         self.coursedir.student_id = '.'
