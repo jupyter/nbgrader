@@ -36,7 +36,8 @@ from . import (
     DbApp,
     UpdateApp,
     ZipCollectApp,
-    GenerateConfigApp
+    GenerateConfigApp,
+    GenerateSolutionApp
 )
 from traitlets.traitlets import MetaHasTraits
 from typing import List
@@ -290,6 +291,14 @@ class NbGraderApp(NbGrader):
             dedent(
                 """
                 Generates a default nbgrader_config.py file.
+                """
+            ).strip()
+        ),
+        generate_solution=(
+            GenerateSolutionApp,
+            dedent(
+                """
+                Generates the solution for the given assignment.
                 """
             ).strip()
         ),

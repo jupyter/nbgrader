@@ -237,6 +237,7 @@ class NbGrader(JupyterApp):
             ("submitted_directory", "submitted_directory"),
             ("autograded_directory", "autograded_directory"),
             ("feedback_directory", "feedback_directory"),
+            ("solution_directory", "solution_directory"),
             ("db_url", "db_url"),
             ("course_directory", "root"),
             ("ignore", "ignore")

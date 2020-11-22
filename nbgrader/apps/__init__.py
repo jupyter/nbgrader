@@ -13,6 +13,7 @@ from .collectapp import CollectApp
 from .fetchapp import FetchApp
 from .fetchassignmentapp import FetchAssignmentApp
 from .fetchfeedbackapp import FetchFeedbackApp
+from .generatesolutionapp import GenerateSolutionApp
 from .submitapp import SubmitApp
 from .listapp import ListApp
 from .extensionapp import ExtensionApp
@@ -64,5 +65,6 @@ __all__ = [
     'UpdateApp',
     'ZipCollectApp',
     'GenerateConfigApp',
-    'NbGraderAPI'
+    'NbGraderAPI',
+    'GenerateSolutionApp'
 ]

@@ -78,3 +78,4 @@ For details on how to configure the API, see :doc:`/configuration/config_options
     .. automethod:: release_feedback
 
     .. automethod:: fetch_feedback
+

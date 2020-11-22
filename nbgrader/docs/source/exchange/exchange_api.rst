@@ -12,6 +12,7 @@ Defined directories
 - ``submitted_directory`` - Where student submissions are copied to, when an instructor *collects* (defaults to ``submitted``)
 - ``autograded_directory`` - Where student submissions are copied to, having been *autograded* (defaults to ``autograded``)
 - ``feedback_directory`` - Where feedback is copied to, when Instructors *generate feedback* (defaults to ``feedback``)
+- ``solution_directory`` - Where solution is copied to, when Istructors *generate solution* (defaults to ``solution``)
 
 Also, taken from the nbgrader help::
 
