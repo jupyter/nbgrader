@@ -47,7 +47,6 @@ class GenerateSolution(BaseConverter):
         IncludeHeaderFooter,
         LockCells,
         ClearOutput,
-        SaveCells,
         ClearMarkScheme,
         Execute
     ])
