@@ -42,9 +42,8 @@ class GenerateSolutionApp(NbGrader):
 
     examples = """
         Produce the solution of the assignment that is intended to be released to
-        students. This performs several modifications to the original assignment:
-
-            1. It ...
+        students. This essentially cleans up the assignment and runs all the cells providing
+        the solution conceived by the instructor.
 
         `nbgrader generate_solution` takes one argument (the name of the assignment), and
         looks for notebooks in the 'source' directory by default, according to
@@ -52,8 +51,8 @@ class GenerateSolutionApp(NbGrader):
         The student version is then saved into the 'solution' directory.
 
         Note that the directory structure requires the `student_id` to be given;
-        however, there is no student ID at this point in the process. Instead,
-        `nbgrader generate_assignment` sets the student ID to be '.' so by default, files are
+        however, there is no student ID also at this point in the process. Instead,
+        `nbgrader generate_solution` sets the student ID to be '.' so by default, files are
         read in according to:
 
             source/./{assignment_id}/{notebook_id}.ipynb
