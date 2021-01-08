@@ -26,7 +26,7 @@ class FormgradeExtension(NbGrader):
     def build_extra_config(self):
         extra_config = super(FormgradeExtension, self).build_extra_config()
         extra_config.HTMLExporter.template_file = 'formgrade'
-        extra_config.HTMLExporter.template_path = [handlers.template_path]
+        extra_config.HTMLExporter.template_paths.append(handlers.template_path)
         return extra_config
 
     def init_tornado_settings(self, webapp):
