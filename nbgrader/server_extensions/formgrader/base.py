@@ -62,19 +62,19 @@ class BaseHandler(IPythonHandler):
     def write_error(self, status_code, **kwargs):
         if status_code == 500:
             html = self.render(
-                'base_500.tpl',
+                'base_500.html.j2',
                 base_url=self.base_url,
                 error_code=500)
 
         elif status_code == 502:
             html = self.render(
-                'base_500.tpl',
+                'base_500.html.j2',
                 base_url=self.base_url,
                 error_code=502)
 
         elif status_code == 403:
             html = self.render(
-                'base_403.tpl',
+                'base_403.html.j2',
                 base_url=self.base_url,
                 error_code=403)
 
