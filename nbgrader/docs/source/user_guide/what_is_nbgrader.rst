@@ -370,7 +370,33 @@ distributed.  This is described above.
 Web extensions
 --------------
 
-TODO
+Most of the above originally was handled via a command line
+interface.  But now there are several interfaces directly from
+Jupyter, and these are essentially the "default" ways of using
+nbgrader.
+
+The **Assignment list** extension serves as the student-facing
+interface for the notebook file browser view.  It fetches assignments
+from the exchange directory, allows students to open them, and submit
+them back to the exchange.  This is for the Jupyter notebook
+file-browser view
+
+The **formgrader** extension is the instructor-facing interface
+accessible from the file browser view.  It allows the instructor to
+browse assignments, open them, manage students, etc.  This is for the
+Jupyter notebook file-browser view.
+
+The **validate** extension is a student-facing for the
+notebook view that does validation.  Basically, it is the same as
+"Restart and run all cells" but it shows errors a little bit nicer.
+
+The **create assignment** extension is an instructor-facing for the
+notebook view.  It provides a toolbar that allows you to edit cell
+metadata.
+
+Currently, these only work for the Jupyter notebook interface, not
+JupyterLab.  This is a point under development.
+
 
 
 See also
