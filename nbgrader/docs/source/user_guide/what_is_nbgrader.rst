@@ -13,6 +13,19 @@ conceptual introduction
 
 
 
+Working with nbgrader
+---------------------
+
+When nbgrader was first written, all interactions were done on the
+command line. Later on it acquired notebook extensions to enable
+interaction from within a jupyter notebook. These notes will refer to
+the command-line interface, and we'll discuss the UI interactions
+later.  Over time, this and other improvements have been added, but
+because of the simple roots, it is not too difficult to dig deeper and
+innovate to your specific case.
+
+
+
 Nbgrader format
 ---------------
 
@@ -125,7 +138,11 @@ execute the entire notebook.
 nbgrader generate_feedback
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-...
+This will take any feedback created during manual grading, for all
+student submissions in this assignments, and create a .html file.
+This uses the same machinery that `nbconvert
+<https://nbconvert.readthedocs.io/>`__ uses, but with a custom
+template that adds in information about grading, points, etc.
 
 
 
@@ -223,7 +240,9 @@ However, this requires a consistent mapping to UIDs across the
 cluster.  This is not difficult to do, but if often not the way that
 "cloud stuff" works by default.
 
-The default filesystem exchange path is ``/srv/nbgraber/exchange``.
+The default filesystem exchange path is ``/srv/nbgrader/exchange``.
+In a UNIX file system, this is by default owned by the root user, so
+you will need to use a bit of knowledge to set things up properly.
 
 
 
@@ -244,6 +263,7 @@ replaced by custom implementations.
 Student directories
 -------------------
 
+TODO
 
 
 Autograding
@@ -318,6 +338,14 @@ system.
 The database also stores assignments and their cells.  For example, it
 stores the contents of read-only cells, and autograder tests cells,
 which get re-inserted into the notebook before the autograde step.
+Cells are stored by the cell ID, which is in the cell metadata (cell
+metadata is a ipynb-format native concept).
+The autograder step looks at the database and re-inserts data based on
+the cell ID.
+
+In the formgrader "manual grading" interface, the instructor can
+manually grade assignments (after autograding), and these points +
+comments are added to the database.
 
 Grades can be exported in csv format.  You can also build other
 exporters, which access the database and export somehow - to a file,
@@ -338,6 +366,7 @@ directories).  Now, using the exchange, there can be automatically
 distributed.  This is described above.
 
 
+
 Web extensions
 --------------
 
@@ -347,4 +376,7 @@ TODO
 See also
 --------
 
-TODO
+* Noteable service, based on nbgrader
+
+  * `Student guide <https://noteable.edina.ac.uk/student-guide/>`__
+  * `Instructor guide <https://noteable.edina.ac.uk/nbguide/>`__
