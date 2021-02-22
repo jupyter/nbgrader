@@ -49,9 +49,10 @@ making it easy to script other tools with them.
 both notebook-wide and per-cell.  This is used to track the progress
 of the assignment.  For example, this tracks cells that are
 read-only.  However, since the metadata is within the notebook file
-itself - which is given to the student - so one can't prevent the
-student from editing the notebook file to change this.  More on the
-effects of this later.
+itself - which is given to the student - one can't prevent the
+student from editing the notebook file to change anything within it,
+since they have direct access to the file within their server.
+More on the effects of this later.
 
 The standard Jupyter stack and notebook format is also one of the
 downsides, compared to other learning management systems (depending on
@@ -105,8 +106,9 @@ return them.
 
 Most operations primarily look at the filesystem to see the current
 state, so that it is easy to understand and manipulate the
-internals.  The gradebook is a sort of secondary source of information
-most of the time.
+internals.  In other words, just by manipulating the files on disk,
+you can control all of the nbgrader steps.  The gradebook is a sort of
+secondary source of information most of the time.
 
 
 nbgrader generate_assignment
@@ -131,7 +133,9 @@ nbgrader autograde
 
 This is described below, but the core tasks are to re-insert the
 read-only cells (replace them with the known-good versions), and
-execute the entire notebook.
+execute the entire notebook.  Note that there is a separate manual
+grading step, but this isn't a nbgrader command, but done in the
+formgrader interface.  This is described more below.
 
 
 
@@ -263,7 +267,12 @@ replaced by custom implementations.
 Student directories
 -------------------
 
-TODO
+The basic principle is that the student copy of assignments are copied
+to and from the student's home directory (on more precisely, the
+working directory of the notebook server).  Once they are in the
+student directory, they are accessed just like any other notebooks or
+data the student can access.
+
 
 
 Autograding
@@ -313,7 +322,8 @@ willing to do a bit of exploration).
 Manual grading
 --------------
 
-After autograding, there is a web UI to do **manual grading**.  This
+After autograding, there is a web UI (via the formgrader extension) to
+do **manual grading**.  This
 allows one to see the output from autograding, give comments, adjust
 points, etc.  There are also purely manually graded exercises.
 
