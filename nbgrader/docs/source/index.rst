@@ -19,6 +19,7 @@ For additional resources on using Jupyter in educational contexts, see the `jupy
     user_guide/highlights
     user_guide/installation
     user_guide/philosophy
+    user_guide/what_is_nbgrader
     user_guide/creating_and_grading_assignments
     user_guide/managing_the_database
     user_guide/managing_assignment_files
