@@ -9,7 +9,7 @@ from traitlets.config import LoggingConfigurable, Config, get_config
 from traitlets import Instance, Enum, Unicode, observe
 
 from ..coursedir import CourseDirectory
-from ..converters import GenerateAssignment, Autograde, GenerateFeedback
+from ..converters import GenerateAssignment, Autograde, GenerateFeedback, GenerateSolution
 from ..exchange import ExchangeFactory, ExchangeError
 from ..api import MissingEntry, Gradebook, Student, SubmittedAssignment
 from ..utils import parse_utc, temp_attrs, capture_log, as_timezone, to_numeric_tz
@@ -1120,7 +1120,7 @@ class NbGraderAPI(LoggingConfigurable):
                     authentictor=self.authenticator,
                     parent=self)
                 return capture_log(app)
-
+    
     def fetch_feedback(self, assignment_id, student_id):
         """Run ``nbgrader fetch_feedback`` for a particular assignment/student.
 

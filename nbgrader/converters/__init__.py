@@ -4,6 +4,7 @@ from .generate_assignment import GenerateAssignment
 from .autograde import Autograde
 from .feedback import Feedback
 from .generate_feedback import GenerateFeedback
+from .generate_solution import GenerateSolution
 
 __all__ = [
     "BaseConverter",
@@ -12,5 +13,6 @@ __all__ = [
     "GenerateAssignment",
     "Autograde",
     "Feedback",
-    "GenerateFeedback"
+    "GenerateFeedback",
+    "GenerateSolution"
 ]

@@ -175,6 +175,17 @@ class CourseDirectory(LoggingConfigurable):
         )
     ).tag(config=True)
 
+    solution_directory = Unicode(
+        'solution',
+        help=dedent(
+            """
+            The name of the directory that contains the assignment solution after
+            grading has been completed. This corresponds to the `nbgrader_step`
+            variable in the `directory_structure` config option.
+            """
+        )
+    ).tag(config=True)
+
     db_url = Unicode(
         "",
         help=dedent(
