@@ -98,7 +98,7 @@ def upgrade():
     grade_cells = [
         {
             'id': cellid,
-            'type': celltype,
+            'cell_type': celltype,
             'max_score': max_score,
         } for _, cellid, celltype, _, max_score in results]
 
