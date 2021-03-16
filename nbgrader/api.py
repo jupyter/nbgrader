@@ -9,7 +9,7 @@ from sqlalchemy import (create_engine, ForeignKey, Column, String, Text,
                         DateTime, Interval, Float, Enum, UniqueConstraint,
                         Boolean)
 from sqlalchemy.orm import (sessionmaker, scoped_session, relationship,
-                            column_property, aliased)
+                            column_property)
 from sqlalchemy.orm.exc import NoResultFound, FlushError
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.ext.associationproxy import association_proxy
@@ -3061,7 +3061,7 @@ class Gradebook(object):
          .group_by(SubmittedAssignment.id)\
          .subquery()
 
-        all_scores = aliased(union_all(
+        all_scores = union_all(
             self.db.query(
                 SubmittedAssignment.id.label('id'),
                 func.sum(Grade.score).label("score"),
@@ -3088,7 +3088,6 @@ class Gradebook(object):
             ).join(SubmittedNotebook, Grade, TaskCell)\
             .filter(TaskCell.cell_type == "markdown")\
             .group_by(SubmittedAssignment.id)
-        )
         )
         total_scores = self.db.query(
             func.sum(all_scores.c.score).label("score"),
@@ -3203,7 +3202,7 @@ class Gradebook(object):
          .group_by(SubmittedNotebook.id)\
          .subquery()
 
-        all_scores = aliased(union_all(
+        all_scores = union_all(
             self.db.query(
                 SubmittedNotebook.id.label('id'),
                 func.sum(Grade.score).label("score"),
@@ -3230,7 +3229,6 @@ class Gradebook(object):
             ).join(Grade, TaskCell)\
             .filter(TaskCell.cell_type == "markdown")\
             .group_by(SubmittedNotebook.id)
-        )
         )
         total_scores = self.db.query(
             func.sum(all_scores.c.score).label("score"),
