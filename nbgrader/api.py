@@ -2729,10 +2729,10 @@ class Gradebook(object):
             return 0.0
 
         score_sum_gradecell = self.db.query(func.coalesce(func.sum(Grade.score), 0.0))\
-            .join(GradeCell, Notebook, Assignment)\
+            .join(GradeCell).join(Notebook).join(Assignment)\
             .filter(Assignment.name == assignment_id).scalar()
         score_sum_taskcell = self.db.query(func.coalesce(func.sum(Grade.score), 0.0))\
-            .join(TaskCell, Notebook, Assignment)\
+            .join(TaskCell).join(Notebook).join(Assignment)\
             .filter(Assignment.name == assignment_id).scalar()
         score_sum = score_sum_gradecell + score_sum_taskcell
         return score_sum / assignment.num_submissions
@@ -2757,7 +2757,7 @@ class Gradebook(object):
             return 0.0
 
         score_sum = self.db.query(func.coalesce(func.sum(Grade.score), 0.0))\
-            .join(GradeCell, Notebook, Assignment)\
+            .join(GradeCell).join(Notebook).join(Assignment)\
             .filter(and_(
                 Assignment.name == assignment_id,
                 Notebook.assignment_id == Assignment.id,
@@ -2786,7 +2786,7 @@ class Gradebook(object):
             return 0.0
 
         score_sum = self.db.query(func.coalesce(func.sum(Grade.score), 0.0))\
-            .join(GradeCell, Notebook, Assignment)\
+            .join(GradeCell).join(Notebook).join(Assignment)\
             .filter(and_(
                 Assignment.name == assignment_id,
                 Notebook.assignment_id == Assignment.id,
@@ -2815,7 +2815,7 @@ class Gradebook(object):
             return 0.0
 
         score_sum = self.db.query(func.coalesce(func.sum(Grade.score), 0.0))\
-            .join(TaskCell, Notebook, Assignment)\
+            .join(TaskCell).join(Notebook).join(Assignment)\
             .filter(and_(
                 Assignment.name == assignment_id,
                 Notebook.assignment_id == Assignment.id,
@@ -2846,7 +2846,7 @@ class Gradebook(object):
             return 0.0
 
         score_sum = self.db.query(func.coalesce(func.sum(Grade.score), 0.0))\
-            .join(SubmittedNotebook, Notebook, Assignment)\
+            .join(SubmittedNotebook).join(Notebook).join(Assignment)\
             .filter(and_(
                 Notebook.name == notebook_id,
                 Assignment.name == assignment_id)).scalar()
@@ -2875,7 +2875,7 @@ class Gradebook(object):
             return 0.0
 
         score_sum = self.db.query(func.coalesce(func.sum(Grade.score), 0.0))\
-            .join(GradeCell, Notebook, Assignment)\
+            .join(GradeCell).join(Notebook).join(Assignment)\
             .filter(and_(
                 Notebook.name == notebook_id,
                 Assignment.name == assignment_id,
@@ -2908,7 +2908,7 @@ class Gradebook(object):
             return 0.0
 
         score_sum = self.db.query(func.coalesce(func.sum(Grade.score), 0.0))\
-            .join(GradeCell, Notebook, Assignment)\
+            .join(GradeCell).join(Notebook).join(Assignment)\
             .filter(and_(
                 Notebook.name == notebook_id,
                 Assignment.name == assignment_id,
@@ -2941,7 +2941,7 @@ class Gradebook(object):
             return 0.0
 
         score_sum = self.db.query(func.coalesce(func.sum(Grade.score), 0.0))\
-            .join(TaskCell, Notebook, Assignment)\
+            .join(TaskCell).join(Notebook).join(Assignment)\
             .filter(and_(
                 Notebook.name == notebook_id,
                 Assignment.name == assignment_id,
@@ -2975,7 +2975,7 @@ class Gradebook(object):
             scores = self.db.query(
                 Student.id,
                 func.sum(Grade.score).label("score")
-            ).join(SubmittedAssignment, SubmittedNotebook, Grade)\
+            ).join(SubmittedAssignment).join(SubmittedNotebook).join(Grade)\
              .group_by(Student.id)\
              .subquery()
 
@@ -3021,7 +3021,7 @@ class Gradebook(object):
             func.sum(Grade.score).label("code_score"),
             func.sum(GradeCell.max_score).label("max_code_score"),
         ).select_from(SubmittedAssignment
-        ).join(SubmittedNotebook, Notebook, Assignment, Student, Grade, GradeCell)\
+        ).join(SubmittedNotebook).join(Notebook).join(Assignment).join(Student).join(Grade).join(GradeCell)\
          .filter(GradeCell.cell_type == "code")\
          .group_by(SubmittedAssignment.id)\
          .subquery()
@@ -3032,7 +3032,7 @@ class Gradebook(object):
             func.sum(Grade.score).label("written_score"),
             func.sum(GradeCell.max_score).label("max_written_score"),
         ).select_from(SubmittedAssignment
-        ).join(SubmittedNotebook, Notebook, Assignment, Student, Grade, GradeCell)\
+        ).join(SubmittedNotebook).join(Notebook).join(Assignment).join(Student).join(Grade).join(GradeCell)\
          .filter(GradeCell.cell_type == "markdown")\
          .group_by(SubmittedAssignment.id)\
          .subquery()
@@ -3043,7 +3043,7 @@ class Gradebook(object):
             func.sum(Grade.score).label("task_score"),
             func.sum(TaskCell.max_score).label("max_task_score"),
         ).select_from(SubmittedAssignment
-        ).join(SubmittedNotebook, Notebook, Assignment, Student, Grade, TaskCell)\
+        ).join(SubmittedNotebook).join(Notebook).join(Assignment).join(Student).join(Grade).join(TaskCell)\
          .filter(TaskCell.cell_type == "markdown")\
          .group_by(SubmittedAssignment.id)\
          .subquery()
@@ -3053,7 +3053,7 @@ class Gradebook(object):
             SubmittedAssignment.id,
             exists().where(Grade.needs_manual_grade).label("needs_manual_grade")
         ).select_from(SubmittedAssignment
-        ).join(SubmittedNotebook, Assignment, Notebook)\
+        ).join(SubmittedNotebook).join(Assignment).join(Notebook)\
          .filter(
              SubmittedNotebook.assignment_id == SubmittedAssignment.id,
              Grade.notebook_id == SubmittedNotebook.id,
@@ -3067,7 +3067,7 @@ class Gradebook(object):
                 func.sum(Grade.score).label("score"),
                 func.sum(GradeCell.max_score).label("max_score"),
             ).select_from(SubmittedAssignment
-            ).join(SubmittedNotebook, Grade, GradeCell)
+            ).join(SubmittedNotebook).join(Grade).join(GradeCell)
             .filter(GradeCell.cell_type == "code")
             .group_by(SubmittedAssignment.id),
             # subquery for the written scores
@@ -3076,7 +3076,7 @@ class Gradebook(object):
                 func.sum(Grade.score).label("score"),
                 func.sum(GradeCell.max_score).label("max_score"),
             ).select_from(SubmittedAssignment
-            ).join(SubmittedNotebook, Grade, GradeCell)\
+            ).join(SubmittedNotebook).join(Grade).join(GradeCell)\
             .filter(GradeCell.cell_type == "markdown")\
             .group_by(SubmittedAssignment.id),
 
@@ -3085,7 +3085,7 @@ class Gradebook(object):
                 func.sum(Grade.score).label("score"),
                 func.sum(TaskCell.max_score).label("max_score"),
             ).select_from(SubmittedAssignment
-            ).join(SubmittedNotebook, Grade, TaskCell)\
+            ).join(SubmittedNotebook).join(Grade).join(TaskCell)\
             .filter(TaskCell.cell_type == "markdown")\
             .group_by(SubmittedAssignment.id)
         )
@@ -3112,7 +3112,7 @@ class Gradebook(object):
             func.coalesce(task_scores.c.max_task_score, 0.0),
             _manual_grade
         ).select_from(SubmittedAssignment
-        ).join(SubmittedNotebook, Assignment, Student, Grade)\
+        ).join(SubmittedNotebook).join(Assignment).join(Student).join(Grade)\
          .outerjoin(code_scores, SubmittedAssignment.id == code_scores.c.id)\
          .outerjoin(written_scores, SubmittedAssignment.id == written_scores.c.id)\
          .outerjoin(task_scores, SubmittedAssignment.id == task_scores.c.id)\
@@ -3168,7 +3168,7 @@ class Gradebook(object):
             func.sum(Grade.score).label("code_score"),
             func.sum(GradeCell.max_score).label("max_code_score"),
         ).select_from(SubmittedNotebook
-        ).join(SubmittedAssignment, Notebook, Assignment, Student, Grade, GradeCell)\
+        ).join(SubmittedAssignment).join(Notebook).join(Assignment).join(Student).join(Grade).join(GradeCell)\
          .filter(GradeCell.cell_type == "code")\
          .group_by(SubmittedNotebook.id)\
          .subquery()
@@ -3179,7 +3179,7 @@ class Gradebook(object):
             func.sum(Grade.score).label("written_score"),
             func.sum(GradeCell.max_score).label("max_written_score"),
         ).select_from(SubmittedNotebook
-        ).join(SubmittedAssignment, Notebook, Assignment, Student, Grade, GradeCell)\
+        ).join(SubmittedAssignment).join(Notebook).join(Assignment).join(Student).join(Grade).join(GradeCell)\
          .filter(GradeCell.cell_type == "markdown")\
          .group_by(SubmittedNotebook.id)\
          .subquery()
@@ -3189,7 +3189,7 @@ class Gradebook(object):
             func.coalesce(func.sum(Grade.score), 0.0).label("task_score"),
             func.sum(TaskCell.max_score).label("max_task_score"),
         ).select_from(SubmittedNotebook
-        ).join(SubmittedAssignment, Notebook, Assignment, Student, Grade, TaskCell)\
+        ).join(SubmittedAssignment).join(Notebook).join(Assignment).join(Student).join(Grade).join(TaskCell)\
          .filter(TaskCell.cell_type == "markdown")\
          .group_by(SubmittedNotebook.id)\
          .subquery()
@@ -3198,7 +3198,7 @@ class Gradebook(object):
             SubmittedNotebook.id,
             func.sum(task_scores.c.max_task_score).label("mmmm"),
         ).select_from(SubmittedNotebook
-        ).join(SubmittedAssignment, task_scores)\
+        ).join(SubmittedAssignment).join(task_scores)\
          .group_by(SubmittedNotebook.id)\
          .subquery()
 
@@ -3208,7 +3208,7 @@ class Gradebook(object):
                 func.sum(Grade.score).label("score"),
                 func.sum(GradeCell.max_score).label("max_score"),
             ).select_from(SubmittedNotebook
-            ).join(Grade, GradeCell)
+            ).join(Grade).join(GradeCell)
             .filter(GradeCell.cell_type == "code")
             .group_by(SubmittedNotebook.id),
             # subquery for the written scores
@@ -3217,7 +3217,7 @@ class Gradebook(object):
                 func.sum(Grade.score).label("score"),
                 func.sum(GradeCell.max_score).label("max_score"),
             ).select_from(SubmittedNotebook
-            ).join(Grade, GradeCell)\
+            ).join(Grade).join(GradeCell)\
             .filter(GradeCell.cell_type == "markdown")\
             .group_by(SubmittedNotebook.id),
 
@@ -3226,7 +3226,7 @@ class Gradebook(object):
                 func.sum(Grade.score).label("score"),
                 func.sum(TaskCell.max_score).label("max_score"),
             ).select_from(SubmittedNotebook
-            ).join(Grade, TaskCell)\
+            ).join(Grade).join(TaskCell)\
             .filter(TaskCell.cell_type == "markdown")\
             .group_by(SubmittedNotebook.id)
         )
@@ -3244,7 +3244,7 @@ class Gradebook(object):
             SubmittedNotebook.id,
             exists().where(Grade.needs_manual_grade).label("needs_manual_grade")
         ).select_from(SubmittedNotebook
-        ).join(SubmittedAssignment, Assignment, Notebook)\
+        ).join(SubmittedAssignment).join(Assignment).join(Notebook)\
          .filter(
              Grade.notebook_id == SubmittedNotebook.id,
              Grade.needs_manual_grade)\
@@ -3256,7 +3256,7 @@ class Gradebook(object):
             SubmittedNotebook.id,
             exists().where(Grade.failed_tests).label("failed_tests")
         ).select_from(SubmittedNotebook
-        ).join(SubmittedAssignment, Assignment, Notebook)\
+        ).join(SubmittedAssignment).join(Assignment).join(Notebook)\
          .filter(
              Grade.notebook_id == SubmittedNotebook.id,
              Grade.failed_tests)\
@@ -3279,7 +3279,7 @@ class Gradebook(object):
             func.coalesce(task_scores.c.max_task_score, 0.0),
             _manual_grade, _failed_tests, SubmittedNotebook.flagged
         ).select_from(SubmittedNotebook
-        ).join(SubmittedAssignment, Notebook, Assignment, Student, Grade)\
+        ).join(SubmittedAssignment).join(Notebook).join(Assignment).join(Student).join(Grade)\
          .outerjoin(code_scores, SubmittedNotebook.id == code_scores.c.id)\
          .outerjoin(written_scores, SubmittedNotebook.id == written_scores.c.id)\
          .outerjoin(task_scores, SubmittedNotebook.id == task_scores.c.id)\
