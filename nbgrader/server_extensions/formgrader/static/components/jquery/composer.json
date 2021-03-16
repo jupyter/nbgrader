@@ -6,15 +6,15 @@
     "license": "MIT",
     "support": {
         "irc": "irc://irc.freenode.org/jquery",
-        "issues": "http://bugs.jquery.com",
+        "issues": "https://github.com/jquery/jquery/issues",
         "forum": "http://forum.jquery.com",
         "wiki": "http://docs.jquery.com/",
         "source": "https://github.com/jquery/jquery"
     },
     "authors": [
         {
-            "name": "John Resig",
-            "email": "jeresig@gmail.com"
+            "name": "JS Foundation and other contributors",
+            "url": "https://github.com/jquery/jquery/blob/master/AUTHORS.txt"
         }
     ],
     "extra": {
@@ -25,8 +25,9 @@
             "files": [
                 "jquery.min.js",
                 "jquery.min.map",
-                "jquery-migrate.js",
-                "jquery-migrate.min.js"
+                "jquery.slim.js",
+                "jquery.slim.min.js",
+                "jquery.slim.min.map"
             ]
         }
     }

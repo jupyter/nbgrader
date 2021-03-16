@@ -39,8 +39,10 @@ var AssignmentUI = Backbone.View.extend({
 
     openModal: function () {
         var body = $("<table/>").addClass("table table-striped form-table");
+        var tablebody = $("<tbody/>");
+        body.append(tablebody);
         var name = $("<tr/>");
-        body.append(name);
+        tablebody.append(name);
         name.append($("<td/>").addClass("align-middle").text("Name"));
         name.append($("<td/>").append($("<input/>")
             .addClass("modal-name")
@@ -48,12 +50,12 @@ var AssignmentUI = Backbone.View.extend({
             .attr("disabled", "disabled")));
 
         var duedate = $("<tr/>");
-        body.append(duedate);
+        tablebody.append(duedate);
         duedate.append($("<td/>").addClass("align-middle").text("Due date (optional)"));
         duedate.append($("<td/>").append($("<input/>").addClass("modal-duedate").attr("type", "datetime-local")));
 
         var timezone = $("<tr/>");
-        body.append(timezone);
+        tablebody.append(timezone);
         timezone.append($("<td/>").addClass("align-middle").text("Timezone as UTC offset (optional)"));
         timezone.append($("<td/>").append($("<input/>").addClass("modal-timezone").attr("type", "text")));
 
@@ -528,19 +530,20 @@ var createAssignmentModal = function () {
     var body = $("<p/>")
     body.append($("<p id='create-error' class='alert alert-danger' style='display: none'/>"));
     var table = $("<table/>").addClass("table table-striped form-table");
-    body.append(table)
+    var tablebody = $("<tbody/>");
+    body.append(table.append(tablebody));
     var name = $("<tr/>");
-    table.append(name);
+    tablebody.append(name);
     name.append($("<td/>").addClass("align-middle").text("Name"));
     name.append($("<td/>").append($("<input/>").addClass("name").attr("type", "text").attr("size", "31")));
 
     var duedate = $("<tr/>");
-    table.append(duedate);
+    tablebody.append(duedate);
     duedate.append($("<td/>").addClass("align-middle").text("Due date (optional)"));
     duedate.append($("<td/>").append($("<input/>").addClass("duedate").attr("type", "datetime-local")));
 
     var timezone = $("<tr/>");
-    table.append(timezone);
+    tablebody.append(timezone);
     timezone.append($("<td/>").addClass("align-middle").text("Timezone as UTC offset (optional)"));
     timezone.append($("<td/>").append($("<input/>").addClass("timezone").attr("type", "text")));
 
@@ -583,6 +586,6 @@ var loadAssignments = function () {
 
 var models = undefined;
 var views = [];
-$(window).load(function () {
+$(window).on('load', function () {
     loadAssignments();
 });
