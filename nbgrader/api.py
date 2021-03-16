@@ -237,6 +237,14 @@ class BaseCell(Base):
 
     type = Column(String(50))
 
+    #: A collection of grades associated with this cell,
+    #: represented by :class:`~nbgrader.api.Grade` objects
+    grades = relationship("Grade", back_populates="cell")
+
+    #: A collection of comments associated with this cell,
+    #: represented by :class:`~nbgrader.api.Comment` objects
+    comments = relationship("Comment", back_populates="cell")
+
     __mapper_args__ = {
         'polymorphic_identity': 'BaseCell',
         'polymorphic_on': type
@@ -245,6 +253,7 @@ class BaseCell(Base):
 
 class GradedMixin():
     """Mixin class providing the reference to a grade and the data members relevant for graded cells."""
+
     #: Maximum score that can be assigned to this grade cell
     @declared_attr
     def max_score(cls):
@@ -255,12 +264,6 @@ class GradedMixin():
     def cell_type(cls):
         return Column(Enum("code", "markdown", name="grade_cell_type", validate_strings=True), nullable=False)
 
-    #: A collection of grades associated with this grade cell,
-    #: represented by :class:`~nbgrader.api.Grade` objects
-    @declared_attr
-    def grades(cls):
-        return relationship("Grade", backref="graded_" + cls.__name__)
-
 
 class GradeCell(BaseCell, GradedMixin):
     """Database representation of the master/source version of a grade cell."""
@@ -269,6 +272,8 @@ class GradeCell(BaseCell, GradedMixin):
 
     #: Unique id of the cell (automatically generated from BaseCell)
     id = Column(String(32), ForeignKey('base_cell.id'), primary_key=True)
+
+    comments = None
 
     def to_dict(self):
         """Convert the grade cell object to a JSON-friendly dictionary
@@ -295,22 +300,14 @@ class GradeCell(BaseCell, GradedMixin):
     }
 
 
-class CommentedMixin():
-    """Mixin class providing the reference to comments for commented cells."""
-
-    #: A collection of comments assigned to submitted versions of this grade cell,
-    #: represented by :class:`~nbgrader.api.Comment` objects
-    @declared_attr
-    def comments(cls):
-        return relationship("Comment", backref="commented_" + cls.__name__)
-
-
-class SolutionCell(BaseCell, CommentedMixin):
+class SolutionCell(BaseCell):
 
     __tablename__ = "solution_cells"
 
     #: Unique id of the cell (automatically generated from BaseCell)
     id = Column(String(32), ForeignKey('base_cell.id'), primary_key=True)
+
+    grades = None
 
     def to_dict(self):
         """Convert the solution cell object to a JSON-friendly dictionary
@@ -335,7 +332,7 @@ class SolutionCell(BaseCell, CommentedMixin):
     }
 
 
-class TaskCell(BaseCell, GradedMixin, CommentedMixin):
+class TaskCell(BaseCell, GradedMixin):
     """Database representation of a task cell."""
 
     __tablename__ = "task_cells"
@@ -741,15 +738,7 @@ class Grade(Base):
     id = Column(String(32), primary_key=True, default=new_uuid)
 
     #: Unique name of the grade cell, inherited from :class:`~nbgrader.api.GradeCell`
-    taskcell_name = association_proxy('graded_TaskCell', 'name')
-    gradecell_name = association_proxy('graded_GradeCell', 'name')
-
-    @property
-    def name(self):
-        if self.taskcell_name:
-            return self.taskcell_name
-        else:
-            return self.gradecell_name
+    name = association_proxy('cell', 'name')
 
     #: The submitted assignment that this grade is contained in, represented by
     #: a :class:`~nbgrader.api.SubmittedAssignment` object
@@ -764,33 +753,14 @@ class Grade(Base):
 
     #: The master version of the cell this grade is assigned to, represented by
     #: a :class:`~nbgrader.api.GradeCell` object.
-
-    graded_GradeCell = None
-    graded_TaskCell = None
-
-    @property
-    def cell(self):
-        if self.graded_TaskCell:
-            return self.graded_TaskCell
-        elif self.graded_GradeCell:
-            return self.graded_GradeCell
-        else:
-            raise ValueError(self)
-
-    @cell.setter
-    def cell(self, value):
-        if value.__class__.__name__ == "TaskCell":
-            self.graded_TaskCell = value
-        elif value.__class__.__name__ == "GradeCell":
-            self.graded_GradeCell = value
-        else:
-            raise ValueError(value)
+    cell = relationship('BaseCell', back_populates='grades')
 
     #: Unique id of :attr:`~nbgrader.api.Grade.cell`
     cell_id = Column(String(32), ForeignKey('base_cell.id'))
 
     #: The type of cell this grade corresponds to, inherited from
     #: :class:`~nbgrader.api.GradeCell`
+    cell_type = association_proxy('cell', 'cell_type')
 
     #: The student who this grade is assigned to, represented by a
     #: :class:`~nbgrader.api.Student` object
@@ -876,15 +846,7 @@ class Comment(Base):
     id = Column(String(32), primary_key=True, default=new_uuid)
 
     #: Unique name of the solution cell, inherited from :class:`~nbgrader.api.SolutionCell`
-    name_taskcell = association_proxy('commented_TaskCell', 'name')
-    name_solutioncell = association_proxy('commented_SolutionCell', 'name')
-
-    @property
-    def name(self) -> str:
-        if self.commented_TaskCell:
-            return self.name_taskcell
-        else:
-            return self.name_solutioncell
+    name = association_proxy('cell', 'name')
 
     #: The submitted assignment that this comment is contained in, represented by
     #: a :class:`~nbgrader.api.SubmittedAssignment` object
@@ -899,26 +861,7 @@ class Comment(Base):
 
     #: The master version of the cell this comment is assigned to, represented by
     #: a :class:`~nbgrader.api.SolutionCell` object.
-    commented_TaskCell = None
-    commented_SolutionCell = None
-
-    @property
-    def cell(self):
-        if self.commented_TaskCell:
-            return self.commented_TaskCell
-        elif self.commented_SolutionCell:
-            return self.commented_SolutionCell
-        else:
-            raise ValueError(self)
-
-    @cell.setter
-    def cell(self, value):
-        if value.__class__.__name__ == "TaskCell":
-            self.commented_TaskCell = value
-        elif value.__class__.__name__ == "SolutionCell":
-            self.commented_SolutionCell = value
-        else:
-            raise ValueError(value)
+    cell = relationship('BaseCell', back_populates='comments')
 
     #: Unique id of :attr:`~nbgrader.api.Comment.cell`
     cell_id = Column(String(32), ForeignKey('base_cell.id'))
