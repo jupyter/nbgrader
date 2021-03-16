@@ -1,20 +1,25 @@
 #!/usr/bin/env python
 """
-Backport pull requests to a particular branch.
+Backport pull requests to a particular branch. This script has two usages:
 
-Usage: backport_pr.py branch [PR] [PR2]
+Usage 1: backport_pr.py branch PR
 
 e.g.:
 
-    python tools/backport_pr.py 0.13.1 123 155
+    python tools/backport_pr.py 0.3.x 123
 
-to backport PR #123 onto branch 0.13.1
+to backport PR #123 onto branch 0.3.x. Note that the first argument is the *branch name*,
+not the milestone ID.
 
-or
-    python tools/backport_pr.py 2.1
 
-to see what PRs are marked for backport with milestone=2.1 that have yet to be applied
-to branch 2.x.
+Usage 2: backport_pr.py milestone
+
+e.g.
+
+    python tools/backport_pr.py 0.3.2
+
+to see what PRs are marked for backport with milestone=0.3.2 that have yet to be applied
+to branch 0.3.x. Note that the arguent is the *milestone id*, not the branch name.
 
 Forked from the backport_pr.py script in the ipython/ipython repository.
 
@@ -57,8 +62,8 @@ def backport_pr(branch, num, project='jupyter/nbgrader'):
     if branch != current_branch:
         check_call(['git', 'checkout', branch])
     check_call(['git', 'pull'])
-    pr = get_pull_request(project, num, auth=False)
-    files = get_pull_request_files(project, num, auth=False)
+    pr = get_pull_request(project, num, auth=True)
+    files = get_pull_request_files(project, num, auth=True)
     patch_url = pr['patch_url']
     title = pr['title']
     description = pr['body']
@@ -128,17 +133,17 @@ def should_backport(labels=None, milestone=None):
             "jupyter/nbgrader",
             labels=labels,
             state='closed',
-            auth=False)
+            auth=True)
     else:
         milestone_id = get_milestone_id(
             "jupyter/nbgrader",
             milestone,
-            auth=False)
+            auth=True)
         issues = get_issues_list(
             "jupyter/nbgrader",
             milestone=milestone_id,
             state='closed',
-            auth=False)
+            auth=True)
 
     should_backport = set()
     for issue in issues:
@@ -147,7 +152,7 @@ def should_backport(labels=None, milestone=None):
         pr = get_pull_request(
             "jupyter/nbgrader",
             issue['number'],
-            auth=False)
+            auth=True)
         if not pr['merged']:
             print ("Marked PR closed without merge: %i" % pr['number'])
             continue

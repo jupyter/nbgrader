@@ -60,7 +60,7 @@ def get_paged_request(url, headers=None, **params):
     return results
 
 
-def get_issues_list(project, auth=False, **params):
+def get_issues_list(project, auth=True, **params):
     """get issues list"""
     params.setdefault("state", "closed")
     url = "https://api.github.com/repos/{project}/issues".format(project=project)
@@ -72,7 +72,7 @@ def get_issues_list(project, auth=False, **params):
     return pages
 
 
-def get_pull_request(project, num, auth=False):
+def get_pull_request(project, num, auth=True):
     """get pull request info  by number
     """
     url = "https://api.github.com/repos/{project}/pulls/{num}".format(project=project, num=num)
@@ -86,7 +86,7 @@ def get_pull_request(project, num, auth=False):
     return json.loads(response.text, object_hook=Obj)
 
 
-def get_pull_request_files(project, num, auth=False):
+def get_pull_request_files(project, num, auth=True):
     """get list of files in a pull request"""
     url = "https://api.github.com/repos/{project}/pulls/{num}/files".format(project=project, num=num)
     if auth:
@@ -101,7 +101,7 @@ def is_pull_request(issue):
     return bool(issue.get('pull_request', {}).get('html_url', None))
 
 
-def get_milestones(project, auth=False, **params):
+def get_milestones(project, auth=True, **params):
     params.setdefault('state', 'all')
     url = "https://api.github.com/repos/{project}/milestones".format(project=project)
     if auth:
@@ -112,7 +112,7 @@ def get_milestones(project, auth=False, **params):
     return milestones
 
 
-def get_milestone(project, milestone, auth=False, **params):
+def get_milestone(project, milestone, auth=True, **params):
     milestones = get_milestones(project, auth=auth, **params)
     for mstone in milestones:
         if mstone['title'] == milestone:
@@ -121,7 +121,7 @@ def get_milestone(project, milestone, auth=False, **params):
         raise ValueError("milestone %s not found" % milestone)
 
 
-def get_milestone_id(project, milestone, auth=False, **params):
+def get_milestone_id(project, milestone, auth=True, **params):
     milestones = get_milestones(project, auth=auth, **params)
     for mstone in milestones:
         if mstone['title'] == milestone:
@@ -130,7 +130,7 @@ def get_milestone_id(project, milestone, auth=False, **params):
         raise ValueError("milestone %s not found" % milestone)
 
 
-def get_pulls_list(project, auth=False, **params):
+def get_pulls_list(project, auth=True, **params):
     """get pull request list"""
     params.setdefault("state", "closed")
     url = "https://api.github.com/repos/{project}/pulls".format(project=project)
