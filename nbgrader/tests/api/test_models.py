@@ -511,7 +511,7 @@ def test_query_needs_manual_grade_ungraded(submissions):
 
     # do all the assignments need grading?
     a = db.query(api.SubmittedAssignment)\
-        .join(api.SubmittedNotebook, api.Grade)\
+        .join(api.SubmittedNotebook).join(api.Grade)\
         .filter(api.SubmittedNotebook.needs_manual_grade)\
         .order_by(api.SubmittedAssignment.id)\
         .all()
@@ -560,7 +560,7 @@ def test_query_needs_manual_grade_autograded(submissions):
 
     # do all the assignments need grading?
     a = db.query(api.SubmittedAssignment)\
-        .join(api.SubmittedNotebook, api.Grade)\
+        .join(api.SubmittedNotebook).join(api.Grade)\
         .filter(api.SubmittedNotebook.needs_manual_grade)\
         .order_by(api.SubmittedAssignment.id)\
         .all()
@@ -590,7 +590,7 @@ def test_query_needs_manual_grade_autograded(submissions):
 
     # do none of the assignments need grading?
     assert [] == db.query(api.SubmittedAssignment)\
-        .join(api.SubmittedNotebook, api.Grade)\
+        .join(api.SubmittedNotebook).join(api.Grade)\
         .filter(api.SubmittedNotebook.needs_manual_grade)\
         .all()
 
@@ -635,7 +635,7 @@ def test_query_needs_manual_grade_manualgraded(submissions):
 
     # do all the assignments need grading?
     a = db.query(api.SubmittedAssignment)\
-        .join(api.SubmittedNotebook, api.Grade)\
+        .join(api.SubmittedNotebook).join(api.Grade)\
         .filter(api.SubmittedNotebook.needs_manual_grade)\
         .order_by(api.SubmittedAssignment.id)\
         .all()
@@ -665,7 +665,7 @@ def test_query_needs_manual_grade_manualgraded(submissions):
 
     # do none of the assignments need grading?
     assert [] == db.query(api.SubmittedAssignment)\
-        .join(api.SubmittedNotebook, api.Grade)\
+        .join(api.SubmittedNotebook).join(api.Grade)\
         .filter(api.SubmittedNotebook.needs_manual_grade)\
         .all()
 
@@ -1197,7 +1197,7 @@ def test_submittednotebook_to_dict(submissions):
     db = submissions[0]
 
     sn = db.query(api.SubmittedNotebook)\
-        .join(api.Notebook, api.SubmittedAssignment, api.Student)\
+        .join(api.Notebook).join(api.SubmittedAssignment).join(api.Student)\
         .filter(and_(
             api.Student.id == '12345',
             api.Notebook.name == 'blah'))\
