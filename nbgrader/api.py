@@ -137,17 +137,25 @@ class Notebook(Base):
     #: The json string representation of the kernelspec for this notebook
     kernelspec = Column(String(1024), nullable=True)
 
+    _base_cells = relationship("BaseCell", backref="notebook")
+
     #: A collection of grade cells contained within this notebook, represented
     #: by :class:`~nbgrader.api.GradeCell` objects
-    grade_cells = relationship("GradeCell", backref="grade_notebook")
+    @property
+    def grade_cells(self):
+        return [x for x in self._base_cells if isinstance(x, GradeCell)]
 
     #: A collection of solution cells contained within this notebook, represented
     #: by :class:`~nbgrader.api.SolutionCell` objects
-    solution_cells = relationship("SolutionCell", backref="solution_notebook")
+    @property
+    def solution_cells(self):
+        return [x for x in self._base_cells if isinstance(x, SolutionCell)]
 
     #: A collection of task cells contained within this notebook, represented
     #: by :class:`~nbgrader.api.TaskCell` objects
-    task_cells = relationship("TaskCell", backref="task_notebook")
+    @property
+    def task_cells(self):
+        return [x for x in self._base_cells if isinstance(x, TaskCell)]
 
     #: A collection of source cells contained within this notebook, represented
     #: by :class:`~nbgrader.api.SourceCell` objects
@@ -209,30 +217,11 @@ class BaseCell(Base):
     #: Unique id of the grade cell (automatically generated)
     id = Column(String(32), primary_key=True, default=new_uuid)
 
-    #: Unique human-readable name of the grade cell. This need only be unique
+    #: Unique human-readable name of the cell. This need only be unique
     #: within the notebook, not across notebooks.
     name = Column(String(128), nullable=False)
 
-    #: The :class:`~nbgrader.api.Notebook` that this grade cell is contained in
-    @property
-    def notebook(self):
-        if hasattr(self, 'task_notebook'):
-            return self.task_notebook
-        elif hasattr(self, 'solution_notebook'):
-            return self.solution_notebook
-        elif hasattr(self, 'grade_notebook'):
-            return self.grade_notebook
-
-    @notebook.setter
-    def notebook(self, value: Notebook):
-        if hasattr(self, 'task_notebook'):
-            self.task_notebook = value
-        elif hasattr(self, 'solution_notebook'):
-            self.solution_notebook = value
-        elif hasattr(self, 'grade_notebook'):
-            self.grade_notebook = value
-
-    #: Unique id of the :attr:`~nbgrader.api.GradeCell.notebook`
+    #: Unique id of the :attr:`~nbgrader.api.BaseCell.notebook`
     notebook_id = Column(String(32), ForeignKey('notebook.id'), nullable=False)
 
     #: The assignment that this cell is contained within, represented by a
@@ -243,7 +232,7 @@ class BaseCell(Base):
         return self.notebook.assignment
 
     def __repr__(self):
-        return "GradeCell<{}/{}/{}>".format(
+        return "BaseCell<{}/{}/{}>".format(
             self.assignment.name, self.notebook.name, self.name)
 
     type = Column(String(50))
@@ -266,7 +255,7 @@ class GradedMixin():
     def cell_type(cls):
         return Column(Enum("code", "markdown", name="grade_cell_type", validate_strings=True), nullable=False)
 
-    #: A collection of  assigned to submitted versions of this grade cell,
+    #: A collection of grades associated with this grade cell,
     #: represented by :class:`~nbgrader.api.Grade` objects
     @declared_attr
     def grades(cls):
@@ -317,7 +306,9 @@ class CommentedMixin():
 
 
 class SolutionCell(BaseCell, CommentedMixin):
+
     __tablename__ = "solution_cells"
+
     #: Unique id of the cell (automatically generated from BaseCell)
     id = Column(String(32), ForeignKey('base_cell.id'), primary_key=True)
 
@@ -1317,6 +1308,7 @@ SubmittedAssignment.late_submission_penalty = column_property(
     select([func.coalesce(func.sum(SubmittedNotebook.late_submission_penalty), 0.0)])
     .where(SubmittedNotebook.assignment_id == SubmittedAssignment.id)
     .correlate_except(SubmittedNotebook), deferred=True)
+
 
 
 class Gradebook(object):
