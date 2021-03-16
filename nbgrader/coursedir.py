@@ -306,9 +306,12 @@ class CourseDirectory(LoggingConfigurable):
         )
 
         if escape:
-            base = re.escape(self.root)
             structure = [x.format(**kwargs) for x in full_split(self.directory_structure)]
-            path = re.escape(os.path.sep).join([base] + structure)
+            if len(structure) == 0 or not structure[0].startswith(os.sep):
+                base = [re.escape(self.root)]
+            else:
+                base = []
+            path = re.escape(os.path.sep).join(base + structure)
         else:
             path = os.path.join(self.root, self.directory_structure).format(**kwargs)
 
