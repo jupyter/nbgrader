@@ -60,8 +60,8 @@ def backport_pr(branch, num, project='jupyter/nbgrader'):
     if branch != current_branch:
         check_call(['git', 'checkout', branch])
     check_call(['git', 'pull'])
-    pr = get_pull_request(project, num, auth=False)
-    files = get_pull_request_files(project, num, auth=False)
+    pr = get_pull_request(project, num, auth=True)
+    files = get_pull_request_files(project, num, auth=True)
     patch_url = pr['patch_url']
     title = pr['title']
     description = pr['body']
@@ -131,17 +131,17 @@ def should_backport(labels=None, milestone=None):
             "jupyter/nbgrader",
             labels=labels,
             state='closed',
-            auth=False)
+            auth=True)
     else:
         milestone_id = get_milestone_id(
             "jupyter/nbgrader",
             milestone,
-            auth=False)
+            auth=True)
         issues = get_issues_list(
             "jupyter/nbgrader",
             milestone=milestone_id,
             state='closed',
-            auth=False)
+            auth=True)
 
     should_backport = set()
     for issue in issues:
@@ -150,7 +150,7 @@ def should_backport(labels=None, milestone=None):
         pr = get_pull_request(
             "jupyter/nbgrader",
             issue['number'],
-            auth=False)
+            auth=True)
         if not pr['merged']:
             print ("Marked PR closed without merge: %i" % pr['number'])
             continue
