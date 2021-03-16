@@ -5,6 +5,7 @@ import shutil
 import sqlalchemy
 import traceback
 
+from rapidfuzz import fuzz
 from traitlets.config import LoggingConfigurable, Config
 from traitlets import Bool, List, Dict, Integer, Instance, Type
 from traitlets import default
@@ -118,11 +119,6 @@ class BaseConverter(LoggingConfigurable):
             assignment_glob2 = self._format_source("*", self.coursedir.student_id)
             found = glob.glob(assignment_glob2)
             if found:
-                # Normally it is a bad idea to put imports in the middle of
-                # a function, but we do this here because otherwise fuzzywuzzy
-                # prints an annoying message about python-Levenshtein every
-                # time nbgrader is run.
-                from fuzzywuzzy import fuzz
                 scores = sorted([(fuzz.ratio(assignment_glob, x), x) for x in found])
                 self.log.error("Did you mean: %s", scores[-1][1])
 
