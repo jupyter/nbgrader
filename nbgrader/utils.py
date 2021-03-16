@@ -59,34 +59,53 @@ def is_locked(cell):
         return cell.metadata['nbgrader'].get('locked', False)
 
 def get_partial_grade(output, max_points, log=None):
+    """
+    Calculates partial grade for a cell, based on contents of
+    output["data"]["text/plain"]. Returns a value between 0
+    and max_points. Returns max_points (and a warning) for edge cases.
+    """
     # check that output["data"]["text/plain"] exists
     if not output["data"]["text/plain"]:
         raise KeyError("output ['data']['text/plain'] does not exist")
     grade = output["data"]["text/plain"]
-    warning_msg = """For autograder tests, expecting output to indicate
-    partial credit and be single value between 0.0 and max_points.
-    Currently treating other output as full credit, but future releases
-    may treat as error."""
-    # For partial credit, expecting grade to be a value between 0 and max_points
-    # A valid value for key output["data"]["text/plain"] can be a list or a string
+    # For partial credit, expecting grade to be a value between 0
+    # and max_points
+    # A valid value for key output["data"]["text/plain"] can be a
+    # list or a string, so handle the string case
     if (isinstance(grade,list)):
+        # grade is a list
         if (len(grade)>1):
             if log:
+                warning_msg = """Cell output is {}, which is a list. For autograder tests, expecting output to indicate
+                partial credit and be single value between 0.0 and max_points.
+                Currently treating other output as full credit, but future
+                releases may treat as error.""".format(grade)
                 log.warning(warning_msg)
             return max_points
+        # if a single value in list, set grade to that value
         grade = grade[0]
     try:
+        # now that we have a single values for grade, can we
+        # convert to a float?
         grade = float(grade)
     except ValueError:
         if log:
+            warning_msg = """Cell output is {}, which cannot be converted to
+            a float. For
+            autograder tests, expecting output to indicate
+            partial credit and be single value between 0.0 and max_points.
+            Currently treating other output as full credit, but future releases
+            may treat as error.""".format(grade)
             log.warning(warning_msg)
         return max_points
-    if (grade > 0.0):
+    if (grade >= 0.0):
         if (grade > max_points):
             raise ValueError("partial credit cannot be greater than maximum points for cell")
         return grade
     else:
         if log:
+            warning_msg = """Cell output is {}, which is less than 0.0.
+            This is strange.""".format(grade)
             log.warning(warning_msg)
         return max_points
 

@@ -141,6 +141,10 @@ def test_get_partial_grade():
     test_data = { "data": { "text/plain": "6.0" } }
     assert utils.get_partial_grade(test_data,10.0) == 6.0
 
+    # test zero
+    test_data = { "data": { "text/plain": [ "0.0" ] } }
+    assert utils.get_partial_grade(test_data,1.0) == 0.0
+
     # test string in list, should assume partial credit not intended
     test_data = { "data": { "text/plain": [ "'this is a string'" ] } }
     assert utils.get_partial_grade(test_data,2.0) == 2.0
@@ -157,6 +161,8 @@ def test_get_partial_grade():
 def test_determine_grade_code_partial_credit():
     # create grade cell with max_points == 5
     cell = create_grade_cell('test', "code", "foo", 5)
+
+    # simple case when output between 0 and max_points
     test_data = {
         "text/plain": "3"
         }
@@ -180,6 +186,7 @@ def test_determine_grade_code_partial_credit():
     with pytest.raises(ValueError):
         utils.determine_grade(cell)
 
+    # returns max_points if output is a list
     cell.outputs = []
     test_data = {
         "text/plain": [ "0.5", "abc" ]
