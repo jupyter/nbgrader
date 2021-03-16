@@ -13,7 +13,7 @@ from sqlalchemy.orm import (sessionmaker, scoped_session, relationship,
 from sqlalchemy.orm.exc import NoResultFound, FlushError
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.ext.associationproxy import association_proxy
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy.exc import IntegrityError, StatementError
 from sqlalchemy.sql import and_, or_
 from sqlalchemy import select, func, exists, case, literal_column, union_all
 from sqlalchemy.ext.declarative import declared_attr
@@ -264,7 +264,7 @@ class GradedMixin():
     #: The cell type, either "code" or "markdown"
     @declared_attr
     def cell_type(cls):
-        return Column(Enum("code", "markdown", name="grade_cell_type"), nullable=False)
+        return Column(Enum("code", "markdown", name="grade_cell_type", validate_strings=True), nullable=False)
 
     #: A collection of  assigned to submitted versions of this grade cell,
     #: represented by :class:`~nbgrader.api.Grade` objects
@@ -386,7 +386,7 @@ class SourceCell(Base):
     name = Column(String(128), nullable=False)
 
     #: The cell type, either "code" or "markdown"
-    cell_type = Column(Enum("code", "markdown", name="source_cell_type"), nullable=False)
+    cell_type = Column(Enum("code", "markdown", name="source_cell_type", validate_strings=True), nullable=False)
 
     #: Whether the cell is locked (e.g. the source saved in the database should
     #: be used to overwrite the source of students' cells)
@@ -1408,7 +1408,7 @@ class Gradebook(object):
 
         try:
             self.db.commit()
-        except (IntegrityError, FlushError) as e:
+        except (IntegrityError, FlushError, StatementError) as e:
             self.db.rollback()
             raise InvalidEntry(*e.args)
         return course
@@ -1444,7 +1444,7 @@ class Gradebook(object):
         self.db.add(student)
         try:
             self.db.commit()
-        except (IntegrityError, FlushError) as e:
+        except (IntegrityError, FlushError, StatementError) as e:
             self.db.rollback()
             raise InvalidEntry(*e.args)
 
@@ -1504,7 +1504,7 @@ class Gradebook(object):
                 setattr(student, attr, kwargs[attr])
             try:
                 self.db.commit()
-            except (IntegrityError, FlushError) as e:
+            except (IntegrityError, FlushError, StatementError) as e:
                 self.db.rollback()
                 raise InvalidEntry(*e.args)
 
@@ -1533,7 +1533,7 @@ class Gradebook(object):
 
         try:
             self.db.commit()
-        except (IntegrityError, FlushError) as e:
+        except (IntegrityError, FlushError, StatementError) as e:
             self.db.rollback()
             raise InvalidEntry(*e.args)
 
@@ -1569,7 +1569,7 @@ class Gradebook(object):
         self.db.add(assignment)
         try:
             self.db.commit()
-        except (IntegrityError, FlushError) as e:
+        except (IntegrityError, FlushError, StatementError) as e:
             self.db.rollback()
             raise InvalidEntry(*e.args)
         return assignment
@@ -1625,7 +1625,7 @@ class Gradebook(object):
                     setattr(assignment, attr, kwargs[attr])
             try:
                 self.db.commit()
-            except (IntegrityError, FlushError) as e:
+            except (IntegrityError, FlushError, StatementError) as e:
                 self.db.rollback()
                 raise InvalidEntry(*e.args)
 
@@ -1653,7 +1653,7 @@ class Gradebook(object):
 
         try:
             self.db.commit()
-        except (IntegrityError, FlushError) as e:
+        except (IntegrityError, FlushError, StatementError) as e:
             self.db.rollback()
             raise InvalidEntry(*e.args)
 
@@ -1682,7 +1682,7 @@ class Gradebook(object):
         self.db.add(notebook)
         try:
             self.db.commit()
-        except (IntegrityError, FlushError) as e:
+        except (IntegrityError, FlushError, StatementError) as e:
             self.db.rollback()
             raise InvalidEntry(*e.args)
         return notebook
@@ -1740,7 +1740,7 @@ class Gradebook(object):
                 setattr(notebook, attr, kwargs[attr])
             try:
                 self.db.commit()
-            except (IntegrityError, FlushError) as e:
+            except (IntegrityError, FlushError, StatementError) as e:
                 self.db.rollback()
                 raise InvalidEntry(*e.args)
 
@@ -1775,7 +1775,7 @@ class Gradebook(object):
 
         try:
             self.db.commit()
-        except (IntegrityError, FlushError) as e:
+        except (IntegrityError, FlushError, StatementError) as e:
             self.db.rollback()
             raise InvalidEntry(*e.args)
 
@@ -1807,7 +1807,7 @@ class Gradebook(object):
         self.db.add(grade_cell)
         try:
             self.db.commit()
-        except (IntegrityError, FlushError) as e:
+        except (IntegrityError, FlushError, StatementError) as e:
             self.db.rollback()
             raise InvalidEntry(*e.args)
         return grade_cell
@@ -1916,7 +1916,7 @@ class Gradebook(object):
                 setattr(grade_cell, attr, kwargs[attr])
             try:
                 self.db.commit()
-            except (IntegrityError, FlushError) as e:
+            except (IntegrityError, FlushError, StatementError) as e:
                 self.db.rollback()
                 raise InvalidEntry(*e.args)
 
@@ -1950,7 +1950,7 @@ class Gradebook(object):
         self.db.add(solution_cell)
         try:
             self.db.commit()
-        except (IntegrityError, FlushError) as e:
+        except (IntegrityError, FlushError, StatementError) as e:
             self.db.rollback()
             raise InvalidEntry(*e.args)
         return solution_cell
@@ -2019,7 +2019,7 @@ class Gradebook(object):
                 setattr(solution_cell, attr, kwargs[attr])
             try:
                 self.db.commit()
-            except (IntegrityError, FlushError) as e:
+            except (IntegrityError, FlushError, StatementError) as e:
                 raise InvalidEntry(*e.args)
 
         return solution_cell
@@ -2052,7 +2052,7 @@ class Gradebook(object):
         self.db.add(task_cell)
         try:
             self.db.commit()
-        except (IntegrityError, FlushError) as e:
+        except (IntegrityError, FlushError, StatementError) as e:
             self.db.rollback()
             raise InvalidEntry(*e.args)
         return task_cell
@@ -2116,7 +2116,7 @@ class Gradebook(object):
                 setattr(task_cell, attr, kwargs[attr])
             try:
                 self.db.commit()
-            except (IntegrityError, FlushError) as e:
+            except (IntegrityError, FlushError, StatementError) as e:
                 raise InvalidEntry(*e.args)
 
         return task_cell
@@ -2149,7 +2149,7 @@ class Gradebook(object):
         self.db.add(source_cell)
         try:
             self.db.commit()
-        except (IntegrityError, FlushError) as e:
+        except (IntegrityError, FlushError, StatementError) as e:
             self.db.rollback()
             raise InvalidEntry(*e.args)
         return source_cell
@@ -2213,7 +2213,7 @@ class Gradebook(object):
                 setattr(source_cell, attr, kwargs[attr])
             try:
                 self.db.commit()
-            except (IntegrityError, FlushError) as e:
+            except (IntegrityError, FlushError, StatementError) as e:
                 raise InvalidEntry(*e.args)
 
         return source_cell
@@ -2268,7 +2268,7 @@ class Gradebook(object):
             self.db.add(submission)
             self.db.commit()
 
-        except (IntegrityError, FlushError) as e:
+        except (IntegrityError, FlushError, StatementError) as e:
             self.db.rollback()
             raise InvalidEntry(*e.args)
 
@@ -2336,7 +2336,7 @@ class Gradebook(object):
                     setattr(submission, attr, kwargs[attr])
             try:
                 self.db.commit()
-            except (IntegrityError, FlushError) as e:
+            except (IntegrityError, FlushError, StatementError) as e:
                 self.db.rollback()
                 raise InvalidEntry(*e.args)
 
@@ -2378,7 +2378,7 @@ class Gradebook(object):
                 minutes=minutes, hours=hours, days=days, weeks=weeks)
         try:
             self.db.commit()
-        except (IntegrityError, FlushError) as e:
+        except (IntegrityError, FlushError, StatementError) as e:
             self.db.rollback()
             raise InvalidEntry(*e.args)
 
@@ -2402,7 +2402,7 @@ class Gradebook(object):
 
         try:
             self.db.commit()
-        except (IntegrityError, FlushError) as e:
+        except (IntegrityError, FlushError, StatementError) as e:
             self.db.rollback()
             raise InvalidEntry(*e.args)
 
@@ -2429,7 +2429,7 @@ class Gradebook(object):
 
         try:
             self.db.commit()
-        except (IntegrityError, FlushError) as e:
+        except (IntegrityError, FlushError, StatementError) as e:
             self.db.rollback()
             raise InvalidEntry(*e.args)
 
