@@ -7,7 +7,7 @@ import subprocess as sp
 
 from sqlalchemy import (create_engine, ForeignKey, Column, String, Text,
                         DateTime, Interval, Float, Enum, UniqueConstraint,
-                        Boolean)
+                        Boolean, inspect)
 from sqlalchemy.orm import (sessionmaker, scoped_session, relationship,
                             column_property)
 from sqlalchemy.orm.exc import NoResultFound, FlushError
@@ -1283,7 +1283,7 @@ class Gradebook(object):
         self.db = scoped_session(sessionmaker(autoflush=True, bind=self.engine))
 
         # this creates all the tables in the database if they don't already exist
-        db_exists = len(self.engine.table_names()) > 0
+        db_exists = len(inspect(self.engine).get_table_names()) > 0
         Base.metadata.create_all(bind=self.engine)
 
         # set the alembic version if it doesn't exist
