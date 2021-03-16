@@ -8,6 +8,50 @@ A summary of changes to nbgrader.
 0.6.x
 -----
 
+0.6.2
+~~~~~
+
+nbgrader version 0.6.2 is a bugfix release. The following PRs were merged:
+
+- PR #1410: partial credit returns zero when score is zero
+- PR #1384: Fix migrations.
+- PR #1369: Pin nbconvert to 5.6.1, traitlets to 4.3.3 and pytest to <6.0.0
+- PR #1362: Fix migration, grade cells were looking for a non-existing column
+- PR #1356: add SAS codestub and autograde for metakernel based non-python kernels
+- PR #1352: Description of "what is nbgrader?"
+- PR #1343: Update deprecated jquery functions and update jquery
+- PR #1341: Make format_path behave the same for absolute paths
+- PR #1330: Update azure pipelines matrix to add Python 3.8
+- PR #1329: Update the test matrix on Travis to Python 3.6+
+- PR #1319: use rapidfuzz instead of fuzzywuzzy
+- PR #1308: docs: Fix formgrader group name in docs
+- PR #1290: Backport PR #1288 on branch 0.6.x (Fixes #1283: Replace AppVeyor badge with Azure Devops badge)
+- PR #1289: Backport PR #1249 on branch 0.6.x (timestamp_format raises an exception)
+- PR #1288: Fixes #1283: Replace AppVeyor badge with Azure Devops badge
+- PR #1281: Demos using Python3
+- PR #1249: timestamp_format raises an exception
+
+Thanks to the following users who submitted PRs or reported issues that were merged or fixed for the 0.6.1 release:
+
+- BertR
+- chinery
+- echuber2
+- enisnazif
+- fredcallaway
+- HanTeo
+- jgwerner
+- jhamrick
+- jld23
+- kcranston
+- lzach
+- maxbachmann
+- meeseeksmachine
+- nklever
+- Patil2099
+- rkdarst
+- tmetzl
+- willingc
+
 0.6.1
 ~~~~~
 
