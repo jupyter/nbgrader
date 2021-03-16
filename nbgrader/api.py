@@ -22,6 +22,7 @@ from .dbutil import _temp_alembic_ini
 from typing import List, Any, Optional, Union
 from .auth import Authenticator
 
+
 Base = declarative_base()
 
 
@@ -951,14 +952,16 @@ Notebook.needs_manual_grade = column_property(
 SubmittedNotebook.score = column_property(
     select([func.coalesce(func.sum(Grade.score), 0.0)])
     .where(Grade.notebook_id == SubmittedNotebook.id)
-    .correlate_except(Grade), deferred=True)
+    .correlate_except(Grade)
+    .scalar_subquery(), deferred=True)
 
 SubmittedAssignment.score = column_property(
     select([func.coalesce(func.sum(Grade.score), 0.0)])
     .where(and_(
         SubmittedNotebook.assignment_id == SubmittedAssignment.id,
         Grade.notebook_id == SubmittedNotebook.id))
-    .correlate_except(Grade), deferred=True)
+    .correlate_except(Grade)
+    .scalar_subquery(), deferred=True)
 
 Student.score = column_property(
     select([func.coalesce(func.sum(Grade.score), 0.0)])
@@ -966,7 +969,8 @@ Student.score = column_property(
         SubmittedAssignment.student_id == Student.id,
         SubmittedNotebook.assignment_id == SubmittedAssignment.id,
         Grade.notebook_id == SubmittedNotebook.id))
-    .correlate_except(Grade), deferred=True)
+    .correlate_except(Grade)
+    .scalar_subquery(), deferred=True)
 
 
 # Overall max scores
@@ -975,13 +979,15 @@ Grade.max_score_gradecell = column_property(
     select([func.coalesce(GradeCell.max_score, 0.0)])
     .select_from(GradeCell)
     .where(Grade.cell_id == GradeCell.id)
-    .correlate_except(GradeCell), deferred=True)
+    .correlate_except(GradeCell)
+    .scalar_subquery(), deferred=True)
 
 Grade.max_score_taskcell = column_property(
     select([func.coalesce(TaskCell.max_score, 0.0)])
     .select_from(TaskCell)
     .where(Grade.cell_id == TaskCell.id)
-    .correlate_except(TaskCell), deferred=True)
+    .correlate_except(TaskCell)
+    .scalar_subquery(), deferred=True)
 # a grade is either from a grade cell or a task cell , so only one will not be none
 Grade.max_score = column_property(func.coalesce(Grade.max_score_gradecell, Grade.max_score_taskcell, 0.0), deferred=True)
 
@@ -992,16 +998,19 @@ Grade.cell_type_from_taskcell = column_property(
     select([TaskCell.cell_type])
     .select_from(TaskCell)
     .where(Grade.cell_id == TaskCell.id)
-    .correlate_except(TaskCell), deferred=True)
+    .correlate_except(TaskCell)
+    .scalar_subquery(), deferred=True)
 
 Grade.cell_type_from_gradecell = column_property(
     select([GradeCell.cell_type])
     .select_from(GradeCell)
     .where(Grade.cell_id == GradeCell.id)
-    .correlate_except(GradeCell), deferred=True)
+    .correlate_except(GradeCell)
+    .scalar_subquery(), deferred=True)
 
 Grade.cell_type = column_property(
     select([func.coalesce(Grade.cell_type_from_gradecell, Grade.cell_type_from_taskcell)])
+    .scalar_subquery()
 )
 
 
@@ -1009,13 +1018,15 @@ Notebook.max_score_gradecell = column_property(
     select([func.coalesce(func.sum(GradeCell.max_score), 0.0)])
         .select_from(GradeCell)
         .where(GradeCell.notebook_id == Notebook.id)
-        .correlate_except(GradeCell), deferred=True)
+        .correlate_except(GradeCell)
+    .scalar_subquery(), deferred=True)
 
 Notebook.max_score_taskcell = column_property(
     select([func.coalesce(func.sum(TaskCell.max_score), 0.0)])
         .select_from(TaskCell)
         .where(TaskCell.notebook_id == Notebook.id)
-        .correlate_except(TaskCell), deferred=True)
+        .correlate_except(TaskCell)
+    .scalar_subquery(), deferred=True)
 
 Notebook.max_score = column_property(
     Notebook.max_score_gradecell + Notebook.max_score_taskcell
@@ -1024,7 +1035,8 @@ Notebook.max_score = column_property(
 SubmittedNotebook.max_score = column_property(
     select([Notebook.max_score])
     .where(SubmittedNotebook.notebook_id == Notebook.id)
-    .correlate_except(Notebook), deferred=True)
+    .correlate_except(Notebook)
+    .scalar_subquery(), deferred=True)
 
 Assignment.max_score_gradecell = column_property(
     select([func.coalesce(func.sum(GradeCell.max_score), 0.0)])
@@ -1032,7 +1044,8 @@ Assignment.max_score_gradecell = column_property(
     .where(and_(
         Notebook.assignment_id == Assignment.id,
         GradeCell.notebook_id == Notebook.id))
-    .correlate_except(GradeCell), deferred=True)
+    .correlate_except(GradeCell)
+    .scalar_subquery(), deferred=True)
 
 Assignment.max_score_taskcell = column_property(
     select([func.coalesce(func.sum(TaskCell.max_score), 0.0)])
@@ -1040,7 +1053,8 @@ Assignment.max_score_taskcell = column_property(
     .where(and_(
         Notebook.assignment_id == Assignment.id,
         TaskCell.notebook_id == Notebook.id))
-    .correlate_except(TaskCell), deferred=True)
+    .correlate_except(TaskCell)
+    .scalar_subquery(), deferred=True)
 
 Assignment.max_score = column_property(
     Assignment.max_score_gradecell + Assignment.max_score_taskcell
@@ -1050,11 +1064,13 @@ Assignment.max_score = column_property(
 SubmittedAssignment.max_score = column_property(
     select([Assignment.max_score])
     .where(SubmittedAssignment.assignment_id == Assignment.id)
-    .correlate_except(Assignment), deferred=True)
+    .correlate_except(Assignment)
+    .scalar_subquery(), deferred=True)
 
 Student.max_score = column_property(
     select([func.coalesce(func.sum(Assignment.max_score), 0.0)])
-    .correlate_except(Assignment), deferred=True)
+    .correlate_except(Assignment)
+    .scalar_subquery(), deferred=True)
 
 
 # Written scores
@@ -1065,7 +1081,8 @@ SubmittedNotebook.written_score = column_property(
         Grade.notebook_id == SubmittedNotebook.id,
         GradeCell.id == Grade.cell_id,
         GradeCell.cell_type == "markdown"))
-    .correlate_except(Grade), deferred=True)
+    .correlate_except(Grade)
+    .scalar_subquery(), deferred=True)
 
 SubmittedAssignment.written_score = column_property(
     select([func.coalesce(func.sum(Grade.score), 0.0)])
@@ -1074,7 +1091,8 @@ SubmittedAssignment.written_score = column_property(
         Grade.notebook_id == SubmittedNotebook.id,
         GradeCell.id == Grade.cell_id,
         GradeCell.cell_type == "markdown"))
-    .correlate_except(Grade), deferred=True)
+    .correlate_except(Grade)
+    .scalar_subquery(), deferred=True)
 
 
 # Written max scores
@@ -1085,12 +1103,14 @@ Notebook.max_written_score = column_property(
     .where(and_(
         GradeCell.notebook_id == Notebook.id,
         GradeCell.cell_type == "markdown"))
-    .correlate_except(GradeCell), deferred=True)
+    .correlate_except(GradeCell)
+    .scalar_subquery(), deferred=True)
 
 SubmittedNotebook.max_written_score = column_property(
     select([Notebook.max_written_score])
     .where(Notebook.id == SubmittedNotebook.notebook_id)
-    .correlate_except(Notebook), deferred=True)
+    .correlate_except(Notebook)
+    .scalar_subquery(), deferred=True)
 
 Assignment.max_written_score = column_property(
     select([func.coalesce(func.sum(GradeCell.max_score), 0.0)])
@@ -1099,12 +1119,14 @@ Assignment.max_written_score = column_property(
         Notebook.assignment_id == Assignment.id,
         GradeCell.notebook_id == Notebook.id,
         GradeCell.cell_type == "markdown"))
-    .correlate_except(GradeCell), deferred=True)
+    .correlate_except(GradeCell)
+    .scalar_subquery(), deferred=True)
 
 SubmittedAssignment.max_written_score = column_property(
     select([Assignment.max_written_score])
     .where(Assignment.id == SubmittedAssignment.assignment_id)
-    .correlate_except(Assignment), deferred=True)
+    .correlate_except(Assignment)
+    .scalar_subquery(), deferred=True)
 
 
 # Code scores
@@ -1115,7 +1137,8 @@ SubmittedNotebook.code_score = column_property(
         Grade.notebook_id == SubmittedNotebook.id,
         GradeCell.id == Grade.cell_id,
         GradeCell.cell_type == "code"))
-    .correlate_except(Grade), deferred=True)
+    .correlate_except(Grade)
+    .scalar_subquery(), deferred=True)
 
 SubmittedAssignment.code_score = column_property(
     select([func.coalesce(func.sum(Grade.score), 0.0)])
@@ -1124,7 +1147,8 @@ SubmittedAssignment.code_score = column_property(
         Grade.notebook_id == SubmittedNotebook.id,
         GradeCell.id == Grade.cell_id,
         GradeCell.cell_type == "code"))
-    .correlate_except(Grade), deferred=True)
+    .correlate_except(Grade)
+    .scalar_subquery(), deferred=True)
 
 
 # Code max scores
@@ -1135,12 +1159,14 @@ Notebook.max_code_score = column_property(
         .where(and_(
             GradeCell.notebook_id == Notebook.id,
             GradeCell.cell_type == "code"))
-        .correlate_except(GradeCell), deferred=True)
+        .correlate_except(GradeCell)
+    .scalar_subquery(), deferred=True)
 
 SubmittedNotebook.max_code_score = column_property(
     select([Notebook.max_code_score])
     .where(Notebook.id == SubmittedNotebook.notebook_id)
-    .correlate_except(Notebook), deferred=True)
+    .correlate_except(Notebook)
+    .scalar_subquery(), deferred=True)
 
 Assignment.max_code_score = column_property(
     select([func.coalesce(func.sum(GradeCell.max_score), 0.0)])
@@ -1149,12 +1175,14 @@ Assignment.max_code_score = column_property(
         Notebook.assignment_id == Assignment.id,
         GradeCell.notebook_id == Notebook.id,
         GradeCell.cell_type == "code"))
-    .correlate_except(GradeCell), deferred=True)
+    .correlate_except(GradeCell)
+    .scalar_subquery(), deferred=True)
 
 SubmittedAssignment.max_code_score = column_property(
     select([Assignment.max_code_score])
     .where(Assignment.id == SubmittedAssignment.assignment_id)
-    .correlate_except(Assignment), deferred=True)
+    .correlate_except(Assignment)
+    .scalar_subquery(), deferred=True)
 
 # task score
 
@@ -1164,7 +1192,8 @@ SubmittedNotebook.task_score = column_property(
         Grade.notebook_id == SubmittedNotebook.id,
         TaskCell.id == Grade.cell_id,
         TaskCell.cell_type == "markdown"))
-    .correlate_except(Grade), deferred=True)
+    .correlate_except(Grade)
+    .scalar_subquery(), deferred=True)
 
 SubmittedAssignment.task_score = column_property(
     select([func.coalesce(func.sum(Grade.score), 0.0)])
@@ -1173,7 +1202,8 @@ SubmittedAssignment.task_score = column_property(
         Grade.notebook_id == SubmittedNotebook.id,
         TaskCell.id == Grade.cell_id,
         TaskCell.cell_type == "markdown"))
-    .correlate_except(Grade), deferred=True)
+    .correlate_except(Grade)
+    .scalar_subquery(), deferred=True)
 
 
 # task max scores
@@ -1184,12 +1214,14 @@ Notebook.max_task_score = column_property(
     .where(and_(
         TaskCell.notebook_id == Notebook.id,
         TaskCell.cell_type == "markdown"))
-    .correlate_except(TaskCell), deferred=True)
+    .correlate_except(TaskCell)
+    .scalar_subquery(), deferred=True)
 
 SubmittedNotebook.max_task_score = column_property(
     select([Notebook.max_task_score])
     .where(Notebook.id == SubmittedNotebook.notebook_id)
-    .correlate_except(Notebook), deferred=True)
+    .correlate_except(Notebook)
+    .scalar_subquery(), deferred=True)
 
 Assignment.max_task_score = column_property(
     select([func.coalesce(func.sum(TaskCell.max_score), 0.0)])
@@ -1198,10 +1230,12 @@ Assignment.max_task_score = column_property(
         Notebook.assignment_id == Assignment.id,
         TaskCell.notebook_id == Notebook.id,
         TaskCell.cell_type == "markdown"))
-    .correlate_except(TaskCell), deferred=True)
+    .correlate_except(TaskCell)
+    .scalar_subquery(), deferred=True)
 
 SubmittedAssignment.max_task_score = column_property(
     select([func.coalesce(Assignment.max_task_score, 0.0)])
+    .scalar_subquery()
 )
 
 # Number of submissions
@@ -1209,12 +1243,14 @@ SubmittedAssignment.max_task_score = column_property(
 Assignment.num_submissions = column_property(
     select([func.count(SubmittedAssignment.id)])
     .where(SubmittedAssignment.assignment_id == Assignment.id)
-    .correlate_except(SubmittedAssignment), deferred=True)
+    .correlate_except(SubmittedAssignment)
+    .scalar_subquery(), deferred=True)
 
 Notebook.num_submissions = column_property(
     select([func.count(SubmittedNotebook.id)])
     .where(SubmittedNotebook.notebook_id == Notebook.id)
-    .correlate_except(SubmittedNotebook), deferred=True)
+    .correlate_except(SubmittedNotebook)
+    .scalar_subquery(), deferred=True)
 
 
 # Cell type
@@ -1223,13 +1259,15 @@ Grade.cell_type_gradecell = column_property(
     select([GradeCell.cell_type])
     .select_from(GradeCell)
     .where(Grade.cell_id == GradeCell.id)
-    .correlate_except(GradeCell), deferred=True)
+    .correlate_except(GradeCell)
+    .scalar_subquery(), deferred=True)
 
 Grade.cell_type_taskcell = column_property(
     select([TaskCell.cell_type])
     .select_from(TaskCell)
     .where(Grade.cell_id == TaskCell.id)
-    .correlate_except(TaskCell), deferred=True)
+    .correlate_except(TaskCell)
+    .scalar_subquery(), deferred=True)
 
 
 # Failed tests
@@ -1250,7 +1288,8 @@ SubmittedNotebook.failed_tests = column_property(
 SubmittedAssignment.late_submission_penalty = column_property(
     select([func.coalesce(func.sum(SubmittedNotebook.late_submission_penalty), 0.0)])
     .where(SubmittedNotebook.assignment_id == SubmittedAssignment.id)
-    .correlate_except(SubmittedNotebook), deferred=True)
+    .correlate_except(SubmittedNotebook)
+    .scalar_subquery(), deferred=True)
 
 
 
