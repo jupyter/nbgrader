@@ -1,4 +1,4 @@
-from nbconvert.preprocessors import ExecutePreprocessor
+from nbconvert.preprocessors import ExecutePreprocessor, CellExecutionError
 from traitlets import Bool, List, Integer
 from textwrap import dedent
 
@@ -55,3 +55,51 @@ class Execute(NbGraderPreprocessor, ExecutePreprocessor):
                 return self.preprocess(nb, resources, retries=retries - 1)
 
         return output
+
+    def preprocess_cell(self, cell, resources, cell_index, store_history=True):
+            """
+            Need to override preprocess_cell to check reply for errors
+            """
+            # Copied from nbconvert ExecutePreprocessor
+            if cell.cell_type != 'code' or not cell.source.strip():
+                return cell, resources
+
+            reply, outputs = self.run_cell(cell, cell_index, store_history)
+            # Backwards compatibility for processes that wrap run_cell
+            cell.outputs = outputs
+
+            cell_allows_errors = (self.allow_errors or "raises-exception"
+                                in cell.metadata.get("tags", []))
+
+            if self.force_raise_errors or not cell_allows_errors:
+                if (reply is not None) and reply['content']['status'] == 'error':
+                    raise CellExecutionError.from_cell_and_msg(cell, reply['content'])
+
+            # Ensure errors are recorded to prevent false positives when autograding
+            if (reply is None) or reply['content']['status'] == 'error':
+                error_recorded = False
+                for output in cell.outputs:
+                    if output.output_type == 'error':
+                        error_recorded = True
+                if not error_recorded:
+                    error_output = NotebookNode(output_type='error')
+                    if reply is None:
+                        # Occurs when
+                        # IPython.core.interactiveshell.InteractiveShell.showtraceback
+                        # = None
+                        error_output.ename = "CellTimeoutError"
+                        error_output.evalue = ""
+                        error_output.traceback = ["ERROR: No reply from kernel"]
+                    else:
+                        # Occurs when
+                        # IPython.core.interactiveshell.InteractiveShell.showtraceback
+                        # = lambda *args, **kwargs : None
+                        error_output.ename = reply['content']['ename']
+                        error_output.evalue = reply['content']['evalue']
+                        error_output.traceback = reply['content']['traceback']
+                        if error_output.traceback == []:
+                            error_output.traceback = ["ERROR: An error occurred while"
+                                                      " showtraceback was disabled"]
+                    cell.outputs.append(error_output)
+
+            return cell, resources
