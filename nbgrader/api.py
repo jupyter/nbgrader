@@ -65,11 +65,11 @@ class Assignment(Base):
 
     #: A collection of notebooks contained in this assignment, represented
     #: by :class:`~nbgrader.api.Notebook` objects
-    notebooks = relationship("Notebook", backref="assignment", order_by="Notebook.name")
+    notebooks = relationship("Notebook", back_populates="assignment", order_by="Notebook.name")
 
     #: A collection of submissions of this assignment, represented by
     #: :class:`~nbgrader.api.SubmittedAssignment` objects.
-    submissions = relationship("SubmittedAssignment", backref="assignment")
+    submissions = relationship("SubmittedAssignment", back_populates="assignment")
 
     #: The number of submissions of this assignment
     num_submissions = None
@@ -130,7 +130,7 @@ class Notebook(Base):
 
     #: The :class:`~nbgrader.api.Assignment` object that this notebook is a
     #: part of
-    assignment = None
+    assignment = relationship("Assignment", back_populates="notebooks")
 
     #: Unique id of :attr:`~nbgrader.api.Notebook.assignment`
     assignment_id = Column(String(32), ForeignKey('assignment.id'))
@@ -138,7 +138,7 @@ class Notebook(Base):
     #: The json string representation of the kernelspec for this notebook
     kernelspec = Column(String(1024), nullable=True)
 
-    _base_cells = relationship("BaseCell", backref="notebook")
+    _base_cells = relationship("BaseCell", back_populates="notebook")
 
     #: A collection of grade cells contained within this notebook, represented
     #: by :class:`~nbgrader.api.GradeCell` objects
@@ -160,11 +160,11 @@ class Notebook(Base):
 
     #: A collection of source cells contained within this notebook, represented
     #: by :class:`~nbgrader.api.SourceCell` objects
-    source_cells = relationship("SourceCell", backref="notebook")
+    source_cells = relationship("SourceCell", back_populates="notebook")
 
     #: A collection of submitted versions of this notebook, represented by
     #: :class:`~nbgrader.api.SubmittedNotebook` objects
-    submissions = relationship("SubmittedNotebook", backref="notebook")
+    submissions = relationship("SubmittedNotebook", back_populates="notebook")
 
     #: The number of submissions of this notebook
     num_submissions = None
@@ -221,6 +221,10 @@ class BaseCell(Base):
     #: Unique human-readable name of the cell. This need only be unique
     #: within the notebook, not across notebooks.
     name = Column(String(128), nullable=False)
+
+    #: The notebook that this cell is contained within, represented by a
+    #: :class:`~nbgrader.api.Notebook` object
+    notebook = relationship("Notebook", back_populates="_base_cells")
 
     #: Unique id of the :attr:`~nbgrader.api.BaseCell.notebook`
     notebook_id = Column(String(32), ForeignKey('notebook.id'), nullable=False)
@@ -389,7 +393,7 @@ class SourceCell(Base):
     checksum = Column(String(128))
 
     #: The :class:`~nbgrader.api.Notebook` that this source cell is contained in
-    notebook = None
+    notebook = relationship("Notebook", back_populates="source_cells")
 
     #: Unique id of the :attr:`~nbgrader.api.SourceCell.notebook`
     notebook_id = Column(String(32), ForeignKey('notebook.id'))
@@ -442,7 +446,7 @@ class Student(Base):
 
     #: A collection of assignments submitted by the student, represented as
     #: :class:`~nbgrader.api.SubmittedAssignment` objects
-    submissions = relationship("SubmittedAssignment", backref="student")
+    submissions = relationship("SubmittedAssignment", back_populates="student")
 
     #: The overall score of the student across all assignments, computed
     #: automatically from the :attr:`~nbgrader.api.SubmittedAssignment.score`
@@ -491,14 +495,14 @@ class SubmittedAssignment(Base):
 
     #: The master version of this assignment, represented by a
     #: :class:`~nbgrader.api.Assignment` object
-    assignment = None
+    assignment = relationship("Assignment", back_populates="submissions")
 
     #: Unique id of :attr:`~nbgrader.api.SubmittedAssignment.assignment`
     assignment_id = Column(String(32), ForeignKey('assignment.id'))
 
     #: The student who submitted this assignment, represented by a
     #: :class:`~nbgrader.api.Student` object
-    student = None
+    student = relationship("Student", back_populates="submissions")
 
     #: Unique id of :attr:`~nbgrader.api.SubmittedAssignment.student`
     student_id = Column(String(128), ForeignKey('student.id'))
@@ -513,7 +517,7 @@ class SubmittedAssignment(Base):
 
     #: A collection of notebooks contained within this submitted assignment,
     #: represented by :class:`~nbgrader.api.SubmittedNotebook` objects
-    notebooks = relationship("SubmittedNotebook", backref="assignment")
+    notebooks = relationship("SubmittedNotebook", back_populates="assignment")
 
     #: The score assigned to this assignment, automatically calculated from the
     #: :attr:`~nbgrader.api.SubmittedNotebook.score` of each notebook within
@@ -628,25 +632,25 @@ class SubmittedNotebook(Base):
 
     #: The submitted assignment this notebook is a part of, represented by a
     #: :class:`~nbgrader.api.SubmittedAssignment` object
-    assignment = None
+    assignment = relationship("SubmittedAssignment", back_populates="notebooks")
 
     #: Unique id of :attr:`~nbgrader.api.SubmittedNotebook.assignment`
     assignment_id = Column(String(32), ForeignKey('submitted_assignment.id'))
 
     #: The master version of this notebook, represented by a
     #: :class:`~nbgrader.api.Notebook` object
-    notebook = None
+    notebook = relationship("Notebook", back_populates="submissions")
 
     #: Unique id of :attr:`~nbgrader.api.SubmittedNotebook.notebook`
     notebook_id = Column(String(32), ForeignKey('notebook.id'))
 
     #: Collection of associated with this submitted notebook, represented
     #: by :class:`~nbgrader.api.Grade` objects
-    grades = relationship("Grade", backref="notebook")
+    grades = relationship("Grade", back_populates="notebook")
 
     #: Collection of comments associated with this submitted notebook, represented
     #: by :class:`~nbgrader.api.Comment` objects
-    comments = relationship("Comment", backref="notebook")
+    comments = relationship("Comment", back_populates="notebook")
 
     #: The student who submitted this notebook, represented by a
     #: :class:`~nbgrader.api.Student` object
@@ -747,7 +751,7 @@ class Grade(Base):
 
     #: The submitted notebook that this grade is assigned to, represented by a
     #: :class:`~nbgrader.api.SubmittedNotebook` object
-    notebook = None
+    notebook = relationship("SubmittedNotebook", back_populates="grades")
 
     #: Unique id of :attr:`~nbgrader.api.Grade.notebook`
     notebook_id = Column(String(32), ForeignKey('submitted_notebook.id'))
@@ -855,7 +859,7 @@ class Comment(Base):
 
     #: The submitted notebook that this comment is assigned to, represented by a
     #: :class:`~nbgrader.api.SubmittedNotebook` object
-    notebook = None
+    notebook = relationship("SubmittedNotebook", back_populates="comments")
 
     #: Unique id of :attr:`~nbgrader.api.Comment.notebook`
     notebook_id = Column(String(32), ForeignKey('submitted_notebook.id'))
