@@ -7,7 +7,7 @@ import traceback
 
 from rapidfuzz import fuzz
 from traitlets.config import LoggingConfigurable, Config
-from traitlets import Bool, List, Dict, Integer, Instance, Type
+from traitlets import Bool, List, Dict, Integer, Instance, Type, Any
 from traitlets import default
 from textwrap import dedent
 from nbconvert.exporters import Exporter, NotebookExporter
@@ -35,6 +35,40 @@ class BaseConverter(LoggingConfigurable):
     preprocessors = List([])
 
     force = Bool(False, help="Whether to overwrite existing assignments/submissions").tag(config=True)
+
+    pre_convert_hook = Any(
+        None,
+        config=True,
+        allow_none=True,
+        help=dedent("""
+        An optional hook function that you can implement to do some
+        bootstrapping work before converting. 
+        This function is called before the notebooks are converted
+        and should be used for specific converters such as Autograde,
+        GenerateAssignment or GenerateFeedback.
+
+        It will be called as (all arguments are passed as keywords)::
+
+            hook(assignment=assignment, student=student, notebooks=notebooks)
+        """)
+    )
+
+    post_convert_hook = Any(
+        None,
+        config=True,
+        allow_none=True,
+        help=dedent("""
+        An optional hook function that you can implement to do some
+        work after converting. 
+        This function is called after the notebooks are converted
+        and should be used for specific converters such as Autograde,
+        GenerateAssignment or GenerateFeedback.
+
+        It will be called as (all arguments are passed as keywords)::
+
+            hook(assignment=assignment, student=student, notebooks=notebooks)
+        """)
+    )
 
     permissions = Integer(
         help=dedent(
@@ -325,6 +359,8 @@ class BaseConverter(LoggingConfigurable):
                 if not should_process:
                     continue
 
+                self.run_pre_convert_hook()
+
                 # initialize the destination
                 self.init_assignment(gd['assignment_id'], gd['student_id'])
 
@@ -334,6 +370,7 @@ class BaseConverter(LoggingConfigurable):
 
                 # set assignment permissions
                 self.set_permissions(gd['assignment_id'], gd['student_id'])
+                self.run_post_convert_hook()
 
             except UnresponsiveKernelError:
                 self.log.error(
@@ -408,3 +445,25 @@ class BaseConverter(LoggingConfigurable):
 
             self.log.error(msg)
             raise NbGraderException(msg)
+
+    def run_pre_convert_hook(self):
+        if self.pre_convert_hook:
+            self.log.info('Running pre-convert hook')
+            try:
+                self.pre_convert_hook(
+                    assignment=self.coursedir.assignment_id,
+                    student=self.coursedir.student_id,
+                    notebooks=self.notebooks)
+            except Exception:
+                self.log.info('Pre-convert hook failed', exc_info=True)
+
+    def run_post_convert_hook(self):
+        if self.post_convert_hook:
+            self.log.info('Running post-convert hook')
+            try:
+                self.post_convert_hook(
+                    assignment=self.coursedir.assignment_id,
+                    student=self.coursedir.student_id,
+                    notebooks=self.notebooks)
+            except Exception:
+                self.log.info('Post-convert hook failed', exc_info=True)

@@ -67,7 +67,7 @@ class GenerateAssignment(BaseConverter):
         ClearMarkScheme,
         ComputeChecksums,
         CheckCellMetadata,
-    ])
+    ]).tag(config=True)
     # NB: ClearHiddenTests must come after ComputeChecksums and SaveCells.
     # ComputerChecksums must come again after ClearHiddenTests.
 

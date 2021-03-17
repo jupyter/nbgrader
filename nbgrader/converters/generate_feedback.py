@@ -22,7 +22,7 @@ class GenerateFeedback(BaseConverter):
     preprocessors = List([
         GetGrades,
         CSSHTMLHeaderPreprocessor
-    ])
+    ]).tag(config=True)
 
     @default("classes")
     def _classes_default(self):
