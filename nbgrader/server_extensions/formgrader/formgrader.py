@@ -25,13 +25,17 @@ class FormgradeExtension(NbGrader):
 
     def build_extra_config(self):
         extra_config = super(FormgradeExtension, self).build_extra_config()
-        extra_config.HTMLExporter.template_file = 'formgrade'
-        extra_config.HTMLExporter.template_paths.append(handlers.template_path)
+        extra_config.HTMLExporter.template_name = 'formgrade'
+        extra_config.HTMLExporter.template_file = 'formgrade.html.j2'
+        extra_config.HTMLExporter.extra_template_basedirs.append(handlers.template_path)
         return extra_config
 
     def init_tornado_settings(self, webapp):
         # Init jinja environment
-        jinja_env = Environment(loader=FileSystemLoader([handlers.template_path]))
+        jinja_env = Environment(loader=FileSystemLoader([
+            os.path.join(handlers.template_path, 'formgrade'),
+            os.path.join(handlers.template_path, 'pages')
+        ]))
 
         course_dir = self.coursedir.root
         notebook_dir = self.parent.notebook_dir
