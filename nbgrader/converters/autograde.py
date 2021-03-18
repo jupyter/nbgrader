@@ -7,7 +7,7 @@ from traitlets import Bool, List, Dict
 from .base import BaseConverter, NbGraderException
 from ..preprocessors import (
     AssignLatePenalties, ClearOutput, DeduplicateIds, OverwriteCells, SaveAutoGrades,
-    Execute, LimitOutput, OverwriteKernelspec, CheckCellMetadata)
+    Execute, LimitOutput, OverwriteKernelspec, CheckCellMetadata, RemoveExecutionInfo)
 from ..api import Gradebook, MissingEntry
 from .. import utils
 
@@ -59,6 +59,7 @@ class Autograde(BaseConverter):
     ]).tag(config=True)
     autograde_preprocessors = List([
         Execute,
+        RemoveExecutionInfo,
         LimitOutput,
         SaveAutoGrades,
         AssignLatePenalties,
