@@ -9,6 +9,8 @@ Gradebook
 
     .. automethod:: close
 
+    .. automethod:: check_course
+
     .. autoattribute:: students
 
     .. automethod:: add_student
@@ -110,5 +112,7 @@ Gradebook
     .. automethod:: average_notebook_task_score
 
     .. automethod:: student_dicts
+
+    .. automethod:: submission_dicts
 
     .. automethod:: notebook_submission_dicts

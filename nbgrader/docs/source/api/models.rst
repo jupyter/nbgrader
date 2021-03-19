@@ -41,6 +41,10 @@ Master version of an assignment
 
     .. autoattribute:: duedate
 
+    .. autoattribute:: course_id
+
+    .. autoattribute:: course
+
     .. autoattribute:: notebooks
 
     .. autoattribute:: submissions
@@ -66,9 +70,13 @@ Master version of an assignment
 
     .. autoattribute:: assignment_id
 
+    .. autoattribute:: kernelspec
+
     .. autoattribute:: grade_cells
 
     .. autoattribute:: solution_cells
+
+    .. autoattribute:: task_cells
 
     .. autoattribute:: source_cells
 
@@ -84,8 +92,6 @@ Master version of an assignment
 
     .. autoattribute:: needs_manual_grade
 
-    .. autoattribute:: kernelspec
-
     .. automethod:: to_dict
 
 
@@ -95,11 +101,6 @@ Master version of an assignment
 
     .. autoattribute:: cell_type
 
-    .. autoattribute:: grades 
-
-.. autoclass:: CommentedMixin
-
-    .. autoattribute:: comments
 
 .. autoclass:: BaseCell
 
@@ -119,11 +120,26 @@ Master version of an assignment
 
     .. autoattribute:: id
 
+    .. autoattribute:: grades 
+
     .. automethod:: to_dict
 
 .. autoclass:: SolutionCell
 
     .. autoattribute:: id
+
+    .. autoattribute:: comments 
+
+    .. automethod:: to_dict
+
+.. autoclass:: TaskCell
+    :show-inheritance:
+    
+    .. autoattribute:: id
+
+    .. autoattribute:: grades 
+
+    .. autoattribute:: comments 
 
     .. automethod:: to_dict
 
@@ -135,6 +151,8 @@ Master version of an assignment
 
     .. autoattribute:: cell_type
 
+    .. autoattribute:: locked
+
     .. autoattribute:: source
 
     .. autoattribute:: checksum
@@ -145,13 +163,6 @@ Master version of an assignment
     .. autoattribute:: notebook_id
 
     .. autoattribute:: assignment
-
-    .. automethod:: to_dict
-
-.. autoclass:: TaskCell
-    :show-inheritance:
-    
-    .. autoattribute:: id
 
     .. automethod:: to_dict
 
@@ -197,6 +208,8 @@ Submitted assignments
     .. autoattribute:: max_written_score
 
     .. autoattribute:: needs_manual_grade
+
+    .. autoattribute:: late_submission_penalty
 
     .. automethod:: to_dict
 
@@ -307,3 +320,9 @@ Submitted assignments
     .. autoattribute:: comment
 
     .. automethod:: to_dict
+
+.. autoclass:: Course
+
+    .. autoattribute:: id
+
+    .. autoattribute:: assignments
