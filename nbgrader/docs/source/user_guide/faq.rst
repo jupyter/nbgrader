@@ -197,3 +197,11 @@ Can tests be only temporarily hidden, so that students can reveal them?
 No, the tests are either present in the student version of the notebook or they
 are not. However, there exist extensions such as
 https://github.com/kirbs-/hide_code which can assist in hiding code cells.
+
+Can I modify the notebook behavior during autograding or validation?
+--------------------------------------------------------------------
+
+Yes, when running the autograder or validator, nbgrader sets the ``NBGRADER_EXECUTION``
+environment variable, either to ``'autograde'`` or ``'validate'``. You can check whether
+this variable is set and then modify the logic in the notebook accordingly. For example,
+you could use this to skip executing some cells during autograding only.
