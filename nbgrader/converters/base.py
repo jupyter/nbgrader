@@ -31,7 +31,7 @@ class BaseConverter(LoggingConfigurable):
     assignments = Dict({})
     writer = Instance(FilesWriter)
     exporter = Instance(Exporter)
-    exporter_class = Type(NotebookExporter, klass=Exporter)
+    exporter_class = Type(NotebookExporter, klass=Exporter).tag(config=True)
     preprocessors = List([])
 
     force = Bool(False, help="Whether to overwrite existing assignments/submissions").tag(config=True)
