@@ -188,6 +188,7 @@ class Autograde(BaseConverter):
         self._sanitizing = False
         self._init_preprocessors()
         try:
-            super(Autograde, self).convert_single_notebook(notebook_filename)
+            with utils.setenv(NBGRADER_EXECUTION='autograde'):
+                super(Autograde, self).convert_single_notebook(notebook_filename)
         finally:
             self._sanitizing = True

@@ -1050,3 +1050,21 @@ class TestNbGraderAutograde(BaseTestApp):
             nb1, nb2 = submission.notebooks
             assert not nb2.needs_manual_grade
             assert nb2.score == 0
+
+    def test_grade_with_validating_envvar(self, db, course_dir):
+        run_nbgrader(["db", "assignment", "add", "ps1", "--db", db, "--duedate",
+                      "2015-02-02 14:58:23.948203 America/Los_Angeles"])
+        run_nbgrader(["db", "student", "add", "foo", "--db", db])
+
+        self._copy_file(join("files", "validating-environment-variable.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
+        run_nbgrader(["generate_assignment", "ps1", "--db", db])
+
+        self._copy_file(join("files", "validating-environment-variable.ipynb"), join(course_dir, "submitted", "foo", "ps1", "p1.ipynb"))
+        run_nbgrader(["autograde", "ps1", "--db", db])
+
+        assert os.path.isfile(join(course_dir, "autograded", "foo", "ps1", "p1.ipynb"))
+
+        with Gradebook(db) as gb:
+            submission = gb.find_submission("ps1", "foo")
+            nb1, = submission.notebooks
+            assert nb1.score == 0

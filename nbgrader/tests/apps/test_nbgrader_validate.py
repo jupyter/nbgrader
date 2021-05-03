@@ -121,3 +121,9 @@ class TestNbGraderValidate(BaseTestApp):
         run_nbgrader(["validate", "nb1.ipynb", "nb2.ipynb"])
         run_nbgrader(["validate", "nb1.ipynb", "nb2.ipynb", "nb3.ipynb"])
         run_nbgrader(["validate"], retcode=1)
+
+    def test_validate_with_validating_envvar(self, db, course_dir):
+        self._copy_file(join("files", "validating-environment-variable.ipynb"), "nb1.ipynb")
+        output = run_nbgrader(["validate", "nb1.ipynb"], stdout=True)
+        assert output.splitlines()[0] == "VALIDATION FAILED ON 1 CELL(S)! If you submit your assignment as it is, you WILL NOT"
+
