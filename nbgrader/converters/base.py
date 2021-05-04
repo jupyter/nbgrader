@@ -8,7 +8,7 @@ import traceback
 from rapidfuzz import fuzz
 from traitlets.config import LoggingConfigurable, Config
 from traitlets import Bool, List, Dict, Integer, Instance, Type, Any
-from traitlets import default
+from traitlets import default, validate
 from textwrap import dedent
 from nbconvert.exporters import Exporter, NotebookExporter
 from nbconvert.writers import FilesWriter
@@ -19,6 +19,8 @@ from ..preprocessors.execute import UnresponsiveKernelError
 from ..nbgraderformat import SchemaTooOldError, SchemaTooNewError
 import typing
 from nbconvert.exporters.exporter import ResourcesDict
+from ipython_genutils.importstring import import_item
+from ipython_genutils.py3compat import string_types
 
 
 class NbGraderException(Exception):
@@ -84,6 +86,24 @@ class BaseConverter(LoggingConfigurable):
     @default("permissions")
     def _permissions_default(self) -> int:
         return 664 if self.coursedir.groupshared else 444
+
+    @validate('pre_convert_hook')
+    def _validate_pre_convert_hook(self, proposal):
+        value = proposal['value']
+        if isinstance(value, string_types):
+            value = import_item(self.pre_convert_hook)
+        if not callable(value):
+            raise TraitError("pre_convert_hook must be callable")
+        return value
+
+    @validate('post_convert_hook')
+    def _validate_post_convert_hook(self, proposal):
+        value = proposal['value']
+        if isinstance(value, string_types):
+            value = import_item(self.post_convert_hook)
+        if not callable(value):
+            raise TraitError("post_convert_hook must be callable")
+        return value
 
     coursedir = Instance(CourseDirectory, allow_none=True)
 
