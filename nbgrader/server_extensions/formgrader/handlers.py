@@ -14,7 +14,7 @@ class ManageAssignmentsHandler(BaseHandler):
     @check_notebook_dir
     def get(self):
         html = self.render(
-            "manage_assignments.tpl",
+            "manage_assignments.html.j2",
             url_prefix=self.url_prefix,
             base_url=self.base_url,
             windows=(sys.prefix == 'win32'),
@@ -30,7 +30,7 @@ class ManageSubmissionsHandler(BaseHandler):
     @check_notebook_dir
     def get(self, assignment_id):
         html = self.render(
-            "manage_submissions.tpl",
+            "manage_submissions.html.j2",
             course_dir=self.coursedir.root,
             assignment_id=assignment_id,
             base_url=self.base_url)
@@ -43,7 +43,7 @@ class GradebookAssignmentsHandler(BaseHandler):
     @check_notebook_dir
     def get(self):
         html = self.render(
-            "gradebook_assignments.tpl",
+            "gradebook_assignments.html.j2",
             base_url=self.base_url)
         self.write(html)
 
@@ -54,7 +54,7 @@ class GradebookNotebooksHandler(BaseHandler):
     @check_notebook_dir
     def get(self, assignment_id):
         html = self.render(
-            "gradebook_notebooks.tpl",
+            "gradebook_notebooks.html.j2",
             assignment_id=assignment_id,
             base_url=self.base_url)
         self.write(html)
@@ -66,7 +66,7 @@ class GradebookNotebookSubmissionsHandler(BaseHandler):
     @check_notebook_dir
     def get(self, assignment_id, notebook_id):
         html = self.render(
-            "gradebook_notebook_submissions.tpl",
+            "gradebook_notebook_submissions.html.j2",
             assignment_id=assignment_id,
             notebook_id=notebook_id,
             base_url=self.base_url
@@ -116,7 +116,7 @@ class SubmissionHandler(BaseHandler):
 
         if not os.path.exists(filename):
             resources['filename'] = filename
-            html = self.render('formgrade_404.tpl', resources=resources)
+            html = self.render('formgrade_404.html.j2', resources=resources)
             self.clear()
             self.set_status(404)
             self.write(html)
@@ -235,7 +235,7 @@ class ManageStudentsHandler(BaseHandler):
     @check_notebook_dir
     def get(self):
         html = self.render(
-            "manage_students.tpl",
+            "manage_students.html.j2",
             base_url=self.base_url)
         self.write(html)
 
@@ -246,7 +246,7 @@ class ManageStudentsAssignmentsHandler(BaseHandler):
     @check_notebook_dir
     def get(self, student_id):
         html = self.render(
-            "manage_students_assignments.tpl",
+            "manage_students_assignments.html.j2",
             student_id=student_id,
             base_url=self.base_url)
 
@@ -259,7 +259,7 @@ class ManageStudentNotebookSubmissionsHandler(BaseHandler):
     @check_notebook_dir
     def get(self, student_id, assignment_id):
         html = self.render(
-            "manage_students_notebook_submissions.tpl",
+            "manage_students_notebook_submissions.html.j2",
             assignment_id=assignment_id,
             student_id=student_id,
             base_url=self.base_url
