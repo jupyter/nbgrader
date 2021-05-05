@@ -30,18 +30,14 @@ jobs:
       matrix:
         os: [windows-latest, ubuntu-20.04]
         group: ["docs", "nbextensions", "python"]
-        python: ["3.6", "3.7", "3.8", "3.9"]
+        python: ["3.7", "3.8", "3.9"]
         exclude:
           - os: windows-latest
-            group: docs
-          - python: "3.6"
             group: docs
           - python: "3.7"
             group: docs
           - python: "3.8"
             group: docs
-          - python: "3.6"
-            group: nbextensions
           - python: "3.7"
             group: nbextensions
     steps:
