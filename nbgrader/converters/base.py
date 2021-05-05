@@ -4,6 +4,7 @@ import re
 import shutil
 import sqlalchemy
 import traceback
+import importlib
 
 from rapidfuzz import fuzz
 from traitlets.config import LoggingConfigurable, Config
@@ -19,8 +20,6 @@ from ..preprocessors.execute import UnresponsiveKernelError
 from ..nbgraderformat import SchemaTooOldError, SchemaTooNewError
 import typing
 from nbconvert.exporters.exporter import ResourcesDict
-from ipython_genutils.importstring import import_item
-from ipython_genutils.py3compat import string_types
 
 
 class NbGraderException(Exception):
@@ -90,8 +89,9 @@ class BaseConverter(LoggingConfigurable):
     @validate('pre_convert_hook')
     def _validate_pre_convert_hook(self, proposal):
         value = proposal['value']
-        if isinstance(value, string_types):
-            value = import_item(self.pre_convert_hook)
+        if isinstance(value, str):
+            module, function = value.rsplit('.', 1)
+            value = getattr(importlib.import_module(module), function)
         if not callable(value):
             raise TraitError("pre_convert_hook must be callable")
         return value
@@ -99,8 +99,9 @@ class BaseConverter(LoggingConfigurable):
     @validate('post_convert_hook')
     def _validate_post_convert_hook(self, proposal):
         value = proposal['value']
-        if isinstance(value, string_types):
-            value = import_item(self.post_convert_hook)
+        if isinstance(value, str):
+            module, function = value.rsplit('.', 1)
+            value = getattr(importlib.import_module(module), function)
         if not callable(value):
             raise TraitError("post_convert_hook must be callable")
         return value
