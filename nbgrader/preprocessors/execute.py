@@ -38,6 +38,11 @@ class Execute(NbGraderPreprocessor, ExecutePreprocessor):
                    resources: ResourcesDict,
                    retries: Optional[Any] = None
                    ) -> Tuple[NotebookNode, ResourcesDict]:
+        # This gets added in by the parent execute preprocessor, so if it's already in our
+        # extra arguments we need to delete it or traitlets will be unhappy.
+        if '--HistoryManager.hist_file=:memory:' in self.extra_arguments:
+            self.extra_arguments.remove('--HistoryManager.hist_file=:memory:')
+
         if retries is None:
             retries = self.execute_retries
 
