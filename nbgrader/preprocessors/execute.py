@@ -38,10 +38,6 @@ class Execute(NbGraderPreprocessor, ExecutePreprocessor):
                    resources: ResourcesDict,
                    retries: Optional[Any] = None
                    ) -> Tuple[NotebookNode, ResourcesDict]:
-        kernel_name = nb.metadata.get('kernelspec', {}).get('name', 'python')
-        if self.extra_arguments == [] and kernel_name == "python":
-            self.extra_arguments = ["--HistoryManager.hist_file=:memory:"]
-
         if retries is None:
             retries = self.execute_retries
 
