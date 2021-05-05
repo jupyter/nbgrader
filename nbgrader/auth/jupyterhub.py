@@ -158,7 +158,7 @@ class JupyterHubAuthPlugin(BaseAuthPlugin):
 
         except JupyterhubApiError as e:
             self.log.error(
-                "Student {student} was NOT removed from the Jupyterhub group {group_name}:".format(
-                    student=student_id, group_name=group_name), str(e))
+                "Student {student} was NOT removed from the Jupyterhub group {group_name}: {err}".format(
+                    student=student_id, group_name=group_name, err=str(e)))
             self.log.error(
                 "Make sure you start your service with a valid admin_user 'api_token' in your Jupyterhub config")
