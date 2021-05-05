@@ -6,6 +6,7 @@ import traceback
 
 from tornado import web
 from textwrap import dedent
+from pathlib import Path
 
 from notebook.utils import url_path_join as ujoin
 from notebook.base.handlers import IPythonHandler
@@ -38,8 +39,10 @@ class ValidateAssignmentHandler(IPythonHandler):
         return app.config
 
     def validate_notebook(self, path):
-        fullpath = os.path.join(self.notebook_dir, path)
-
+        #fullpath = os.path.join(self.notebook_dir, path)
+        notebook_dir = Path(self.notebook_dir).resolve()
+        rel_path = Path(path).relative_to('/')
+        fullpath = notebook_dir / rel_path
         try:
             config = self.load_config()
             validator = Validator(config=config)
