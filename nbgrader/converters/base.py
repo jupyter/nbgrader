@@ -4,11 +4,12 @@ import re
 import shutil
 import sqlalchemy
 import traceback
+import importlib
 
 from rapidfuzz import fuzz
 from traitlets.config import LoggingConfigurable, Config
 from traitlets import Bool, List, Dict, Integer, Instance, Type, Any
-from traitlets import default
+from traitlets import default, validate
 from textwrap import dedent
 from nbconvert.exporters import Exporter, NotebookExporter
 from nbconvert.writers import FilesWriter
@@ -84,6 +85,26 @@ class BaseConverter(LoggingConfigurable):
     @default("permissions")
     def _permissions_default(self) -> int:
         return 664 if self.coursedir.groupshared else 444
+
+    @validate('pre_convert_hook')
+    def _validate_pre_convert_hook(self, proposal):
+        value = proposal['value']
+        if isinstance(value, str):
+            module, function = value.rsplit('.', 1)
+            value = getattr(importlib.import_module(module), function)
+        if not callable(value):
+            raise TraitError("pre_convert_hook must be callable")
+        return value
+
+    @validate('post_convert_hook')
+    def _validate_post_convert_hook(self, proposal):
+        value = proposal['value']
+        if isinstance(value, str):
+            module, function = value.rsplit('.', 1)
+            value = getattr(importlib.import_module(module), function)
+        if not callable(value):
+            raise TraitError("post_convert_hook must be callable")
+        return value
 
     coursedir = Instance(CourseDirectory, allow_none=True)
 
