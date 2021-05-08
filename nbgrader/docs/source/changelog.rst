@@ -13,7 +13,9 @@ A summary of changes to nbgrader.
 
 nbgrader version 0.6.2 is a bugfix release. The following PRs were merged:
 
+- PR #1443: Fix broken windows tests
 - PR #1410: partial credit returns zero when score is zero
+- PR #1388: Move from travis ci to github actions
 - PR #1384: Fix migrations.
 - PR #1369: Pin nbconvert to 5.6.1, traitlets to 4.3.3 and pytest to <6.0.0
 - PR #1362: Fix migration, grade cells were looking for a non-existing column
@@ -45,7 +47,6 @@ Thanks to the following users who submitted PRs or reported issues that were mer
 - Patil2099
 - rkdarst
 - tmetzl
-- willingc
 
 0.6.1
 ~~~~~

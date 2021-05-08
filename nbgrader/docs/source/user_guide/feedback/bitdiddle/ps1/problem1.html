@@ -12943,8 +12943,13 @@ ul.typeahead-list  > li > a.pull-right {
 /*# sourceMappingURL=style.min.css.map */
     </style>
 <style type="text/css">
-    .highlight .hll { background-color: #ffffcc }
-.highlight  { background: #f8f8f8; }
+    pre { line-height: 125%; }
+td.linenos .normal { color: inherit; background-color: transparent; padding-left: 5px; padding-right: 5px; }
+span.linenos { color: inherit; background-color: transparent; padding-left: 5px; padding-right: 5px; }
+td.linenos .special { color: #000000; background-color: #ffffc0; padding-left: 5px; padding-right: 5px; }
+span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 5px; padding-right: 5px; }
+.highlight .hll { background-color: #ffffcc }
+.highlight { background: #f8f8f8; }
 .highlight .c { color: #408080; font-style: italic } /* Comment */
 .highlight .err { border: 1px solid #FF0000 } /* Error */
 .highlight .k { color: #008000; font-weight: bold } /* Keyword */
@@ -13380,7 +13385,7 @@ span.nbgrader-label {
 <pre>
 <span class="ansi-red-fg">---------------------------------------------------------------------------</span>
 <span class="ansi-red-fg">AssertionError</span>                            Traceback (most recent call last)
-<span class="ansi-green-fg">&lt;ipython-input-4-f3fef5b9ed4e&gt;</span> in <span class="ansi-cyan-fg">&lt;module&gt;</span><span class="ansi-blue-fg">()</span>
+<span class="ansi-green-fg">&lt;ipython-input-4-f3fef5b9ed4e&gt;</span> in <span class="ansi-cyan-fg">&lt;module&gt;</span>
 <span class="ansi-green-intense-fg ansi-bold">      1</span> <span class="ansi-blue-fg">&#34;&#34;&#34;Check that squares returns the correct output for several inputs&#34;&#34;&#34;</span>
 <span class="ansi-green-fg">----&gt; 2</span><span class="ansi-red-fg"> </span><span class="ansi-green-fg">assert</span> squares<span class="ansi-blue-fg">(</span><span class="ansi-cyan-fg">1</span><span class="ansi-blue-fg">)</span> <span class="ansi-blue-fg">==</span> <span class="ansi-blue-fg">[</span><span class="ansi-cyan-fg">1</span><span class="ansi-blue-fg">]</span>
 <span class="ansi-green-intense-fg ansi-bold">      3</span> <span class="ansi-green-fg">assert</span> squares<span class="ansi-blue-fg">(</span><span class="ansi-cyan-fg">2</span><span class="ansi-blue-fg">)</span> <span class="ansi-blue-fg">==</span> <span class="ansi-blue-fg">[</span><span class="ansi-cyan-fg">1</span><span class="ansi-blue-fg">,</span> <span class="ansi-cyan-fg">4</span><span class="ansi-blue-fg">]</span>
@@ -13500,7 +13505,7 @@ span.nbgrader-label {
 </div>
 
 </div>
-<div class="cell border-box-sizing code_cell rendered">
+<div class="cell border-box-sizing code_cell rendered celltag_raises-exception">
 <div class="input">
 <div class="prompt input_prompt">In&nbsp;[8]:</div><div class="panel panel-primary nbgrader_cell">
     <a name="correct_sum_of_squares"></a><div class="panel-heading"><span class="nbgrader-label">Grade cell: <code>correct_sum_of_squares</code></span>
@@ -13535,7 +13540,7 @@ span.nbgrader-label {
 <pre>
 <span class="ansi-red-fg">---------------------------------------------------------------------------</span>
 <span class="ansi-red-fg">AssertionError</span>                            Traceback (most recent call last)
-<span class="ansi-green-fg">&lt;ipython-input-8-1a00eaa7c988&gt;</span> in <span class="ansi-cyan-fg">&lt;module&gt;</span><span class="ansi-blue-fg">()</span>
+<span class="ansi-green-fg">&lt;ipython-input-8-1a00eaa7c988&gt;</span> in <span class="ansi-cyan-fg">&lt;module&gt;</span>
 <span class="ansi-green-intense-fg ansi-bold">      1</span> <span class="ansi-blue-fg">&#34;&#34;&#34;Check that sum_of_squares returns the correct answer for various inputs.&#34;&#34;&#34;</span>
 <span class="ansi-green-fg">----&gt; 2</span><span class="ansi-red-fg"> </span><span class="ansi-green-fg">assert</span> sum_of_squares<span class="ansi-blue-fg">(</span><span class="ansi-cyan-fg">1</span><span class="ansi-blue-fg">)</span> <span class="ansi-blue-fg">==</span> <span class="ansi-cyan-fg">1</span>
 <span class="ansi-green-intense-fg ansi-bold">      3</span> <span class="ansi-green-fg">assert</span> sum_of_squares<span class="ansi-blue-fg">(</span><span class="ansi-cyan-fg">2</span><span class="ansi-blue-fg">)</span> <span class="ansi-blue-fg">==</span> <span class="ansi-cyan-fg">5</span>
@@ -13614,7 +13619,7 @@ span.nbgrader-label {
     </div>
   </div></div>
 
-<div class="cell border-box-sizing code_cell rendered">
+<div class="cell border-box-sizing code_cell rendered celltag_raises-exception">
 <div class="input">
 <div class="prompt input_prompt">In&nbsp;[10]:</div><div class="panel panel-primary nbgrader_cell">
     <a name="comment-sum_of_squares_application"></a><a name="sum_of_squares_application"></a><div class="panel-heading"><span class="nbgrader-label">Student's answer</span><span class="pull-right">
@@ -13650,7 +13655,7 @@ span.nbgrader-label {
 <pre>
 <span class="ansi-red-fg">---------------------------------------------------------------------------</span>
 <span class="ansi-red-fg">NotImplementedError</span>                       Traceback (most recent call last)
-<span class="ansi-green-fg">&lt;ipython-input-10-15b94d1fa268&gt;</span> in <span class="ansi-cyan-fg">&lt;module&gt;</span><span class="ansi-blue-fg">()</span>
+<span class="ansi-green-fg">&lt;ipython-input-10-15b94d1fa268&gt;</span> in <span class="ansi-cyan-fg">&lt;module&gt;</span>
 <span class="ansi-green-intense-fg ansi-bold">      1</span> <span class="ansi-red-fg"># YOUR CODE HERE</span>
 <span class="ansi-green-fg">----&gt; 2</span><span class="ansi-red-fg"> </span><span class="ansi-green-fg">raise</span> NotImplementedError<span class="ansi-blue-fg">(</span><span class="ansi-blue-fg">)</span>
 
