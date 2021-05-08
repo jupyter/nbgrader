@@ -8,6 +8,78 @@ A summary of changes to nbgrader.
 0.6.x
 -----
 
+0.6.2
+~~~~~
+
+nbgrader version 0.6.2 is a bugfix release. The following PRs were merged:
+
+- PR #1443: Fix broken windows tests
+- PR #1410: partial credit returns zero when score is zero
+- PR #1388: Move from travis ci to github actions
+- PR #1384: Fix migrations.
+- PR #1369: Pin nbconvert to 5.6.1, traitlets to 4.3.3 and pytest to <6.0.0
+- PR #1362: Fix migration, grade cells were looking for a non-existing column
+- PR #1356: add SAS codestub and autograde for metakernel based non-python kernels
+- PR #1352: Description of "what is nbgrader?"
+- PR #1343: Update deprecated jquery functions and update jquery
+- PR #1341: Make format_path behave the same for absolute paths
+- PR #1319: use rapidfuzz instead of fuzzywuzzy
+- PR #1308: docs: Fix formgrader group name in docs
+- PR #1288: Fixes #1283: Replace AppVeyor badge with Azure Devops badge
+- PR #1281: Demos using Python3
+- PR #1249: timestamp_format raises an exception
+
+Thanks to the following users who submitted PRs or reported issues that were merged or fixed for the 0.6.1 release:
+
+- BertR
+- chinery
+- echuber2
+- enisnazif
+- fredcallaway
+- HanTeo
+- jgwerner
+- jhamrick
+- jld23
+- kcranston
+- lzach
+- maxbachmann
+- nklever
+- Patil2099
+- rkdarst
+- tmetzl
+
+0.6.1
+~~~~~
+
+nbgrader version 0.6.1 is a bugfix release. The following PRs were merged:
+
+- PR #1280: Fix inappropriate use of sum with newer sqlite
+- PR #1278: Fix course list hanging when exchange has not been created
+- PR #1272: Improve test coverage in auth folder
+- PR #1270: Add requirements for readthedocs
+- PR #1267: Improve the error message on the assignments page
+- PR #1260: Set up CI with Azure Pipelines
+- PR #1245: Move away from using the internal Traitles API to load default configuration.
+- PR #1243: Fix project name typo
+- PR #1228: Fix formgrader API
+- PR #1227: Bump pytest required version to 4.5 for custom marker support
+- PR #1208: Improve coverage of nbgraderformat
+- PR #1205: Check for newer feedback in nbgrader list
+- PR #1204: Force generate feedback by default in API
+- PR #1200: Associate feedback files with unique submission attempts
+- PR #1197: Do not duplicate assignments when fetching feedback
+- PR #1196: Fix config warning in ExchangeReleaseAssignment
+- PR #1194: Update releasing instructions
+
+Thanks to the following users who submitted PRs or reported issues that were merged or fixed for the 0.6.1 release:
+
+- BertR
+- enisnazif
+- jhamrick
+- kinow
+- nthiery
+- sir-dio
+
 0.6.0
 ~~~~~
 
