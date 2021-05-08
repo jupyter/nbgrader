@@ -147,6 +147,8 @@ def sanitize_notebook():
                 new_nb = orig_nb.replace(nb_root, '[NB_GRADER_ROOT]')
                 # parses: permissions, links, user, group, size, month, day, time
                 new_nb = re.sub(r'([-drwxs][-rwxs]{9}\.?)\s+(\d+)\s+(\w+)\s+(\w+)\s+(\d+)\s+(\w+)\s+(\d)+\s+(\d\d:\d\d)', r'\1 1 nb_user nb_group [size] [date] [time]', new_nb)
+                # parses: permissions, links, user, group, size, day, month, time
+                new_nb = re.sub(r'([-drwxs][-rwxs]{9}\.?)\s+(\d+)\s+(\w+)\s+(\w+)\s+(\d+)\s+(\w+)\s+(\w+)\s+(\d\d:\d\d)', r'\1 1 nb_user nb_group [size] [date] [time]', new_nb)
                 # parses: permissions, links, user, group, size, month, day, year
                 new_nb = re.sub(r'([-drwxs][-rwxs]{9}\.?)\s+(\d+)\s+(\w+)\s+(\w+)\s+(\d+)\s+(\w+)\s+(\d)+\s+(\d+)', r'\1 1 nb_user nb_group [size] [date] [time]', new_nb)
                 new_nb = re.sub(r'"total \d+\\n"', r'"total ##\\n"', new_nb)
