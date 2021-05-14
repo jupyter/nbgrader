@@ -54,10 +54,6 @@ flags.update({
 })
 
 
-# See https://bugs.python.org/issue37373 :(
-# Workaround from https://github.com/jupyter/nbconvert/issues/1372
-if sys.version_info[0] == 3 and sys.version_info[1] >= 8 and sys.platform.startswith('win'):
-    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
 
 class NbGraderApp(NbGrader):
@@ -317,6 +313,11 @@ class NbGraderApp(NbGrader):
 
     @catch_config_error
     def initialize(self, argv: List[str] = None) -> None:
+        # See https://bugs.python.org/issue37373 :(
+        # Workaround from https://github.com/jupyter/nbconvert/issues/1372
+        if sys.version_info[0] == 3 and sys.version_info[1] >= 8 and sys.platform.startswith('win'):
+            asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
         super(NbGraderApp, self).initialize(argv)
 
     def start(self) -> None:
