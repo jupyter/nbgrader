@@ -160,7 +160,7 @@ The test code for this can be written as
         foo()
     mock_print.assert_called_once_with('right_result')
 
-This test passes silently if the print is correct, but of the print is wrong 
+This test passes silently if the print is correct, but if the print is wrong:
 
 .. code:: python
 
@@ -181,7 +181,7 @@ an assertion error is raised with output of the form
 
 Example
 ^^^^^^^
-Problem: verify that the students has implemented a `min` function without using the built-in function.
+Problem: verify that the students have implemented a `min` function without using the built-in function.
 That is, you expect the student to write a solution like
 
 .. code:: python
@@ -294,3 +294,7 @@ variable names:
     # this test will fail because it uses a new input AND a new variable name
     arr2 = np.array([3, 2])
     np.assert_array_equal(f(arr2), np.array([6, 4]))
+
+One solution is to quietly reset the notebook environment using [`%reset -f`](https://ipython.readthedocs.io/en/stable/interactive/magics.html?highlight=magic#magic-reset) magic function. Note that this wipes out all variables, function definitions, and loaded libraries, but should leave downloaded libraries in local environment. This is useful if the test functions in a single notebook are completely independent of one another. 
+
+Alternatively, if you suspect a particular variable name be re-used in between tests, consider deleting these variables before running the tests.
