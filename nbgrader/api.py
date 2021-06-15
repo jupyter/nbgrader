@@ -1931,6 +1931,7 @@ class Gradebook(object):
         except (IntegrityError, FlushError, StatementError) as e:
             self.db.rollback()
             raise InvalidEntry(*e.args)
+
         return solution_cell
 
     def find_solution_cell(self, name: str, notebook: str, assignment: str) -> SolutionCell:
@@ -1998,6 +1999,7 @@ class Gradebook(object):
             try:
                 self.db.commit()
             except (IntegrityError, FlushError, StatementError) as e:
+                self.db.rollback()
                 raise InvalidEntry(*e.args)
 
         return solution_cell
@@ -2033,6 +2035,7 @@ class Gradebook(object):
         except (IntegrityError, FlushError, StatementError) as e:
             self.db.rollback()
             raise InvalidEntry(*e.args)
+
         return task_cell
 
     def find_task_cell(self, name, notebook, assignment):
@@ -2095,6 +2098,7 @@ class Gradebook(object):
             try:
                 self.db.commit()
             except (IntegrityError, FlushError, StatementError) as e:
+                self.db.rollback()
                 raise InvalidEntry(*e.args)
 
         return task_cell
@@ -2130,6 +2134,7 @@ class Gradebook(object):
         except (IntegrityError, FlushError, StatementError) as e:
             self.db.rollback()
             raise InvalidEntry(*e.args)
+
         return source_cell
 
     def find_source_cell(self, name: str, notebook: str, assignment: str) -> SourceCell:
@@ -2192,6 +2197,7 @@ class Gradebook(object):
             try:
                 self.db.commit()
             except (IntegrityError, FlushError, StatementError) as e:
+                self.db.rollback()
                 raise InvalidEntry(*e.args)
 
         return source_cell
