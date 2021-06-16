@@ -1066,9 +1066,10 @@ class NbGraderAPI(LoggingConfigurable):
         """
         # Because we may be using HTMLExporter.template_file in other
         # parts of the the UI, we need to make sure that the template
-        # is explicitply 'feedback.tpl` here:
+        # is explicitly 'feedback.html.j2` here:
         c = Config()
-        c.HTMLExporter.template_file = 'feedback.tpl'
+        c.HTMLExporter.template_name = 'feedback'
+        c.HTMLExporter.template_file = 'feedback.html.j2'
         if student_id is not None:
             with temp_attrs(self.coursedir,
                             assignment_id=assignment_id,
