@@ -17,6 +17,9 @@ from sqlalchemy.exc import IntegrityError, StatementError
 from sqlalchemy.sql import and_, or_
 from sqlalchemy import select, func, exists, case, literal_column, union_all
 from sqlalchemy.ext.declarative import declared_attr
+
+from tornado.log import app_log
+
 from uuid import uuid4
 from .dbutil import _temp_alembic_ini
 from typing import List, Any, Optional, Union
@@ -1387,6 +1390,7 @@ class Gradebook(object):
         try:
             self.db.commit()
         except (IntegrityError, FlushError, StatementError) as e:
+            app_log.exception("Rolling back session due to database error %s" % e)
             self.db.rollback()
             raise InvalidEntry(*e.args)
         return course
@@ -1423,6 +1427,7 @@ class Gradebook(object):
         try:
             self.db.commit()
         except (IntegrityError, FlushError, StatementError) as e:
+            app_log.exception("Rolling back session due to database error %s" % e)
             self.db.rollback()
             raise InvalidEntry(*e.args)
 
@@ -1483,6 +1488,7 @@ class Gradebook(object):
             try:
                 self.db.commit()
             except (IntegrityError, FlushError, StatementError) as e:
+                app_log.exception("Rolling back session due to database error %s" % e)
                 self.db.rollback()
                 raise InvalidEntry(*e.args)
 
@@ -1512,6 +1518,7 @@ class Gradebook(object):
         try:
             self.db.commit()
         except (IntegrityError, FlushError, StatementError) as e:
+            app_log.exception("Rolling back session due to database error %s" % e)
             self.db.rollback()
             raise InvalidEntry(*e.args)
 
@@ -1548,6 +1555,7 @@ class Gradebook(object):
         try:
             self.db.commit()
         except (IntegrityError, FlushError, StatementError) as e:
+            app_log.exception("Rolling back session due to database error %s" % e)
             self.db.rollback()
             raise InvalidEntry(*e.args)
         return assignment
@@ -1604,6 +1612,7 @@ class Gradebook(object):
             try:
                 self.db.commit()
             except (IntegrityError, FlushError, StatementError) as e:
+                app_log.exception("Rolling back session due to database error %s" % e)
                 self.db.rollback()
                 raise InvalidEntry(*e.args)
 
@@ -1632,6 +1641,7 @@ class Gradebook(object):
         try:
             self.db.commit()
         except (IntegrityError, FlushError, StatementError) as e:
+            app_log.exception("Rolling back session due to database error %s" % e)
             self.db.rollback()
             raise InvalidEntry(*e.args)
 
@@ -1661,6 +1671,7 @@ class Gradebook(object):
         try:
             self.db.commit()
         except (IntegrityError, FlushError, StatementError) as e:
+            app_log.exception("Rolling back session due to database error %s" % e)
             self.db.rollback()
             raise InvalidEntry(*e.args)
         return notebook
@@ -1719,6 +1730,7 @@ class Gradebook(object):
             try:
                 self.db.commit()
             except (IntegrityError, FlushError, StatementError) as e:
+                app_log.exception("Rolling back session due to database error %s" % e)
                 self.db.rollback()
                 raise InvalidEntry(*e.args)
 
@@ -1754,6 +1766,7 @@ class Gradebook(object):
         try:
             self.db.commit()
         except (IntegrityError, FlushError, StatementError) as e:
+            app_log.exception("Rolling back session due to database error %s" % e)
             self.db.rollback()
             raise InvalidEntry(*e.args)
 
@@ -1786,6 +1799,7 @@ class Gradebook(object):
         try:
             self.db.commit()
         except (IntegrityError, FlushError, StatementError) as e:
+            app_log.exception("Rolling back session due to database error %s" % e)
             self.db.rollback()
             raise InvalidEntry(*e.args)
         return grade_cell
@@ -1895,6 +1909,7 @@ class Gradebook(object):
             try:
                 self.db.commit()
             except (IntegrityError, FlushError, StatementError) as e:
+                app_log.exception("Rolling back session due to database error %s" % e)
                 self.db.rollback()
                 raise InvalidEntry(*e.args)
 
@@ -1929,6 +1944,7 @@ class Gradebook(object):
         try:
             self.db.commit()
         except (IntegrityError, FlushError, StatementError) as e:
+            app_log.exception("Rolling back session due to database error %s" % e)
             self.db.rollback()
             raise InvalidEntry(*e.args)
 
@@ -1999,6 +2015,7 @@ class Gradebook(object):
             try:
                 self.db.commit()
             except (IntegrityError, FlushError, StatementError) as e:
+                app_log.exception("Rolling back session due to database error %s" % e)
                 self.db.rollback()
                 raise InvalidEntry(*e.args)
 
@@ -2033,6 +2050,7 @@ class Gradebook(object):
         try:
             self.db.commit()
         except (IntegrityError, FlushError, StatementError) as e:
+            app_log.exception("Rolling back session due to database error %s" % e)
             self.db.rollback()
             raise InvalidEntry(*e.args)
 
@@ -2098,6 +2116,7 @@ class Gradebook(object):
             try:
                 self.db.commit()
             except (IntegrityError, FlushError, StatementError) as e:
+                app_log.exception("Rolling back session due to database error %s" % e)
                 self.db.rollback()
                 raise InvalidEntry(*e.args)
 
@@ -2132,6 +2151,7 @@ class Gradebook(object):
         try:
             self.db.commit()
         except (IntegrityError, FlushError, StatementError) as e:
+            app_log.exception("Rolling back session due to database error %s" % e)
             self.db.rollback()
             raise InvalidEntry(*e.args)
 
@@ -2197,6 +2217,7 @@ class Gradebook(object):
             try:
                 self.db.commit()
             except (IntegrityError, FlushError, StatementError) as e:
+                app_log.exception("Rolling back session due to database error %s" % e)
                 self.db.rollback()
                 raise InvalidEntry(*e.args)
 
@@ -2253,6 +2274,7 @@ class Gradebook(object):
             self.db.commit()
 
         except (IntegrityError, FlushError, StatementError) as e:
+            app_log.exception("Rolling back session due to database error %s" % e)
             self.db.rollback()
             raise InvalidEntry(*e.args)
 
@@ -2321,6 +2343,7 @@ class Gradebook(object):
             try:
                 self.db.commit()
             except (IntegrityError, FlushError, StatementError) as e:
+                app_log.exception("Rolling back session due to database error %s" % e)
                 self.db.rollback()
                 raise InvalidEntry(*e.args)
 
@@ -2363,6 +2386,7 @@ class Gradebook(object):
         try:
             self.db.commit()
         except (IntegrityError, FlushError, StatementError) as e:
+            app_log.exception("Rolling back session due to database error %s" % e)
             self.db.rollback()
             raise InvalidEntry(*e.args)
 
@@ -2387,6 +2411,7 @@ class Gradebook(object):
         try:
             self.db.commit()
         except (IntegrityError, FlushError, StatementError) as e:
+            app_log.exception("Rolling back session due to database error %s" % e)
             self.db.rollback()
             raise InvalidEntry(*e.args)
 
@@ -2414,6 +2439,7 @@ class Gradebook(object):
         try:
             self.db.commit()
         except (IntegrityError, FlushError, StatementError) as e:
+            app_log.exception("Rolling back session due to database error %s" % e)
             self.db.rollback()
             raise InvalidEntry(*e.args)
 
