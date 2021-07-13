@@ -12,4 +12,3 @@ codecov
 nbval
 requests-mock
 wheel
-
