@@ -89,7 +89,7 @@ setup_args = dict(
         "python-dateutil==2.8.1",
         "jupyter==1.0.0",
         "notebook==6.4.0",
-        "nbconvert==5.6.1",
+        "nbconvert==6.1.0",
         "nbformat==5.1.3",
         "traitlets==5.0.5",
         "jupyter_core==4.7.1",
