@@ -86,7 +86,7 @@ setup_args = dict(
     },
     install_requires=[
         "sqlalchemy==1.4.21",
-        "python-dateutil==2.8.1",
+        "python-dateutil==2.8.2",
         "jupyter==1.0.0",
         "notebook==6.4.0",
         "nbconvert==5.6.1",
