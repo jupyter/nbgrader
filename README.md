@@ -1,7 +1,6 @@
 # nbgrader
 
-Linux: [![TravisCI](https://travis-ci.org/jupyter/nbgrader.svg?branch=master)](https://travis-ci.org/jupyter/nbgrader)  
-Windows: [![Azure Devops](https://dev.azure.com/jessicabhamrick/nbgrader/_apis/build/status/jupyter.nbgrader?branchName=master)](https://dev.azure.com/jessicabhamrick/nbgrader/_build/latest?definitionId=1&branchName=master)  
+Build: [![Build](https://img.shields.io/github/workflow/status/jupyter/nbgrader/Test?logo=github&label=tests)](https://github.com/jupyter/nbgrader/actions)  
 Forum: [![Google Group](https://img.shields.io/badge/-Google%20Group-lightgrey.svg)](https://groups.google.com/forum/#!forum/jupyter)  
 Coverage: [![codecov.io](http://codecov.io/github/jupyter/nbgrader/coverage.svg?branch=master)](http://codecov.io/github/jupyter/nbgrader?branch=master)  
 Cite: [![DOI](https://jose.theoj.org/papers/10.21105/jose.00032/status.svg)](https://doi.org/10.21105/jose.00032)
