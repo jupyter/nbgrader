@@ -61,7 +61,7 @@ class CourseListHandler(IPythonHandler):
         http_client = AsyncHTTPClient()
         try:
             response = yield http_client.fetch(url, headers=header)
-        except HTTPError:
+        except (HTTPError, ConnectionRefusedError):
             # local formgrader isn't running
             self.log.warning("Local formgrader does not seem to be running")
             raise gen.Return([])
