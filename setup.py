@@ -98,7 +98,7 @@ setup_args = dict(
         "requests==2.26.0",
         "jsonschema==3.2.0",
         "alembic==1.6.5",
-        "rapidfuzz==1.4.1",
+        "rapidfuzz==1.5.1",
     ]
 )
 
