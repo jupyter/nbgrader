@@ -1,8 +1,38 @@
-Interface highlights
-====================
+Highlights
+==========
+
+Broadly speaking, nbgrader implements:
+
+* A **Jupyter notebook format** for assignments, completely normal
+  Jupyter notebooks with metadata to make them useful for teaching.
+
+* A **student interface** as Jupyter interface extensions.
+
+* An **instructor interface** as Jupyter interface extensions.
+
+* A method of exchanging files between instructors and students.
+
+
+Student interface
+-----------------
+
+Student assignment list extension for Jupyter notebooks
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Using the **assignment list extension**, students may conveniently view, fetch,
+submit, and validate their assignments. This is also where they recieve and
+review any feedback on those submissions:
+
+.. image:: images/student_assignment.gif
+   :alt: nbgrader assignment list
+
+
+
+Instructor interface
+--------------------
 
 Instructor toolbar extension for Jupyter notebooks
---------------------------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The **nbgrader toolbar extension** for Jupyter notebooks guides the instructor
 through assignment and grading tasks using the familiar Jupyter notebook
@@ -12,7 +42,7 @@ interface. For example, creating an assignment has the following workflow:
    :alt: Creating assignment
 
 Instructor "formgrader" extension for Jupyter notebooks
--------------------------------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The **formgrader extension** for the Jupyter notebook allows instructors to use
 the core functionality of nbgrader---generating the student version of an
@@ -22,15 +52,6 @@ autograding submissions, and manually grading submissions.
 .. image:: images/formgrader.gif
     :alt: Formgrader extension
 
-Student assignment list extension for Jupyter notebooks
--------------------------------------------------------
-
-Using the **assignment list extension**, students may conveniently view, fetch,
-submit, and validate their assignments. This is also where they recieve and
-review any feedback on those submissions:
-
-.. image:: images/student_assignment.gif
-   :alt: nbgrader assignment list
 
 The command line tools of nbgrader
 ----------------------------------
