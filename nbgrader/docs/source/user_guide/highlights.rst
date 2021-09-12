@@ -3,14 +3,72 @@ Highlights
 
 Broadly speaking, nbgrader implements:
 
-* A **Jupyter notebook format** for assignments, completely normal
+* A **Jupyter notebook format** for assignments: completely normal
   Jupyter notebooks with metadata to make them useful for teaching.
 
-* A **student interface** as Jupyter interface extensions.
+* **Student interface** as Jupyter extensions.
 
-* An **instructor interface** as Jupyter interface extensions.
+* **Instructor interface** as Jupyter extensions.
 
 * A method of exchanging files between instructors and students.
+
+Notebook format
+---------------
+
+Nbgrader actually doesn't have its own notebook format: it is
+completely standard Jupyter, so you don't have to learn anything new
+or need to put code into a teaching-only format.  Let's look at an
+example of an instructor's notebook:
+
+.. code:: python
+
+   # Cell 1, cell metadata=autograded-answer
+   def add(a, b):
+       ### BEGIN SOLUTION
+       c = a + b
+       ### END SOLUTION
+       return c
+
+.. code:: python
+
+   # Cell 2, cell metadata=autograder-tests
+   assert add(1, 2) == 3
+   ### BEGIN HIDDEN TESTS
+   assert add(-1, 2) == 1
+   ### END HIDDEN TESTS
+
+We see that this is a perfectly normal notebook, with cell metadata
+tagging cells and some ``###`` markup indicating lines to be
+changed/removed in the student version.  Validating the assignment
+assignment is as simple as running the entire notebook and looking for
+errors.
+
+The student version is generated from the above to get:
+
+.. code:: python
+
+   # Cell 1
+   def add(a, b):
+       # YOUR CODE HERE
+       raise NotImplementedError()
+       return c
+
+.. code:: python
+
+   # Cell 2
+   assert add(1, 2) == 3
+
+We see that this is also a valid notebook, with the assignment parts
+replaced with a placeholder.  The student can attempt to do the
+assignment, and student validation is as simple as "Run all cells" and
+look for errors.
+
+When the instructor receives the assignment back from the students,
+Cell 2 is restored to its initial values (restoring the hidden test
+while leaving the student solution), and autograding is as simple as
+"Run all cells" and look for error output in the autograded-tests
+cells.
+
 
 
 Student interface
