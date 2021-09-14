@@ -39,11 +39,11 @@ example of an instructor's notebook:
 
 We see that this is a perfectly normal notebook, with cell metadata
 tagging cells and some ``###`` markup indicating lines to be
-changed/removed in the student version.  Validating the assignment
+changed/removed in the student version.  Testing the assignment
 assignment is as simple as running the entire notebook and looking for
 errors.
 
-The student version is generated from the above to get:
+The student version is **generated** from the above to get:
 
 .. code:: python
 
@@ -60,14 +60,15 @@ The student version is generated from the above to get:
 
 We see that this is also a valid notebook, with the assignment parts
 replaced with a placeholder.  The student can attempt to do the
-assignment, and student validation is as simple as "Run all cells" and
-look for errors.
+assignment, and checking their work is as simple as "Restart kernel and
+run all cells" and looking for errors (which the **validate** button
+implements automatically).
 
 When the instructor receives the assignment back from the students,
 Cell 2 is restored to its initial values (restoring the hidden test
-while leaving the student solution), and autograding is as simple as
-"Run all cells" and look for error output in the autograded-tests
-cells.
+while leaving the student solution), and the **autograding**
+implementation is as simple as "Run all cells" and looking for error
+output in the autograded-tests cells).
 
 
 
