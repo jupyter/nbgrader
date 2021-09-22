@@ -97,7 +97,7 @@ setup_args = dict(
         "tornado==6.1",
         "requests==2.26.0",
         "jsonschema==3.2.0",
-        "alembic==1.7.1",
+        "alembic==1.7.3",
         "rapidfuzz==1.6.2",
     ]
 )
