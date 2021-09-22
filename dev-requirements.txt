@@ -1,7 +1,7 @@
 pytest==6.2.4
 pytest-cov
 pytest-rerunfailures
-pytest-xdist==2.2.1
+pytest-xdist==2.4.0
 #pytest-mypy
 coverage
 selenium
