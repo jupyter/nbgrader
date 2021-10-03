@@ -85,7 +85,7 @@ setup_args = dict(
         'console_scripts': ['nbgrader=nbgrader.apps.nbgraderapp:main']
     },
     install_requires=[
-        "sqlalchemy==1.4.23",
+        "sqlalchemy==1.4.25",
         "python-dateutil==2.8.2",
         "jupyter==1.0.0",
         "notebook==6.4.4",
@@ -96,7 +96,7 @@ setup_args = dict(
         "jupyter_client==6.1.12",
         "tornado==6.1",
         "requests==2.26.0",
-        "jsonschema==3.2.0",
+        "jsonschema==4.0.1",
         "alembic==1.7.3",
         "rapidfuzz==1.6.2",
     ]
