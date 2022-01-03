@@ -96,7 +96,7 @@ setup_args = dict(
         "jupyter_client==6.1.12",
         "tornado==6.1",
         "requests==2.26.0",
-        "jsonschema==3.2.0",
+        "jsonschema==4.3.3",
         "alembic==1.7.3",
         "rapidfuzz==1.6.2",
     ]
