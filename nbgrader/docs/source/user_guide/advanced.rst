@@ -71,7 +71,7 @@ though if you find something that can't be accessed through the API please
 
 In this example, we'll go through how to create a CSV file of grades for each
 student and assignment using nbgrader and `pandas
-<http://pandas.pydata.org/>`__.
+<https://pandas.pydata.org/>`__.
 
 .. versionadded:: 0.4.0
     nbgrader now comes with CSV export functionality out-of-the box using the
