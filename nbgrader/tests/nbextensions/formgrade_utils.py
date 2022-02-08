@@ -79,7 +79,7 @@ def _wait_for_gradebook_page(browser, port, url):
 def _switch_to_window(browser, index):
     handle_exists = lambda browser: index < len(browser.window_handles)
     WebDriverWait(browser, 10).until(handle_exists)
-    browser.switch_to_window(browser.window_handles[index])
+    browser.switch_to.window(browser.window_handles[index])
 
 
 def _get(browser, url, retries=5):
