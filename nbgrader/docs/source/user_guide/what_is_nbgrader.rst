@@ -415,4 +415,4 @@ See also
 * Noteable service, based on nbgrader
 
   * `Student guide <https://noteable.edina.ac.uk/student-guide/>`__
-  * `Instructor guide <https://noteable.edina.ac.uk/nbguide/>`__
+  * `Instructor guide <https://noteable.edina.ac.uk/documentation/nbguide/>`__
