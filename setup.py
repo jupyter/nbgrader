@@ -92,7 +92,7 @@ setup_args = dict(
         "nbconvert==5.6.1",
         "nbformat==5.1.3",
         "traitlets==5.1.0",
-        "jupyter_core==4.7.1",
+        "jupyter_core==4.9.2",
         "jupyter_client==6.1.12",
         "tornado==6.1",
         "requests==2.26.0",
