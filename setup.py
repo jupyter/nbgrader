@@ -88,7 +88,7 @@ setup_args = dict(
         "sqlalchemy==1.4.25",
         "python-dateutil==2.8.2",
         "jupyter==1.0.0",
-        "notebook==6.4.4",
+        "notebook==6.4.10",
         "nbconvert==5.6.1",
         "nbformat==5.1.3",
         "traitlets==5.1.0",
