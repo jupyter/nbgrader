@@ -93,7 +93,7 @@ setup_args = dict(
         "jsonschema>=3",
         "alembic>=1.7",
         "rapidfuzz>=1.8",
-        "Jinja2<3",
+        "Jinja2<4",
         "MarkupSafe<2.1.0",
         "jupyter_client<7",
         "jupyter_server>=1.12",
