@@ -1,0 +1,8 @@
+{
+  "jupyter.lab.shortcuts": [],
+  "title": "nbgrader",
+  "description": "nbgrader settings.",
+  "type": "object",
+  "properties": {},
+  "additionalProperties": false
+}

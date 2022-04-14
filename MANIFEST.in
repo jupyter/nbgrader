@@ -9,6 +9,14 @@ include pytest.ini
 include codecov.yml
 include .readthedocs.yaml
 include tasks.py
+include yarn.lock
+
+# Lab extension files
+graft src
+graft style
+graft schema
+prune **/node_modules
+prune lib
 
 #nbgrader format files
 include nbgrader/nbgraderformat/*.json
@@ -37,6 +45,9 @@ include nbgrader/tests/nbextensions/files/*
 global-exclude *.pyc
 global-exclude .ipynb_checkpoints
 global-exclude __pycache__
+global-exclude .git
+global-exclude *.pyo
+global-exclude *~
 
 # directories to prune
 prune demos
