@@ -45,7 +45,6 @@ class AssignmentList(LoggingConfigurable):
     def load_config(self):
         paths = jupyter_config_path()
         paths.insert(0, os.getcwd())
-
         app = NbGrader()
         app.config_file_paths.append(paths)
         app.load_config_file()
@@ -54,6 +53,7 @@ class AssignmentList(LoggingConfigurable):
 
     @contextlib.contextmanager
     def get_assignment_dir_config(self):
+
         # first get the exchange assignment directory
         with chdir(self.root_dir):
             config = self.load_config()
