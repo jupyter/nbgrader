@@ -1,3 +1,5 @@
+import { JupyterFrontEnd } from '@jupyterlab/application';
+
 import { URLExt } from '@jupyterlab/coreutils';
 
 import { ServerConnection } from '@jupyterlab/services';
@@ -10,7 +12,7 @@ import { PageConfig } from '@jupyterlab/coreutils';
 
 
 export class AssignmentList{
-  
+
   released_selector: string;
   fetched_selector: string;
   submitted_selector: string;
@@ -19,26 +21,28 @@ export class AssignmentList{
   submitted_element: HTMLDivElement;
   options: Map<string, string>;
   base_url: string;
+  app: JupyterFrontEnd;
   callback: () => void;
 
   list_loading_ids = ['released_assignments_list_loading','fetched_assignments_list_loading','submitted_assignments_list_loading'];
   list_placeholder_ids = ['released_assignments_list_placeholder','fetched_assignments_list_placeholder', 'submitted_assignments_list_placeholder'];
   list_error_ids = ['released_assignments_list_error','fetched_assignments_list_error', 'submitted_assignments_list_error'];
 
-  constructor(widget: Widget, released_selector: string, fetched_selector: string, submitted_selector: string, options: Map<string, string>){ 
-  this.released_selector = released_selector;
-  this.fetched_selector = fetched_selector;
-  this.submitted_selector = submitted_selector;
+  constructor(widget: Widget, released_selector: string, fetched_selector: string, submitted_selector: string, options: Map<string, string>, app:JupyterFrontEnd){
+    this.released_selector = released_selector;
+    this.fetched_selector = fetched_selector;
+    this.submitted_selector = submitted_selector;
 
-  var div_elments = widget.node.getElementsByTagName('div');
-  this.released_element = div_elments.namedItem(released_selector);
-  this.fetched_element = div_elments.namedItem(fetched_selector);
-  this.submitted_element = div_elments.namedItem(submitted_selector);
+    var div_elments = widget.node.getElementsByTagName('div');
+    this.released_element = div_elments.namedItem(released_selector);
+    this.fetched_element = div_elments.namedItem(fetched_selector);
+    this.submitted_element = div_elments.namedItem(submitted_selector);
 
-  this.options = options;
-  this.base_url = options.get('base_url') || PageConfig.getBaseUrl();
+    this.options = options;
+    this.base_url = options.get('base_url') || PageConfig.getBaseUrl();
 
-  this.callback = undefined;
+    this.app = app;
+    this.callback = undefined;
 
   }
 
@@ -46,47 +50,47 @@ export class AssignmentList{
     var elems = [this.released_element, this.fetched_element, this.submitted_element];
     var i;
     var j;
-  
+
     // remove list items
     for (i = 0; i < elems.length; i++) {
-      
+
       for(j =0; j < elems[i].children.length; ++j){
         if(elems[i].children[j].classList.contains('list_item')){
           elems[i].removeChild(elems[i].children[j]);
           --j;
         }
-  
+
       }
-  
+
       if (loading) {
           // show loading
           (<HTMLDivElement>elems[i].children.namedItem(this.list_loading_ids[i])).hidden = false;
-          
+
           // hide placeholders and errors
           (<HTMLDivElement>elems[i].children.namedItem(this.list_placeholder_ids[i])).hidden = true;
-          (<HTMLDivElement>elems[i].children.namedItem(this.list_error_ids[i])).hidden = true; 
-  
+          (<HTMLDivElement>elems[i].children.namedItem(this.list_error_ids[i])).hidden = true;
+
       } else {
           // show placeholders display
           // using hidden = false here does not work
           (<HTMLDivElement>elems[i].children.namedItem(this.list_placeholder_ids[i])).style.display = 'block';
-  
+
           // hide loading and errors
           (<HTMLDivElement>elems[i].children.namedItem(this.list_loading_ids[i])).hidden = true;
           (<HTMLDivElement>elems[i].children.namedItem(this.list_error_ids[i])).hidden = true;
-          
+
       }
     }
   };
 
   private load_list_success(data: string | any[]): void {
     this.clear_list(false);
-  
+
     var len = data.length;
     for (var i=0; i<len; i++) {
         var element = document.createElement('div');
         new Assignment(element, data[i], this.fetched_selector,
-          (newData)=>{this.handle_load_list(newData)}, this.options);
+          (newData)=>{this.handle_load_list(newData)}, this.options, this.app);
         if (data[i].status === 'released') {
           this.released_element.append(element);
           (<HTMLDivElement>this.released_element.children.namedItem('released_assignments_list_placeholder')).style.removeProperty('display');
@@ -98,14 +102,14 @@ export class AssignmentList{
           (<HTMLDivElement>this.submitted_element.children.namedItem('submitted_assignments_list_placeholder')).style.removeProperty('display');
         }
     }
-  
+
     var assignments  = this.fetched_element.getElementsByClassName('assignment-notebooks-link');
     for(let a of assignments){
       var icon = document.createElement('i');
       icon.classList.add('fa', 'fa-caret-right');
       a.append(icon);
       (<HTMLAnchorElement>a).onclick = function(){
-        
+
         if(a.children[0].classList.contains('fa-caret-right')){
           a.children[0].classList.remove('fa-caret-right');
           a.children[0].classList.add('fa-caret-down');
@@ -113,23 +117,23 @@ export class AssignmentList{
           a.children[0].classList.remove('fa-caret-down');
           a.children[0].classList.add('fa-caret-right');
         }
-  
+
       }
-      
+
     }
-  
+
     if (this.callback) {
       this.callback();
       this.callback = undefined;
     }
-  
-  
+
+
   };
 
   public show_error(error: string): void {
     var elems = [this.released_element, this.fetched_element, this.submitted_element];
     var i;
-  
+
     // remove list items
     for (i = 0; i < elems.length; i++) {
       for(var j =0; j < elems[i].children.length; ++j){
@@ -137,40 +141,40 @@ export class AssignmentList{
           elems[i].removeChild(elems[i].children[j]);
           --j;
         }
-  
+
       }
-  
+
       // show errors
       // FIX ME avoid doing all this casting
       (<HTMLDivElement>elems[i].children.namedItem(this.list_error_ids[i])).style.display = 'block';
       (<HTMLDivElement>elems[i].children.namedItem(this.list_error_ids[i])).innerText = error;
-  
+
       // hide loading and placeholding
       (<HTMLDivElement>elems[i].children.namedItem(this.list_loading_ids[i])).hidden = true;
       (<HTMLDivElement>elems[i].children.namedItem(this.list_placeholder_ids[i])).hidden = true;
     }
   };
-  
+
   public handle_load_list(data: { success: any; value: any; }): void {
     if (data.success) {
         this.load_list_success(data.value);
     } else {
-      this.show_error(data.value); 
+      this.show_error(data.value);
     }
   };
-  
+
   public async load_list(course: string, callback: any){
     this.callback = callback;
     this.clear_list(true);
     try {
-      const data = await requestAPI<any>('assignments?course_id=' + course, { 
+      const data = await requestAPI<any>('assignments?course_id=' + course, {
         method: 'GET',
       });
       this.handle_load_list(data)
     } catch (reason) {
       console.error(`Error on GET /assignments.\n${reason}`);
     }
-  
+
   };
 
 
@@ -186,14 +190,16 @@ class Assignment {
   on_refresh: (data: any) => void;
   options: Map<string, string>;
   base_url: any;
+  app: JupyterFrontEnd;
 
-  constructor(element: HTMLDivElement , data: any, parent: string , on_refresh: (data: any) => void, options: Map<string, string>){
+  constructor(element: HTMLDivElement , data: any, parent: string , on_refresh: (data: any) => void, options: Map<string, string>, app: JupyterFrontEnd){
     this.element = element;
     this.data = data;
     this.parent = parent;
     this.on_refresh = on_refresh;
     this.options = options;
     this.base_url = options.get('base_url') || PageConfig.getBaseUrl();
+    this.app = app;
     this.style();
     this.make_row();
   }
@@ -207,20 +213,20 @@ class Assignment {
     // prepend the id with "nbgrader" (this also ensures that the first
     // character is always a letter, as required by HTML 4)
     var id = "nbgrader-" + this.data['course_id'] + "-" + this.data['assignment_id'];
-  
+
     // replace spaces with '_'
     id = id.replace(/ /g, "_");
-  
+
     // remove any characters that are invalid in HTML div ids
     id = id.replace(/[^A-Za-z0-9\-_]/g, "");
-  
+
     return id;
   };
 
   private make_link(): HTMLSpanElement {
     var container = document.createElement('span');;
     container.classList.add('item_name', 'col-sm-6');
-  
+
     var link;
     if (this.data['status'] === 'fetched') {
         link = document.createElement ('a');
@@ -247,8 +253,8 @@ class Assignment {
       body: data.value,
       buttons: [Dialog.okButton()]
     });
-  
-  
+
+
   };
 
   private make_button(): HTMLSpanElement{
@@ -259,18 +265,18 @@ class Assignment {
     container.append(button);
     var that = this;
     if (this.data['status'] === 'released') {
-  
+
       button.innerText = "fetch";
       button.onclick = async function(){
         button.innerText = 'Fetching...';
-        button.setAttribute('disabled', 'disabled'); 
+        button.setAttribute('disabled', 'disabled');
         const dataToSend = { 'course_id': that.data['course_id'], 'assignment_id': that.data['assignment_id']};
         try {
           const reply = await requestAPI<any>('assignments/fetch', {
             body: JSON.stringify(dataToSend),
             method: 'POST'
           });
-          
+
           that.on_refresh(reply);
         } catch (reason) {
           remove_children(container);
@@ -279,20 +285,20 @@ class Assignment {
             `Error on POST /assignment_list/fetch ${dataToSend}.\n${reason}`
           );
         }
-        
+
       }
     } else if (this.data.status == 'fetched') {
         button.innerText = "Submit";
         button.onclick = async function(){
           button.innerText = 'submitting...';
-          button.setAttribute('disabled', 'disabled'); 
+          button.setAttribute('disabled', 'disabled');
           const dataToSend = { course_id: that.data['course_id'], assignment_id: that.data['assignment_id']};
           try {
             const reply = await requestAPI<any>('assignments/submit', {
               body: JSON.stringify(dataToSend),
               method: 'POST'
             });
-  
+
             if(!reply.success){
               that.submit_error(reply);
               button.innerText = 'Submit'
@@ -300,7 +306,7 @@ class Assignment {
             }else{
               that.on_refresh(reply);
             }
-  
+
           } catch (reason) {
             remove_children(container);
             container.innerText = 'Error submitting assignment.';
@@ -308,24 +314,24 @@ class Assignment {
               `Error on POST /assignment_list/assignments/submit ${dataToSend}.\n${reason}`
             );
           }
-          
+
         }
-  
-  
+
+
     } else if (this.data.status == 'submitted') {
       button.innerText = "Fetch Feedback";
       button.onclick = async function(){
         button.innerText = 'Fetching Feedback...';
-        button.setAttribute('disabled', 'disabled'); 
+        button.setAttribute('disabled', 'disabled');
         const dataToSend = { course_id: that.data['course_id'], assignment_id: that.data['assignment_id']};
         try {
           const reply = await requestAPI<any>('assignments/fetch_feedback', {
             body: JSON.stringify(dataToSend),
             method: 'POST'
           });
-  
+
           that.on_refresh(reply);
-  
+
         } catch (reason) {
           remove_children(container);
           container.innerText = 'Error fetching feedback.';
@@ -333,10 +339,10 @@ class Assignment {
             `Error on POST /assignments/fetch_feedback ${dataToSend}.\n${reason}`
           );
         }
-        
+
       }
     }
-  
+
     return container;
   };
 
@@ -349,7 +355,7 @@ class Assignment {
     s.classList.add('item_course', 'col-sm-2')
     s.innerText = this.data['course_id']
     row.append(s)
-  
+
     var id, element;
     var children = document.createElement('div');
     if (this.data['status'] == 'submitted') {
@@ -357,7 +363,7 @@ class Assignment {
       children.id = id;
       children.classList.add('panel-collapse', 'list_container', 'assignment-notebooks');
       children.setAttribute('role', 'tabpanel');
-  
+
       var d = document.createElement('div');
       d.classList.add('list_item', 'row');
       children.append(d);
@@ -366,12 +372,12 @@ class Assignment {
         new Submission(element, this.data.submissions[i], this.options);
         children.append(element);
       }
-  
+
     } else if (this.data['status'] === 'fetched') {
-  
+
         id = this.escape_id();
         children.id = id;
-        children.classList.add('panel-collapse', 'list_container', 'assignment-notebooks', 'collapse'); 
+        children.classList.add('panel-collapse', 'list_container', 'assignment-notebooks', 'collapse');
         children.setAttribute('role', 'tabpanel');
         var d = document.createElement('div');
         d.classList.add('list_item', 'row');
@@ -380,19 +386,19 @@ class Assignment {
             element = document.createElement('div');
             this.data.notebooks[i]['course_id'] = this.data['course_id'];
             this.data.notebooks[i]['assignment_id'] = this.data['assignment_id'];
-            new Notebook(element, this.data.notebooks[i], this.options);
+            new Notebook(element, this.data.notebooks[i], this.options, this.app);
             children.append(element);
         }
     }
-  
+
     row.append(this.make_button());
     this.element.innerHTML= ''
-  
+
     this.element.append(row);
     this.element.append(children);
   };
 
-}; 
+};
 
 const remove_children = function (element: HTMLElement) {
   element.innerHTML = '';
@@ -404,8 +410,8 @@ class Submission{
   data: any;
   options: Map<string, string>;
   base_url: any;
-  
-  constructor(element: HTMLDivElement, data: any, options: Map<string, string>){ 
+
+  constructor(element: HTMLDivElement, data: any, options: Map<string, string>){
     this.element = element;
     this.data = data;
     this.options = options;
@@ -419,7 +425,7 @@ class Submission{
     this.element.classList.add('list_item');
     this.element.classList.add('row');
   };
-  
+
   private make_row(): void{
     var container = document.createElement('div')
     container.classList.add('col-md-12');
@@ -427,8 +433,8 @@ class Submission{
     status.classList.add('item_name', 'col-sm-6');
     var s = document.createElement('span').innerText = this.data['timestamp'];
     status.append(s);
-  
-  
+
+
     if (this.data['has_local_feedback'] && !this.data['feedback_updated']) {
       var url = URLExt.join(this.base_url, 'tree', this.data['local_feedback_path']);
       var link = document.createElement('a')
@@ -461,12 +467,14 @@ class Notebook{
   data: any;
   options: Map<string, string>;
   base_url: any;
+  app: JupyterFrontEnd;
 
-  constructor (element: HTMLDivElement, data: any, options: Map<string, string>) {
+  constructor (element: HTMLDivElement, data: any, options: Map<string, string>, app:JupyterFrontEnd) {
     this.element = element;
     this.data = data;
     this.options = options;
     this.base_url = options.get('base_url') || PageConfig.getBaseUrl();
+    this.app = app;
     this.style();
     this.make_row();
 
@@ -476,27 +484,27 @@ class Notebook{
     this.element.classList.add('list_item')
     this.element.classList.add("row");
   };
-  
+
   private make_button(): HTMLSpanElement {
     var that = this;
     var container = document.createElement('span');
     container.classList.add('item_status', 'col-sm-4');
     var button = document.createElement('button')
     button.classList.add('btn', 'btn-default', 'btn-xs')
-    
+
     container.append(button);
-  
+
     button.innerText = 'Validate';
     button.onclick = async function(){
       button.innerText = 'Validating...';
-      button.setAttribute('disabled', 'disabled'); 
+      button.setAttribute('disabled', 'disabled');
       const dataToSend = { path: that.data['path']}
       try {
         const reply = await requestAPI<any>('assignments/validate', {
           body: JSON.stringify(dataToSend),
           method: 'POST'
         });
-  
+
         button.innerText = 'Validate'
         button.removeAttribute('disabled')
         that.validate(reply, button);
@@ -508,22 +516,22 @@ class Notebook{
           `Error on POST /assignments/validate ${dataToSend}.\n${reason}`
         );
       }
-      
+
     }
-  
+
     return container;
   };
-  
+
   private validate_success(button: HTMLButtonElement): void {
     button.classList.remove('btn-default', 'btn-danger', 'btn-success');
     button.classList.add('btn-success');
   };
-  
+
   private validate_failure(button: HTMLButtonElement): void {
     button.classList.remove('btn-default', 'btn-danger', 'btn-success');
     button.classList.add("btn-danger");
   };
-  
+
   private validate(data: { [x: string]: any; value: string; changed: string | any[]; passed: { source: string; }[]; failed: string | any[]; }, button: HTMLButtonElement): void {
 
     var body = document.createElement('div') as HTMLDivElement;
@@ -547,7 +555,7 @@ class Notebook{
           }
           body.classList.add("validation-changed");
           this.validate_failure(button);
-  
+
         } else if (data['passed'] !== undefined) {
           for (var i=0; i<data.changed.length; i++) {
             var div = document.createElement('div');
@@ -561,7 +569,7 @@ class Notebook{
           }
           body.classList.add("validation-passed");
           this.validate_failure(button);
-  
+
         } else if (data['failed'] !== undefined) {
           for (var i=0; i<data.failed.length; i++) {
             var div = document.createElement('div');
@@ -571,27 +579,27 @@ class Notebook{
             body.append(div);
             var pre1 = document.createElement('pre');
             pre1.innerText = data.failed[i].source;
-            
+
             body.append(pre1);
             var pre2 = document.createElement('pre');
             pre2.innerHTML = data.failed[i].error;
             body.append(pre2);
-            
+
           }
           body.classList.add('validation-failed');
           this.validate_failure(button);
-  
+
         } else {
           var div = document.createElement('div')
           var paragraph  = document.createElement('p')
           paragraph.innerText = 'Success! Your notebook passes all the tests.';
           div.append(paragraph);
           body.append(div);
-  
+
           body.classList.add("validation-success");
           this.validate_success(button);
         }
-  
+
     } else {
       var div  = document.createElement('div');
       var paragraph = document.createElement('p');
@@ -601,7 +609,7 @@ class Notebook{
       var pre = document.createElement('pre');
       pre.innerText = data.value
       body.append(pre);
-  
+
       this.validate_failure(button);
     }
     let b: Widget;
@@ -611,22 +619,30 @@ class Notebook{
       body: b,
       buttons: [Dialog.okButton()]
     });
-  
+
   };
-  
+
   private make_row(): void {
+
+    var app = this.app;
+    var nb_path = this.data['path']
+
     var container = document.createElement('div');
     container.classList.add('col-md-12');
-    var url = URLExt.join(this.base_url, 'tree', encodeURI(this.data['path']));
     var s1 = document.createElement('span');
     s1.classList.add('item_name', 'col-sm-6');
-  
+
     var a = document.createElement('a');
-    a.href = url;
-    a.target = '_blank';
-    a.innerText = this.data['notebook_id']
+    a.href = '#';
+    a.innerText = this.data['notebook_id'];
+    a.onclick = function() {
+      app.commands.execute('docmanager:open', {
+        path: nb_path
+      });
+    }
+
     s1.append(a);
-  
+
     container.append(s1);
     var s2 = document.createElement('span');
     s2.classList.add('item_course', 'col-sm-2');
@@ -652,26 +668,26 @@ export class CourseList{
   refresh_element: HTMLButtonElement;
 
   constructor(widget: Widget, course_list_selector: string, default_course_selector: string, dropdown_selector: string, refresh_selector: string, assignment_list: AssignmentList, options: Map<string, string>) {
-    
+
   this.course_list_selector = course_list_selector;
   this.default_course_selector = default_course_selector;
   this.dropdown_selector = dropdown_selector;
   this.refresh_selector = refresh_selector;
   this.course_list_element = widget.node.getElementsByTagName('ul').namedItem(course_list_selector);
   var buttons = widget.node.getElementsByTagName('button');
-  this.default_course_element = buttons.namedItem(default_course_selector); 
+  this.default_course_element = buttons.namedItem(default_course_selector);
   this.dropdown_element = buttons.namedItem(dropdown_selector);
   this.refresh_element = buttons.namedItem(refresh_selector);
 
   this.assignment_list = assignment_list;
   this.current_course = undefined;
-  
+
   //options = options || {};
   this.options = options;
   this.base_url = options.get('base_url') || PageConfig.getBaseUrl();
 
   this.data = undefined;
-  
+
   var that = this;
   this.refresh_element.onclick = function(){
     that.load_list();
@@ -736,7 +752,7 @@ private load_list_success(data: string[]): void {
       this.enable_list()
       return;
   }
-  
+
   if (!this.data.includes(this.current_course)) {
       this.current_course = undefined;
   }
@@ -757,7 +773,7 @@ private change_course(course: string): void {
   }
   this.current_course = course;
   this.default_course_element.innerText = this.current_course;
-  var success = ()=>{this.load_assignment_list_success()}; 
+  var success = ()=>{this.load_assignment_list_success()};
   this.assignment_list.load_list(course, success);
 };
 

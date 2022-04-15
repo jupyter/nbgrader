@@ -1,5 +1,5 @@
 import {
-  ILayoutRestorer, JupyterFrontEnd,JupyterFrontEndPlugin
+  ILayoutRestorer, JupyterFrontEnd, JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 
 import {
@@ -10,24 +10,27 @@ import {
   Widget
 } from '@lumino/widgets';
 
-import { 
-  PageConfig 
+import {
+  PageConfig
 } from '@jupyterlab/coreutils';
 
 import { requestAPI, CourseList, AssignmentList } from './assignmentlist';
 
 
 class AssignmentListWidget extends Widget {
-  
-  constructor() {
+
+  app: JupyterFrontEnd;
+
+  constructor(app: JupyterFrontEnd) {
     super();
+    this.app = app;
     var h = document.getElementsByTagName('head')[0] as HTMLHeadElement;
     console.log('Initializing the assignments list widget');
     var l = document.createElement('link') as HTMLLinkElement;
     l.rel = 'stylesheet';
     l.href = 'https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css'
     l.type = 'text/css'
-    
+
     var s1 = document.createElement('script') as HTMLScriptElement;
     s1.src = 'https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js'
     s1.type = 'text/javascript'
@@ -37,7 +40,7 @@ class AssignmentListWidget extends Widget {
     s2.src = 'https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js'
     s2.type = 'text/javascript'
     s2.async=false;
-  
+
     h.append(l)
     h.append(s1)
     h.append(s2)
@@ -126,7 +129,7 @@ class AssignmentListWidget extends Widget {
     var html = document.createElement('div') as HTMLDivElement;
     html.innerHTML=assignment_html;
     this.node.append(html);
-    
+
     let base_url = PageConfig.getBaseUrl();
     let options = new Map();
     options.set('base_url',base_url);
@@ -134,8 +137,9 @@ class AssignmentListWidget extends Widget {
       'released_assignments_list',
       'fetched_assignments_list',
       'submitted_assignments_list',
-      options);
- 
+      options,
+      this.app);
+
     new CourseList(this,
       'course_list',
       'course_list_default',
@@ -144,7 +148,7 @@ class AssignmentListWidget extends Widget {
       assignment_l,
       options
     );
-    
+
     this.checkNbGraderVersion();
 
   }
@@ -186,7 +190,7 @@ export const assignment_list_extension: JupyterFrontEndPlugin<void> = {
       label: 'Assignment List',
       execute: () => {
         if(!widget){
-          const content = new AssignmentListWidget();
+          const content = new AssignmentListWidget(app);
           widget = new MainAreaWidget({content});
           widget.id = 'assignments';
           widget.title.label = 'Assignments';
@@ -220,7 +224,7 @@ export const assignment_list_extension: JupyterFrontEndPlugin<void> = {
       name: () => 'al'
     });
 
-    
+
   }
 };
 
