@@ -369,7 +369,7 @@ class Assignment {
       children.append(d);
       for (var i=0; i<this.data['submissions'].length; i++) {
         element = document.createElement('div');
-        new Submission(element, this.data.submissions[i], this.options);
+        new Submission(element, this.data.submissions[i], this.options, this.app);
         children.append(element);
       }
 
@@ -410,12 +410,14 @@ class Submission{
   data: any;
   options: Map<string, string>;
   base_url: any;
+  app: JupyterFrontEnd;
 
-  constructor(element: HTMLDivElement, data: any, options: Map<string, string>){
+  constructor(element: HTMLDivElement, data: any, options: Map<string, string>, app: JupyterFrontEnd){
     this.element = element;
     this.data = data;
     this.options = options;
     this.base_url = options.get('base_url') || PageConfig.getBaseUrl();
+    this.app = app
     this.style();
     this.make_row();
 
@@ -436,10 +438,15 @@ class Submission{
 
 
     if (this.data['has_local_feedback'] && !this.data['feedback_updated']) {
-      var url = URLExt.join(this.base_url, 'tree', this.data['local_feedback_path']);
+      var app = this.app;
+      var feedback_path = this.data['local_feedback_path'];
+      // var url = URLExt.join(this.base_url, 'tree', this.data['local_feedback_path']);
       var link = document.createElement('a')
-      link.href = url;
-      link.target = '_blank';
+      link.onclick = function() {
+        app.commands.execute('filebrowser:go-to-path', {
+          path: feedback_path
+        });
+      }
       link.innerText = ' (view feedback)';
       status.append(link);
     } else if (this.data['has_exchange_feedback']) {
