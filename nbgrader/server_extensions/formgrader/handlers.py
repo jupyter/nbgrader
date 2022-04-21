@@ -17,6 +17,7 @@ class ManageAssignmentsHandler(BaseHandler):
             "manage_assignments.tpl",
             url_prefix=self.url_prefix,
             base_url=self.base_url,
+            is_lab=int(self.get_argument('is_lab', 0)),
             windows=(sys.prefix == 'win32'),
             course_id=self.api.course_id,
             exchange=self.api.exchange_root,
