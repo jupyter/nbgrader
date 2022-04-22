@@ -11,10 +11,16 @@ clone the nbgrader repository::
 
 Installing and building nbgrader
 -------------------------------------
-nbgrader installs and builds with one command::
+Building nbgrader jupyterlab extension requires nodejs to be installed.
+We recommand using `conda environment <https://docs.conda.io/en/latest/miniconda.html>`_ with `mamba <https://mamba.readthedocs.io/en/latest/>`_::
+
+    # create a new environment
+    mamba create -n nbgrader -c conda-forge python nodejs -y
+
+    # activate the environment
+    mamba activate notebook
 
     pip install -e .[docs,tests]
-
 
 Installing notebook extensions
 ------------------------------
@@ -29,16 +35,17 @@ whenever you update the nbgrader repository.
 The serverextension is a Python module inside nbgrader, so only an
 enable step is needed.
 To install and enable all the frontend nbextensions (*assignment list*,
-*create assignment*, and *formgrader*) along with the server extensions
-(*assignment list* and *formgrader*) run::
+*create assignment*, and *formgrader*) and the frontend labextensions
+along with the server extensions (*assignment list* and *formgrader*) run::
 
+    jupyter labextension develop --overwrite .
     jupyter nbextension install --symlink --sys-prefix --py nbgrader
     jupyter nbextension enable --sys-prefix --py nbgrader
     jupyter serverextension enable --sys-prefix --py nbgrader
 
 To work properly, the *assignment list* and *formgrader* extensions require
-both the nbextension and serverextension. The *create assignment* extension
-only has an nbextension part.
+both the frontend extension and serverextension. The *create assignment* extension
+only has an frontend extension part.
 
 Installing Firefox Headless WebDriver
 -------------------------------------
