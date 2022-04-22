@@ -30,16 +30,15 @@ class FormgraderWidget extends IFrame {
       const settings = ServerConnection.makeSettings();
       const requestURL = URLExt.join(
         settings.baseUrl,
-        endPoint,
-        URLExt.objectToQueryString({'is_lab': 1})
+        endPoint
       );
 
       this.url = requestURL;
 
-      var that = this;
+      var this_widget = this;
 
       window.addEventListener('message', function (event) {
-        that.on_click(event);
+        this_widget.on_click(event);
       });
 
     }
