@@ -2,8 +2,6 @@ import {
   ILayoutRestorer, JupyterFrontEnd, JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 
-import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
-
 import { URLExt } from '@jupyterlab/coreutils';
 
 import { ServerConnection } from '@jupyterlab/services';
@@ -16,15 +14,13 @@ import {
 class FormgraderWidget extends IFrame {
 
     app: JupyterFrontEnd;
-    browser: IFileBrowserFactory;
 
-    constructor(app: JupyterFrontEnd, browser: IFileBrowserFactory) {
+    constructor(app: JupyterFrontEnd) {
       super();
       this.referrerPolicy = 'strict-origin-when-cross-origin';
       this.sandbox = ['allow-scripts', 'allow-same-origin'];
       this.node.id = "formgrader-iframe"
       this.app = app;
-      this.browser = browser;
       var endPoint = "formgrader";
 
       const settings = ServerConnection.makeSettings();
@@ -58,8 +54,8 @@ class FormgraderWidget extends IFrame {
 export const formgrader_extension: JupyterFrontEndPlugin<void> = {
   id: 'formgrader',
   autoStart: true,
-  requires: [ICommandPalette, ILayoutRestorer, IFileBrowserFactory],
-  activate: async (app: JupyterFrontEnd, palette: ICommandPalette, restorer: ILayoutRestorer, browser: IFileBrowserFactory)=> {
+  requires: [ICommandPalette, ILayoutRestorer],
+  activate: async (app: JupyterFrontEnd, palette: ICommandPalette, restorer: ILayoutRestorer)=> {
     console.log('JupyterLab extension formgrader is activated!');
 
     // Declare a widget variable
@@ -72,7 +68,7 @@ export const formgrader_extension: JupyterFrontEndPlugin<void> = {
     label: 'Formgrader',
     execute: () => {
         if(!widget){
-        const content = new FormgraderWidget(app, browser);
+        const content = new FormgraderWidget(app);
         widget = new MainAreaWidget({content});
         widget.id = 'formgrader';
         widget.title.label = 'Formgrader';
@@ -101,6 +97,7 @@ export const formgrader_extension: JupyterFrontEndPlugin<void> = {
     let tracker = new WidgetTracker<MainAreaWidget<FormgraderWidget>>({
       namespace: 'formgrader'
     });
+
     restorer.restore(tracker, {
       command,
       name: () => 'nbgrader_formgrader'
