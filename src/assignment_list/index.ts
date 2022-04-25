@@ -176,7 +176,8 @@ class AssignmentListWidget extends Widget {
 export const assignment_list_extension: JupyterFrontEndPlugin<void> = {
   id: 'assignment-list',
   autoStart: true,
-  requires: [ICommandPalette, ILayoutRestorer],
+  requires: [ICommandPalette],
+  optional: [ILayoutRestorer],
   activate: async (app: JupyterFrontEnd, palette: ICommandPalette, restorer: ILayoutRestorer)=> {
     console.log('JupyterLab extension assignment-list is activated!');
 
@@ -184,7 +185,12 @@ export const assignment_list_extension: JupyterFrontEndPlugin<void> = {
     let widget: MainAreaWidget<AssignmentListWidget>;
 
     // Add an application command
-    const command: string = 'al:open';
+    const command: string = 'nbgrader:assignment-list';
+
+    // Track the widget state
+    let tracker = new WidgetTracker<MainAreaWidget<AssignmentListWidget>>({
+      namespace: 'nbgrader-assignment-list'
+    });
 
     app.commands.addCommand(command,{
       label: 'Assignment List',
@@ -215,15 +221,13 @@ export const assignment_list_extension: JupyterFrontEndPlugin<void> = {
     // Add the command to the palette
     palette.addItem({command, category: 'nbgrader'});
 
-    // Track and restore the widget state
-    let tracker = new WidgetTracker<MainAreaWidget<AssignmentListWidget>>({
-    namespace: 'al'
-    });
-    restorer.restore(tracker, {
-      command,
-      name: () => 'al'
-    });
-
+    // Restore the widget state
+    if (restorer != null){
+      restorer.restore(tracker, {
+        command,
+        name: () => 'nbgrader-assignment-list'
+      });
+    }
 
   }
 };

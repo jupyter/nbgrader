@@ -88,25 +88,28 @@ class CourseListWidget extends Widget {
 export const course_list_extension: JupyterFrontEndPlugin<void> = {
     id: 'course-list',
     autoStart: true,
-    requires: [ICommandPalette, ILayoutRestorer],
+    requires: [ICommandPalette],
+    optional: [ILayoutRestorer],
 
     activate: async (app: JupyterFrontEnd, palette: ICommandPalette, restorer: ILayoutRestorer) => {
-        const command = 'nbgrader:course_list';
+
         let widget: MainAreaWidget<CourseListWidget>;
 
-        let tracker = new WidgetTracker<MainAreaWidget<CourseListWidget>>({
-            namespace: 'nbgrader'
-        });
-        restorer.restore(tracker, {command, name: () => 'nbgrader_course_list'});
+        const command:string = 'nbgrader:course-list';
 
-        app.commands.addCommand("nbgrader:course_list", {
+        // Track the widget state
+        let tracker = new WidgetTracker<MainAreaWidget<CourseListWidget>>({
+            namespace: 'nbgrader-course-list'
+        });
+
+        app.commands.addCommand(command, {
             label: 'Course List',
             execute: () => {
                 if (!widget) {
                     const content = new CourseListWidget;
                     widget = new MainAreaWidget({content});
                     widget.id = 'nbgrader-course-list'
-                    widget.title.label = 'Course List'
+                    widget.title.label = 'Courses'
                     widget.title.closable = true;
                 }
                 if (!tracker.has(widget)) {
@@ -121,6 +124,15 @@ export const course_list_extension: JupyterFrontEndPlugin<void> = {
         })
 
         palette.addItem({ command, category: "nbgrader" });
+
+        // Restore the widget state
+        if (restorer != null){
+            restorer.restore(tracker, {
+                command,
+                name: () => 'nbgrader-course-list'
+            });
+        }
+
         console.log('JupyterLab extension course-list is activated!');
 
   }
