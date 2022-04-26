@@ -77,6 +77,11 @@ def _run_tests(mark, skip, junitxml, paralell=False):
         run("coverage combine || true")
 
 
+def _run_ts_test():
+    cmd = ['npx', 'playwright', 'test']
+    run(" ".join(cmd))
+
+
 def tests(args):
     if args.group == 'python':
         _run_tests(
@@ -86,13 +91,14 @@ def tests(args):
         _run_tests(mark="nbextensions", skip=args.skip, junitxml=args.junitxml)
 
     elif args.group =='labextensions':
-        _run_tests(mark="labextensions", skip=args.skip, junitxml=args.junitxml)
+        _run_ts_test()
 
     elif args.group == 'docs':
         docs(args)
 
     elif args.group == 'all':
         _run_tests(mark=None, skip=args.skip, junitxml=args.junitxml)
+        _run_ts_test()
 
     else:
         raise ValueError("Invalid test group: {}".format(args.group))

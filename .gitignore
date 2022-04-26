@@ -120,3 +120,8 @@ package-lock.json
 .goutputstream*
 .idea
 .mypy_cache
+
+
+# playwright output tests directory
+playwright-report
+test-results

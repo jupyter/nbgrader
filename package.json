@@ -43,8 +43,10 @@
     "prettier": "jlpm prettier:base --write --list-different",
     "prettier:base": "prettier \"**/*{.ts,.tsx,.js,.jsx,.css,.json,.md}\"",
     "prettier:check": "jlpm prettier:base --check",
+    "start:test": "jupyter lab --config ./nbgrader/tests/labextension_ui-tests/jupyter_server_test_config.py",
     "stylelint": "jlpm stylelint:check --fix",
     "stylelint:check": "stylelint --cache \"style/**/*.css\"",
+    "test": "jlpm playwright test",
     "watch": "run-p watch:src watch:labextension",
     "watch:src": "tsc -w",
     "watch:labextension": "jupyter labextension watch ."
@@ -59,7 +61,9 @@
     "@jupyterlab/settingregistry": "^3.1.0"
   },
   "devDependencies": {
-    "@jupyterlab/builder": "^3.1.0",
+    "@jupyterlab/builder": "^3.3.3",
+    "@jupyterlab/galata": "^4.2.4",
+    "@playwright/test": "^1.21.1",
     "@typescript-eslint/eslint-plugin": "^4.8.1",
     "@typescript-eslint/parser": "^4.8.1",
     "bower": "*",
