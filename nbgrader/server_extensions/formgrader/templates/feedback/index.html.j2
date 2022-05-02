@@ -1,5 +1,4 @@
-{%- extends 'basic.tpl' -%}
-{% from 'mathjax.tpl' import mathjax %}
+{%- extends 'nbconvert/templates/classic/index.html.j2' -%}
 
 {%- block header -%}
 <!DOCTYPE html>
@@ -8,6 +7,8 @@
 
 <meta charset="utf-8" />
 <title>{{ resources.nbgrader.notebook }}</title>
+
+{{ resources.include_css('bootstrap.min.css')}}
 
 {% for css in resources.inlining.css -%}
     <style type="text/css">

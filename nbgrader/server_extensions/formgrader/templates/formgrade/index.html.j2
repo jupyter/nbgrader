@@ -1,6 +1,6 @@
-{%- extends 'basic.tpl' -%}
-{% from 'formgrade_macros.tpl' import nav, header %}
-{% from 'mathjax.tpl' import mathjax %}
+{%- extends 'nbconvert/templates/classic/index.html.j2' -%}
+
+{% from 'formgrade_macros.html.j2' import nav, header %}
 
 {%- block header -%}
 <!DOCTYPE html>
@@ -15,7 +15,7 @@
 {% endfor %}
 
 <!-- Loading mathjax macro -->
-{{ mathjax( resources.base_url + '/' + resources.mathjax_url + '?config=TeX-AMS-MML_HTMLorMML-full') }}
+{{ mathjax( resources.mathjax_url + '?config=TeX-AMS-MML_HTMLorMML-full') }}
 
 <link rel="stylesheet" href="{{ resources.base_url }}/formgrader/static/css/formgrade.css" />
 
@@ -85,7 +85,7 @@
   <span class="nbgrader-label"><code>{{ cell.metadata.nbgrader.grade_id }}</code></span>
   {{ score(cell) }}
 {%- endif -%}
-</div>  
+</div>
 {%- endmacro %}
 
 {% macro nbgrader_footer(cell) -%}
@@ -137,7 +137,7 @@
   </div>
 
   {%- else -%}
-  
+
   <div class="inner_cell">
     <div class="input_area">
       {{ cell.source | highlight_code(metadata=cell.metadata) }}
