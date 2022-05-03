@@ -88,18 +88,18 @@ setup_args = dict(
         "sqlalchemy>=1.4,<2",
         "python-dateutil>=2.8",
         "notebook>=6.4,<7",
-        "nbconvert>=5,<6",
+        "nbconvert>=6",
         "requests>=2.26",
         "jsonschema>=3",
         "alembic>=1.7",
         "rapidfuzz>=1.8",
-        "Jinja2<3",
+        "Jinja2>=3",
         "MarkupSafe<2.1.0",
         "jupyter_client<7",
         "jupyter_server>=1.12",
         "qtconsole>=5.2",
         "ipywidgets>=7.6",
-        "nbclient>=0.5",
+        "nbclient>=0.6.1",
     ]
 )
 
