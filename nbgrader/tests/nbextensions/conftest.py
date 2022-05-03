@@ -185,6 +185,7 @@ def _make_browser(tempdir):
 
     options = webdriver.firefox.options.Options()
     options.add_argument('-headless')
+    options.set_preference('intl.accept_languages', 'en-GB')
     browser = webdriver.Firefox(
         options=options, service_log_path=os.path.devnull)
     browser.set_page_load_timeout(30)
