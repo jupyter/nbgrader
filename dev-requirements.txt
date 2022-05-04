@@ -4,7 +4,7 @@ pytest-rerunfailures
 pytest-xdist==2.4.0
 #pytest-mypy
 coverage
-selenium
+selenium>2.4
 sphinx
 sphinx_rtd_theme
 sphinx-autodoc-typehints
