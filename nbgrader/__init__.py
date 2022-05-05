@@ -8,6 +8,11 @@ import json
 from pathlib import Path
 from ._version import __version__
 
+from .server_extensions.assignment_list import load_jupyter_server_extension as load_assignments
+from .server_extensions.course_list import load_jupyter_server_extension as load_courses
+from .server_extensions.validate_assignment import load_jupyter_server_extension as load_validate
+from .server_extensions.formgrader import load_jupyter_server_extension as load_formgrader
+
 HERE = Path(__file__).parent.resolve()
 
 
@@ -98,3 +103,10 @@ def _jupyter_server_extension_paths():
         paths.append(dict(module="nbgrader.server_extensions.course_list"))
 
     return paths
+
+
+def _load_jupyter_server_extension(app):
+    load_assignments(app)
+    load_courses(app)
+    load_formgrader(app)
+    load_validate(app)
