@@ -5,6 +5,112 @@ Changelog
 
 A summary of changes to nbgrader.
 
+0.7.x
+-----
+
+0.7.0
+~~~~~
+
+The following PRs were merged for the 0.7.0 milestone:
+
+- PR #1572: Fix a false positive test
+- PR #1571: Add workflow to enforce GitHub labels
+- PR #1569: Add Python 3.10 to CI pipeline
+- PR #1568: Update markupsafe requirement from <2.1.0 to <2.2.0
+- PR #1567: Upgrade nbconvert
+- PR #1565: Bump pytest from 6.2.4 to 7.1.2
+- PR #1564: Pin to `notebook<7` for now
+- PR #1561: Add missing 'self' argument to `late_submission_penalty`
+- PR #1559: Fix breaking tests due to changes in the newest Jinja2 release
+- PR #1558: Bump pytest-xdist from 2.4.0 to 2.5.0
+- PR #1557: Update jupyter-client requirement from <7 to <8
+- PR #1541: Update setup.py with dependency ranges
+- PR #1539: Improve CI by running sphinx linkcheck
+- PR #1519: Make generate solutions preprocessors configurable
+- PR #1504: Bump sqlalchemy from 1.4.23 to 1.4.25
+- PR #1503: Bump pytest-xdist from 2.2.1 to 2.4.0
+- PR #1502: Bump alembic from 1.7.1 to 1.7.3
+- PR #1498: Bump rapidfuzz from 1.5.1 to 1.6.2
+- PR #1497: Bump notebook from 6.4.3 to 6.4.4
+- PR #1496: docs/index: Move setup-related topics to configuration section
+- PR #1494: docs: update highlights to introduce the notebook format
+- PR #1493: docs: revise "Managing assignment files" pages
+- PR #1489: Bump rapidfuzz from 1.4.1 to 1.5.1
+- PR #1488: Bump traitlets from 5.0.5 to 5.1.0
+- PR #1487: Bump alembic from 1.6.5 to 1.7.1
+- PR #1480: Bump sqlalchemy from 1.4.22 to 1.4.23
+- PR #1478: Bump notebook from 6.4.2 to 6.4.3
+- PR #1477: Bump notebook from 6.4.1 to 6.4.2
+- PR #1476: Fix Issue with Courses tab on Multi courses
+- PR #1475: Bump notebook from 6.4.0 to 6.4.1
+- PR #1472: Bump sqlalchemy from 1.4.21 to 1.4.22
+- PR #1470: Update badges in README
+- PR #1469: Bump python-dateutil from 2.8.1 to 2.8.2
+- PR #1468: Bump sqlalchemy from 1.4.20 to 1.4.21
+- PR #1467: Bump sqlalchemy from 1.4.18 to 1.4.20
+- PR #1466: Bump requests from 2.25.1 to 2.26.0
+- PR #1458: Lock setup dependencies
+- PR #1457: Add missing rollbacks to try/except clauses that execute db commits
+- PR #1450: Update autograding_resources.rst
+- PR #1444: Remove continuous integration for python 3.6
+- PR #1442: Bump traitlets from 4.3.3 to 5.0.5
+- PR #1441: Update pytest requirement from <6.0.0,>=4.5 to 6.2.4
+- PR #1440: Bump pytest-xdist from 1.34.0 to 2.2.1
+- PR #1438: Validate pre and post convert hooks
+- PR #1437: Make converter exporter class configurable
+- PR #1431: Add dependabot configuration
+- PR #1425: Use NBGRADER_VALIDATING env var during autograding
+- PR #1422: Fix docs building
+- PR #1420: Fix various SQLAlchemy errors and warnings
+- PR #1419: Update releasing docs and tools
+- PR #1394: Added CLI for generating solution notebooks
+- PR #1381: find cell failure when stderr is used
+- PR #1376: Make preprocessors of generate assignment, autograde and generate feedback configurable
+- PR #1330: Update azure pipelines matrix to add Python 3.8
+- PR #1329: Update the test matrix on Travis to Python 3.6+
+- PR #1324: Ensure errors are written to cell outputs to prevent the autograder from awarding points for failed tests
+- PR #1320: Add nbgrader collect --before-duedate option
+- PR #1315: ExchangeFetchAssignment deleting the wrong config
+- PR #1287: Add mypy for type checking
+- PR #1282: Further type annotations across the codebase
+- PR #1276: remove db_assignments db_students
+- PR #1274: Further Python 3 type annotations on top-level files
+- PR #1268: Type annotations for the api
+- PR #1259: Remove Python 2 compatibility code
+- PR #1257: Deprecate Python 2 support
+- PR #1238: Pluggable exchange
+- PR #1222: CourseDir.format_path: supports absolute paths in nbgrader_step
+
+Thanks to the following users who submitted PRs or reported issues that were merged or fixed for the 0.7.0 release:
+
+- aliniknejad
+- AnotherCodeArtist
+- bbhopesh
+- BertR
+- brichet
+- elesiuta
+- gymreklab
+- HanTeo
+- jgwerner
+- jhamrick
+- jnishii
+- jtpio
+- LaurentHayez
+- liuq
+- lzach
+- nthiery
+- omelnikov
+- QuantumEntangledAndy
+- rkdarst
+- ryanlovett
+- samarthbhargav
+- sigurdurb
+- Tebinski
+- tmetzl
+- Wildcarde
+- willingc
+- ykazakov
+
 0.6.x
 -----
 
