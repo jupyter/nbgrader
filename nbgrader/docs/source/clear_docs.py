@@ -154,6 +154,8 @@ def sanitize_notebook():
                 new_nb = re.sub(r'([-drwxs][-rwxs]{9}\.?)\s+(\d+)\s+(\w+)\s+(\w+)\s+(\d+)\s+(\w+)\s+(\w+)\s+(\d\d:\d\d)', r'\1 1 nb_user nb_group [size] [date] [time]', new_nb)
                 # parses: permissions, links, user, group, size, month, day, year
                 new_nb = re.sub(r'([-drwxs][-rwxs]{9}\.?)\s+(\d+)\s+(\w+)\s+(\w+)\s+(\d+)\s+(\w+)\s+(\d)+\s+(\d+)', r'\1 1 nb_user nb_group [size] [date] [time]', new_nb)
+                # parses: permissions, links, user, group, size, day, month, year
+                new_nb = re.sub(r'([-drwxs][-rwxs]{9}\.?)\s+(\d+)\s+(\w+)\s+(\w+)\s+(\d+)\s+(\d+)\s+(\w)+\s+(\d+)', r'\1 1 nb_user nb_group [size] [date] [time]', new_nb)
                 new_nb = re.sub(r'"total \d+\\n"', r'"total ##\\n"', new_nb)
                 new_nb = re.sub(r'\d\d\d\d\-\d\d\-\d\d \d\d:\d\d:\d\d\.\d\d\d\d\d\d', r'[timestamp]', new_nb)
                 new_nb = re.sub(r'(example_course )\w+( ps1 \[timestamp\] UTC)', r'\1nb_user\2', new_nb)
