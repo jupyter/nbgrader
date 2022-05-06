@@ -95,7 +95,7 @@ setup_args = dict(
         "rapidfuzz>=1.8",
         "Jinja2>=3",
         "MarkupSafe<2.2.0",
-        "jupyter_client<7",
+        "jupyter_client<8",
         "jupyter_server>=1.12",
         "qtconsole>=5.2",
         "ipywidgets>=7.6",
