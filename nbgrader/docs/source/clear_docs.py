@@ -126,6 +126,9 @@ def clean_metadata(new_nb):
             "name": "python"
         }
     }
+    for cell in new_nb.cells:
+        if 'execution' in cell.metadata:
+            del cell.metadata['execution']
 
 
 def sanitize_notebook():
