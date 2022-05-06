@@ -49,9 +49,7 @@ class GenerateSolution(BaseConverter):
         ClearOutput,
         ClearMarkScheme,
         Execute
-    ])
-    # NB: ClearHiddenTests must come after ComputeChecksums and SaveCells.
-    # ComputerChecksums must come again after ClearHiddenTests.
+    ]).tag(config=True)
 
     def __init__(self, coursedir: CourseDirectory = None, **kwargs: Any) -> None:
         super(GenerateSolution, self).__init__(coursedir=coursedir, **kwargs)

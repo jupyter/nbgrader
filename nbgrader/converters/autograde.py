@@ -4,6 +4,8 @@ import shutil
 from textwrap import dedent
 from traitlets import Bool, List, Dict
 
+from nbconvert.preprocessors import ClearMetadataPreprocessor
+
 from .base import BaseConverter, NbGraderException
 from ..preprocessors import (
     AssignLatePenalties, ClearOutput, DeduplicateIds, OverwriteCells, SaveAutoGrades,
@@ -59,6 +61,7 @@ class Autograde(BaseConverter):
     ]).tag(config=True)
     autograde_preprocessors = List([
         Execute,
+        ClearMetadataPreprocessor,
         LimitOutput,
         SaveAutoGrades,
         AssignLatePenalties,

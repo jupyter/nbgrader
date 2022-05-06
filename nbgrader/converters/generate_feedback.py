@@ -55,9 +55,12 @@ class GenerateFeedback(BaseConverter):
     def __init__(self, coursedir=None, **kwargs):
         super(GenerateFeedback, self).__init__(coursedir=coursedir, **kwargs)
         c = Config()
-        if 'template_file' not in self.config.HTMLExporter:
-            c.HTMLExporter.template_file = 'feedback.tpl'
-        if 'template_path' not in self.config.HTMLExporter:
-            template_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'server_extensions', 'formgrader', 'templates'))
-            c.HTMLExporter.template_path = ['.', template_path]
+        if 'template_name' not in self.config.HTMLExporter:
+            c.HTMLExporter.template_name = 'feedback'
+
+        template_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'server_extensions', 'formgrader', 'templates'))
+        c.HTMLExporter.extra_template_basedirs = [template_path]
+        extra_static_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'server_extensions', 'formgrader', 'static', 'components', 'bootstrap', 'css'))
+        c.HTMLExporter.extra_template_paths = [extra_static_path]
+
         self.update_config(c)

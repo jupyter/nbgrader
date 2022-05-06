@@ -694,7 +694,11 @@ class TestNbGraderAutograde(BaseTestApp):
 
         self._copy_file(join("files", "test.ipynb"), join(course_dir, "submitted", "foo", "ps1", "p1.ipynb"))
         self._copy_file(join("files", "test.ipynb"), join(course_dir, "submitted", "foo", "ps1", "p2.ipynb"))
-        run_nbgrader(["autograde", "ps1"])
+        run_nbgrader(["autograde", "ps1",
+                      "--ClearMetadataPreprocessor.enabled=True",
+                      "--ClearMetadataPreprocessor.clear_notebook_metadata=False",
+                      "--ClearMetadataPreprocessor.preserve_cell_metadata_mask=[('nbgrader')]"
+                      ])
 
         assert os.path.exists(join(course_dir, "autograded", "foo", "ps1", "p1.ipynb"))
         assert os.path.exists(join(course_dir, "autograded", "foo", "ps1", "p2.ipynb"))
@@ -751,7 +755,11 @@ class TestNbGraderAutograde(BaseTestApp):
         self._copy_file(join("files", "test.ipynb"), join(course_dir, "submitted", "foo", "ps1", "p1.ipynb"))
         self._copy_file(join("files", "test.ipynb"), join(course_dir, "submitted", "foo", "ps1", "p2.ipynb"))
         self._make_file(join(course_dir, "submitted", "foo", "ps1", "timestamp.txt"), "2015-02-02 15:58:23.948203 America/Los_Angeles")
-        run_nbgrader(["autograde", "ps1"])
+        run_nbgrader(["autograde", "ps1",
+                      "--ClearMetadataPreprocessor.enabled=True",
+                      "--ClearMetadataPreprocessor.clear_notebook_metadata=False",
+                      "--ClearMetadataPreprocessor.preserve_cell_metadata_mask=[('nbgrader')]"
+                      ])
 
         assert os.path.exists(join(course_dir, "autograded", "foo", "ps1", "p1.ipynb"))
         assert os.path.exists(join(course_dir, "autograded", "foo", "ps1", "p2.ipynb"))

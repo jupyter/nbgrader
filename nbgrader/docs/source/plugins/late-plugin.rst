@@ -34,7 +34,7 @@ assigns a penalty of 1 point per hour late:::
 
 
     class SubMarks(BasePlugin):
-        def late_submission_penalty(student_id, score, total_seconds_late):
+        def late_submission_penalty(self, student_id, score, total_seconds_late):
             """Penalty of 1 mark per hour late"""
             hours_late = total_seconds_late / 3600
             return round(hours_late, 0)

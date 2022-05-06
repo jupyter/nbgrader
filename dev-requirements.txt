@@ -1,10 +1,10 @@
-pytest==6.2.4
+pytest==7.1.2
 pytest-cov
 pytest-rerunfailures
-pytest-xdist==2.4.0
+pytest-xdist==2.5.0
 #pytest-mypy
 coverage
-selenium
+selenium>2.4
 sphinx
 sphinx_rtd_theme
 sphinx-autodoc-typehints
