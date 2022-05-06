@@ -34,7 +34,7 @@ function error_dialog(body: string, title: string = 'Validation failed'): void {
   });
 }
 
-var nbgrader_version = "0.7.0.dev"; // TODO: hardcoded value
+var nbgrader_version = "0.8.0.dev"; // TODO: hardcoded value
 
 class ValidateButton extends ToolbarButton {
   private _buttonCallback = this.newButtonCallback();
