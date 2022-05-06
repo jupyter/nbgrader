@@ -663,8 +663,8 @@ def test_total_points(browser, port):
 
 
 @pytest.mark.nbextensions
-def test_total_points(browser, port):
-    _load_notebook(browser, port, 'task')
+def test_task_total_points(browser, port):
+    _load_notebook(browser, port, name='task')
     _activate_toolbar(browser)
 
     # make sure the total points is zero
@@ -680,8 +680,8 @@ def test_total_points(browser, port):
     _select_manual(browser)
     assert _get_total_points(browser) == 2
 
-    # make it a solution make sure the total points is zero
-    _select_solution(browser)
+    # make it a none and make sure the total points is zero
+    _select_none(browser)
     assert _get_total_points(browser) == 0
 
     # make it task
@@ -832,7 +832,7 @@ def test_negative_points(browser, port):
 
 @pytest.mark.nbextensions
 def test_task_negative_points(browser, port):
-    _load_notebook(browser, port, 'task')
+    _load_notebook(browser, port, name='task')
     _activate_toolbar(browser)
 
     # make sure the total points is zero
