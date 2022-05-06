@@ -1,6 +1,5 @@
 import {
   Dialog,
-  showDialog,
   Styling
 } from '@jupyterlab/apputils';
 
@@ -72,6 +71,14 @@ const CSS_NOTEBOOK_PANEL_WIDGET = 'nbgrader-NotebookPanelWidget';
 const CSS_NOTEBOOK_POINTS = 'nbgrader-NotebookPoints';
 const CSS_NOTEBOOK_WIDGET = 'nbgrader-NotebookWidget';
 const CSS_TOTAL_POINTS_INPUT = 'nbgrader-TotalPointsInput';
+const CSS_ERROR_DIALOG = 'nbgrader-ErrorDialog'
+
+
+function showErrorDialog<T>(options: Partial<Dialog.IOptions<T>> = {}): Promise<Dialog.IResult<T>> {
+  const dialog = new Dialog(options);
+  dialog.addClass(CSS_ERROR_DIALOG);
+  return dialog.launch();
+}
 
 /**
  * A widget which shows the "Create Assignment" widgets for the active notebook.
@@ -882,14 +889,14 @@ class NotebookWidget extends Panel {
       options.body = 'At least one cell has an invalid nbgrader ID. Cell IDs ' +
           'must contain at least one character, and may only contain ' +
           'letters, numbers, hyphens, and/or underscores.';
-      showDialog(options);
+      showErrorDialog(options);
       return;
     }
     else if (duplicateId) {
       options.title = 'Duplicate nbgrader cell ID';
       options.body = `The nbgrader ID "${id}" has been used for more than ` +
           `one cell. Please make sure all grade cells have unique ids.`;
-      showDialog(options);
+      showErrorDialog(options);
       return;
     }
   }
@@ -912,7 +919,7 @@ class NotebookWidget extends Panel {
         'line using the following command: ';
     code.innerText = `nbgrader update ${notebookPath}`;
     body.appendChild(code);
-    showDialog(options);
+    showErrorDialog(options);
   }
 
   private scrollIntoViewNearest(widget: CellWidget): void {
