@@ -125,3 +125,6 @@ package-lock.json
 # playwright output tests directory
 playwright-report
 test-results
+/test-results/
+/playwright-report/
+/dist-pw/
