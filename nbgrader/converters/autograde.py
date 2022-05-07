@@ -2,7 +2,7 @@ import os
 import shutil
 
 from textwrap import dedent
-from traitlets import Bool, List, Dict
+from traitlets import Bool, List, Dict, default
 
 from nbconvert.preprocessors import ClearMetadataPreprocessor
 
