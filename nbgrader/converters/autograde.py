@@ -41,6 +41,10 @@ class Autograde(BaseConverter):
 
     _sanitizing = True
 
+    @default("permissions")
+    def _permissions_default(self) -> int:
+        return 444
+
     @property
     def _input_directory(self) -> str:
         if self._sanitizing:
