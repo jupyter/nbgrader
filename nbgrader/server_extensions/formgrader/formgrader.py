@@ -6,7 +6,7 @@ from nbconvert.exporters import HTMLExporter
 from traitlets import default
 from tornado import web
 from jinja2 import Environment, FileSystemLoader
-from notebook.utils import url_path_join as ujoin
+from jupyter_server.utils import url_path_join as ujoin
 
 from . import handlers, apihandlers
 from ...apps.baseapp import NbGrader

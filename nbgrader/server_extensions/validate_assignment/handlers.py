@@ -7,8 +7,8 @@ import traceback
 from tornado import web
 from textwrap import dedent
 
-from notebook.utils import url_path_join as ujoin
-from notebook.base.handlers import IPythonHandler
+from jupyter_server.utils import url_path_join as ujoin
+from jupyter_server.base.handlers import JupyterHandler
 from traitlets.config import Config
 from jupyter_core.paths import jupyter_config_path
 
@@ -21,7 +21,7 @@ from ... import __version__ as nbgrader_version
 static = os.path.join(os.path.dirname(__file__), 'static')
 
 
-class ValidateAssignmentHandler(IPythonHandler):
+class ValidateAssignmentHandler(JupyterHandler):
 
     @property
     def notebook_dir(self):
@@ -92,7 +92,7 @@ class ValidateAssignmentHandler(IPythonHandler):
         self.finish(json.dumps(output))
 
 
-class NbGraderVersionHandler(IPythonHandler):
+class NbGraderVersionHandler(JupyterHandler):
 
     @web.authenticated
     def get(self):

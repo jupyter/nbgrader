@@ -3,12 +3,12 @@ import json
 import functools
 
 from tornado import web
-from notebook.base.handlers import IPythonHandler
+from jupyter_server.base.handlers import JupyterHandler
 from ...api import Gradebook
 from ...apps.api import NbGraderAPI
 
 
-class BaseHandler(IPythonHandler):
+class BaseHandler(JupyterHandler):
 
     @property
     def base_url(self):

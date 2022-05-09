@@ -9,7 +9,7 @@ from tornado import web
 from textwrap import dedent
 
 from notebook.utils import url_path_join as ujoin
-from notebook.base.handlers import IPythonHandler
+from jupyter_server.base.handlers import JupyterHandler
 from traitlets import Unicode, default
 from traitlets.config import LoggingConfigurable, Config
 from jupyter_core.paths import jupyter_config_path
@@ -269,7 +269,7 @@ class AssignmentList(LoggingConfigurable):
         return retvalue
 
 
-class BaseAssignmentHandler(IPythonHandler):
+class BaseAssignmentHandler(JupyterHandler):
 
     @property
     def manager(self):
