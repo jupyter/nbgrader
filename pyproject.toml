@@ -1,0 +1,82 @@
+[project]
+name = "nbgrader"
+description = "A system for assigning and grading notebooks"
+license = {file = "LICENSE"}
+authors = [{name = "Jupyter Development Team", email = "jupyter@googlegroups.com"}]
+keywords = ["Jupyter", "Notebooks", "Grading", "Homework"]
+classifiers = [
+    "License :: OSI Approved :: BSD License",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+
+    "Framework :: Jupyter",
+    "Framework :: Jupyter :: JupyterLab",
+    "Framework :: Jupyter :: JupyterLab :: 3",
+    "Framework :: Jupyter :: JupyterLab :: Extensions",
+    "Framework :: Jupyter :: JupyterLab :: Extensions :: Prebuilt",
+]
+urls = {Homepage = "https://github.com/jupyter/nbgrader"}
+requires-python = ">=3.7"
+dependencies = [
+    "sqlalchemy>=1.4,<2",
+    "python-dateutil>=2.8",
+    "notebook>=6.4,<7",
+    "nbconvert>=6",
+    "requests>=2.26",
+    "jsonschema>=3",
+    "alembic>=1.7",
+    "rapidfuzz>=1.8",
+    "Jinja2>=3",
+    "MarkupSafe<2.2.0",
+    "jupyter_client<8",
+    "jupyter_server>=1.12",
+    "qtconsole>=5.2",
+    "ipywidgets>=7.6",
+    "nbclient>=0.6.1",
+]
+dynamic = ["version"]
+
+[project.readme]
+file = "README.md"
+content-type = "text/markdown"
+
+[project.optional-dependencies]
+docs = [
+    "sphinx",
+    "sphinx_rtd_theme",
+    "sphinx-autodoc-typehints",
+    "myst-parser"
+]
+tests = [
+    "pytest==7.1.2",
+    "pytest-cov",
+    "pytest-rerunfailures",
+    "pytest-xdist==2.5.0",
+    "coverage",
+    "selenium>2.4",
+    "codecov",
+    "nbval",
+    "requests-mock",
+    "wheel",
+]
+
+[project.scripts]
+nbgrader = "nbgrader.apps.nbgraderapp:main"
+
+[tool.tbump.version]
+current = "0.8.0.dev"
+regex = '''
+  (?P<major>\d+)\.(?P<minor>\d+)\.(?P<patch>\d+)
+  ((?P<channel>a|b|rc|.dev)(?P<release>\d+))?
+'''
+
+[tool.tbump.git]
+message_template = "Bump to {new_version}"
+tag_template = "v{new_version}"
+
+[[tool.tbump.file]]
+src = "nbgrader/__init__.py"
+
+[[tool.tbump.file]]
+src = "nbgrader/docs/source/conf.py"
+
