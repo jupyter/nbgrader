@@ -39,7 +39,7 @@ Update the changelog
 --------------------
 
 Ideally, the :doc:`/changelog` (located at
-``nbgrader/docs/source/changelog.rst``) should be updated as things are
+``CHANGELOG.md``) should be updated as things are
 changed. In practice, this doesn't always happen as people forget to include
 changes to the changelog in PRs. However, the changelog should be fully
 up-to-date at the time of a release. To ensure that it is up-to-date, filter

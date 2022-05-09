@@ -1,0 +1,5 @@
+changelog
+=======
+
+```{include} ../../../CHANGELOG.md
+```

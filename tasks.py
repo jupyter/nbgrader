@@ -34,8 +34,8 @@ def _check_if_directory_in_path(pth, target):
 def docs(args):
     del args  # unused
     run('git clean -fdX nbgrader/docs')
-    if not WINDOWS:
-        run('pytest --nbval-lax --current-env nbgrader/docs/source/user_guide/*.ipynb')
+    # if not WINDOWS:
+    #     run('pytest --nbval-lax --current-env nbgrader/docs/source/user_guide/*.ipynb')
     run('python nbgrader/docs/source/build_docs.py')
     run('python nbgrader/docs/source/clear_docs.py')
     run('make -C nbgrader/docs html')
