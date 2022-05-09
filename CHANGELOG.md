@@ -1,5 +1,13 @@
 A summary of changes to nbgrader.
 
+<!-- <START NEW CHANGELOG ENTRY> -->
+
+## 0.8.x
+
+### 0.8.0
+
+<!-- <END NEW CHANGELOG ENTRY> -->
+
 ## 0.7.x
 
 ### 0.7.0
