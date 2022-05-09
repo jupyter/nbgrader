@@ -1,0 +1,19 @@
+name: Check Release
+on:
+  push:
+    branches: ["master"]
+  pull_request:
+    branches: ["*"]
+
+jobs:
+  check_release:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        group: [check_release, link_check]
+    steps:
+      - name: Check Release
+        if: ${{ matrix.group == 'check_release' }}
+        uses: jupyter-server/jupyter_releaser/.github/actions/check-release@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
