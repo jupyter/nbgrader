@@ -1,3 +1,15 @@
+include *.md
+include *.json
+include *.txt
+
+include .coveragerc
+include .bowerrc
+include mypy.ini
+include pytest.ini
+include codecov.yml
+include readthedocs.yaml
+include tasks.py
+
 #nbgrader format files
 include nbgrader/nbgraderformat/*.json
 
@@ -25,3 +37,8 @@ include nbgrader/tests/nbextensions/files/*
 global-exclude *.pyc
 global-exclude .ipynb_checkpoints
 global-exclude __pycache__
+
+# directories to prune
+prune demos
+prune tools
+prune paper
