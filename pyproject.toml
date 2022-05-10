@@ -87,3 +87,12 @@ src = "pyproject.toml"
 [[tool.tbump.file]]
 src = "package.json"
 search = '"version": "{current_version}"'
+
+[[tool.tbump.file]]
+src = "nbgrader/nbextensions/assignment_list/main.js"
+
+[[tool.tbump.file]]
+src = "nbgrader/nbextensions/course_list/main.js"
+
+[[tool.tbump.file]]
+src = "nbgrader/nbextensions/validate_assignment/main.js"
