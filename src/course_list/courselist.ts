@@ -1,3 +1,5 @@
+import { JupyterFrontEnd } from '@jupyterlab/application';
+
 import { URLExt } from '@jupyterlab/coreutils';
 
 import { ServerConnection } from '@jupyterlab/services';
@@ -37,7 +39,7 @@ export async function requestAPI<T>(
   return data;
 }
 
-function createElementFromCourse(data: any) {
+function createElementFromCourse(data: any, app: JupyterFrontEnd) {
     var element = document.createElement('div') as HTMLDivElement;
     element.classList.add('list_item','row');
 
@@ -48,13 +50,15 @@ function createElementFromCourse(data: any) {
     container.classList.add('item_name','col-sm-2');
 
     var anchor = document.createElement('a') as HTMLAnchorElement;
-    anchor.href = data['url'];
-    anchor.target = '_blank';
-    anchor.text = data['course_id'];
+    anchor.href = '#';
+    anchor.innerText = data['course_id'];
+    anchor.onclick = function() {
+      app.commands.execute('nbgrader:formgrader');
+    }
 
     var fgkind = document.createElement('span') as HTMLSpanElement;
     fgkind.classList.add('item_course', 'col-sm-2');
-    fgkind.textContent = data['formgrader_kind'];
+    fgkind.textContent = data['kind'];
 
     container.append(anchor);
     row.append(container);
@@ -69,8 +73,10 @@ export class CourseList {
     listloading: HTMLDivElement;
     listerror: HTMLDivElement;
     listerrortext: HTMLDivElement;
+    app: JupyterFrontEnd;
 
-    constructor(public course_list_element: HTMLDivElement) {
+    constructor(public course_list_element: HTMLDivElement, app: JupyterFrontEnd) {
+        this.app = app;
         this.listplaceholder = document.createElement('div') as HTMLDivElement;
         this.listplaceholder.id = 'formgrader_list_placeholder';
         this.listplaceholder.classList.add('row', 'list_placeholder');
@@ -153,7 +159,7 @@ export class CourseList {
             this.listplaceholder.hidden = true;
         }
         for (var i=0; i<len; i++) {
-            this.course_list_element.appendChild(createElementFromCourse(data[i]));
+            this.course_list_element.appendChild(createElementFromCourse(data[i], this.app));
         }
 
     }

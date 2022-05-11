@@ -62,6 +62,11 @@
     padding-right: 0;
 }
 
+#courses .list_item .item_name, #courses .list_item .item_course{
+    display: inline-block;
+    width: 16.66666667%;
+}
+
 #courses .list_placeholder {
     /* set using hidden = true instead, no need for this. */
     /* display: none; */

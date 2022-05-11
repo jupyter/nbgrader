@@ -6,9 +6,11 @@ import { Widget } from '@lumino/widgets';
 class CourseListWidget extends Widget {
     version_alert: HTMLDivElement;
     courselist: CourseList;
+    app: JupyterFrontEnd;
 
-    constructor() {
+    constructor(app: JupyterFrontEnd) {
         super();
+        this.app = app;
         var maindiv = document.createElement('div') as HTMLDivElement;
         maindiv.id = 'courses';
         maindiv.classList.add("tab-pane");
@@ -52,7 +54,7 @@ class CourseListWidget extends Widget {
         formgraderlist.classList.add('list_container');
 
         // further initialization of formgraderlist is in here
-        this.courselist = new CourseList(formgraderlist);
+        this.courselist = new CourseList(formgraderlist, this.app);
 
         panelbody.appendChild(formgraderlist);
         panel.appendChild(panelbody);
@@ -106,7 +108,7 @@ export const course_list_extension: JupyterFrontEndPlugin<void> = {
             label: 'Course List',
             execute: () => {
                 if (!widget) {
-                    const content = new CourseListWidget;
+                    const content = new CourseListWidget(app);
                     widget = new MainAreaWidget({content});
                     widget.id = 'nbgrader-course-list'
                     widget.title.label = 'Courses'

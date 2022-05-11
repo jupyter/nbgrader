@@ -1,4 +1,4 @@
 
-@import url('assignment_list.css');
-@import url('course_list.css');
-@import url('create_assignment.css');
+@import url('./assignment_list.css');
+@import url('./course_list.css');
+@import url('./create_assignment.css');
