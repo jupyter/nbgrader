@@ -4,8 +4,11 @@ import * as path from 'path';
 
 test.use({ tmpPath: 'nbgrader-create-assignments-test' });
 
-const nb_files = ["blank.ipynb", "task.ipynb", "old-schema.ipynb"]
+const nb_files = ["blank.ipynb", "task.ipynb", "old-schema.ipynb"];
 
+/*
+ * copy notebook files before each test
+ */
 test.beforeEach(async ({ baseURL, tmpPath }) => {
     const contents = galata.newContentsHelper(baseURL);
     nb_files.forEach(elem => {
@@ -19,12 +22,18 @@ test.beforeEach(async ({ baseURL, tmpPath }) => {
     });
 });
 
+/*
+ * delete temp directory at the end of test
+ */
 test.afterAll(async ({ baseURL, tmpPath }) => {
     const contents = galata.newContentsHelper(baseURL);
     await contents.deleteDirectory(tmpPath);
   });
 
 
+/*
+ * Open a notebook file
+ */
 const open_notebook = async (page:IJupyterLabPageFixture, notebook:string) => {
 
     var filename = notebook + '.ipynb';
@@ -35,6 +44,9 @@ const open_notebook = async (page:IJupyterLabPageFixture, notebook:string) => {
 
 }
 
+/*
+ * Save the current notebook file
+ */
 const save_current_notebook = async (page:IJupyterLabPageFixture) => {
     return await page.evaluate(async () => {
         var nb = window.jupyterapp.shell.currentWidget;
@@ -45,6 +57,9 @@ const save_current_notebook = async (page:IJupyterLabPageFixture) => {
     // Read local file ?
 }
 
+/*
+ * Activate assignment toolbar in jupyterlab
+ */
 const activate_toolbar = async (page:IJupyterLabPageFixture) => {
 
     if (await page.locator('.nbgrader-NotebookWidget').count() > 0){
@@ -56,6 +71,9 @@ const activate_toolbar = async (page:IJupyterLabPageFixture) => {
     await expect(page.locator('.nbgrader-NotebookWidget')).toBeVisible();
 }
 
+/*
+ * Get the nbgrader's metadata of a cell
+ */
 const get_cell_metadata = async (page:IJupyterLabPageFixture, cell_number:Number=0) => {
 
     return await page.evaluate((cell_num) => {
@@ -64,44 +82,71 @@ const get_cell_metadata = async (page:IJupyterLabPageFixture, cell_number:Number
     }, cell_number);
 }
 
+/*
+ * Set points to a notebook cell
+ */
 const set_points = async (page:IJupyterLabPageFixture, points:number=0, index:number=0) => {
     await page.locator(".nbgrader-CellPoints input").nth(index).fill(points.toString());
     await page.keyboard.press("Enter");
 }
 
+/*
+ * Set id to a notebook cell
+ */
 const set_id = async (page:IJupyterLabPageFixture, id:string="foo", index:number=0) => {
     await page.locator(".nbgrader-CellId input").nth(index).fill(id);
     await page.keyboard.press("Enter");
 }
 
+/*
+ * Select type of assignment of a cell in nbgrader toolbar
+ */
 const select_in_toolbar = async(page:IJupyterLabPageFixture, text:string, index:number=0) => {
     var select = page.locator('.nbgrader-NotebookWidget select').nth(index);
     await select.selectOption(text);
 }
 
+/*
+ * Get the total points of an assignment
+ */
 const get_total_points = async (page:IJupyterLabPageFixture, index:number=0) => {
     return parseFloat(await page.locator('.nbgrader-TotalPointsInput').nth(0).inputValue());
 }
 
+/*
+ * Wait for error modal
+ */
 const wait_for_modal = async (page:IJupyterLabPageFixture) => {
     await expect(page.locator(".nbgrader-ErrorDialog")).toHaveCount(1);
 }
 
+/*
+ * Close error modal
+ */
 const close_modal = async (page:IJupyterLabPageFixture) => {
     await page.locator(".nbgrader-ErrorDialog button.jp-Dialog-button").click();
 }
 
+/*
+ * Create a new cell in current notebook
+ */
 const create_new_cell = async (page:IJupyterLabPageFixture, after:number=0) => {
     await page.locator('.jp-Cell .jp-InputArea-prompt').nth(after).click();
     await page.keyboard.press('b');
 }
 
+/*
+ * Delete a cell in current notebook
+ */
 const delete_cell = async (page:IJupyterLabPageFixture, index:number=0) => {
     await page.locator('.jp-Cell .jp-InputArea-prompt').nth(index).click();
     await page.keyboard.press('d');
     await page.keyboard.press('d');
 }
 
+/*
+ * Test manipulating a manually graded cell
+ */
 test('manual cell', async ({
     page
   }) => {
@@ -137,6 +182,9 @@ test('manual cell', async ({
     await save_current_notebook(page);
 });
 
+/*
+ * Test manipulating a task cell
+ */
 test('task cell', async ({
     page
 }) => {
@@ -171,6 +219,9 @@ test('task cell', async ({
     await save_current_notebook(page);
 })
 
+/*
+ * Test manipulating a solution graded cell
+ */
 test('solution cell', async ({
     page
 }) => {
@@ -201,6 +252,9 @@ test('solution cell', async ({
     await save_current_notebook(page);
 })
 
+/*
+ * Test manipulating a test graded cell
+ */
 test('tests cell', async ({
     page
 }) => {
@@ -236,6 +290,9 @@ test('tests cell', async ({
     await save_current_notebook(page);
 })
 
+/*
+ * Test converting cell's type
+ */
 test('tests to solution cell', async ({
     page
 }) => {
@@ -278,6 +335,9 @@ test('tests to solution cell', async ({
     await save_current_notebook(page);
 })
 
+/*
+ * Tests on locked cell
+ */
 test('locked cell', async ({
     page
 }) => {
@@ -308,6 +368,9 @@ test('locked cell', async ({
     await save_current_notebook(page);
 })
 
+/*
+ * Test focus using TAB key
+ */
 test('tab key', async ({
     page
 }) => {
@@ -332,6 +395,9 @@ test('tab key', async ({
 
 })
 
+/*
+ * Test the total points of a notebook
+ */
 test('total points', async ({
     page
 }) => {
@@ -381,6 +447,9 @@ test('total points', async ({
 
 })
 
+/*
+ * Test the total points of a notebook using task cell
+ */
 test('task total points', async ({
     page
 }) => {
@@ -391,21 +460,21 @@ test('task total points', async ({
     // make sure the total points is zero
     expect(await get_total_points(page)).toBe(0);
 
-    // make it autograder task and set the points to two
+    // make cell autograded task and set the points to two
     await select_in_toolbar(page, 'task');
     await set_points(page, 2);
     await set_id(page);
     expect(await get_total_points(page)).toBe(2);
 
-    // make it manually graded
+    // make cell manually graded
     await select_in_toolbar(page, 'manual');
     expect(await get_total_points(page)).toBe(2);
 
-    // make it a solution make sure the total points is zero
+    // make cell a none graded and make sure the total points is zero
     await select_in_toolbar(page, '');
     expect(await get_total_points(page)).toBe(0);
 
-    // make it task again
+    // make cell a task again
     await select_in_toolbar(page, 'task');
     expect(await get_total_points(page)).toBe(0);
     await set_points(page, 2);
@@ -430,6 +499,9 @@ test('task total points', async ({
 
 })
 
+/*
+ * Tests on cell ids
+ */
 test('cell ids', async ({
     page
 }) => {
@@ -463,6 +535,9 @@ test('cell ids', async ({
 
 })
 
+/*
+ * Tests on task's cell ids
+ */
 test('task cell ids', async ({
     page
 }) => {
@@ -496,6 +571,9 @@ test('task cell ids', async ({
 
 })
 
+/*
+ * Test attributing negative points
+ */
 test('negative points', async ({
     page
 }) => {
@@ -520,6 +598,9 @@ test('negative points', async ({
 
 })
 
+/*
+ * Test attributing negative points on task's cell
+ */
 test('task negative points', async ({
     page
 }) => {
@@ -544,6 +625,9 @@ test('task negative points', async ({
 
 })
 
+/*
+ * Test nbgrader schema version
+ */
 test('schema version', async ({
     page
 }) => {
@@ -557,6 +641,9 @@ test('schema version', async ({
 
 })
 
+/*
+ * Test an invalid cell type
+ */
 test('invalid nbgrader cell type', async ({
     page
     }) => {
