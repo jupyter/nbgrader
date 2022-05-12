@@ -1,14 +1,8 @@
 A summary of changes to nbgrader.
 
-<!-- <START NEW CHANGELOG ENTRY> -->
-
-## 0.8.x
-
-### 0.8.0
-
-<!-- <END NEW CHANGELOG ENTRY> -->
-
 ## 0.7.x
+
+<!-- <START NEW CHANGELOG ENTRY> -->
 
 ### 0.7.0
 
@@ -96,6 +90,8 @@ were merged or fixed for the 0.7.0 release:
 -   Wildcarde
 -   willingc
 -   ykazakov
+
+<!-- <END NEW CHANGELOG ENTRY> -->
 
 ## 0.6.x
 
