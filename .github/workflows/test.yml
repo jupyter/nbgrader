@@ -17,7 +17,7 @@ defaults:
 jobs:
   test_nbgrader:
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 20
+    timeout-minutes: 25
 
     env:
       # NOTE: UTF-8 content may be interpreted as ascii and causes errors
