@@ -70,11 +70,7 @@
     min-width: 13ex;
 }
 
-#assignments .list_placeholder {
-    display: none;
-}
-
-#assignments .list_error, #assignments .version_error {
+#assignments .version_error {
     display: none;
 }
 

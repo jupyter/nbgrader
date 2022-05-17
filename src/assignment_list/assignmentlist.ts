@@ -4,12 +4,23 @@ import { URLExt } from '@jupyterlab/coreutils';
 
 import { ServerConnection } from '@jupyterlab/services';
 
-import { Dialog, showDialog } from '@jupyterlab/apputils';
+import { Dialog } from '@jupyterlab/apputils';
 
 import { Widget } from '@lumino/widgets';
 
 import { PageConfig } from '@jupyterlab/coreutils';
 
+const CSS_ERROR_DIALOG = 'nbgrader-ErrorDialog'
+const CSS_SUCCESS_DIALOG = 'nbgrader-SuccessDialog'
+
+function showNbGraderDialog<T>(options: Partial<Dialog.IOptions<T>> = {}, error: boolean = false): Promise<Dialog.IResult<T>> {
+  const dialog = new Dialog(options);
+
+  if (error) dialog.addClass(CSS_ERROR_DIALOG);
+  else dialog.addClass(CSS_SUCCESS_DIALOG);
+
+  return dialog.launch();
+}
 
 export class AssignmentList{
 
@@ -33,10 +44,10 @@ export class AssignmentList{
     this.fetched_selector = fetched_selector;
     this.submitted_selector = submitted_selector;
 
-    var div_elments = widget.node.getElementsByTagName('div');
-    this.released_element = div_elments.namedItem(released_selector);
-    this.fetched_element = div_elments.namedItem(fetched_selector);
-    this.submitted_element = div_elments.namedItem(submitted_selector);
+    var div_elements = widget.node.getElementsByTagName('div');
+    this.released_element = div_elements.namedItem(released_selector);
+    this.fetched_element = div_elements.namedItem(fetched_selector);
+    this.submitted_element = div_elements.namedItem(submitted_selector);
 
     this.options = options;
     this.base_url = options.get('base_url') || PageConfig.getBaseUrl();
@@ -72,8 +83,7 @@ export class AssignmentList{
 
       } else {
           // show placeholders display
-          // using hidden = false here does not work
-          (<HTMLDivElement>elems[i].children.namedItem(this.list_placeholder_ids[i])).style.display = 'block';
+          (<HTMLDivElement>elems[i].children.namedItem(this.list_placeholder_ids[i])).hidden = false;
 
           // hide loading and errors
           (<HTMLDivElement>elems[i].children.namedItem(this.list_loading_ids[i])).hidden = true;
@@ -93,13 +103,13 @@ export class AssignmentList{
           (newData)=>{this.handle_load_list(newData)}, this.options, this.app);
         if (data[i].status === 'released') {
           this.released_element.append(element);
-          (<HTMLDivElement>this.released_element.children.namedItem('released_assignments_list_placeholder')).style.removeProperty('display');
+          (<HTMLDivElement>this.released_element.children.namedItem('released_assignments_list_placeholder')).hidden = true;
         } else if (data[i]['status'] === 'fetched') {
           this.fetched_element.append(element);
-          (<HTMLDivElement>this.fetched_element.children.namedItem('fetched_assignments_list_placeholder')).style.removeProperty('display');
+          (<HTMLDivElement>this.fetched_element.children.namedItem('fetched_assignments_list_placeholder')).hidden = true;
         } else if (data[i]['status'] === 'submitted') {
           this.submitted_element.append(element);
-          (<HTMLDivElement>this.submitted_element.children.namedItem('submitted_assignments_list_placeholder')).style.removeProperty('display');
+          (<HTMLDivElement>this.submitted_element.children.namedItem('submitted_assignments_list_placeholder')).hidden = true;
         }
     }
 
@@ -145,8 +155,7 @@ export class AssignmentList{
       }
 
       // show errors
-      // FIX ME avoid doing all this casting
-      (<HTMLDivElement>elems[i].children.namedItem(this.list_error_ids[i])).style.display = 'block';
+      (<HTMLDivElement>elems[i].children.namedItem(this.list_error_ids[i])).hidden = false;
       (<HTMLDivElement>elems[i].children.namedItem(this.list_error_ids[i])).innerText = error;
 
       // hide loading and placeholding
@@ -248,11 +257,11 @@ class Assignment {
 
   private submit_error(data: { value: any; }): void {
 
-    showDialog({
+    showNbGraderDialog({
       title: "Invalid Submission",
       body: data.value,
       buttons: [Dialog.okButton()]
-    });
+    }, true);
 
 
   };
@@ -543,6 +552,8 @@ class Notebook{
 
     var body = document.createElement('div') as HTMLDivElement;
     body.id = 'validation-message';
+    var error = false;
+
     if (data['success']) {
         if (typeof(data.value) === "string") {
             data = JSON.parse(data.value);
@@ -578,6 +589,7 @@ class Notebook{
           this.validate_failure(button);
 
         } else if (data['failed'] !== undefined) {
+          error = true;
           for (var i=0; i<data.failed.length; i++) {
             var div = document.createElement('div');
             var paragraph = document.createElement('p');
@@ -608,6 +620,7 @@ class Notebook{
         }
 
     } else {
+      error = true;
       var div  = document.createElement('div');
       var paragraph = document.createElement('p');
       paragraph.innerText = 'There was an error running the validate command:';
@@ -621,11 +634,11 @@ class Notebook{
     }
     let b: Widget;
     b = new Widget({node: body});
-    showDialog({
+    showNbGraderDialog({
       title: "Validation Results",
       body: b,
       buttons: [Dialog.okButton()]
-    });
+    }, error);
 
   };
 
