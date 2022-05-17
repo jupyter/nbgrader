@@ -10,6 +10,7 @@ const config: PlaywrightTestConfig = {
   testIgnore: '**/node_modules/**/*',
   timeout: 30000,
   reporter: [[process.env.CI ? 'dot' : 'list'], ['html']],
+  workers: 1,
   use: {
   // Browser options
   // headless: false,
