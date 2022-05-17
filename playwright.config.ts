@@ -8,7 +8,7 @@ const config: PlaywrightTestConfig = {
   testDir: './nbgrader/tests/labextension_ui-tests',
   testMatch: '**/*.spec.ts',
   testIgnore: '**/node_modules/**/*',
-  timeout: 30000,
+  timeout: 120000,
   reporter: [[process.env.CI ? 'dot' : 'list'], ['html']],
   workers: 1,
   use: {
