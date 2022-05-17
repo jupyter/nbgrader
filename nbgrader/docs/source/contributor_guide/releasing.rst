@@ -13,7 +13,6 @@ Prerequisites
 - All PRs should be tagged with the appropriate milestone. Several of the
   releasing scripts depend on this being done.
 - You will need a GitHub API key: https://github.com/settings/tokens
-- Install packaging requirement `tbump <https://github.com/dmerejkowsky/tbump>`_ : ``pip install tbump``
 
 Backport PRs
 ------------
@@ -52,15 +51,8 @@ changes to the changelog in PRs. However, the changelog should be fully
 up-to-date at the time of a release. To ensure that it is up-to-date, filter
 PRs on GitHub by the current milestone and make sure to include all major
 changes. In addition, please include a full list of merged PRs, which can be
-found using one of the 2 following options :
-
-- jupyter_releaser workflow :
-https://jupyter-releaser.readthedocs.io/en/latest/get_started/generate_changelog.html
-
-- using the ``changelog.py`` script in the ``tools`` directory, for example ``./tools/changelog.py 0.3.0``.
-
-This will print out the list of merged PRs for the given milestone, which
-should then be included in the changelog.
+found using
+`jupyter_releaser workflow <https://jupyter-releaser.readthedocs.io/en/latest/get_started/generate_changelog.html>`_.
 
 Note that if you are updating the changelog on a release branch (e.g.
 ``0.3.x``), then you will need to also make the relevant changes on master.
@@ -82,7 +74,7 @@ Bump the version number
 The version number is bumped using `tbump <https://github.com/dmerejkowsky/tbump>`_ :
 ``tbump <VERSION> --no-push``
 
-The version number should has been changed in the following files :
+The version number should have been changed in the following files :
 
 - ``pyproject.toml``
 - ``package.json``
