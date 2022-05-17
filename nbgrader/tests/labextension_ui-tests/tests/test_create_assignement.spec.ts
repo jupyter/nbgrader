@@ -2,6 +2,8 @@ import { test, galata, IJupyterLabPageFixture } from '@jupyterlab/galata';
 import { expect } from '@playwright/test';
 import * as path from 'path';
 
+import { wait_for_error_modal, close_error_modal } from "./test_utils";
+
 test.use({ tmpPath: 'nbgrader-create-assignments-test' });
 
 const nb_files = ["blank.ipynb", "task.ipynb", "old-schema.ipynb"];
@@ -111,20 +113,6 @@ const select_in_toolbar = async(page:IJupyterLabPageFixture, text:string, index:
  */
 const get_total_points = async (page:IJupyterLabPageFixture, index:number=0) => {
     return parseFloat(await page.locator('.nbgrader-TotalPointsInput').nth(0).inputValue());
-}
-
-/*
- * Wait for error modal
- */
-const wait_for_modal = async (page:IJupyterLabPageFixture) => {
-    await expect(page.locator(".nbgrader-ErrorDialog")).toHaveCount(1);
-}
-
-/*
- * Close error modal
- */
-const close_modal = async (page:IJupyterLabPageFixture) => {
-    await page.locator(".nbgrader-ErrorDialog button.jp-Dialog-button").click();
 }
 
 /*
@@ -515,8 +503,8 @@ test('cell ids', async ({
 
     // wait for error on saving with empty id
     await save_current_notebook(page);
-    await wait_for_modal(page);
-    await close_modal(page);
+    await wait_for_error_modal(page);
+    await close_error_modal(page);
 
     // set correct id
     await set_id(page);
@@ -530,8 +518,8 @@ test('cell ids', async ({
 
     // wait for error on saving with empty id
     await save_current_notebook(page);
-    await wait_for_modal(page);
-    await close_modal(page);
+    await wait_for_error_modal(page);
+    await close_error_modal(page);
 
 })
 
@@ -551,8 +539,8 @@ test('task cell ids', async ({
 
     // wait for error on saving with empty id
     await save_current_notebook(page);
-    await wait_for_modal(page);
-    await close_modal(page);
+    await wait_for_error_modal(page);
+    await close_error_modal(page);
 
     // set correct id
     await set_id(page);
@@ -566,8 +554,8 @@ test('task cell ids', async ({
 
     // wait for error on saving with empty id
     await save_current_notebook(page);
-    await wait_for_modal(page);
-    await close_modal(page);
+    await wait_for_error_modal(page);
+    await close_error_modal(page);
 
 })
 
@@ -636,8 +624,8 @@ test('schema version', async ({
 
     // activate toolbar should show an error modal
     await activate_toolbar(page);
-    await wait_for_modal(page);
-    await close_modal(page);
+    await wait_for_error_modal(page);
+    await close_error_modal(page);
 
 })
 
