@@ -7,7 +7,7 @@ import sys
 from ._version import version_info, __version__
 
 
-# Classic notebook extension
+# Classic notebook extensions
 def _jupyter_nbextension_paths():
     paths = [
         dict(
@@ -51,7 +51,7 @@ def _jupyter_nbextension_paths():
     return paths
 
 
-# Jupyter server extension
+# Jupyter server extensions
 def _jupyter_server_extension_points():
     paths = [
         dict(module="nbgrader.server_extensions.formgrader"),
@@ -65,7 +65,7 @@ def _jupyter_server_extension_points():
     return paths
 
 
-# Classic notebook server extension
+# Classic notebook server extensions
 def _jupyter_server_extension_paths():
     paths = [
         dict(module="nbgrader.server_extensions.formgrader"),
