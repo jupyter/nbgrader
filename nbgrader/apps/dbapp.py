@@ -405,7 +405,7 @@ class DbAssignmentImportApp(DbGenericImportApp):
 class DbAssignmentListApp(DbBaseApp):
 
     name = u'nbgrader-db-assignment-list'
-    description = u'List assignments int the nbgrader database'
+    description = u'List assignments in the nbgrader database'
 
     aliases = aliases
     flags = flags
