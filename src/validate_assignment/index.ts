@@ -8,7 +8,7 @@ import {
 } from '@lumino/disposable';
 
 import {
-  ToolbarButton, Dialog, showDialog
+  ToolbarButton, Dialog
 } from '@jupyterlab/apputils';
 
 import {
@@ -25,13 +25,20 @@ import {
 
 import { requestAPI } from './validateassignment';
 
-function error_dialog(body: string, title: string = 'Validation failed'): void {
-  showDialog({
-    title: title,
-    body: body,
-    buttons: [Dialog.okButton()],
-    focusNodeSelector: 'input'
-  });
+const CSS_ERROR_DIALOG = 'nbgrader-ErrorDialog'
+const CSS_SUCCESS_DIALOG = 'nbgrader-SuccessDialog'
+
+function showNbGraderDialog<T>(
+  options: Partial<Dialog.IOptions<T>> = {},
+  error: boolean = false
+  ): Promise<Dialog.IResult<T>> {
+
+    const dialog = new Dialog(options);
+
+    if (error) dialog.addClass(CSS_ERROR_DIALOG);
+    else dialog.addClass(CSS_SUCCESS_DIALOG);
+
+    return dialog.launch();
 }
 
 var nbgrader_version = "0.8.0.dev"; // TODO: hardcoded value
@@ -83,7 +90,12 @@ class ValidateButton extends ToolbarButton {
       this.panel.context.saveState.disconnect(this.saveCallback);
 
       if (args !== "completed") {
-        error_dialog("Cannot save notebook");
+        showNbGraderDialog({
+          title: "Validation failed",
+          body: "Cannot save notebook",
+          buttons: [Dialog.okButton()],
+          focusNodeSelector: 'input'
+        }, true);
         this.setButtonLabel();
         this.setButtonDisabled(false);
         return;
@@ -100,7 +112,12 @@ class ValidateButton extends ToolbarButton {
         this.setButtonLabel();
         this.setButtonDisabled(false);
       }).catch(reason => {
-        error_dialog(`Cannot validate: ${reason}`);
+        showNbGraderDialog({
+          title: "Validation failed",
+          body: `Cannot validate: ${reason}`,
+          buttons: [Dialog.okButton()],
+          focusNodeSelector: 'input'
+        }, true);
         this.setButtonLabel();
         this.setButtonDisabled(false);
       });
@@ -110,7 +127,12 @@ class ValidateButton extends ToolbarButton {
   private newVersionCheckCallback() {
     return (data: any) => {
       if (data.success !== true) {
-        error_dialog(data.message, 'Version Mismatch');
+        showNbGraderDialog({
+          title: "Version Mismatch",
+          body: data.message,
+          buttons: [Dialog.okButton()],
+          focusNodeSelector: 'input'
+        }, true);
         return;
       }
 
@@ -133,7 +155,12 @@ class ValidateButton extends ToolbarButton {
           this.versionCheckCallback
       ).catch(reason => {
         // The validate_assignment server extension appears to be missing
-        error_dialog(`Cannot check version: ${reason}`);
+        showNbGraderDialog({
+          title: "Validation failed",
+          body: `Cannot check version: ${reason}`,
+          buttons: [Dialog.okButton()],
+          focusNodeSelector: 'input'
+        }, true);
       });
     }
   }
@@ -156,6 +183,7 @@ class ValidateButton extends ToolbarButton {
   private validate(data: any): void {
     let body = document.createElement('div');
     body.id = "validation-message";
+    var isError = false;
 
     const newSourceBox = function(text: string): HTMLDivElement {
       const source = document.createElement('div');
@@ -181,6 +209,7 @@ class ValidateButton extends ToolbarButton {
         data = data.value;
       }
       if (data.type_changed !== undefined) {
+        isError = true;
         for (let i=0; i<data.type_changed.length; i++) {
           const textBox = newTextBox(`The following ${data.type_changed[i].old_type} cell has changed to a ${data.type_changed[i].new_type} cell, but it should not have!`);
           const source = newSourceBox(data.type_changed[i].source);
@@ -190,6 +219,7 @@ class ValidateButton extends ToolbarButton {
         body.classList.add("validation-type-changed");
 
       } else if (data.changed !== undefined) {
+        isError = true;
         for (let i=0; i<data.changed.length; i++) {
           const textBox = newTextBox('The source of the following cell has changed, but it should not have!');
           const source = newSourceBox(data.changed[i].source);
@@ -208,6 +238,7 @@ class ValidateButton extends ToolbarButton {
         body.classList.add("validation-passed");
 
       } else if (data.failed !== undefined) {
+        isError = true;
         for (let i=0; i<data.failed.length; i++) {
           const textBox = newTextBox('The following cell failed:');
           const source = newSourceBox(data.failed[i].source);
@@ -230,6 +261,7 @@ class ValidateButton extends ToolbarButton {
       }
 
     } else {
+      isError = true;
       const textBox = newTextBox('There was an error running the validate command:');
       const source = document.createElement('pre');
       source.innerText = data.value;
@@ -237,12 +269,12 @@ class ValidateButton extends ToolbarButton {
       body.appendChild(source);
     }
 
-    showDialog({
+    showNbGraderDialog({
       title: "Validation Results",
       body: new Widget({node: body}),
       buttons: [Dialog.okButton()],
       focusNodeSelector: 'input'
-    });
+    }, isError);
   }
 }
 

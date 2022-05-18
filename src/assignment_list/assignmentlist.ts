@@ -552,7 +552,7 @@ class Notebook{
 
     var body = document.createElement('div') as HTMLDivElement;
     body.id = 'validation-message';
-    var error = false;
+    var isError = false;
 
     if (data['success']) {
         if (typeof(data.value) === "string") {
@@ -561,6 +561,7 @@ class Notebook{
             data = data.value;
         }
         if (data['changed'] !== undefined) {
+          isError = true;
           for (var i=0; i<data.changed.length; i++) {
             var div = document.createElement('div')
             var paragraph = document.createElement('p')
@@ -589,7 +590,7 @@ class Notebook{
           this.validate_failure(button);
 
         } else if (data['failed'] !== undefined) {
-          error = true;
+          isError = true;
           for (var i=0; i<data.failed.length; i++) {
             var div = document.createElement('div');
             var paragraph = document.createElement('p');
@@ -620,7 +621,7 @@ class Notebook{
         }
 
     } else {
-      error = true;
+      isError = true;
       var div  = document.createElement('div');
       var paragraph = document.createElement('p');
       paragraph.innerText = 'There was an error running the validate command:';
@@ -638,7 +639,7 @@ class Notebook{
       title: "Validation Results",
       body: b,
       buttons: [Dialog.okButton()]
-    }, error);
+    }, isError);
 
   };
 
