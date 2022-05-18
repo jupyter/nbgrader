@@ -7,7 +7,7 @@ include .bowerrc
 include mypy.ini
 include pytest.ini
 include codecov.yml
-include readthedocs.yaml
+include .readthedocs.yaml
 include tasks.py
 
 #nbgrader format files
