@@ -1,6 +1,0 @@
-name: nbgrader
-type: sphinx
-requirements_file: readthedocs-requirements.txt
-python:
-  version: 3
-  setup_py_install: true

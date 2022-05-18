@@ -1,0 +1,12 @@
+name: nbgrader
+type: sphinx
+sphinx:
+  builder: html
+  configuration: nbgrader/docs/source/conf.py
+python:
+  version: 3
+  install:
+    - method: pip
+      path: .
+      extra_requirements:
+        - docs
