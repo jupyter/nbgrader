@@ -67,9 +67,12 @@ class ExchangeReleaseFeedback(Exchange, ABCExchangeReleaseFeedback):
                 submission_secret = fh.read()
 
             checksum = notebook_hash(secret=submission_secret, notebook_id=notebook_id)
-            dest = os.path.join(self.dest_path, "{}.html".format(checksum))
+            dest = os.path.join(self.dest_path, "{}-tmp.html".format(checksum))
 
             self.log.info("Releasing feedback for student '{}' on assignment '{}/{}/{}' ({})".format(
                 student_id, self.coursedir.course_id, self.coursedir.assignment_id, notebook_id, timestamp))
             shutil.copy(html_file, dest)
+            # Copy to temporary location and mv to update atomically.
+            updated_feedback = os.path.join(self.dest_path, "{}.html". format(checksum))
+            shutil.move(dest, updated_feedback)
             self.log.info("Feedback released to: {}".format(dest))
