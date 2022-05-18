@@ -5,6 +5,8 @@ Releasing a new version
     :local:
     :depth: 1
 
+This repository uses `jupyter_releaser <https://jupyter-releaser.readthedocs.io/en/latest/>`_.
+
 Prerequisites
 -------------
 
@@ -38,26 +40,25 @@ just apply the changes manually.
 Update the changelog
 --------------------
 
-Ideally, the :doc:`/changelog` (located at
-``nbgrader/docs/source/changelog.rst``) should be updated as things are
+The :doc:`/changelog` is located at ``CHANGELOG.md``.
+
+Get the list of PR
+~~~~~~~~~~~~~~~~~~
+
+Ideally, the :doc:`/changelog` should be updated as things are
 changed. In practice, this doesn't always happen as people forget to include
 changes to the changelog in PRs. However, the changelog should be fully
 up-to-date at the time of a release. To ensure that it is up-to-date, filter
 PRs on GitHub by the current milestone and make sure to include all major
 changes. In addition, please include a full list of merged PRs, which can be
-found using the ``changelog.py`` script in the ``tools`` directory, for
-example::
-
-    ./tools/changelog.py 0.3.0
-
-This will print out the list of merged PRs for the given milestone, which
-should then be included in the changelog.
+found using
+`jupyter_releaser workflow <https://jupyter-releaser.readthedocs.io/en/latest/get_started/generate_changelog.html>`_.
 
 Note that if you are updating the changelog on a release branch (e.g.
 ``0.3.x``), then you will need to also make the relevant changes on master.
 
 Get the list of contributors
-----------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 To get the list of contributors, you can use the ``contributor_list.py`` script
 in the ``tools`` directory, for example::
@@ -70,8 +71,13 @@ This list should then be included in the changelog.
 Bump the version number
 -----------------------
 
-The version number needs to be changed in the following files:
+The version number is bumped using `tbump <https://github.com/dmerejkowsky/tbump>`_ :
+``tbump <VERSION> --no-push``
 
+The version number should have been changed in the following files :
+
+- ``pyproject.toml``
+- ``package.json``
 - ``nbgrader/_version.py``
 - ``nbgrader/nbextensions/assignment_list/main.js``
 - ``nbgrader/nbextensions/course_list/main.js``
@@ -80,9 +86,9 @@ The version number needs to be changed in the following files:
 Rebuild the documentation
 -------------------------
 
-Regenerate all the documentation for this release by running::
+Regenerate all the documentation for this release by running :
 
-    python tasks.py docs
+    ``python tasks.py docs``
 
 Make sure the linkcheck passes, and commit the results.
 
@@ -157,8 +163,15 @@ Change to development version
 -----------------------------
 
 Bump the version again, this time to development. For example, if the release
-was ``0.3.0``, then the new version should be ``0.4.0.dev0``. Remember that the version needs to be changed in these files:
+was ``0.3.0``, then the new version should be ``0.4.0.dev``.
 
+Use `tbump <https://github.com/dmerejkowsky/tbump>`_ again :
+``tbump 0.4.0.dev --no-push`` (change the version number with the correct one)
+
+As a reminder, the files concerned are :
+
+- ``pyproject.toml``
+- ``package.json``
 - ``nbgrader/_version.py``
 - ``nbgrader/nbextensions/assignment_list/main.js``
 - ``nbgrader/nbextensions/course_list/main.js``

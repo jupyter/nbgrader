@@ -1,0 +1,44 @@
+include *.md
+include *.json
+include *.txt
+
+include .coveragerc
+include .bowerrc
+include mypy.ini
+include pytest.ini
+include codecov.yml
+include readthedocs.yaml
+include tasks.py
+
+#nbgrader format files
+include nbgrader/nbgraderformat/*.json
+
+# nbextension files
+recursive-include nbgrader/nbextensions *
+
+# doc files
+recursive-include nbgrader/docs *
+prune nbgrader/docs/build
+
+# static files and templates
+recursive-include nbgrader/server_extensions/formgrader/static *
+recursive-include nbgrader/server_extensions/formgrader/templates *
+
+# alembic files
+include nbgrader/alembic.ini
+recursive-include nbgrader/alembic *
+
+# tests files
+include nbgrader/tests/apps/files/*
+include nbgrader/tests/preprocessors/files/*
+include nbgrader/tests/nbextensions/files/*
+
+# global exclusion
+global-exclude *.pyc
+global-exclude .ipynb_checkpoints
+global-exclude __pycache__
+
+# directories to prune
+prune demos
+prune tools
+prune paper

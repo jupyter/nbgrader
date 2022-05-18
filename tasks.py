@@ -112,9 +112,9 @@ def js(args):
 def install(args):
     # The docs don't seem to build correctly if it's a symlinked install.
     if args.group == 'docs':
-        cmd = 'pip install -r dev-requirements.txt .'
+        cmd = 'pip install .[docs,tests]'
     else:
-        cmd = 'pip install -r dev-requirements.txt -e .'
+        cmd = 'pip install -e .[tests]'
     run(cmd)
 
 

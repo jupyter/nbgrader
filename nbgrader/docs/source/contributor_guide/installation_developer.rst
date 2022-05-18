@@ -13,7 +13,7 @@ Installing and building nbgrader
 -------------------------------------
 nbgrader installs and builds with one command::
 
-    pip install -r dev-requirements.txt -e .
+    pip install -e .[docs,tests]
 
 
 Installing notebook extensions
