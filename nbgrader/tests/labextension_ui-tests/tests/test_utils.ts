@@ -19,8 +19,12 @@ export const execute_command = async (command: string) => {
   }
 }
 
+/*
+ * Create a copy of default config file, append exchange directories to config file, and populate database
+ */
 export const create_env = async (
   page:IJupyterLabPageFixture,
+  tmpPath:string,
   exchange_dir:string,
   cache_dir:string
   ) => {
@@ -28,13 +32,17 @@ export const create_env = async (
   var content = await page.locator('#jupyter-config-data').textContent();
   const rootDir = JSON.parse(content)['serverRoot'];
 
+  if (fs.existsSync(path.resolve(rootDir, "nbgrader_config.py"))) fs.rmSync(path.resolve(rootDir, "nbgrader_config.py"))
+
+  fs.copyFileSync(
+    path.resolve(rootDir, "nbgrader_config.py.default"),
+    path.resolve(rootDir, "nbgrader_config.py")
+  )
+
   /* Add config_file to jupyter root directory, and change to that directory.
   TODO : test on windows, the config file may change (see nbextension test)
   */
   try {
-
-    fs.copyFileSync(path.resolve(__dirname, `../files/nbgrader_config.py`),
-                    path.resolve(rootDir, "nbgrader_config.py"));
 
     var text_to_append = `
 c.Exchange.root = "${exchange_dir}"
@@ -43,7 +51,7 @@ c.Exchange.cache = "${cache_dir}"
 `;
 
     fs.appendFileSync(path.resolve(rootDir, "nbgrader_config.py"), text_to_append);
-    process.chdir(path.resolve(rootDir));
+    process.chdir(path.resolve(rootDir, tmpPath));
   }
   catch (e){
     throw new Error(`ERROR : ${e}`);

@@ -38,16 +38,17 @@ test.afterEach(async ({ baseURL, tmpPath }) => {
   fs.rmSync(cache_dir, { recursive: true, force: true });
   const contents = galata.newContentsHelper(baseURL);
   await contents.deleteDirectory(tmpPath);
-  await contents.deleteFile("gradebook.db");
-  await contents.deleteFile("nbgrader_config.py");
 });
 
 
 /*
- * Create a nbgrader file system
+ * Create a nbgrader file system and modify config
  */
-const class_files = async (page:IJupyterLabPageFixture, baseURL:string, tmpPath:string) => {
+const add_courses = async (page:IJupyterLabPageFixture, baseURL:string, tmpPath:string) => {
+
   const contents = galata.newContentsHelper(baseURL);
+
+  // copy files from the user guide
   const source = path.resolve(__dirname, "..", "..", "..", "docs", "source", "user_guide", "source");
   await contents.uploadDirectory(source, `${tmpPath}/source`);
   await contents.renameDirectory(`${tmpPath}/source/ps1`, `${tmpPath}/source/Problem Set 1`);
@@ -64,15 +65,15 @@ const class_files = async (page:IJupyterLabPageFixture, baseURL:string, tmpPath:
   var text_to_append = `
 c.Exchange.assignment_dir = "${path.resolve(rootDir, tmpPath)}"
 c.CourseDirectory.root = "${path.resolve(rootDir, tmpPath)}"
-  `
+`
   fs.appendFileSync(path.resolve(rootDir, "nbgrader_config.py"), text_to_append);
 
-  fs.copyFileSync(path.resolve(rootDir, "nbgrader_config.py"), path.resolve(rootDir, tmpPath, "nbgrader_config.py"))
-  fs.copyFileSync(path.resolve(rootDir, "gradebook.db"), path.resolve(rootDir, tmpPath, "gradebook.db"))
+  // Necessary to generate and release assignments
+  fs.copyFileSync(path.resolve(rootDir, "nbgrader_config.py"), path.resolve(rootDir, tmpPath, "nbgrader_config.py"));
 }
 
 /*
- * Open a assignment list tab
+ * Open the assignment list tab
  */
 const open_assignment_list = async (page:IJupyterLabPageFixture) => {
 
@@ -116,7 +117,7 @@ const select_course = async(page:IJupyterLabPageFixture, course:string) => {
  */
 const expand_fetched = async(page:IJupyterLabPageFixture, assignment:string, item_id:string): Promise<Locator> => {
   await page.locator(`#fetched_assignments_list a:text("${assignment}")`).click();
-  await expect(page.locator(item_id)).not.toHaveClass("in");
+  await page.waitForSelector(`${item_id}.collapse.in`);
 
   const rows = page.locator(`${item_id} .list_item`);
   for (var i=1; i < await rows.count(); i++){
@@ -130,7 +131,7 @@ const expand_fetched = async(page:IJupyterLabPageFixture, assignment:string, ite
  */
 const collapse_fetched = async(page:IJupyterLabPageFixture, assignment:string, item_id:string) => {
   await page.locator(`#fetched_assignments_list a:text("${assignment}")`).click();
-  await page.waitForSelector(`${item_id}.collapse.in`);
+  await expect(page.locator(`${item_id}.collapse`)).not.toHaveClass('in');
 }
 
 /*
@@ -141,8 +142,8 @@ test('Show assignment list', async({
   baseURL,
   tmpPath
   }) => {
-    await create_env(page, exchange_dir, cache_dir);
-    await class_files(page, baseURL, tmpPath);
+    await create_env(page, tmpPath, exchange_dir, cache_dir);
+    await add_courses(page, baseURL, tmpPath);
     await open_assignment_list(page);
 
     // Wait for DOM of each status
@@ -161,6 +162,7 @@ test('Show assignment list', async({
     const rows = await wait_for_list(page, 'released', 1);
     expect(rows.first().locator('.item_name')).toHaveText("Problem Set 1");
     expect(rows.first().locator('.item_course')).toHaveText("abc101");
+
   });
 
 /*
@@ -171,8 +173,8 @@ test('Multiple released assignments', async({
   baseURL,
   tmpPath
   }) => {
-    await create_env(page, exchange_dir, cache_dir);
-    await class_files(page, baseURL, tmpPath);
+    await create_env(page, tmpPath, exchange_dir, cache_dir);
+    await add_courses(page, baseURL, tmpPath);
     await open_assignment_list(page);
 
     // release two assignments
@@ -191,6 +193,7 @@ test('Multiple released assignments', async({
     const rows = await wait_for_list(page, 'released', 1);
     expect(rows.first().locator('.item_name')).toHaveText("ps.01");
     expect(rows.first().locator('.item_course')).toHaveText("xyz 200");
+
   });
 
 /*
@@ -201,8 +204,8 @@ test('Fetch assignments', async({
   baseURL,
   tmpPath
   }) => {
-    await create_env(page, exchange_dir, cache_dir);
-    await class_files(page, baseURL, tmpPath);
+    await create_env(page, tmpPath, exchange_dir, cache_dir);
+    await add_courses(page, baseURL, tmpPath);
     await open_assignment_list(page);
 
     // release some assignments
@@ -237,6 +240,7 @@ test('Fetch assignments', async({
 
     // collapse assignments notebooks
     await collapse_fetched(page, "ps.01", "#nbgrader-xyz_200-ps01");
+
   });
 
 /*
@@ -248,8 +252,8 @@ test('Submit assignments', async({
   tmpPath
   }) => {
     // create directories and config files, and open assignment_list tab
-    await create_env(page, exchange_dir, cache_dir);
-    await class_files(page, baseURL, tmpPath);
+    await create_env(page, tmpPath, exchange_dir, cache_dir);
+    await add_courses(page, baseURL, tmpPath);
     await open_assignment_list(page);
 
     // release some assignments
@@ -293,6 +297,7 @@ test('Submit assignments', async({
     const timestamp1 = rows.nth(1).locator(".item_name").textContent();
     const timestamp2 = rows.nth(2).locator(".item_name").textContent();
     expect(timestamp1 != timestamp2);
+
   });
 
 /*
@@ -304,8 +309,8 @@ test('submit assignment missing notebook', async ({
   tmpPath
   }) => {
     // create directories and config files, and open assignment_list tab
-    await create_env(page, exchange_dir, cache_dir);
-    await class_files(page, baseURL, tmpPath);
+    await create_env(page, tmpPath, exchange_dir, cache_dir);
+    await add_courses(page, baseURL, tmpPath);
     await open_assignment_list(page);
 
     // release some assignments
@@ -359,13 +364,12 @@ test('submit assignment missing notebook', async ({
     // Set strict flag
     // const jupyter_config_content = await page.locator('#jupyter-config-data').textContent();
     // const rootDir = JSON.parse(jupyter_config_content)['serverRoot'];
-    fs.appendFileSync(path.resolve(tmpPath, "nbgrader_config.py"),
-                      'c.ExchangeSubmit.strict = True');
+    fs.appendFileSync("nbgrader_config.py", 'c.ExchangeSubmit.strict = True');
 
     // submit again and check that nothing changes
     rows = await wait_for_list(page, 'fetched', 1);
     await rows.first().locator('.item_status button:text("Submit")').click();
-    await page.pause();
+
     // wait for error modal and close it
     await wait_for_error_modal(page);
     await close_error_modal(page);
@@ -376,6 +380,7 @@ test('submit assignment missing notebook', async ({
     expect(rows.first().locator('.item_course').first()).toHaveText("xyz 200");
     rows = page.locator('#nbgrader-xyz_200-ps01-submissions > .list_item');
     expect(rows).toHaveCount(3);
+
 });
 
 /*
@@ -386,8 +391,8 @@ test('Fetch a second assignment', async({
   baseURL,
   tmpPath
   }) => {
-    await create_env(page, exchange_dir, cache_dir);
-    await class_files(page, baseURL, tmpPath);
+    await create_env(page, tmpPath, exchange_dir, cache_dir);
+    await add_courses(page, baseURL, tmpPath);
     await open_assignment_list(page);
 
     // release some assignments
@@ -430,6 +435,7 @@ test('Fetch a second assignment', async({
 
     // collapse assignments notebooks
     await collapse_fetched(page, "Problem Set 1", "#nbgrader-abc101-Problem_Set_1");
+
   });
 
 /*
@@ -441,8 +447,8 @@ test('Submit another assignments', async({
   tmpPath
   }) => {
     // create directories and config files, and open assignment_list tab
-    await create_env(page, exchange_dir, cache_dir);
-    await class_files(page, baseURL, tmpPath);
+    await create_env(page, tmpPath, exchange_dir, cache_dir);
+    await add_courses(page, baseURL, tmpPath);
     await open_assignment_list(page);
 
     // release some assignments
@@ -486,8 +492,8 @@ test('Validate OK', async({
   tmpPath
   }) => {
     // create directories and config files, and open assignment_list tab
-    await create_env(page, exchange_dir, cache_dir);
-    await class_files(page, baseURL, tmpPath);
+    await create_env(page, tmpPath, exchange_dir, cache_dir);
+    await add_courses(page, baseURL, tmpPath);
     await open_assignment_list(page);
 
     // release some assignments
@@ -531,8 +537,8 @@ test('Validate failure', async({
   tmpPath
   }) => {
     // create directories and config files, and open assignment_list tab
-    await create_env(page, exchange_dir, cache_dir);
-    await class_files(page, baseURL, tmpPath);
+    await create_env(page, tmpPath, exchange_dir, cache_dir);
+    await add_courses(page, baseURL, tmpPath);
     await open_assignment_list(page);
 
     // release some assignments
@@ -576,8 +582,8 @@ test('Missing exchange directory', async({
   tmpPath
   }) => {
     // create directories and config files
-    await create_env(page, exchange_dir, cache_dir);
-    await class_files(page, baseURL, tmpPath);
+    await create_env(page, tmpPath, exchange_dir, cache_dir);
+    await add_courses(page, baseURL, tmpPath);
 
     // delete exchange directory
     fs.rmSync(exchange_dir, { recursive: true, force: true });
@@ -601,7 +607,6 @@ test('Missing exchange directory', async({
 
     // refresh assignment list and expect retrieving released assignment
     await page.locator('#refresh_assignments_list').click();
-    await page.pause();
     const rows = await wait_for_list(page, 'released', 1);
     expect(rows.first().locator('.item_name')).toHaveText("Problem Set 1");
     expect(rows.first().locator('.item_course')).toHaveText("abc101");

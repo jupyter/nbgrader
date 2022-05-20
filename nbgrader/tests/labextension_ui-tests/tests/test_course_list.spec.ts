@@ -29,15 +29,10 @@ test.beforeEach(async ({ baseURL, tmpPath }) => {
  * delete temp directories at the end of test
  */
 test.afterEach(async ({ baseURL, tmpPath }) => {
-  fs.rmSync(exchange_dir, { recursive: true, force: true });
-  fs.rmSync(cache_dir, { recursive: true, force: true });
-});
-
-test.afterAll(async ({ baseURL, tmpPath }) => {
   const contents = galata.newContentsHelper(baseURL);
   await contents.deleteDirectory(tmpPath);
-  await contents.deleteFile("gradebook.db");
-  await contents.deleteFile("nbgrader_config.py");
+  fs.rmSync(exchange_dir, { recursive: true, force: true });
+  fs.rmSync(cache_dir, { recursive: true, force: true });
 });
 
 /*
@@ -59,6 +54,25 @@ const open_courses_list = async (page:IJupyterLabPageFixture) => {
 }
 
 /*
+ * Modify config file
+ */
+const update_config = async (page:IJupyterLabPageFixture, baseURL:string, tmpPath:string) => {
+
+  const contents = galata.newContentsHelper(baseURL);
+
+  const jupyter_config_content = await page.locator('#jupyter-config-data').textContent();
+  const rootDir = JSON.parse(jupyter_config_content)['serverRoot'];
+
+  var text_to_append = `
+c.Exchange.assignment_dir = "${path.resolve(rootDir, tmpPath)}"
+c.CourseDirectory.root = "${path.resolve(rootDir, tmpPath)}"
+c.CourseDirectory.course_id = "course101"
+`
+
+  fs.appendFileSync(path.resolve(rootDir, "nbgrader_config.py"), text_to_append);
+}
+
+/*
  * TODO: package the 4 extensions individually to be able to install/enable/disable each.
 */
 // test('No formgrader', async ({
@@ -76,11 +90,12 @@ const open_courses_list = async (page:IJupyterLabPageFixture) => {
  */
 test('local formgrader', async ({
   page,
+  baseURL,
   tmpPath
   }) => {
-    await create_env(page, exchange_dir, cache_dir);
+    await create_env(page, tmpPath, exchange_dir, cache_dir);
 
-    fs.appendFileSync("nbgrader_config.py", 'c.CourseDirectory.course_id = "course101"');
+    await update_config(page, baseURL, tmpPath);
 
     await open_courses_list(page);
     await expect(page.locator("#formgrader_list_loading")).not.toBeVisible();
@@ -88,7 +103,6 @@ test('local formgrader', async ({
     await expect(page.locator("#formgrader_list_error")).not.toBeVisible();
     await expect(page.locator("#formgrader_list > .list_item")).toHaveCount(1);
 
-    await page.pause();
     await expect(page.locator("#formgrader_list > .list_item")).toHaveText("course101local");
 
     await expect(page.locator("#formgrader_list > .list_item a")).toHaveCount(1);
@@ -99,6 +113,7 @@ test('local formgrader', async ({
     var tabs = page.locator("#jp-main-dock-panel .lm-TabBar-tab.p-TabBar-tab");
     var newTab_label = tabs.last().locator(".lm-TabBar-tabLabel.p-TabBar-tabLabel");
     await expect(newTab_label).toHaveText("Formgrader");
+
   }
 );
 
@@ -108,18 +123,20 @@ test('local formgrader', async ({
  */
 test('No jupyterhub', async ({
   page,
+  baseURL,
   tmpPath
   }) => {
 
-    await create_env(page, exchange_dir, cache_dir);
+    await create_env(page, tmpPath, exchange_dir, cache_dir);
+
+    await update_config(page, baseURL, tmpPath);
 
     var text_to_append = `
-c.CourseDirectory.course_id = "course101"
 from nbgrader.auth import JupyterHubAuthPlugin
 c.Authenticator.plugin_class = JupyterHubAuthPlugin
     `;
 
-    fs.appendFileSync("nbgrader_config.py", text_to_append);
+    fs.appendFileSync("../nbgrader_config.py", text_to_append);
 
     await open_courses_list(page);
     await expect(page.locator("#formgrader_list_loading")).not.toBeVisible();
@@ -137,5 +154,6 @@ c.Authenticator.plugin_class = JupyterHubAuthPlugin
     var tabs = page.locator("#jp-main-dock-panel .lm-TabBar-tab.p-TabBar-tab");
     var newTab_label = tabs.last().locator(".lm-TabBar-tabLabel.p-TabBar-tabLabel");
     await expect(newTab_label).toHaveText("Formgrader");
+
   }
 );

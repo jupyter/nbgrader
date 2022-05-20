@@ -43,7 +43,7 @@
     "prettier": "jlpm prettier:base --write --list-different",
     "prettier:base": "prettier \"**/*{.ts,.tsx,.js,.jsx,.css,.json,.md}\"",
     "prettier:check": "jlpm prettier:base --check",
-    "start:test": "jupyter lab --config ./nbgrader/tests/labextension_ui-tests/jupyter_server_test_config.py",
+    "start:test": "python ./nbgrader/tests/labextension_ui-tests/run_jupyter_lab.py",
     "stylelint": "jlpm stylelint:check --fix",
     "stylelint:check": "stylelint --cache \"style/**/*.css\"",
     "test": "jlpm playwright test",
