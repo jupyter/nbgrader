@@ -232,7 +232,13 @@ def load_jupyter_server_extension(nbapp):
     nbapp.log.info("Loading the course_list nbgrader serverextension")
     webapp = nbapp.web_app
     base_url = webapp.settings['base_url']
-    webapp.settings['assignment_dir'] = nbapp.notebook_dir
+
+    # compatibility between notebook.notebookapp.NotebookApp and jupyter_server.serverapp.ServerApp
+    if nbapp.name == 'jupyter-notebook':
+        webapp.settings['assignment_dir'] = nbapp.notebook_dir
+    else:
+        webapp.settings['assignment_dir'] = nbapp.root_dir
+
     webapp.add_handlers(".*$", [
         (ujoin(base_url, pat), handler)
         for pat, handler in default_handlers

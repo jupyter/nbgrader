@@ -21,7 +21,7 @@ class Exchange(LoggingConfigurable):
         help=dedent(
             """
             Local path for storing student assignments.  Defaults to '.'
-            which is normally Jupyter's notebook_dir.
+            which is normally Jupyter's root_dir.
             """
         )
     ).tag(config=True)
