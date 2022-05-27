@@ -10,13 +10,14 @@ const async_exec = promisify(exec)
 
 
 export const execute_command = async (command: string) => {
-  const { stderr } = await async_exec(command);
+  const { stdout, stderr } = await async_exec(command);
   if (stderr) {
     if (stderr.includes("ERROR")){
       console.log(`stderr: ${stderr}`);
       throw new Error(`ERROR in command : ${command}\n${stderr}`);
     }
   }
+  return stdout;
 }
 
 /*
@@ -47,11 +48,14 @@ export const create_env = async (
     var text_to_append = `
 c.Exchange.root = "${exchange_dir}"
 c.Exchange.cache = "${cache_dir}"
+c.Exchange.assignment_dir = "${path.resolve(rootDir, tmpPath)}"
+c.CourseDirectory.root = "${path.resolve(rootDir, tmpPath)}"
+c.CourseDirectory.db_url = "sqlite:///${path.resolve(rootDir, tmpPath, 'gradebook.db')}"
 
 `;
 
     fs.appendFileSync(path.resolve(rootDir, "nbgrader_config.py"), text_to_append);
-    process.chdir(path.resolve(rootDir, tmpPath));
+    process.chdir(rootDir);
   }
   catch (e){
     throw new Error(`ERROR : ${e}`);
@@ -63,6 +67,7 @@ c.Exchange.cache = "${cache_dir}"
   await execute_command("nbgrader db student add Bitdiddle --first-name Ben --last-name B");
   await execute_command("nbgrader db student add Hacker --first-name Alyssa --last-name H");
   await execute_command("nbgrader db student add Reasoner --first-name Louis --last-name R");
+
 }
 
 /*
