@@ -111,9 +111,9 @@ var AssignmentUI = Backbone.View.extend({
             .attr("target", self.is_lab ? undefined : "_blank")
             .attr("href", self.is_lab ? undefined : base_url + "/tree/" + url_prefix + "/" + this.model.get("source_path"))
             .click(self.is_lab ? function(){
-                window.parent.postMessage(jlab_go_to_path(this_assignment.model.get("source_path")), '*');
+                window.parent.postMessage(jlab_go_to_path(url_prefix + "/" + this_assignment.model.get("source_path")), '*');
             } : undefined)
-            );
+        );
 
         // duedate
         var duedate = this.model.get("duedate");
@@ -162,7 +162,7 @@ var AssignmentUI = Backbone.View.extend({
                 .attr("target", self.is_lab ? undefined : "_blank")
                 .attr("href", self.is_lab ? undefined : base_url + "/tree/" + url_prefix + "/" + release_path)
                 .click(self.is_lab ? function(){
-                        window.parent.postMessage(jlab_go_to_path(release_path), '*');
+                        window.parent.postMessage(jlab_go_to_path(url_prefix + "/" + release_path), '*');
                     } : undefined)
                 .append($("<span/>")
                     .addClass("glyphicon glyphicon-search")
