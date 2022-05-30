@@ -11,8 +11,8 @@ from tornado import gen
 from textwrap import dedent
 from urllib.parse import urlparse
 
-from notebook.utils import url_path_join as ujoin
-from notebook.base.handlers import IPythonHandler
+from jupyter_server.utils import url_path_join as ujoin
+from jupyter_server.base.handlers import JupyterHandler
 from jupyter_core.paths import jupyter_config_path
 
 from ...apps import NbGrader
@@ -31,7 +31,7 @@ def chdir(dirname):
     os.chdir(currdir)
 
 
-class CourseListHandler(IPythonHandler):
+class CourseListHandler(JupyterHandler):
 
     @property
     def assignment_dir(self):
@@ -191,7 +191,7 @@ class CourseListHandler(IPythonHandler):
         raise gen.Return(self.finish(json.dumps(retvalue)))
 
 
-class NbGraderVersionHandler(IPythonHandler):
+class NbGraderVersionHandler(JupyterHandler):
 
     @web.authenticated
     def get(self):
@@ -232,7 +232,13 @@ def load_jupyter_server_extension(nbapp):
     nbapp.log.info("Loading the course_list nbgrader serverextension")
     webapp = nbapp.web_app
     base_url = webapp.settings['base_url']
-    webapp.settings['assignment_dir'] = nbapp.notebook_dir
+
+    # compatibility between notebook.notebookapp.NotebookApp and jupyter_server.serverapp.ServerApp
+    if nbapp.name == 'jupyter-notebook':
+        webapp.settings['assignment_dir'] = nbapp.notebook_dir
+    else:
+        webapp.settings['assignment_dir'] = nbapp.root_dir
+
     webapp.add_handlers(".*$", [
         (ujoin(base_url, pat), handler)
         for pat, handler in default_handlers

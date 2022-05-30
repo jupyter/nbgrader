@@ -9,7 +9,7 @@ from tornado import web
 from textwrap import dedent
 
 from notebook.utils import url_path_join as ujoin
-from notebook.base.handlers import IPythonHandler
+from jupyter_server.base.handlers import JupyterHandler
 from traitlets import Unicode, default
 from traitlets.config import LoggingConfigurable, Config
 from jupyter_core.paths import jupyter_config_path
@@ -34,6 +34,14 @@ def chdir(dirname):
 
 class AssignmentList(LoggingConfigurable):
 
+    @property
+    def root_dir(self):
+        return self._root_dir
+
+    @root_dir.setter
+    def root_dir(self, directory):
+        self._root_dir = directory
+
     def load_config(self):
         paths = jupyter_config_path()
         paths.insert(0, os.getcwd())
@@ -47,7 +55,7 @@ class AssignmentList(LoggingConfigurable):
     @contextlib.contextmanager
     def get_assignment_dir_config(self):
         # first get the exchange assignment directory
-        with chdir(self.parent.notebook_dir):
+        with chdir(self.root_dir):
             config = self.load_config()
 
         lister = ExchangeFactory(config=config).List(config=config)
@@ -96,9 +104,9 @@ class AssignmentList(LoggingConfigurable):
             else:
                 for assignment in assignments:
                     if assignment['status'] == 'fetched':
-                        assignment['path'] = os.path.relpath(assignment['path'], self.parent.notebook_dir)
+                        assignment['path'] = os.path.relpath(assignment['path'], self.root_dir)
                         for notebook in assignment['notebooks']:
-                            notebook['path'] = os.path.relpath(notebook['path'], self.parent.notebook_dir)
+                            notebook['path'] = os.path.relpath(notebook['path'], self.root_dir)
                 retvalue = {
                     "success": True,
                     "value": sorted(assignments, key=lambda x: (x['course_id'], x['assignment_id']))
@@ -269,7 +277,7 @@ class AssignmentList(LoggingConfigurable):
         return retvalue
 
 
-class BaseAssignmentHandler(IPythonHandler):
+class BaseAssignmentHandler(JupyterHandler):
 
     @property
     def manager(self):
@@ -360,6 +368,13 @@ def load_jupyter_server_extension(nbapp):
     nbapp.log.info("Loading the assignment_list nbgrader serverextension")
     webapp = nbapp.web_app
     webapp.settings['assignment_list_manager'] = AssignmentList(parent=nbapp)
+
+    # compatibility between notebook.notebookapp.NotebookApp and jupyter_server.serverapp.ServerApp
+    if nbapp.name == 'jupyter-notebook':
+        webapp.settings['assignment_list_manager'].root_dir = nbapp.notebook_dir
+    else:
+        webapp.settings['assignment_list_manager'].root_dir = nbapp.root_dir
+
     base_url = webapp.settings['base_url']
     webapp.add_handlers(".*$", [
         (ujoin(base_url, pat), handler)

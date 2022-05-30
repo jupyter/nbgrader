@@ -1,0 +1,10 @@
+{
+  "ServerApp": {
+    "jpserver_extensions": {
+      "nbgrader.server_extensions.formgrader": true,
+      "nbgrader.server_extensions.validate_assignment": true,
+      "nbgrader.server_extensions.assignment_list": true,
+      "nbgrader.server_extensions.course_list": true
+    }
+  }
+}
