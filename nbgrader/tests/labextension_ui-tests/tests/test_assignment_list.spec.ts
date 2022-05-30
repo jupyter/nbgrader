@@ -62,11 +62,6 @@ const add_courses = async (page:IJupyterLabPageFixture, baseURL:string, tmpPath:
 
   const jupyter_config_content = await page.locator('#jupyter-config-data').textContent();
   const rootDir = JSON.parse(jupyter_config_content)['serverRoot'];
-  var text_to_append = `
-c.Exchange.assignment_dir = "${path.resolve(rootDir, tmpPath)}"
-c.CourseDirectory.root = "${path.resolve(rootDir, tmpPath)}"
-`
-  fs.appendFileSync(path.resolve(rootDir, "nbgrader_config.py"), text_to_append);
 
   // Necessary to generate and release assignments
   fs.copyFileSync(path.resolve(rootDir, "nbgrader_config.py"), path.resolve(rootDir, tmpPath, "nbgrader_config.py"));
@@ -309,7 +304,7 @@ test('submit assignment missing notebook', async ({
   tmpPath
   }) => {
     // create directories and config files, and open assignment_list tab
-    await create_env(page, tmpPath, exchange_dir, cache_dir);
+    const rootDir = await create_env(page, tmpPath, exchange_dir, cache_dir);
     await add_courses(page, baseURL, tmpPath);
     await open_assignment_list(page);
 
@@ -362,9 +357,7 @@ test('submit assignment missing notebook', async ({
     expect(timestamp1 != timestamp2);
 
     // Set strict flag
-    // const jupyter_config_content = await page.locator('#jupyter-config-data').textContent();
-    // const rootDir = JSON.parse(jupyter_config_content)['serverRoot'];
-    fs.appendFileSync("nbgrader_config.py", 'c.ExchangeSubmit.strict = True');
+    fs.appendFileSync(path.resolve(rootDir, tmpPath, "nbgrader_config.py"), 'c.ExchangeSubmit.strict = True');
 
     // submit again and check that nothing changes
     rows = await wait_for_list(page, 'fetched', 1);

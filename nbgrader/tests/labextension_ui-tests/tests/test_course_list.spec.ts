@@ -56,17 +56,11 @@ const open_courses_list = async (page:IJupyterLabPageFixture) => {
 /*
  * Modify config file
  */
-const update_config = async (page:IJupyterLabPageFixture, baseURL:string, tmpPath:string) => {
-
-  const contents = galata.newContentsHelper(baseURL);
-
-  const jupyter_config_content = await page.locator('#jupyter-config-data').textContent();
-  const rootDir = JSON.parse(jupyter_config_content)['serverRoot'];
+const update_config = async (page:IJupyterLabPageFixture, rootDir:string) => {
 
   var text_to_append = `
-c.Exchange.assignment_dir = "${path.resolve(rootDir, tmpPath)}"
-c.CourseDirectory.root = "${path.resolve(rootDir, tmpPath)}"
 c.CourseDirectory.course_id = "course101"
+
 `
 
   fs.appendFileSync(path.resolve(rootDir, "nbgrader_config.py"), text_to_append);
@@ -93,9 +87,9 @@ test('local formgrader', async ({
   baseURL,
   tmpPath
   }) => {
-    await create_env(page, tmpPath, exchange_dir, cache_dir);
+    const rootDir = await create_env(page, tmpPath, exchange_dir, cache_dir);
 
-    await update_config(page, baseURL, tmpPath);
+    await update_config(page, rootDir);
 
     await open_courses_list(page);
     await expect(page.locator("#formgrader_list_loading")).not.toBeVisible();
@@ -127,16 +121,16 @@ test('No jupyterhub', async ({
   tmpPath
   }) => {
 
-    await create_env(page, tmpPath, exchange_dir, cache_dir);
+    const rootDir = await create_env(page, tmpPath, exchange_dir, cache_dir);
 
-    await update_config(page, baseURL, tmpPath);
+    await update_config(page, rootDir);
 
     var text_to_append = `
 from nbgrader.auth import JupyterHubAuthPlugin
 c.Authenticator.plugin_class = JupyterHubAuthPlugin
     `;
 
-    fs.appendFileSync("../nbgrader_config.py", text_to_append);
+    fs.appendFileSync(path.resolve(rootDir, "nbgrader_config.py"), text_to_append);
 
     await open_courses_list(page);
     await expect(page.locator("#formgrader_list_loading")).not.toBeVisible();

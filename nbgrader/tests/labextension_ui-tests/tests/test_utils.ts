@@ -28,7 +28,7 @@ export const create_env = async (
   tmpPath:string,
   exchange_dir:string,
   cache_dir:string
-  ) => {
+  ): Promise<string> => {
 
   var content = await page.locator('#jupyter-config-data').textContent();
   const rootDir = JSON.parse(content)['serverRoot'];
@@ -68,6 +68,7 @@ c.CourseDirectory.db_url = "sqlite:///${path.resolve(rootDir, tmpPath, 'gradeboo
   await execute_command("nbgrader db student add Hacker --first-name Alyssa --last-name H");
   await execute_command("nbgrader db student add Reasoner --first-name Louis --last-name R");
 
+  return rootDir;
 }
 
 /*
