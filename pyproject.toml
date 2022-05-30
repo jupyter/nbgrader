@@ -2,6 +2,13 @@
 requires = ["jupyter_packaging~=0.12.0", "jupyterlab<4", "setuptools>=40.8.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
+[tool.jupyter-packaging.builder]
+factory = "jupyter_packaging.npm_builder"
+
+[tool.jupyter-packaging.build-args]
+build_cmd = "build:prod"
+npm = ["jlpm"]
+
 [tool.tbump.version]
 current = "0.8.0.dev"
 regex = '''

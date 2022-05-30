@@ -29,7 +29,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [windows-latest, ubuntu-20.04]
-        group: ["docs", "nbextensions", "python"]
+        group: ["docs", "nbextensions", "python", "labextensions"]
         python: ["3.7", "3.8", "3.9", "3.10"]
         exclude:
           - os: windows-latest
@@ -57,7 +57,14 @@ jobs:
           if [ "${{ matrix.group }}" == "python" ]; then
               echo "GROUP=python" >> $GITHUB_ENV
           fi
+          if [ "${{ matrix.group }}" == "labextensions" ]; then
+              echo "GROUP=labextensions" >> $GITHUB_ENV
+          fi
       - uses: actions/checkout@v2
+      - name: Install node
+        uses: actions/setup-node@v1
+        with:
+          node-version: '17.x'
       # NOTE: actions/setup-python@v2 can make use of a cache within the GitHub
       #       Action virtual environment and setup extremely fast. 3.9 isn't
       #       available in this cache as of November 2020.
@@ -74,6 +81,9 @@ jobs:
           python -m pip install --upgrade pip wheel setuptools
           python tasks.py install --group="$GROUP"
           pip freeze
+      - name: Install Playwright
+        run: |
+          npx playwright install
       - name: Run pytest
         run: |
           python tasks.py tests --group="$GROUP"
