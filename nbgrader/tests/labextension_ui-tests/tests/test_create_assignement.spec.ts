@@ -69,7 +69,14 @@ const activate_toolbar = async (page:IJupyterLabPageFixture) => {
             return;
         }
     }
-    await page.mouse.click(1010, 160);
+
+    const widget_button = page.locator(".lm-TabBar-tab.p-TabBar-tab[title='nbgrader Create Assignment']");
+    const button_position = await widget_button.boundingBox();
+    await page.mouse.click(
+        button_position.x + button_position.width/2,
+        button_position.y + button_position.height/2
+    );
+
     await expect(page.locator('.nbgrader-NotebookWidget')).toBeVisible();
 }
 
@@ -151,9 +158,9 @@ test('manual cell', async ({
     expect(metadata).toHaveProperty('grade', true);
     expect(metadata).toHaveProperty('locked', false);
 
-    await page.waitForSelector(".nbgrader-CellId >> nth=0");
-    await page.waitForSelector(".nbgrader-CellPoints >> nth=0");
-    await page.waitForSelector(".nbgrader-LockButton >> nth=0");
+    await expect(page.locator(".nbgrader-CellId >> nth=0")).toBeVisible();
+    await expect(page.locator(".nbgrader-CellPoints >> nth=0")).toBeVisible();
+    await expect(page.locator(".nbgrader-LockButton >> nth=0")).toBeVisible();
 
     await set_points(page, 2);
     expect(await get_cell_metadata(page)).toHaveProperty('points', 2);
@@ -189,8 +196,8 @@ test('task cell', async ({
     expect(metadata).toHaveProperty('grade', false);
     expect(metadata).toHaveProperty('locked', true);
 
-    await page.waitForSelector(".nbgrader-CellId >> nth=0");
-    await page.waitForSelector(".nbgrader-CellPoints >> nth=0");
+    await expect(page.locator(".nbgrader-CellId >> nth=0")).toBeVisible();
+    await expect(page.locator(".nbgrader-CellPoints >> nth=0")).toBeVisible();
 
     await set_points(page, 2);
     expect(await get_cell_metadata(page)).toHaveProperty('points', 2);
@@ -226,7 +233,7 @@ test('solution cell', async ({
     expect(metadata).toHaveProperty('grade', false);
     expect(metadata).toHaveProperty('locked', false);
 
-    await page.waitForSelector(".nbgrader-CellId >> nth=0");
+    await expect(page.locator(".nbgrader-CellId >> nth=0")).toBeVisible();
 
     expect((await get_cell_metadata(page))['grade_id']).toEqual(expect.stringMatching('^cell\-'));
     await set_id(page);
@@ -259,9 +266,9 @@ test('tests cell', async ({
     expect(metadata).toHaveProperty('grade', true);
     expect(metadata).toHaveProperty('locked', true);
 
-    await page.waitForSelector(".nbgrader-CellId >> nth=0");
-    await page.waitForSelector(".nbgrader-CellPoints >> nth=0");
-    await page.waitForSelector(".nbgrader-LockButton >> nth=0");
+    await expect(page.locator(".nbgrader-CellId >> nth=0")).toBeVisible();
+    await expect(page.locator(".nbgrader-CellPoints >> nth=0")).toBeVisible();
+    await expect(page.locator(".nbgrader-LockButton >> nth=0")).toBeVisible();
 
     await set_points(page, 2);
     expect(await get_cell_metadata(page)).toHaveProperty('points', 2);
@@ -297,9 +304,9 @@ test('tests to solution cell', async ({
     expect(metadata).toHaveProperty('grade', true);
     expect(metadata).toHaveProperty('locked', true);
 
-    await page.waitForSelector(".nbgrader-CellId >> nth=0");
-    await page.waitForSelector(".nbgrader-CellPoints >> nth=0");
-    await page.waitForSelector(".nbgrader-LockButton >> nth=0");
+    await expect(page.locator(".nbgrader-CellId >> nth=0")).toBeVisible();
+    await expect(page.locator(".nbgrader-CellPoints >> nth=0")).toBeVisible();
+    await expect(page.locator(".nbgrader-LockButton >> nth=0")).toBeVisible();
 
     await set_points(page, 2);
     expect(await get_cell_metadata(page)).toHaveProperty('points', 2);
@@ -342,8 +349,8 @@ test('locked cell', async ({
     expect(metadata).toHaveProperty('grade', false);
     expect(metadata).toHaveProperty('locked', true);
 
-    await page.waitForSelector(".nbgrader-CellId >> nth=0");
-    await page.waitForSelector(".nbgrader-LockButton >> nth=0");
+    await expect(page.locator(".nbgrader-CellId >> nth=0")).toBeVisible();
+    await expect(page.locator(".nbgrader-LockButton >> nth=0")).toBeVisible();
 
     expect((await get_cell_metadata(page))['grade_id']).toEqual(expect.stringMatching('^cell\-'));
     await set_id(page);
@@ -647,7 +654,7 @@ test('invalid nbgrader cell type', async ({
     expect(metadata).toHaveProperty('grade', false);
     expect(metadata).toHaveProperty('locked', false);
 
-    await page.waitForSelector(".nbgrader-CellId");
+    await expect(page.locator(".nbgrader-CellId")).toBeVisible();
 
     expect((await get_cell_metadata(page))['grade_id']).toEqual(expect.stringMatching('^cell\-'));
     await set_id(page);
