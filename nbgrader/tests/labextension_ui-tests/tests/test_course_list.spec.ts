@@ -12,6 +12,8 @@ test.use({ tmpPath: 'nbgrader-course-list-test' });
 var exchange_dir:string;
 var cache_dir: string;
 
+const is_windows = os.platform().startsWith('win')
+
 /*
  * Create environment
  */
@@ -73,6 +75,7 @@ c.CourseDirectory.course_id = "course101"
 //   page
 //   }) => {
 
+//     test.skip(is_windows, 'This feature is not implemented for Windows');
 //     await open_courses_list(page);
 
 //   }
@@ -87,6 +90,9 @@ test('local formgrader', async ({
   baseURL,
   tmpPath
   }) => {
+
+    test.skip(is_windows, 'This feature is not implemented for Windows');
+
     const rootDir = await create_env(page, tmpPath, exchange_dir, cache_dir);
 
     await update_config(page, rootDir);
@@ -118,8 +124,11 @@ test('local formgrader', async ({
 test('No jupyterhub', async ({
   page,
   baseURL,
-  tmpPath
+  tmpPath,
+
   }) => {
+
+    test.skip(is_windows, 'This feature is not implemented for Windows');
 
     const rootDir = await create_env(page, tmpPath, exchange_dir, cache_dir);
 
