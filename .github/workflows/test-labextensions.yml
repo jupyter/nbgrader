@@ -1,7 +1,7 @@
 # This is a GitHub workflow defining a set of jobs with a set of steps.
 # ref: https://docs.github.com/en/free-pro-team@latest/actions/reference/workflow-syntax-for-github-actions
 #
-name: Test
+name: Test labextensions
 
 on:
   pull_request:
@@ -29,37 +29,14 @@ jobs:
       fail-fast: false
       matrix:
         os: [windows-latest, ubuntu-20.04]
-        group: ["docs", "nbextensions", "python", "labextensions"]
         python: ["3.7", "3.8", "3.9", "3.10"]
-        exclude:
-          - os: windows-latest
-            group: docs
-          - python: "3.7"
-            group: docs
-          - python: "3.8"
-            group: docs
-          - python: "3.9"
-            group: docs
-          - python: "3.7"
-            group: nbextensions
     steps:
       # This is how you set an environment variable in a GitHub workflow that
       # will be available in following steps as if you would used `export
       # MY_ENV=my-value`.
       - name: Configure environment variables from job flags
         run: |
-          if [ "${{ matrix.group }}" == "docs" ]; then
-              echo "GROUP=docs" >> $GITHUB_ENV
-          fi
-          if [ "${{ matrix.group }}" == "nbextensions" ]; then
-              echo "GROUP=nbextensions" >> $GITHUB_ENV
-          fi
-          if [ "${{ matrix.group }}" == "python" ]; then
-              echo "GROUP=python" >> $GITHUB_ENV
-          fi
-          if [ "${{ matrix.group }}" == "labextensions" ]; then
-              echo "GROUP=labextensions" >> $GITHUB_ENV
-          fi
+          echo "GROUP=labextensions" >> $GITHUB_ENV
       - uses: actions/checkout@v2
       - name: Install node
         uses: actions/setup-node@v1
@@ -72,21 +49,21 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python }}
-      - name: Run pre-commit
-        if: matrix.group == 'docs'
-        run: |
-          sudo apt-get install pandoc
       - name: Install Python dependencies
         run: |
           python -m pip install --upgrade pip wheel setuptools
-          python tasks.py install --group="$GROUP"
+          python tasks.py install --group=labextensions
           pip freeze
       - name: Install Playwright
         run: |
           npx playwright install
       - name: Run pytest
         run: |
-          python tasks.py tests --group="$GROUP"
-      # - name: Submit codecov report
-      #   run: |
-      #     codecov
+          python tasks.py tests --group=labextensions
+      - name: Upload Playwright Test report
+        if: always()
+        uses: actions/upload-artifact@v2
+        with:
+          name: nbgrader-playwright-tests-os_${{ matrix.os }}-python_${{ matrix.python }}
+          path: |
+            playwright-tests

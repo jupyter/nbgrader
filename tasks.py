@@ -78,7 +78,7 @@ def _run_tests(mark, skip, junitxml, paralell=False):
 
 
 def _run_ts_test():
-    cmd = ['npx', 'playwright', 'test']
+    cmd = ['npx', 'playwright', 'test', '--retries=3']
     run(" ".join(cmd))
 
 

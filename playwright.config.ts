@@ -9,7 +9,7 @@ const config: PlaywrightTestConfig = {
   testMatch: '**/*.spec.ts',
   testIgnore: '**/node_modules/**/*',
   timeout: 120000,
-  reporter: [[process.env.CI ? 'dot' : 'list'], ['html']],
+  reporter: [[process.env.CI ? 'dot' : 'list'], ['html', { outputFolder: 'playwright-tests' }]],
   workers: 1,
   use: {
   // Browser options
