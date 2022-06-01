@@ -44,7 +44,10 @@ test.beforeEach(async ({ baseURL, tmpPath }) => {
 test.afterAll(async ({ baseURL, tmpPath }) => {
     const contents = galata.newContentsHelper(baseURL);
     await contents.deleteDirectory(tmpPath);
-  });
+
+    if (contents.fileExists("nbgrader_config.py")) contents.deleteFile("nbgrader_config.py");
+    contents.uploadFile(path.resolve(__dirname, "../files/nbgrader_config.py"), "nbgrader_config.py");
+});
 
 
 /*

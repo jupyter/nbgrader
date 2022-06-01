@@ -33,13 +33,6 @@ export const create_env = async (
   var content = await page.locator('#jupyter-config-data').textContent();
   const rootDir = JSON.parse(content)['serverRoot'];
 
-  if (fs.existsSync(path.resolve(rootDir, "nbgrader_config.py"))) fs.rmSync(path.resolve(rootDir, "nbgrader_config.py"))
-
-  fs.copyFileSync(
-    path.resolve(rootDir, "nbgrader_config.py.default"),
-    path.resolve(rootDir, "nbgrader_config.py")
-  )
-
   /* Add config_file to jupyter root directory, and change to that directory.
   TODO : test on windows, the config file may change (see nbextension test)
   */

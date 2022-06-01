@@ -13,7 +13,7 @@ shutil.copyfile("./nbgrader/tests/labextension_ui-tests/jupyter_server_test_conf
                 join(root_dir, "jupyter_server_test_config.py"))
 
 shutil.copyfile("./nbgrader/tests/labextension_ui-tests/files/nbgrader_config.py",
-                join(root_dir, "nbgrader_config.py.default"))
+                join(root_dir, "nbgrader_config.py"))
 
 subprocess.check_call([sys.executable, "-m", "jupyter", "server", "extension", "enable", "--user", "--py", "nbgrader"], env=env)
 subprocess.check_call([sys.executable, "-m", "jupyter", "labextension", "develop", "."])

@@ -35,6 +35,9 @@ test.afterEach(async ({ baseURL, tmpPath }) => {
   await contents.deleteDirectory(tmpPath);
   fs.rmSync(exchange_dir, { recursive: true, force: true });
   fs.rmSync(cache_dir, { recursive: true, force: true });
+
+  if (contents.fileExists("nbgrader_config.py")) contents.deleteFile("nbgrader_config.py");
+  contents.uploadFile(path.resolve(__dirname, "../files/nbgrader_config.py"), "nbgrader_config.py");
 });
 
 /*
@@ -118,45 +121,45 @@ test('local formgrader', async ({
 );
 
 
-/*
- * Test using JupyterHub authenticator without jupyterHub, expecting same results as previous tests
- */
-test('No jupyterhub', async ({
-  page,
-  baseURL,
-  tmpPath,
+// /*
+//  * Test using JupyterHub authenticator without jupyterHub, expecting same results as previous tests
+//  */
+// test('No jupyterhub', async ({
+//   page,
+//   baseURL,
+//   tmpPath,
 
-  }) => {
+//   }) => {
 
-    test.skip(is_windows, 'This feature is not implemented for Windows');
+//     test.skip(is_windows, 'This feature is not implemented for Windows');
 
-    const rootDir = await create_env(page, tmpPath, exchange_dir, cache_dir);
+//     const rootDir = await create_env(page, tmpPath, exchange_dir, cache_dir);
 
-    await update_config(page, rootDir);
+//     await update_config(page, rootDir);
 
-    var text_to_append = `
-from nbgrader.auth import JupyterHubAuthPlugin
-c.Authenticator.plugin_class = JupyterHubAuthPlugin
-    `;
+//     var text_to_append = `
+// from nbgrader.auth import JupyterHubAuthPlugin
+// c.Authenticator.plugin_class = JupyterHubAuthPlugin
+//     `;
 
-    fs.appendFileSync(path.resolve(rootDir, "nbgrader_config.py"), text_to_append);
+//     fs.appendFileSync(path.resolve(rootDir, "nbgrader_config.py"), text_to_append);
 
-    await open_courses_list(page);
-    await expect(page.locator("#formgrader_list_loading")).not.toBeVisible();
-    await expect(page.locator("#formgrader_list_placeholder")).not.toBeVisible();
-    await expect(page.locator("#formgrader_list_error")).not.toBeVisible();
-    await expect(page.locator("#formgrader_list > .list_item")).toHaveCount(1);
+//     await open_courses_list(page);
+//     await expect(page.locator("#formgrader_list_loading")).not.toBeVisible();
+//     await expect(page.locator("#formgrader_list_placeholder")).not.toBeVisible();
+//     await expect(page.locator("#formgrader_list_error")).not.toBeVisible();
+//     await expect(page.locator("#formgrader_list > .list_item")).toHaveCount(1);
 
-    await expect(page.locator("#formgrader_list > .list_item")).toHaveText("course101local");
+//     await expect(page.locator("#formgrader_list > .list_item")).toHaveText("course101local");
 
-    await expect(page.locator("#formgrader_list > .list_item a")).toHaveCount(1);
+//     await expect(page.locator("#formgrader_list > .list_item a")).toHaveCount(1);
 
-    await page.locator("#formgrader_list > .list_item a").click();
-    await expect(page.locator("#jp-main-dock-panel .lm-TabBar-tab.p-TabBar-tab")).toHaveCount(3);
+//     await page.locator("#formgrader_list > .list_item a").click();
+//     await expect(page.locator("#jp-main-dock-panel .lm-TabBar-tab.p-TabBar-tab")).toHaveCount(3);
 
-    var tabs = page.locator("#jp-main-dock-panel .lm-TabBar-tab.p-TabBar-tab");
-    var newTab_label = tabs.last().locator(".lm-TabBar-tabLabel.p-TabBar-tabLabel");
-    await expect(newTab_label).toHaveText("Formgrader");
+//     var tabs = page.locator("#jp-main-dock-panel .lm-TabBar-tab.p-TabBar-tab");
+//     var newTab_label = tabs.last().locator(".lm-TabBar-tabLabel.p-TabBar-tabLabel");
+//     await expect(newTab_label).toHaveText("Formgrader");
 
-  }
-);
+//   }
+// );
