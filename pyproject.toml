@@ -13,6 +13,9 @@ factory = "jupyter_packaging.npm_builder"
 build_cmd = "build:prod"
 npm = ["jlpm"]
 
+[tool.check-manifest]
+ignore = ["nbgrader/labextension/**", "yarn.lock"]
+
 [tool.tbump.version]
 current = "0.8.0.dev"
 regex = '''
