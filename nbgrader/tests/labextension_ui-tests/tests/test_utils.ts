@@ -27,7 +27,8 @@ export const create_env = async (
   page:IJupyterLabPageFixture,
   tmpPath:string,
   exchange_dir:string,
-  cache_dir:string
+  cache_dir:string,
+  is_windows:boolean
   ): Promise<string> => {
 
   var content = await page.locator('#jupyter-config-data').textContent();
@@ -39,13 +40,19 @@ export const create_env = async (
   try {
 
     var text_to_append = `
-c.Exchange.root = "${exchange_dir}"
-c.Exchange.cache = "${cache_dir}"
-c.Exchange.assignment_dir = "${path.resolve(rootDir, tmpPath)}"
-c.CourseDirectory.root = "${path.resolve(rootDir, tmpPath)}"
-c.CourseDirectory.db_url = "sqlite:///${path.resolve(rootDir, tmpPath, 'gradebook.db')}"
+c.CourseDirectory.root = r"${path.resolve(rootDir, tmpPath)}"
+c.CourseDirectory.db_url = r"sqlite:///${path.resolve(rootDir, tmpPath, 'gradebook.db')}"
 
 `;
+
+    if (!is_windows){
+      text_to_append = text_to_append.concat(`
+c.Exchange.root = r"${exchange_dir}"
+c.Exchange.cache = r"${cache_dir}"
+c.Exchange.assignment_dir = r"${path.resolve(rootDir, tmpPath)}"
+
+`);
+    }
 
     fs.appendFileSync(path.resolve(rootDir, "nbgrader_config.py"), text_to_append);
     process.chdir(rootDir);

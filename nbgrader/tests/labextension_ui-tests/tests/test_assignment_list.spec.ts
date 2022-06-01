@@ -28,16 +28,21 @@ test.beforeEach(async ({ baseURL, tmpPath }) => {
 
   await contents.createDirectory(tmpPath);
 
-  exchange_dir = fs.mkdtempSync(path.join(os.tmpdir(), 'nbgrader_exchange_test_'));
-  cache_dir = fs.mkdtempSync(path.join(os.tmpdir(), 'nbgrader_cache_test_'));
+  if (!is_windows){
+    exchange_dir = fs.mkdtempSync(path.join(os.tmpdir(), 'nbgrader_exchange_test_'));
+    cache_dir = fs.mkdtempSync(path.join(os.tmpdir(), 'nbgrader_cache_test_'));
+  }
 });
 
 /*
  * delete temp directories at the end of test
  */
 test.afterEach(async ({ baseURL, tmpPath }) => {
-  fs.rmSync(exchange_dir, { recursive: true, force: true });
-  fs.rmSync(cache_dir, { recursive: true, force: true });
+  if (!is_windows){
+    fs.rmSync(exchange_dir, { recursive: true, force: true });
+    fs.rmSync(cache_dir, { recursive: true, force: true });
+  }
+
   const contents = galata.newContentsHelper(baseURL);
   await contents.deleteDirectory(tmpPath);
 
@@ -145,7 +150,7 @@ test('Show assignment list', async({
 
     test.skip(is_windows, 'This feature is not implemented for Windows');
 
-    await create_env(page, tmpPath, exchange_dir, cache_dir);
+    await create_env(page, tmpPath, exchange_dir, cache_dir, is_windows);
     await add_courses(page, baseURL, tmpPath);
     await open_assignment_list(page);
 
@@ -179,7 +184,7 @@ test('Multiple released assignments', async({
 
     test.skip(is_windows, 'This feature is not implemented for Windows');
 
-    await create_env(page, tmpPath, exchange_dir, cache_dir);
+    await create_env(page, tmpPath, exchange_dir, cache_dir, is_windows);
     await add_courses(page, baseURL, tmpPath);
     await open_assignment_list(page);
 
@@ -213,7 +218,7 @@ test('Fetch assignments', async({
 
     test.skip(is_windows, 'This feature is not implemented for Windows');
 
-    await create_env(page, tmpPath, exchange_dir, cache_dir);
+    await create_env(page, tmpPath, exchange_dir, cache_dir, is_windows);
     await add_courses(page, baseURL, tmpPath);
     await open_assignment_list(page);
 
@@ -264,7 +269,7 @@ test('Submit assignments', async({
     test.skip(is_windows, 'This feature is not implemented for Windows');
 
     // create directories and config files, and open assignment_list tab
-    await create_env(page, tmpPath, exchange_dir, cache_dir);
+    await create_env(page, tmpPath, exchange_dir, cache_dir, is_windows);
     await add_courses(page, baseURL, tmpPath);
     await open_assignment_list(page);
 
@@ -324,7 +329,7 @@ test('submit assignment missing notebook', async ({
     test.skip(is_windows, 'This feature is not implemented for Windows');
 
     // create directories and config files, and open assignment_list tab
-    const rootDir = await create_env(page, tmpPath, exchange_dir, cache_dir);
+    const rootDir = await create_env(page, tmpPath, exchange_dir, cache_dir, is_windows);
     await add_courses(page, baseURL, tmpPath);
     await open_assignment_list(page);
 
@@ -407,7 +412,7 @@ test('Fetch a second assignment', async({
 
     test.skip(is_windows, 'This feature is not implemented for Windows');
 
-    await create_env(page, tmpPath, exchange_dir, cache_dir);
+    await create_env(page, tmpPath, exchange_dir, cache_dir, is_windows);
     await add_courses(page, baseURL, tmpPath);
     await open_assignment_list(page);
 
@@ -466,7 +471,7 @@ test('Submit another assignments', async({
     test.skip(is_windows, 'This feature is not implemented for Windows');
 
     // create directories and config files, and open assignment_list tab
-    await create_env(page, tmpPath, exchange_dir, cache_dir);
+    await create_env(page, tmpPath, exchange_dir, cache_dir, is_windows);
     await add_courses(page, baseURL, tmpPath);
     await open_assignment_list(page);
 
@@ -514,7 +519,7 @@ test('Validate OK', async({
     test.skip(is_windows, 'This feature is not implemented for Windows');
 
     // create directories and config files, and open assignment_list tab
-    await create_env(page, tmpPath, exchange_dir, cache_dir);
+    await create_env(page, tmpPath, exchange_dir, cache_dir, is_windows);
     await add_courses(page, baseURL, tmpPath);
     await open_assignment_list(page);
 
@@ -562,7 +567,7 @@ test('Validate failure', async({
     test.skip(is_windows, 'This feature is not implemented for Windows');
 
     // create directories and config files, and open assignment_list tab
-    await create_env(page, tmpPath, exchange_dir, cache_dir);
+    await create_env(page, tmpPath, exchange_dir, cache_dir, is_windows);
     await add_courses(page, baseURL, tmpPath);
     await open_assignment_list(page);
 
@@ -610,7 +615,7 @@ test('Missing exchange directory', async({
     test.skip(is_windows, 'This feature is not implemented for Windows');
 
     // create directories and config files
-    await create_env(page, tmpPath, exchange_dir, cache_dir);
+    await create_env(page, tmpPath, exchange_dir, cache_dir, is_windows);
     await add_courses(page, baseURL, tmpPath);
 
     // delete exchange directory

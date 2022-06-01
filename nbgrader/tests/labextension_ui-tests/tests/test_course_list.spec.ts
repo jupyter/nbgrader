@@ -23,8 +23,10 @@ test.beforeEach(async ({ baseURL, tmpPath }) => {
 
   await contents.createDirectory(tmpPath);
 
-  exchange_dir = fs.mkdtempSync(path.join(os.tmpdir(), 'nbgrader_exchange_test_'));
-  cache_dir = fs.mkdtempSync(path.join(os.tmpdir(), 'nbgrader_cache_test_'));
+  if (!is_windows){
+    exchange_dir = fs.mkdtempSync(path.join(os.tmpdir(), 'nbgrader_exchange_test_'));
+    cache_dir = fs.mkdtempSync(path.join(os.tmpdir(), 'nbgrader_cache_test_'));
+  }
 });
 
 /*
@@ -33,8 +35,11 @@ test.beforeEach(async ({ baseURL, tmpPath }) => {
 test.afterEach(async ({ baseURL, tmpPath }) => {
   const contents = galata.newContentsHelper(baseURL);
   await contents.deleteDirectory(tmpPath);
-  fs.rmSync(exchange_dir, { recursive: true, force: true });
-  fs.rmSync(cache_dir, { recursive: true, force: true });
+
+  if (!is_windows){
+    fs.rmSync(exchange_dir, { recursive: true, force: true });
+    fs.rmSync(cache_dir, { recursive: true, force: true });
+  }
 
   if (contents.fileExists("nbgrader_config.py")) contents.deleteFile("nbgrader_config.py");
   contents.uploadFile(path.resolve(__dirname, "../files/nbgrader_config.py"), "nbgrader_config.py");
@@ -96,7 +101,7 @@ test('local formgrader', async ({
 
     test.skip(is_windows, 'This feature is not implemented for Windows');
 
-    const rootDir = await create_env(page, tmpPath, exchange_dir, cache_dir);
+    const rootDir = await create_env(page, tmpPath, exchange_dir, cache_dir, is_windows);
 
     await update_config(page, rootDir);
 

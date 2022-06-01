@@ -29,17 +29,21 @@ test.beforeEach(async ({ baseURL, tmpPath }) => {
 
   await contents.createDirectory(tmpPath);
 
-  exchange_dir = fs.mkdtempSync(path.join(os.tmpdir(), 'nbgrader_exchange_test_'));
-  cache_dir = fs.mkdtempSync(path.join(os.tmpdir(), 'nbgrader_cache_test_'));
-
+  if (!is_windows){
+    exchange_dir = fs.mkdtempSync(path.join(os.tmpdir(), 'nbgrader_exchange_test_'));
+    cache_dir = fs.mkdtempSync(path.join(os.tmpdir(), 'nbgrader_cache_test_'));
+  }
 });
 
 /*
  * delete temp directories at the end of test
  */
 test.afterEach(async ({ baseURL, tmpPath }) => {
-  fs.rmSync(exchange_dir, { recursive: true, force: true });
-  fs.rmSync(cache_dir, { recursive: true, force: true });
+  if (!is_windows){
+    fs.rmSync(exchange_dir, { recursive: true, force: true });
+    fs.rmSync(cache_dir, { recursive: true, force: true });
+  }
+
   const contents = galata.newContentsHelper(baseURL);
   await contents.deleteDirectory(tmpPath);
 
@@ -183,7 +187,7 @@ test('Load manage assignments', async ({
   }) => {
 
     // create environment
-    await create_env(page, tmpPath, exchange_dir, cache_dir);
+    await create_env(page, tmpPath, exchange_dir, cache_dir, is_windows);
     await add_courses(page, baseURL, tmpPath);
     await open_formgrader(page);
 
@@ -220,7 +224,7 @@ test('Load manage submissions', async ({
 }) => {
 
   // create environment
-  await create_env(page, tmpPath, exchange_dir, cache_dir);
+  await create_env(page, tmpPath, exchange_dir, cache_dir, is_windows);
   await add_courses(page, baseURL, tmpPath);
   await open_formgrader(page);
 
@@ -264,7 +268,7 @@ test('Load gradebook1', async ({
 }) => {
 
   // create environment
-  await create_env(page, tmpPath, exchange_dir, cache_dir);
+  await create_env(page, tmpPath, exchange_dir, cache_dir, is_windows);
   await add_courses(page, baseURL, tmpPath);
   await open_formgrader(page);
 
@@ -298,7 +302,7 @@ test('Load gradebook2', async ({
 }) => {
 
   // create environment
-  await create_env(page, tmpPath, exchange_dir, cache_dir);
+  await create_env(page, tmpPath, exchange_dir, cache_dir, is_windows);
   await add_courses(page, baseURL, tmpPath);
   await open_formgrader(page);
 
@@ -339,7 +343,7 @@ test('Load gradebook3', async ({
 }) => {
 
   // create environment
-  await create_env(page, tmpPath, exchange_dir, cache_dir);
+  await create_env(page, tmpPath, exchange_dir, cache_dir, is_windows);
   await add_courses(page, baseURL, tmpPath);
   await open_formgrader(page);
 
@@ -399,7 +403,7 @@ test('Gradebook3 show hide names', async ({
 }) => {
 
   // create environment
-  await create_env(page, tmpPath, exchange_dir, cache_dir);
+  await create_env(page, tmpPath, exchange_dir, cache_dir, is_windows);
   await add_courses(page, baseURL, tmpPath);
   await open_formgrader(page);
 
@@ -443,7 +447,7 @@ test('Load students', async ({
 }) => {
 
   // create environment
-  await create_env(page, tmpPath, exchange_dir, cache_dir);
+  await create_env(page, tmpPath, exchange_dir, cache_dir, is_windows);
   await add_courses(page, baseURL, tmpPath);
   await open_formgrader(page);
 
@@ -478,7 +482,7 @@ test('Load students submissions', async ({
 }) => {
 
   // create environment
-  await create_env(page, tmpPath, exchange_dir, cache_dir);
+  await create_env(page, tmpPath, exchange_dir, cache_dir, is_windows);
   await add_courses(page, baseURL, tmpPath);
   await open_formgrader(page);
 
@@ -511,7 +515,7 @@ test('Switch views', async ({
 }) => {
 
   // create environment
-  await create_env(page, tmpPath, exchange_dir, cache_dir);
+  await create_env(page, tmpPath, exchange_dir, cache_dir, is_windows);
   await add_courses(page, baseURL, tmpPath);
   await open_formgrader(page);
 
