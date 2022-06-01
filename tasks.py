@@ -10,9 +10,9 @@ def echo(msg):
     print("\033[1;37m{0}\033[0m".format(msg))
 
 
-def run(cmd):
+def run(cmd, **kwargs):
     echo(cmd)
-    return sp.check_call(cmd, shell=True)
+    return sp.check_call(cmd, shell=True, **kwargs)
 
 
 try:
@@ -124,7 +124,11 @@ def install(args):
         cmd = 'pip install .[docs,tests]'
     else:
         cmd = 'pip install -e .[tests]'
-    run(cmd)
+
+    env = os.environ.copy()
+    if args.group != 'labextensions':
+        env['NBGRADER_NO_LAB'] = '1'
+    run(cmd, env=env)
 
 
 if __name__ == '__main__':

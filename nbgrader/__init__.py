@@ -16,15 +16,16 @@ from .server_extensions.formgrader import load_jupyter_server_extension as load_
 HERE = Path(__file__).parent.resolve()
 
 
-with (HERE / "labextension" / "package.json").open() as fid:
-    data = json.load(fid)
+if os.path.exists(HERE / "labextension"):
+    with (HERE / "labextension" / "package.json").open() as fid:
+        data = json.load(fid)
 
 
-def _jupyter_labextension_paths():
-    return [{
-        "src": "labextension",
-        "dest": data["name"]
-    }]
+    def _jupyter_labextension_paths():
+        return [{
+            "src": "labextension",
+            "dest": data["name"]
+        }]
 
 
 def _jupyter_server_extension_points():

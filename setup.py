@@ -9,6 +9,7 @@ from jupyter_packaging import create_cmdclass
 from pathlib import Path
 import json
 import sys
+import os
 
 HERE = Path(__file__).parent.resolve()
 
@@ -37,24 +38,25 @@ data_files_spec = [
 
 setup_args = dict()
 
-try:
-    from jupyter_packaging import (
-        wrap_installers,
-        npm_builder,
-        get_data_files
-    )
+if not os.getenv("NBGRADER_NO_LAB"):
+    try:
+        from jupyter_packaging import (
+            wrap_installers,
+            npm_builder,
+            get_data_files
+        )
 
-    post_develop = npm_builder(
-        build_cmd="install:labextension", source_dir="src", build_dir=lab_path
-    )
-    setup_args["cmdclass"] = wrap_installers(post_develop=post_develop, ensured_targets=ensured_targets)
-    setup_args["data_files"] = get_data_files(data_files_spec)
-except ImportError as e:
-    import logging
-    logging.basicConfig(format="%(levelname)s: %(message)s")
-    logging.warning("Build tool `jupyter-packaging` is missing. Install it with pip or conda.")
-    if not ("--name" in sys.argv or "--version" in sys.argv):
-        raise e
+        post_develop = npm_builder(
+            build_cmd="install:labextension", source_dir="src", build_dir=lab_path
+        )
+        setup_args["cmdclass"] = wrap_installers(post_develop=post_develop, ensured_targets=ensured_targets)
+        setup_args["data_files"] = get_data_files(data_files_spec)
+    except ImportError as e:
+        import logging
+        logging.basicConfig(format="%(levelname)s: %(message)s")
+        logging.warning("Build tool `jupyter-packaging` is missing. Install it with pip or conda.")
+        if not ("--name" in sys.argv or "--version" in sys.argv):
+            raise e
 
 if __name__ == "__main__":
     setup(**setup_args)
