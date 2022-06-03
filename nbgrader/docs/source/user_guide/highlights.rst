@@ -82,7 +82,7 @@ Using the **assignment list extension**, students may conveniently view, fetch,
 submit, and validate their assignments. This is also where they recieve and
 review any feedback on those submissions:
 
-.. image:: images/student_assignment.gif
+.. image:: images/classic_notebook/student_assignment.gif
    :alt: nbgrader assignment list
 
 
@@ -97,7 +97,7 @@ The **nbgrader toolbar extension** for Jupyter notebooks guides the instructor
 through assignment and grading tasks using the familiar Jupyter notebook
 interface. For example, creating an assignment has the following workflow:
 
-.. image:: images/creating_assignment.gif
+.. image:: images/classic_notebook/creating_assignment.gif
    :alt: Creating assignment
 
 Instructor "formgrader" extension for Jupyter notebooks
@@ -108,7 +108,7 @@ the core functionality of nbgrader---generating the student version of an
 assignment, releasing assignments to students, collecting assignments,
 autograding submissions, and manually grading submissions.
 
-.. image:: images/formgrader.gif
+.. image:: images/classic_notebook/formgrader.gif
     :alt: Formgrader extension
 
 

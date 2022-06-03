@@ -14,8 +14,31 @@ Or, if you use `Anaconda <https://www.anaconda.com/download>`__::
     conda install jupyter
     conda install -c conda-forge nbgrader
 
-nbgrader extensions
--------------------
+
+nbgrader extensions in Jupyter Lab
+----------------------------------
+
+Extensions will be automatically installed after the installation of nbgrader.
+
+The installation will activated 4 server extensions
+(formgrader, assignment_list, course_list and validate_assignment)
+and 1 labextension composed of 5 plugins (formgrader, assignment_list, course_list, validate_assignment and create_assignment).
+
+The server extensions can be individually disabled by running::
+
+    jupyter server extension disable nbgrader.server_extensions.formgrader
+    jupyter server extension disable nbgrader.server_extensions.assignment_list
+    jupyter server extension disable nbgrader.server_extensions.course_list
+    jupyter server extension disable nbgrader.server_extensions.validate_assignment
+
+The plugins cannot be individually disabled yet.
+To disable the whole labextension run::
+
+    jupyter labextension disable nbgrader
+
+
+nbgrader extensions in classic Notebook
+---------------------------------------
 
 **Take note:** If you install nbgrader via `Anaconda
 <https://www.anaconda.com/download>`__ the nbgrader extensions will be

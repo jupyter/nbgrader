@@ -18,9 +18,11 @@ For additional resources on using Jupyter in educational contexts, see the `jupy
 
     user_guide/highlights
     user_guide/philosophy
-    user_guide/creating_and_grading_assignments
+    user_guide/creating_and_grading_assignments_jlab
+    user_guide/creating_and_grading_assignments_nb
     user_guide/managing_the_database
-    user_guide/managing_assignment_files
+    user_guide/managing_assignment_files_jlab
+    user_guide/managing_assignment_files_nb
     user_guide/managing_assignment_files_manually
     user_guide/autograding_resources
     user_guide/faq
