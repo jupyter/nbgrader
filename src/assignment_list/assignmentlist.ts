@@ -10,6 +10,8 @@ import { Widget } from '@lumino/widgets';
 
 import { PageConfig } from '@jupyterlab/coreutils';
 
+import * as React from 'react';
+
 const CSS_ERROR_DIALOG = 'nbgrader-ErrorDialog'
 const CSS_SUCCESS_DIALOG = 'nbgrader-SuccessDialog'
 
@@ -257,9 +259,13 @@ class Assignment {
 
   private submit_error(data: { value: any; }): void {
 
+    const body_title = React.createElement('p', null, 'Assignment not submitted:');
+    const body_content = React.createElement('pre', null, data.value);
+    const body = React.createElement("div", {'id': 'submission-message'}, [body_title, body_content]);
+
     showNbGraderDialog({
       title: "Invalid Submission",
-      body: data.value,
+      body: body,
       buttons: [Dialog.okButton()]
     }, true);
 
