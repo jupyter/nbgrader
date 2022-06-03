@@ -78,20 +78,6 @@ def _jupyter_nbextension_paths():
     return paths
 
 
-# Jupyter server extensions
-def _jupyter_server_extension_points():
-    paths = [
-        dict(module="nbgrader.server_extensions.formgrader"),
-        dict(module="nbgrader.server_extensions.validate_assignment")
-    ]
-
-    if sys.platform != 'win32':
-        paths.append(dict(module="nbgrader.server_extensions.assignment_list"))
-        paths.append(dict(module="nbgrader.server_extensions.course_list"))
-
-    return paths
-
-
 # Classic notebook server extensions
 def _jupyter_server_extension_paths():
     paths = [
