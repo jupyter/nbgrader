@@ -1,7 +1,18 @@
-import { ILayoutRestorer, JupyterFrontEnd, JupyterFrontEndPlugin } from '@jupyterlab/application';
-import { requestAPI, CourseList } from './courselist';
+import {
+    ILayoutRestorer,
+    JupyterFrontEnd,
+    JupyterFrontEndPlugin
+} from '@jupyterlab/application';
+
 import { ICommandPalette, MainAreaWidget, WidgetTracker } from '@jupyterlab/apputils';
+
 import { Widget } from '@lumino/widgets';
+
+import { requestAPI, CourseList } from './courselist';
+
+
+const PLUGIN_ID = "@nbgrader:course-list";
+const COMMAND_NAME = "nbgrader:open-course-list";
 
 class CourseListWidget extends Widget {
     version_alert: HTMLDivElement;
@@ -88,16 +99,20 @@ class CourseListWidget extends Widget {
  * Initialization data for the course_list extension.
  */
 export const course_list_extension: JupyterFrontEndPlugin<void> = {
-    id: 'course-list',
+    id: PLUGIN_ID,
     autoStart: true,
     requires: [ICommandPalette],
     optional: [ILayoutRestorer],
 
-    activate: async (app: JupyterFrontEnd, palette: ICommandPalette, restorer: ILayoutRestorer) => {
+    activate: async (
+      app: JupyterFrontEnd,
+      palette: ICommandPalette,
+      restorer: ILayoutRestorer | null
+    ) => {
 
         let widget: MainAreaWidget<CourseListWidget>;
 
-        const command:string = 'nbgrader:course-list';
+        const command:string = COMMAND_NAME;
 
         // Track the widget state
         let tracker = new WidgetTracker<MainAreaWidget<CourseListWidget>>({
@@ -136,7 +151,6 @@ export const course_list_extension: JupyterFrontEndPlugin<void> = {
         }
 
         console.log('JupyterLab extension course-list is activated!');
-
   }
 };
 

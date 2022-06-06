@@ -1,9 +1,13 @@
 import {
-  ILayoutRestorer, JupyterFrontEnd, JupyterFrontEndPlugin
+  ILayoutRestorer,
+  JupyterFrontEnd,
+  JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 
 import {
-  ICommandPalette, MainAreaWidget, WidgetTracker
+  ICommandPalette,
+  MainAreaWidget,
+  WidgetTracker
 } from '@jupyterlab/apputils';
 
 import {
@@ -14,7 +18,15 @@ import {
   PageConfig
 } from '@jupyterlab/coreutils';
 
-import { requestAPI, CourseList, AssignmentList } from './assignmentlist';
+import {
+  requestAPI,
+  CourseList,
+  AssignmentList
+} from './assignmentlist';
+
+
+const PLUGIN_ID = '@nbgrader:assignment-list';
+const COMMAND_NAME = "nbgrader:open-assignment-list";
 
 
 class AssignmentListWidget extends Widget {
@@ -174,18 +186,21 @@ class AssignmentListWidget extends Widget {
 
 
 export const assignment_list_extension: JupyterFrontEndPlugin<void> = {
-  id: 'assignment-list',
+  id: PLUGIN_ID,
   autoStart: true,
   requires: [ICommandPalette],
   optional: [ILayoutRestorer],
-  activate: async (app: JupyterFrontEnd, palette: ICommandPalette, restorer: ILayoutRestorer)=> {
-    console.log('JupyterLab extension assignment-list is activated!');
+  activate: async (
+    app: JupyterFrontEnd,
+    palette: ICommandPalette,
+    restorer: ILayoutRestorer | null
+  )=> {
 
     // Declare a widget variable
     let widget: MainAreaWidget<AssignmentListWidget>;
 
     // Add an application command
-    const command: string = 'nbgrader:assignment-list';
+    const command: string = COMMAND_NAME;
 
     // Track the widget state
     let tracker = new WidgetTracker<MainAreaWidget<AssignmentListWidget>>({
@@ -222,13 +237,14 @@ export const assignment_list_extension: JupyterFrontEndPlugin<void> = {
     palette.addItem({command, category: 'nbgrader'});
 
     // Restore the widget state
-    if (restorer != null){
+    if (restorer != null) {
       restorer.restore(tracker, {
         command,
         name: () => 'nbgrader-assignment-list'
       });
     }
 
+    console.log('JupyterLab extension assignment-list is activated!');
   }
 };
 

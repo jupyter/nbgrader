@@ -53,7 +53,7 @@ function createElementFromCourse(data: any, app: JupyterFrontEnd) {
     anchor.href = '#';
     anchor.innerText = data['course_id'];
     anchor.onclick = function() {
-      app.commands.execute('nbgrader:formgrader');
+      app.commands.execute('nbgrader:open-formgrader');
     }
 
     var fgkind = document.createElement('span') as HTMLSpanElement;

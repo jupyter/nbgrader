@@ -1,5 +1,7 @@
 import {
-  ILayoutRestorer, JupyterFrontEnd, JupyterFrontEndPlugin
+  ILayoutRestorer,
+  JupyterFrontEnd,
+  JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 
 import { URLExt } from '@jupyterlab/coreutils';
@@ -7,9 +9,14 @@ import { URLExt } from '@jupyterlab/coreutils';
 import { ServerConnection } from '@jupyterlab/services';
 
 import {
-  ICommandPalette, MainAreaWidget, WidgetTracker, IFrame
+  ICommandPalette,
+  MainAreaWidget,
+  WidgetTracker,
+  IFrame
 } from '@jupyterlab/apputils';
 
+const PLUGIN_ID = "@nbgrader/formgrader:nbgrader"
+const COMMAND_NAME = "nbgrader:open-formgrader"
 
 class FormgraderWidget extends IFrame {
 
@@ -52,18 +59,22 @@ class FormgraderWidget extends IFrame {
  * Initialization data for the formfrader extension.
  */
 export const formgrader_extension: JupyterFrontEndPlugin<void> = {
-  id: 'formgrader',
+  id: PLUGIN_ID,
   autoStart: true,
   requires: [ICommandPalette],
   optional: [ILayoutRestorer],
-  activate: async (app: JupyterFrontEnd, palette: ICommandPalette, restorer: ILayoutRestorer)=> {
+  activate: async (
+    app: JupyterFrontEnd,
+    palette: ICommandPalette,
+    restorer: ILayoutRestorer | null
+  )=> {
     console.log('JupyterLab extension formgrader is activated!');
 
     // Declare a widget variable
     let widget: MainAreaWidget<FormgraderWidget>;
 
     // Add an application command
-    const command: string = 'nbgrader:formgrader';
+    const command: string = COMMAND_NAME;
 
     // Track the widget state
     let tracker = new WidgetTracker<MainAreaWidget<FormgraderWidget>>({
