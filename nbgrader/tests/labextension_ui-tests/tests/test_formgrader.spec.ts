@@ -106,7 +106,7 @@ const open_formgrader = async (page:IJupyterLabPageFixture) => {
   await expect(page.locator("#jp-main-dock-panel .lm-TabBar-tab.p-TabBar-tab")).toHaveCount(1);
 
   await page.keyboard.press('Control+Shift+c');
-  await page.locator('#modal-command-palette li[data-command="nbgrader:formgrader"]').click();
+  await page.locator('#modal-command-palette li[data-command="nbgrader:open-formgrader"]').click();
 
   await expect(page.locator("#jp-main-dock-panel .lm-TabBar-tab.p-TabBar-tab")).toHaveCount(2);
 
@@ -176,6 +176,29 @@ const click_link = async (iframe:Frame, text:string) => {
 //   await expect(await iframe.locator('.comment').count()).toBeGreaterThanOrEqual(index);
 //   await expect poll(() => iframe.locator('.comment').count()).toBeGreaterThan(3);
 // }
+
+
+/*
+ * Test opening formgrader tab from menu
+ */
+test('Open assignment list tab from menu', async({
+  page
+  }) => {
+
+    await expect(page.locator("#jp-main-dock-panel .lm-TabBar-tab.p-TabBar-tab")).toHaveCount(1);
+    // Check main menu exists
+    await expect(page.locator('#jp-menu-panel div.lm-MenuBar-itemLabel.p-MenuBar-itemLabel:text("Nbgrader")')).toHaveCount(1);
+    await page.locator('#jp-menu-panel div.lm-MenuBar-itemLabel.p-MenuBar-itemLabel:text("Nbgrader")').click();
+
+    await page.locator('#jp-mainmenu-nbgrader-menu li[data-command="nbgrader:open-formgrader"]').click();
+
+    await expect(page.locator("#jp-main-dock-panel .lm-TabBar-tab.p-TabBar-tab")).toHaveCount(2);
+
+    var tabs = page.locator("#jp-main-dock-panel .lm-TabBar-tab.p-TabBar-tab");
+    var newTab_label = tabs.last().locator(".lm-TabBar-tabLabel.p-TabBar-tabLabel");
+    await expect(newTab_label).toHaveText("Formgrader");
+
+});
 
 /*
  * Load manage assignments

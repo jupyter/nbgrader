@@ -78,14 +78,14 @@ const add_courses = async (page:IJupyterLabPageFixture, baseURL:string, tmpPath:
 }
 
 /*
- * Open the assignment list tab
+ * Open the assignment list tab from palette
  */
 const open_assignment_list = async (page:IJupyterLabPageFixture) => {
 
   await expect(page.locator("#jp-main-dock-panel .lm-TabBar-tab.p-TabBar-tab")).toHaveCount(1);
 
   await page.keyboard.press('Control+Shift+c');
-  await page.locator('#modal-command-palette li[data-command="nbgrader:assignment-list"]').click();
+  await page.locator('#modal-command-palette li[data-command="nbgrader:open-assignment-list"]').click();
 
   await expect(page.locator("#jp-main-dock-panel .lm-TabBar-tab.p-TabBar-tab")).toHaveCount(2);
 
@@ -138,6 +138,29 @@ const collapse_fetched = async(page:IJupyterLabPageFixture, assignment:string, i
   await page.locator(`#fetched_assignments_list a:text("${assignment}")`).click();
   await expect(page.locator(`${item_id}.collapse`)).not.toHaveClass('in');
 }
+
+
+/*
+ * Test opening assignment list tab from menu
+ */
+test('Open assignment list tab from menu', async({
+  page
+  }) => {
+
+    await expect(page.locator("#jp-main-dock-panel .lm-TabBar-tab.p-TabBar-tab")).toHaveCount(1);
+    // Check main menu exists
+    await expect(page.locator('#jp-menu-panel div.lm-MenuBar-itemLabel.p-MenuBar-itemLabel:text("Nbgrader")')).toHaveCount(1);
+    await page.locator('#jp-menu-panel div.lm-MenuBar-itemLabel.p-MenuBar-itemLabel:text("Nbgrader")').click();
+
+    await page.locator('#jp-mainmenu-nbgrader-menu li[data-command="nbgrader:open-assignment-list"]').click();
+
+    await expect(page.locator("#jp-main-dock-panel .lm-TabBar-tab.p-TabBar-tab")).toHaveCount(2);
+
+    var tabs = page.locator("#jp-main-dock-panel .lm-TabBar-tab.p-TabBar-tab");
+    var newTab_label = tabs.last().locator(".lm-TabBar-tabLabel.p-TabBar-tabLabel");
+    await expect(newTab_label).toHaveText("Assignments");
+
+});
 
 /*
  * Test showing assignment list
