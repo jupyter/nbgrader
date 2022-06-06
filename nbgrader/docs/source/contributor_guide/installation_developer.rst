@@ -18,7 +18,7 @@ We recommand using `conda environment <https://docs.conda.io/en/latest/miniconda
     mamba create -n nbgrader -c conda-forge python nodejs -y
 
     # activate the environment
-    mamba activate notebook
+    mamba activate nbgrader
 
     pip install -e .[docs,tests]
 
