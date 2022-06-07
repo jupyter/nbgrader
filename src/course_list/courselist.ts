@@ -79,7 +79,7 @@ export class CourseList {
         this.app = app;
         this.listplaceholder = document.createElement('div') as HTMLDivElement;
         this.listplaceholder.id = 'formgrader_list_placeholder';
-        this.listplaceholder.classList.add('row', 'list_placeholder');
+        this.listplaceholder.classList.add('list_placeholder');
         var listplaceholdertext = document.createElement('div') as HTMLDivElement;
         listplaceholdertext.textContent = 'There are no available formgrader services.';
         this.listplaceholder.hidden = true;
@@ -88,7 +88,7 @@ export class CourseList {
 
         this.listloading = document.createElement('div') as HTMLDivElement;
         this.listloading.id = 'formgrader_list_loading';
-        this.listloading.classList.add('row', 'list_loading');
+        this.listloading.classList.add('list_loading');
         var listloadingtext = document.createElement('div') as HTMLDivElement;
         listloadingtext.textContent = 'Loading, please wait...';
         this.listloading.appendChild(listloadingtext);
@@ -96,7 +96,7 @@ export class CourseList {
 
         this.listerror = document.createElement('div') as HTMLDivElement;
         this.listerror.id = 'formgrader_list_error';
-        this.listerror.classList.add('row', 'list_error');
+        this.listerror.classList.add('list_error');
         this.listerrortext = document.createElement('div') as HTMLDivElement;
         this.listerrortext.textContent = 'There are no available formgrader services.';
         this.listerror.hidden = true;

@@ -21,7 +21,7 @@ Advanced "Assignment List" installation
   :doc:`installation`
     General installation instructions.
 
-  :doc:`managing_assignment_files`
+  :doc:`managing_assignment_files_jlab`
     Details on fetching and submitting assignments using the "Assignment List"
 	plugin.
 
