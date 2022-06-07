@@ -19,27 +19,9 @@ import {
   NotebookPanel, INotebookModel
 } from '@jupyterlab/notebook';
 
-import {
-  Widget
-} from '@lumino/widgets';
-
 import { requestAPI } from './validateassignment';
 
-const CSS_ERROR_DIALOG = 'nbgrader-ErrorDialog'
-const CSS_SUCCESS_DIALOG = 'nbgrader-SuccessDialog'
-
-function showNbGraderDialog<T>(
-  options: Partial<Dialog.IOptions<T>> = {},
-  error: boolean = false
-  ): Promise<Dialog.IResult<T>> {
-
-    const dialog = new Dialog(options);
-
-    if (error) dialog.addClass(CSS_ERROR_DIALOG);
-    else dialog.addClass(CSS_SUCCESS_DIALOG);
-
-    return dialog.launch();
-}
+import { showNbGraderDialog, validate } from '../common/validate';
 
 var nbgrader_version = "0.8.0.dev"; // TODO: hardcoded value
 
@@ -108,7 +90,7 @@ class ValidateButton extends ToolbarButton {
           { method: 'POST' },
           new Map([['path', notebook_path]])
       ).then(data => {
-        this.validate(data);
+        validate(data);
         this.setButtonLabel();
         this.setButtonDisabled(false);
       }).catch(reason => {
@@ -180,106 +162,9 @@ class ValidateButton extends ToolbarButton {
     labelElement.innerText = label;
   }
 
-  private validate(data: any): void {
-    let body = document.createElement('div');
-    body.id = "validation-message";
-    var isError = false;
-
-    const newSourceBox = function(text: string): HTMLDivElement {
-      const source = document.createElement('div');
-      const sourceText = document.createElement('pre');
-      sourceText.innerText = text;
-      source.appendChild(sourceText);
-      source.classList.add('jp-InputArea-editor');
-      return source;
-    };
-
-    const newTextBox = function(text: string): HTMLDivElement {
-      const container = document.createElement('div');
-      const paragraph = document.createElement('p');
-      paragraph.innerText = text;
-      container.appendChild(paragraph);
-      return container;
-    };
-
-    if (data.success === true) {
-      if (typeof(data.value) === "string") {
-        data = JSON.parse(data.value);
-      } else {
-        data = data.value;
-      }
-      if (data.type_changed !== undefined) {
-        isError = true;
-        for (let i=0; i<data.type_changed.length; i++) {
-          const textBox = newTextBox(`The following ${data.type_changed[i].old_type} cell has changed to a ${data.type_changed[i].new_type} cell, but it should not have!`);
-          const source = newSourceBox(data.type_changed[i].source);
-          body.appendChild(textBox);
-          body.appendChild(source);
-        }
-        body.classList.add("validation-type-changed");
-
-      } else if (data.changed !== undefined) {
-        isError = true;
-        for (let i=0; i<data.changed.length; i++) {
-          const textBox = newTextBox('The source of the following cell has changed, but it should not have!');
-          const source = newSourceBox(data.changed[i].source);
-          body.appendChild(textBox);
-          body.appendChild(source);
-        }
-        body.classList.add("validation-changed");
-
-      } else if (data.passed !== undefined) {
-        for (let i=0; i<data.changed.length; i++) {
-          const textBox = newTextBox('The following cell passed:');
-          const source = newSourceBox(data.passed[i].source);
-          body.appendChild(textBox);
-          body.appendChild(source);
-        }
-        body.classList.add("validation-passed");
-
-      } else if (data.failed !== undefined) {
-        isError = true;
-        for (let i=0; i<data.failed.length; i++) {
-          const textBox = newTextBox('The following cell failed:');
-          const source = newSourceBox(data.failed[i].source);
-          const error = document.createElement('div');
-          const errorText = document.createElement('pre');
-          errorText.innerHTML = data.failed[i].error;
-          error.classList.add('jp-RenderedText');
-          error.setAttribute('data-mime-type', 'application/vnd.jupyter.stderr');
-          error.appendChild(errorText);
-          body.appendChild(textBox);
-          body.appendChild(source);
-          body.appendChild(error);
-        }
-        body.classList.add("validation-failed");
-
-      } else {
-        const textBox = newTextBox('Success! Your notebook passes all the tests.');
-        body.appendChild(textBox);
-        body.classList.add("validation-success");
-      }
-
-    } else {
-      isError = true;
-      const textBox = newTextBox('There was an error running the validate command:');
-      const source = document.createElement('pre');
-      source.innerText = data.value;
-      body.appendChild(textBox);
-      body.appendChild(source);
-    }
-
-    showNbGraderDialog({
-      title: "Validation Results",
-      body: new Widget({node: body}),
-      buttons: [Dialog.okButton()],
-      focusNodeSelector: 'input'
-    }, isError);
-  }
 }
 
-export
-class ButtonExtension implements DocumentRegistry.IWidgetExtension<NotebookPanel, INotebookModel> {
+export class ButtonExtension implements DocumentRegistry.IWidgetExtension<NotebookPanel, INotebookModel> {
   /**
    * Create a new extension object.
    */

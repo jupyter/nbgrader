@@ -26,6 +26,7 @@ class FormgraderWidget extends IFrame {
       super();
       this.referrerPolicy = 'strict-origin-when-cross-origin';
       this.sandbox = ['allow-scripts', 'allow-same-origin'];
+
       this.node.id = "formgrader-iframe"
       this.app = app;
       var endPoint = "formgrader";

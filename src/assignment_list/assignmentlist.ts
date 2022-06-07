@@ -12,17 +12,7 @@ import { PageConfig } from '@jupyterlab/coreutils';
 
 import * as React from 'react';
 
-const CSS_ERROR_DIALOG = 'nbgrader-ErrorDialog'
-const CSS_SUCCESS_DIALOG = 'nbgrader-SuccessDialog'
-
-function showNbGraderDialog<T>(options: Partial<Dialog.IOptions<T>> = {}, error: boolean = false): Promise<Dialog.IResult<T>> {
-  const dialog = new Dialog(options);
-
-  if (error) dialog.addClass(CSS_ERROR_DIALOG);
-  else dialog.addClass(CSS_SUCCESS_DIALOG);
-
-  return dialog.launch();
-}
+import { showNbGraderDialog, validate } from '../common/validate';
 
 export class AssignmentList{
 
@@ -190,9 +180,6 @@ export class AssignmentList{
 
 
 };
-
-
-
 
 class Assignment {
   element: HTMLDivElement;
@@ -529,7 +516,10 @@ class Notebook{
 
         button.innerText = 'Validate'
         button.removeAttribute('disabled')
-        that.validate(reply, button);
+        const success = validate(reply);
+
+        if (success) that.validate_success(button);
+        else that.validate_failure(button);
 
       } catch (reason) {
         remove_children(container);
@@ -538,7 +528,6 @@ class Notebook{
           `Error on POST /assignments/validate ${dataToSend}.\n${reason}`
         );
       }
-
     }
 
     return container;
@@ -552,101 +541,6 @@ class Notebook{
   private validate_failure(button: HTMLButtonElement): void {
     button.classList.remove('btn-default', 'btn-danger', 'btn-success');
     button.classList.add("btn-danger");
-  };
-
-  private validate(data: { [x: string]: any; value: string; changed: string | any[]; passed: { source: string; }[]; failed: string | any[]; }, button: HTMLButtonElement): void {
-
-    var body = document.createElement('div') as HTMLDivElement;
-    body.id = 'validation-message';
-    var isError = false;
-
-    if (data['success']) {
-        if (typeof(data.value) === "string") {
-            data = JSON.parse(data.value);
-        } else {
-            data = data.value;
-        }
-        if (data['changed'] !== undefined) {
-          isError = true;
-          for (var i=0; i<data.changed.length; i++) {
-            var div = document.createElement('div')
-            var paragraph = document.createElement('p')
-            paragraph.innerText = 'The source of the following cell has changed, but it should not have!';
-            div.append(paragraph);
-            body.append(div);
-            var pre = document.createElement('pre');
-            pre.innerText = data.changed[i].source;
-            body.append(pre);
-          }
-          body.classList.add("validation-changed");
-          this.validate_failure(button);
-
-        } else if (data['passed'] !== undefined) {
-          for (var i=0; i<data.changed.length; i++) {
-            var div = document.createElement('div');
-            var paragraph = document.createElement('p');
-            paragraph.innerText = 'The following cell passed:';
-            div.append(paragraph)
-            body.append(div)
-            var pre = document.createElement('pre');
-            pre.innerText = data.passed[i].source;
-            body.append(pre);
-          }
-          body.classList.add("validation-passed");
-          this.validate_failure(button);
-
-        } else if (data['failed'] !== undefined) {
-          isError = true;
-          for (var i=0; i<data.failed.length; i++) {
-            var div = document.createElement('div');
-            var paragraph = document.createElement('p');
-            paragraph.innerText = 'The following cell failed:';
-            div.append(paragraph);
-            body.append(div);
-            var pre1 = document.createElement('pre');
-            pre1.innerText = data.failed[i].source;
-
-            body.append(pre1);
-            var pre2 = document.createElement('pre');
-            pre2.innerHTML = data.failed[i].error;
-            body.append(pre2);
-
-          }
-          body.classList.add('validation-failed');
-          this.validate_failure(button);
-
-        } else {
-          var div = document.createElement('div')
-          var paragraph  = document.createElement('p')
-          paragraph.innerText = 'Success! Your notebook passes all the tests.';
-          div.append(paragraph);
-          body.append(div);
-
-          body.classList.add("validation-success");
-          this.validate_success(button);
-        }
-
-    } else {
-      isError = true;
-      var div  = document.createElement('div');
-      var paragraph = document.createElement('p');
-      paragraph.innerText = 'There was an error running the validate command:';
-      div.append(paragraph);
-      body.append(div);
-      var pre = document.createElement('pre');
-      pre.innerText = data.value
-      body.append(pre);
-
-      this.validate_failure(button);
-    }
-    let b: Widget;
-    b = new Widget({node: body});
-    showNbGraderDialog({
-      title: "Validation Results",
-      body: b,
-      buttons: [Dialog.okButton()]
-    }, isError);
-
   };
 
   private make_row(): void {
@@ -820,10 +714,8 @@ private load_assignment_list_success(): void {
         element.onclick = set_course(this.data[i]);
         this.course_list_element.append(element);
       }
-
       this.data = undefined;
   }
-
   this.enable_list();
 };
 

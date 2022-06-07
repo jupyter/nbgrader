@@ -1,0 +1,12 @@
+#submission-message p,
+#validation-message p {
+    margin-bottom: 1em;
+    padding-top: 1em;
+}
+
+#submission-message pre,
+#validation-message pre {
+    border: solid lightgray 1px;
+    padding: 5px;
+    margin: 1em;
+}
