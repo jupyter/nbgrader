@@ -100,6 +100,7 @@ setup_args = dict(
         "qtconsole>=5.2",
         "ipywidgets>=7.6",
         "nbclient>=0.6.1",
+        "traitlets<5.2.0",
     ]
 )
 
