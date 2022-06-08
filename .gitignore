@@ -23,7 +23,6 @@ var/
 *.egg
 
 # built labextension
-yarn.lock
 tsconfig.tsbuildinfo
 nbgrader/labextension/
 
