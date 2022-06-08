@@ -1,3 +1,7 @@
+#nbgrader-course-list {
+    overflow: auto;
+}
+
 #courses .alert-danger {
   /* these are copied from bootstrap, since apparantly it needs them */
   position: relative;

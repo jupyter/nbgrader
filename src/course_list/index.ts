@@ -11,7 +11,7 @@ import { Widget } from '@lumino/widgets';
 import { requestAPI, CourseList } from './courselist';
 
 
-const PLUGIN_ID = "@nbgrader:course-list";
+const PLUGIN_ID = "nbgrader/course-list";
 const COMMAND_NAME = "nbgrader:open-course-list";
 
 class CourseListWidget extends Widget {

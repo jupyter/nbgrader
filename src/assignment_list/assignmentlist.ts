@@ -14,7 +14,7 @@ import * as React from 'react';
 
 import { showNbGraderDialog, validate } from '../common/validate';
 
-export class AssignmentList{
+export class AssignmentList {
 
   released_selector: string;
   fetched_selector: string;

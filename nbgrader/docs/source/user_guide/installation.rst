@@ -24,18 +24,32 @@ The installation will activated 4 server extensions
 (formgrader, assignment_list, course_list and validate_assignment)
 and 1 labextension composed of 5 plugins (formgrader, assignment_list, course_list, validate_assignment and create_assignment).
 
-The server extensions can be individually disabled by running::
+The server extensions can be disabled individually by running::
 
     jupyter server extension disable nbgrader.server_extensions.formgrader
     jupyter server extension disable nbgrader.server_extensions.assignment_list
     jupyter server extension disable nbgrader.server_extensions.course_list
     jupyter server extension disable nbgrader.server_extensions.validate_assignment
 
-The plugins cannot be individually disabled yet.
 To disable the whole labextension run::
 
     jupyter labextension disable nbgrader
 
+The labextensions are all enabled by default, but can be disabled individually by running::
+
+    jupyter labextension disable nbgrader/formgrader
+    jupyter labextension disable nbgrader/assignment-list
+    jupyter labextension disable nbgrader/course-list
+    jupyter labextension disable nbgrader/create-assignment
+    jupyter labextension disable nbgrader/validate-assignment
+
+or enabled::
+
+    jupyter labextension enable nbgrader/formgrader
+    jupyter labextension enable nbgrader/assignment-list
+    jupyter labextension enable nbgrader/course-list
+    jupyter labextension enable nbgrader/create-assignment
+    jupyter labextension enable nbgrader/validate-assignment
 
 nbgrader extensions in classic Notebook
 ---------------------------------------

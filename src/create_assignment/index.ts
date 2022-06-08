@@ -15,11 +15,13 @@ import {
   CreateAssignmentWidget
 } from './create_assignment_extension';
 
+const PLUGIN_ID = "nbgrader/create-assignment"
+
 /**
  * Initialization data for the create_assignment extension.
  */
 export const create_assignment_extension: JupyterFrontEndPlugin<void> = {
-  id: 'create-assignment',
+  id: PLUGIN_ID,
   autoStart: true,
   requires: [INotebookTracker],
   activate: activate_extension

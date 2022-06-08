@@ -25,6 +25,8 @@ import { showNbGraderDialog, validate } from '../common/validate';
 
 var nbgrader_version = "0.8.0.dev"; // TODO: hardcoded value
 
+const PLUGIN_ID = "nbgrader/validate-assignment"
+
 class ValidateButton extends ToolbarButton {
   private _buttonCallback = this.newButtonCallback();
   private _versionCheckCallback = this.newVersionCheckCallback();
@@ -194,7 +196,7 @@ export class ButtonExtension implements DocumentRegistry.IWidgetExtension<Notebo
  * Initialization data for the validate_assignment extension.
  */
 export const validate_assignment_extension: JupyterFrontEndPlugin<void> = {
-  id: 'validate-assignment',
+  id: PLUGIN_ID,
   autoStart: true,
   activate: (app: JupyterFrontEnd) => {
     console.log('JupyterLab extension validate-assignment is activated!');

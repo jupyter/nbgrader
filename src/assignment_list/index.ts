@@ -25,7 +25,7 @@ import {
 } from './assignmentlist';
 
 
-const PLUGIN_ID = '@nbgrader:assignment-list';
+const PLUGIN_ID = 'nbgrader/assignment-list';
 const COMMAND_NAME = "nbgrader:open-assignment-list";
 
 
@@ -213,7 +213,7 @@ export const assignment_list_extension: JupyterFrontEndPlugin<void> = {
         if(!widget){
           const content = new AssignmentListWidget(app);
           widget = new MainAreaWidget({content});
-          widget.id = 'assignments';
+          widget.id = 'nbgrader-assignment-list';
           widget.title.label = 'Assignments';
           widget.title.closable = true;
         }
