@@ -20,7 +20,7 @@
 }
 
 .nbgrader-TotalPointsInput {
-  width: 3em;
+  width: 5em;
   height: 24px;
   text-align: right;
   line-height: 10px;
@@ -147,7 +147,7 @@
 }
 
 .nbgrader-CellPoints input {
-    width: 3.5em;
+    width: 5em;
     height: 22px;
     text-align: right;
     line-height: 10px;
