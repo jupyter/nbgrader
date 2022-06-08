@@ -845,10 +845,13 @@ class NotebookWidget extends Panel {
     const set = new Set<string>();
     const valid = /^[a-zA-Z0-9_\-]+$/;
     const iter = this.notebookPanel.model.cells.iter();
-    for (let cellModel = iter.next(); cellModel != null;
-         cellModel = iter.next()) {
-      const data = CellModel.getNbgraderData(cellModel.metadata)
-      const id = data == null ? null : data.grade_id;
+    for (let cellModel = iter.next(); cellModel != null; cellModel = iter.next()) {
+      const data = CellModel.getNbgraderData(cellModel.metadata);
+
+      if (data == null) continue;
+
+      const id = data.grade_id;
+
       if (!valid.test(id)) {
         this.warnInvalidId(true, false, id);
         return;
