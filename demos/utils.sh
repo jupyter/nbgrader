@@ -4,7 +4,7 @@ set -e
 
 setup_directory () {
     local directory="${1}"
-    local permissions="${2}"
+    local permissions="${2:-}"
     echo "Creating directory '${directory}' with permissions '${permissions}'"
     if [ ! -d "${directory}" ]; then
         mkdir -p "${directory}"
