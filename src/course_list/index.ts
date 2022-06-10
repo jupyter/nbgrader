@@ -72,6 +72,7 @@ class CourseListWidget extends Widget {
         panelgroup.appendChild(panel);
         maindiv.appendChild(panelgroup);
         this.node.appendChild(maindiv);
+        this.node.style.overflowY = 'auto';
 
         refreshbutton.onclick = () => this.courselist.load_list.call(this.courselist);
         this.checkNbGraderVersion();
@@ -126,6 +127,7 @@ export const course_list_extension: JupyterFrontEndPlugin<void> = {
                     const content = new CourseListWidget(app);
                     widget = new MainAreaWidget({content});
                     widget.id = 'nbgrader-course-list'
+                    widget.addClass('nbgrader-mainarea-widget');
                     widget.title.label = 'Courses'
                     widget.title.closable = true;
                 }

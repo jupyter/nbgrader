@@ -38,7 +38,6 @@
 }
 
 .nbgrader-NotebookWidget {
-  overflow: auto;
   height: 100%;
 }
 

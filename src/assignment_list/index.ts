@@ -36,26 +36,8 @@ class AssignmentListWidget extends Widget {
   constructor(app: JupyterFrontEnd) {
     super();
     this.app = app;
-    var h = document.getElementsByTagName('head')[0] as HTMLHeadElement;
+
     console.log('Initializing the assignments list widget');
-    var l = document.createElement('link') as HTMLLinkElement;
-    l.rel = 'stylesheet';
-    l.href = 'https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css'
-    l.type = 'text/css'
-
-    var s1 = document.createElement('script') as HTMLScriptElement;
-    s1.src = 'https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js'
-    s1.type = 'text/javascript'
-    s1.crossOrigin = 'anonymous'
-    s1.async = false;
-    var s2 = document.createElement('script') as HTMLScriptElement;
-    s2.src = 'https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js'
-    s2.type = 'text/javascript'
-    s2.async=false;
-
-    h.append(l)
-    h.append(s1)
-    h.append(s2)
 
     var assignment_html = ([
       '<div id="assignments" class="tab-pane">',
@@ -138,9 +120,9 @@ class AssignmentListWidget extends Widget {
       '  </div>   ',
       '</div>'
   ].join('\n'));
-    var html = document.createElement('div') as HTMLDivElement;
-    html.innerHTML=assignment_html;
-    this.node.append(html);
+
+    this.node.innerHTML = assignment_html;
+    this.node.style.overflowY = 'auto';
 
     let base_url = PageConfig.getBaseUrl();
     let options = new Map();
@@ -214,6 +196,7 @@ export const assignment_list_extension: JupyterFrontEndPlugin<void> = {
           const content = new AssignmentListWidget(app);
           widget = new MainAreaWidget({content});
           widget.id = 'nbgrader-assignment-list';
+          widget.addClass('nbgrader-mainarea-widget');
           widget.title.label = 'Assignments';
           widget.title.closable = true;
         }

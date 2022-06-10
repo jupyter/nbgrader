@@ -1,91 +1,94 @@
-#nbgrader-assignment-list {
-    overflow: auto;
+#nbgrader-assignment-list .panel-group .panel {
+  margin-top: 3px;
+  margin-bottom: 1em;
 }
 
-#assignments .panel-group .panel {
-    margin-top: 3px;
-    margin-bottom: 1em;
+#nbgrader-assignment-list .panel-group .panel .panel-heading {
+  background-color: #eee;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 7px;
+  padding-right: 7px;
+  line-height: 22px;
 }
 
-#assignments .panel-group .panel .panel-heading {
-    background-color: #eee;
-    padding-top: 4px;
-    padding-bottom: 4px;
-    padding-left: 7px;
-    padding-right: 7px;
-    line-height: 22px;
+#nbgrader-assignment-list .panel-group .panel .panel-heading a:focus, a:hover {
+  text-decoration: none;
 }
 
-#assignments .panel-group .panel .panel-heading a:focus, a:hover {
-    text-decoration: none;
+#nbgrader-assignment-list .panel-group .panel .panel-body {
+  padding: 0;
 }
 
-#assignments .panel-group .panel .panel-body {
-    padding: 0;
+#nbgrader-assignment-list .panel-group .panel .panel-body .list_container {
+  margin-top: 0px;
+  margin-bottom: 0px;
+  border: 0px;
+  border-radius: 0px;
 }
 
-#assignments .panel-group .panel .panel-body .list_container {
-    margin-top: 0px;
-    margin-bottom: 0px;
-    border: 0px;
-    border-radius: 0px;
+#nbgrader-assignment-list .panel-group .panel .panel-body .list_container .list_item {
+  border-bottom: 1px solid #ddd;
 }
 
-#assignments .panel-group .panel .panel-body .list_container .list_item {
-    border-bottom: 1px solid #ddd;
+#nbgrader-assignment-list .panel-group .panel .panel-body .list_container .list_item:last-child {
+  border-bottom: 0px;
 }
 
-#assignments .panel-group .panel .panel-body .list_container .list_item:last-child {
-    border-bottom: 0px;
+#nbgrader-assignment-list .assignment-notebooks .list_item {
+  background-color: inherit !important;
 }
 
-#assignments .assignment-notebooks .list_item {
-    background-color: inherit !important;
+#nbgrader-assignment-list .assignment-notebooks .list_item:hover {
+  background-color: #ddd !important;
 }
 
-#assignments .assignment-notebooks .list_item:hover {
-    background-color: #ddd !important;
+#nbgrader-assignment-list .assignment-notebooks .list_item:first-child:hover {
+  background-color: inherit !important;
 }
 
-#assignments .assignment-notebooks .list_item:first-child:hover {
-    background-color: inherit !important;
+#nbgrader-assignment-list .list_item {
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 7px;
+  line-height: 22px;
 }
 
-#assignments .list_item {
-    padding-top: 4px;
-    padding-bottom: 4px;
-    padding-left: 7px;
-    padding-right: 7px;
-    line-height: 22px;
+#nbgrader-assignment-list .list_item:not(.nested_list_item) {
+  padding-right: 7px;
 }
 
-#assignments .list_item > div {
-    padding-top: 0;
-    padding-bottom: 0;
-    padding-left: 0;
-    padding-right: 0;
+#nbgrader-assignment-list .list_item > div {
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: 0;
+  padding-right: 0;
 }
 
-#assignments .item_status {
-    text-align: right;
+#nbgrader-assignment-list .item_status {
+  text-align: right;
 }
 
-#assignments .item_status .btn {
-    min-width: 13ex;
+#nbgrader-assignment-list .item_status .btn {
+  min-width: 13ex;
 }
 
-#assignments .version_error {
-    display: none;
+#nbgrader-assignment-list .version_error {
+  display: none;
 }
 
 #submission-message pre {
-    white-space: pre;
+  white-space: pre;
 }
 
-#assignments .list_placeholder, #assignments .list_loading, #assignments .list_error {
-    font-weight: bold;
-    padding-top: 4px;
-    padding-bottom: 4px;
-    padding-left: 7px;
-    padding-right: 7px;
+#nbgrader-assignment-list .list_placeholder, #nbgrader-assignment-list .list_loading, #nbgrader-assignment-list .list_error {
+  font-weight: bold;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 7px;
+  padding-right: 7px;
+}
+
+#assignments_toolbar {
+  padding: 3px;
 }

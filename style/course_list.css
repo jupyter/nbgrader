@@ -71,11 +71,6 @@
     width: 16.66666667%;
 }
 
-#courses .list_placeholder {
-    /* set using hidden = true instead, no need for this. */
-    /* display: none; */
-}
-
 #courses .list_placeholder, #courses .list_loading, #courses .list_error {
     font-weight: bold;
     padding-top: 4px;
@@ -84,7 +79,3 @@
     padding-right: 7px;
 }
 
-#courses .list_error, #courses .version_error {
-    /* set using hidden = true instead, no need for this. */
-    /* display: none; */
-}

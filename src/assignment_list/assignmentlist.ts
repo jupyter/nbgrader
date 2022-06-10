@@ -110,7 +110,7 @@ export class AssignmentList {
       var icon = document.createElement('i');
       icon.classList.add('fa', 'fa-caret-right');
       a.append(icon);
-      (<HTMLAnchorElement>a).onclick = function(){
+      (<HTMLAnchorElement>a).onclick = function(event){
 
         if(a.children[0].classList.contains('fa-caret-right')){
           a.children[0].classList.remove('fa-caret-right');
@@ -120,6 +120,9 @@ export class AssignmentList {
           a.children[0].classList.add('fa-caret-right');
         }
 
+        /* Open or close collapsed child list on click */
+        const list_item = (<HTMLAnchorElement>event.target).closest('.list_item');
+        list_item.querySelector('.collapse').classList.toggle('in');
       }
 
     }
@@ -229,13 +232,13 @@ class Assignment {
     if (this.data['status'] === 'fetched') {
         link = document.createElement ('a');
         var id = this.escape_id();
-        link.classList.add('collapsed', 'assignment-notebooks-link')
-        link.setAttribute('role', 'button')
-        link.setAttribute('data-toggle', 'collapse')
-        link.setAttribute('data-parent', this.parent)
-        link.setAttribute('href', '#' + id)
-        link.setAttribute('aria-expanded', 'false')
-        link.setAttribute('aria-controls', id)
+        link.classList.add('collapsed', 'assignment-notebooks-link');
+        link.setAttribute('role', 'button');
+        link.setAttribute('data-toggle', 'collapse');
+        link.setAttribute('data-parent', this.parent);
+        link.setAttribute('href', '#' + id);
+        link.setAttribute('aria-expanded', 'false');
+        link.setAttribute('aria-controls', id);
     }else{
       link = document.createElement('span');
     }
@@ -426,8 +429,7 @@ class Submission{
   }
 
   private style(): void {
-    this.element.classList.add('list_item');
-    this.element.classList.add('row');
+    this.element.classList.add('list_item', 'row', 'nested_list_item');
   };
 
   private make_row(): void{
@@ -490,8 +492,7 @@ class Notebook{
   }
 
   private style(): void  {
-    this.element.classList.add('list_item')
-    this.element.classList.add("row");
+    this.element.classList.add('list_item', 'row', 'nested_list_item');
   };
 
   private make_button(): HTMLSpanElement {
@@ -610,11 +611,23 @@ export class CourseList{
   this.data = undefined;
 
   var that = this;
+
+  /* Open the dropdown course_list when clicking on dropdown toggle button */
+  this.dropdown_element.onclick = function() {
+    that.course_list_element.classList.toggle('open');
+  }
+
+  /* Close the dropdown course_list if clicking anywhere else */
+  document.onclick = function(event) {
+    if ((<HTMLElement>event.target).closest('button') != that.dropdown_element) {
+      that.course_list_element.classList.remove('open');
+    }
+  }
+
   this.refresh_element.onclick = function(){
     that.load_list();
   }
   this.bind_events()
-  var that = this;
 }
 
 private enable_list(): void {
@@ -629,9 +642,7 @@ public clear_list(): void {
   // remove list items
   if(this.course_list_element.children.length > 0){
     this.course_list_element.innerHTML = '';
-
   }
-
 };
 
 private bind_events(): void {

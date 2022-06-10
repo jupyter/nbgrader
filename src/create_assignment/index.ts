@@ -8,7 +8,7 @@ import {
 } from '@jupyterlab/notebook';
 
 import {
-  BoxPanel
+  Panel
 } from '@lumino/widgets';
 
 import {
@@ -30,9 +30,8 @@ export const create_assignment_extension: JupyterFrontEndPlugin<void> = {
 function activate_extension(app: JupyterFrontEnd, tracker: INotebookTracker) {
   console.log('Activating extension "create_assignment".');
 
-  const panel = new BoxPanel();
-  panel.layout.fitPolicy = 'set-min-size';
-
+  const panel = new Panel();
+  panel.node.style.overflowY = 'auto';
   const createAssignmentWidget = new CreateAssignmentWidget(tracker);
   panel.addWidget(createAssignmentWidget);
   panel.id = 'nbgrader-create_assignemnt';
