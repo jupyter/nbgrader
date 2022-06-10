@@ -108,8 +108,9 @@ class SubmissionHandler(BaseHandler):
             'index': ix,
             'total': len(indices),
             'base_url': self.base_url,
-            'my_mathjax_url': self.base_url + '/' + self.mathjax_url,
+            'my_mathjax_url': self.mathjax_url if self.settings['is_jlab'] else self.base_url + '/' + self.mathjax_url,
             'student': student_id,
+            'last_name': submission.student.last_name,
             'last_name': submission.student.last_name,
             'first_name': submission.student.first_name,
             'notebook_path': self.url_prefix + '/' + relative_path
