@@ -15,11 +15,11 @@ c.JupyterHub.load_groups = {
         'instructor1',
         'instructor2',
     ],
-    'formgrader-course101': [
+    'formgrade-course101': [
         'instructor1',
         'grader-course101',
     ],
-    'formgrader-course123': [
+    'formgrade-course123': [
         'instructor2',
         'grader-course123',
     ],
@@ -27,9 +27,7 @@ c.JupyterHub.load_groups = {
     'nbgrader-course123': [],
 }
 
-c.JupyterHub.load_roles = roles = []
-
-roles.append(
+c.JupyterHub.load_roles = roles = [
     {
         'name': 'instructor',
         'groups': ['instructors'],
@@ -38,16 +36,35 @@ roles.append(
             'admin:users',
             'admin:servers',
         ],
-    }
-)
+    },
+    # The class_list extension needs permission to access services
+    {
+        'name': 'server',
+        'scopes': [
+            'inherit',
+            # in JupyterHub 2.4, this can be a list of permissions
+            # greater than the owner and the result will be the intersection;
+            # until then, 'inherit' is the only way to have variable permissions
+            # for the server token by user
+            # "access:services",
+            # "list:services",
+            # "read:services",
+            # "users:activity!user",
+            # "access:servers!user",
+        ],
+    },
+]
 # add grader roles
 for course in ['course101', 'course123']:
     roles.append(
         {
-            'name': f'formgrader-{course}',
-            'groups': [f'formgrader-{course}'],
+            'name': f'formgrade-{course}',
+            'groups': [f'formgrade-{course}'],
             'scopes': [
                 f'access:services!service={course}',
+                # access to the services API to discover the service(s)
+                'list:services',
+                f'read:services!service={course}',
             ],
         }
     )
