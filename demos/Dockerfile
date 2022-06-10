@@ -11,7 +11,7 @@ RUN apt-get update \
  && apt-get -y install git sudo
 # cache some of the bigger installs
 RUN apt-get -y install python3-pip nodejs npm
-RUN python3 -m pip install --upgrade jupyterhub notebook
+RUN python3 -m pip install --upgrade jupyterhub notebook nbclassic
 RUN git clone https://github.com/jupyter/nbgrader /srv/nbgrader/nbgrader
 # COPY is like deploy_demos.sh
 COPY ./ /root/
