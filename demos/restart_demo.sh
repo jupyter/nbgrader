@@ -26,7 +26,7 @@ install_dependencies () {
     apt install -y npm
     npm install -g configurable-http-proxy
     apt install -y python3-pip
-    pip3 install -U notebook
+    pip3 install -U notebook nbclassic
     pip3 install -U jupyterhub
 }
 
