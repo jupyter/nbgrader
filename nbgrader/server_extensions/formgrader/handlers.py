@@ -107,7 +107,7 @@ class SubmissionHandler(BaseHandler):
             'index': ix,
             'total': len(indices),
             'base_url': self.base_url,
-            'mathjax_url': self.mathjax_url,
+            'my_mathjax_url': self.base_url + '/' + self.mathjax_url,
             'student': student_id,
             'last_name': submission.student.last_name,
             'first_name': submission.student.first_name,
