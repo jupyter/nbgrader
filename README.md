@@ -15,7 +15,7 @@ A system for assigning and grading Jupyter notebooks.
 The nbgrader toolbar extension for Jupyter notebooks guides the instructor through
 assignment and grading tasks using the familiar Jupyter notebook interface.
 
-![Creating assignment](nbgrader/docs/source/user_guide/images/classic_notebook/creating_assignment.gif "Creating assignment")
+![Creating assignment](nbgrader/docs/source/user_guide/images/creating_assignment.gif "Creating assignment")
 
 ### Instructor "formgrader" extension for Jupyter notebooks
 
@@ -24,13 +24,13 @@ the core functionality of nbgrader---generating the student version of an
 assignment, releasing assignments to students, collecting assignments,
 autograding submissions, and manually grading submissions.
 
-![Formgrader extension](nbgrader/docs/source/user_guide/images/classic_notebook/formgrader.gif "Formgrader extension")
+![Formgrader extension](nbgrader/docs/source/user_guide/images/formgrader.gif "Formgrader extension")
 
 ### Student assignment list extension for Jupyter notebooks
 Using the assignment list extension, students may conveniently view, fetch,
 submit, and validate their assignments.
 
-![nbgrader assignment list](nbgrader/docs/source/user_guide/images/classic_notebook/student_assignment.gif "nbgrader assignment list")
+![nbgrader assignment list](nbgrader/docs/source/user_guide/images/student_assignment.gif "nbgrader assignment list")
 
 ### The command line tools of nbgrader
 

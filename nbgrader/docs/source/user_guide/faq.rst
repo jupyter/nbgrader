@@ -74,7 +74,7 @@ database. You can access the timestamps through the API, like so:
 
 Note that if you use the release_assignment/fetch_assignment/submit/collect
 commands (see
-:doc:`managing_assignment_files_jlab`), the ``timestamp.txt`` files will be included
+:doc:`managing_assignment_files`), the ``timestamp.txt`` files will be included
 automatically.
 
 Do I have to use sqlite for the nbgrader database?

@@ -79,10 +79,8 @@ nbgrader/docs/source/user_guide/students.csv
 nbgrader/docs/source/user_guide/assignments.csv
 nbgrader/docs/source/command_line_tools/nbgrader*.rst
 nbgrader/docs/source/configuration/config_options.rst
-nbgrader/docs/source/user_guide/creating_and_grading_assignments_jlab.rst
-nbgrader/docs/source/user_guide/creating_and_grading_assignments_nb.rst
-nbgrader/docs/source/user_guide/managing_assignment_files_jlab.rst
-nbgrader/docs/source/user_guide/managing_assignment_files_nb.rst
+nbgrader/docs/source/user_guide/creating_and_grading_assignments.rst
+nbgrader/docs/source/user_guide/managing_assignment_files.rst
 nbgrader/docs/source/user_guide/managing_assignment_files_manually.rst
 nbgrader/docs/source/user_guide/managing_the_database.rst
 nbgrader/docs/source/user_guide/autograded/bitdiddle/ps1/problem1.html

@@ -46,31 +46,3 @@ To install labextensions run::
 or in developer mode::
 
     jupyter labextension develop --overwrite .
-
-Installing classic notebook extensions
---------------------------------------
-Previously this was done using the ``nbgrader extension install`` command.
-However, moving forward this is done using the ``jupyter nbextension`` and
-``jupyter serverextension`` commands.
-
-The nbextensions are Javascript/HTML/CSS so they require
-separate installation and enabling.
-The --symlink option is recommended since it updates the extensions
-whenever you update the nbgrader repository.
-The serverextension is a Python module inside nbgrader, so only an
-enable step is needed.
-To install and enable all the frontend nbextensions (*assignment list*,
-*create assignment*, and *formgrader*) along with the server extensions
-(*assignment list* and *formgrader*) run::
-
-    jupyter nbextension install --symlink --sys-prefix --py nbgrader
-    jupyter nbextension enable --sys-prefix --py nbgrader
-    jupyter serverextension enable --sys-prefix --py nbgrader
-
-To work properly, the *assignment list* and *formgrader* extensions require
-both the nbextension and serverextension. The *create assignment* extension
-only has an nbextension part.
-
-Installing Firefox Headless WebDriver
--------------------------------------
-To run tests on nbextensions while developing nbgrader and its documentation, the Firefox headless webdriver must be installed. Please `follow the Mozilla installation instructions <https://developer.mozilla.org/en-US/docs/Web/WebDriver>`_ to get Firefox properly setup on your system.
