@@ -52,8 +52,17 @@ function createElementFromCourse(data: any, app: JupyterFrontEnd) {
     var anchor = document.createElement('a') as HTMLAnchorElement;
     anchor.href = '#';
     anchor.innerText = data['course_id'];
-    anchor.onclick = function() {
-      app.commands.execute('nbgrader:open-formgrader');
+
+    if (data['kind'] == 'local') {
+      anchor.href = '#';
+      anchor.onclick = function() {
+        app.commands.execute('nbgrader:open-formgrader', data);
+      }
+    }
+    else {
+      const url = data['url'] as string;
+      anchor.href = URLExt.join(url.replace(/formgrader$/, 'lab'), 'workspaces', 'formgrader');
+      anchor.target = 'blank';
     }
 
     var fgkind = document.createElement('span') as HTMLSpanElement;

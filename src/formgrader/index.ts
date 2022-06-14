@@ -22,22 +22,15 @@ class FormgraderWidget extends IFrame {
 
     app: JupyterFrontEnd;
 
-    constructor(app: JupyterFrontEnd) {
+    constructor(app: JupyterFrontEnd, url:string) {
       super();
       this.referrerPolicy = 'strict-origin-when-cross-origin';
-      this.sandbox = ['allow-scripts', 'allow-same-origin'];
+      this.sandbox = ['allow-scripts', 'allow-same-origin', 'allow-forms'];
 
       this.node.id = "formgrader-iframe"
       this.app = app;
-      var endPoint = "formgrader";
 
-      const settings = ServerConnection.makeSettings();
-      const requestURL = URLExt.join(
-        settings.baseUrl,
-        endPoint
-      );
-
-      this.url = requestURL;
+      this.url = url;
 
       var this_widget = this;
 
@@ -84,9 +77,13 @@ export const formgrader_extension: JupyterFrontEndPlugin<void> = {
 
     app.commands.addCommand(command,{
     label: 'Formgrader',
-    execute: () => {
+    execute: async args => {
       if(!widget){
-        const content = new FormgraderWidget(app);
+        const settings = ServerConnection.makeSettings();
+        const url = (args.url as string) || URLExt.join(settings.baseUrl, "formgrader");
+
+        const content = new FormgraderWidget(app, url);
+
         widget = new MainAreaWidget({content});
         widget.id = 'formgrader';
         widget.title.label = 'Formgrader';
