@@ -2,10 +2,11 @@
 
 from traitlets import Type, Instance, default
 from .baseapp import NbGrader
+from .baseapp import NbGraderAliasesType, NbGraderFlagsType
 from ..plugins import ExportPlugin, CsvExportPlugin
 from ..api import Gradebook
 
-aliases = {
+aliases: NbGraderAliasesType = {
     'log-level' : 'Application.log_level',
     'db': 'CourseDirectory.db_url',
     'to' : 'ExportPlugin.to',
@@ -14,7 +15,7 @@ aliases = {
     'student': 'ExportPlugin.student',
     'course': 'CourseDirectory.course_id'
 }
-flags = {}
+flags: NbGraderFlagsType = {}
 
 
 class ExportApp(NbGrader):

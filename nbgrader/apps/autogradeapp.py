@@ -5,19 +5,20 @@ import sys
 from traitlets import default
 
 from .baseapp import NbGrader, nbgrader_aliases, nbgrader_flags
+from .baseapp import NbGraderAliasesType, NbGraderFlagsType
 from ..converters import BaseConverter, Autograde, NbGraderException
 from traitlets.traitlets import MetaHasTraits
 from traitlets.config.loader import Config
 from typing import List
 
-aliases = {
+aliases: NbGraderAliasesType = {
     'course': 'CourseDirectory.course_id'
 }
 aliases.update(nbgrader_aliases)
 aliases.update({
 })
 
-flags = {}
+flags: NbGraderFlagsType = {}
 flags.update(nbgrader_flags)
 flags.update({
     'create': (

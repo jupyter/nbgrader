@@ -30,6 +30,7 @@ class AssignLatePenalties(NbGraderPreprocessor):
             self.log.warning(msg.format("< 0", penalty, 0))
             return 0
 
+        assert notebook.score is not None
         if penalty > notebook.score:
             self.log.warning(msg.format("> score", penalty, notebook.score))
             return notebook.score

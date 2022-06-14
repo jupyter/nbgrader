@@ -19,7 +19,7 @@ except ImportError:
 try:
     import pwd
 except:
-    pwd = None
+    pwd = None  # type: ignore
 
 
 def run(cmd):

@@ -105,7 +105,9 @@ class ClearSolutions(NbGraderPreprocessor):
                 replaced_solution = True
 
                 # replace it with the stub, indented as necessary
-                indent = re.match(r"\s*", line).group(0)
+                match = re.match(r"\s*", line)
+                assert match is not None
+                indent = match.group(0)
                 for stub_line in stub_lines:
                     new_lines.append(indent + stub_line)
 

@@ -1,5 +1,6 @@
 import os
 import shutil
+import typing
 
 from textwrap import dedent
 from traitlets import Bool, List, Dict
@@ -74,7 +75,7 @@ class Autograde(BaseConverter):
         super(Autograde, self).init_assignment(assignment_id, student_id)
         # try to get the student from the database, and throw an error if it
         # doesn't exist
-        student = {}
+        student: typing.Dict[str, typing.Any] = {}
 
         if student or self.create_student:
             if 'id' in student:
@@ -122,7 +123,7 @@ class Autograde(BaseConverter):
         source_path = self.coursedir.format_path(self.coursedir.source_directory, '.', assignment_id)
         source_files = set(utils.find_all_files(source_path, self.coursedir.ignore + ["*.ipynb"]))
         exclude_files = set([os.path.join(source_path, x) for x in self.exclude_overwriting.get(assignment_id, [])])
-        source_files = list(source_files - exclude_files)
+        source_files = list(source_files - exclude_files)  # type: ignore[assignment]
 
         # copy them to the build directory
         for filename in source_files:

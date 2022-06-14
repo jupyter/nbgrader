@@ -6,11 +6,12 @@ import glob
 from traitlets import default
 
 from .baseapp import NbGrader
+from .baseapp import NbGraderAliasesType, NbGraderFlagsType
 from ..validator import Validator
 from ..nbgraderformat import SchemaTooOldError, SchemaTooNewError
 
-aliases = {}
-flags = {
+aliases: NbGraderAliasesType = {}
+flags: NbGraderFlagsType = {
     'invert': (
         {'Validator': {'invert': True}},
         "Complain when cells pass, rather than vice versa."

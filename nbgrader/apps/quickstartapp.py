@@ -8,10 +8,11 @@ import sys
 from textwrap import dedent
 from traitlets import Bool, default
 from .baseapp import NbGrader
+from .baseapp import NbGraderAliasesType, NbGraderFlagsType
 from .. import utils
 
-aliases = {}
-flags = {
+aliases: NbGraderAliasesType = {}
+flags: NbGraderFlagsType = {
     'force': (
         {'QuickStartApp': {'force': True}},
         dedent(

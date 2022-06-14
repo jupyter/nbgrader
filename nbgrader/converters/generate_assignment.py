@@ -1,6 +1,7 @@
 import os
 import re
 from textwrap import dedent
+import typing
 
 from traitlets import List, Bool, default
 
@@ -18,7 +19,6 @@ from ..preprocessors import (
     ClearMarkScheme,
 )
 from traitlets.config.loader import Config
-from typing import Any
 from ..coursedir import CourseDirectory
 
 
@@ -71,7 +71,7 @@ class GenerateAssignment(BaseConverter):
     # NB: ClearHiddenTests must come after ComputeChecksums and SaveCells.
     # ComputerChecksums must come again after ClearHiddenTests.
 
-    def _load_config(self, cfg: Config, **kwargs: Any) -> None:
+    def _load_config(self, cfg: Config, **kwargs: typing.Any) -> None:
         if 'Assign' in cfg:
             self.log.warning(
                 "Use GenerateAssignment in config, not Assign. Outdated config:\n%s",
@@ -85,7 +85,7 @@ class GenerateAssignment(BaseConverter):
 
         super(GenerateAssignment, self)._load_config(cfg, **kwargs)
 
-    def __init__(self, coursedir: CourseDirectory = None, **kwargs: Any) -> None:
+    def __init__(self, coursedir: CourseDirectory = None, **kwargs: typing.Any) -> None:
         super(GenerateAssignment, self).__init__(coursedir=coursedir, **kwargs)
 
     def _clean_old_notebooks(self, assignment_id: str, student_id: str) -> None:
@@ -131,7 +131,7 @@ class GenerateAssignment(BaseConverter):
         # try to get the assignment from the database, and throw an error if it
         # doesn't exist
         if not self.no_database:
-            assignment = {}
+            assignment: typing.Dict[str, typing.Any] = {}
 
             if assignment or self.create_assignment:
                 if 'name' in assignment:

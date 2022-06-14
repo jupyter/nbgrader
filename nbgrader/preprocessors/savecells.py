@@ -1,11 +1,12 @@
 import json
 
+from .. import api
 from .. import utils
 from ..api import Gradebook, MissingEntry
 from . import NbGraderPreprocessor
 from nbformat.notebooknode import NotebookNode
 from nbconvert.exporters.exporter import ResourcesDict
-from typing import Tuple
+from typing import Tuple, Dict
 
 
 class SaveCells(NbGraderPreprocessor):
@@ -84,10 +85,10 @@ class SaveCells(NbGraderPreprocessor):
             raise ValueError("Invalid assignment id: '{}'".format(self.assignment_id))
 
         # create a place to put new cell information
-        self.new_grade_cells = {}
-        self.new_solution_cells = {}
-        self.new_task_cells = {}
-        self.new_source_cells = {}
+        self.new_grade_cells: Dict[str, api.GradeCell] = {}
+        self.new_solution_cells: Dict[str, api.SolutionCell] = {}
+        self.new_task_cells: Dict[str, api.TaskCell] = {}
+        self.new_source_cells: Dict[str, api.SourceCell] = {}
 
         # connect to the database
         self.gradebook = Gradebook(self.db_url)

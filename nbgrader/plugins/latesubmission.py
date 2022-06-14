@@ -43,3 +43,4 @@ class LateSubmissionPlugin(BasePlugin):
             if total_seconds_late == 0:
                 self.log.error("Assigning a penalty to a notebook that was not submitted late.")
             return score
+        return None
