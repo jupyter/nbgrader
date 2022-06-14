@@ -39,7 +39,7 @@ src = "pyproject.toml"
 
 [[tool.tbump.file]]
 src = "package.json"
-version_template = "{major}.{minor}.{patch}-{channel}"
+version_template = "{major}.{minor}.{patch}"
 search = '"version": "{current_version}"'
 
 [[tool.tbump.file]]
