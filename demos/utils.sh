@@ -4,7 +4,7 @@ set -e
 
 setup_directory () {
     local directory="${1}"
-    local permissions="${2}"
+    local permissions="${2:-}"
     echo "Creating directory '${directory}' with permissions '${permissions}'"
     if [ ! -d "${directory}" ]; then
         mkdir -p "${directory}"
@@ -42,6 +42,10 @@ setup_nbgrader () {
     ${runas} mkdir -p "${HOME}/.jupyter"
     ${runas} cp "${config}" "${HOME}/.jupyter/nbgrader_config.py"
     ${runas} chown "${USER}:${USER}" "${HOME}/.jupyter/nbgrader_config.py"
+
+    cp "/root/formgrader_workspace.json" "${HOME}/formgrader_workspace.json"
+    chown "${USER}:${USER}" "${HOME}/formgrader_workspace.json"
+    ${runas} jupyter lab workspaces import "${HOME}/formgrader_workspace.json"
 }
 
 setup_jupyterhub () {
@@ -66,6 +70,8 @@ enable_create_assignment () {
     local runas="sudo -u ${USER}"
 
     ${runas} jupyter nbextension enable --user create_assignment/main
+    ${runas} jupyter labextension disable --level=user nbgrader/create-assignment
+    ${runas} jupyter labextension enable --level=user nbgrader/create-assignment
 }
 
 enable_formgrader () {
@@ -74,6 +80,8 @@ enable_formgrader () {
     local runas="sudo -u ${USER}"
 
     ${runas} jupyter nbextension enable --user formgrader/main --section=tree
+    ${runas} jupyter labextension disable --level=user nbgrader/formgrader
+    ${runas} jupyter labextension enable --level=user nbgrader/formgrader
     ${runas} jupyter serverextension enable --user nbgrader.server_extensions.formgrader
 }
 
@@ -83,6 +91,8 @@ enable_assignment_list () {
     local runas="sudo -u ${USER}"
 
     ${runas} jupyter nbextension enable --user assignment_list/main --section=tree
+    ${runas} jupyter labextension disable --level=user nbgrader/assignment-list
+    ${runas} jupyter labextension enable --level=user nbgrader/assignment-list
     ${runas} jupyter serverextension enable --user nbgrader.server_extensions.assignment_list
 }
 
@@ -92,6 +102,8 @@ enable_course_list () {
     local runas="sudo -u ${USER}"
 
     ${runas} jupyter nbextension enable --user course_list/main --section=tree
+    ${runas} jupyter labextension disable --level=user nbgrader/course-list
+    ${runas} jupyter labextension enable --level=user nbgrader/course-list
     ${runas} jupyter serverextension enable --user nbgrader.server_extensions.course_list
 }
 
