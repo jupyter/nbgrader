@@ -32,6 +32,13 @@ function toggle_name(on) {
     $(".name-shown").hide();
   }
 }
+
+function jlab_open_notebook(notebook_path) {
+  return JSON.stringify({
+    "command": "docmanager:open",
+    "arguments": {"path": notebook_path}
+  });
+}
 </script>
 
 <link rel="stylesheet" href="{{ resources.base_url }}/formgrader/static/components/bootstrap/css/bootstrap.min.css" />
@@ -56,10 +63,22 @@ function toggle_name(on) {
             <li><a href="{{ resources.base_url }}/formgrader/gradebook/{{ resources.assignment_id }}">{{ resources.assignment_id }}</a></li>
             <li><a href="{{ resources.base_url }}/formgrader/gradebook/{{ resources.assignment_id }}/{{ resources.notebook_id }}">{{ resources.notebook_id }}</a></li>
             <li class="active live-notebook">
-              <a class="name-hidden" data-toggle="tooltip" data-placement="bottom" title="Open live notebook" target="_blank" href="{{ resources.base_url }}/notebooks/{{ resources.notebook_path }}">
+              <a class="name-hidden" data-toggle="tooltip" data-placement="bottom" title="Open live notebook"
+                {%- if is_lab -%}
+                onclick='window.parent.postMessage(jlab_open_notebook("{{ resources.notebook_path }}"), "*");'
+                {%- else -%}
+                target="_blank" href="{{ resources.base_url }}/notebooks/{{ resources.notebook_path }}"
+                {%- endif -%}
+              >
                 Submission #{{ resources.index + 1 }}
               </a>
-              <a class="name-shown" data-toggle="tooltip" data-placement="bottom" title="Open live notebook" target="_blank" href="{{ resources.base_url }}/notebooks/{{ resources.notebook_path }}">
+              <a class="name-shown" data-toggle="tooltip" data-placement="bottom" title="Open live notebook"
+                {%- if is_lab -%}
+                onclick='window.parent.postMessage(jlab_open_notebook("{{ resources.notebook_path }}"), "*"); '
+                {%- else -%}
+                target="_blank" href="{{ resources.base_url }}/notebooks/{{ resources.notebook_path }}"
+                {%- endif -%}
+              >
                 {%- if resources.last_name and resources.first_name -%}
                 {{ resources.last_name }}, {{ resources.first_name }}
                 {%- else -%}

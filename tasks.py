@@ -10,9 +10,9 @@ def echo(msg):
     print("\033[1;37m{0}\033[0m".format(msg))
 
 
-def run(cmd):
+def run(cmd, **kwargs):
     echo(cmd)
-    return sp.check_call(cmd, shell=True)
+    return sp.check_call(cmd, shell=True, **kwargs)
 
 
 try:
@@ -77,6 +77,11 @@ def _run_tests(mark, skip, junitxml, paralell=False):
         run("coverage combine || true")
 
 
+def _run_ts_test():
+    cmd = ['npx', 'playwright', 'test', '--retries=3']
+    run(" ".join(cmd))
+
+
 def tests(args):
     if args.group == 'python':
         _run_tests(
@@ -85,11 +90,15 @@ def tests(args):
     elif args.group == 'nbextensions':
         _run_tests(mark="nbextensions", skip=args.skip, junitxml=args.junitxml)
 
+    elif args.group =='labextensions':
+        _run_ts_test()
+
     elif args.group == 'docs':
         docs(args)
 
     elif args.group == 'all':
         _run_tests(mark=None, skip=args.skip, junitxml=args.junitxml)
+        _run_ts_test()
 
     else:
         raise ValueError("Invalid test group: {}".format(args.group))
@@ -115,7 +124,11 @@ def install(args):
         cmd = 'pip install .[docs,tests]'
     else:
         cmd = 'pip install -e .[tests]'
-    run(cmd)
+
+    env = os.environ.copy()
+    if args.group not in ['all', 'labextensions']:
+        env['NBGRADER_NO_LAB'] = '1'
+    run(cmd, env=env)
 
 
 if __name__ == '__main__':

@@ -27,6 +27,9 @@ To run a selective group of tests you can use one of the following commands:
 | ``python tasks.py tests --group=nbextensions`` | Run tests only for the notebook    |
 |                                                | extensions                         |
 +------------------------------------------------+------------------------------------+
+| ``python tasks.py tests --group=labextensions``| Run tests only for the jupyter lab |
+|                                                | extensions                         |
++------------------------------------------------+------------------------------------+
 | ``python tasks.py tests --group=docs``         | Build the docs                     |
 +------------------------------------------------+------------------------------------+
 | ``python tasks.py tests --group=all``          | Same as ``python tasks.py tests``  |

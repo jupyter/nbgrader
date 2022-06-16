@@ -7,6 +7,7 @@ from traitlets import default
 from tornado import web
 from jinja2 import Environment, FileSystemLoader
 from jupyter_server.utils import url_path_join as ujoin
+from jupyter_core.paths import jupyter_config_path
 
 from . import handlers, apihandlers
 from ...apps.baseapp import NbGrader
@@ -25,6 +26,21 @@ class FormgradeExtension(NbGrader):
     def root_dir(self, directory):
         self._root_dir = directory
 
+    @property
+    def url_prefix(self):
+        self.coursedir._load_config(self.load_config())
+        relpath = os.path.relpath(self.coursedir.root, self.root_dir)
+        return relpath
+
+    def load_config(self):
+        paths = jupyter_config_path()
+        paths.insert(0, os.getcwd())
+        app = NbGrader()
+        app.config_file_paths.append(paths)
+        app.load_config_file()
+
+        return app.config
+
     @default("classes")
     def _classes_default(self):
         classes = super(FormgradeExtension, self)._classes_default()
@@ -41,7 +57,8 @@ class FormgradeExtension(NbGrader):
         # Init jinja environment
         jinja_env = Environment(loader=FileSystemLoader([handlers.template_path]))
 
-        relpath = os.path.relpath(self.coursedir.root, self.root_dir)
+        relpath = self.url_prefix
+
         if relpath.startswith("../"):
             nbgrader_bad_setup = True
             self.log.error(
@@ -54,7 +71,7 @@ class FormgradeExtension(NbGrader):
 
         # Configure the formgrader settings
         tornado_settings = dict(
-            nbgrader_url_prefix=relpath,
+            nbgrader_formgrader=self,
             nbgrader_coursedir=self.coursedir,
             nbgrader_authenticator=self.authenticator,
             nbgrader_exporter=HTMLExporter(config=self.config),
@@ -89,6 +106,10 @@ def load_jupyter_server_extension(nbapp):
     """Load the formgrader extension"""
     nbapp.log.info("Loading the formgrader nbgrader serverextension")
     webapp = nbapp.web_app
+
+    # Save which kind of application is running : Jupyterlab like or classic Notebook
+    webapp.settings['is_jlab'] = not (nbapp.name == 'jupyter-notebook')
+
     formgrader = FormgradeExtension(parent=nbapp)
 
     # compatibility between notebook.notebookapp.NotebookApp and jupyter_server.serverapp.ServerApp

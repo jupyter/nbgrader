@@ -85,7 +85,7 @@ You will additionally need to install and enable the various nbgrader extensions
    :widths: 33 33 33 33
    :header-rows: 1
 
-   * - 
+   * -
      - Students
      - Instructors
      - Formgraders

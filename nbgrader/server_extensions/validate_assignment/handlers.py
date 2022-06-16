@@ -88,7 +88,13 @@ class ValidateAssignmentHandler(JupyterHandler):
 
     @web.authenticated
     def post(self):
-        output = self.validate_notebook(self.get_argument('path'))
+        try:
+            data = {
+                'path' : self.get_argument('path')
+            }
+        except web.MissingArgumentError:
+            data = self.get_json_body()
+        output = self.validate_notebook(data['path'])
         self.finish(json.dumps(output))
 
 

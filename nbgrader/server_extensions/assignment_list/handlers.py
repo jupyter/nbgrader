@@ -45,7 +45,6 @@ class AssignmentList(LoggingConfigurable):
     def load_config(self):
         paths = jupyter_config_path()
         paths.insert(0, os.getcwd())
-
         app = NbGrader()
         app.config_file_paths.append(paths)
         app.load_config_file()
@@ -54,8 +53,9 @@ class AssignmentList(LoggingConfigurable):
 
     @contextlib.contextmanager
     def get_assignment_dir_config(self):
+
         # first get the exchange assignment directory
-        with chdir(self.root_dir):
+        with chdir(self._root_dir):
             config = self.load_config()
 
         lister = ExchangeFactory(config=config).List(config=config)
@@ -104,9 +104,9 @@ class AssignmentList(LoggingConfigurable):
             else:
                 for assignment in assignments:
                     if assignment['status'] == 'fetched':
-                        assignment['path'] = os.path.relpath(assignment['path'], self.root_dir)
+                        assignment['path'] = os.path.relpath(assignment['path'], self._root_dir)
                         for notebook in assignment['notebooks']:
-                            notebook['path'] = os.path.relpath(notebook['path'], self.root_dir)
+                            notebook['path'] = os.path.relpath(notebook['path'], self._root_dir)
                 retvalue = {
                     "success": True,
                     "value": sorted(assignments, key=lambda x: (x['course_id'], x['assignment_id']))
@@ -296,22 +296,30 @@ class AssignmentActionHandler(BaseAssignmentHandler):
 
     @web.authenticated
     def post(self, action):
+        try:
+            data = {
+                'assignment_id' : self.get_argument('assignment_id'),
+                'course_id' : self.get_argument('course_id')
+            }
+        except web.MissingArgumentError:
+            data = self.get_json_body()
+
         if action == 'fetch':
-            assignment_id = self.get_argument('assignment_id')
-            course_id = self.get_argument('course_id')
+            assignment_id = data['assignment_id']
+            course_id = data['course_id']
             self.manager.fetch_assignment(course_id, assignment_id)
             self.finish(json.dumps(self.manager.list_assignments(course_id=course_id)))
         elif action == 'submit':
-            assignment_id = self.get_argument('assignment_id')
-            course_id = self.get_argument('course_id')
+            assignment_id = data['assignment_id']
+            course_id = data['course_id']
             output = self.manager.submit_assignment(course_id, assignment_id)
             if output['success']:
                 self.finish(json.dumps(self.manager.list_assignments(course_id=course_id)))
             else:
                 self.finish(json.dumps(output))
         elif action == 'fetch_feedback':
-            assignment_id = self.get_argument('assignment_id')
-            course_id = self.get_argument('course_id')
+            assignment_id = data['assignment_id']
+            course_id = data['course_id']
             self.manager.fetch_feedback(course_id, assignment_id)
             self.finish(json.dumps(self.manager.list_assignments(course_id=course_id)))
 
