@@ -7,7 +7,7 @@ root="/root"
 srv_root="/srv/nbgrader"
 nbgrader_root="/srv/nbgrader/nbgrader"
 jupyterhub_root="/srv/nbgrader/jupyterhub"
-exchange_root="/srv/nbgrader/exchange"
+exchange_root="/usr/local/share/nbgrader/exchange"
 
 # List of possible users, used across all demos.
 possible_users=(
