@@ -31,10 +31,6 @@ The server extensions can be disabled individually by running::
     jupyter server extension disable nbgrader.server_extensions.course_list
     jupyter server extension disable nbgrader.server_extensions.validate_assignment
 
-To disable all the labextensions run::
-
-    jupyter labextension disable nbgrader
-
 The labextensions are all enabled by default, but can be disabled individually by running::
 
     jupyter labextension disable nbgrader/formgrader
