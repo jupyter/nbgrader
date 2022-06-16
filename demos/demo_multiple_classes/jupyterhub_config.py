@@ -9,7 +9,10 @@ c.Authenticator.allowed_users = [
     'grader-course123',
 ]
 
-# instructor1 and instructor2 have access to different shared servers:
+# instructor1 and instructor2 have access to different shared servers.
+# Note that groups providing access to the formgrader *must* start with
+# 'formgrade-', and groups providing access to course materials *must*
+# start with 'nbgrader-' in order for nbgrader to work correctly.
 c.JupyterHub.load_groups = {
     'instructors': [
         'instructor1',
@@ -23,8 +26,14 @@ c.JupyterHub.load_groups = {
         'instructor2',
         'grader-course123',
     ],
-    'nbgrader-course101': [],
-    'nbgrader-course123': [],
+    'nbgrader-course101': [
+        'instructor1',
+        'student1',
+    ],
+    'nbgrader-course123': [
+        'instructor2',
+        'student1',
+    ],
 }
 
 c.JupyterHub.load_roles = roles = [
@@ -54,20 +63,31 @@ c.JupyterHub.load_roles = roles = [
         ],
     },
 ]
-# add grader roles
 for course in ['course101', 'course123']:
+    # access to formgrader
     roles.append(
         {
             'name': f'formgrade-{course}',
             'groups': [f'formgrade-{course}'],
             'scopes': [
                 f'access:services!service={course}',
+            ],
+        }
+    )
+    # access to course materials
+    roles.append(
+        {
+            'name': f'nbgrader-{course}',
+            'groups': [f'nbgrader-{course}'],
+            'scopes': [
                 # access to the services API to discover the service(s)
                 'list:services',
                 f'read:services!service={course}',
             ],
         }
     )
+
+
 # Start the notebook server as a service. The port can be whatever you want
 # and the group has to match the name of the group defined above.
 c.JupyterHub.services = [

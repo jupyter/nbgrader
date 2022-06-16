@@ -26,7 +26,7 @@ install_dependencies () {
     apt install -y npm
     npm install -g configurable-http-proxy
     apt install -y python3-pip
-    pip3 install -U notebook nbclassic
+    pip3 install -U jupyterlab
     pip3 install -U jupyterhub
 }
 
@@ -48,16 +48,22 @@ install_nbgrader () {
     git pull
 
     # Install requirements and nbgrader.
-    pip3 install -U .
+    pip3 install -e ".[docs,tests]"
 
     # Install global extensions, and disable them globally. We will re-enable
     # specific ones for different user accounts in each demo.
     jupyter nbextension install --symlink --sys-prefix --py nbgrader --overwrite
     jupyter nbextension disable --sys-prefix --py nbgrader
+    jupyter labextension develop --overwrite .
+    jupyter labextension disable --level=sys_prefix nbgrader/assignment-list
+    jupyter labextension disable --level=sys_prefix nbgrader/formgrader
+    jupyter labextension disable --level=sys_prefix nbgrader/course-list
+    jupyter labextension disable --level=sys_prefix nbgrader/create-assignment
     jupyter serverextension disable --sys-prefix --py nbgrader
 
     # Everybody gets the validate extension, however.
     jupyter nbextension enable --sys-prefix validate_assignment/main --section=notebook
+    jupyter labextension enable --level=sys_prefix nbgrader/validate_assignment
     jupyter serverextension enable --sys-prefix nbgrader.server_extensions.validate_assignment
 
     # Reset exchange.

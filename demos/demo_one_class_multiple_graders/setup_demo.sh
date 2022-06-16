@@ -13,6 +13,7 @@ setup_demo () {
     make_user student1
 
     # Install global nbgrader config file.
+    mkdir -p /etc/jupyter
     cp global_nbgrader_config.py /etc/jupyter/nbgrader_config.py
 
     # Setup nbgrader configuration for grading account.

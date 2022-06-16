@@ -7,13 +7,22 @@ c.Authenticator.allowed_users = [
     'student1',
 ]
 
-# instructor1 and instructor2 have access to a shared server:
+# instructor1 and instructor2 have access to a shared server.
+# This group *must* start with formgrade- for nbgrader to work correctly.
 c.JupyterHub.load_groups = {
     'formgrade-course101': [
         'instructor1',
         'instructor2',
     ]
 }
+
+# Note: we don't need to add students to a nbgrader-course101 group to give
+# them access to coure materials (as we do in demo_multiple_classes) because
+# we explicitly set the course id in the nbgrader_config.py. If we didn't
+# set this explicitly, we would also have to create a nbgrader-course101
+# group and give it the scopes of:
+# ['list:services', 'read:services!service=course101'].
+
 c.JupyterHub.load_roles = [
     {
         'name': 'formgrade-course101',
