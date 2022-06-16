@@ -18,7 +18,7 @@ from nbgrader.utils import check_directory, ignore_patterns, self_owned
 
 class Exchange(ABCExchange):
     root = Unicode(
-        "/srv/nbgrader/exchange",
+        "/usr/local/share/nbgrader/exchange",
         help="The nbgrader exchange directory writable to everyone. MUST be preexisting."
     ).tag(config=True)
 
