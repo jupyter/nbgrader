@@ -6,7 +6,7 @@
 
 #submission-message pre,
 #validation-message pre {
-    border: solid lightgray 1px;
+    border: solid var(--jp-border-color2) 1px;
     padding: 5px;
     margin: 1em;
 }

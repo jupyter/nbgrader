@@ -9,8 +9,8 @@
   margin-bottom: 1rem;
   border: 1px solid transparent;
   border-radius: 0.25rem;
-  color: #721c24;
-  background-color: #f8d7da;
+  color: var(--jp-error-color1);
+  background-color: var(--jp-error-color3);
   border-color: #f5c6cb;
 }
 
@@ -20,7 +20,6 @@
 }
 
 #courses .panel-group .panel .panel-heading {
-    background-color: #eee;
     padding-top: 4px;
     padding-bottom: 4px;
     padding-left: 7px;
@@ -44,7 +43,7 @@
 }
 
 #courses .panel-group .panel .panel-body .list_container .list_item {
-    border-bottom: 1px solid #ddd;
+    border-bottom: 1px solid  var(--jp-border-color2);
 }
 
 #courses .panel-group .panel .panel-body .list_container .list_item:last-child {
@@ -57,6 +56,7 @@
     padding-left: 7px;
     padding-right: 7px;
     line-height: 22px;
+    background-color: var(--jp-layout-color0);
 }
 
 #courses .list_item > div {
@@ -77,5 +77,6 @@
     padding-bottom: 4px;
     padding-left: 7px;
     padding-right: 7px;
+    background-color: var(--jp-layout-color0);
 }
 

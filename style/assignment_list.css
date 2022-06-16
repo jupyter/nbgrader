@@ -4,7 +4,6 @@
 }
 
 #nbgrader-assignment-list .panel-group .panel .panel-heading {
-  background-color: #eee;
   padding-top: 4px;
   padding-bottom: 4px;
   padding-left: 7px;
@@ -28,11 +27,12 @@
 }
 
 #nbgrader-assignment-list .panel-group .panel .panel-body .list_container .list_item {
-  border-bottom: 1px solid #ddd;
+  border-bottom: 1px solid var(--jp-border-color2);
 }
 
 #nbgrader-assignment-list .panel-group .panel .panel-body .list_container .list_item:last-child {
   border-bottom: 0px;
+  background-color: var(--jp-layout-color0);
 }
 
 #nbgrader-assignment-list .assignment-notebooks .list_item {
@@ -40,7 +40,7 @@
 }
 
 #nbgrader-assignment-list .assignment-notebooks .list_item:hover {
-  background-color: #ddd !important;
+  background-color: var(--jp-border-color2) !important;
 }
 
 #nbgrader-assignment-list .assignment-notebooks .list_item:first-child:hover {
@@ -87,6 +87,7 @@
   padding-bottom: 4px;
   padding-left: 7px;
   padding-right: 7px;
+  background-color: var(--jp-layout-color0);
 }
 
 #assignments_toolbar {
