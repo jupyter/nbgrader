@@ -112,11 +112,6 @@
   padding: 0 0.5em;
 }
 
-.nbgrader-mod-highlight .nbgrader-CellHeader {
-  background-color: var(--jp-brand-color);
-
-}
-
 .nbgrader-CellHeader>.jp-InputPrompt {
   border-width: 0;
   padding-left: 0;
@@ -126,10 +121,6 @@
 
 .nbgrader-CellHeader>* {
   color: var(--jp-layout-color5);
-}
-
-.nbgrader-mod-highlight .nbgrader-CellHeader>* {
-  color: var(--jp-layout-color0);
 }
 
 .nbgrader-CellHeader>.nbgrader-LockButton {
