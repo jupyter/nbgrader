@@ -57,7 +57,7 @@
   padding: 0 12px 0 6px;
   border-style: solid;
   border-width: 0 0 0 6px;
-  border-color: #0000;
+  border-color: var(--jp-ui-font-color0);
 }
 
 .nbgrader-CellWidget.nbgrader-mod-active>div {
@@ -108,12 +108,8 @@
 .nbgrader-CellHeader {
   display: grid;
   grid-template-columns: auto max-content;
-  background-color: #EEE;
+  background-color: var(--jp-layout-color2);
   padding: 0 0.5em;
-}
-
-.nbgrader-mod-highlight .nbgrader-CellHeader {
-  background-color: #337AB7;
 }
 
 .nbgrader-CellHeader>.jp-InputPrompt {
@@ -124,11 +120,7 @@
 }
 
 .nbgrader-CellHeader>* {
-  color: black;
-}
-
-.nbgrader-mod-highlight .nbgrader-CellHeader>* {
-  color: white;
+  color: var(--jp-layout-color5);
 }
 
 .nbgrader-CellHeader>.nbgrader-LockButton {

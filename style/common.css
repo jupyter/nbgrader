@@ -12,7 +12,7 @@ FOLLOWING RULES REPLACE BOOTSTRAP RULES
   font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
   font-size: 14px;
   line-height: 1.42857143;
-  color: #333;
+  color: var(--jp-ui-font-color1);
   padding-left: 3px;
   padding-right: 3px;
 }
@@ -49,7 +49,7 @@ FOLLOWING RULES REPLACE BOOTSTRAP RULES
 }
 
 .nbgrader-mainarea-widget a {
-  color: #337ab7;
+  color: var(--jp-content-link-color);
   text-decoration: none;
 }
 
@@ -145,15 +145,15 @@ FOLLOWING RULES REPLACE BOOTSTRAP RULES
 }
 
 .btn-default {
-  color: #333;
-  background-color: #fff;
-  border-color: #ccc;
+  color: var(--jp-ui-font-color1);
+  background-color: var(--jp-layout-color0);
+  border-color: var(--jp-layout-color2);
 }
 
 .btn-primary {
-  color: #fff;
-  background-color: #337ab7;
-  border-color: #2e6da4;
+  color: var(--jp-ui-inverse-font-color0);
+  background-color: var(--jp-brand-color1);
+  border-color:  var(--jp-brand-color0);
 }
 
 .btn-group-xs > .btn, .btn-xs {
@@ -200,14 +200,14 @@ FOLLOWING RULES REPLACE BOOTSTRAP RULES
 }
 
 .btn.focus, .btn:focus, .btn:hover {
-  color: #333;
+  color: var(--jp-ui-font-color1);
   text-decoration: none;
 }
 
 .nbgrader-mainarea-widget .btn-primary:hover {
-  color: #fff;
-  background-color: #286090;
-  border-color: #204d74;
+  color: var(--jp-ui-inverse-font-color0);
+  background-color:  var(--jp-brand-color2);
+  border-color: var(--jp-brand-color1);
 }
 
 .dropdown-menu {
@@ -223,13 +223,12 @@ FOLLOWING RULES REPLACE BOOTSTRAP RULES
   font-size: 14px;
   text-align: left;
   list-style: none;
-  background-color: #fff;
+  background-color: var(--jp-layout-color0);
   background-clip: padding-box;
-  border: 1px solid #ccc;
-  border: 1px solid rgba(0,0,0,.15);
+  border: 1px solid var(--jp-layout-color3);
   border-radius: 4px;
-  -webkit-box-shadow: 0 6px 12px rgba(0,0,0,.175);
-  box-shadow: 0 6px 12px rgba(0,0,0,.175);
+  -webkit-box-shadow: 0 6px 12px var(--jp-toolbar-box-shadow);
+  box-shadow: 0 6px 12px var(--jp-toolbar-box-shadow);
 }
 
 .dropdown-menu.open {
@@ -242,14 +241,14 @@ FOLLOWING RULES REPLACE BOOTSTRAP RULES
   clear: both;
   font-weight: 400;
   line-height: 1.42857143;
-  color: #333;
+  color: var(--jp-ui-font-color1);
   white-space: nowrap;
 }
 
 .dropdown-menu > li > a:focus, .dropdown-menu > li > a:hover {
-  color: #262626;
+  color: var(--jp-ui-font-color1);
   text-decoration: none;
-  background-color: #f5f5f5;
+  background-color: var(--jp-layout-color3);
 }
 
 .caret {
@@ -299,8 +298,8 @@ FOLLOWING RULES REPLACE BOOTSTRAP RULES
 }
 
 .alert-danger {
-  color: #a94442;
-  background-color: #f2dede;
+  color: var(--jp-error-color1);
+  background-color: var(--jp-error-color3);
   border-color: #ebccd1;
 }
 
@@ -310,7 +309,7 @@ FOLLOWING RULES REPLACE BOOTSTRAP RULES
 
 .panel {
   margin-bottom: 20px;
-  background-color: #fff;
+  background-color: var(--jp-layout-color0);
   border: 1px solid transparent;
   border-top-color: transparent;
   border-right-color: transparent;
@@ -322,7 +321,7 @@ FOLLOWING RULES REPLACE BOOTSTRAP RULES
 }
 
 .panel-default {
-  border-color: #ddd;
+  border-color: var(--jp-border-color2);
 }
 
 .panel-group .panel-heading {
@@ -331,9 +330,9 @@ FOLLOWING RULES REPLACE BOOTSTRAP RULES
 }
 
 .panel-default > .panel-heading {
-  color: #333;
-  background-color: #f5f5f5;
-  border-color: #ddd;
+  color: var(--jp-ui-font-color1);
+  background-color: var(--jp-layout-color2);
+  border-color: var(--jp-border-color2);
 }
 
 .panel-heading {
