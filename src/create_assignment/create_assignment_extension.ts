@@ -112,7 +112,7 @@ export class CreateAssignmentWidget extends Panel {
 
   private addMainAreaActiveListener(shell: LabShell): void {
     this.mainAreaListener = this.getMainAreaActiveListener();
-    shell.activeChanged.connect(this.mainAreaListener);
+    shell.currentChanged.connect(this.mainAreaListener);
   }
 
   private async addNotebookWidget(

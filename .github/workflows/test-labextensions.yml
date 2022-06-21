@@ -57,7 +57,7 @@ jobs:
       - name: Install Playwright
         run: |
           npx playwright install
-      - name: Run pytest
+      - name: Run playwright tests
         run: |
           python tasks.py tests --group=labextensions
       - name: Upload Playwright Test report
