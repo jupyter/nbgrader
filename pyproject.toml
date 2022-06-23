@@ -52,6 +52,15 @@ src = "nbgrader/nbextensions/course_list/main.js"
 [[tool.tbump.file]]
 src = "nbgrader/nbextensions/validate_assignment/main.js"
 
+[[tool.tbump.file]]
+src = "src/assignment_list/index.ts"
+
+[[tool.tbump.file]]
+src = "src/course_list/index.ts"
+
+[[tool.tbump.file]]
+src = "src/validate_assignment/index.ts"
+
 [[tool.tbump.field]]
 name = "channel"
 default = ""
