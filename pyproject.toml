@@ -64,3 +64,7 @@ src = "src/validate_assignment/index.ts"
 [[tool.tbump.field]]
 name = "channel"
 default = ""
+
+[[tool.tbump.field]]
+name = "release"
+default = ""
