@@ -16,6 +16,9 @@ npm = ["jlpm"]
 [tool.check-manifest]
 ignore = ["nbgrader/labextension/**", "yarn.lock"]
 
+[tool.jupyter-releaser.hooks]
+after-bump-version = ["python tools/post-bump.py"]
+
 [tool.tbump.version]
 current = "0.8.0.dev0"
 regex = '''
@@ -37,11 +40,6 @@ version_template = '({major}, {minor}, {patch}, "{channel}", "{release}")'
 
 [[tool.tbump.file]]
 src = "pyproject.toml"
-
-[[tool.tbump.file]]
-src = "package.json"
-version_template = "{major}.{minor}.{patch}"
-search = '"version": "{current_version}"'
 
 [[tool.tbump.file]]
 src = "nbgrader/nbextensions/assignment_list/main.js"

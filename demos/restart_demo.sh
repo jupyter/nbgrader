@@ -48,7 +48,7 @@ install_nbgrader () {
     git pull
 
     # Install requirements and nbgrader.
-    pip3 install -e ".[docs,tests]"
+    pip3 install -e ".[dev,docs,tests]"
 
     # Install global extensions, and disable them globally. We will re-enable
     # specific ones for different user accounts in each demo.
