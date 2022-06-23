@@ -8,6 +8,31 @@ A summary of changes to nbgrader.
 0.7.x
 -----
 
+0.7.1
+~~~~~
+
+The following PRs were merged for the 0.7.1 milestone:
+
+- PR #1607: More informative error messages in ClearSolutions
+- PR #1598: Fix mathjax in formgrade templates
+- PR #1593: Pin traitlets dependency for 0.7.x
+- PR #1590: Ensure html files aren't copied over from documentation
+- PR #1582: Trivial typo: "int the database"
+- PR #1579: Only add extra_template_basedirs if it has not been set
+- PR #1576: Revert "[converters/autograde] Fix autograded notebook permission"
+- PR #1518: [converters/autograde] Fix autograded notebook permission
+
+Thanks to the following users who submitted PRs or reported issues that were merged or fixed for the 0.7.1 release:
+
+- Anmol23oct
+- brichet
+- jhamrick
+- kno10
+- meeseeksmachine
+- mhwasil
+- szazs89
+- tmetzl
+
 0.7.0
 ~~~~~
 
