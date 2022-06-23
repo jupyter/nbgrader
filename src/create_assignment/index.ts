@@ -1,6 +1,7 @@
 import {
   JupyterFrontEnd,
-  JupyterFrontEndPlugin
+  JupyterFrontEndPlugin,
+  ILabShell
 } from '@jupyterlab/application';
 
 import {
@@ -23,20 +24,21 @@ const PLUGIN_ID = "nbgrader/create-assignment"
 export const create_assignment_extension: JupyterFrontEndPlugin<void> = {
   id: PLUGIN_ID,
   autoStart: true,
-  requires: [INotebookTracker],
+  requires: [INotebookTracker, ILabShell],
   activate: activate_extension
 };
 
-function activate_extension(app: JupyterFrontEnd, tracker: INotebookTracker) {
+function activate_extension(app: JupyterFrontEnd, tracker: INotebookTracker, shell: ILabShell) {
   console.log('Activating extension "create_assignment".');
 
   const panel = new Panel();
   panel.node.style.overflowY = 'auto';
-  const createAssignmentWidget = new CreateAssignmentWidget(tracker);
+  const createAssignmentWidget = new CreateAssignmentWidget(tracker, shell);
   panel.addWidget(createAssignmentWidget);
   panel.id = 'nbgrader-create_assignemnt';
   panel.title.label = 'Create Assignment';
   panel.title.caption = 'nbgrader Create Assignment';
+
   app.shell.add(panel, 'right');
   console.log('Extension "create_assignment" activated.');
 }
