@@ -33,7 +33,7 @@ cmd = "grep -q {new_version} CHANGELOG.md"
 
 [[tool.tbump.file]]
 src = "nbgrader/_version.py"
-version_template = '({major}, {minor}, {patch}, "{channel}")'
+version_template = '({major}, {minor}, {patch}, "{channel}", "{release}")'
 
 [[tool.tbump.file]]
 src = "pyproject.toml"
