@@ -28,7 +28,6 @@ Thanks to the following users who submitted PRs or reported issues that were mer
 - brichet
 - jhamrick
 - kno10
-- meeseeksmachine
 - mhwasil
 - szazs89
 - tmetzl
