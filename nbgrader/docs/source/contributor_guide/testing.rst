@@ -8,6 +8,12 @@ We have automatic tests on Travis CI, but they take a long time to run and
 sometimes randomly time out, so it will be much more efficient if you can
 test locally first.
 
+Testing labextensions
+---------------------
+Labextensions tests use `playwright <https://playwright.dev/>`_, which must be initialize first::
+
+    npx playwright install
+
 Running the full test suite
 ---------------------------
 To run the full test suite, run the following command from the root of the
@@ -25,6 +31,9 @@ To run a selective group of tests you can use one of the following commands:
 | ``python tasks.py tests --group=python``       | Run tests only for the Python code |
 +------------------------------------------------+------------------------------------+
 | ``python tasks.py tests --group=nbextensions`` | Run tests only for the notebook    |
+|                                                | extensions                         |
++------------------------------------------------+------------------------------------+
+| ``python tasks.py tests --group=labextensions``| Run tests only for the jupyter lab |
 |                                                | extensions                         |
 +------------------------------------------------+------------------------------------+
 | ``python tasks.py tests --group=docs``         | Build the docs                     |

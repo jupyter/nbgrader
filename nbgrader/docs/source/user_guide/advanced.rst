@@ -49,15 +49,15 @@ example:
 .. code:: bash
 
   $ nbgrader list
-  [ListApp | ERROR] Unwritable directory, please contact your instructor: /srv/nbgrader/exchange
+  [ListApp | ERROR] Unwritable directory, please contact your instructor: /usr/local/share/nbgrader/exchange
 
 This error that the exchange directory isn't writable is an easy mistake to
 make, but also relatively easy to fix. If the exchange directory is at
-``/srv/nbgrader/exchange``, then make sure you have run:
+``/usr/local/share/nbgrader/exchange``, then make sure you have run:
 
 .. code:: bash
 
-  chmod +rw /srv/nbgrader/exchange
+  chmod ugo+rw /usr/local/share/nbgrader/exchange
 
 .. _getting-information-from-db:
 

@@ -2,13 +2,25 @@ include *.md
 include *.json
 include *.txt
 
-include .coveragerc
+include tasks.py
+include .readthedocs.yaml
 include .bowerrc
 include mypy.ini
-include pytest.ini
 include codecov.yml
-include .readthedocs.yaml
-include tasks.py
+include yarn.lock
+
+include pytest.ini
+include .coveragerc
+include conftest.py
+include playwright.config.ts
+
+# Lab extension files
+graft nbgrader/labextension
+graft src
+graft style
+graft schema
+prune **/node_modules
+prune lib
 
 #nbgrader format files
 include nbgrader/nbgraderformat/*.json
@@ -32,11 +44,14 @@ recursive-include nbgrader/alembic *
 include nbgrader/tests/apps/files/*
 include nbgrader/tests/preprocessors/files/*
 include nbgrader/tests/nbextensions/files/*
-
+recursive-include nbgrader/tests/labextension_ui-tests *
 # global exclusion
 global-exclude *.pyc
 global-exclude .ipynb_checkpoints
 global-exclude __pycache__
+global-exclude .git
+global-exclude *.pyo
+global-exclude *~
 
 # directories to prune
 prune demos

@@ -14,70 +14,65 @@ Or, if you use `Anaconda <https://www.anaconda.com/download>`__::
     conda install jupyter
     conda install -c conda-forge nbgrader
 
-nbgrader extensions
--------------------
 
-**Take note:** If you install nbgrader via `Anaconda
-<https://www.anaconda.com/download>`__ the nbgrader extensions will be
-installed and enabled for you upon installation. See the `Installation
-options`_ and `Disabling extensions`_ sections below for more information on
-changing the default installation option ``--sys-prefix`` or disabling one or
-more extensions.
+nbgrader extensions in Jupyter Lab
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Installing and activating extensions
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Extensions will be automatically installed after the installation of nbgrader.
 
-You can install the nbgrader extensions for Jupyter notebook. Previously
-this was done using the ``nbgrader extension install`` command. However, moving
-forward this is done using the ``jupyter nbextension`` and ``jupyter
-serverextension`` commands.
+The installation will activated 4 server extensions
+(formgrader, assignment_list, course_list and validate_assignment)
+and 5 labextensions (formgrader, assignment_list, course_list, validate_assignment and create_assignment).
 
-To install and enable all nbextensions (**assignment list**, **create
-assignment**, **formgrader**, and **validate**) run::
+The server extensions can be disabled individually by running::
 
-    jupyter nbextension install --sys-prefix --py nbgrader --overwrite
-    jupyter nbextension enable --sys-prefix --py nbgrader
-    jupyter serverextension enable --sys-prefix --py nbgrader
+    jupyter server extension disable nbgrader.server_extensions.formgrader
+    jupyter server extension disable nbgrader.server_extensions.assignment_list
+    jupyter server extension disable nbgrader.server_extensions.course_list
+    jupyter server extension disable nbgrader.server_extensions.validate_assignment
 
-To work properly, the **assignment list**, **formgrader**, and **validate**
-extensions require both the nbextension and serverextension. The **create
-assignment** extension only has an nbextension part.
+The labextensions are all enabled by default, but can be disabled individually by running::
+
+    jupyter labextension disable nbgrader/formgrader
+    jupyter labextension disable nbgrader/assignment-list
+    jupyter labextension disable nbgrader/course-list
+    jupyter labextension disable nbgrader/create-assignment
+    jupyter labextension disable nbgrader/validate-assignment
+
+or enabled::
+
+    jupyter labextension enable nbgrader/formgrader
+    jupyter labextension enable nbgrader/assignment-list
+    jupyter labextension enable nbgrader/course-list
+    jupyter labextension enable nbgrader/create-assignment
+    jupyter labextension enable nbgrader/validate-assignment
+
+To work properly, the **assignment list**, **formgrader**, **course list** and **validate assignment**
+extensions require both the labextension and server extension. The **create
+assignment** extension only has an labextension part.
 
 Installation options
 ~~~~~~~~~~~~~~~~~~~~
 
-When installed/enabled with the ``--sys-prefix`` option, the nbextensions and
-serverextension will be installed and enabled for anyone using the particular
+When installed/enabled with the ``--sys-prefix`` option, the
+server extension will be installed and enabled for anyone using the particular
 Python installation or conda environment where nbgrader is installed. If that
 Python installation is available system-wide, all users will immediately be
 able to use the nbgrader extensions.
 
 There are a number of ways you may need to customize the installation:
 
--  To install or enable the nbextensions/serverextension for just the
+-  To install or enable the labextensions/server extension for just the
    current user, run the above commands with ``--user`` instead of ``--sys-prefix``::
 
-    jupyter nbextension install --user --py nbgrader --overwrite
-    jupyter nbextension enable --user --py nbgrader
-    jupyter serverextension enable --user --py nbgrader
+    jupyter labextension enable --level=user nbgrader
+    jupyter server extension enable --user --py nbgrader
 
--  To install or enable the nbextensions/serverextension for all
+-  To install or enable the labextensions/server extension for all
    Python installations on the system, run the above commands with ``--system`` instead of ``--sys-prefix``::
 
-    jupyter nbextension install --system --py nbgrader --overwrite
-    jupyter nbextension enable --system --py nbgrader
-    jupyter serverextension enable --system --py nbgrader
-
--  You can also use the ``--overwrite`` option along with the ``jupyter
-   nbextension install`` command to overwrite existing nbgrader extension
-   installation files, typically used when updating nbgrader, for
-   example::
-
-    jupyter nbextension install --sys-prefix --overwrite --py nbgrader
-
-Previous versions of nbgrader required each user on a system to enable the
-nbextensions; this is no longer needed if the ``--sys-prefix`` option is used
-for a system-wide python or the ``--system`` option is used.
+    jupyter labextension enable --level=system nbgrader
+    jupyter server extension enable --system --py nbgrader
 
 Disabling extensions
 ~~~~~~~~~~~~~~~~~~~~
@@ -86,47 +81,47 @@ You may want to only install one of the nbgrader extensions. To do this, follow
 the above steps to install everything and then disable the extension you don't
 need. For example, to disable the Assignment List extension::
 
-    jupyter nbextension disable --sys-prefix assignment_list/main --section=tree
-    jupyter serverextension disable --sys-prefix nbgrader.server_extensions.assignment_list
+    jupyter labextension disable --level=sys_prefix nbgrader/assignment_list
+    jupyter server extension disable --sys-prefix nbgrader.server_extensions.assignment_list
 
 or to disable the Create Assignment extension::
 
-    jupyter nbextension disable --sys-prefix create_assignment/main
+    jupyter labextension disable --level=sys_prefix nbgrader/create_assignment
 
 or to disable the Formgrader extension::
 
-    jupyter nbextension disable --sys-prefix formgrader/main --section=tree
-    jupyter serverextension disable --sys-prefix nbgrader.server_extensions.formgrader
+    jupyter labextension disable --level=sys_prefix nbgrader/formgrader
+    jupyter server extension disable --sys-prefix nbgrader.server_extensions.formgrader
 
 or to disable the Course List extension::
 
-    jupyter nbextension disable --sys-prefix course_list/main --section=tree
-    jupyter serverextension disable --sys-prefix nbgrader.server_extensions.course_list
+    jupyter labextension disable --level=sys_prefix nbgrader/course_list
+    jupyter server extension disable --sys-prefix nbgrader.server_extensions.course_list
 
 For example lets assume you have installed nbgrader via `Anaconda
-<https://www.anaconda.com/download>`__ (meaning all extensions are installed
+<https://www.anaconda.com/download>`__ (meaning all serverextensions are installed
 and enabled with the ``--sys-prefix`` flag, i.e. anyone using the particular
 Python installation or conda environment where nbgrader is installed). But you
 only want the *create assignment* extension available to a specific user and
 not everyone else. First you will need to disable the *create assignment*
 extension for everyone else::
 
-    jupyter nbextension disable --sys-prefix create_assignment/main
+    jupyter labextension disable nbgrader/create_assignment
 
 Log in with the specific user and then enable the *create assignment* extension
 only for that user::
 
-    jupyter nbextension enable --user create_assignment/main
+    jupyter labextension enable --level=user nbgrader/create_assignment
 
-Finally to see all installed nbextensions/server extensions, run::
+Finally to see all installed labextensions/server extensions, run::
 
-    jupyter nbextension list
-    jupyter serverextension list
+    jupyter labextension list
+    jupyter server extension list
 
 For further documentation on these commands run::
 
-    jupyter nbextension --help-all
-    jupyter serverextension --help-all
+    jupyter labextension --help-all
+    jupyter server extension --help-all
 
 For advanced instructions on installing the *assignment list* extension please
 see the :ref:`advanced installation instructions<assignment-list-installation>`.

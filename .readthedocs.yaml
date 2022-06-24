@@ -3,6 +3,7 @@ build:
   os: ubuntu-20.04
   tools:
     python: "3"
+    nodejs: "16"
 sphinx:
   builder: html
   configuration: nbgrader/docs/source/conf.py

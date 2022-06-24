@@ -1,6 +1,20 @@
 [build-system]
-requires = ["jupyter_packaging~=0.12.0", "setuptools>=40.8.0", "wheel"]
-build-backend = "setuptools.build_meta"
+requires = ["jupyter_packaging~=0.12.0", "jupyterlab<4"]
+build-backend = "jupyter_packaging.build_api"
+
+[tool.jupyter-packaging.options]
+skip-if-exists = ["nbgrader/labextension/static/style.js"]
+ensured-targets = ["nbgrader/labextension/static/style.js", "nbgrader/labextension/package.json"]
+
+[tool.jupyter-packaging.builder]
+factory = "jupyter_packaging.npm_builder"
+
+[tool.jupyter-packaging.build-args]
+build_cmd = "build:prod"
+npm = ["jlpm"]
+
+[tool.check-manifest]
+ignore = ["nbgrader/labextension/**", "yarn.lock"]
 
 [tool.tbump.version]
 current = "0.8.0.dev"
@@ -25,6 +39,7 @@ src = "pyproject.toml"
 
 [[tool.tbump.file]]
 src = "package.json"
+version_template = "{major}.{minor}.{patch}"
 search = '"version": "{current_version}"'
 
 [[tool.tbump.file]]

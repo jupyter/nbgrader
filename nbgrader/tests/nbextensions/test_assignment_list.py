@@ -20,6 +20,7 @@ from .conftest import notwindows, _make_nbserver, _make_browser, _close_nbserver
 from ...utils import rmtree
 
 
+
 @pytest.fixture(scope="module")
 def nbserver(request, port, tempdir, jupyter_config_dir, jupyter_data_dir, exchange, cache):
     server = _make_nbserver("", port, tempdir, jupyter_config_dir, jupyter_data_dir, exchange, cache)

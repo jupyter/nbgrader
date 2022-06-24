@@ -1,14 +1,109 @@
 {
- "name": "nbgrader-deps",
- "version": "0.8.0.dev",
- "description": "nbgrader nodejs dependencies",
- "author": "Jupyter Developers",
- "license": "BSD",
- "repository": {
-  "type": "git",
-  "url": "https://github.com/jupyter/nbgrader.git"
- },
- "devDependencies": {
-  "bower": "*"
- }
+  "name": "nbgrader",
+  "version": "0.8.0",
+  "description": "nbgrader nodejs dependencies",
+  "keywords": [
+    "jupyter",
+    "jupyterlab",
+    "jupyterlab-extension"
+  ],
+  "license": "BSD-3-Clause",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jupyter/nbgrader.git"
+  },
+  "author": {
+    "name": "Jupyter Development Team",
+    "email": "jupyter@googlegroups.com"
+  },
+  "files": [
+    "lib/**/*.{d.ts,eot,gif,html,jpg,js,js.map,json,png,svg,woff2,ttf}",
+    "style/**/*.{css,js,eot,gif,html,jpg,json,png,svg,woff2,ttf}",
+    "schema/*.json"
+  ],
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "style": "style/index.css",
+  "scripts": {
+    "build": "jlpm build:lib && jlpm build:labextension:dev",
+    "build:prod": "jlpm clean && jlpm build:lib && jlpm build:labextension",
+    "build:labextension": "jupyter labextension build .",
+    "build:labextension:dev": "jupyter labextension build --development True .",
+    "build:lib": "tsc",
+    "clean": "jlpm clean:lib",
+    "clean:lib": "rimraf lib tsconfig.tsbuildinfo",
+    "clean:labextension": "rimraf nbgrader/labextension",
+    "clean:all": "jlpm clean:lib && jlpm clean:labextension",
+    "install:labextension": "jlpm build",
+    "start:test": "python ./nbgrader/tests/labextension_ui-tests/run_jupyter_lab.py",
+    "test": "jlpm playwright test",
+    "watch": "run-p watch:src watch:labextension",
+    "watch:src": "tsc -w",
+    "watch:labextension": "jupyter labextension watch ."
+  },
+  "dependencies": {
+    "@jupyterlab/application": "^3.1.0",
+    "@jupyterlab/apputils": "^3.1.0",
+    "@jupyterlab/cells": "^3.3.3",
+    "@jupyterlab/coreutils": "^5.1.0",
+    "@jupyterlab/launcher": "^3.4.2",
+    "@jupyterlab/notebook": "^3.3.3",
+    "@jupyterlab/services": "^6.1.0",
+    "@jupyterlab/settingregistry": "^3.1.0"
+  },
+  "devDependencies": {
+    "@jupyterlab/builder": "^3.3.3",
+    "@jupyterlab/galata": "^4.2.4",
+    "@playwright/test": "^1.21.1",
+    "@typescript-eslint/eslint-plugin": "^4.8.1",
+    "@typescript-eslint/parser": "^4.8.1",
+    "bower": "*",
+    "eslint": "^7.14.0",
+    "eslint-config-prettier": "^6.15.0",
+    "eslint-plugin-prettier": "^3.1.4",
+    "mkdirp": "^1.0.3",
+    "npm-run-all": "^4.1.5",
+    "prettier": "^2.1.1",
+    "rimraf": "^3.0.2",
+    "stylelint": "^14.3.0",
+    "stylelint-config-prettier": "^9.0.3",
+    "stylelint-config-recommended": "^6.0.0",
+    "stylelint-config-standard": "~24.0.0",
+    "stylelint-prettier": "^2.0.0",
+    "typescript": "~4.1.3"
+  },
+  "sideEffects": [
+    "style/*.css",
+    "style/index.js"
+  ],
+  "styleModule": "style/index.js",
+  "publishConfig": {
+    "access": "public"
+  },
+  "jupyterlab": {
+    "discovery": {
+      "server": {
+        "managers": [
+          "pip"
+        ],
+        "base": {
+          "name": "nbgrader"
+        }
+      }
+    },
+    "extension": true,
+    "outputDir": "nbgrader/labextension",
+    "schemaDir": "schema"
+  },
+  "jupyter-releaser": {
+    "hooks": {
+      "before-build-npm": [
+        "python -m pip install jupyterlab~=3.1",
+        "jlpm"
+      ],
+      "before-build-python": [
+        "jlpm clean:all"
+      ]
+    }
+  }
 }
