@@ -5,6 +5,7 @@ from .autograde import Autograde
 from .feedback import Feedback
 from .generate_feedback import GenerateFeedback
 from .generate_solution import GenerateSolution
+from .instantiate_tests import InstantiateTests
 
 __all__ = [
     "BaseConverter",
@@ -14,5 +15,6 @@ __all__ = [
     "Autograde",
     "Feedback",
     "GenerateFeedback",
-    "GenerateSolution"
+    "GenerateSolution",
+    "InstantiateTests"
 ]

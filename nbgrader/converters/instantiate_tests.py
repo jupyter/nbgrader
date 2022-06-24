@@ -24,7 +24,7 @@ from typing import Any
 from ..coursedir import CourseDirectory
 
 
-class GenerateAssignment(BaseConverter):
+class InstantiateTests(BaseConverter):
 
     create_assignment = Bool(
         True,
@@ -55,19 +55,19 @@ class GenerateAssignment(BaseConverter):
 
     @property
     def _output_directory(self) -> str:
-        return self.coursedir.release_directory
+        return self.coursedir.instantiated_directory
 
     preprocessors = List([
         IncludeHeaderFooter,
         InstantiateTests,
-        LimitTestCellHeights,
+        # LimitTestCellHeights,
         LockCells,
         ClearSolutions,
         ClearOutput,
         CheckCellMetadata,
         ComputeChecksums,
         SaveCells,
-        ClearHiddenTests,
+        # ClearHiddenTests,
         ClearMarkScheme,
         ComputeChecksums,
         CheckCellMetadata,
@@ -78,19 +78,19 @@ class GenerateAssignment(BaseConverter):
     def _load_config(self, cfg: Config, **kwargs: Any) -> None:
         if 'Assign' in cfg:
             self.log.warning(
-                "Use GenerateAssignment in config, not Assign. Outdated config:\n%s",
+                "Use InstantiateTests in config, not Assign. Outdated config:\n%s",
                 '\n'.join(
                     'Assign.{key} = {value!r}'.format(key=key, value=value)
-                    for key, value in cfg.GenerateAssignmentApp.items()
+                    for key, value in cfg.InstantiateTestsApp.items()
                 )
             )
-            cfg.GenerateAssignment.merge(cfg.Assign)
-            del cfg.GenerateAssignmentApp
+            cfg.InstantiateTests.merge(cfg.Assign)
+            del cfg.InstantiateTestsApp
 
-        super(GenerateAssignment, self)._load_config(cfg, **kwargs)
+        super(InstantiateTests, self)._load_config(cfg, **kwargs)
 
     def __init__(self, coursedir: CourseDirectory = None, **kwargs: Any) -> None:
-        super(GenerateAssignment, self).__init__(coursedir=coursedir, **kwargs)
+        super(InstantiateTests, self).__init__(coursedir=coursedir, **kwargs)
 
     def _clean_old_notebooks(self, assignment_id: str, student_id: str) -> None:
         with Gradebook(self.coursedir.db_url, self.coursedir.course_id) as gb:
@@ -130,7 +130,7 @@ class GenerateAssignment(BaseConverter):
                 gb.remove_notebook(notebook_id, assignment_id)
 
     def init_assignment(self, assignment_id: str, student_id: str) -> None:
-        super(GenerateAssignment, self).init_assignment(assignment_id, student_id)
+        super(InstantiateTests, self).init_assignment(assignment_id, student_id)
 
         # try to get the assignment from the database, and throw an error if it
         # doesn't exist
@@ -162,6 +162,6 @@ class GenerateAssignment(BaseConverter):
         old_student_id = self.coursedir.student_id
         self.coursedir.student_id = '.'
         try:
-            super(GenerateAssignment, self).start()
+            super(InstantiateTests, self).start()
         finally:
             self.coursedir.student_id = old_student_id

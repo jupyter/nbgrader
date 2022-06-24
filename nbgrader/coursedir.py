@@ -142,6 +142,18 @@ class CourseDirectory(LoggingConfigurable):
         )
     ).tag(config=True)
 
+    instantiated_directory = Unicode(
+        'instantiated',
+        help=dedent(
+            """
+            The name of the directory that contains the version of the
+            assignment that will be released to students. This corresponds to
+            the `nbgrader_step` variable in the `directory_structure` config
+            option.
+            """
+        )
+    ).tag(config=True)
+
     submitted_directory = Unicode(
         'submitted',
         help=dedent(

@@ -9,7 +9,7 @@ from traitlets.config import LoggingConfigurable, Config, get_config
 from traitlets import Instance, Enum, Unicode, observe
 
 from ..coursedir import CourseDirectory
-from ..converters import GenerateAssignment, Autograde, GenerateFeedback, GenerateSolution
+from ..converters import GenerateAssignment, Autograde, GenerateFeedback, GenerateSolution, InstantiateTests
 from ..exchange import ExchangeFactory, ExchangeError
 from ..api import MissingEntry, Gradebook, Student, SubmittedAssignment
 from ..utils import parse_utc, temp_attrs, capture_log, as_timezone, to_numeric_tz
@@ -913,6 +913,36 @@ class NbGraderAPI(LoggingConfigurable):
         """
         with temp_attrs(self.coursedir, assignment_id=assignment_id):
             app = GenerateAssignment(coursedir=self.coursedir, parent=self)
+            app.force = force
+            app.create_assignment = create
+            return capture_log(app)
+
+    def instantiate_tests(self, assignment_id, force=True, create=True):
+        """Run ``nbgrader instantiate_tests`` for a particular assignment.
+
+        Arguments
+        ---------
+        assignment_id: string
+            The name of the assignment
+        force: bool
+            Whether to force creating the student version, even if it already
+            exists.
+        create: bool
+            Whether to create the assignment in the database, if it doesn't
+            already exist.
+
+        Returns
+        -------
+        result: dict
+            A dictionary with the following keys (error and log may or may not be present):
+
+            - success (bool): whether or not the operation completed successfully
+            - error (string): formatted traceback
+            - log (string): captured log output
+
+        """
+        with temp_attrs(self.coursedir, assignment_id=assignment_id):
+            app = InstantiateTests(coursedir=self.coursedir, parent=self)
             app.force = force
             app.create_assignment = create
             return capture_log(app)
