@@ -1,0 +1,106 @@
+setup: "from hashlib import sha1"
+hash: 'sha1({{snippet}}.encode("utf-8")+b"{{salt}}").hexdigest()'
+dispatch: "type({{snippet}})"
+normalize: "str({{snippet}})"
+check: 'assert {{snippet}} == "{{value}}", "{{message}}"'
+success: "print('Success!')"
+
+templates:
+    default:
+        - test: "type({{snippet}})"
+          fail: "type of {{snippet}} is not correct"
+
+        - test: "{{snippet}}"
+          fail: "value of {{snippet}} is not correct"
+
+    int:
+        - test: "type({{snippet}})"
+          fail: "type of {{snippet}} is not int"
+
+        - test: "{{snippet}}"
+          fail: "value of {{snippet}} is not correct"
+
+    float:
+        - test: "type({{snippet}})"
+          fail: "type of {{snippet}} is not float"
+
+        - test: "round({{snippet}}, 8)"
+          fail: "value of {{snippet}} is not correct (rounded to 8 decimal places)"
+
+    set:
+        - test: "type({{snippet}})"
+          fail: "type of {{snippet}} is not set"
+
+        - test: "len({{snippet}})"
+          fail: "length of {{snippet}} is not correct"
+
+        - test: "{{snippet}}"
+          fail: "value of {{snippet}} is not correct"
+
+    list:
+        - test: "type({{snippet}})"
+          fail: "type of {{snippet}} is not list"
+
+        - test: "len({{snippet}})"
+          fail: "length of {{snippet}} is not correct"
+
+        - test: "sorted([str(element) for element in {{snippet}}])"
+          fail: "values of {{snippet}} are not correct"
+
+        - test: "{{snippet}}"
+          fail: "order of elements of {{snippet}} is not correct"
+
+    tuple:
+        - test: "type({{snippet}})"
+          fail: "type of {{snippet}} is not tuple"
+
+        - test: "len({{snippet}})"
+          fail: "length of {{snippet}} is not correct"
+
+        - test: "sorted([str(element) for element in {{snippet}}])"
+          fail: "values of {{snippet}} are not correct"
+
+        - test: "{{snippet}}"
+          fail: "order of elements of {{snippet}} is not correct"
+
+    str:
+
+        - test: "type({{snippet}})"
+          fail: "type of {{snippet}} is not str"
+
+        - test: "len({{snippet}})"
+          fail: "length of {{snippet}} is not correct"
+
+        - test: "{{snippet}}.lower()"
+          fail: "value of {{snippet}} is not correct"
+
+        - test: "{{snippet}}"
+          fail: "correct string value of {{snippet}} but incorrect case of letters"
+
+    dict:
+
+        - test: "type({{snippet}})"
+          fail: "type of {{snippet}} is not dict"
+
+        - test: "len(list({{snippet}}.keys()))"
+          fail: "number of keys of {{snippet}} is not correct"
+
+        - test: "sorted(list({{snippet}}.keys()))"
+          fail: "keys of {{snippet}} are not correct"
+
+        - test: "sorted(list({{snippet}}.values()))"
+          fail: "correct keys, but values of {{snippet}} are not correct"
+
+        - test: "{{snippet}}"
+          fail: "correct keys and values, but incorrect correspondence in keys and values of {{snippet}}"
+
+    bool:
+        - test: "type({{snippet}})"
+          fail: "type of {{snippet}} is not bool"
+
+        - test: "{{snippet}}"
+          fail: "boolean value of {{snippet}} is not correct"
+
+    type:
+        - test: "{{snippet}}"
+          fail: "type of {{snippet}} is not correct"
