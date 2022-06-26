@@ -3,12 +3,24 @@ import yaml
 import jinja2 as j2
 import re
 from .. import utils
-from traitlets import Bool, List, Integer, Unicode
+from traitlets import Bool, List, Integer, Unicode, Dict
 from textwrap import dedent
 from . import Execute
 import secrets
 import asyncio
 import inspect
+import typing as t
+from nbformat import NotebookNode
+from queue import Empty
+import datetime
+from typing import Optional
+from nbclient.exceptions import (
+    CellControlSignal,
+    CellExecutionComplete,
+    CellExecutionError,
+    CellTimeoutError,
+    DeadKernelError,
+)
 
 try:
     from time import monotonic  # Py 3
@@ -208,7 +220,7 @@ class InstantiateTests(Execute):
                 setup_code_inserted_into_cell = True
                 asyncio.run(self._async_execute_code_snippet(self.setup_code))
 
-            # decide whether to use hashing based on whether the self.hashed_delimiter token 
+            # decide whether to use hashing based on whether the self.hashed_delimiter token
             # appears in the line before the self.autotest_delimiter token
             use_hash = (self.hashed_delimiter in line[:line.find(self.autotest_delimiter)])
             if use_hash:
@@ -328,7 +340,7 @@ class InstantiateTests(Execute):
         template = j2.Environment(loader=j2.BaseLoader).from_string(self.dispatch_template)
         dispatch_code = template.render(snippet=snippet)
         dispatch_result = asyncio.run(self._async_execute_code_snippet(dispatch_code))
-        self.log.debug('Dispatch result returned by kernel: ' + dispatch_result)
+        self.log.debug('Dispatch result returned by kernel: ', dispatch_result)
         # get the test code; if the type isn't in our dict, just default to 'default'
         # if default isn't in the tests code, this will throw an error
         try:
@@ -381,7 +393,7 @@ class InstantiateTests(Execute):
         return instantiated_tests, test_values, rendered_fail_msgs
 
     # -------------------------------------------------------------------------------------
-    
+
     #########################
     # async version of nbgrader interaction with kernel
     # the below functions were adapted from the jupyter/nbclient GitHub repo, commit:
@@ -407,29 +419,33 @@ class InstantiateTests(Execute):
 
     # -------------------------------------------------------------------------------------
     # adapted from nbclient.client._async_handle_timeout
-    async def _async_handle_timeout(self):
-        self.log.error(
-            "Timeout waiting for execute reply (%is)." % self.timeout)
+    async def _async_handle_timeout(self, timeout: int) -> None:
+
+        self.log.error("Timeout waiting for execute reply (%is)." % timeout)
         if self.interrupt_on_timeout:
             self.log.error("Interrupting kernel")
-            await self._ensure_async(self.km.interrupt_kernel())
+            assert self.km is not None
+            await _ensure_async(self.km.interrupt_kernel())
         else:
-            raise TimeoutError("Cell execution timed out")
+            raise CellTimeoutError.error_from_timeout_and_cell(
+                "Cell execution timed out", timeout
+            )
 
     # -------------------------------------------------------------------------------------
     # adapted from nbclient.client._async_check_alive
-    async def _async_check_alive(self):
+    async def _async_check_alive(self) -> None:
+        assert self.kc is not None
         if not await self._ensure_async(self.kc.is_alive()):
-            self.log.error(
-                "Kernel died while waiting for execute reply.")
+            self.log.error("Kernel died while waiting for execute reply.")
             raise DeadKernelError("Kernel died")
 
     # -------------------------------------------------------------------------------------
     # adapted from nbclient.client._async_poll_output_msg
-    async def _async_poll_output_msg(self, parent_msg_id, code):
-        assert self.kc is not None
+    async def _async_poll_output_msg_code(
+            self, parent_msg_id: str, code
+    ) -> None:
 
-        self.log.debug("Executing _async_poll_output_msg:\n%s", parent_msg_id)
+        assert self.kc is not None
         while True:
             msg = await self._ensure_async(self.kc.iopub_channel.get_msg(timeout=None))
             if msg['parent_header'].get('msg_id') == parent_msg_id:
@@ -450,34 +466,46 @@ class InstantiateTests(Execute):
                     if msg_type == 'status':
                         if content['execution_state'] == 'idle':
                             raise CellExecutionComplete()
-                except CellExecutionComplete:
-                    self.log.debug("Get _async_poll_output_msg:\n%s", msg)
-                    break
 
-        return None
+                except CellExecutionComplete:
+                    return
 
     # -------------------------------------------------------------------------------------
     # adapted from nbclient.client.async_wait_for_reply
-    async def _async_wait_for_reply(self, msg_id, cell=None, timeout=None):
+    async def _async_wait_for_reply(
+            self, msg_id: str, cell: t.Optional[NotebookNode] = None
+    ) -> t.Optional[t.Dict]:
+
+        assert self.kc is not None
         # wait for finish, with timeout
+        timeout = self._get_timeout(cell)
         cummulative_time = 0
-        timeout_interval = 5
         while True:
             try:
-                msg = await self._ensure_async(self.kc.shell_channel.get_msg(timeout=timeout))
+                msg = await _ensure_async(
+                    self.kc.shell_channel.get_msg(timeout=self.shell_timeout_interval)
+                )
             except Empty:
                 await self._async_check_alive()
-                cummulative_time += timeout_interval
+                cummulative_time += self.shell_timeout_interval
                 if timeout and cummulative_time > timeout:
-                    await self._handle_timeout()
+                    await self._async_async_handle_timeout(timeout, cell)
                     break
             else:
                 if msg['parent_header'].get('msg_id') == msg_id:
                     return msg
+        return None
 
     # -------------------------------------------------------------------------------------
     # adapted from nbclient.client._async_poll_for_reply
-    async def _async_poll_for_reply(self, msg_id, timeout, task_poll_output_msg, task_poll_kernel_alive):
+    async def _async_poll_for_reply_code(
+            self,
+            msg_id: str,
+            timeout: t.Optional[int],
+            task_poll_output_msg: asyncio.Future,
+            task_poll_kernel_alive: asyncio.Future,
+    ) -> t.Dict:
+
         assert self.kc is not None
 
         self.log.debug("Executing _async_poll_for_reply:\n%s", msg_id)
@@ -518,10 +546,10 @@ class InstantiateTests(Execute):
 
         task_poll_kernel_alive = asyncio.ensure_future(self._async_check_alive())
 
-        task_poll_output_msg = asyncio.ensure_future(self._async_poll_output_msg(parent_msg_id, code))
+        task_poll_output_msg = asyncio.ensure_future(self._async_poll_output_msg_code(parent_msg_id, code))
 
         task_poll_for_reply = asyncio.ensure_future(
-            self._async_poll_for_reply(parent_msg_id, self.timeout, task_poll_output_msg, task_poll_kernel_alive))
+            self._async_poll_for_reply_code(parent_msg_id, self.timeout, task_poll_output_msg, task_poll_kernel_alive))
 
         try:
             msg = await task_poll_for_reply
@@ -539,4 +567,129 @@ class InstantiateTests(Execute):
                 raise
 
         return msg
+
     # -------------------------------------------------------------------------------------
+    async def async_execute_cell(
+            self,
+            cell: NotebookNode,
+            cell_index: int,
+            execution_count: t.Optional[int] = None,
+            store_history: bool = True,
+    ) -> NotebookNode:
+        """
+        Executes a single code cell.
+
+        To execute all cells see :meth:`execute`.
+
+        Parameters
+        ----------
+        cell : nbformat.NotebookNode
+            The cell which is currently being processed.
+        cell_index : int
+            The position of the cell within the notebook object.
+        execution_count : int
+            The execution count to be assigned to the cell (default: Use kernel response)
+        store_history : bool
+            Determines if history should be stored in the kernel (default: False).
+            Specific to ipython kernels, which can store command histories.
+
+        Returns
+        -------
+        output : dict
+            The execution output payload (or None for no output).
+
+        Raises
+        ------
+        CellExecutionError
+            If execution failed and should raise an exception, this will be raised
+            with defaults about the failure.
+
+        Returns
+        -------
+        cell : NotebookNode
+            The cell which was just processed.
+        """
+        assert self.kc is not None
+
+        await run_hook(self.on_cell_start, cell=cell, cell_index=cell_index)
+
+        if cell.cell_type != 'code' or not cell.source.strip():
+            self.log.debug("Skipping non-executing cell %s", cell_index)
+            return cell
+
+        if self.skip_cells_with_tag in cell.metadata.get("tags", []):
+            self.log.debug("Skipping tagged cell %s", cell_index)
+            return cell
+
+        if self.record_timing:  # clear execution metadata prior to execution
+            cell['metadata']['execution'] = {}
+
+        self.log.debug("Executing cell:\n%s", cell.source)
+
+        cell_allows_errors = (not self.force_raise_errors) and (
+                self.allow_errors or "raises-exception" in cell.metadata.get("tags", [])
+        )
+
+        await run_hook(self.on_cell_execute, cell=cell, cell_index=cell_index)
+        parent_msg_id = await _ensure_async(
+            self.kc.execute(
+                cell.source, store_history=store_history, stop_on_error=not cell_allows_errors
+            )
+        )
+        await run_hook(self.on_cell_complete, cell=cell, cell_index=cell_index)
+        # We launched a code cell to execute
+        self.code_cells_executed += 1
+        exec_timeout = self._get_timeout(cell)
+
+        cell.outputs = []
+        self.clear_before_next_output = False
+
+        task_poll_kernel_alive = asyncio.ensure_future(self._async_poll_kernel_alive())
+        task_poll_output_msg = asyncio.ensure_future(
+            self._async_poll_output_msg_code(parent_msg_id, code)
+        )
+        self.task_poll_for_reply = asyncio.ensure_future(
+            self._async_poll_for_reply_code(
+                parent_msg_id, exec_timeout, task_poll_output_msg, task_poll_kernel_alive
+            )
+        )
+        try:
+            exec_reply = await self.task_poll_for_reply
+        except asyncio.CancelledError:
+            # can only be cancelled by task_poll_kernel_alive when the kernel is dead
+            task_poll_output_msg.cancel()
+            raise DeadKernelError("Kernel died")
+        except Exception as e:
+            # Best effort to cancel request if it hasn't been resolved
+            try:
+                # Check if the task_poll_output is doing the raising for us
+                if not isinstance(e, CellControlSignal):
+                    task_poll_output_msg.cancel()
+            finally:
+                raise
+
+        if execution_count:
+            cell['execution_count'] = execution_count
+        await self._check_raise_for_error(cell, cell_index, exec_reply)
+        self.nb['cells'][cell_index] = cell
+        return cell
+    # -------------------------------------------------------------------------------------
+
+
+def timestamp(msg: Optional[Dict] = None) -> str:
+    if msg and 'header' in msg:  # The test mocks don't provide a header, so tolerate that
+        msg_header = msg['header']
+        if 'date' in msg_header and isinstance(msg_header['date'], datetime.datetime):
+            try:
+                # reformat datetime into expected format
+                formatted_time = datetime.datetime.strftime(
+                    msg_header['date'], '%Y-%m-%dT%H:%M:%S.%fZ'
+                )
+                if (
+                        formatted_time
+                ):  # docs indicate strftime may return empty string, so let's catch that too
+                    return formatted_time
+            except Exception:
+                pass  # fallback to a local time
+
+    return datetime.datetime.utcnow().isoformat() + 'Z'
