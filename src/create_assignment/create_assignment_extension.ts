@@ -1,3 +1,4 @@
+import { ILabShell, LabShell } from '@jupyterlab/application';
 import {
   Dialog,
   Styling
@@ -29,6 +30,8 @@ import {
   IObservableMap,
   IObservableUndoableList
 } from '@jupyterlab/observables';
+
+import { each } from '@lumino/algorithm';
 
 import {
   ReadonlyPartialJSONValue
@@ -87,15 +90,19 @@ export class CreateAssignmentWidget extends Panel {
   private activeNotebook: NotebookPanel;
   private currentNotebookListener: (tracker: INotebookTracker,
                                     panel: NotebookPanel) => void;
+  private mainAreaListener: (shell: LabShell, changed: ILabShell.IChangedArgs) => void;
   private notebookPanelWidgets = new Map<NotebookPanel, NotebookPanelWidget>();
   private notebookTracker: INotebookTracker;
+  private shell: ILabShell;
 
-  constructor(tracker: INotebookTracker) {
+  constructor(tracker: INotebookTracker, shell: ILabShell) {
     super();
     this.addClass(CSS_CREATE_ASSIGNMENT_WIDGET);
     this.addNotebookListeners(tracker);
+    this.addMainAreaActiveListener(shell);
     this.activeNotebook = null;
     this.notebookTracker = tracker;
+    this.shell = shell;
   }
 
   private addNotebookListeners(tracker: INotebookTracker): void {
@@ -103,22 +110,32 @@ export class CreateAssignmentWidget extends Panel {
     tracker.currentChanged.connect(this.currentNotebookListener);
   }
 
-  private async addNotebookWidget(tracker: INotebookTracker,
-                                  panel: NotebookPanel) {
-    await panel.revealed
-    const notebookPanelWidget = new NotebookPanelWidget(panel);
-    this.addWidget(notebookPanelWidget);
-    this.notebookPanelWidgets.set(panel, notebookPanelWidget);
-    panel.disposed.connect(() => {
-      notebookPanelWidget.dispose();
-    });
-    notebookPanelWidget.disposed.connect(() => {
-      this.notebookPanelWidgets.delete(panel);
-    });
-    if (tracker.currentWidget != panel) {
-      notebookPanelWidget.hide();
-    }
-    return panel.revealed;
+  private addMainAreaActiveListener(shell: LabShell): void {
+    this.mainAreaListener = this.getMainAreaActiveListener();
+    shell.currentChanged.connect(this.mainAreaListener);
+  }
+
+  private async addNotebookWidget(
+    tracker: INotebookTracker,
+    panel: NotebookPanel) {
+
+      if (panel === null) return;
+
+      await panel.revealed;
+      const notebookPanelWidget = new NotebookPanelWidget(panel);
+      this.addWidget(notebookPanelWidget);
+      this.notebookPanelWidgets.set(panel, notebookPanelWidget);
+
+      panel.disposed.connect(() => {
+        notebookPanelWidget.dispose();
+      });
+      notebookPanelWidget.disposed.connect(() => {
+        this.notebookPanelWidgets.delete(panel);
+      });
+      if (tracker.currentWidget != panel) {
+        notebookPanelWidget.hide();
+      }
+      return panel.revealed;
   }
 
   dispose(): void {
@@ -152,7 +169,7 @@ export class CreateAssignmentWidget extends Panel {
         if (this.isVisible && this.notebookPanelWidgets.get(panel) == null) {
           await this.addNotebookWidget(tracker, panel);
         }
-        const widget = this.notebookPanelWidgets.get(panel)
+        const widget = this.notebookPanelWidgets.get(panel);
         if (widget != null) {
           widget.show();
         }
@@ -161,15 +178,54 @@ export class CreateAssignmentWidget extends Panel {
     }
   }
 
+  /*
+   * The listener on the main area tab change
+   * to collapse create_assignment widget if the current tab is not a Notebook
+   */
+  private getMainAreaActiveListener(): (
+    shell: ILabShell,
+    changed: ILabShell.IChangedArgs) => void {
+      return async (shell: ILabShell, changed: ILabShell.IChangedArgs) => {
+        if ( !(changed.newValue instanceof NotebookPanel) && this.isVisible) {
+          this.hideRightPanel();
+        }
+    }
+  }
+
   protected onBeforeShow(msg: Message): void {
     super.onBeforeShow(msg);
-    const notebookWidget = this.notebookPanelWidgets.get(this.activeNotebook);
-    if (notebookWidget == null) {
-      this.addNotebookWidget(this.notebookTracker, this.activeNotebook);
+    if (this.activeNotebook != null){
+      const notebookWidget = this.notebookPanelWidgets.get(this.activeNotebook);
+      if (notebookWidget == null) {
+        this.addNotebookWidget(this.notebookTracker, this.activeNotebook);
+      }
+      else {
+        notebookWidget.show();
+      }
+    }
+  }
+
+  /*
+   * Check if the widget must be visible :
+   *  -> is there an active Notebook visible in main panel ?
+   */
+  protected onAfterShow(): void {
+    const widgets = this.shell.widgets('main');
+    if (this.activeNotebook == null){
+      this.hideRightPanel();
     }
     else {
-      notebookWidget.show();
+      each(widgets, w => {
+        if (w.title == this.activeNotebook.title) {
+          if (!w.isVisible) this.hideRightPanel();
+          else w.activate();
+        }
+      });
     }
+  }
+
+  private hideRightPanel(): void {
+    this.shell.collapseRight();
   }
 
   private removeNotebookListeners(tracker: INotebookTracker): void {
