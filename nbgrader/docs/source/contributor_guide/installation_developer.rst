@@ -20,7 +20,7 @@ We recommand using `conda environment <https://docs.conda.io/en/latest/miniconda
     # activate the environment
     mamba activate nbgrader
 
-    pip install -e ".[docs,tests]"
+    pip install -e ".[dev,docs,tests]"
 
 Installing Jupyter labextensions
 --------------------------------
