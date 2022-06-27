@@ -17,7 +17,7 @@ def main():
   py_version = project.get("current")
 
   # set the JS version
-  js_version = py_version.replace("a", "-alpha").replace("b", "-beta").replace("rc", "-rc").replace(".dev", "-dev")
+  js_version = py_version.replace("a", "-alpha.").replace("b", "-beta.").replace("rc", "-rc.").replace(".dev", "-dev.")
   package_json = json.loads(PACKAGE_JSON.read_text(**ENC))
   package_json["version"] = js_version
   PACKAGE_JSON.write_text(json.dumps(package_json, indent=2), **ENC)
