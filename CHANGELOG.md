@@ -4,6 +4,47 @@ A summary of changes to nbgrader.
 
 <!-- <START NEW CHANGELOG ENTRY> -->
 
+## 0.8.0a0
+
+([Full Changelog](https://github.com/jupyter/nbgrader/compare/v0.7.0...840e6abaa78f8f0764b805da5413e8f28abe90c0))
+
+### Enhancements made
+
+- Create assignment panel only open if a Notebook is visible on main area [#1606](https://github.com/jupyter/nbgrader/pull/1606) ([@brichet](https://github.com/brichet))
+- Use jupyter css variable in labextension to manage colors with theme [#1603](https://github.com/jupyter/nbgrader/pull/1603) ([@brichet](https://github.com/brichet))
+- Jupyterlab extensions [#1588](https://github.com/jupyter/nbgrader/pull/1588) ([@brichet](https://github.com/brichet))
+- Jupyter server [#1586](https://github.com/jupyter/nbgrader/pull/1586) ([@brichet](https://github.com/brichet))
+
+### Bugs fixed
+
+- More informative error messages in ClearSolutions [#1607](https://github.com/jupyter/nbgrader/pull/1607) ([@jhamrick](https://github.com/jhamrick))
+- Fix demos for JupyterHub 2.0 and JupyterLab [#1601](https://github.com/jupyter/nbgrader/pull/1601) ([@jhamrick](https://github.com/jhamrick))
+- Fix mathjax in formgrade templates [#1598](https://github.com/jupyter/nbgrader/pull/1598) ([@brichet](https://github.com/brichet))
+- Change default exchange path [#1592](https://github.com/jupyter/nbgrader/pull/1592) ([@jhamrick](https://github.com/jhamrick))
+- Ensure html files aren't copied over from documentation [#1590](https://github.com/jupyter/nbgrader/pull/1590) ([@jhamrick](https://github.com/jhamrick))
+
+### Maintenance and upkeep improvements
+
+- Fix missing `.` in the JS version [#1614](https://github.com/jupyter/nbgrader/pull/1614) ([@jtpio](https://github.com/jtpio))
+- Pins selenium version to 4.2 [#1611](https://github.com/jupyter/nbgrader/pull/1611) ([@brichet](https://github.com/brichet))
+- Fix version bumping for pre-releases [#1610](https://github.com/jupyter/nbgrader/pull/1610) ([@jtpio](https://github.com/jtpio))
+- Fix demos for JupyterHub 2.0 and JupyterLab [#1601](https://github.com/jupyter/nbgrader/pull/1601) ([@jhamrick](https://github.com/jhamrick))
+- Don't depend on qtconsole [#1596](https://github.com/jupyter/nbgrader/pull/1596) ([@minrk](https://github.com/minrk))
+- Fix readthedocs automatic build [#1587](https://github.com/jupyter/nbgrader/pull/1587) ([@brichet](https://github.com/brichet))
+
+### Documentation improvements
+
+- Add instruction to run playwright tests [#1602](https://github.com/jupyter/nbgrader/pull/1602) ([@brichet](https://github.com/brichet))
+- Fix readthedocs automatic build [#1587](https://github.com/jupyter/nbgrader/pull/1587) ([@brichet](https://github.com/brichet))
+
+### Contributors to this release
+
+([GitHub contributors page for this release](https://github.com/jupyter/nbgrader/graphs/contributors?from=2022-05-07&to=2022-06-28&type=c))
+
+[@brichet](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Abrichet+updated%3A2022-05-07..2022-06-28&type=Issues) | [@jhamrick](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Ajhamrick+updated%3A2022-05-07..2022-06-28&type=Issues) | [@jtpio](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Ajtpio+updated%3A2022-05-07..2022-06-28&type=Issues) | [@minrk](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Aminrk+updated%3A2022-05-07..2022-06-28&type=Issues) | [@perllaghu](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Aperllaghu+updated%3A2022-05-07..2022-06-28&type=Issues) | [@rkdarst](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Arkdarst+updated%3A2022-05-07..2022-06-28&type=Issues)
+
+<!-- <END NEW CHANGELOG ENTRY> -->
+
 ### 0.7.1
 
 The following PRs were merged for the 0.7.1 milestone:
@@ -113,8 +154,6 @@ were merged or fixed for the 0.7.0 release:
 -   Wildcarde
 -   willingc
 -   ykazakov
-
-<!-- <END NEW CHANGELOG ENTRY> -->
 
 ## 0.6.x
 
