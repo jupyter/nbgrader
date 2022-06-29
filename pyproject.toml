@@ -18,7 +18,7 @@ ignore = ["nbgrader/labextension/**", "yarn.lock"]
 
 [tool.jupyter-releaser.hooks]
 after-bump-version = ["python tools/post-bump.py"]
-before-build-npm = ["jlpm"]
+before-build-npm = ["python -m pip install 'jupyterlab<4'", "jlpm"]
 before-build-python = ["jlpm clean:all"]
 
 [tool.tbump.version]
