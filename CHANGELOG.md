@@ -4,6 +4,26 @@ A summary of changes to nbgrader.
 
 <!-- <START NEW CHANGELOG ENTRY> -->
 
+## 0.8.0a1
+
+([Full Changelog](https://github.com/jupyter/nbgrader/compare/v0.8.0a0...86861f3ccdfa1c32a9a78c14e9fdaba1d7c913c1))
+
+### Enhancements made
+
+- Fix version error message [#1616](https://github.com/jupyter/nbgrader/pull/1616) ([@brichet](https://github.com/brichet))
+
+### Maintenance and upkeep improvements
+
+- Move the jupyter_releaser hooks from package.json to pyproject.toml [#1617](https://github.com/jupyter/nbgrader/pull/1617) ([@brichet](https://github.com/brichet))
+
+### Contributors to this release
+
+([GitHub contributors page for this release](https://github.com/jupyter/nbgrader/graphs/contributors?from=2022-06-28&to=2022-07-04&type=c))
+
+[@brichet](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Abrichet+updated%3A2022-06-28..2022-07-04&type=Issues)
+
+<!-- <END NEW CHANGELOG ENTRY> -->
+
 ## 0.8.0a0
 
 ([Full Changelog](https://github.com/jupyter/nbgrader/compare/v0.7.0...840e6abaa78f8f0764b805da5413e8f28abe90c0))
@@ -42,8 +62,6 @@ A summary of changes to nbgrader.
 ([GitHub contributors page for this release](https://github.com/jupyter/nbgrader/graphs/contributors?from=2022-05-07&to=2022-06-28&type=c))
 
 [@brichet](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Abrichet+updated%3A2022-05-07..2022-06-28&type=Issues) | [@jhamrick](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Ajhamrick+updated%3A2022-05-07..2022-06-28&type=Issues) | [@jtpio](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Ajtpio+updated%3A2022-05-07..2022-06-28&type=Issues) | [@minrk](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Aminrk+updated%3A2022-05-07..2022-06-28&type=Issues) | [@perllaghu](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Aperllaghu+updated%3A2022-05-07..2022-06-28&type=Issues) | [@rkdarst](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Arkdarst+updated%3A2022-05-07..2022-06-28&type=Issues)
-
-<!-- <END NEW CHANGELOG ENTRY> -->
 
 ### 0.7.1
 
