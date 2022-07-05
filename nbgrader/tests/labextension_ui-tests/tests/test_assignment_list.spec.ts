@@ -23,7 +23,7 @@ const is_windows = os.platform().startsWith('win')
  * Create environment
  */
 test.beforeEach(async ({ baseURL, tmpPath }) => {
-
+  if (baseURL === undefined) throw new Error("BaseURL is undefined.");
   const contents = galata.newContentsHelper(baseURL);
 
   await contents.createDirectory(tmpPath);
@@ -43,10 +43,11 @@ test.afterEach(async ({ baseURL, tmpPath }) => {
     fs.rmSync(cache_dir, { recursive: true, force: true });
   }
 
+  if (baseURL === undefined) throw new Error("BaseURL is undefined.");
   const contents = galata.newContentsHelper(baseURL);
   await contents.deleteDirectory(tmpPath);
 
-  if (contents.fileExists("nbgrader_config.py")) contents.deleteFile("nbgrader_config.py");
+  if (await contents.fileExists("nbgrader_config.py")) contents.deleteFile("nbgrader_config.py");
   contents.uploadFile(path.resolve(__dirname, "../files/nbgrader_config.py"), "nbgrader_config.py");
 });
 
@@ -71,6 +72,7 @@ const add_courses = async (page:IJupyterLabPageFixture, baseURL:string, tmpPath:
   )
 
   const jupyter_config_content = await page.locator('#jupyter-config-data').textContent();
+  if (jupyter_config_content === null) throw new Error("Cannot get the server root directory.");
   const rootDir = JSON.parse(jupyter_config_content)['serverRoot'];
 
   // Necessary to generate and release assignments
@@ -173,6 +175,8 @@ test('Show assignment list', async({
 
     test.skip(is_windows, 'This feature is not implemented for Windows');
 
+    if (baseURL === undefined) throw new Error("BaseURL is undefined.");
+
     await create_env(page, tmpPath, exchange_dir, cache_dir, is_windows);
     await add_courses(page, baseURL, tmpPath);
     await open_assignment_list(page);
@@ -207,6 +211,8 @@ test('Multiple released assignments', async({
 
     test.skip(is_windows, 'This feature is not implemented for Windows');
 
+    if (baseURL === undefined) throw new Error("BaseURL is undefined.");
+
     await create_env(page, tmpPath, exchange_dir, cache_dir, is_windows);
     await add_courses(page, baseURL, tmpPath);
     await open_assignment_list(page);
@@ -240,6 +246,8 @@ test('Fetch assignments', async({
   }) => {
 
     test.skip(is_windows, 'This feature is not implemented for Windows');
+
+    if (baseURL === undefined) throw new Error("BaseURL is undefined.");
 
     await create_env(page, tmpPath, exchange_dir, cache_dir, is_windows);
     await add_courses(page, baseURL, tmpPath);
@@ -290,6 +298,8 @@ test('Submit assignments', async({
   }) => {
 
     test.skip(is_windows, 'This feature is not implemented for Windows');
+
+    if (baseURL === undefined) throw new Error("BaseURL is undefined.");
 
     // create directories and config files, and open assignment_list tab
     await create_env(page, tmpPath, exchange_dir, cache_dir, is_windows);
@@ -350,6 +360,8 @@ test('submit assignment missing notebook', async ({
   }) => {
 
     test.skip(is_windows, 'This feature is not implemented for Windows');
+
+    if (baseURL === undefined) throw new Error("BaseURL is undefined.");
 
     // create directories and config files, and open assignment_list tab
     const rootDir = await create_env(page, tmpPath, exchange_dir, cache_dir, is_windows);
@@ -435,6 +447,8 @@ test('Fetch a second assignment', async({
 
     test.skip(is_windows, 'This feature is not implemented for Windows');
 
+    if (baseURL === undefined) throw new Error("BaseURL is undefined.");
+
     await create_env(page, tmpPath, exchange_dir, cache_dir, is_windows);
     await add_courses(page, baseURL, tmpPath);
     await open_assignment_list(page);
@@ -493,6 +507,8 @@ test('Submit another assignments', async({
 
     test.skip(is_windows, 'This feature is not implemented for Windows');
 
+    if (baseURL === undefined) throw new Error("BaseURL is undefined.");
+
     // create directories and config files, and open assignment_list tab
     await create_env(page, tmpPath, exchange_dir, cache_dir, is_windows);
     await add_courses(page, baseURL, tmpPath);
@@ -540,6 +556,8 @@ test('Validate OK', async({
   }) => {
 
     test.skip(is_windows, 'This feature is not implemented for Windows');
+
+    if (baseURL === undefined) throw new Error("BaseURL is undefined.");
 
     // create directories and config files, and open assignment_list tab
     await create_env(page, tmpPath, exchange_dir, cache_dir, is_windows);
@@ -589,6 +607,8 @@ test('Validate failure', async({
 
     test.skip(is_windows, 'This feature is not implemented for Windows');
 
+    if (baseURL === undefined) throw new Error("BaseURL is undefined.");
+
     // create directories and config files, and open assignment_list tab
     await create_env(page, tmpPath, exchange_dir, cache_dir, is_windows);
     await add_courses(page, baseURL, tmpPath);
@@ -636,6 +656,8 @@ test('Missing exchange directory', async({
   }) => {
 
     test.skip(is_windows, 'This feature is not implemented for Windows');
+
+    if (baseURL === undefined) throw new Error("BaseURL is undefined.");
 
     // create directories and config files
     await create_env(page, tmpPath, exchange_dir, cache_dir, is_windows);
