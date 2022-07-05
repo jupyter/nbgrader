@@ -4,6 +4,22 @@ A summary of changes to nbgrader.
 
 <!-- <START NEW CHANGELOG ENTRY> -->
 
+## 0.8.0a2
+
+([Full Changelog](https://github.com/jupyter/nbgrader/compare/v0.8.0a1...b630994b82aec84ba9126edf1c4436f1011177cc))
+
+### Bugs fixed
+
+- Pin version of nbclassic<0.4.0 [#1621](https://github.com/jupyter/nbgrader/pull/1621) ([@brichet](https://github.com/brichet))
+
+### Contributors to this release
+
+([GitHub contributors page for this release](https://github.com/jupyter/nbgrader/graphs/contributors?from=2022-07-04&to=2022-07-05&type=c))
+
+[@brichet](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Abrichet+updated%3A2022-07-04..2022-07-05&type=Issues)
+
+<!-- <END NEW CHANGELOG ENTRY> -->
+
 ## 0.8.0a1
 
 ([Full Changelog](https://github.com/jupyter/nbgrader/compare/v0.8.0a0...86861f3ccdfa1c32a9a78c14e9fdaba1d7c913c1))
@@ -21,8 +37,6 @@ A summary of changes to nbgrader.
 ([GitHub contributors page for this release](https://github.com/jupyter/nbgrader/graphs/contributors?from=2022-06-28&to=2022-07-04&type=c))
 
 [@brichet](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Abrichet+updated%3A2022-06-28..2022-07-04&type=Issues)
-
-<!-- <END NEW CHANGELOG ENTRY> -->
 
 ## 0.8.0a0
 
