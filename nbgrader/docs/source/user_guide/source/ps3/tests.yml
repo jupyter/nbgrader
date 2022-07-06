@@ -1,0 +1,19 @@
+setup: "library(digest)"
+dispatch: "class({{snippet}})"
+hash: "digest(paste(toString({{snippet}}), '{{salt}}'))"
+templates:
+    default: 
+        test: "assert({{answer.code}} == {{answer.val}})"
+        variables:
+            answer: "{{snippet}}"
+    numeric:
+        test: >
+            "assert({{str.code}} == {{str.val}})
+             assert({{strlen.code}} == {{strlen.val}})
+             print('Success!')
+            "
+        variables:
+            str: "{{snippet}}"
+            strlen: "nchar({{snippet}})"
+    
+
