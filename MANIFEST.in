@@ -22,7 +22,7 @@ graft schema
 prune **/node_modules
 prune lib
 
-#nbgrader format files
+# nbgrader format files
 include nbgrader/nbgraderformat/*.json
 
 # nbextension files
@@ -57,3 +57,6 @@ global-exclude *~
 prune demos
 prune tools
 prune paper
+
+# binder files
+prune binder
