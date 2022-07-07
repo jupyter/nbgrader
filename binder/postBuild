@@ -1,0 +1,11 @@
+#!/bin/bash
+
+nbgrader quickstart example_course
+
+mkdir example_course_exchange
+
+chmod ugo+rw example_course_exchange
+
+cd example_course
+
+echo 'c.Exchange.root = "../example_course_exchange/"' >> nbgrader_config.py
