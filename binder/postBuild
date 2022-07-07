@@ -10,6 +10,6 @@ chmod ugo+rw example_course_exchange
 
 cp binder/jupyter_config.json ./jupyter_config.json
 
-cd example_course
-
-echo 'c.Exchange.root = "../example_course_exchange/"' >> nbgrader_config.py
+echo 'c = get_config()' > nbgrader_config.py
+echo 'c.CourseDirectory.root = "./example_course"' >> nbgrader_config.py
+echo 'c.Exchange.root = "example_course_exchange"' >> nbgrader_config.py
