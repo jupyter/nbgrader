@@ -8,7 +8,7 @@ import traceback
 from tornado import web
 from textwrap import dedent
 
-from notebook.utils import url_path_join as ujoin
+from jupyter_server.utils import url_path_join as ujoin
 from jupyter_server.base.handlers import JupyterHandler
 from traitlets import Unicode, default
 from traitlets.config import LoggingConfigurable, Config
