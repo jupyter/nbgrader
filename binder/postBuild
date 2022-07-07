@@ -1,5 +1,7 @@
 #!/bin/bash
 
+pip install .
+
 nbgrader quickstart example_course
 
 mkdir example_course_exchange
