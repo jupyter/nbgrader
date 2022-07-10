@@ -286,6 +286,7 @@ class InstantiateTests(Execute):
         or perhaps cannot be loaded, it will attempt to load the default_tests.yaml file with the course_directory
         """
         self.log.debug('loading template tests.yml...')
+        self.log.debug('kernel_name: ' + resources["kernel_name"])
         try:
             with open(os.path.join(resources['metadata']['path'], self.autotest_filename), 'r') as tests_file:
                 tests = yaml.safe_load(tests_file)
@@ -312,6 +313,9 @@ class InstantiateTests(Execute):
             self.log.error('tests.yml contains invalid YAML code.')
             self.log.error(e.msg)
             raise
+
+        # get kernel specific data
+        tests = tests[resources["kernel_name"]]
 
         # get the test templates
         self.test_templates_by_type = tests['templates']
