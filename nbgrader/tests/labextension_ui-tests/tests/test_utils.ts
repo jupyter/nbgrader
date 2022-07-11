@@ -32,6 +32,9 @@ export const create_env = async (
   ): Promise<string> => {
 
   var content = await page.locator('#jupyter-config-data').textContent();
+
+  if (content === null) throw new Error("Cannot get the server root directory.");
+
   const rootDir = JSON.parse(content)['serverRoot'];
 
   /* Add config_file to jupyter root directory, and change to that directory.

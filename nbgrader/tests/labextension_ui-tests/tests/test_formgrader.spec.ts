@@ -25,6 +25,8 @@ var cache_dir: string;
  */
 test.beforeEach(async ({ baseURL, tmpPath }) => {
 
+  if (baseURL === undefined) throw new Error("BaseURL is undefined.");
+
   const contents = galata.newContentsHelper(baseURL);
 
   await contents.createDirectory(tmpPath);
@@ -44,10 +46,12 @@ test.afterEach(async ({ baseURL, tmpPath }) => {
     fs.rmSync(cache_dir, { recursive: true, force: true });
   }
 
+  if (baseURL === undefined) throw new Error("BaseURL is undefined.");
+
   const contents = galata.newContentsHelper(baseURL);
   await contents.deleteDirectory(tmpPath);
 
-  if (contents.fileExists("nbgrader_config.py")) contents.deleteFile("nbgrader_config.py");
+  if (await contents.fileExists("nbgrader_config.py")) contents.deleteFile("nbgrader_config.py");
   contents.uploadFile(path.resolve(__dirname, "../files/nbgrader_config.py"), "nbgrader_config.py");
 });
 
@@ -86,6 +90,7 @@ const add_courses = async (page:IJupyterLabPageFixture, baseURL:string, tmpPath:
   await contents.renameFile(`${tmpPath}/submitted/Hacker/Problem Set 1/problem2.ipynb`, `${tmpPath}/submitted/Hacker/Problem Set 1/Problem 2.ipynb`);
 
   const jupyter_config_content = await page.locator('#jupyter-config-data').textContent();
+  if (jupyter_config_content === null) throw new Error("Cannot get the server root directory.");
   const rootDir = JSON.parse(jupyter_config_content)['serverRoot'];
 
   fs.copyFileSync(path.resolve(rootDir, "nbgrader_config.py"), path.resolve(rootDir, tmpPath, "nbgrader_config.py"));
@@ -131,9 +136,9 @@ const check_formgrader_breadcrumbs = async (iframe:Frame, breadcrumbs:string[]) 
   await expect(iframe.locator(".breadcrumb li")).toHaveCount(breadcrumbs.length);
 
   const elements = iframe.locator(".breadcrumb li");
-  const array = [];
+  const array: string[] = [];
   for (var i=0; i<await elements.count(); i++){
-    array.push(await elements.nth(i).textContent());
+    array.push(await elements.nth(i).textContent() as string);
   }
   expect(array.sort()).toEqual(breadcrumbs.sort());
 }
@@ -150,9 +155,9 @@ const check_formgrade_view_breadcrumbs = async (
   await expect(iframe.locator(".breadcrumb li a:visible")).toHaveCount(breadcrumbs.length);
 
   const elements = iframe.locator(".breadcrumb li a:visible");
-  const in_page_breadcrumbs = [];
+  const in_page_breadcrumbs: string[] = [];
   for (var i=0; i<await elements.count(); i++){
-    in_page_breadcrumbs.push((await elements.nth(i).textContent()).trim());
+    in_page_breadcrumbs.push((await elements.nth(i).textContent() as string).trim());
   }
 
   if (no_submission_count) {
@@ -211,6 +216,8 @@ test('Load manage assignments', async ({
 
     test.skip(is_windows, 'This test does not work on Windows');
 
+    if (baseURL === undefined) throw new Error("BaseURL is undefined.");
+
     // create environment
     await create_env(page, tmpPath, exchange_dir, cache_dir, is_windows);
     await add_courses(page, baseURL, tmpPath);
@@ -250,6 +257,8 @@ test('Load manage submissions', async ({
 
   test.skip(is_windows, 'This test does not work on Windows');
 
+  if (baseURL === undefined) throw new Error("BaseURL is undefined.");
+
   // create environment
   await create_env(page, tmpPath, exchange_dir, cache_dir, is_windows);
   await add_courses(page, baseURL, tmpPath);
@@ -276,8 +285,8 @@ test('Load manage submissions', async ({
   // Check students links
   await expect(iframe.locator("td.student-name")).toHaveCount(2);
   for (var i=0; i<await iframe.locator("td.student-name").count(); i++){
-    var student_name = await iframe.locator("td.student-name").nth(i).getAttribute("data-order");
-    var student_id = await iframe.locator("td.student-id").nth(i).getAttribute("data-order");
+    var student_name = await iframe.locator("td.student-name").nth(i).getAttribute("data-order") as string;
+    var student_id = await iframe.locator("td.student-id").nth(i).getAttribute("data-order") as string;
     await click_link(iframe, student_name);
     await check_formgrader_breadcrumbs(iframe, ["Students", student_id, "Problem Set 1"]);
     expect(iframe.url()).toBe(encodeURI(`${baseURL}/formgrader/manage_students/${student_id}/Problem Set 1`));
@@ -295,6 +304,8 @@ test('Load gradebook1', async ({
 }) => {
 
   test.skip(is_windows, 'This test does not work on Windows');
+
+  if (baseURL === undefined) throw new Error("BaseURL is undefined.");
 
   // create environment
   await create_env(page, tmpPath, exchange_dir, cache_dir, is_windows);
@@ -331,6 +342,8 @@ test('Load gradebook2', async ({
 
   test.skip(is_windows, 'This test does not work on Windows');
 
+  if (baseURL === undefined) throw new Error("BaseURL is undefined.");
+
   // create environment
   await create_env(page, tmpPath, exchange_dir, cache_dir, is_windows);
   await add_courses(page, baseURL, tmpPath);
@@ -354,7 +367,7 @@ test('Load gradebook2', async ({
   // test problems links
   await expect(iframe.locator("td.name")).toHaveCount(2);
   for (var i=0; i<await iframe.locator("td.name").count(); i++){
-    var problem_name = await iframe.locator("td.name").nth(i).getAttribute("data-order");
+    var problem_name = await iframe.locator("td.name").nth(i).getAttribute("data-order") as string;
     await click_link(iframe, problem_name);
     await check_formgrader_breadcrumbs(iframe, ["Manual Grading", "Problem Set 1", problem_name]);
     expect(iframe.url()).toBe(encodeURI(`${baseURL}/formgrader/gradebook/Problem Set 1/${problem_name}`));
@@ -374,6 +387,8 @@ test('Load gradebook3', async ({
 
   test.skip(is_windows, 'This test does not work on Windows');
 
+  if (baseURL === undefined) throw new Error("BaseURL is undefined.");
+
   // create environment
   await create_env(page, tmpPath, exchange_dir, cache_dir, is_windows);
   await add_courses(page, baseURL, tmpPath);
@@ -388,7 +403,7 @@ test('Load gradebook3', async ({
   // for each problem
   await expect(iframe.locator("td.name")).toHaveCount(2);
   for (var i=0; i<await iframe.locator("td.name").count(); i++){
-    var problem_name = await iframe.locator("td.name").nth(i).getAttribute("data-order");
+    var problem_name = await iframe.locator("td.name").nth(i).getAttribute("data-order") as string;
     await iframe.goto(`${baseURL}/formgrader/gradebook/Problem Set 1/${problem_name}`);
     await check_formgrader_breadcrumbs(iframe, ["Manual Grading", "Problem Set 1", problem_name]);
 
@@ -406,7 +421,7 @@ test('Load gradebook3', async ({
     // test submissions links
     await expect(iframe.locator("td.name")).toHaveCount(2);
     for (var j=0; j<await iframe.locator("td.name").count(); j++){
-      var submission_id = parseInt(await iframe.locator("td.name").nth(j).getAttribute("data-order")) + 1;
+      var submission_id = parseInt(await iframe.locator("td.name").nth(j).getAttribute("data-order") as string) + 1;
       await click_link(iframe, `Submission #${submission_id.toString()}`);
       await check_formgrade_view_breadcrumbs(
         iframe,
@@ -435,6 +450,8 @@ test('Gradebook3 show hide names', async ({
 }) => {
 
   test.skip(is_windows, 'This test does not work on Windows');
+
+  if (baseURL === undefined) throw new Error("BaseURL is undefined.");
 
   // create environment
   await create_env(page, tmpPath, exchange_dir, cache_dir, is_windows);
@@ -482,6 +499,8 @@ test('Load students', async ({
 
   test.skip(is_windows, 'This test does not work on Windows');
 
+  if (baseURL === undefined) throw new Error("BaseURL is undefined.");
+
   // create environment
   await create_env(page, tmpPath, exchange_dir, cache_dir, is_windows);
   await add_courses(page, baseURL, tmpPath);
@@ -497,8 +516,8 @@ test('Load students', async ({
   // Check students links
   await expect(iframe.locator("td.name")).toHaveCount(3);
   for (var i=0; i < await iframe.locator("td.name").count(); i++){
-    var student_name = await iframe.locator("td.name").nth(i).getAttribute("data-order");
-    var student_id = await iframe.locator("td.id").nth(i).getAttribute("data-order");
+    var student_name = await iframe.locator("td.name").nth(i).getAttribute("data-order") as string;
+    var student_id = await iframe.locator("td.id").nth(i).getAttribute("data-order") as string;
     await click_link(iframe, student_name);
     await check_formgrader_breadcrumbs(iframe, ["Students", student_id]);
     expect(iframe.url()).toBe(encodeURI(`${baseURL}/formgrader/manage_students/${student_id}`));
@@ -518,6 +537,8 @@ test('Load students submissions', async ({
 }) => {
 
   test.skip(is_windows, 'This test does not work on Windows');
+
+  if (baseURL === undefined) throw new Error("BaseURL is undefined.");
 
   // create environment
   await create_env(page, tmpPath, exchange_dir, cache_dir, is_windows);
@@ -553,6 +574,8 @@ test('Switch views', async ({
 }) => {
 
   test.skip(is_windows, 'This test does not work on Windows');
+
+  if (baseURL === undefined) throw new Error("BaseURL is undefined.");
 
   // create environment
   await create_env(page, tmpPath, exchange_dir, cache_dir, is_windows);
