@@ -1,0 +1,9 @@
+{
+  "ServerApp": {
+    "root_dir": "example_course"
+  },
+  "NotebookApp": {
+    "notebook_dir": "example_course",
+    "root_dir": "example_course"
+  }
+}
