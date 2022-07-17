@@ -137,15 +137,17 @@ class InstantiateTests(Execute):
     global_tests_loaded = False
 
     # -------------------------------------------------------------------------------------
-    def preprocess(self, nb, resources):
-        kernel_name = nb.metadata.get("kernelspec", {}).get("name", "")
-        if kernel_name not in self.comment_strs:
-            raise ValueError(
-                "kernel '{}' has not been specified in "
-                "InstantiateTests.comment_strs".format(kernel_name))
-        resources["kernel_name"] = kernel_name
-        nb, resources = super(InstantiateTests, self).preprocess(nb, resources)
-        return nb, resources
+    # def preprocess(self, nb, resources):
+    #     nb, resources = super(InstantiateTests, self).preprocess(nb, resources)
+    #     self.log.warning('nb.metadata')
+    #     self.log.warning(nb.metadata)
+    #     kernel_name = nb.metadata.get("kernelspec", {}).get("name", "")
+    #     if kernel_name not in self.comment_strs:
+    #         raise ValueError(
+    #             "kernel '{}' has not been specified in "
+    #             "InstantiateTests.comment_strs".format(kernel_name))
+    #     resources["kernel_name"] = kernel_name
+    #     return nb, resources
 
     # -------------------------------------------------------------------------------------
     def preprocess_cell(self, cell, resources, index):
@@ -154,6 +156,13 @@ class InstantiateTests(Execute):
 
         # first, run the cell normally
         cell, resources = super(InstantiateTests, self).preprocess_cell(cell, resources, index)
+
+        kernel_name = self.nb.metadata.get("kernelspec", {}).get("name", "")
+        if kernel_name not in self.comment_strs:
+            raise ValueError(
+                "kernel '{}' has not been specified in "
+                "InstantiateTests.comment_strs".format(kernel_name))
+        resources["kernel_name"] = kernel_name
 
         # if it's not a code cell, or it's empty, just return
         if cell.cell_type != 'code':
