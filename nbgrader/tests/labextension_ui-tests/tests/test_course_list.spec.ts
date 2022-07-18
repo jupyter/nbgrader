@@ -18,7 +18,7 @@ const is_windows = os.platform().startsWith('win')
  * Create environment
  */
 test.beforeEach(async ({ baseURL, tmpPath }) => {
-
+  if (baseURL === undefined) throw new Error("BaseURL is undefined.");
   const contents = galata.newContentsHelper(baseURL);
 
   await contents.createDirectory(tmpPath);
@@ -33,6 +33,7 @@ test.beforeEach(async ({ baseURL, tmpPath }) => {
  * delete temp directories at the end of test
  */
 test.afterEach(async ({ baseURL, tmpPath }) => {
+  if (baseURL === undefined) throw new Error("BaseURL is undefined.");
   const contents = galata.newContentsHelper(baseURL);
   await contents.deleteDirectory(tmpPath);
 
@@ -41,7 +42,7 @@ test.afterEach(async ({ baseURL, tmpPath }) => {
     fs.rmSync(cache_dir, { recursive: true, force: true });
   }
 
-  if (contents.fileExists("nbgrader_config.py")) contents.deleteFile("nbgrader_config.py");
+  if (await contents.fileExists("nbgrader_config.py")) contents.deleteFile("nbgrader_config.py");
   contents.uploadFile(path.resolve(__dirname, "../files/nbgrader_config.py"), "nbgrader_config.py");
 });
 

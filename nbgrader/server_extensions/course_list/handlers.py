@@ -199,13 +199,13 @@ class NbGraderVersionHandler(JupyterHandler):
         if ui_version != nbgrader_version:
             msg = dedent(
                 """
-                The version of the Course List nbextension does not match
-                the server extension; the nbextension version is {} while the
+                The version of the Course List labextension does not match
+                the server extension; the labextension version is {} while the
                 server version is {}. This can happen if you have recently
                 upgraded nbgrader, and may cause this extension to not work
                 correctly. To fix the problem, please see the nbgrader
                 installation instructions:
-                http://nbgrader.readthedocs.io/en/stable/user_guide/installation.html
+                http://nbgrader.readthedocs.io/en/main/user_guide/installation.html
                 """.format(ui_version, nbgrader_version)
             ).strip().replace("\n", " ")
             self.log.error(msg)

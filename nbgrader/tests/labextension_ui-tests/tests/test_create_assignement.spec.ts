@@ -12,6 +12,9 @@ const nb_files = ["blank.ipynb", "task.ipynb", "old-schema.ipynb"];
  * copy notebook files before each test
  */
 test.beforeEach(async ({ baseURL, tmpPath }) => {
+
+    if (baseURL === undefined) throw new Error("BaseURL is undefined.");
+
     const contents = galata.newContentsHelper(baseURL);
     nb_files.forEach(elem => {
          contents.uploadFile(
@@ -28,10 +31,13 @@ test.beforeEach(async ({ baseURL, tmpPath }) => {
  * delete temp directory at the end of test
  */
 test.afterAll(async ({ baseURL, tmpPath }) => {
+
+    if (baseURL === undefined) throw new Error("BaseURL is undefined.");
+
     const contents = galata.newContentsHelper(baseURL);
     await contents.deleteDirectory(tmpPath);
 
-    if (contents.fileExists("nbgrader_config.py")) contents.deleteFile("nbgrader_config.py");
+    if (await contents.fileExists("nbgrader_config.py")) contents.deleteFile("nbgrader_config.py");
     contents.uploadFile(path.resolve(__dirname, "../files/nbgrader_config.py"), "nbgrader_config.py");
 });
 
@@ -68,13 +74,16 @@ const save_current_notebook = async (page:IJupyterLabPageFixture) => {
 const activate_toolbar = async (page:IJupyterLabPageFixture) => {
 
     if (await page.locator('.nbgrader-NotebookWidget').count() > 0){
-        if (page.locator('.nbgrader-NotebookWidget').isVisible()) {
+        if (await page.locator('.nbgrader-NotebookWidget').isVisible()) {
             return;
         }
     }
 
     const widget_button = page.locator(".lm-TabBar-tab.p-TabBar-tab[title='nbgrader Create Assignment']");
     const button_position = await widget_button.boundingBox();
+
+    if (button_position === null) throw new Error("Cannot get the position of the create assignment button.");
+
     await page.mouse.click(
         button_position.x + button_position.width/2,
         button_position.y + button_position.height/2
