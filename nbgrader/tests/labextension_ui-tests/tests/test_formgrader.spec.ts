@@ -193,7 +193,7 @@ const click_link = async (iframe:Frame, text:string) => {
 /*
  * Test opening formgrader tab from menu
  */
-test('Open assignment list tab from menu', async({
+test('Open formgrader tab from menu', async({
   page
   }) => {
 

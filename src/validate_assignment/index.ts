@@ -25,7 +25,7 @@ import { showNbGraderDialog, validate } from '../common/validate';
 
 var nbgrader_version = "0.8.4"; // TODO: hardcoded value
 
-const PLUGIN_ID = "nbgrader/validate-assignment"
+const PLUGIN_ID = "nbgrader:validate-assignment"
 
 class ValidateButton extends ToolbarButton {
   private _buttonCallback = this.newButtonCallback();

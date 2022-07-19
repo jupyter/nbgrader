@@ -15,7 +15,8 @@ import {
   IFrame
 } from '@jupyterlab/apputils';
 
-const PLUGIN_ID = "nbgrader/formgrader"
+
+const PLUGIN_ID = "nbgrader:formgrader"
 const COMMAND_NAME = "nbgrader:open-formgrader"
 
 class FormgraderWidget extends IFrame {

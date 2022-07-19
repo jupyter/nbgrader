@@ -16,7 +16,7 @@ import {
   CreateAssignmentWidget
 } from './create_assignment_extension';
 
-const PLUGIN_ID = "nbgrader/create-assignment"
+const PLUGIN_ID = "nbgrader:create-assignment"
 
 /**
  * Initialization data for the create_assignment extension.

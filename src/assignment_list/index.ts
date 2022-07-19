@@ -25,7 +25,7 @@ import {
 } from './assignmentlist';
 
 
-const PLUGIN_ID = 'nbgrader/assignment-list';
+const PLUGIN_ID = 'nbgrader:assignment-list';
 const COMMAND_NAME = "nbgrader:open-assignment-list";
 
 
