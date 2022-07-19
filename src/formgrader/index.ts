@@ -15,6 +15,9 @@ import {
   IFrame
 } from '@jupyterlab/apputils';
 
+import { INotebookShell } from '@jupyter-notebook/application';
+
+import { TabPanel } from '@lumino/widgets';
 
 const PLUGIN_ID = "nbgrader:formgrader"
 const COMMAND_NAME = "nbgrader:open-formgrader"
@@ -36,12 +39,12 @@ class FormgraderWidget extends IFrame {
       var this_widget = this;
 
       window.addEventListener('message', function (event) {
-        this_widget.on_click(event);
+        this_widget.on_message(event);
       });
 
     }
 
-    private on_click(event:MessageEvent){
+    private on_message(event:MessageEvent){
       var contentWindow = this.node.querySelector('iframe').contentWindow;
       if (contentWindow === event.source){
         var data = JSON.parse(event.data);
@@ -57,11 +60,12 @@ export const formgrader_extension: JupyterFrontEndPlugin<void> = {
   id: PLUGIN_ID,
   autoStart: true,
   requires: [ICommandPalette],
-  optional: [ILayoutRestorer],
+  optional: [ILayoutRestorer, INotebookShell],
   activate: async (
     app: JupyterFrontEnd,
     palette: ICommandPalette,
-    restorer: ILayoutRestorer | null
+    restorer: ILayoutRestorer | null,
+    notebookShell: INotebookShell | null
   )=> {
     console.log('JupyterLab extension formgrader is activated!');
 
@@ -96,13 +100,21 @@ export const formgrader_extension: JupyterFrontEndPlugin<void> = {
         tracker.add(widget);
         }
         if(!widget.isAttached){
-        // Attach the widget to the mainwork area if it's not there
-        app.shell.add(widget, 'main');
-        }
-        widget.content.update();
 
-        // Activate the widget
-        app.shell.activateById(widget.id);
+          // Attach the widget to the mainwork area if it's not there
+          // and activate it.
+          if (notebookShell) {
+            let w = app.shell.widgets('main').next() as TabPanel;
+            w.addWidget(widget);
+          }
+          else {
+            app.shell.add(widget, 'main');
+          }
+        }
+
+        widget.content.update();
+        // TODO: fix the activation which does nothing
+        widget.activate();
       }
     });
 
