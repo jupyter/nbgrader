@@ -24,11 +24,16 @@ const PLUGIN_ID = "nbgrader:create-assignment"
 export const create_assignment_extension: JupyterFrontEndPlugin<void> = {
   id: PLUGIN_ID,
   autoStart: true,
-  requires: [INotebookTracker, ILabShell],
+  requires: [INotebookTracker],
+  optional: [ILabShell],
   activate: activate_extension
 };
 
-function activate_extension(app: JupyterFrontEnd, tracker: INotebookTracker, shell: ILabShell) {
+function activate_extension(
+  app: JupyterFrontEnd,
+  tracker: INotebookTracker,
+  shell: ILabShell | null
+) {
   console.log('Activating extension "create_assignment".');
 
   const panel = new Panel();

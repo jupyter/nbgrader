@@ -95,11 +95,11 @@ export class CreateAssignmentWidget extends Panel {
   private notebookTracker: INotebookTracker;
   private shell: ILabShell;
 
-  constructor(tracker: INotebookTracker, shell: ILabShell) {
+  constructor(tracker: INotebookTracker, shell: ILabShell | null) {
     super();
     this.addClass(CSS_CREATE_ASSIGNMENT_WIDGET);
     this.addNotebookListeners(tracker);
-    this.addMainAreaActiveListener(shell);
+    if (shell) this.addMainAreaActiveListener(shell);
     this.activeNotebook = null;
     this.notebookTracker = tracker;
     this.shell = shell;
