@@ -28,20 +28,6 @@ class TestInstantiateTests(BaseTestPreprocessor):
         assert preprocessor.normalize_template is not None
         assert preprocessor.setup_code is not None
 
-    # def test_autotest_grade_cell(self, preprocessor):
-    #     test_cell = create_autotest_test_cell()
-    #     test_cell.metadata['nbgrader'] = {'grade': False}
-    #     nb = new_notebook()
-    #     nb.metadata['kernelspec'] = {
-    #         "name": "python3"
-    #     }
-    #     nb.cells.append(test_cell)
-    #     resources = {
-    #         'metadata': {'path': 'nbgrader/docs/source/user_guide/'}
-    #     }
-    #     with pytest.raises(Exception):
-    #         nb, resources = preprocessor.preprocess(nb, resources)
-
     def test_replace_autotest_code(self, preprocessor):
         sol_cell = create_autotest_solution_cell()
         test_cell = create_autotest_test_cell()
@@ -58,21 +44,3 @@ class TestInstantiateTests(BaseTestPreprocessor):
         nb, resources = preprocessor.preprocess(nb, resources)
         assert 'assert' in nb['cells'][1]['source']
 
-    def test_add_kernel_name_to_resources(self, preprocessor):
-        pass
-        # cell = create_autotest_cell()
-        # cell.metadata['nbgrader'] = {'grade': True}
-        # nb = new_notebook()
-        # nb.cells.append(cell)
-        # nb.metadata['kernelspec'] = {
-        #     "display_name": "Python 3",
-        #     "language": "python",
-        #     "name": "python3"
-        # }
-        # resources = {
-        #     'metadata': {'path': 'nbgrader/docs/source/user_guide/'}
-        # }
-        # assert 'kernel_name' not in resources
-        # nb, resources = preprocessor.preprocess(nb, resources)
-        # # preprocessor.preprocess_cell(cell, resources, 1)
-        # assert 'kernel_name' in resources
