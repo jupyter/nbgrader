@@ -3,6 +3,7 @@ from traitlets import Integer
 from .. import utils
 from . import NbGraderPreprocessor
 
+
 class LimitTestCellHeights(NbGraderPreprocessor):
     """A preprocessor for making test cells not be too large."""
 
@@ -10,7 +11,6 @@ class LimitTestCellHeights(NbGraderPreprocessor):
         100,
         help="Max height of a test cell"
     ).tag(config=True)
-
 
     def preprocess_cell(self, cell, resources, cell_index):
         if utils.is_grade(cell):
