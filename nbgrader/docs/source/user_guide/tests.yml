@@ -156,8 +156,8 @@ ir:
             - test: "class({{snippet}})"
               fail: "type of {{snippet}} is not double"
 
-            - test: "round({{snippet}}, 8)"
-              fail: "value of {{snippet}} is not correct (rounded to 8 decimal places)"
+            - test: "round({{snippet}}, 3)"
+              fail: "value of {{snippet}} is not correct (rounded to 3 decimal places)"
 
             - test: "length({{snippet}})"
               fail: "length of {{snippet}} is not correct"
