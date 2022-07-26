@@ -48,7 +48,7 @@ python3:
 
         set:
             - test: "type({{snippet}})"
-              fail: "type of {{snippet}} is not set"
+              fail: "type of {{snippet}} is not set. {{snippet}} should be a set"
 
             - test: "len({{snippet}})"
               fail: "length of {{snippet}} is not correct"
@@ -58,7 +58,7 @@ python3:
 
         list:
             - test: "type({{snippet}})"
-              fail: "type of {{snippet}} is not list"
+              fail: "type of {{snippet}} is not list. {{snippet}} should be a list"
 
             - test: "len({{snippet}})"
               fail: "length of {{snippet}} is not correct"
@@ -71,7 +71,7 @@ python3:
 
         tuple:
             - test: "type({{snippet}})"
-              fail: "type of {{snippet}} is not tuple"
+              fail: "type of {{snippet}} is not tuple. {{snippet}} should be a tuple"
 
             - test: "len({{snippet}})"
               fail: "length of {{snippet}} is not correct"
@@ -85,7 +85,7 @@ python3:
         str:
 
             - test: "type({{snippet}})"
-              fail: "type of {{snippet}} is not str"
+              fail: "type of {{snippet}} is not str. {{snippet}} should be an str"
 
             - test: "len({{snippet}})"
               fail: "length of {{snippet}} is not correct"
@@ -99,7 +99,7 @@ python3:
         dict:
 
             - test: "type({{snippet}})"
-              fail: "type of {{snippet}} is not dict"
+              fail: "type of {{snippet}} is not dict. {{snippet}} should be a dict"
 
             - test: "len(list({{snippet}}.keys()))"
               fail: "number of keys of {{snippet}} is not correct"
@@ -115,7 +115,7 @@ python3:
 
         bool:
             - test: "type({{snippet}})"
-              fail: "type of {{snippet}} is not bool"
+              fail: "type of {{snippet}} is not bool. {{snippet}} should be a bool"
 
             - test: "{{snippet}}"
               fail: "boolean value of {{snippet}} is not correct"
