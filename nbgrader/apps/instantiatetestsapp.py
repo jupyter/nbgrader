@@ -52,7 +52,7 @@ flags.update({
 class InstantiateTestsApp(NbGrader):
 
     name = u'nbgrader-instantiate-tests'
-    description = u'Produce the version of an assignment to be released to students.'
+    description = u'Produce the version of an assignment with all autotest code instantiated.'
 
     aliases = aliases
     flags = flags
