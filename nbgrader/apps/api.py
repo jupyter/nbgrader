@@ -925,7 +925,7 @@ class NbGraderAPI(LoggingConfigurable):
         assignment_id: string
             The name of the assignment
         force: bool
-            Whether to force creating the student version, even if it already
+            Whether to force creating the instantiated version, even if it already
             exists.
         create: bool
             Whether to create the assignment in the database, if it doesn't
