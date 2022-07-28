@@ -7,17 +7,8 @@ from traitlets import List, Bool, default
 from ..api import Gradebook, MissingEntry
 from .base import BaseConverter, NbGraderException
 from ..preprocessors import (
-    IncludeHeaderFooter,
     InstantiateTests,
-    LimitTestCellHeights,
-    ClearSolutions,
-    LockCells,
-    ComputeChecksums,
-    SaveCells,
-    CheckCellMetadata,
     ClearOutput,
-    ClearHiddenTests,
-    ClearMarkScheme,
 )
 from traitlets.config.loader import Config
 from typing import Any
@@ -58,35 +49,11 @@ class InstantiateTests(BaseConverter):
         return self.coursedir.instantiated_directory
 
     preprocessors = List([
-        IncludeHeaderFooter,
         InstantiateTests,
-        # LimitTestCellHeights,
-        LockCells,
-        # ClearSolutions,
         ClearOutput,
-        CheckCellMetadata,
-        ComputeChecksums,
-        SaveCells,
-        ClearHiddenTests,
-        ClearMarkScheme,
-        ComputeChecksums,
-        CheckCellMetadata,
     ]).tag(config=True)
-    # NB: ClearHiddenTests must come after ComputeChecksums and SaveCells.
-    # ComputerChecksums must come again after ClearHiddenTests.
 
     def _load_config(self, cfg: Config, **kwargs: Any) -> None:
-        if 'Assign' in cfg:
-            self.log.warning(
-                "Use InstantiateTests in config, not Assign. Outdated config:\n%s",
-                '\n'.join(
-                    'Assign.{key} = {value!r}'.format(key=key, value=value)
-                    for key, value in cfg.InstantiateTestsApp.items()
-                )
-            )
-            cfg.InstantiateTests.merge(cfg.Assign)
-            del cfg.InstantiateTestsApp
-
         super(InstantiateTests, self)._load_config(cfg, **kwargs)
 
     def __init__(self, coursedir: CourseDirectory = None, **kwargs: Any) -> None:

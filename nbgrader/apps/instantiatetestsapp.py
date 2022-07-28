@@ -23,18 +23,13 @@ flags.update(nbgrader_flags)
 flags.update({
     'no-db': (
         {
-            'SaveCells': {'enabled': False},
             'InstantiateTests': {'no_database': True}
         },
         "Do not save information into the database."
     ),
     'no-metadata': (
         {
-            'ClearSolutions': {'enforce_metadata': False},
-            'ClearHiddenTests': {'enforce_metadata': False},
-            'ClearMarkScheme': {'enforce_metadata': False},
-            'CheckCellMetadata': {'enabled': False},
-            'ComputeChecksums': {'enabled': False}
+            'InstantiateTests': {'enforce_metadata': False},
         },
         "Do not validate or modify cell metatadata."
     ),
@@ -56,56 +51,44 @@ flags.update({
 
 class InstantiateTestsApp(NbGrader):
 
-    name = u'nbgrader-generate-assignment'
+    name = u'nbgrader-instantiate-tests'
     description = u'Produce the version of an assignment to be released to students.'
 
     aliases = aliases
     flags = flags
 
     examples = """
-        Produce the version of the assignment that is intended to be released to
-        students. This performs several modifications to the original assignment:
+        Produce a version of the assignment that includes generated test code based on the
+        autotest directives in the notebook. This "instantiated" version is still editable by instructors
+        and still contains all solutions. The instantiated notebook does not limit test cell heights to
+        enable instructors to easily see all test code. The instantiated notebook
+        is useful for instructors to examine/debug the test code that autotest will
+        generate in the release version. Students will not receive this version of the notebook.
+        The instantiate tests app performs several modifications to the original assignment:
 
-            1. It inserts a header and/or footer to each notebook in the
-               assignment, if the header/footer are specified.
+            1. It clears all outputs from the cells of the notebooks.
 
-            2. It locks certain cells so that they cannot be deleted by students
-               accidentally (or on purpose!)
-
-            3. It removes solutions from the notebooks and replaces them with
-               code or text stubs saying (for example) "YOUR ANSWER HERE".
-
-            4. It clears all outputs from the cells of the notebooks.
-
-            5. It saves information about the cell contents so that we can warn
-               students if they have changed the tests, or if they have failed
-               to provide a response to a written answer. Specifically, this is
-               done by computing a checksum of the cell contents and saving it
-               into the cell metadata.
-
-            6. It saves the tests used to grade students' code into a database,
-               so that those tests can be replaced during autograding if they
-               were modified by the student (you can prevent this by passing the
-               --no-db flag).
+            2. It produces a version of the source notebook with all autotests instantiated
+               in the instantiated notebooks folder (by default, 'instantiated/').
 
                If the assignment is not already present in the database, it
-               will be automatically created when running `nbgrader generate_assignment`.
+               will be automatically created when running `nbgrader instantiate_tests`.
 
-        `nbgrader generate_assignment` takes one argument (the name of the assignment), and
+        `nbgrader instantiate_tests` takes one argument (the name of the assignment), and
         looks for notebooks in the 'source' directory by default, according to
         the directory structure specified in `CourseDirectory.directory_structure`.
-        The student version is then saved into the 'release' directory.
+        The instantiated version is then saved into the 'instantiated' directory.
 
         Note that the directory structure requires the `student_id` to be given;
         however, there is no student ID at this point in the process. Instead,
-        `nbgrader generate_assignment` sets the student ID to be '.' so by default, files are
+        `nbgrader instantiate_tests` sets the student ID to be '.' so by default, files are
         read in according to:
 
             source/./{assignment_id}/{notebook_id}.ipynb
 
         and saved according to:
 
-            release/./{assignment_id}/{notebook_id}.ipynb
+            instantiated/./{assignment_id}/{notebook_id}.ipynb
 
         """
 
@@ -116,17 +99,6 @@ class InstantiateTestsApp(NbGrader):
         return classes
 
     def _load_config(self, cfg: Config, **kwargs: Any) -> None:
-        if 'AssignApp' in cfg:
-            self.log.warning(
-                "Use InstantiateTests in config, not AssignApp. Outdated config:\n%s",
-                '\n'.join(
-                    'AssignApp.{key} = {value!r}'.format(key=key, value=value)
-                    for key, value in cfg.AssignApp.items()
-                )
-            )
-            cfg.InstantiateTests.merge(cfg.AssignApp)
-            del cfg.AssignApp
-
         super()._load_config(cfg, **kwargs)
 
     def start(self) -> None:
