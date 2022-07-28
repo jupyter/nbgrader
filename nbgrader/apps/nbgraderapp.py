@@ -117,8 +117,8 @@ class NbGraderApp(NbGrader):
             InstantiateTestsApp,
             dedent(
                 """
-                Create the instructor version of an assignment. Intended for use by
-                instructors only.
+                Create the instructor version of an assignment with all
+                autotests instantiated. Intended for use by instructors only.
                 """
             ).strip()
         ),
