@@ -9,6 +9,7 @@ from .base import BaseConverter, NbGraderException
 from ..preprocessors import (
     InstantiateTests,
     ClearOutput,
+    CheckCellMetadata
 )
 from traitlets.config.loader import Config
 from typing import Any
