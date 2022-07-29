@@ -136,20 +136,19 @@ class InstantiateTests(Execute):
     sanitizer = None
     global_tests_loaded = False
 
-    # -------------------------------------------------------------------------------------
-    # def preprocess(self, nb, resources):
-    #     nb, resources = super(InstantiateTests, self).preprocess(nb, resources)
-    #     self.log.warning('nb.metadata')
-    #     self.log.warning(nb.metadata)
-    #     kernel_name = nb.metadata.get("kernelspec", {}).get("name", "")
-    #     if kernel_name not in self.comment_strs:
-    #         raise ValueError(
-    #             "kernel '{}' has not been specified in "
-    #             "InstantiateTests.comment_strs".format(kernel_name))
-    #     resources["kernel_name"] = kernel_name
-    #     return nb, resources
+    def preprocess(self, nb, resources):
+        # avoid starting the kernel at all/processing the notebook if there are no autotest delimiters
+        for index, cell in enumerate(nb.cells):
+            # ignore non-code cells
+            if cell.cell_type != 'code':
+                continue
+            # look for an autotest delimiter in this cell's source; if we find one, process this notebook
+            if self.autotest_delimiter in cell.source:
+                nb, resources = super(InstantiateTests, self).preprocess(nb, resources)
+                return
+        # if not, just return
+        return nb, resources
 
-    # -------------------------------------------------------------------------------------
     def preprocess_cell(self, cell, resources, index):
         # new_lines will store the replacement code after autotest template instantiation
         new_lines = []
@@ -199,13 +198,20 @@ class InstantiateTests(Execute):
             non_autotest_code_lines = []
 
             # there are autotests; we should check that it is a grading cell
-            if not is_grade_flag and self.enforce_metadata:
-                self.log.error(
-                    "Autotest region detected in a non-grade cell; "
-                    "please make sure all autotest regions are within "
-                    "'Autograder tests' cells."
-                )
-                raise Exception
+            if not is_grade_flag:
+                if not self.enforce_metadata:
+                    self.log.warning(
+                        "Autotest region detected in a non-grade cell; "
+                        "please make sure all autotest regions are within "
+                        "'Autograder tests' cells."
+                    )
+                else:
+                    self.log.error(
+                        "Autotest region detected in a non-grade cell; "
+                        "please make sure all autotest regions are within "
+                        "'Autograder tests' cells."
+                    )
+                    raise Exception
 
             self.log.debug('')
             self.log.debug('')
