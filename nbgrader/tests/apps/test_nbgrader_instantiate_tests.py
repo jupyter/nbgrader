@@ -30,7 +30,7 @@ class TestNbGraderInstantiateTests(BaseTestApp):
         """Is there an error if multiple arguments are given?"""
         run_nbgrader(["instantiate_tests", "foo", "bar"], retcode=1)
 
-    def test_no_modify_db(self):
+    def test_no_modify_db(self, course_dir):
         """Does instantiate tests avoid modifying the database?"""
         self._empty_notebook(join(course_dir, 'source', 'ps1', 'foo.ipynb'))
         run_nbgrader(["instantiate_tests", "ps1"])
