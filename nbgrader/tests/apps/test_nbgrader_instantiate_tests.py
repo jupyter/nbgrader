@@ -82,16 +82,6 @@ class TestNbGraderInstantiateTests(BaseTestApp):
         with open(join(course_dir, 'instantiated', 'ps1', 'data', 'bar.csv'), 'r') as fh:
             assert fh.read() == 'bar'
 
-    def test_save_cells(self, db, course_dir):
-        """Ensure cells are saved into the database"""
-        self._copy_file(join('files', 'test.ipynb'), join(course_dir, 'source', 'ps1', 'test.ipynb'))
-        run_nbgrader(["db", "assignment", "add", "ps1"])
-        run_nbgrader(["instantiate_tests", "ps1", "--db", db])
-
-        with Gradebook(db) as gb:
-            notebook = gb.find_notebook("test", "ps1")
-            assert len(notebook.grade_cells) == 6
-
     def test_force(self, course_dir):
         """Ensure the force option works properly"""
         self._copy_file(join('files', 'test.ipynb'), join(course_dir, 'source', 'ps1', 'test.ipynb'))
