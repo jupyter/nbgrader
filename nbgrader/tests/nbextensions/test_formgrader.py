@@ -92,6 +92,12 @@ def gradebook(request, tempdir, nbserver):
     for student in ["bitdiddle", "hacker"]:
         shutil.copytree(join(submitted_path, student), join("submitted", student))
 
+    # remove new demo assignments ps2 and ps3 for now to avoid changing all tests
+    # submitted/ folder doesn't include them currently, so no need to delete in submitted/
+    # perhaps include these later?
+    shutil.rmtree(join("source", "ps2"))
+    shutil.rmtree(join("source", "ps3"))
+
     # rename to old names -- we do this rather than changing all the tests
     # because I want the tests to operate on files with spaces in the names
     os.rename(join("source", "ps1"), join("source", "Problem Set 1"))
