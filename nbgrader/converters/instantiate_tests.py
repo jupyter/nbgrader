@@ -32,6 +32,7 @@ class InstantiateTests(BaseConverter):
     preprocessors = List([
         InstantiateTests,
         ClearOutput,
+        CheckCellMetadata,
     ]).tag(config=True)
 
     def _load_config(self, cfg: Config, **kwargs: Any) -> None:

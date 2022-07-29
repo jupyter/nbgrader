@@ -201,16 +201,14 @@ class TestNbGraderInstantiateTests(BaseTestApp):
     def test_fail_no_notebooks(self):
         run_nbgrader(["instantiate_tests", "ps1"], retcode=1)
 
-
-    # TODO fix this
     def test_no_metadata(self, course_dir):
         self._copy_file(join("files", "test-no-metadata.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
 
-        # it should fail because of the solution and hidden test regions
-        run_nbgrader(["instantiate_tests", "ps1", "--no-db"], retcode=1)
+        # it should fail because of the missing meta data, instantiatetests runs checkcellmetadata
+        run_nbgrader(["instantiate_tests", "ps1"], retcode=1)
 
         # it should pass now that we're not enforcing metadata
-        run_nbgrader(["instantiate_tests", "ps1", "--no-db", "--no-metadata"])
+        run_nbgrader(["instantiate_tests", "ps1", "--no-metadata"])
         assert os.path.exists(join(course_dir, "instantiated", "ps1", "p1.ipynb"))
 
     def test_trailing_slash(self, course_dir):
