@@ -81,6 +81,6 @@ def test_validate_ok(browser, port):
     _load_notebook(browser, port, "limited_test_cell_height")
 
     # check that it succeeded
-    element = browser.find_element_by_css_selector("CodeMirror cm-s-ipython")
+    element = browser.find_element_by_css_selector(".CodeMirror.cm-s-ipython")
     style = element.get_attribute("style")
     assert style == 'height: 100px;'
