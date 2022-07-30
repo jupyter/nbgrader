@@ -21,22 +21,11 @@ aliases.update({
 flags = {}
 flags.update(nbgrader_flags)
 flags.update({
-    'no-db': (
-        {
-            'InstantiateTests': {'no_database': True}
-        },
-        "Do not save information into the database."
-    ),
     'no-metadata': (
         {
             'InstantiateTests': {'enforce_metadata': False},
         },
         "Do not validate or modify cell metatadata."
-    ),
-    'create': (
-        {'InstantiateTests': {'create_assignment': True}},
-        "Deprecated: Create an entry for the assignment in the database, if one does not already exist. "
-        "This is now the default."
     ),
     'force': (
         {'BaseConverter': {'force': True}},
