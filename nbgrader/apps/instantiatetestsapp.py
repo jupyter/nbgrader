@@ -88,9 +88,6 @@ class InstantiateTestsApp(NbGrader):
         classes.extend([BaseConverter, InstantiateTests])
         return classes
 
-    def _load_config(self, cfg: Config, **kwargs: Any) -> None:
-        super()._load_config(cfg, **kwargs)
-
     def start(self) -> None:
         super().start()
 

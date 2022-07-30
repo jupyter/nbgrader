@@ -145,7 +145,7 @@ class InstantiateTests(Execute):
             # look for an autotest delimiter in this cell's source; if we find one, process this notebook
             if self.autotest_delimiter in cell.source:
                 nb, resources = super(InstantiateTests, self).preprocess(nb, resources)
-                return
+                return nb, resources
         # if not, just return
         return nb, resources
 
