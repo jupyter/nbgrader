@@ -201,8 +201,20 @@ class TestNbGraderInstantiateTests(BaseTestApp):
     def test_fail_no_notebooks(self):
         run_nbgrader(["instantiate_tests", "ps1"], retcode=1)
 
-    def test_no_metadata(self, course_dir):
+    def test_no_metadata_default_tests(self, course_dir):
         self._copy_file(join("files", "test-no-metadata-autotest.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
+        self._copy_file(join("files", "tests.yml"), course_dir)
+
+        # it should fail because of the missing meta data, instantiatetests runs checkcellmetadata
+        run_nbgrader(["instantiate_tests", "ps1"], retcode=1)
+
+        # it should pass now that we're not enforcing metadata
+        run_nbgrader(["instantiate_tests", "ps1", "--no-metadata"])
+        assert os.path.exists(join(course_dir, "instantiated", "ps1", "p1.ipynb"))
+
+    def test_no_metadata_specific_tests(self, course_dir):
+        self._copy_file(join("files", "test-no-metadata-autotest.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
+        self._copy_file(join("files", "tests.yml"), join(course_dir, "source", "ps1"))
 
         # it should fail because of the missing meta data, instantiatetests runs checkcellmetadata
         run_nbgrader(["instantiate_tests", "ps1"], retcode=1)
