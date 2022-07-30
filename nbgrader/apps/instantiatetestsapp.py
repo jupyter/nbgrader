@@ -24,6 +24,7 @@ flags.update({
     'no-metadata': (
         {
             'InstantiateTests': {'enforce_metadata': False},
+            'CheckCellMetadata': {'enabled': False},
         },
         "Do not validate or modify cell metatadata."
     ),
