@@ -202,7 +202,7 @@ class TestNbGraderInstantiateTests(BaseTestApp):
         run_nbgrader(["instantiate_tests", "ps1"], retcode=1)
 
     def test_no_metadata(self, course_dir):
-        self._copy_file(join("files", "test-no-metadata.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
+        self._copy_file(join("files", "test-no-metadata-autotest.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
 
         # it should fail because of the missing meta data, instantiatetests runs checkcellmetadata
         run_nbgrader(["instantiate_tests", "ps1"], retcode=1)
