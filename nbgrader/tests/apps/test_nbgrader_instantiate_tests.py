@@ -14,8 +14,7 @@ from .base import BaseTestApp
 
 class TestNbGraderInstantiateTests(BaseTestApp):
 
-    # TODO modify tests below to work on notebooks that have autotest statements
-    # right now many don't have autotest statements, so instantiatetests doesn't run
+    # TODO 2: copy all new autotest tests from the generate_assignments test file once they're done
 
     def test_help(self):
         """Does the help display without error?"""
@@ -43,21 +42,21 @@ class TestNbGraderInstantiateTests(BaseTestApp):
 
     def test_single_file(self, course_dir, temp_cwd):
         """Can a single file be instantiated?"""
-        self._empty_notebook(join(course_dir, 'source', 'ps1', 'foo.ipynb'))
+        self._copy_file(join("files", "autotest-simple.ipynb"), join(course_dir, "source", "ps1", "foo.ipynb"))
         run_nbgrader(["instantiate_tests", "ps1"])
         assert os.path.isfile(join(course_dir, "instantiated", "ps1", "foo.ipynb"))
 
     def test_single_file_bad_assignment_name(self, course_dir, temp_cwd):
         """Test that an error is thrown when the assignment name is invalid."""
-        self._empty_notebook(join(course_dir, 'source', 'foo+bar', 'foo.ipynb'))
+        self._copy_file(join("files", "autotest-simple.ipynb"), join(course_dir, "source", "foo+bar", "foo.ipynb"))
         with pytest.raises(traitlets.TraitError):
             run_nbgrader(["instantiate_tests", "foo+bar"])
         assert not os.path.isfile(join(course_dir, "instantiated", "foo+bar", "foo.ipynb"))
 
     def test_multiple_files(self, course_dir):
         """Can multiple files be instantiated?"""
-        self._empty_notebook(join(course_dir, 'source', 'ps1', 'foo.ipynb'))
-        self._empty_notebook(join(course_dir, 'source', 'ps1', 'bar.ipynb'))
+        self._copy_file(join("files", "autotest-simple.ipynb"), join(course_dir, "source", "ps1", "foo.ipynb"))
+        self._copy_file(join("files", "autotest-simple.ipynb"), join(course_dir, "source", "ps1", "bar.ipynb"))
         run_nbgrader(["instantiate_tests", "ps1"])
         assert os.path.isfile(join(course_dir, 'instantiated', 'ps1', 'foo.ipynb'))
         assert os.path.isfile(join(course_dir, 'instantiated', 'ps1', 'bar.ipynb'))
@@ -66,8 +65,8 @@ class TestNbGraderInstantiateTests(BaseTestApp):
         """Are dependent files properly linked?"""
         self._make_file(join(course_dir, 'source', 'ps1', 'data', 'foo.csv'), 'foo')
         self._make_file(join(course_dir, 'source', 'ps1', 'data', 'bar.csv'), 'bar')
-        self._empty_notebook(join(course_dir, 'source', 'ps1', 'foo.ipynb'))
-        self._empty_notebook(join(course_dir, 'source', 'ps1', 'bar.ipynb'))
+        self._copy_file(join("files", "autotest-simple.ipynb"), join(course_dir, "source", "ps1", "foo.ipynb"))
+        self._copy_file(join("files", "autotest-simple.ipynb"), join(course_dir, "source", "ps1", "bar.ipynb"))
         run_nbgrader(["instantiate_tests", "ps1"])
 
         assert os.path.isfile(join(course_dir, 'instantiated', 'ps1', 'foo.ipynb'))
@@ -82,7 +81,7 @@ class TestNbGraderInstantiateTests(BaseTestApp):
 
     def test_force(self, course_dir):
         """Ensure the force option works properly"""
-        self._copy_file(join('files', 'test.ipynb'), join(course_dir, 'source', 'ps1', 'test.ipynb'))
+        self._copy_file(join("files", "autotest-simple.ipynb"), join(course_dir, "source", "ps1", "test.ipynb"))
         self._make_file(join(course_dir, 'source', 'ps1', 'foo.txt'), "foo")
         self._make_file(join(course_dir, 'source', 'ps1', 'data', 'bar.txt'), "bar")
         self._make_file(join(course_dir, 'source', 'ps1', 'blah.pyc'), "asdf")
@@ -111,7 +110,7 @@ class TestNbGraderInstantiateTests(BaseTestApp):
 
     def test_force_f(self, course_dir):
         """Ensure the force option works properly"""
-        self._copy_file(join('files', 'test.ipynb'), join(course_dir, 'source', 'ps1', 'test.ipynb'))
+        self._copy_file(join("files", "autotest-simple.ipynb"), join(course_dir, "source", "ps1", "test.ipynb"))
         self._make_file(join(course_dir, 'source', 'ps1', 'foo.txt'), "foo")
         self._make_file(join(course_dir, 'source', 'ps1', 'data', 'bar.txt'), "bar")
         self._make_file(join(course_dir, 'source', 'ps1', 'blah.pyc'), "asdf")
@@ -141,7 +140,7 @@ class TestNbGraderInstantiateTests(BaseTestApp):
     @pytest.mark.parametrize("groupshared", [False, True])
     def test_permissions(self, course_dir, groupshared):
         """Are permissions properly set?"""
-        self._empty_notebook(join(course_dir, 'source', 'ps1', 'foo.ipynb'))
+        self._copy_file(join("files", "autotest-simple.ipynb"), join(course_dir, "source", "ps1", "foo.ipynb"))
         self._make_file(join(course_dir, 'source', 'ps1', 'foo.txt'), 'foo')
         with open("nbgrader_config.py", "a") as fh:
             if groupshared:
@@ -172,7 +171,7 @@ class TestNbGraderInstantiateTests(BaseTestApp):
 
     def test_custom_permissions(self, course_dir):
         """Are custom permissions properly set?"""
-        self._empty_notebook(join(course_dir, 'source', 'ps1', 'foo.ipynb'))
+        self._copy_file(join("files", "autotest-simple.ipynb"), join(course_dir, "source", "ps1", "foo.ipynb"))
         self._make_file(join(course_dir, 'source', 'ps1', 'foo.txt'), 'foo')
         run_nbgrader(["instantiate_tests", "ps1", "--InstantiateTests.permissions=444"])
 
@@ -182,8 +181,8 @@ class TestNbGraderInstantiateTests(BaseTestApp):
         assert self._get_permissions(join(course_dir, "instantiated", "ps1", "foo.txt")) == "444"
 
     def test_force_single_notebook(self, course_dir):
-        self._copy_file(join("files", "test.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
-        self._copy_file(join("files", "test.ipynb"), join(course_dir, "source", "ps1", "p2.ipynb"))
+        self._copy_file(join("files", "autotest-simple.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
+        self._copy_file(join("files", "autotest-simple.ipynb"), join(course_dir, "source", "ps1", "p2.ipynb"))
         run_nbgrader(["instantiate_tests", "ps1"])
 
         assert os.path.exists(join(course_dir, "instantiated", "ps1", "p1.ipynb"))

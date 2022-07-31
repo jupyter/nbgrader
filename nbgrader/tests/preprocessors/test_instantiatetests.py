@@ -44,3 +44,12 @@ class TestInstantiateTests(BaseTestPreprocessor):
         nb, resources = preprocessor.preprocess(nb, resources)
         assert 'assert' in nb['cells'][1]['source']
 
+    # TODO
+    # test some basic types (int, string, float, list)
+    # test error checking autotest
+    # test with different numbers of # strings and spaces at beginning
+    # test non-remove autotest directives in non-grading cells
+    # test for warning for autotest directive in nongrade cell
+    # test for error for autotest directive in nongrade cell
+    # test that improper statement raises error
+
