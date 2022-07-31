@@ -3,7 +3,7 @@ import yaml
 import jinja2 as j2
 import re
 from .. import utils
-from traitlets import Bool, List, Integer, Unicode, Dict
+from traitlets import Bool, List, Integer, Unicode, Dict, Callable
 from textwrap import dedent
 from . import Execute
 import secrets
@@ -121,17 +121,38 @@ class InstantiateTests(Execute):
         )
     ).tag(config=True)
 
-    comment_strs = {
-        'ir': '#',
-        'python': '#',
-        'python3': '#'
-    }
+    comment_strs = Dict(
+        key_trait = Unicode(),
+        value_trait = Unicode(),
+        default_value = {
+            'ir': '#',
+            'python': '#',
+            'python3': '#'
+        },
+        help = dedent(
+            """
+            A dictionary mapping each Jupyter kernel's name to the comment string for that kernel.
+            For an example, one of the entries in this dictionary is "python" : "#", because # is the comment
+            character in python.
+            """
+        )
+    ).tag(config=True)
 
-    sanitizers = {
-        'ir': lambda s: re.sub(r'\[\d+\]\s+', '', s).strip('"').strip("'"),
-        'python': lambda s: s.strip('"').strip("'"),
-        'python3': lambda s: s.strip('"').strip("'")
-    }
+    sanitizers = Dict(
+        key_trait = Unicode(),
+        value_trait = Callable(),
+        default_value = {
+            'ir': lambda s: re.sub(r'\[\d+\]\s+', '', s).strip('"').strip("'"),
+            'python': lambda s: s.strip('"').strip("'"),
+            'python3': lambda s: s.strip('"').strip("'")
+        },
+        help = dedent(
+            """
+            A dictionary mapping each Jupyter kernel's name to the function that is used to 
+            sanitize the output from the kernel within InstantiateTests.
+            """
+        )
+    ).tag(config=True)
 
     sanitizer = None
     global_tests_loaded = False
