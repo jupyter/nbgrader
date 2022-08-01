@@ -15,115 +15,6 @@
 #            - test:
 #              fail:
 
-python:
-    setup: "from hashlib import sha1"
-    hash: 'sha1({{snippet}}.encode("utf-8")+b"{{salt}}").hexdigest()'
-    dispatch: "type({{snippet}})"
-    normalize: "str({{snippet}})"
-    check: 'assert {{snippet}} == "{{value}}", "{{message}}"'
-    success: "print('Success!')"
-
-    templates:
-        default:
-            - test: "type({{snippet}})"
-              fail: "type of {{snippet}} is not correct"
-
-            - test: "{{snippet}}"
-              fail: "value of {{snippet}} is not correct"
-
-        int:
-            - test: "type({{snippet}})"
-              fail: "type of {{snippet}} is not int. Please make sure it is int and not np.int64, etc. You can cast your value into float using int()"
-
-            - test: "{{snippet}}"
-              fail: "value of {{snippet}} is not correct"
-
-        float:
-            - test: "type({{snippet}})"
-              fail: "type of {{snippet}} is not float. Please make sure it is float and not np.float64, etc. You can cast your value into float using float()"
-
-            - test: "round({{snippet}}, 2)"
-              fail: "value of {{snippet}} is not correct (rounded to 2 decimal places)"
-
-        set:
-            - test: "type({{snippet}})"
-              fail: "type of {{snippet}} is not set. {{snippet}} should be a set"
-
-            - test: "len({{snippet}})"
-              fail: "length of {{snippet}} is not correct"
-
-            - test: "{{snippet}}"
-              fail: "value of {{snippet}} is not correct"
-
-        list:
-            - test: "type({{snippet}})"
-              fail: "type of {{snippet}} is not list. {{snippet}} should be a list"
-
-            - test: "len({{snippet}})"
-              fail: "length of {{snippet}} is not correct"
-
-            - test: "sorted([str(element) for element in {{snippet}}])"
-              fail: "values of {{snippet}} are not correct"
-
-            - test: "{{snippet}}"
-              fail: "order of elements of {{snippet}} is not correct"
-
-        tuple:
-            - test: "type({{snippet}})"
-              fail: "type of {{snippet}} is not tuple. {{snippet}} should be a tuple"
-
-            - test: "len({{snippet}})"
-              fail: "length of {{snippet}} is not correct"
-
-            - test: "sorted([str(element) for element in {{snippet}}])"
-              fail: "values of {{snippet}} are not correct"
-
-            - test: "{{snippet}}"
-              fail: "order of elements of {{snippet}} is not correct"
-
-        str:
-
-            - test: "type({{snippet}})"
-              fail: "type of {{snippet}} is not str. {{snippet}} should be an str"
-
-            - test: "len({{snippet}})"
-              fail: "length of {{snippet}} is not correct"
-
-            - test: "{{snippet}}.lower()"
-              fail: "value of {{snippet}} is not correct"
-
-            - test: "{{snippet}}"
-              fail: "correct string value of {{snippet}} but incorrect case of letters"
-
-        dict:
-
-            - test: "type({{snippet}})"
-              fail: "type of {{snippet}} is not dict. {{snippet}} should be a dict"
-
-            - test: "len(list({{snippet}}.keys()))"
-              fail: "number of keys of {{snippet}} is not correct"
-
-            - test: "sorted(list({{snippet}}.keys()))"
-              fail: "keys of {{snippet}} are not correct"
-
-            - test: "sorted(list({{snippet}}.values()))"
-              fail: "correct keys, but values of {{snippet}} are not correct"
-
-            - test: "{{snippet}}"
-              fail: "correct keys and values, but incorrect correspondence in keys and values of {{snippet}}"
-
-        bool:
-            - test: "type({{snippet}})"
-              fail: "type of {{snippet}} is not bool. {{snippet}} should be a bool"
-
-            - test: "{{snippet}}"
-              fail: "boolean value of {{snippet}} is not correct"
-
-        type:
-            - test: "{{snippet}}"
-              fail: "type of {{snippet}} is not correct"
-
-
 
 python3:
     setup: "from hashlib import sha1"
@@ -172,7 +63,7 @@ python3:
             - test: "len({{snippet}})"
               fail: "length of {{snippet}} is not correct"
 
-            - test: "sorted([str(element) for element in {{snippet}}])"
+            - test: "set({{snippet}})"
               fail: "values of {{snippet}} are not correct"
 
             - test: "{{snippet}}"
@@ -185,7 +76,7 @@ python3:
             - test: "len({{snippet}})"
               fail: "length of {{snippet}} is not correct"
 
-            - test: "sorted([str(element) for element in {{snippet}}])"
+            - test: "set({{snippet}})"
               fail: "values of {{snippet}} are not correct"
 
             - test: "{{snippet}}"
@@ -213,10 +104,10 @@ python3:
             - test: "len(list({{snippet}}.keys()))"
               fail: "number of keys of {{snippet}} is not correct"
 
-            - test: "sorted(list({{snippet}}.keys()))"
+            - test: "set({{snippet}}.keys())"
               fail: "keys of {{snippet}} are not correct"
 
-            - test: "sorted(list({{snippet}}.values()))"
+            - test: "set({{snippet}}.values())"
               fail: "correct keys, but values of {{snippet}} are not correct"
 
             - test: "{{snippet}}"
