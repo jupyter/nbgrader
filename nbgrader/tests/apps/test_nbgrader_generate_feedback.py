@@ -333,6 +333,7 @@ class TestNbGraderFeedback(BaseTestApp):
 
         self._copy_file(join("files", "autotest-simple.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
         self._copy_file(join("files", "autotest-simple.ipynb"), join(course_dir, "source", "ps1", "p2.ipynb"))
+        self._copy_file(join("files", "tests.yml"), join(course_dir, "tests.yml"))
         run_nbgrader(["generate_assignment", "ps1"])
 
         self._copy_file(join("files", "autotest-simple.ipynb"), join(course_dir, "submitted", "foo", "ps1", "p1.ipynb"))
