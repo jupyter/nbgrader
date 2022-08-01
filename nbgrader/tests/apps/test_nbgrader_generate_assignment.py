@@ -47,191 +47,71 @@ class TestNbGraderGenerateAssignment(BaseTestApp):
         run_nbgrader(["generate_assignment", "ps1"])
         assert os.path.isfile(join(course_dir, "release", "ps1", "foo.ipynb"))
 
-    # TODO AUTOTEST
-    def test_autotests(self, course_dir, temp_cwd):
-        """Can a notebook with autotests be generated?"""
-        self._empty_notebook(join(course_dir, 'source', 'ps1', 'foo.ipynb'))
+    def test_autotests_simple(self, course_dir, temp_cwd):
+        """Can a notebook with simple autotests be generated with a default yaml location, and is autotest code removed?"""
+        self._copy_file(join("files", "autotest-simple.ipynb"), join(course_dir, "source", "ps1", "foo.ipynb"))
+        self._copy_file(join("files", "tests.yml"), join(course_dir, "tests.yml"))
+        run_nbgrader(["db", "assignment", "add", "ps1"])
+        run_nbgrader(["generate_assignment", "ps1"])
+        assert os.path.isfile(join(course_dir, "release", "ps1", "foo.ipynb"))
+        assert not os.path.isfile(join(course_dir, "release", "ps1", "tests.yml"))
+
+        foo = self._file_contents(join(course_dir, "release", "ps1", "foo.ipynb"))
+        assert "AUTOTEST" not in foo
+
+    def test_autotests_simple(self, course_dir, temp_cwd):
+        """Can a notebook with simple autotests be generated with an assignment-specific yaml, and is autotest code removed?"""
+        self._copy_file(join("files", "autotest-simple.ipynb"), join(course_dir, "source", "ps1", "foo.ipynb"))
+        self._copy_file(join("files", "tests.yml"), join(course_dir, "source", "ps1", "tests.yml"))
+        run_nbgrader(["db", "assignment", "add", "ps1"])
+        run_nbgrader(["generate_assignment", "ps1"])
+        assert os.path.isfile(join(course_dir, "release", "ps1", "foo.ipynb"))
+        assert os.path.isfile(join(course_dir, "release", "ps1", "tests.yml"))
+
+        foo = self._file_contents(join(course_dir, "release", "ps1", "foo.ipynb"))
+        assert "AUTOTEST" not in foo
+
+    def test_autotests_needs_yaml(self, course_dir, temp_cwd):
+        """Can a notebook with autotests be generated without a yaml file?"""
+        self._copy_file(join("files", "autotest-simple.ipynb"), join(course_dir, "source", "ps1", "foo.ipynb"))
+        run_nbgrader(["db", "assignment", "add", "ps1"])
+        run_nbgrader(["generate_assignment", "ps1"], retcode=1)
+
+
+    def test_autotests_multiple_per_line(self, course_dir, temp_cwd):
+        """Can a more complicated autotests notebook be generated, and is autotest code removed?"""
+        self._copy_file(join("files", "autotest-full.ipynb"), join(course_dir, "source", "ps1", "foo.ipynb"))
+        self._copy_file(join("files", "tests.yml"), join(course_dir, "tests.yml"))
         run_nbgrader(["db", "assignment", "add", "ps1"])
         run_nbgrader(["generate_assignment", "ps1"])
         assert os.path.isfile(join(course_dir, "release", "ps1", "foo.ipynb"))
 
-    # TODO AUTOTEST
-    def test_hidden_tests_autotest(self, db, course_dir):
-        """Can files with hidden autotests be generated?"""
-        run_nbgrader(["db", "assignment", "add", "ps1", "--db", db, "--duedate",
-                      "2015-02-02 14:58:23.948203 America/Los_Angeles"])
-        run_nbgrader(["db", "student", "add", "foo", "--db", db])
-        run_nbgrader(["db", "student", "add", "bar", "--db", db])
-        with open("nbgrader_config.py", "a") as fh:
-            fh.write("""c.ClearSolutions.code_stub=dict(python="# YOUR CODE HERE")""")
+        foo = self._file_contents(join(course_dir, "release", "ps1", "foo.ipynb"))
+        assert "AUTOTEST" not in foo
 
-        self._copy_file(
-            join("files", "test-hidden-tests.ipynb"),
-            join(course_dir, "source", "ps1", "p1.ipynb")
-        )
-        # test-hidden-tests.ipynb contains vizable solutions that pass
-        # vizable tests, but fail on hidden tests
+    def test_autotests_hidden(self, course_dir, temp_cwd):
+        """Can a notebook with hidden autotest be generated, and is autotest/hidden sections removed?"""
+        self._copy_file(join("files", "autotest-full.ipynb"), join(course_dir, "source", "ps1", "foo.ipynb"))
+        self._copy_file(join("files", "tests.yml"), join(course_dir, "tests.yml"))
+        run_nbgrader(["db", "assignment", "add", "ps1"])
+        run_nbgrader(["generate_assignment", "ps1"])
+        assert os.path.isfile(join(course_dir, "release", "ps1", "foo.ipynb"))
 
-        run_nbgrader(["generate_assignment", "ps1", "--db", db])
+        foo = self._file_contents(join(course_dir, "release", "ps1", "foo.ipynb"))
+        assert "AUTOTEST" not in foo
+        assert "HIDDEN" not in foo
 
-        # make sure hidden tests are removed in release
-        with io.open(join(course_dir, "release", "ps1", "p1.ipynb"), mode='r', encoding='utf-8') as nb:
-            source = nb.read()
-        assert "BEGIN HIDDEN TESTS" not in source
+    def test_autotests_hashed(self, course_dir, temp_cwd):
+        """Can a notebook with hashed autotests be generated, and is hashed autotest code removed?"""
+        self._copy_file(join("files", "autotest-full.ipynb"), join(course_dir, "source", "ps1", "foo.ipynb"))
+        self._copy_file(join("files", "tests.yml"), join(course_dir, "tests.yml"))
+        run_nbgrader(["db", "assignment", "add", "ps1"])
+        run_nbgrader(["generate_assignment", "ps1"])
+        assert os.path.isfile(join(course_dir, "release", "ps1", "foo.ipynb"))
 
-        self._copy_file(
-            join(course_dir, "release", "ps1", "p1.ipynb"),
-            join(course_dir, "submitted", "foo", "ps1", "p1.ipynb")
-        )
-
-        # make sure submitted validates, should only fail on hidden tests
-        output = run_nbgrader([
-            "validate", join(course_dir, "submitted", "foo", "ps1", "p1.ipynb")
-        ], stdout=True)
-        assert output.strip() == "Success! Your notebook passes all the tests."
-
-        run_nbgrader(["autograde", "ps1", "--db", db])
-        assert os.path.exists(join(course_dir, "autograded", "foo", "ps1", "p1.ipynb"))
-
-        # make sure hidden tests are placed back in autograded
-        sub_nb = join(course_dir, "autograded", "foo", "ps1", "p1.ipynb")
-        with io.open(sub_nb, mode='r', encoding='utf-8') as nb:
-            source = nb.read()
-        assert "BEGIN HIDDEN TESTS" in source
-
-        # make sure autograded does not validate, should fail on hidden tests
-        output = run_nbgrader([
-            "validate", join(course_dir, "autograded", "foo", "ps1", "p1.ipynb"),
-        ], stdout=True)
-        assert output.splitlines()[0] == (
-            "VALIDATION FAILED ON 2 CELL(S)! If you submit your assignment "
-            "as it is, you WILL NOT"
-        )
-
-        with Gradebook(db) as gb:
-            submission = gb.find_submission("ps1", "foo")
-            nb1 = submission.notebooks[0]
-            assert nb1.score == 1.5
-
-    # TODO AUTOTEST
-    def test_hashed_tests_autotest(self, db, course_dir):
-        """Can files with hashed autotests be generated?"""
-        run_nbgrader(["db", "assignment", "add", "ps1", "--db", db, "--duedate",
-                      "2015-02-02 14:58:23.948203 America/Los_Angeles"])
-        run_nbgrader(["db", "student", "add", "foo", "--db", db])
-        run_nbgrader(["db", "student", "add", "bar", "--db", db])
-        with open("nbgrader_config.py", "a") as fh:
-            fh.write("""c.ClearSolutions.code_stub=dict(python="# YOUR CODE HERE")""")
-
-        self._copy_file(
-            join("files", "test-hidden-tests.ipynb"),
-            join(course_dir, "source", "ps1", "p1.ipynb")
-        )
-        # test-hidden-tests.ipynb contains vizable solutions that pass
-        # vizable tests, but fail on hidden tests
-
-        run_nbgrader(["generate_assignment", "ps1", "--db", db])
-
-        # make sure hidden tests are removed in release
-        with io.open(join(course_dir, "release", "ps1", "p1.ipynb"), mode='r', encoding='utf-8') as nb:
-            source = nb.read()
-        assert "BEGIN HIDDEN TESTS" not in source
-
-        self._copy_file(
-            join(course_dir, "release", "ps1", "p1.ipynb"),
-            join(course_dir, "submitted", "foo", "ps1", "p1.ipynb")
-        )
-
-        # make sure submitted validates, should only fail on hidden tests
-        output = run_nbgrader([
-            "validate", join(course_dir, "submitted", "foo", "ps1", "p1.ipynb")
-        ], stdout=True)
-        assert output.strip() == "Success! Your notebook passes all the tests."
-
-        run_nbgrader(["autograde", "ps1", "--db", db])
-        assert os.path.exists(join(course_dir, "autograded", "foo", "ps1", "p1.ipynb"))
-
-        # make sure hidden tests are placed back in autograded
-        sub_nb = join(course_dir, "autograded", "foo", "ps1", "p1.ipynb")
-        with io.open(sub_nb, mode='r', encoding='utf-8') as nb:
-            source = nb.read()
-        assert "BEGIN HIDDEN TESTS" in source
-
-        # make sure autograded does not validate, should fail on hidden tests
-        output = run_nbgrader([
-            "validate", join(course_dir, "autograded", "foo", "ps1", "p1.ipynb"),
-        ], stdout=True)
-        assert output.splitlines()[0] == (
-            "VALIDATION FAILED ON 2 CELL(S)! If you submit your assignment "
-            "as it is, you WILL NOT"
-        )
-
-        with Gradebook(db) as gb:
-            submission = gb.find_submission("ps1", "foo")
-            nb1 = submission.notebooks[0]
-            assert nb1.score == 1.5
-
-    # TODO AUTOTEST
-    def test_hidden_hashed_tests_autotest(self, db, course_dir):
-        """Can files with hidden hashed autotests be generated?"""
-        run_nbgrader(["db", "assignment", "add", "ps1", "--db", db, "--duedate",
-                      "2015-02-02 14:58:23.948203 America/Los_Angeles"])
-        run_nbgrader(["db", "student", "add", "foo", "--db", db])
-        run_nbgrader(["db", "student", "add", "bar", "--db", db])
-        with open("nbgrader_config.py", "a") as fh:
-            fh.write("""c.ClearSolutions.code_stub=dict(python="# YOUR CODE HERE")""")
-
-        self._copy_file(
-            join("files", "test-hidden-tests.ipynb"),
-            join(course_dir, "source", "ps1", "p1.ipynb")
-        )
-        # test-hidden-tests.ipynb contains vizable solutions that pass
-        # vizable tests, but fail on hidden tests
-
-        run_nbgrader(["generate_assignment", "ps1", "--db", db])
-
-        # make sure hidden tests are removed in release
-        with io.open(join(course_dir, "release", "ps1", "p1.ipynb"), mode='r', encoding='utf-8') as nb:
-            source = nb.read()
-        assert "BEGIN HIDDEN TESTS" not in source
-
-        self._copy_file(
-            join(course_dir, "release", "ps1", "p1.ipynb"),
-            join(course_dir, "submitted", "foo", "ps1", "p1.ipynb")
-        )
-
-        # make sure submitted validates, should only fail on hidden tests
-        output = run_nbgrader([
-            "validate", join(course_dir, "submitted", "foo", "ps1", "p1.ipynb")
-        ], stdout=True)
-        assert output.strip() == "Success! Your notebook passes all the tests."
-
-        run_nbgrader(["autograde", "ps1", "--db", db])
-        assert os.path.exists(join(course_dir, "autograded", "foo", "ps1", "p1.ipynb"))
-
-        # make sure hidden tests are placed back in autograded
-        sub_nb = join(course_dir, "autograded", "foo", "ps1", "p1.ipynb")
-        with io.open(sub_nb, mode='r', encoding='utf-8') as nb:
-            source = nb.read()
-        assert "BEGIN HIDDEN TESTS" in source
-
-        # make sure autograded does not validate, should fail on hidden tests
-        output = run_nbgrader([
-            "validate", join(course_dir, "autograded", "foo", "ps1", "p1.ipynb"),
-        ], stdout=True)
-        assert output.splitlines()[0] == (
-            "VALIDATION FAILED ON 2 CELL(S)! If you submit your assignment "
-            "as it is, you WILL NOT"
-        )
-
-        with Gradebook(db) as gb:
-            submission = gb.find_submission("ps1", "foo")
-            nb1 = submission.notebooks[0]
-            assert nb1.score == 1.5
-
-
-
-
+        foo = self._file_contents(join(course_dir, "release", "ps1", "foo.ipynb"))
+        assert "AUTOTEST" not in foo
+        assert "HASHED" not in foo
 
     def test_deprecation(self, course_dir, temp_cwd):
         """Can a single file be assigned?"""
