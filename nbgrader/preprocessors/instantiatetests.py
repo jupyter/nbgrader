@@ -317,6 +317,9 @@ class InstantiateTests(Execute):
         # replace the cell source
         cell.source = "\n".join(new_lines)
 
+        # remove the execution metainfo
+        cell.pop('execution', None)
+
         return cell, resources
 
     # -------------------------------------------------------------------------------------
