@@ -259,7 +259,7 @@ class TestNbGraderInstantiateTests(BaseTestApp):
 
         foo = self._file_contents(join(course_dir, "instantiated", "ps1", "foo.ipynb"))
         assert "AUTOTEST" not in foo
-        assert "HIDDEN" not in foo
+        assert "HIDDEN" in foo
 
     def test_autotests_hashed(self, course_dir, temp_cwd):
         """Can a notebook with hashed autotests be generated, and is hashed autotest code removed?"""
