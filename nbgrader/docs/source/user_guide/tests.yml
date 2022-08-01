@@ -34,14 +34,14 @@ python3:
 
         int:
             - test: "type({{snippet}})"
-              fail: "type of {{snippet}} is not int. Please make sure it is int and not np.int64, etc. You can cast your value into float using int()"
+              fail: "type of {{snippet}} is not int. Please make sure it is int and not np.int64, etc. You can cast your value into an int using int()"
 
             - test: "{{snippet}}"
               fail: "value of {{snippet}} is not correct"
 
         float:
             - test: "type({{snippet}})"
-              fail: "type of {{snippet}} is not float. Please make sure it is float and not np.float64, etc. You can cast your value into float using float()"
+              fail: "type of {{snippet}} is not float. Please make sure it is float and not np.float64, etc. You can cast your value into a float using float()"
 
             - test: "round({{snippet}}, 2)"
               fail: "value of {{snippet}} is not correct (rounded to 2 decimal places)"
