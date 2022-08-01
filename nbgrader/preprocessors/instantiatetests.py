@@ -305,6 +305,10 @@ class InstantiateTests(Execute):
                 # add an empty line after this block of test code
                 new_lines.append('')
 
+        # run the trailing non-autotest lines, if any remain
+        if len(non_autotest_code_lines) > 0:
+            asyncio.run(self._async_execute_code_snippet("\n".join(non_autotest_code_lines)))
+
         # add the final success message
         if is_grade_flag and self.global_tests_loaded:
             if self.autotest_delimiter in cell.source:
