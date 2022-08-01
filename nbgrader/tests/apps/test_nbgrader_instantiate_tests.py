@@ -240,9 +240,9 @@ class TestNbGraderInstantiateTests(BaseTestApp):
         foo = self._file_contents(join(course_dir, "instantiated", "ps1", "foo.ipynb"))
         assert "AUTOTEST" not in foo
 
-    def test_autotests_multiple_per_line(self, course_dir, temp_cwd):
+    def test_autotests_fancy(self, course_dir, temp_cwd):
         """Can a more complicated autotests notebook be generated, and is autotest code removed?"""
-        self._copy_file(join("files", "autotest-full.ipynb"), join(course_dir, "source", "ps1", "foo.ipynb"))
+        self._copy_file(join("files", "autotest-multi.ipynb"), join(course_dir, "source", "ps1", "foo.ipynb"))
         self._copy_file(join("files", "tests.yml"), join(course_dir, "tests.yml"))
         run_nbgrader(["instantiate_tests", "ps1"])
         assert os.path.isfile(join(course_dir, "instantiated", "ps1", "foo.ipynb"))
@@ -252,7 +252,7 @@ class TestNbGraderInstantiateTests(BaseTestApp):
 
     def test_autotests_hidden(self, course_dir, temp_cwd):
         """Can a notebook with hidden autotest be generated, and is autotest/hidden sections removed?"""
-        self._copy_file(join("files", "autotest-full.ipynb"), join(course_dir, "source", "ps1", "foo.ipynb"))
+        self._copy_file(join("files", "autotest-hidden.ipynb"), join(course_dir, "source", "ps1", "foo.ipynb"))
         self._copy_file(join("files", "tests.yml"), join(course_dir, "tests.yml"))
         run_nbgrader(["instantiate_tests", "ps1"])
         assert os.path.isfile(join(course_dir, "instantiated", "ps1", "foo.ipynb"))
@@ -263,7 +263,7 @@ class TestNbGraderInstantiateTests(BaseTestApp):
 
     def test_autotests_hashed(self, course_dir, temp_cwd):
         """Can a notebook with hashed autotests be generated, and is hashed autotest code removed?"""
-        self._copy_file(join("files", "autotest-full.ipynb"), join(course_dir, "source", "ps1", "foo.ipynb"))
+        self._copy_file(join("files", "autotest-hashed.ipynb"), join(course_dir, "source", "ps1", "foo.ipynb"))
         self._copy_file(join("files", "tests.yml"), join(course_dir, "tests.yml"))
         run_nbgrader(["instantiate_tests", "ps1"])
         assert os.path.isfile(join(course_dir, "instantiated", "ps1", "foo.ipynb"))
