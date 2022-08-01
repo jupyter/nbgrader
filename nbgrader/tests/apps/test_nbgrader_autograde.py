@@ -989,7 +989,7 @@ class TestNbGraderAutograde(BaseTestApp):
             "validate", join(course_dir, "autograded", "foo", "ps1", "p1.ipynb"),
         ], stdout=True)
         assert output.splitlines()[0] == (
-            "VALIDATION FAILED ON 2 CELL(S)! If you submit your assignment "
+            "VALIDATION FAILED ON 1 CELL(S)! If you submit your assignment "
             "as it is, you WILL NOT"
         )
         # make sure autograded for bar does not, should fail on hidden tests
@@ -997,7 +997,7 @@ class TestNbGraderAutograde(BaseTestApp):
             "validate", join(course_dir, "autograded", "bar", "ps1", "p1.ipynb"),
         ], stdout=True)
         assert output.splitlines()[0] == (
-            "VALIDATION FAILED ON 2 CELL(S)! If you submit your assignment "
+            "VALIDATION FAILED ON 1 CELL(S)! If you submit your assignment "
             "as it is, you WILL NOT"
         )
         # make sure autograded for bar validates, should succeed on hidden tests
