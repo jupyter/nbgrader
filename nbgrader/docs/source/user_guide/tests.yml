@@ -63,7 +63,7 @@ python3:
             - test: "len({{snippet}})"
               fail: "length of {{snippet}} is not correct"
 
-            - test: "sorted([str(e) for e in {{snippet}}])"
+            - test: "sorted(map(str, {{snippet}}))"
               fail: "values of {{snippet}} are not correct"
 
             - test: "{{snippet}}"
@@ -76,7 +76,7 @@ python3:
             - test: "len({{snippet}})"
               fail: "length of {{snippet}} is not correct"
 
-            - test: "sorted([str(e) for e in {{snippet}}])"
+            - test: "sorted(map(str, {{snippet}}))"
               fail: "values of {{snippet}} are not correct"
 
             - test: "{{snippet}}"
@@ -104,10 +104,10 @@ python3:
             - test: "len(list({{snippet}}.keys()))"
               fail: "number of keys of {{snippet}} is not correct"
 
-            - test: "sorted([str(e) for e in {{snippet}}.keys()])"
+            - test: "sorted(map(str, {{snippet}}.keys()))"
               fail: "keys of {{snippet}} are not correct"
 
-            - test: "sorted([str(e) for e in {{snippet}}.values()])"
+            - test: "sorted(map(str, {{snippet}}.values()))"
               fail: "correct keys, but values of {{snippet}} are not correct"
 
             - test: "{{snippet}}"
