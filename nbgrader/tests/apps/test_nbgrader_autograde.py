@@ -951,7 +951,7 @@ class TestNbGraderAutograde(BaseTestApp):
             "validate", join(course_dir, "submitted", "foo", "ps1", "p1.ipynb"),
         ], stdout=True)
         assert output.splitlines()[0] == (
-            "VALIDATION FAILED ON 2 CELL(S)! If you submit your assignment "
+            "VALIDATION FAILED ON 1 CELL(S)! If you submit your assignment "
             "as it is, you WILL NOT"
         )
         output = run_nbgrader([
