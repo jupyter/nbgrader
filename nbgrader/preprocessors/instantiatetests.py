@@ -408,7 +408,10 @@ class InstantiateTests(Execute):
         rendered_fail_msgs = []
         for templ in fail_msgs:
             template = j2.Environment(loader=j2.BaseLoader).from_string(templ)
-            rendered_fail_msgs.append(template.render(snippet=snippet))
+            fmsg = template.render(snippet=snippet)
+            # escape double quotes
+            fmsg = fmsg.replace("\"", "\\\"")
+            rendered_fail_msgs.append(fmsg)
 
         # normalize the templates
         normalized_templs = []
