@@ -44,11 +44,11 @@ class TestNbGraderInstantiateTests(BaseTestApp):
         self._copy_file(join("files", "autotest-simple.ipynb"), join(course_dir, "source", "ps1", "foo.ipynb"))
         self._copy_file(join("files", "tests.yml"), join(course_dir, "tests.yml"))
         run_nbgrader(["db", "assignment", "add", "ps1"])
-        run_nbgrader(["generate_assignment", "ps1"])
-        assert os.path.isfile(join(course_dir, "release", "ps1", "foo.ipynb"))
-        assert not os.path.isfile(join(course_dir, "release", "ps1", "tests.yml"))
+        run_nbgrader(["instantiate_tests", "ps1"])
+        assert os.path.isfile(join(course_dir, "instantiated", "ps1", "foo.ipynb"))
+        assert not os.path.isfile(join(course_dir, "instantiated", "ps1", "tests.yml"))
 
-        foo = self._file_contents(join(course_dir, "release", "ps1", "foo.ipynb"))
+        foo = self._file_contents(join(course_dir, "instantiated", "ps1", "foo.ipynb"))
         assert "AUTOTEST" not in foo
 
     def test_autotests_simple(self, course_dir, temp_cwd):
@@ -56,18 +56,18 @@ class TestNbGraderInstantiateTests(BaseTestApp):
         self._copy_file(join("files", "autotest-simple.ipynb"), join(course_dir, "source", "ps1", "foo.ipynb"))
         self._copy_file(join("files", "tests.yml"), join(course_dir, "source", "ps1", "tests.yml"))
         run_nbgrader(["db", "assignment", "add", "ps1"])
-        run_nbgrader(["generate_assignment", "ps1"])
-        assert os.path.isfile(join(course_dir, "release", "ps1", "foo.ipynb"))
-        assert os.path.isfile(join(course_dir, "release", "ps1", "tests.yml"))
+        run_nbgrader(["instantiate_tests", "ps1"])
+        assert os.path.isfile(join(course_dir, "instantiated", "ps1", "foo.ipynb"))
+        assert os.path.isfile(join(course_dir, "instantiated", "ps1", "tests.yml"))
 
-        foo = self._file_contents(join(course_dir, "release", "ps1", "foo.ipynb"))
+        foo = self._file_contents(join(course_dir, "instantiated", "ps1", "foo.ipynb"))
         assert "AUTOTEST" not in foo
 
     def test_autotests_needs_yaml(self, course_dir, temp_cwd):
         """Can a notebook with autotests be generated without a yaml file?"""
         self._copy_file(join("files", "autotest-simple.ipynb"), join(course_dir, "source", "ps1", "foo.ipynb"))
         run_nbgrader(["db", "assignment", "add", "ps1"])
-        run_nbgrader(["generate_assignment", "ps1"], retcode=1)
+        run_nbgrader(["instantiate_tests", "ps1"], retcode=1)
 
     def test_single_file_bad_assignment_name(self, course_dir, temp_cwd):
         """Test that an error is thrown when the assignment name is invalid."""
