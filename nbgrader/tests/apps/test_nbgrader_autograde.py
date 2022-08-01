@@ -934,6 +934,7 @@ class TestNbGraderAutograde(BaseTestApp):
                       "2015-02-02 14:58:23.948203 America/Los_Angeles"])
         run_nbgrader(["db", "student", "add", "foo", "--db", db])
         run_nbgrader(["db", "student", "add", "bar", "--db", db])
+        run_nbgrader(["db", "student", "add", "baz", "--db", db])
         with open("nbgrader_config.py", "a") as fh:
             fh.write("""c.ClearSolutions.code_stub=dict(python="# YOUR CODE HERE")""")
 
@@ -942,16 +943,24 @@ class TestNbGraderAutograde(BaseTestApp):
         run_nbgrader(["generate_assignment", "ps1", "--db", db])
 
         self._copy_file(join("files", "autotest-hidden-unchanged.ipynb"), join(course_dir, "submitted", "foo", "ps1", "p1.ipynb"))
-        self._copy_file(join("files", "autotest-hidden-changed.ipynb"), join(course_dir, "submitted", "bar", "ps1", "p1.ipynb"))
+        self._copy_file(join("files", "autotest-hidden-changed-wrong.ipynb"), join(course_dir, "submitted", "bar", "ps1", "p1.ipynb"))
+        self._copy_file(join("files", "autotest-hidden-changed-right.ipynb"), join(course_dir, "submitted", "baz", "ps1", "p1.ipynb"))
 
-        # make sure submitted validates for both foo and bar (should only fail on hidden tests)
+        # make sure submitted validates for both bar and baz (should only fail on hidden tests), but not foo (missing any input and visible type checks will fail)
         output = run_nbgrader([
-            "validate", join(course_dir, "submitted", "foo", "ps1", "p1.ipynb")
+            "validate", join(course_dir, "submitted", "foo", "ps1", "p1.ipynb"),
+        ], stdout=True)
+        assert output.splitlines()[0] == (
+            "VALIDATION FAILED ON 2 CELL(S)! If you submit your assignment "
+            "as it is, you WILL NOT"
+        )
+        output = run_nbgrader([
+            "validate", join(course_dir, "submitted", "bar", "ps1", "p1.ipynb")
         ], stdout=True)
         assert output.strip() == "Success! Your notebook passes all the tests."
 
         output = run_nbgrader([
-            "validate", join(course_dir, "submitted", "bar", "ps1", "p1.ipynb")
+            "validate", join(course_dir, "submitted", "baz", "ps1", "p1.ipynb")
         ], stdout=True)
         assert output.strip() == "Success! Your notebook passes all the tests."
 
@@ -959,6 +968,7 @@ class TestNbGraderAutograde(BaseTestApp):
         run_nbgrader(["autograde", "ps1", "--db", db])
         assert os.path.exists(join(course_dir, "autograded", "foo", "ps1", "p1.ipynb"))
         assert os.path.exists(join(course_dir, "autograded", "bar", "ps1", "p1.ipynb"))
+        assert os.path.exists(join(course_dir, "autograded", "baz", "ps1", "p1.ipynb"))
 
         # make sure hidden tests are placed back in autograded
         sub_nb = join(course_dir, "autograded", "foo", "ps1", "p1.ipynb")
@@ -969,8 +979,12 @@ class TestNbGraderAutograde(BaseTestApp):
         with io.open(sub_nb, mode='r', encoding='utf-8') as nb:
             source = nb.read()
         assert "BEGIN HIDDEN TESTS" in source
+        sub_nb = join(course_dir, "autograded", "baz", "ps1", "p1.ipynb")
+        with io.open(sub_nb, mode='r', encoding='utf-8') as nb:
+            source = nb.read()
+        assert "BEGIN HIDDEN TESTS" in source
 
-        # make sure autograded for foo does not validate, should fail on hidden tests
+        # make sure autograded for foo does not validate, should fail on visible and hidden tests
         output = run_nbgrader([
             "validate", join(course_dir, "autograded", "foo", "ps1", "p1.ipynb"),
         ], stdout=True)
@@ -978,9 +992,17 @@ class TestNbGraderAutograde(BaseTestApp):
             "VALIDATION FAILED ON 2 CELL(S)! If you submit your assignment "
             "as it is, you WILL NOT"
         )
-        # make sure autograded for bar validates, should succeed on hidden tests
+        # make sure autograded for bar does not, should fail on hidden tests
         output = run_nbgrader([
             "validate", join(course_dir, "autograded", "bar", "ps1", "p1.ipynb"),
+        ], stdout=True)
+        assert output.splitlines()[0] == (
+            "VALIDATION FAILED ON 2 CELL(S)! If you submit your assignment "
+            "as it is, you WILL NOT"
+        )
+        # make sure autograded for bar validates, should succeed on hidden tests
+        output = run_nbgrader([
+            "validate", join(course_dir, "autograded", "baz", "ps1", "p1.ipynb"),
         ], stdout=True)
         assert output.strip() == "Success! Your notebook passes all the tests."
 
@@ -989,6 +1011,9 @@ class TestNbGraderAutograde(BaseTestApp):
             nb1 = submission.notebooks[0]
             assert nb1.score == 0
             submission = gb.find_submission("ps1", "bar")
+            nb1 = submission.notebooks[0]
+            assert nb1.score == 0
+            submission = gb.find_submission("ps1", "baz")
             nb1 = submission.notebooks[0]
             assert nb1.score == 1
 
