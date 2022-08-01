@@ -39,7 +39,7 @@ class TestNbGraderInstantiateTests(BaseTestApp):
             with pytest.raises(MissingEntry):
                 assignment = gb.find_assignment("ps1")
 
-   def test_autotests_simple(self, course_dir, temp_cwd):
+    def test_autotests_simple(self, course_dir, temp_cwd):
         """Can a notebook with simple autotests be generated with a default yaml location, and is autotest code removed?"""
         self._copy_file(join("files", "autotest-simple.ipynb"), join(course_dir, "source", "ps1", "foo.ipynb"))
         self._copy_file(join("files", "tests.yml"), join(course_dir, "tests.yml"))
