@@ -148,7 +148,7 @@ class InstantiateTests(Execute):
         },
         help = dedent(
             """
-            A dictionary mapping each Jupyter kernel's name to the function that is used to 
+            A dictionary mapping each Jupyter kernel's name to the function that is used to
             sanitize the output from the kernel within InstantiateTests.
             """
         )
@@ -175,7 +175,7 @@ class InstantiateTests(Execute):
         new_lines = []
 
         # first, run the cell normally
-        cell, resources = super(InstantiateTests, self).preprocess_cell(cell, resources, index)
+        #cell, resources = super(InstantiateTests, self).preprocess_cell(cell, resources, index)
 
         kernel_name = self.nb.metadata.get("kernelspec", {}).get("name", "")
         if kernel_name not in self.comment_strs:
