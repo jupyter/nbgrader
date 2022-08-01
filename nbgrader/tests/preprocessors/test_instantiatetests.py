@@ -14,10 +14,10 @@ def preprocessor():
 
 class TestInstantiateTests(BaseTestPreprocessor):
 
-    def test_load_default_test_template_file(self, preprocessor):
+    def test_load_test_template_file(self, preprocessor):
         resources = {
             'kernel_name': 'python3',
-            'metadata': {'path': 'nbgrader/docs/source/user_guide/source/ps1'}
+            'metadata': {'path': 'nbgrader/docs/source/user_guide'}
         }
         preprocessor._load_test_template_file(resources=resources)
         assert preprocessor.test_templates_by_type is not None
