@@ -917,7 +917,7 @@ class NbGraderAPI(LoggingConfigurable):
             app.create_assignment = create
             return capture_log(app)
 
-    def instantiate_tests(self, assignment_id, force=True, create=True):
+    def instantiate_tests(self, assignment_id, force=True):
         """Run ``nbgrader instantiate_tests`` for a particular assignment.
 
         Arguments
@@ -927,9 +927,6 @@ class NbGraderAPI(LoggingConfigurable):
         force: bool
             Whether to force creating the instantiated version, even if it already
             exists.
-        create: bool
-            Whether to create the assignment in the database, if it doesn't
-            already exist.
 
         Returns
         -------
@@ -944,7 +941,6 @@ class NbGraderAPI(LoggingConfigurable):
         with temp_attrs(self.coursedir, assignment_id=assignment_id):
             app = InstantiateTests(coursedir=self.coursedir, parent=self)
             app.force = force
-            app.create_assignment = create
             return capture_log(app)
 
     def unrelease(self, assignment_id):
