@@ -70,6 +70,20 @@ class Exchange(ABCExchange):
         """Actually do the file transfer."""
         raise NotImplementedError
 
+    def get_size(self, root):
+        """
+        Return total size of directory in bytes.
+        """
+        total_size = 0
+        for dirpath, dirnames, filenames in os.walk(root):
+            for f in filenames:
+                fp = os.path.join(dirpath, f)
+                # skip if it is symbolic link
+                if not os.path.islink(fp):
+                    total_size += os.path.getsize(fp)
+        return total_size
+
+
     def do_copy(self, src, dest, log=None):
         """
         Copy the src dir to the dest dir, omitting excluded
@@ -77,6 +91,12 @@ class Exchange(ABCExchange):
         specified by the options coursedir.ignore, coursedir.include
         and coursedir.max_file_size.
         """
+        dir_size = self.get_size(src)
+        max_dir_size = self.coursedir.max_dir_size
+        if dir_size > 1000 * max_dir_size:
+            self.log.error("Directory size is too big")
+            raise RuntimeError(f"Directory size is too big. Size is {dir_size}, maximum size is {1000 * max_dir_size}")
+
         shutil.copytree(src, dest,
                         ignore=ignore_patterns(exclude=self.coursedir.ignore,
                                                include=self.coursedir.include,

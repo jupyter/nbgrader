@@ -279,6 +279,17 @@ class CourseDirectory(LoggingConfigurable):
         )
     ).tag(config=True)
 
+    max_dir_size = Integer(
+        100000,
+        help=dedent(
+            """
+            Maximum size of directories (in kilobytes; default: 100Mb).
+            Upon copying directories recursively, larger files will be
+            ignored with a warning.
+            """
+        )
+    ).tag(config=True)
+
     def format_path(self, nbgrader_step: str, student_id: str, assignment_id: str, escape: bool = False) -> str:
         kwargs = dict(
             nbgrader_step=nbgrader_step,
