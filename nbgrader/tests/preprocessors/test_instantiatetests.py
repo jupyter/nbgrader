@@ -94,10 +94,6 @@ class TestInstantiateTests(BaseTestPreprocessor):
 
         assert "Autotest region detected in a non-grade cell; " in caplog.text
 
-    # test that AUTOTEST directives are not removed from non-grade cells (and that all non-grade cells are not modified)
-    def test_no_remove_autotest_nongrade(self, preprocessor):
-        pass
-
     # test that invalid python statements in AUTOTEST directives cause errors
     def test_error_bad_autotest_code(self, preprocessor):
         sol_cell = create_autotest_solution_cell()
