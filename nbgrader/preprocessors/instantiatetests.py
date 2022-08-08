@@ -75,6 +75,18 @@ class CellExecutionError(Exception):
     # -------------------------------------------------------------------------------------
 
 
+#########################################################################################
+class CodeExecutionError(Exception):
+    """
+    Custom exception to propagate exceptions that are raised during
+    code snippet execution to the caller. This is mostly useful when
+    using nbconvert as a library, since it allows dealing with
+    failures gracefully.
+    """
+
+
+#########################################################################################
+
 exec_err_msg = u"""\
 An error occurred while executing the following code:
 ------------------
@@ -122,14 +134,14 @@ class InstantiateTests(Execute):
     ).tag(config=True)
 
     comment_strs = Dict(
-        key_trait = Unicode(),
-        value_trait = Unicode(),
-        default_value = {
+        key_trait=Unicode(),
+        value_trait=Unicode(),
+        default_value={
             'ir': '#',
             'python': '#',
             'python3': '#'
         },
-        help = dedent(
+        help=dedent(
             """
             A dictionary mapping each Jupyter kernel's name to the comment string for that kernel.
             For an example, one of the entries in this dictionary is "python" : "#", because # is the comment
@@ -139,14 +151,14 @@ class InstantiateTests(Execute):
     ).tag(config=True)
 
     sanitizers = Dict(
-        key_trait = Unicode(),
-        value_trait = Callable(),
-        default_value = {
+        key_trait=Unicode(),
+        value_trait=Callable(),
+        default_value={
             'ir': lambda s: re.sub(r'\[\d+\]\s+', '', s).strip('"').strip("'"),
             'python': lambda s: s.strip('"').strip("'"),
             'python3': lambda s: s.strip('"').strip("'")
         },
-        help = dedent(
+        help=dedent(
             """
             A dictionary mapping each Jupyter kernel's name to the function that is used to
             sanitize the output from the kernel within InstantiateTests.
@@ -175,7 +187,7 @@ class InstantiateTests(Execute):
         new_lines = []
 
         # first, run the cell normally
-        #cell, resources = super(InstantiateTests, self).preprocess_cell(cell, resources, index)
+        # cell, resources = super(InstantiateTests, self).preprocess_cell(cell, resources, index)
 
         kernel_name = self.nb.metadata.get("kernelspec", {}).get("name", "")
         if kernel_name not in self.comment_strs:
@@ -337,7 +349,8 @@ class InstantiateTests(Execute):
 
         except FileNotFoundError:
             # if there is no tests file, just load a default tests dict
-            self.log.warning('No tests.yml file found in the assignment directory. Loading the default tests.yml file in the course root directory')
+            self.log.warning(
+                'No tests.yml file found in the assignment directory. Loading the default tests.yml file in the course root directory')
             # tests = {}
             try:
                 with open(os.path.join(self.autotest_filename), 'r') as tests_file:
@@ -511,7 +524,7 @@ class InstantiateTests(Execute):
                     if msg_type == 'error':
                         self.log.error("Failed to run code: \n%s", code)
                         self.log.error("Runtime error from the kernel: \n%s", content['evalue'])
-                        break
+                        raise CodeExecutionError()
 
                     if msg_type == 'status':
                         if content['execution_state'] == 'idle':
