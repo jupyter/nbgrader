@@ -142,12 +142,13 @@ class CourseDirectory(LoggingConfigurable):
         )
     ).tag(config=True)
 
-    instantiated_directory = Unicode(
-        'instantiated',
+    source_with_tests_directory = Unicode(
+        'source_with_tests',
         help=dedent(
             """
             The name of the directory that contains the version of the
-            assignment that will be released to students. This corresponds to
+            assignment that will contain both the solutions and the instantiated 
+            test cases to be used by instructors. This corresponds to
             the `nbgrader_step` variable in the `directory_structure` config
             option.
             """
