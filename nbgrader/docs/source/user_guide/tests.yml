@@ -106,6 +106,13 @@ python3:
             - test: "{{snippet}}"
               fail: "type of {{snippet}} is not correct"
 
+        pandas.core.frame.DataFrame:
+            - test: "type({{snippet}})"
+              fail: "type of {{snippet}} is not pandas.core.frame.DataFrame. {{snippet}} should be a DataFrame"
+
+            - test: "{{snippet}}.reindex(sorted({{snippet}}.columns), axis=1)"
+              fail: "some or all elements of {{snippet}} are not correct"
+
 # ---------------------------------------------
 
 python:
@@ -216,6 +223,12 @@ python:
             - test: "{{snippet}}"
               fail: "type of {{snippet}} is not correct"
 
+        pandas.core.frame.DataFrame:
+            - test: "type({{snippet}})"
+              fail: "type of {{snippet}} is not pandas.core.frame.DataFrame. {{snippet}} should be a DataFrame"
+
+            - test: "{{snippet}}.reindex(sorted({{snippet}}.columns), axis=1)"
+              fail: "some or all elements of {{snippet}} are not correct"
 
 
 # --------------------------------------------------------------------------------------------------
