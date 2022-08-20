@@ -2,10 +2,11 @@
 
 import sys
 
-from traitlets import default
+from traitlets import default, Bool
+from textwrap import dedent
 
 from .baseapp import NbGrader, nbgrader_aliases, nbgrader_flags
-from ..converters import BaseConverter, GenerateAssignment, NbGraderException
+from ..converters import BaseConverter, GenerateAssignment, NbGraderException, InstantiateTests
 from traitlets.traitlets import MetaHasTraits
 from typing import List, Any
 from traitlets.config.loader import Config
@@ -51,6 +52,13 @@ flags.update({
         {'BaseConverter': {'force': True}},
         "Overwrite an assignment/submission if it already exists."
     ),
+    'generate_source_with_tests': (
+        {'GenerateAssignmentApp': {'instantiate_tests': True}},
+        "Generate an intermediate notebooks that contain the solutions as well as the tests "
+        "to be used for debugging purposes by the instructors\n"
+        "results saved according to\n"
+        "source_with_tests/./{assignment_id}/{notebook_id}.ipynb"
+    )
 })
 
 
@@ -61,6 +69,16 @@ class GenerateAssignmentApp(NbGrader):
 
     aliases = aliases
     flags = flags
+
+    instantiate_tests = Bool(
+        False,
+        help=dedent(
+            """
+            Generate an intermediate notebook that contains both solutions as well as the tests
+            to be used for debugging purposes"
+            """
+        )
+    ).tag(config=True)
 
     examples = """
         Produce the version of the assignment that is intended to be released to
@@ -112,7 +130,7 @@ class GenerateAssignmentApp(NbGrader):
     @default("classes")
     def _classes_default(self) -> List[MetaHasTraits]:
         classes = super(GenerateAssignmentApp, self)._classes_default()
-        classes.extend([BaseConverter, GenerateAssignment])
+        classes.extend([BaseConverter, GenerateAssignment, InstantiateTests])
         return classes
 
     def _load_config(self, cfg: Config, **kwargs: Any) -> None:
@@ -140,6 +158,13 @@ class GenerateAssignmentApp(NbGrader):
             self.fail("An assignment id must be specified, either as an argument or with --assignment")
         elif len(self.extra_args) == 1:
             self.coursedir.assignment_id = self.extra_args[0]
+
+        if self.instantiate_tests:
+            converter = InstantiateTests(coursedir=self.coursedir, parent=self)
+            try:
+                converter.start()
+            except NbGraderException:
+                sys.exit(1)
 
         converter = GenerateAssignment(coursedir=self.coursedir, parent=self)
         try:
