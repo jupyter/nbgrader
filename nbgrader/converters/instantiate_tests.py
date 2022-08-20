@@ -28,7 +28,7 @@ class InstantiateTests(BaseConverter):
 
     @property
     def _output_directory(self) -> str:
-        return self.coursedir.instantiated_directory
+        return self.coursedir.source_with_tests_directory
 
     preprocessors = List([
         InstantiateTests,
