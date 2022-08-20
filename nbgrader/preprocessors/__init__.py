@@ -9,7 +9,6 @@ from .overwritecells import OverwriteCells
 from .checkcellmetadata import CheckCellMetadata
 from .execute import Execute
 from .instantiatetests import InstantiateTests
-from .limittestcellheights import LimitTestCellHeights
 from .getgrades import GetGrades
 from .clearoutput import ClearOutput
 from .limitoutput import LimitOutput
@@ -31,7 +30,6 @@ __all__ = [
     "CheckCellMetadata",
     "Execute",
     "InstantiateTests",
-    "LimitTestCellHeights",
     "GetGrades",
     "ClearOutput",
     "LimitOutput",
