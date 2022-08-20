@@ -1,21 +1,3 @@
-#kernel_name:
-#    setup:
-#    hash:
-#    dispatch:
-#    normalize:
-#    check:
-#    success:
-#
-#    templates:
-#        default:
-#            - test:
-#              fail:
-#
-#        datatype:
-#            - test:
-#              fail:
-
-
 python3:
     setup: "from hashlib import sha1"
     hash: 'sha1({{snippet}}.encode("utf-8")+b"{{salt}}").hexdigest()'
