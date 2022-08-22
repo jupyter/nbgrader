@@ -4,6 +4,57 @@ A summary of changes to nbgrader.
 
 <!-- <START NEW CHANGELOG ENTRY> -->
 
+## 0.8.0
+
+([Full Changelog](https://github.com/jupyter/nbgrader/compare/v0.7.0...16d53c511b10ea2fa7802bd74c4c0ca79c3e68c4))
+
+### Enhancements made
+
+- Feature/mybinder [#1626](https://github.com/jupyter/nbgrader/pull/1626) ([@brichet](https://github.com/brichet))
+- Fix version error message [#1616](https://github.com/jupyter/nbgrader/pull/1616) ([@brichet](https://github.com/brichet))
+- Create assignment panel only open if a Notebook is visible on main area [#1606](https://github.com/jupyter/nbgrader/pull/1606) ([@brichet](https://github.com/brichet))
+- Use jupyter css variable in labextension to manage colors with theme [#1603](https://github.com/jupyter/nbgrader/pull/1603) ([@brichet](https://github.com/brichet))
+- Jupyterlab extensions [#1588](https://github.com/jupyter/nbgrader/pull/1588) ([@brichet](https://github.com/brichet))
+- Jupyter server [#1586](https://github.com/jupyter/nbgrader/pull/1586) ([@brichet](https://github.com/brichet))
+
+### Bugs fixed
+
+- Add required github-token in workflow [#1648](https://github.com/jupyter/nbgrader/pull/1648) ([@brichet](https://github.com/brichet))
+- Pin version of nbclassic<0.4.0 [#1621](https://github.com/jupyter/nbgrader/pull/1621) ([@brichet](https://github.com/brichet))
+- More informative error messages in ClearSolutions [#1607](https://github.com/jupyter/nbgrader/pull/1607) ([@jhamrick](https://github.com/jhamrick))
+- Fix demos for JupyterHub 2.0 and JupyterLab [#1601](https://github.com/jupyter/nbgrader/pull/1601) ([@jhamrick](https://github.com/jhamrick))
+- Fix mathjax in formgrade templates [#1598](https://github.com/jupyter/nbgrader/pull/1598) ([@brichet](https://github.com/brichet))
+- Change default exchange path [#1592](https://github.com/jupyter/nbgrader/pull/1592) ([@jhamrick](https://github.com/jhamrick))
+- Ensure html files aren't copied over from documentation [#1590](https://github.com/jupyter/nbgrader/pull/1590) ([@jhamrick](https://github.com/jhamrick))
+
+### Maintenance and upkeep improvements
+
+- Bump terser from 5.14.1 to 5.14.2 [#1649](https://github.com/jupyter/nbgrader/pull/1649) ([@dependabot](https://github.com/dependabot))
+- Add required github-token in workflow [#1648](https://github.com/jupyter/nbgrader/pull/1648) ([@brichet](https://github.com/brichet))
+- Remove a remaining dependency to notebook [#1647](https://github.com/jupyter/nbgrader/pull/1647) ([@brichet](https://github.com/brichet))
+- Bump moment from 2.29.3 to 2.29.4 [#1631](https://github.com/jupyter/nbgrader/pull/1631) ([@dependabot](https://github.com/dependabot))
+- Fix some typo and variable declaration in labextension tests [#1623](https://github.com/jupyter/nbgrader/pull/1623) ([@brichet](https://github.com/brichet))
+- Move the jupyter_releaser hooks from package.json to pyproject.toml [#1617](https://github.com/jupyter/nbgrader/pull/1617) ([@brichet](https://github.com/brichet))
+- Fix missing `.` in the JS version [#1614](https://github.com/jupyter/nbgrader/pull/1614) ([@jtpio](https://github.com/jtpio))
+- Pins selenium version to 4.2 [#1611](https://github.com/jupyter/nbgrader/pull/1611) ([@brichet](https://github.com/brichet))
+- Fix version bumping for pre-releases [#1610](https://github.com/jupyter/nbgrader/pull/1610) ([@jtpio](https://github.com/jtpio))
+- Fix demos for JupyterHub 2.0 and JupyterLab [#1601](https://github.com/jupyter/nbgrader/pull/1601) ([@jhamrick](https://github.com/jhamrick))
+- Don't depend on qtconsole [#1596](https://github.com/jupyter/nbgrader/pull/1596) ([@minrk](https://github.com/minrk))
+- Fix readthedocs automatic build [#1587](https://github.com/jupyter/nbgrader/pull/1587) ([@brichet](https://github.com/brichet))
+
+### Documentation improvements
+
+- Add instruction to run playwright tests [#1602](https://github.com/jupyter/nbgrader/pull/1602) ([@brichet](https://github.com/brichet))
+- Fix readthedocs automatic build [#1587](https://github.com/jupyter/nbgrader/pull/1587) ([@brichet](https://github.com/brichet))
+
+### Contributors to this release
+
+([GitHub contributors page for this release](https://github.com/jupyter/nbgrader/graphs/contributors?from=2022-05-07&to=2022-08-22&type=c))
+
+[@brichet](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Abrichet+updated%3A2022-05-07..2022-08-22&type=Issues) | [@dependabot](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Adependabot+updated%3A2022-05-07..2022-08-22&type=Issues) | [@jhamrick](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Ajhamrick+updated%3A2022-05-07..2022-08-22&type=Issues) | [@jtpio](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Ajtpio+updated%3A2022-05-07..2022-08-22&type=Issues) | [@minrk](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Aminrk+updated%3A2022-05-07..2022-08-22&type=Issues) | [@perllaghu](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Aperllaghu+updated%3A2022-05-07..2022-08-22&type=Issues) | [@rkdarst](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Arkdarst+updated%3A2022-05-07..2022-08-22&type=Issues)
+
+<!-- <END NEW CHANGELOG ENTRY> -->
+
 ## 0.8.0a2
 
 ([Full Changelog](https://github.com/jupyter/nbgrader/compare/v0.8.0a1...b630994b82aec84ba9126edf1c4436f1011177cc))
@@ -17,8 +68,6 @@ A summary of changes to nbgrader.
 ([GitHub contributors page for this release](https://github.com/jupyter/nbgrader/graphs/contributors?from=2022-07-04&to=2022-07-05&type=c))
 
 [@brichet](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Abrichet+updated%3A2022-07-04..2022-07-05&type=Issues)
-
-<!-- <END NEW CHANGELOG ENTRY> -->
 
 ## 0.8.0a1
 
