@@ -3,7 +3,7 @@ python3:
     hash: 'sha1({{snippet}}.encode("utf-8")+b"{{salt}}").hexdigest()'
     dispatch: "type({{snippet}})"
     normalize: "str({{snippet}})"
-    check: 'assert {{snippet}} == "{{value}}", "{{message}}"'
+    check: 'assert {{snippet}} == """{{value}}""", """{{message}}"""'
     success: "print('Success!')"
 
     templates:
@@ -120,7 +120,7 @@ python:
     hash: 'sha1({{snippet}}.encode("utf-8")+b"{{salt}}").hexdigest()'
     dispatch: "type({{snippet}})"
     normalize: "str({{snippet}})"
-    check: 'assert {{snippet}} == "{{value}}", "{{message}}"'
+    check: 'assert {{snippet}} == """{{value}}""", """{{message}}"""'
     success: "print('Success!')"
 
     templates:
