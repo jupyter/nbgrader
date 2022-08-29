@@ -14661,23 +14661,8 @@ body[data-format='mobile'] .jp-OutputArea-child .jp-OutputArea-output {
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="sd">"""Check that squares returns the correct output for several inputs"""</span>
-<span class="kn">from</span> <span class="nn">hashlib</span> <span class="kn">import</span> <span class="n">sha1</span>
-<span class="k">assert</span> <span class="nb">str</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">squares</span><span class="p">(</span><span class="mi">1</span><span class="p">)))</span> <span class="o">==</span> <span class="s2">"&lt;class 'list'&gt;"</span><span class="p">,</span> <span class="s2">"type of squares(1) is not list. squares(1) should be a list"</span>
-<span class="k">assert</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">squares</span><span class="p">(</span><span class="mi">1</span><span class="p">)))</span> <span class="o">==</span> <span class="s2">"1"</span><span class="p">,</span> <span class="s2">"length of squares(1) is not correct"</span>
-<span class="k">assert</span> <span class="nb">str</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">squares</span><span class="p">(</span><span class="mi">1</span><span class="p">))))</span> <span class="o">==</span> <span class="s2">"['1']"</span><span class="p">,</span> <span class="s2">"values of squares(1) are not correct"</span>
-<span class="k">assert</span> <span class="nb">str</span><span class="p">(</span><span class="n">squares</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span> <span class="o">==</span> <span class="s2">"[1]"</span><span class="p">,</span> <span class="s2">"order of elements of squares(1) is not correct"</span>
-
-<span class="k">assert</span> <span class="nb">str</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">squares</span><span class="p">(</span><span class="mi">2</span><span class="p">)))</span> <span class="o">==</span> <span class="s2">"&lt;class 'list'&gt;"</span><span class="p">,</span> <span class="s2">"type of squares(2) is not list. squares(2) should be a list"</span>
-<span class="k">assert</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">squares</span><span class="p">(</span><span class="mi">2</span><span class="p">)))</span> <span class="o">==</span> <span class="s2">"2"</span><span class="p">,</span> <span class="s2">"length of squares(2) is not correct"</span>
-<span class="k">assert</span> <span class="nb">str</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">squares</span><span class="p">(</span><span class="mi">2</span><span class="p">))))</span> <span class="o">==</span> <span class="s2">"['1', '4']"</span><span class="p">,</span> <span class="s2">"values of squares(2) are not correct"</span>
-<span class="k">assert</span> <span class="nb">str</span><span class="p">(</span><span class="n">squares</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span> <span class="o">==</span> <span class="s2">"[1, 4]"</span><span class="p">,</span> <span class="s2">"order of elements of squares(2) is not correct"</span>
-
-<span class="k">assert</span> <span class="n">sha1</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">squares</span><span class="p">(</span><span class="mi">3</span><span class="p">)))</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">"utf-8"</span><span class="p">)</span><span class="o">+</span><span class="sa">b</span><span class="s2">"7ef067be93c58afc"</span><span class="p">)</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">()</span> <span class="o">==</span> <span class="s2">"76a282e3819e0520ca4fb40001588d514f4c7a1a"</span><span class="p">,</span> <span class="s2">"type of squares(3) is not list. squares(3) should be a list"</span>
-<span class="k">assert</span> <span class="n">sha1</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">squares</span><span class="p">(</span><span class="mi">3</span><span class="p">)))</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">"utf-8"</span><span class="p">)</span><span class="o">+</span><span class="sa">b</span><span class="s2">"7ef067be93c58afc"</span><span class="p">)</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">()</span> <span class="o">==</span> <span class="s2">"b35a0ff351ce8467d63144adae04ea410728b770"</span><span class="p">,</span> <span class="s2">"length of squares(3) is not correct"</span>
-<span class="k">assert</span> <span class="n">sha1</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">squares</span><span class="p">(</span><span class="mi">3</span><span class="p">))))</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">"utf-8"</span><span class="p">)</span><span class="o">+</span><span class="sa">b</span><span class="s2">"7ef067be93c58afc"</span><span class="p">)</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">()</span> <span class="o">==</span> <span class="s2">"77b9b1f804eecb7d7e81b144ca9d1e2db718ea7c"</span><span class="p">,</span> <span class="s2">"values of squares(3) are not correct"</span>
-<span class="k">assert</span> <span class="n">sha1</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">squares</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">"utf-8"</span><span class="p">)</span><span class="o">+</span><span class="sa">b</span><span class="s2">"7ef067be93c58afc"</span><span class="p">)</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">()</span> <span class="o">==</span> <span class="s2">"a66024bf690c23a95fa96fc9000abc28a9ee0f45"</span><span class="p">,</span> <span class="s2">"order of elements of squares(3) is not correct"</span>
-
-<span class="nb">print</span><span class="p">(</span><span class="s1">'Success!'</span><span class="p">)</span>
+<span class="c1">### AUTOTEST squares(1); squares(2)</span>
+<span class="c1">### HASHED AUTOTEST squares(3)</span>
 </pre></div>
 
      </div>
@@ -14703,15 +14688,8 @@ body[data-format='mobile'] .jp-OutputArea-child .jp-OutputArea-output {
         <span class="nb">print</span><span class="p">(</span><span class="s1">'Did not raise right type of error!'</span><span class="p">)</span>
         <span class="k">return</span> <span class="kc">False</span>
     
-<span class="kn">from</span> <span class="nn">hashlib</span> <span class="kn">import</span> <span class="n">sha1</span>
-<span class="k">assert</span> <span class="nb">str</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">test_func_throws</span><span class="p">(</span><span class="k">lambda</span> <span class="p">:</span> <span class="n">squares</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="ne">ValueError</span><span class="p">)))</span> <span class="o">==</span> <span class="s2">"&lt;class 'bool'&gt;"</span><span class="p">,</span> <span class="s2">"type of test_func_throws(lambda : squares(0), ValueError) is not bool. test_func_throws(lambda : squares(0), ValueError) should be a bool"</span>
-<span class="k">assert</span> <span class="nb">str</span><span class="p">(</span><span class="n">test_func_throws</span><span class="p">(</span><span class="k">lambda</span> <span class="p">:</span> <span class="n">squares</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="ne">ValueError</span><span class="p">))</span> <span class="o">==</span> <span class="s2">"True"</span><span class="p">,</span> <span class="s2">"boolean value of test_func_throws(lambda : squares(0), ValueError) is not correct"</span>
-
-<span class="k">assert</span> <span class="nb">str</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">test_func_throws</span><span class="p">(</span><span class="k">lambda</span> <span class="p">:</span> <span class="n">squares</span><span class="p">(</span><span class="o">-</span><span class="mi">4</span><span class="p">),</span> <span class="ne">ValueError</span><span class="p">)))</span> <span class="o">==</span> <span class="s2">"&lt;class 'bool'&gt;"</span><span class="p">,</span> <span class="s2">"type of test_func_throws(lambda : squares(-4), ValueError) is not bool. test_func_throws(lambda : squares(-4), ValueError) should be a bool"</span>
-<span class="k">assert</span> <span class="nb">str</span><span class="p">(</span><span class="n">test_func_throws</span><span class="p">(</span><span class="k">lambda</span> <span class="p">:</span> <span class="n">squares</span><span class="p">(</span><span class="o">-</span><span class="mi">4</span><span class="p">),</span> <span class="ne">ValueError</span><span class="p">))</span> <span class="o">==</span> <span class="s2">"True"</span><span class="p">,</span> <span class="s2">"boolean value of test_func_throws(lambda : squares(-4), ValueError) is not correct"</span>
-
-
-<span class="nb">print</span><span class="p">(</span><span class="s1">'Success!'</span><span class="p">)</span>
+<span class="c1">### AUTOTEST test_func_throws(lambda : squares(0), ValueError)</span>
+<span class="c1">### AUTOTEST test_func_throws(lambda : squares(-4), ValueError);</span>
 </pre></div>
 
      </div>
@@ -14789,21 +14767,9 @@ body[data-format='mobile'] .jp-OutputArea-child .jp-OutputArea-output {
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="sd">"""Check that sum_of_squares returns the correct answer for various inputs."""</span>
-<span class="kn">from</span> <span class="nn">hashlib</span> <span class="kn">import</span> <span class="n">sha1</span>
-<span class="k">assert</span> <span class="nb">str</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">sum_of_squares</span><span class="p">(</span><span class="mi">1</span><span class="p">)))</span> <span class="o">==</span> <span class="s2">"&lt;class 'int'&gt;"</span><span class="p">,</span> <span class="s2">"type of sum_of_squares(1) is not int. Please make sure it is int and not np.int64, etc. You can cast your value into an int using int()"</span>
-<span class="k">assert</span> <span class="nb">str</span><span class="p">(</span><span class="n">sum_of_squares</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span> <span class="o">==</span> <span class="s2">"1"</span><span class="p">,</span> <span class="s2">"value of sum_of_squares(1) is not correct"</span>
-
-<span class="k">assert</span> <span class="nb">str</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">sum_of_squares</span><span class="p">(</span><span class="mi">2</span><span class="p">)))</span> <span class="o">==</span> <span class="s2">"&lt;class 'int'&gt;"</span><span class="p">,</span> <span class="s2">"type of sum_of_squares(2) is not int. Please make sure it is int and not np.int64, etc. You can cast your value into an int using int()"</span>
-<span class="k">assert</span> <span class="nb">str</span><span class="p">(</span><span class="n">sum_of_squares</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span> <span class="o">==</span> <span class="s2">"5"</span><span class="p">,</span> <span class="s2">"value of sum_of_squares(2) is not correct"</span>
-
-<span class="k">assert</span> <span class="nb">str</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">sum_of_squares</span><span class="p">(</span><span class="mi">10</span><span class="p">)))</span> <span class="o">==</span> <span class="s2">"&lt;class 'int'&gt;"</span><span class="p">,</span> <span class="s2">"type of sum_of_squares(10) is not int. Please make sure it is int and not np.int64, etc. You can cast your value into an int using int()"</span>
-<span class="k">assert</span> <span class="nb">str</span><span class="p">(</span><span class="n">sum_of_squares</span><span class="p">(</span><span class="mi">10</span><span class="p">))</span> <span class="o">==</span> <span class="s2">"385"</span><span class="p">,</span> <span class="s2">"value of sum_of_squares(10) is not correct"</span>
-
-<span class="k">assert</span> <span class="nb">str</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">sum_of_squares</span><span class="p">(</span><span class="mi">11</span><span class="p">)))</span> <span class="o">==</span> <span class="s2">"&lt;class 'int'&gt;"</span><span class="p">,</span> <span class="s2">"type of sum_of_squares(11) is not int. Please make sure it is int and not np.int64, etc. You can cast your value into an int using int()"</span>
-<span class="k">assert</span> <span class="nb">str</span><span class="p">(</span><span class="n">sum_of_squares</span><span class="p">(</span><span class="mi">11</span><span class="p">))</span> <span class="o">==</span> <span class="s2">"506"</span><span class="p">,</span> <span class="s2">"value of sum_of_squares(11) is not correct"</span>
-
-
-<span class="nb">print</span><span class="p">(</span><span class="s1">'Success!'</span><span class="p">)</span>
+<span class="c1">### AUTOTEST sum_of_squares(1)</span>
+<span class="c1">### AUTOTEST sum_of_squares(2); sum_of_squares(10) </span>
+<span class="c1">### AUTOTEST sum_of_squares(11) </span>
 </pre></div>
 
      </div>
@@ -14824,14 +14790,9 @@ body[data-format='mobile'] .jp-OutputArea-child .jp-OutputArea-output {
 <span class="n">orig_squares</span> <span class="o">=</span> <span class="n">squares</span>
 <span class="k">del</span> <span class="n">squares</span>
 
-<span class="kn">from</span> <span class="nn">hashlib</span> <span class="kn">import</span> <span class="n">sha1</span>
-<span class="k">assert</span> <span class="nb">str</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">test_func_throws</span><span class="p">(</span><span class="k">lambda</span> <span class="p">:</span> <span class="n">sum_of_squares</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="ne">NameError</span><span class="p">)))</span> <span class="o">==</span> <span class="s2">"&lt;class 'bool'&gt;"</span><span class="p">,</span> <span class="s2">"type of test_func_throws(lambda : sum_of_squares(1), NameError) is not bool. test_func_throws(lambda : sum_of_squares(1), NameError) should be a bool"</span>
-<span class="k">assert</span> <span class="nb">str</span><span class="p">(</span><span class="n">test_func_throws</span><span class="p">(</span><span class="k">lambda</span> <span class="p">:</span> <span class="n">sum_of_squares</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="ne">NameError</span><span class="p">))</span> <span class="o">==</span> <span class="s2">"True"</span><span class="p">,</span> <span class="s2">"boolean value of test_func_throws(lambda : sum_of_squares(1), NameError) is not correct"</span>
-
+<span class="c1">### AUTOTEST test_func_throws(lambda : sum_of_squares(1), NameError)</span>
 
 <span class="n">squares</span> <span class="o">=</span> <span class="n">orig_squares</span>
-
-<span class="nb">print</span><span class="p">(</span><span class="s1">'Success!'</span><span class="p">)</span>
 </pre></div>
 
      </div>
