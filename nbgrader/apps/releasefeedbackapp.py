@@ -3,17 +3,18 @@
 from traitlets import default
 
 from .baseapp import NbGrader, nbgrader_aliases, nbgrader_flags
+from .baseapp import NbGraderAliasesType, NbGraderFlagsType
 from ..exchange import Exchange, ExchangeReleaseFeedback, ExchangeError
 
 
-aliases = {}
+aliases: NbGraderAliasesType = {}
 aliases.update(nbgrader_aliases)
 aliases.update({
     "timezone": "Exchange.timezone",
     "course": "CourseDirectory.course_id",
 })
 
-flags = {}
+flags: NbGraderFlagsType = {}
 flags.update(nbgrader_flags)
 
 class ReleaseFeedbackApp(NbGrader):

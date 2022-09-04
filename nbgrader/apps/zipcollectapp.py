@@ -4,6 +4,7 @@ import os
 import sys
 import shutil
 import datetime
+import typing
 
 from dateutil.tz import gettz
 from textwrap import dedent
@@ -11,18 +12,19 @@ from traitlets import Bool, Instance, Type, Unicode
 from traitlets.config.application import catch_config_error, default
 
 from .baseapp import NbGrader
+from .baseapp import NbGraderAliasesType, NbGraderFlagsType
 
 from ..plugins import BasePlugin, ExtractorPlugin, FileNameCollectorPlugin
 from ..utils import check_directory, rmtree, parse_utc
 from ..utils import find_all_notebooks
 
-aliases = {
+aliases: NbGraderAliasesType = {
     'log-level': 'Application.log_level',
     'extractor': 'ZipCollectApp.extractor_plugin',
     'collector': 'ZipCollectApp.collector_plugin',
     'zip_ext': 'ExtractorPlugin.zip_ext',
 }
-flags = {
+flags: NbGraderFlagsType = {
     'debug': (
         {'Application': {'log_level': 'DEBUG'}},
         "set log level to DEBUG (maximize logging output)"

@@ -204,7 +204,7 @@ class SubmissionNavigationHandler(BaseHandler):
         self.redirect(handler(assignment_id, notebook_id, submission), permanent=False)
 
 
-class SubmissionFilesHandler(web.StaticFileHandler, BaseHandler):
+class SubmissionFilesHandler(web.StaticFileHandler, BaseHandler):  # type: ignore[misc]
     def initialize(self, default_filename=None):
         super(SubmissionFilesHandler, self).initialize(
             self.coursedir.root, default_filename=default_filename)

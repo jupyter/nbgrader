@@ -203,11 +203,12 @@ class BaseConverter(LoggingConfigurable):
         resources['unique_key'] = gd['notebook_id']
         resources['output_files_dir'] = '%s_files' % gd['notebook_id']
 
-        resources['nbgrader'] = {}
-        resources['nbgrader']['student'] = gd['student_id']
-        resources['nbgrader']['assignment'] = gd['assignment_id']
-        resources['nbgrader']['notebook'] = gd['notebook_id']
-        resources['nbgrader']['db_url'] = self.coursedir.db_url
+        resources['nbgrader'] = {
+            'student': gd['student_id'],
+            'assignment': gd['assignment_id'],
+            'notebook': gd['notebook_id'],
+            'db_url': self.coursedir.db_url
+        }
 
         return resources
 

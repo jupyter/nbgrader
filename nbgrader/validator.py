@@ -123,7 +123,9 @@ class Validator(LoggingConfigurable):
             if len(errors) == 0:
                 if utils.is_grade(cell):
                     score, max_score = utils.determine_grade(cell, self.log)
-                    if (score < max_score):
+                    if score is None:
+                        errors.append("Could not assign a grade automatically, please contact your instructor.")
+                    elif (score < max_score):
                         errors.append("Partial credit; passed some but not all of the tests")
                 else:
                     errors.append("You did not provide a response.")
@@ -283,7 +285,7 @@ class Validator(LoggingConfigurable):
         return passed
 
     def _preprocess(self, nb: NotebookNode) -> NotebookNode:
-        resources = {}
+        resources: typing.Dict[typing.Any, typing.Any] = {}
         with utils.setenv(NBGRADER_VALIDATING='1', NBGRADER_EXECUTION='validate'):
             for preprocessor in self.preprocessors:
                 # https://github.com/jupyter/nbgrader/pull/1075

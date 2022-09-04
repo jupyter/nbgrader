@@ -48,7 +48,7 @@ class MissingEntry(ValueError):
     pass
 
 
-class Assignment(Base):
+class Assignment(Base):  # type: ignore
     """Database representation of the master/source version of an assignment."""
 
     __tablename__ = "assignment"
@@ -116,7 +116,7 @@ class Assignment(Base):
         return "Assignment<{}>".format(self.name)
 
 
-class Notebook(Base):
+class Notebook(Base):  # type: ignore
     """Database representation of the master/source version of a notebook."""
 
     __tablename__ = "notebook"
@@ -212,7 +212,7 @@ class Notebook(Base):
         return "Notebook<{}/{}>".format(self.assignment.name, self.name)
 
 
-class BaseCell(Base):
+class BaseCell(Base):  # type: ignore
     """Database representation of a cell. It is meant as a base class for cells where additional behavior is added through mixin classes."""
 
     __tablename__ = "base_cell"
@@ -370,7 +370,7 @@ class TaskCell(BaseCell, GradedMixin):
     __mapper_args__ = {'polymorphic_identity': 'TaskCell'}
 
 
-class SourceCell(Base):
+class SourceCell(Base):  # type: ignore
     __tablename__ = "source_cell"
     __table_args__ = (UniqueConstraint('name', 'notebook_id'),)
 
@@ -428,7 +428,7 @@ class SourceCell(Base):
             self.assignment.name, self.notebook.name, self.name)
 
 
-class Student(Base):
+class Student(Base):  # type: ignore
     """Database representation of a student."""
 
     __tablename__ = "student"
@@ -484,7 +484,7 @@ class Student(Base):
         return "Student<{}>".format(self.id)
 
 
-class SubmittedAssignment(Base):
+class SubmittedAssignment(Base):  # type: ignore
     """Database representation of an assignment submitted by a student."""
 
     __tablename__ = "submitted_assignment"
@@ -621,7 +621,7 @@ class SubmittedAssignment(Base):
         return "SubmittedAssignment<{} for {}>".format(self.name, self.student.id)
 
 
-class SubmittedNotebook(Base):
+class SubmittedNotebook(Base):  # type: ignore
     """Database representation of a notebook submitted by a student."""
 
     __tablename__ = "submitted_notebook"
@@ -733,7 +733,7 @@ class SubmittedNotebook(Base):
             self.assignment.name, self.name, self.student.id)
 
 
-class Grade(Base):
+class Grade(Base):  # type: ignore
     """Database representation of a grade assigned to the submitted version of
     a grade cell.
 
@@ -803,13 +803,7 @@ class Grade(Base):
     #: :class:`~nbgrader.api.GradeCell`
     max_score_gradecell = None
     max_score_taskcell = None
-
-    @property
-    def max_score(self):
-        if self.max_score_taskcell:
-            return self.max_score_taskcell
-        else:
-            return self.max_score_gradecell
+    max_score = None
 
     #: Whether the autograded score is a result of failed autograder tests. This
     #: is True if the autograder score is zero and the cell type is "code", and
@@ -844,7 +838,7 @@ class Grade(Base):
             self.assignment.name, self.notebook.name, self.name, self.student.id)
 
 
-class Comment(Base):
+class Comment(Base):  # type: ignore
     """Database representation of a comment on a cell in a submitted notebook."""
 
     __tablename__ = "comment"
@@ -920,7 +914,7 @@ class Comment(Base):
         return "Comment<{}/{}/{} for {}>".format(
             self.assignment.name, self.notebook.name, self.name, self.student.id)
 
-class Course(Base):
+class Course(Base):  # type: ignore
     """Table to store the courses"""
 
     __tablename__ = "course"
@@ -1361,7 +1355,7 @@ class Gradebook(object):
         self.db.remove()
         self.engine.dispose()
 
-    def check_course(self, course_id: str = "default_course", **kwargs: dict) -> Course:
+    def check_course(self, course_id: str = "default_course", **kwargs: Any) -> Optional[Course]:
         """Set the course id
 
         Parameters
@@ -1404,7 +1398,7 @@ class Gradebook(object):
             .order_by(Student.last_name, Student.first_name)\
             .all()
 
-    def add_student(self, student_id: str, **kwargs: dict) -> Student:
+    def add_student(self, student_id: str, **kwargs: Any) -> Student:
         """Add a new student to the database.
 
         Parameters
@@ -1456,7 +1450,7 @@ class Gradebook(object):
 
         return student
 
-    def update_or_create_student(self, student_id: str, **kwargs: dict) -> Student:
+    def update_or_create_student(self, student_id: str, **kwargs: Any) -> Student:
         """Update an existing student, or create it if it doesn't exist.
 
         Parameters
@@ -1531,7 +1525,7 @@ class Gradebook(object):
             .order_by(Assignment.duedate, Assignment.name)\
             .all()
 
-    def add_assignment(self, name: str, **kwargs: dict) -> Assignment:
+    def add_assignment(self, name: str, **kwargs: Any) -> Assignment:
         """Add a new assignment to the gradebook.
 
         Parameters
@@ -1547,9 +1541,9 @@ class Gradebook(object):
 
         """
         if 'duedate' in kwargs:
-            kwargs['duedate'] = utils.parse_utc(kwargs['duedate'])
+            kwargs['duedate'] = utils.parse_utc(kwargs['duedate'])  # type: ignore[assignment,arg-type]
         if 'course_id' not in kwargs:
-            kwargs['course_id'] = self.course_id
+            kwargs['course_id'] = self.course_id  # type: ignore[assignment]
         assignment = Assignment(name=name, **kwargs)
         self.db.add(assignment)
         try:
@@ -1583,7 +1577,7 @@ class Gradebook(object):
 
         return assignment
 
-    def update_or_create_assignment(self, name: str, **kwargs: dict) -> Assignment:
+    def update_or_create_assignment(self, name: str, **kwargs: Any) -> Assignment:
         """Update an existing assignment, or create it if it doesn't exist.
 
         Parameters
@@ -1606,7 +1600,7 @@ class Gradebook(object):
         else:
             for attr in kwargs:
                 if attr == 'duedate':
-                    setattr(assignment, attr, utils.parse_utc(kwargs[attr]))
+                    setattr(assignment, attr, utils.parse_utc(kwargs[attr]))  # type: ignore[arg-type]
                 else:
                     setattr(assignment, attr, kwargs[attr])
             try:
@@ -1647,7 +1641,7 @@ class Gradebook(object):
 
     # Notebooks
 
-    def add_notebook(self, name: str, assignment: str, **kwargs: dict) -> Notebook:
+    def add_notebook(self, name: str, assignment: str, **kwargs: Any) -> Notebook:
         """Add a new notebook to an assignment.
 
         Parameters
@@ -1772,7 +1766,7 @@ class Gradebook(object):
 
     # Grade cells
 
-    def add_grade_cell(self, name: str, notebook: str, assignment: str, **kwargs: dict) -> GradeCell:
+    def add_grade_cell(self, name: str, notebook: str, assignment: str, **kwargs: Any) -> GradeCell:
         """Add a new grade cell to an existing notebook of an existing
         assignment.
 
@@ -1878,7 +1872,7 @@ class Gradebook(object):
 
         return grade_cell
 
-    def update_or_create_grade_cell(self, name: str, notebook: str, assignment: str, **kwargs: dict) -> GradeCell:
+    def update_or_create_grade_cell(self, name: str, notebook: str, assignment: str, **kwargs: Any) -> GradeCell:
         """Update an existing grade cell in a notebook of an assignment, or
         create the grade cell if it does not exist.
 
@@ -1917,7 +1911,7 @@ class Gradebook(object):
 
     # Solution cells
 
-    def add_solution_cell(self, name: str, notebook: str, assignment: str, **kwargs: dict) -> SolutionCell:
+    def add_solution_cell(self, name: str, notebook: str, assignment: str, **kwargs: Any) -> SolutionCell:
         """Add a new solution cell to an existing notebook of an existing
         assignment.
 
@@ -1983,7 +1977,7 @@ class Gradebook(object):
                                        name: str,
                                        notebook: str,
                                        assignment: str,
-                                       **kwargs: dict
+                                       **kwargs: Any
                                        ) -> SolutionCell:
         """Update an existing solution cell in a notebook of an assignment, or
         create the solution cell if it does not exist.
@@ -2023,7 +2017,7 @@ class Gradebook(object):
 
 # Task cells
 
-    def add_task_cell(self, name: str, notebook: str, assignment: str, **kwargs: dict) -> TaskCell:
+    def add_task_cell(self, name: str, notebook: str, assignment: str, **kwargs: Any) -> TaskCell:
         """Add a new task cell to an existing notebook of an existing
         assignment.
 
@@ -2124,7 +2118,7 @@ class Gradebook(object):
 
     # Source cells
 
-    def add_source_cell(self, name: str, notebook: str, assignment: str, **kwargs: dict) -> SourceCell:
+    def add_source_cell(self, name: str, notebook: str, assignment: str, **kwargs: Any) -> SourceCell:
         """Add a new source cell to an existing notebook of an existing
         assignment.
 
@@ -2186,7 +2180,7 @@ class Gradebook(object):
 
         return source_cell
 
-    def update_or_create_source_cell(self, name: str, notebook: str, assignment: str, **kwargs: dict) -> SourceCell:
+    def update_or_create_source_cell(self, name: str, notebook: str, assignment: str, **kwargs: Any) -> SourceCell:
         """Update an existing source cell in a notebook of an assignment, or
         create the source cell if it does not exist.
 
@@ -2225,7 +2219,7 @@ class Gradebook(object):
 
     # Submissions
 
-    def add_submission(self, assignment: str, student: str, **kwargs: dict) -> SubmittedAssignment:
+    def add_submission(self, assignment: str, student: str, **kwargs: Any) -> SubmittedAssignment:
         """Add a new submission of an assignment by a student.
 
         This method not only creates the high-level submission object, but also
@@ -2249,7 +2243,7 @@ class Gradebook(object):
         """
 
         if 'timestamp' in kwargs:
-            kwargs['timestamp'] = utils.parse_utc(kwargs['timestamp'])
+            kwargs['timestamp'] = utils.parse_utc(kwargs['timestamp'])  # type: ignore[assignment,arg-type]
 
         try:
             submission = SubmittedAssignment(
@@ -2308,7 +2302,7 @@ class Gradebook(object):
 
         return submission
 
-    def update_or_create_submission(self, assignment: str, student: str, **kwargs: dict) -> SubmittedAssignment:
+    def update_or_create_submission(self, assignment: str, student: str, **kwargs: Any) -> SubmittedAssignment:
         """Update an existing submission of an assignment by a given student,
         or create a new submission if it doesn't exist.
 
@@ -2337,7 +2331,7 @@ class Gradebook(object):
         else:
             for attr in kwargs:
                 if attr == 'timestamp':
-                    setattr(submission, attr, utils.parse_utc(kwargs[attr]))
+                    setattr(submission, attr, utils.parse_utc(kwargs[attr]))  # type: ignore[arg-type]
                 else:
                     setattr(submission, attr, kwargs[attr])
             try:
@@ -2527,7 +2521,7 @@ class Gradebook(object):
         """
 
         try:
-            notebook = self.db.query(SubmittedNotebook)\
+            notebook_db = self.db.query(SubmittedNotebook)\
                 .join(Notebook, Notebook.id == SubmittedNotebook.notebook_id)\
                 .join(SubmittedAssignment, SubmittedAssignment.id == SubmittedNotebook.assignment_id)\
                 .join(Assignment, Assignment.id == SubmittedAssignment.assignment_id)\
@@ -2541,7 +2535,7 @@ class Gradebook(object):
             raise MissingEntry("No such submitted notebook: {}/{} for {}".format(
                 assignment, notebook, student))
 
-        return notebook
+        return notebook_db
 
     def find_submission_notebook_by_id(self, notebook_id):
         """Find a submitted notebook by its unique id.

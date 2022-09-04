@@ -9,11 +9,11 @@ from _pytest.fixtures import SubRequest
 
 
 @pytest.fixture
-def env(request: SubRequest) -> dict:
+def env(request: SubRequest) -> os._Environ:
     old_env = os.environ.copy()
 
     def fin() -> None:
-        os.environ = old_env
+        os.environ = old_env  # type: ignore[assignment]
     request.addfinalizer(fin)
 
     return os.environ

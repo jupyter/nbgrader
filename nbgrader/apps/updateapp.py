@@ -7,13 +7,14 @@ from nbformat import current_nbformat, read as orig_read, write as orig_write
 from traitlets import Bool
 
 from .baseapp import NbGrader
+from .baseapp import NbGraderAliasesType, NbGraderFlagsType
 from ..nbgraderformat import MetadataValidator, write, ValidationError, SchemaTooNewError
 from ..utils import find_all_notebooks
 
-aliases = {
+aliases: NbGraderAliasesType = {
     'log-level': 'Application.log_level',
 }
-flags = {}
+flags: NbGraderFlagsType = {}
 
 
 class UpdateApp(NbGrader):

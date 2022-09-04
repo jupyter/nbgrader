@@ -2,7 +2,7 @@ from .. import utils
 from . import NbGraderPreprocessor
 from nbconvert.exporters.exporter import ResourcesDict
 from nbformat.notebooknode import NotebookNode
-from typing import Tuple
+from typing import Tuple, Set
 
 
 class DeduplicateIds(NbGraderPreprocessor):
@@ -10,7 +10,7 @@ class DeduplicateIds(NbGraderPreprocessor):
 
     def preprocess(self, nb: NotebookNode, resources: ResourcesDict) -> Tuple[NotebookNode, ResourcesDict]:
         # keep track of grade ids encountered so far
-        self.grade_ids = set([])
+        self.grade_ids: Set[str] = set([])
 
         # reverse cell order
         nb.cells = nb.cells[::-1]

@@ -125,7 +125,7 @@ def determine_grade(cell: NotebookNode, log: Logger = None) -> Tuple[Optional[fl
         if "checksum" in cell.metadata.nbgrader and cell.metadata.nbgrader["checksum"] == compute_checksum(cell):
             return 0, max_points
         else:
-            return None, max_points
+            return None, max_points  # None means the cell needs manual grading
 
     elif cell.cell_type == 'code':
         # for code cells, we look at the output. There are three options:
@@ -146,7 +146,7 @@ def determine_grade(cell: NotebookNode, log: Logger = None) -> Tuple[Optional[fl
         return max_points, max_points
 
     else:
-        return None, max_points
+        return None, max_points  # None means the cell needs manual grading
 
 
 def to_bytes(string: str) -> bytes:
@@ -185,14 +185,14 @@ def parse_utc(ts: Union[datetime, str]) -> datetime:
             ts = " ".join(parts[:2] + ["TZ"])
             tz = parts[2]
             try:
-                tz = int(tz)
+                tz = int(tz)  # type: ignore[assignment]
             except ValueError:
-                tz = dateutil.tz.gettz(tz)
+                tz = dateutil.tz.gettz(tz)  # type: ignore[assignment]
             ts = dateutil.parser.parse(ts, tzinfos=dict(TZ=tz))
         else:
             ts = dateutil.parser.parse(ts)
     if ts.tzinfo is not None:
-        ts = (ts - ts.utcoffset()).replace(tzinfo=None)
+        ts = (ts - ts.utcoffset()).replace(tzinfo=None)  # type: ignore[operator]
     return ts
 
 
@@ -381,8 +381,8 @@ def chdir(dirname: str) -> Iterator:
 def setenv(**kwargs: Any) -> Iterator:
     previous_env = {}
     for key, value in kwargs.items():
-        previous_env[key] = os.environ.get(value)
-        os.environ[key] = value
+        previous_env[key] = os.environ.get(str(value), "")
+        os.environ[key] = str(value)
     yield
     for key, value in kwargs.items():
         if previous_env[key] is None:

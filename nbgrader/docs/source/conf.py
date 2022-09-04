@@ -77,7 +77,7 @@ language = None
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
-exclude_patterns = []
+exclude_patterns = []  # type: ignore[var-annotated]
 
 # The reST default role (used for this markup: `text`) to use for all
 # documents.
@@ -208,7 +208,7 @@ htmlhelp_basename = 'nbgraderdoc'
 
 # -- Options for LaTeX output ---------------------------------------------
 
-latex_elements = {
+latex_elements = {  # type: ignore[var-annotated]
 # The paper size ('letterpaper' or 'a4paper').
 #'papersize': 'letterpaper',
 

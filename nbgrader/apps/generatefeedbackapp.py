@@ -5,14 +5,15 @@ import sys
 from traitlets import default
 
 from .baseapp import NbGrader, nbgrader_aliases, nbgrader_flags
+from .baseapp import NbGraderAliasesType, NbGraderFlagsType
 from ..converters import BaseConverter, GenerateFeedback, NbGraderException
 
-aliases = {}
+aliases: NbGraderAliasesType = {}
 aliases.update(nbgrader_aliases)
 aliases.update({
 })
 
-flags = {}
+flags: NbGraderFlagsType = {}
 flags.update(nbgrader_flags)
 flags.update({
     'force': (

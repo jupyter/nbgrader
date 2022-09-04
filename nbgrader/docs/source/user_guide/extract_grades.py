@@ -1,5 +1,6 @@
 import pandas as pd
 from nbgrader.api import Gradebook, MissingEntry
+from typing import Dict, Any
 
 # Create the connection to the database
 with Gradebook('sqlite:///gradebook.db') as gb:
@@ -14,7 +15,7 @@ with Gradebook('sqlite:///gradebook.db') as gb:
 
             # Create a dictionary that will store information about this student's
             # submitted assignment
-            score = {}
+            score: Dict[str, Any] = {}
             score['max_score'] = assignment.max_score
             score['student'] = student.id
             score['assignment'] = assignment.name
@@ -32,8 +33,8 @@ with Gradebook('sqlite:///gradebook.db') as gb:
             grades.append(score)
 
     # Create a pandas dataframe with our grade information, and save it to disk
-    grades = pd.DataFrame(grades).set_index(['student', 'assignment']).sortlevel()
-    grades.to_csv('grades.csv')
+    grades_df = pd.DataFrame(grades).set_index(['student', 'assignment']).sortlevel()
+    grades_df.to_csv('grades.csv')
 
     # Print out what the grades look like
     with open('grades.csv', 'r') as fh:

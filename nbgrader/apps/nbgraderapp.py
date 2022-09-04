@@ -12,6 +12,7 @@ from jupyter_core.application import NoStart
 
 import nbgrader
 from .baseapp import nbgrader_aliases, nbgrader_flags
+from .baseapp import NbGraderAliasesType, NbGraderFlagsType
 from . import (
     NbGrader,
     AssignApp,
@@ -42,12 +43,12 @@ from . import (
 from traitlets.traitlets import MetaHasTraits
 from typing import List
 
-aliases = {}
+aliases: NbGraderAliasesType = {}
 aliases.update(nbgrader_aliases)
 aliases.update({
 })
 
-flags = {}
+flags: NbGraderFlagsType = {}
 flags.update(nbgrader_flags)
 flags.update({
 })

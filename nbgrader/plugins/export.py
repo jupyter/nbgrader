@@ -116,6 +116,7 @@ class CsvExportPlugin(ExportPlugin):
                     score['score'] = 0.0
                 else:
                     penalty = submission.late_submission_penalty
+                    assert submission.score is not None
                     score['timestamp'] = submission.timestamp
                     score['raw_score'] = submission.score
                     score['late_submission_penalty'] = penalty

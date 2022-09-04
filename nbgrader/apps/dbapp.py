@@ -10,18 +10,19 @@ from textwrap import dedent
 from traitlets import default, Unicode, Bool, List
 from datetime import datetime
 
-from . import NbGrader
+from .baseapp import NbGrader
+from .baseapp import NbGraderAliasesType, NbGraderFlagsType
 from ..api import Gradebook, MissingEntry, Student, Assignment
 from .. import dbutil
 
-aliases = {
+aliases: NbGraderAliasesType = {
     'log-level': 'Application.log_level',
     'course-dir': 'CourseDirectory.root',
     'db': 'CourseDirectory.db_url'
 }
-flags = {}
+flags: NbGraderFlagsType = {}
 
-student_add_aliases = {}
+student_add_aliases: NbGraderAliasesType = {}
 student_add_aliases.update(aliases)
 student_add_aliases.update({
     'last-name': 'DbStudentAddApp.last_name',
@@ -92,7 +93,7 @@ class DbStudentAddApp(DbBaseApp):
         with Gradebook(self.coursedir.db_url, self.course_id, self.authenticator) as gb:
             gb.update_or_create_student(student_id, **student)
 
-student_remove_flags = {}
+student_remove_flags: NbGraderFlagsType = {}
 student_remove_flags.update(flags)
 student_remove_flags.update({
     'force': (
@@ -296,7 +297,7 @@ class DbStudentListApp(DbBaseApp):
                 print("%s (%s, %s) -- %s, %s" % (student.id, student.last_name, student.first_name, student.email, student.lms_user_id))
 
 
-assignment_add_aliases = {}
+assignment_add_aliases: NbGraderAliasesType = {}
 assignment_add_aliases.update(aliases)
 assignment_add_aliases.update({
     'duedate': 'DbAssignmentAddApp.duedate',
@@ -332,7 +333,7 @@ class DbAssignmentAddApp(DbBaseApp):
             gb.update_or_create_assignment(assignment_id, **assignment)
 
 
-assignment_remove_flags = {}
+assignment_remove_flags: NbGraderFlagsType = {}
 assignment_remove_flags.update(flags)
 assignment_remove_flags.update({
     'force': (

@@ -1,4 +1,5 @@
 import pytest
+import typing
 
 from datetime import datetime, timedelta
 from ... import api
@@ -131,7 +132,8 @@ possiblegrades = [
 
 
 @pytest.fixture(params=possiblegrades)
-def assignmentWithSubmissionWithMarks(assignmentWithSubmissionNoMarks: Gradebook, request: SubRequest) -> Gradebook:
+def assignmentWithSubmissionWithMarks(assignmentWithSubmissionNoMarks: Gradebook, request: SubRequest
+                                     ) -> typing.Tuple[Gradebook, typing.Dict[str, typing.Any]]:
     a = assignmentWithSubmissionNoMarks
     g1 = a.find_grade("grade_code1", "p1", "foo", "bitdiddle")
     g2 = a.find_grade("grade_code2", "p1", "foo", "bitdiddle")
@@ -147,12 +149,14 @@ def assignmentWithSubmissionWithMarks(assignmentWithSubmissionNoMarks: Gradebook
     (g1.manual_score, g2.manual_score, g3.manual_score, g4.manual_score, g5.manual_score,
      g6.manual_score, g7.manual_score, g8.manual_score) = request.param
     a.db.commit()
-    a.usedgrades = request.param
-    a.usedgrades_code = request.param[:2]
-    a.usedgrades_written = request.param[2:4]
-    a.usedgrades_task = request.param[4:]
+    ug = {
+        "usedgrades": request.param,
+        "usedgrades_code": request.param[:2],
+        "usedgrades_written": request.param[2:4],
+        "usedgrades_task": request.param[4:]
+    }
 
-    return a
+    return (a, ug)
 
 
 @pytest.fixture
@@ -1125,63 +1129,68 @@ def test_grade_cell_maxscore(gradebook):
     assert n1.max_score == 4035
 
 
-def test_grades_include_taskcells(assignmentWithSubmissionWithMarks: Gradebook) -> None:
-    s = assignmentWithSubmissionWithMarks.find_submission('foo', 'hacker123')
+def test_grades_include_taskcells(assignmentWithSubmissionWithMarks: typing.Tuple[Gradebook, typing.Dict[str, typing.Any]]) -> None:
+    gb, _ = assignmentWithSubmissionWithMarks
+    s = gb.find_submission('foo', 'hacker123')
     for n in s.notebooks:
         grades = n.grades
         assert len(grades) == 6
 
 
 # next 4 same as in normal tests, but with an assignment with tasks
-def test_find_grade(assignmentWithSubmissionWithMarks):
-    s = assignmentWithSubmissionWithMarks.find_submission('foo', 'hacker123')
+def test_find_grade_tasks(assignmentWithSubmissionWithMarks: typing.Tuple[Gradebook, typing.Dict[str, typing.Any]]):
+    gb, _ = assignmentWithSubmissionWithMarks
+    s = gb.find_submission('foo', 'hacker123')
     for n in s.notebooks:
         grades = n.grades
         for g1 in grades:
-            g2 = assignmentWithSubmissionWithMarks.find_grade(g1.name, n.name, 'foo', 'hacker123')
+            g2 = gb.find_grade(g1.name, n.name, 'foo', 'hacker123')
             assert g1 == g2
 
     with pytest.raises(MissingEntry):
-        assignmentWithSubmissionWithMarks.find_grade('asdf', 'p1', 'foo', 'hacker123')
+        gb.find_grade('asdf', 'p1', 'foo', 'hacker123')
 
 
-def test_find_grade_by_id(assignmentWithSubmissionWithMarks):
-    s = assignmentWithSubmissionWithMarks.find_submission('foo', 'hacker123')
+def test_find_grade_by_id_tasks(assignmentWithSubmissionWithMarks: typing.Tuple[Gradebook, typing.Dict[str, typing.Any]]):
+    gb, _ = assignmentWithSubmissionWithMarks
+    s = gb.find_submission('foo', 'hacker123')
     for n in s.notebooks:
         grades = n.grades
 
         for g1 in grades:
-            g2 = assignmentWithSubmissionWithMarks.find_grade_by_id(g1.id)
+            g2 = gb.find_grade_by_id(g1.id)
             assert g1 == g2
 
         with pytest.raises(MissingEntry):
-            assignmentWithSubmissionWithMarks.find_grade_by_id('12345')
+            gb.find_grade_by_id('12345')
 
 
-def test_find_comment(assignmentWithSubmissionWithMarks: Gradebook) -> None:
-    s = assignmentWithSubmissionWithMarks.find_submission('foo', 'hacker123')
+def test_find_comment_tasks(assignmentWithSubmissionWithMarks: typing.Tuple[Gradebook, typing.Dict[str, typing.Any]]) -> None:
+    gb, _ = assignmentWithSubmissionWithMarks
+    s = gb.find_submission('foo', 'hacker123')
     for n in s.notebooks:
         comments = n.comments
 
         for c1 in comments:
-            c2 = assignmentWithSubmissionWithMarks.find_comment(c1.name, n.name, 'foo', 'hacker123')
+            c2 = gb.find_comment(c1.name, n.name, 'foo', 'hacker123')
             assert c1 == c2
 
         with pytest.raises(MissingEntry):
-            assignmentWithSubmissionWithMarks.find_comment('asdf', n.name, 'foo', 'hacker123')
+            gb.find_comment('asdf', n.name, 'foo', 'hacker123')
 
 
-def test_find_comment_by_id(assignmentWithSubmissionWithMarks):
-    s = assignmentWithSubmissionWithMarks.find_submission('foo', 'hacker123')
+def test_find_comment_by_id_tasks(assignmentWithSubmissionWithMarks: typing.Tuple[Gradebook, typing.Dict[str, typing.Any]]):
+    gb, _ = assignmentWithSubmissionWithMarks
+    s = gb.find_submission('foo', 'hacker123')
     for n in s.notebooks:
         comments = n.comments
 
         for c1 in comments:
-            c2 = assignmentWithSubmissionWithMarks.find_comment_by_id(c1.id)
+            c2 = gb.find_comment_by_id(c1.id)
             assert c1 == c2
 
         with pytest.raises(MissingEntry):
-            assignmentWithSubmissionWithMarks.find_comment_by_id('12345')
+            gb.find_comment_by_id('12345')
 
 
 def test_average_assignment_score_empty(assignment):
@@ -1199,10 +1208,11 @@ def test_average_assignment_no_score(assignmentWithSubmissionNoMarks):
 
 
 def test_average_assignment_with_score(assignmentWithSubmissionWithMarks):
-    assert assignmentWithSubmissionWithMarks.average_assignment_score('foo') == sum(assignmentWithSubmissionWithMarks.usedgrades) / 2.0
-    assert assignmentWithSubmissionWithMarks.average_assignment_code_score('foo') == sum(assignmentWithSubmissionWithMarks.usedgrades_code) / 2.0
-    assert assignmentWithSubmissionWithMarks.average_assignment_written_score('foo') == sum(assignmentWithSubmissionWithMarks.usedgrades_written) / 2.0
-    assert assignmentWithSubmissionWithMarks.average_assignment_task_score('foo') == sum(assignmentWithSubmissionWithMarks.usedgrades_task) / 2.0
+    gb, ug = assignmentWithSubmissionWithMarks
+    assert gb.average_assignment_score('foo') == sum(ug["usedgrades"]) / 2.0
+    assert gb.average_assignment_code_score('foo') == sum(ug["usedgrades_code"]) / 2.0
+    assert gb.average_assignment_written_score('foo') == sum(ug["usedgrades_written"]) / 2.0
+    assert gb.average_assignment_task_score('foo') == sum(ug["usedgrades_task"]) / 2.0
 
 
 def test_average_notebook_score_empty(assignment):
@@ -1219,15 +1229,16 @@ def test_average_notebook_no_score(assignmentWithSubmissionNoMarks):
     assert assignmentWithSubmissionNoMarks.average_notebook_task_score('p1', 'foo') == 0.0
 
 
-def test_average_notebook_with_score(assignmentWithSubmissionWithMarks: Gradebook) -> None:
-    assert assignmentWithSubmissionWithMarks.average_notebook_score('p1', 'foo') == sum(assignmentWithSubmissionWithMarks.usedgrades) / 2.0
-    assert assignmentWithSubmissionWithMarks.average_notebook_code_score('p1', 'foo') == sum(assignmentWithSubmissionWithMarks.usedgrades_code) / 2.0
-    assert assignmentWithSubmissionWithMarks.average_notebook_written_score('p1', 'foo') == sum(assignmentWithSubmissionWithMarks.usedgrades_written) / 2.0
-    assert assignmentWithSubmissionWithMarks.average_notebook_task_score('p1', 'foo') == sum(assignmentWithSubmissionWithMarks.usedgrades_task) / 2.0
+def test_average_notebook_with_score(assignmentWithSubmissionWithMarks: typing.Tuple[Gradebook, typing.Dict[str, typing.Any]]) -> None:
+    gb, ug = assignmentWithSubmissionWithMarks
+    assert gb.average_notebook_score('p1', 'foo') == sum(ug["usedgrades"]) / 2.0
+    assert gb.average_notebook_code_score('p1', 'foo') == sum(ug["usedgrades_code"]) / 2.0
+    assert gb.average_notebook_written_score('p1', 'foo') == sum(ug["usedgrades_written"]) / 2.0
+    assert gb.average_notebook_task_score('p1', 'foo') == sum(ug["usedgrades_task"]) / 2.0
 
 
-def test_student_dicts(assignmentWithSubmissionWithMarks):
-    assign = assignmentWithSubmissionWithMarks
+def test_student_dicts_tasks(assignmentWithSubmissionWithMarks):
+    assign, _ = assignmentWithSubmissionWithMarks
     students = assign.student_dicts()
     a = sorted(students, key=lambda x: x["id"])
     b = sorted([x.to_dict() for x in assign.students], key=lambda x: x["id"])
@@ -1289,8 +1300,8 @@ def test_notebook_submission_dicts_multiple_assignments(FiveAssignments):
     assert a == b
 
 
-def test_notebook_submission_dicts(assignmentWithSubmissionWithMarks):
-    assign = assignmentWithSubmissionWithMarks
+def test_notebook_submission_dicts_tasks(assignmentWithSubmissionWithMarks):
+    assign, _= assignmentWithSubmissionWithMarks
     notebook = assign.find_notebook("p1", "foo")
     submissions = assign.notebook_submission_dicts("p1", "foo")
     a = sorted(submissions, key=lambda x: x["id"])

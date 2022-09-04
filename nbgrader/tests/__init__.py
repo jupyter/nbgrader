@@ -189,7 +189,7 @@ def run_nbgrader(args: List[str], retcode: int = 0, env: Optional[dict] = None, 
     # store os.environ
     old_env = os.environ.copy()
     if env:
-        os.environ = env
+        os.environ = env  # type: ignore[assignment]
 
     # create the application
     app = NbGraderApp.instance()
@@ -229,7 +229,7 @@ def run_nbgrader(args: List[str], retcode: int = 0, env: Optional[dict] = None, 
         app.reset()
 
         # restore os.environ
-        os.environ = old_env
+        os.environ = old_env  # type: ignore[assignment]
 
     if retcode != true_retcode:
         raise AssertionError(

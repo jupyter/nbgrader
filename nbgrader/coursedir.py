@@ -298,7 +298,7 @@ class CourseDirectory(LoggingConfigurable):
 
         return path
 
-    def get_existing_timestamp(self, dest_path: str) -> Optional[datetime.datetime]:
+    def get_existing_timestamp(self, dest_path: str) -> Optional[datetime.datetime]:  # type: ignore[return]
         """Get the timestamp, as a datetime object, of an existing submission."""
         timestamp_path = os.path.join(dest_path, 'timestamp.txt')
         if os.path.exists(timestamp_path):

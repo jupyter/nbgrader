@@ -8,6 +8,7 @@ import os
 import traceback
 import logging
 import traitlets.log
+import typing
 
 from jupyter_core.application import JupyterApp
 from textwrap import dedent
@@ -26,10 +27,9 @@ from .. import converters
 from traitlets.traitlets import MetaHasTraits
 from typing import List as TypingList
 from io import StringIO
-from typing import Any
 
-
-nbgrader_aliases = {
+NbGraderAliasesType = typing.Dict[str, typing.Any]
+nbgrader_aliases: NbGraderAliasesType = {
     'log-level' : 'Application.log_level',
     'student': 'CourseDirectory.student_id',
     'assignment': 'CourseDirectory.assignment_id',
@@ -37,7 +37,8 @@ nbgrader_aliases = {
     'db': 'CourseDirectory.db_url',
     'course-dir': 'CourseDirectory.root'
 }
-nbgrader_flags = {
+NbGraderFlagsType = typing.Dict[str, typing.Tuple[typing.Dict[str, typing.Dict[str, typing.Any]], str]]
+nbgrader_flags: NbGraderFlagsType = {
     'debug': (
         {'Application' : {'log_level' : 'DEBUG'}},
         "set log level to DEBUG (maximize logging output)"
@@ -182,7 +183,7 @@ class NbGrader(JupyterApp):
     def _config_file_name_default(self) -> str:
         return u'nbgrader_config'
 
-    def _load_config(self, cfg: Config, **kwargs: Any) -> None:
+    def _load_config(self, cfg: Config, **kwargs: typing.Any) -> None:
         if 'NbGraderConfig' in cfg:
             self.log.warning(
                 "Use NbGrader in config, not NbGraderConfig. Outdated config:\n%s",
@@ -342,7 +343,7 @@ class NbGrader(JupyterApp):
         for key, (app, desc) in self.subcommands.items():
             print("    {}\n{}\n".format(key, desc))
 
-    def load_config_file(self, **kwargs: Any) -> None:
+    def load_config_file(self, **kwargs):
         """Load the config file.
         By default, errors in loading config are handled, and a warning
         printed on screen. For testing, the suppress_errors option is set

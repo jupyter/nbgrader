@@ -231,7 +231,7 @@ class TestNbGraderSubmit(BaseTestApp):
         filename, = os.listdir(join(exchange, "abc101", "inbound"))
         assert not exists(join(exchange, "abc101", "inbound", filename, "foo.txt"))
 
-    def test_submit_include(self, exchange, cache, course_dir):
+    def test_submit_include_max_file_size(self, exchange, cache, course_dir):
         self._release_and_fetch("ps1", exchange, cache, course_dir)
         self._make_file(join("ps1", "small_file"), contents="x" * 2000)
         self._make_file(join("ps1", "large_file"), contents="x" * 2001)
