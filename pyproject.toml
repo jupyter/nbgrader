@@ -1,6 +1,6 @@
 [build-system]
 requires = [
-    "hatchling>=1.15.0",
+    "hatchling>=1.10.0",
     "jupyterlab<4",
 ]
 build-backend = "hatchling.build"
@@ -21,7 +21,6 @@ keywords = [
     "Notebooks",
 ]
 classifiers = [
-    "",
     "Framework :: Jupyter",
     "Framework :: Jupyter :: JupyterLab",
     "Framework :: Jupyter :: JupyterLab :: 3",
@@ -91,6 +90,22 @@ Homepage = "https://github.com/jupyter/nbgrader"
 [tool.hatch.build]
 artifacts = [
     "nbgrader/labextension/",
+    "nbgrader/tests/",
+    "nbgrader/docs/",
+    "nbgrader/server_extensions/",
+]
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "/etc",
+    "/nbgrader",
+    "/schema",
+    "/src",
+    "/style",
+    "/*.*"
+]
+exclude = [
+    "/.github",
 ]
 
 [tool.hatch.build.targets.wheel.shared-data]
