@@ -16,7 +16,7 @@ shutil.copyfile("./nbgrader/tests/labextension_ui-tests/files/nbgrader_config.py
                 join(root_dir, "nbgrader_config.py"))
 
 subprocess.check_call([sys.executable, "-m", "jupyter", "server", "extension", "enable", "--user", "--py", "nbgrader"], env=env)
-subprocess.check_call([sys.executable, "-m", "jupyter", "labextension", "develop", "."])
+subprocess.check_call([sys.executable, "-m", "jupyter", "labextension", "develop", "--overwrite", "."])
 
 os.chdir(root_dir)
 
