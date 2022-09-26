@@ -25,24 +25,11 @@ We recommand using `conda environment <https://docs.conda.io/en/latest/miniconda
 Installing Jupyter labextensions
 --------------------------------
 The labextensions are compiled during installation, and should be in the ``nbgrader/labextension`` directory.
-There are 5 of them (*formgrader*, *assignment list*, *course list*, *validate assignment* and *create assignment*),
-and with the exception of *create assignment* they must be installed along with the server extensions.
+There are 5 of them (*formgrader*, *assignment list*, *course list*, *validate assignment* and *create assignment*).
 
-To install the server extensions all together run::
+All of the labextensions and server extensions are automatically installed and
+enabled when installing ``nbgrader``.
 
-    jupyter server extension enable nbgrader --sys-prefix
-
-It is possible to enable only some of them by running::
-
-    jupyter server extension enable nbgrader.server_extensions.formgrader --sys-prefix
-    jupyter server extension enable nbgrader.server_extensions.assignment_list --sys-prefix
-    jupyter server extension enable nbgrader.server_extensions.course_list --sys-prefix
-    jupyter server extension enable nbgrader.server_extensions.validate_assignment --sys-prefix
-
-To install labextensions run::
-
-    jupyter labextension install .
-
-or in developer mode::
+To install lab extension in developer mode::
 
     jupyter labextension develop --overwrite .
