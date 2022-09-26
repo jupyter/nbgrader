@@ -119,7 +119,11 @@ def js(args):
 
 
 def install(args):
-    cmd = 'pip install -e .[tests]'
+    if args.group == 'docs':
+        cmd = 'pip install -e .[docs,tests]'
+    else:
+        cmd = 'pip install -e .[tests]'
+
     env = os.environ.copy()
     if args.group not in ['all', 'labextensions']:
         env['NBGRADER_NO_LAB'] = '1'
