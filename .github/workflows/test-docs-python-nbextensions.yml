@@ -87,3 +87,23 @@ jobs:
       # - name: Submit codecov report
       #   run: |
       #     codecov
+
+  make_sdist:
+    name: Make SDist
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v2
+      - uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
+      - uses: jupyterlab/maintainer-tools/.github/actions/make-sdist@v1
+
+  test_sdist:
+    runs-on: ubuntu-latest
+    needs: [make_sdist]
+    name: Install from SDist and Test
+    timeout-minutes: 20
+    steps:
+      - uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
+      - uses: jupyterlab/maintainer-tools/.github/actions/test-sdist@v1
+        with:
+          test_command: pytest -vv || pytest -vv --lf

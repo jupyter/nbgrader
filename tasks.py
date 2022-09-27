@@ -120,7 +120,7 @@ def js(args):
 
 def install(args):
     if args.group == 'docs':
-        cmd = 'pip install -e .[docs,tests]'
+        cmd = 'pip install .[docs,tests]'
     else:
         cmd = 'pip install -e .[tests]'
 
