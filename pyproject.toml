@@ -120,7 +120,7 @@ exclude = [
 dependencies = [
     "hatch-jupyter-builder>=0.6.2",
 ]
-build-function = "buildapi.builder"
+build-function = "hatch_jupyter_builder.npm_builder"
 ensured-targets = [
     "nbgrader/labextension/static/style.js",
     "nbgrader/labextension/package.json",

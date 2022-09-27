@@ -126,7 +126,7 @@ def install(args):
 
     env = os.environ.copy()
     if args.group not in ['all', 'labextensions']:
-        env['NBGRADER_NO_LAB'] = '1'
+        env['SKIP_JUPYTER_BUILD'] = '1'
     run(cmd, env=env)
 
 
