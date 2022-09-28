@@ -118,7 +118,7 @@ exclude = [
 
 [tool.hatch.build.hooks.jupyter-builder]
 dependencies = [
-    "hatch-jupyter-builder>=0.6.2",
+    "hatch-jupyter-builder>=0.7",
 ]
 build-function = "hatch_jupyter_builder.npm_builder"
 ensured-targets = [
