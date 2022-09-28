@@ -73,6 +73,9 @@ jobs:
         if: matrix.group == 'docs'
         run: |
           sudo apt-get install pandoc
+          # Remove node
+          sudo rm -rf $(which node)
+          sudo rm -rf $(which node)
       - name: Install Python dependencies
         run: |
           python -m pip install --upgrade pip wheel setuptools
@@ -104,7 +107,11 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
+      - name: Remove node
+        run: |
+        sudo rm -rf $(which node)
+        sudo rm -rf $(which node)
       - uses: jupyterlab/maintainer-tools/.github/actions/test-sdist@v1
         with:
           package_spec: '--editable ."[tests]"'
-          test_command: pytest -vv || pytest -vv --lf
+          test_command: python -m pytest -vv || python -m pytest -vv --lf
