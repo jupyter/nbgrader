@@ -109,8 +109,8 @@ jobs:
       - uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
       - name: Remove node
         run: |
-        sudo rm -rf $(which node)
-        sudo rm -rf $(which node)
+          sudo rm -rf $(which node)
+          sudo rm -rf $(which node)
       - uses: jupyterlab/maintainer-tools/.github/actions/test-sdist@v1
         with:
           package_spec: '--editable ."[tests]"'
