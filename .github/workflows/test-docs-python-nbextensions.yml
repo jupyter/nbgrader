@@ -114,4 +114,4 @@ jobs:
       - uses: jupyterlab/maintainer-tools/.github/actions/test-sdist@v1
         with:
           package_spec: '--editable ."[tests]"'
-          test_command: python -m pytest -vv nbgrader/tests/ || python -m pytest -vv nbgrader/tests/ --lf
+          test_command: python -m pytest -vv nbgrader/tests/api || python -m pytest -vv nbgrader/tests/api --lf
