@@ -82,6 +82,7 @@ jobs:
           python tasks.py install --group="$GROUP"
           pip freeze
       - name: Install Playwright
+        if: matrix.group != 'docs'
         run: |
           npx playwright install
       - name: Run pytest
