@@ -2,6 +2,23 @@
 
 set -ex
 
+
+NODE_MAJOR_VERSION=`node --version | cut -d'.' -f 1 | cut -d'v' -f 2`
+
+test_node_version () {
+    MAJOR_VERSION_RE='^[0-9]+$'
+    # checks if a version exists
+    if ! [[ $1 =~ $MAJOR_VERSION_RE ]] ; then
+        echo "Nodejs seems not installed. This requires nodejs>=14 to continue" >&2; exit 1
+    fi
+    # checks if the version is 14 or more
+    if [ $1 -lt 14 ]; then
+        echo "Nodejs version must be 14 or more, current is $1">&2; exit 1
+    fi
+}
+
+test_node_version ${NODE_MAJOR_VERSION}
+
 # Configuration variables.
 root="$(realpath `dirname $0`)"
 srv_root="/srv/nbgrader"
