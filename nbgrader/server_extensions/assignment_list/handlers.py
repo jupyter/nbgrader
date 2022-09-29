@@ -149,8 +149,8 @@ class AssignmentList(LoggingConfigurable):
             else:
                 for assignment in assignments:
                     for submission in assignment["submissions"]:
-                        if 'local_feedback_path' in submission.keys() and \
-                            os.path.exists(submission['local_feedback_path']):
+                        if submission['local_feedback_path'] \
+                            and os.path.exists(submission['local_feedback_path']):
                                 submission['local_feedback_path'] = \
                                     os.path.relpath(submission['local_feedback_path'],
                                     self._root_dir)
