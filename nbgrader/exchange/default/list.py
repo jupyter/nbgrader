@@ -172,8 +172,13 @@ class ExchangeList(ABCExchangeList, Exchange):
                 info['has_exchange_feedback'] = has_exchange_feedback
                 info['feedback_updated'] = feedback_updated
                 if has_local_feedback:
-                    info['local_feedback_path'] = os.path.join(
-                        assignment_dir, 'feedback', info['timestamp'])
+                    full_path_assignment_dir = os.path.abspath(assignment_dir)
+                    if os.path.exists(full_path_assignment_dir):
+                        info['local_feedback_path'] = os.path.join(
+                            full_path_assignment_dir, 'feedback', info['timestamp'])
+                    else:
+                        info['local_feedback_path'] = os.path.join(
+                            assignment_dir, 'feedback', info['timestamp'])
                 else:
                     info['local_feedback_path'] = None
 
