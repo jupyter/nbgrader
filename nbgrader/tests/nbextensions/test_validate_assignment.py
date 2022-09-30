@@ -77,7 +77,7 @@ def _load_notebook(browser, port, notebook, retries=5):
 def _wait_for_validate_button(browser):
     def validate_exists(browser):
         try:
-            browser.find_element_by_css_selector("button.validate")
+            browser.find_element(By.CSS_SELECTOR, "button.validate")
         except NoSuchElementException:
             return False
         return True
@@ -89,12 +89,12 @@ def _wait_for_modal(browser):
 
 
 def _dismiss_modal(browser):
-    button = browser.find_element_by_css_selector(".modal-footer .btn-primary")
+    button = browser.find_element(By.CSS_SELECTOR, ".modal-footer .btn-primary")
     button.click()
 
     def modal_gone(browser):
         try:
-            browser.find_element_by_css_selector(".modal-dialog")
+            browser.find_element(By.CSS_SELECTOR, ".modal-dialog")
         except NoSuchElementException:
             return True
         return False
@@ -107,13 +107,13 @@ def test_validate_ok(browser, port):
     _wait_for_validate_button(browser)
 
     # click the "validate" button
-    browser.find_element_by_css_selector("button.validate").click()
+    browser.find_element(By.CSS_SELECTOR, "button.validate").click()
 
     # wait for the modal dialog to appear
     _wait_for_modal(browser)
 
     # check that it succeeded
-    browser.find_element_by_css_selector(".modal-dialog .validation-success")
+    browser.find_element(By.CSS_SELECTOR, ".modal-dialog .validation-success")
 
     # close the modal dialog
     _dismiss_modal(browser)
@@ -125,13 +125,13 @@ def test_validate_failure(browser, port):
     _wait_for_validate_button(browser)
 
     # click the "validate" button
-    browser.find_element_by_css_selector("button.validate").click()
+    browser.find_element(By.CSS_SELECTOR, "button.validate").click()
 
     # wait for the modal dialog to appear
     _wait_for_modal(browser)
 
     # check that it failed
-    browser.find_element_by_css_selector(".modal-dialog .validation-failed")
+    browser.find_element(By.CSS_SELECTOR, ".modal-dialog .validation-failed")
 
     # close the modal dialog
     _dismiss_modal(browser)
@@ -143,13 +143,13 @@ def test_validate_grade_cell_changed(browser, port):
     _wait_for_validate_button(browser)
 
     # click the "validate" button
-    browser.find_element_by_css_selector("button.validate").click()
+    browser.find_element(By.CSS_SELECTOR, "button.validate").click()
 
     # wait for the modal dialog to appear
     _wait_for_modal(browser)
 
     # check that it failed
-    browser.find_element_by_css_selector(".modal-dialog .validation-changed")
+    browser.find_element(By.CSS_SELECTOR, ".modal-dialog .validation-changed")
 
     # close the modal dialog
     _dismiss_modal(browser)
@@ -161,13 +161,13 @@ def test_validate_locked_cell_changed(browser, port):
     _wait_for_validate_button(browser)
 
     # click the "validate" button
-    browser.find_element_by_css_selector("button.validate").click()
+    browser.find_element(By.CSS_SELECTOR, "button.validate").click()
 
     # wait for the modal dialog to appear
     _wait_for_modal(browser)
 
     # check that it failed
-    browser.find_element_by_css_selector(".modal-dialog .validation-changed")
+    browser.find_element(By.CSS_SELECTOR, ".modal-dialog .validation-changed")
 
     # close the modal dialog
     _dismiss_modal(browser)
@@ -179,13 +179,13 @@ def test_validate_open_relative_file(browser, port):
     _wait_for_validate_button(browser)
 
     # click the "validate" button
-    browser.find_element_by_css_selector("button.validate").click()
+    browser.find_element(By.CSS_SELECTOR, "button.validate").click()
 
     # wait for the modal dialog to appear
     _wait_for_modal(browser)
 
     # check that it succeeded
-    browser.find_element_by_css_selector(".modal-dialog .validation-success")
+    browser.find_element(By.CSS_SELECTOR, ".modal-dialog .validation-success")
 
     # close the modal dialog
     _dismiss_modal(browser)
@@ -197,13 +197,13 @@ def test_validate_grade_cell_type_changed(browser, port):
     _wait_for_validate_button(browser)
 
     # click the "validate" button
-    browser.find_element_by_css_selector("button.validate").click()
+    browser.find_element(By.CSS_SELECTOR, "button.validate").click()
 
     # wait for the modal dialog to appear
     _wait_for_modal(browser)
 
     # check that it failed
-    browser.find_element_by_css_selector(".modal-dialog .validation-type-changed")
+    browser.find_element(By.CSS_SELECTOR, ".modal-dialog .validation-type-changed")
 
     # close the modal dialog
     _dismiss_modal(browser)
@@ -215,13 +215,13 @@ def test_validate_answer_cell_type_changed(browser, port):
     _wait_for_validate_button(browser)
 
     # click the "validate" button
-    browser.find_element_by_css_selector("button.validate").click()
+    browser.find_element(By.CSS_SELECTOR, "button.validate").click()
 
     # wait for the modal dialog to appear
     _wait_for_modal(browser)
 
     # check that it failed
-    browser.find_element_by_css_selector(".modal-dialog .validation-type-changed")
+    browser.find_element(By.CSS_SELECTOR, ".modal-dialog .validation-type-changed")
 
     # close the modal dialog
     _dismiss_modal(browser)
