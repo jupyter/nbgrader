@@ -144,8 +144,10 @@ class AssignmentList(LoggingConfigurable):
                         if submission['local_feedback_path'] \
                             and os.path.exists(submission['local_feedback_path']):
                                 submission['local_feedback_path'] = \
-                                    os.path.relpath(submission['local_feedback_path'],
-                                    self._root_dir)
+                                    os.path.relpath(
+                                        submission['local_feedback_path'],
+                                        self.parent.notebook_dir
+                                    )
                     assignment["submissions"] = sorted(
                         assignment["submissions"],
                         key=lambda x: x["timestamp"])
