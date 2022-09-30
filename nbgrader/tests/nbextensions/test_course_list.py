@@ -63,7 +63,7 @@ def _load_course_list(browser, port, retries=5):
     _wait(browser).until(EC.presence_of_element_located((By.CSS_SELECTOR, "#courses")))
 
     # switch to the courses list
-    element = browser.find_element_by_link_text("Courses")
+    element = browser.find_element(By.LINK_TEXT, "Courses")
     element.click()
 
     # make sure courses are visible
@@ -74,8 +74,8 @@ def _wait_for_list(browser, num_rows):
     _wait(browser).until(EC.invisibility_of_element_located((By.CSS_SELECTOR, "#formgrader_list_loading")))
     _wait(browser).until(EC.invisibility_of_element_located((By.CSS_SELECTOR, "#formgrader_list_placeholder")))
     _wait(browser).until(EC.invisibility_of_element_located((By.CSS_SELECTOR, "#formgrader_list_error")))
-    _wait(browser).until(lambda browser: len(browser.find_elements_by_css_selector("#formgrader_list > .list_item")) == num_rows)
-    rows = browser.find_elements_by_css_selector("#formgrader_list > .list_item")
+    _wait(browser).until(lambda browser: len(browser.find_elements(By.CSS_SELECTOR, "#formgrader_list > .list_item")) == num_rows)
+    rows = browser.find_elements(By.CSS_SELECTOR, "#formgrader_list > .list_item")
     assert len(rows) == num_rows
     return rows
 
@@ -112,7 +112,7 @@ def test_local_formgrader(browser, port, tempdir, jupyter_config_dir, jupyter_da
         assert rows[0].text == "course101\nlocal"
 
         # make sure the url of the course is correct
-        link = browser.find_elements_by_css_selector("#formgrader_list > .list_item a")[0]
+        link = browser.find_elements(By.CSS_SELECTOR, "#formgrader_list > .list_item a")[0]
         url = link.get_attribute("href")
         assert url == "http://localhost:{}/formgrader".format(port)
 
@@ -138,7 +138,7 @@ def test_no_jupyterhub(browser, port, tempdir, jupyter_config_dir, jupyter_data_
         assert rows[0].text == "course101\nlocal"
 
         # make sure the url of the course is correct
-        link = browser.find_elements_by_css_selector("#formgrader_list > .list_item a")[0]
+        link = browser.find_elements(By.CSS_SELECTOR, "#formgrader_list > .list_item a")[0]
         url = link.get_attribute("href")
         assert url == "http://localhost:{}/formgrader".format(port)
 
