@@ -77,7 +77,7 @@ tests = [
     "pytest-xdist==2.5.0",
     "pytest==7.1.2",
     "requests-mock",
-    "selenium>2.4,<4.3",
+    "selenium>=4.3",
     "wheel",
 ]
 
