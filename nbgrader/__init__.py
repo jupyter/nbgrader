@@ -54,13 +54,7 @@ def _jupyter_nbextension_paths():
             src=os.path.join('nbextensions', 'validate_assignment'),
             dest="validate_assignment",
             require="validate_assignment/main"
-        ),
-        dict(
-            section="notebook",
-            src=os.path.join('nbextensions', 'limit_cell_height'),
-            dest="limit_cell_height",
-            require="limit_cell_height/main"
-        ),
+        )
     ]
 
     if sys.platform != 'win32':
