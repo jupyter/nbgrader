@@ -1,7 +1,7 @@
 [build-system]
 requires = [
     "hatchling>=1.10.0",
-    "jupyterlab<4",
+    "jupyterlab>=4.0.0a30",
 ]
 build-backend = "hatchling.build"
 
@@ -37,12 +37,12 @@ dependencies = [
     "Jinja2>=3",
     "jsonschema>=3",
     "jupyter_client<9",
-    "jupyter_server>=1.12,<2",
-    "jupyterlab<4",
+    "jupyter_server>=1.16",
+    "jupyterlab>=4.0.0a30",
     "jupyterlab_server",
     "nbclient>=0.6.1",
     "nbconvert>=6",
-    "notebook>=6.4,<7",
+    "notebook>=7.0.0a7",
     "python-dateutil>=2.8",
     "rapidfuzz>=1.8",
     "requests>=2.26",
