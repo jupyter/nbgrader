@@ -173,17 +173,16 @@ export class ButtonExtension implements DocumentRegistry.IWidgetExtension<Notebo
   createNew(panel: NotebookPanel, context: DocumentRegistry.IContext<INotebookModel>): IDisposable {
     const button = new ValidateButton(panel);
 
-    let children = panel.toolbar.children();
+    // let children = panel.toolbar.children();
     let index = 0;
-    for (let i = 0; ; i++) {
-      let widget = children.next();
+    for (let widget of panel.toolbar.children()) {
       if (widget == undefined) {
         break;
       }
       if (widget.node.classList.contains("jp-Toolbar-spacer")) {
-        index = i;
         break;
       }
+      index ++;
     }
     panel.toolbar.insertItem(index, 'runAll', button);
     return new DisposableDelegate(() => {

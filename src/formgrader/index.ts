@@ -15,9 +15,7 @@ import {
   IFrame
 } from '@jupyterlab/apputils';
 
-import { INotebookShell } from '@jupyter-notebook/application';
-
-import { TabPanel } from '@lumino/widgets';
+import { INotebookTree } from '@jupyter-notebook/tree';
 
 const PLUGIN_ID = "nbgrader:formgrader"
 const COMMAND_NAME = "nbgrader:open-formgrader"
@@ -60,15 +58,13 @@ export const formgrader_extension: JupyterFrontEndPlugin<void> = {
   id: PLUGIN_ID,
   autoStart: true,
   requires: [ICommandPalette],
-  optional: [ILayoutRestorer, INotebookShell],
-  activate: async (
+  optional: [ILayoutRestorer, INotebookTree],
+  activate: (
     app: JupyterFrontEnd,
     palette: ICommandPalette,
     restorer: ILayoutRestorer | null,
-    notebookShell: INotebookShell | null
+    notebookTree: INotebookTree | null
   )=> {
-    console.log('JupyterLab extension formgrader is activated!');
-
     // Declare a widget variable
     let widget: MainAreaWidget<FormgraderWidget>;
 
@@ -96,25 +92,19 @@ export const formgrader_extension: JupyterFrontEndPlugin<void> = {
         }
 
         if(!tracker.has(widget)){
-        // Track the state of the widget for later restoration
-        tracker.add(widget);
+          // Track the state of the widget for later restoration
+          tracker.add(widget);
         }
-        if(!widget.isAttached){
 
-          // Attach the widget to the mainwork area if it's not there
-          // and activate it.
-          if (notebookShell) {
-            let w = app.shell.widgets('main').next() as TabPanel;
-            w.addWidget(widget);
-          }
-          else {
-            app.shell.add(widget, 'main');
-          }
+        // Attach the widget to the main area if it's not there
+        if(!widget.isAttached){
+          if (notebookTree) notebookTree.addWidget(widget);
+          else app.shell.add(widget, 'main');
         }
 
         widget.content.update();
-        // TODO: fix the activation which does nothing
-        widget.activate();
+
+        app.shell.activateById(widget.id);
       }
     });
 
@@ -128,6 +118,7 @@ export const formgrader_extension: JupyterFrontEndPlugin<void> = {
         name: () => 'nbgrader-formgrader'
       });
     }
+    console.debug('JupyterLab extension formgrader is activated!');
   }
 };
 

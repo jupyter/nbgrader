@@ -6,12 +6,11 @@ import {
 
 import { ICommandPalette, MainAreaWidget, WidgetTracker } from '@jupyterlab/apputils';
 
-import { INotebookShell } from '@jupyter-notebook/application';
-
-import { Widget, TabPanel } from '@lumino/widgets';
+import { Widget } from '@lumino/widgets';
 
 import { requestAPI, CourseList } from './courselist';
 
+import { INotebookTree } from '@jupyter-notebook/tree';
 
 const PLUGIN_ID = "nbgrader:course-list";
 const COMMAND_NAME = "nbgrader:open-course-list";
@@ -105,13 +104,13 @@ export const course_list_extension: JupyterFrontEndPlugin<void> = {
   id: PLUGIN_ID,
   autoStart: true,
   requires: [ICommandPalette],
-  optional: [ILayoutRestorer, INotebookShell],
+  optional: [ILayoutRestorer, INotebookTree],
 
-  activate: async (
+  activate: (
     app: JupyterFrontEnd,
     palette: ICommandPalette,
     restorer: ILayoutRestorer | null,
-    notebookShell: INotebookShell | null
+    notebookTree: INotebookTree | null
   ) => {
 
     let widget: MainAreaWidget<CourseListWidget>;
@@ -137,22 +136,16 @@ export const course_list_extension: JupyterFrontEndPlugin<void> = {
         if (!tracker.has(widget)) {
           tracker.add(widget);
         }
-        if (!widget.isAttached) {
 
-          // Attach the widget to the mainwork area if it's not there
-          // and activate it.
-          if (notebookShell) {
-            let w = app.shell.widgets('main').next() as TabPanel;
-            w.addWidget(widget);
-          }
-          else {
-            app.shell.add(widget, 'main');
-          }
+        // Attach the widget to the main area if it's not there
+        if(!widget.isAttached){
+          if (notebookTree) notebookTree.addWidget(widget);
+          else app.shell.add(widget, 'main');
         }
 
         widget.content.update();
-        // TODO: fix the activation which does nothing
-        widget.activate();
+
+        app.shell.activateById(widget.id);
       }
     })
 
@@ -166,7 +159,7 @@ export const course_list_extension: JupyterFrontEndPlugin<void> = {
       });
     }
 
-    console.log('JupyterLab extension course-list is activated!');
+    console.debug('JupyterLab extension course-list is activated!');
   }
 };
 

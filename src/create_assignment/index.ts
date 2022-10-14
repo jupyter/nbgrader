@@ -12,6 +12,7 @@ import {
   Panel
 } from '@lumino/widgets';
 
+
 import {
   CreateAssignmentWidget
 } from './create_assignment_extension';
@@ -29,23 +30,27 @@ export const create_assignment_extension: JupyterFrontEndPlugin<void> = {
   activate: activate_extension
 };
 
-function activate_extension(
+/**
+ *
+ * @param app JupyterFrontEnd
+ * @param tracker track any changes on the Notebook
+ * @param labShell used only to track if the main area of JupyterLab has a Notebook in frontend.
+ */
+function activate_extension (
   app: JupyterFrontEnd,
   tracker: INotebookTracker,
-  shell: ILabShell | null
+  labShell: ILabShell | null
 ) {
-  console.log('Activating extension "create_assignment".');
-
   const panel = new Panel();
   panel.node.style.overflowY = 'auto';
-  const createAssignmentWidget = new CreateAssignmentWidget(tracker, shell);
+  const createAssignmentWidget = new CreateAssignmentWidget(tracker, labShell);
   panel.addWidget(createAssignmentWidget);
   panel.id = 'nbgrader-create_assignemnt';
   panel.title.label = 'Create Assignment';
   panel.title.caption = 'nbgrader Create Assignment';
 
   app.shell.add(panel, 'right');
-  console.log('Extension "create_assignment" activated.');
+  console.debug('Extension "create_assignment" activated.');
 }
 
 export default create_assignment_extension;

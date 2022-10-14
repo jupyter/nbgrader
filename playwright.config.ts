@@ -12,13 +12,13 @@ const config: PlaywrightTestConfig = {
   reporter: [[process.env.CI ? 'dot' : 'list'], ['html', { outputFolder: 'playwright-tests' }]],
   workers: 1,
   use: {
-  // Browser options
-  // headless: false,
-  // slowMo: 500,
-  // Context options
-  viewport: { width: 1024, height: 768 },
-  // Artifacts
-  video: 'retain-on-failure'
+    // Browser options
+    // headless: false,
+    // slowMo: 500,
+    // Context options
+    viewport: { width: 1024, height: 768 },
+    // Artifacts
+    video: 'retain-on-failure'
   },
 
   webServer: {

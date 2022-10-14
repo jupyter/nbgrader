@@ -23,15 +23,15 @@ import {
   Notebook,
   NotebookPanel
 } from '@jupyterlab/notebook';
+import { CellList } from '@jupyterlab/notebook/lib/celllist';
 
 import {
   IObservableJSON,
   IObservableList,
   IObservableMap,
-  IObservableUndoableList
 } from '@jupyterlab/observables';
 
-import { each } from '@lumino/algorithm';
+// import { each } from '@lumino/algorithm';
 
 import {
   ReadonlyPartialJSONValue
@@ -93,16 +93,16 @@ export class CreateAssignmentWidget extends Panel {
   private mainAreaListener: (shell: LabShell, changed: ILabShell.IChangedArgs) => void;
   private notebookPanelWidgets = new Map<NotebookPanel, NotebookPanelWidget>();
   private notebookTracker: INotebookTracker;
-  private shell: ILabShell;
+  private labShell: ILabShell;
 
-  constructor(tracker: INotebookTracker, shell: ILabShell | null) {
+  constructor(tracker: INotebookTracker, labShell: ILabShell | null) {
     super();
     this.addClass(CSS_CREATE_ASSIGNMENT_WIDGET);
     this.addNotebookListeners(tracker);
-    if (shell) this.addMainAreaActiveListener(shell);
+    if (labShell) this.addMainAreaActiveListener(labShell);
     this.activeNotebook = null;
     this.notebookTracker = tracker;
-    this.shell = shell;
+    this.labShell = labShell;
   }
 
   private addNotebookListeners(tracker: INotebookTracker): void {
@@ -110,9 +110,9 @@ export class CreateAssignmentWidget extends Panel {
     tracker.currentChanged.connect(this.currentNotebookListener);
   }
 
-  private addMainAreaActiveListener(shell: LabShell): void {
+  private addMainAreaActiveListener(labShell: LabShell): void {
     this.mainAreaListener = this.getMainAreaActiveListener();
-    shell.currentChanged.connect(this.mainAreaListener);
+    labShell.currentChanged.connect(this.mainAreaListener);
   }
 
   private async addNotebookWidget(
@@ -210,22 +210,23 @@ export class CreateAssignmentWidget extends Panel {
    *  -> is there an active Notebook visible in main panel ?
    */
   protected onAfterShow(): void {
-    const widgets = this.shell.widgets('main');
+    if (!this.labShell) return;
+    const widgets = this.labShell.widgets('main');
     if (this.activeNotebook == null){
       this.hideRightPanel();
     }
     else {
-      each(widgets, w => {
+      for (let w of widgets) {
         if (w.title == this.activeNotebook.title) {
           if (!w.isVisible) this.hideRightPanel();
           else w.activate();
         }
-      });
+      };
     }
   }
 
   private hideRightPanel(): void {
-    this.shell.collapseRight();
+    this.labShell.collapseRight();
   }
 
   private removeNotebookListeners(tracker: INotebookTracker): void {
@@ -426,10 +427,12 @@ class CellWidget extends Panel {
   private newHeaderElement(): HTMLDivElement {
     const element = document.createElement('div');
     element.className = CSS_CELL_HEADER;
-    const promptNode =  this.cell.promptNode.cloneNode(true) as HTMLElement;
-    element.appendChild(promptNode);
-    this.cell.model.stateChanged.connect(this.getCellStateChangedListener(
-      this.cell.promptNode, promptNode));
+    if (this.cell.promptNode) {
+      const promptNode =  this.cell.promptNode.cloneNode(true) as HTMLElement;
+      element.appendChild(promptNode);
+      this.cell.model.stateChanged.connect(this.getCellStateChangedListener(
+        this.cell.promptNode, promptNode));
+      }
     const lockElement = document.createElement('a');
     lockElement.className = CSS_LOCK_BUTTON;
     const listElement = document.createElement('li');
@@ -645,7 +648,7 @@ class NotebookWidget extends Panel {
   private activeCellWidgetListener: (cellWidget: CellWidget) => void;
   private cellListener: (notebook: Notebook, cell: Cell) => void;
   private cellListListener:
-      (sender: IObservableUndoableList<ICellModel>,
+      (sender: CellList,
        args: IObservableList.IChangedArgs<ICellModel>) => void;
   private _cellMetadataChanged = new Signal<this, CellWidget>(this);
   private cellWidgets = new Map<Cell, CellWidget>();
@@ -680,7 +683,7 @@ class NotebookWidget extends Panel {
 
   private addCellListListener(panel: NotebookPanel) {
     this.cellListListener =
-      (sender: IObservableUndoableList<ICellModel>,
+      (sender: CellList,
        args: IObservableList.IChangedArgs<ICellModel>) => {
          switch (args.type) {
            case 'add': {
@@ -900,8 +903,7 @@ class NotebookWidget extends Panel {
   private validateIds(): void {
     const set = new Set<string>();
     const valid = /^[a-zA-Z0-9_\-]+$/;
-    const iter = this.notebookPanel.model.cells.iter();
-    for (let cellModel = iter.next(); cellModel != null; cellModel = iter.next()) {
+    for (let cellModel of this.notebookPanel.model.cells) {
       const data = CellModel.getNbgraderData(cellModel.metadata);
 
       if (data == null) continue;
@@ -923,9 +925,7 @@ class NotebookWidget extends Panel {
   }
 
   private validateSchemaVersion(): void {
-    const iter = this.notebookPanel.model.cells.iter();
-    for (let cellModel = iter.next(); cellModel != null;
-         cellModel = iter.next()) {
+    for (let cellModel of this.notebookPanel.model.cells) {
       const data = CellModel.getNbgraderData(cellModel.metadata)
       let version = data == null ? null : data.schema_version;
       version = version === undefined ? 0 : version;
@@ -1005,7 +1005,7 @@ class NotebookWidget extends Panel {
  */
 class NotebookPanelWidget extends Panel {
   private cellListListener:
-      (cellModels: IObservableUndoableList<ICellModel>,
+      (cellModels: CellList,
        args: IObservableList.IChangedArgs<ICellModel>) => void;
   private cellModelListener:
       (notebookWidget: NotebookWidget, cellWidget: CellWidget) => void;
@@ -1021,9 +1021,7 @@ class NotebookPanelWidget extends Panel {
 
   private calcTotalPoints(): number {
     let totalPoints = 0;
-    const iter = this.notebookWidget.notebookPanel.model.cells.iter();
-    for (let cellModel = iter.next(); cellModel != null;
-         cellModel = iter.next()) {
+    for (let cellModel of this.notebookWidget.notebookPanel.model.cells) {
       const data = CellModel.getNbgraderData(cellModel.metadata);
       const points = (data == null || data.points == null
                       || !CellModel.isGraded(data)) ? 0 : data.points;
@@ -1063,7 +1061,7 @@ class NotebookPanelWidget extends Panel {
   private setUpTotalPoints(): void {
     this.notebookHeaderWidget.totalPoints = this.calcTotalPoints();
     this.cellListListener =
-        (cellModels: IObservableUndoableList<ICellModel>,
+        (cellModels: CellList,
          args: IObservableList.IChangedArgs<ICellModel>) => {
            if (args.type != 'move') {
              this.notebookHeaderWidget.totalPoints = this.calcTotalPoints();

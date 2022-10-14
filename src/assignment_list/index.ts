@@ -12,14 +12,14 @@ import {
 
 import {
   Widget,
-  TabPanel
+  // TabPanel
 } from '@lumino/widgets';
 
 import {
   PageConfig
 } from '@jupyterlab/coreutils';
 
-import { INotebookShell } from '@jupyter-notebook/application';
+import { INotebookTree } from '@jupyter-notebook/tree';
 
 import {
   requestAPI,
@@ -169,17 +169,16 @@ class AssignmentListWidget extends Widget {
 
 }
 
-
 export const assignment_list_extension: JupyterFrontEndPlugin<void> = {
   id: PLUGIN_ID,
   autoStart: true,
   requires: [ICommandPalette],
-  optional: [ILayoutRestorer, INotebookShell],
-  activate: async (
+  optional: [ILayoutRestorer, INotebookTree],
+  activate: (
     app: JupyterFrontEnd,
     palette: ICommandPalette,
     restorer: ILayoutRestorer | null,
-    notebookShell: INotebookShell | null
+    notebookTree: INotebookTree | null
   )=> {
 
     // Declare a widget variable
@@ -204,29 +203,20 @@ export const assignment_list_extension: JupyterFrontEndPlugin<void> = {
           widget.title.label = 'Assignments';
           widget.title.closable = true;
         }
-        console.log("Assignments list initialized");
         if(!tracker.has(widget)){
           // Track the state of the widget for later restoration
           tracker.add(widget);
         }
 
+        // Attach the widget to the main area if it's not there
         if(!widget.isAttached){
-
-          // Attach the widget to the mainwork area if it's not there
-          // and activate it.
-          if (notebookShell) {
-            let w = app.shell.widgets('main').next() as TabPanel;
-            w.addWidget(widget);
-          }
-          else {
-            app.shell.add(widget, 'main');
-          }
+          if (notebookTree) notebookTree.addWidget(widget);
+          else app.shell.add(widget, 'main');
         }
 
         widget.content.update();
-        // TODO: fix the activation which does nothing
-        widget.activate();
-        // app.shell.activateById(widget.id);
+
+        app.shell.activateById(widget.id);
       }
     });
 
@@ -241,7 +231,7 @@ export const assignment_list_extension: JupyterFrontEndPlugin<void> = {
       });
     }
 
-    console.log('JupyterLab extension assignment-list is activated!');
+    console.debug('JupyterLab extension assignment-list is activated!');
   }
 };
 
