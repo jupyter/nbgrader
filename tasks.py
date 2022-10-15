@@ -119,7 +119,6 @@ def js(args):
 
 
 def install(args):
-    # The docs don't seem to build correctly if it's a symlinked install.
     if args.group == 'docs':
         cmd = 'pip install .[docs,tests]'
     else:
@@ -127,7 +126,7 @@ def install(args):
 
     env = os.environ.copy()
     if args.group not in ['all', 'labextensions']:
-        env['NBGRADER_NO_LAB'] = '1'
+        env['SKIP_JUPYTER_BUILDER'] = '1'
     run(cmd, env=env)
 
 

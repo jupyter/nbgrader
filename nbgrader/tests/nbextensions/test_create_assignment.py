@@ -92,9 +92,9 @@ def _load_notebook(browser, port, retries=5, name="blank"):
 
     # delete all cells
     if name == "blank":
-        cells = browser.find_elements_by_css_selector(".cell")
+        cells = browser.find_elements(By.CSS_SELECTOR, ".cell")
         for _ in range(len(cells)):
-            element = browser.find_elements_by_css_selector(".cell")[0]
+            element = browser.find_elements(By.CSS_SELECTOR, ".cell")[0]
             element.click()
             element.send_keys(Keys.ESCAPE)
             element.send_keys("d")
@@ -128,26 +128,26 @@ def _activate_toolbar(browser, name="Create%20Assignment"):
 
 def _select(browser, text, index=0):
     def is_clickable(browser):
-        elems = browser.find_elements_by_css_selector('.celltoolbar select')
+        elems = browser.find_elements(By.CSS_SELECTOR, '.celltoolbar select')
         if len(elems) <= index:
             return False
         elem = elems[index]
         return elem.is_displayed and elem.is_enabled
 
     def is_option(browser):
-        elem = browser.find_elements_by_css_selector('.celltoolbar select')[index]
+        elem = browser.find_elements(By.CSS_SELECTOR, '.celltoolbar select')[index]
         select = Select(elem)
         options = [x.get_attribute('value') for x in select.options]
         return text in options
 
     _wait(browser).until(is_clickable)
     _wait(browser).until(is_option)
-    elem = browser.find_elements_by_css_selector('.celltoolbar select')[index]
+    elem = browser.find_elements(By.CSS_SELECTOR, '.celltoolbar select')[index]
     select = Select(elem)
     select.select_by_value(text)
 
     def selected(browser):
-        elem = browser.find_elements_by_css_selector('.celltoolbar select')[index]
+        elem = browser.find_elements(By.CSS_SELECTOR, '.celltoolbar select')[index]
         return elem.get_attribute('value') == text
 
     _wait(browser).until(selected)
@@ -162,7 +162,7 @@ def _select_manual(browser, index=0):
 
 
 def _select_task(browser, index=0):
-    select = Select(browser.find_elements_by_css_selector('.celltoolbar select')[index])
+    select = Select(browser.find_elements(By.CSS_SELECTOR, '.celltoolbar select')[index])
     select.select_by_value('task')
 
 
@@ -191,7 +191,7 @@ def _set_points(browser, points=2, index=0):
         $($(".nbgrader-points-input")[{}]).val("{}").change().blur();
         """.format(index, points)
     )
-    browser.find_elements_by_css_selector(".nbgrader-cell")[index].click()
+    browser.find_elements(By.CSS_SELECTOR, ".nbgrader-cell")[index].click()
 
 
 def _set_id(browser, cell_id="foo", index=0):
@@ -201,7 +201,7 @@ def _set_id(browser, cell_id="foo", index=0):
         $($(".nbgrader-id-input")[{}]).val("{}").change().blur();
         """.format(index, cell_id)
     )
-    browser.find_elements_by_css_selector(".nbgrader-cell")[index].click()
+    browser.find_elements(By.CSS_SELECTOR, ".nbgrader-cell")[index].click()
 
 
 def _get_metadata(browser):
@@ -214,7 +214,7 @@ def _get_metadata(browser):
 
 
 def _get_total_points(browser):
-    element = browser.find_element_by_id("nbgrader-total-points")
+    element = browser.find_element(By.ID, "nbgrader-total-points")
     return float(element.get_attribute("value"))
 
 
@@ -254,12 +254,12 @@ def _wait_for_modal(browser):
 
 
 def _dismiss_modal(browser):
-    button = browser.find_element_by_css_selector(".modal-footer .btn-primary")
+    button = browser.find_element(By.CSS_SELECTOR, ".modal-footer .btn-primary")
     button.click()
 
     def modal_gone(browser):
         try:
-            browser.find_element_by_css_selector(".modal-dialog")
+            browser.find_element(By.CSS_SELECTOR, ".modal-dialog")
         except NoSuchElementException:
             return True
         return False
@@ -508,52 +508,52 @@ def test_grade_cell_css(browser, port):
 
     # make it manually graded
     _select_manual(browser)
-    elements = browser.find_elements_by_css_selector(".nbgrader-cell")
+    elements = browser.find_elements(By.CSS_SELECTOR, ".nbgrader-cell")
     assert len(elements) == 1
 
     # make it nothing
     _select_none(browser)
-    elements = browser.find_elements_by_css_selector(".nbgrader-cell")
+    elements = browser.find_elements(By.CSS_SELECTOR, ".nbgrader-cell")
     assert len(elements) == 0
 
     # make it a solution
     _select_solution(browser)
-    elements = browser.find_elements_by_css_selector(".nbgrader-cell")
+    elements = browser.find_elements(By.CSS_SELECTOR, ".nbgrader-cell")
     assert len(elements) == 1
 
     # make it nothing
     _select_none(browser)
-    elements = browser.find_elements_by_css_selector(".nbgrader-cell")
+    elements = browser.find_elements(By.CSS_SELECTOR, ".nbgrader-cell")
     assert len(elements) == 0
 
     # make it autograder tests
     _select_tests(browser)
-    elements = browser.find_elements_by_css_selector(".nbgrader-cell")
+    elements = browser.find_elements(By.CSS_SELECTOR, ".nbgrader-cell")
     assert len(elements) == 1
 
     # make it nothing
     _select_none(browser)
-    elements = browser.find_elements_by_css_selector(".nbgrader-cell")
+    elements = browser.find_elements(By.CSS_SELECTOR, ".nbgrader-cell")
     assert len(elements) == 0
 
     # make it autograder tests
     _select_tests(browser)
-    elements = browser.find_elements_by_css_selector(".nbgrader-cell")
+    elements = browser.find_elements(By.CSS_SELECTOR, ".nbgrader-cell")
     assert len(elements) == 1
 
     # deactivate the toolbar
     _activate_toolbar(browser, "None")
-    elements = browser.find_elements_by_css_selector(".nbgrader-cell")
+    elements = browser.find_elements(By.CSS_SELECTOR, ".nbgrader-cell")
     assert len(elements) == 0
 
     # activate the toolbar
     _activate_toolbar(browser)
-    elements = browser.find_elements_by_css_selector(".nbgrader-cell")
+    elements = browser.find_elements(By.CSS_SELECTOR, ".nbgrader-cell")
     assert len(elements) == 1
 
     # deactivate the toolbar
     _activate_toolbar(browser, "Edit%20Metadata")
-    elements = browser.find_elements_by_css_selector(".nbgrader-cell")
+    elements = browser.find_elements(By.CSS_SELECTOR, ".nbgrader-cell")
     assert len(elements) == 0
 
 
@@ -572,7 +572,7 @@ def test_tabbing(browser, port):
     _select_manual(browser)
 
     # click the id field
-    element = browser.find_element_by_css_selector(".nbgrader-points-input")
+    element = browser.find_element(By.CSS_SELECTOR, ".nbgrader-points-input")
     # There is a bug where sometimes the click doesn't register, so we also press enter
     # here which for some reason seems to help. It's not clear here what's happening
     # to cause this bug but see https://github.com/mozilla/geckodriver/issues/322 for
@@ -589,7 +589,7 @@ def test_tabbing(browser, port):
     _select_tests(browser)
 
     # click the id field
-    element = browser.find_element_by_css_selector(".nbgrader-points-input")
+    element = browser.find_element(By.CSS_SELECTOR, ".nbgrader-points-input")
     element.click()
     element.send_keys(Keys.RETURN)
     _wait(browser).until(active_element_is("nbgrader-points-input"))
@@ -628,14 +628,14 @@ def test_total_points(browser, port):
     assert _get_total_points(browser) == 2
 
     # create a new cell
-    element = browser.find_element_by_tag_name("body")
+    element = browser.find_element(By.TAG_NAME, "body")
     element.send_keys(Keys.ESCAPE)
     element.send_keys("b")
 
     # make sure the toolbar appeared
     def find_toolbar(browser):
         try:
-            browser.find_elements_by_css_selector(".celltoolbar select")[1]
+            browser.find_elements(By.CSS_SELECTOR, ".celltoolbar select")[1]
         except IndexError:
             return False
         return True
@@ -648,7 +648,7 @@ def test_total_points(browser, port):
     assert _get_total_points(browser) == 3
 
     # delete the new cell
-    element = browser.find_elements_by_css_selector(".cell")[0]
+    element = browser.find_elements(By.CSS_SELECTOR, ".cell")[0]
     element.click()
     element.send_keys(Keys.ESCAPE)
     element.send_keys("d")
@@ -656,7 +656,7 @@ def test_total_points(browser, port):
     assert _get_total_points(browser) == 1
 
     # delete the first cell
-    element = browser.find_elements_by_css_selector(".cell")[0]
+    element = browser.find_elements(By.CSS_SELECTOR, ".cell")[0]
     element.send_keys("d")
     element.send_keys("d")
     assert _get_total_points(browser) == 0
@@ -691,14 +691,14 @@ def test_task_total_points(browser, port):
     assert _get_total_points(browser) == 2
 
     # create a new cell
-    element = browser.find_element_by_tag_name("body")
+    element = browser.find_element(By.TAG_NAME, "body")
     element.send_keys(Keys.ESCAPE)
     element.send_keys("b")
 
     # make sure the toolbar appeared
     def find_toolbar(browser):
         try:
-            browser.find_elements_by_css_selector(".celltoolbar select")[1]
+            browser.find_elements(By.CSS_SELECTOR, ".celltoolbar select")[1]
         except IndexError:
             return False
         return True
@@ -711,7 +711,7 @@ def test_task_total_points(browser, port):
     assert _get_total_points(browser) == 3
 
     # delete the new cell
-    element = browser.find_elements_by_css_selector(".cell")[0]
+    element = browser.find_elements(By.CSS_SELECTOR, ".cell")[0]
     element.click()
     element.send_keys(Keys.ESCAPE)
     element.send_keys("d")
@@ -719,7 +719,7 @@ def test_task_total_points(browser, port):
     assert _get_total_points(browser) == 1
 
     # delete the first cell
-    element = browser.find_elements_by_css_selector(".cell")[0]
+    element = browser.find_elements(By.CSS_SELECTOR, ".cell")[0]
     element.send_keys("d")
     element.send_keys("d")
     assert _get_total_points(browser) == 0
@@ -745,14 +745,14 @@ def test_cell_ids(browser, port):
     _set_id(browser)
 
     # create a new cell
-    element = browser.find_element_by_tag_name("body")
+    element = browser.find_element(By.TAG_NAME, "body")
     element.send_keys(Keys.ESCAPE)
     element.send_keys("b")
 
     # make sure the toolbar appeared
     def find_toolbar(browser):
         try:
-            browser.find_elements_by_css_selector(".celltoolbar select")[1]
+            browser.find_elements(By.CSS_SELECTOR, ".celltoolbar select")[1]
         except IndexError:
             return False
         return True
@@ -786,14 +786,14 @@ def test_task_cell_ids(browser, port):
     _set_id(browser)
 
     # create a new cell
-    element = browser.find_element_by_tag_name("body")
+    element = browser.find_element(By.TAG_NAME, "body")
     element.send_keys(Keys.ESCAPE)
     element.send_keys("b")
 
     # make sure the toolbar appeared
     def find_toolbar(browser):
         try:
-            browser.find_elements_by_css_selector(".celltoolbar select")[1]
+            browser.find_elements(By.CSS_SELECTOR, ".celltoolbar select")[1]
         except IndexError:
             return False
         return True
@@ -886,14 +886,14 @@ def test_invalid_nbgrader_cell_type(browser, port):
     _save_and_validate(browser)
 
     # change the cell to a markdown cell
-    element = browser.find_element_by_tag_name("body")
+    element = browser.find_element(By.TAG_NAME, "body")
     element.send_keys(Keys.ESCAPE)
     element.send_keys("m")
 
     # make sure the toolbar appeared
     def find_toolbar(browser):
         try:
-            browser.find_elements_by_css_selector(".celltoolbar select")[0]
+            browser.find_elements(By.CSS_SELECTOR, ".celltoolbar select")[0]
         except IndexError:
             return False
         return True
