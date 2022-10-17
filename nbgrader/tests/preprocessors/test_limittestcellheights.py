@@ -3,7 +3,7 @@ import os
 from textwrap import dedent
 from ...preprocessors import LimitTestCellHeights
 from .base import BaseTestPreprocessor
-from .. import create_code_cell, create_text_cell, create_autotest_solution_cell, create_autotest_test_cell
+from .. import create_code_cell, create_text_cell
 from nbformat.v4 import new_notebook
 
 
@@ -15,7 +15,7 @@ def preprocessor():
 class TestLimitTestCellHeights(BaseTestPreprocessor):
 
     def test_replace_autotest_code(self, preprocessor):
-        test_cell = create_autotest_test_cell()
+        test_cell = create_code_cell()
         test_cell.metadata['nbgrader'] = {'grade': True}
         resources = dict()
         cell = preprocessor.preprocess_cell(test_cell, resources, 1)[0]
