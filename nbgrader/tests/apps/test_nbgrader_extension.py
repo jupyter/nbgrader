@@ -31,13 +31,12 @@ def test_nbextension_mac():
     from nbgrader import _jupyter_nbextension_paths
     with mock_platform("darwin"):
         nbexts = _jupyter_nbextension_paths()
-        assert len(nbexts) == 6
+        assert len(nbexts) == 5
         assert nbexts[0]['section'] == 'notebook'
         assert nbexts[1]['section'] == 'tree'
         assert nbexts[2]['section'] == 'notebook'
-        assert nbexts[3]['section'] == 'notebook'
+        assert nbexts[3]['section'] == 'tree'
         assert nbexts[4]['section'] == 'tree'
-        assert nbexts[5]['section'] == 'tree'
         paths = [ext['src'] for ext in nbexts]
         for path in paths:
             assert os.path.isdir(os.path.join(os.path.dirname(nbgrader.__file__), path))
@@ -47,11 +46,10 @@ def test_nbextension_windows():
     from nbgrader import _jupyter_nbextension_paths
     with mock_platform("win32"):
         nbexts = _jupyter_nbextension_paths()
-        assert len(nbexts) == 4
+        assert len(nbexts) == 3
         assert nbexts[0]['section'] == 'notebook'
         assert nbexts[1]['section'] == 'tree'
         assert nbexts[2]['section'] == 'notebook'
-        assert nbexts[3]['section'] == 'notebook'
         paths = [ext['src'] for ext in nbexts]
         for path in paths:
             assert os.path.isdir(os.path.join(os.path.dirname(nbgrader.__file__), path))
