@@ -125,7 +125,7 @@ class QuickStartApp(NbGrader):
         # copying the tests.yml file to the course directory
         tests_file_path = os.path.abspath(os.path.join(
             os.path.dirname(__file__), '..', 'docs', 'source', 'user_guide', 'tests.yml'))
-        shutil.copyfile(tests_file_path, course_path)
+        shutil.copyfile(tests_file_path, os.path.join(course_path, 'tests.yml'))
 
         # create the config file
         self.log.info("Generating example config file...")
