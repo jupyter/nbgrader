@@ -23,9 +23,9 @@ const is_windows = os.platform().startsWith('win')
 /*
  * Create environment
  */
-test.beforeEach(async ({ baseURL, tmpPath }) => {
-  if (baseURL === undefined) throw new Error("BaseURL is undefined.");
-  const contents = galata.newContentsHelper(baseURL);
+test.beforeEach(async ({ request, tmpPath }) => {
+  if (request === undefined) throw new Error("Request is undefined.");
+  const contents = galata.newContentsHelper(request);
 
   await contents.createDirectory(tmpPath);
 
@@ -38,9 +38,9 @@ test.beforeEach(async ({ baseURL, tmpPath }) => {
 /*
  * delete temp directories at the end of test
  */
-test.afterEach(async ({ baseURL, tmpPath }) => {
-  if (baseURL === undefined) throw new Error("BaseURL is undefined.");
-  const contents = galata.newContentsHelper(baseURL);
+test.afterEach(async ({ request, tmpPath }) => {
+  if (request === undefined) throw new Error("Request is undefined.");
+  const contents = galata.newContentsHelper(request);
   await contents.deleteDirectory(tmpPath);
 
   if (!is_windows){
@@ -57,15 +57,15 @@ test.afterEach(async ({ baseURL, tmpPath }) => {
  */
 const open_courses_list = async (page:IJupyterLabPageFixture) => {
 
-  await expect(page.locator("#jp-main-dock-panel .lm-TabBar-tab.p-TabBar-tab")).toHaveCount(1);
+  await expect(page.locator("#jp-main-dock-panel .lm-TabBar-tab")).toHaveCount(1);
 
   await page.keyboard.press('Control+Shift+c');
   await page.locator('#modal-command-palette li[data-command="nbgrader:open-course-list"]').click();
 
-  await expect(page.locator("#jp-main-dock-panel .lm-TabBar-tab.p-TabBar-tab")).toHaveCount(2);
+  await expect(page.locator("#jp-main-dock-panel .lm-TabBar-tab")).toHaveCount(2);
 
-  var tabs = page.locator("#jp-main-dock-panel .lm-TabBar-tab.p-TabBar-tab");
-  var newTab_label = tabs.last().locator(".lm-TabBar-tabLabel.p-TabBar-tabLabel");
+  var tabs = page.locator("#jp-main-dock-panel .lm-TabBar-tab");
+  var newTab_label = tabs.last().locator(".lm-TabBar-tabLabel");
   await expect(newTab_label).toHaveText("Courses");
   await page.waitForSelector("#formgrader_list");
 }
@@ -103,10 +103,10 @@ test('Open course list tab from menu', async({
   page
   }) => {
 
-    const nbgrader_menu = page.locator('#jp-menu-panel div.lm-MenuBar-itemLabel.p-MenuBar-itemLabel:text("Nbgrader")');
+    const nbgrader_menu = page.locator('#jp-menu-panel div.lm-MenuBar-itemLabel:text("Nbgrader")');
     const courseList_menu = page.locator('#jp-mainmenu-nbgrader-menu li[data-command="nbgrader:open-course-list"]');
-    const tabs = page.locator("#jp-main-dock-panel .lm-TabBar-tab.p-TabBar-tab");
-    const lastTab_label = tabs.last().locator(".lm-TabBar-tabLabel.p-TabBar-tabLabel");
+    const tabs = page.locator("#jp-main-dock-panel .lm-TabBar-tab");
+    const lastTab_label = tabs.last().locator(".lm-TabBar-tabLabel");
 
     await expect(tabs).toHaveCount(1);
 
@@ -114,10 +114,10 @@ test('Open course list tab from menu', async({
     await expect(nbgrader_menu).toHaveCount(1);
 
     // Open course list from the menu
-    await nbgrader_menu.click();    
+    await nbgrader_menu.click();
     await courseList_menu.click();
 
-    await expect(tabs).toHaveCount(2);        
+    await expect(tabs).toHaveCount(2);
     await expect(lastTab_label).toHaveText("Courses");
 
     // Close the last tab
@@ -138,7 +138,6 @@ test('Open course list tab from menu', async({
  */
 test('local formgrader', async ({
   page,
-  baseURL,
   tmpPath
   }) => {
 
@@ -159,10 +158,10 @@ test('local formgrader', async ({
     await expect(page.locator("#formgrader_list > .list_item a")).toHaveCount(1);
 
     await page.locator("#formgrader_list > .list_item a").click();
-    await expect(page.locator("#jp-main-dock-panel .lm-TabBar-tab.p-TabBar-tab")).toHaveCount(3);
+    await expect(page.locator("#jp-main-dock-panel .lm-TabBar-tab")).toHaveCount(3);
 
-    var tabs = page.locator("#jp-main-dock-panel .lm-TabBar-tab.p-TabBar-tab");
-    var newTab_label = tabs.last().locator(".lm-TabBar-tabLabel.p-TabBar-tabLabel");
+    var tabs = page.locator("#jp-main-dock-panel .lm-TabBar-tab");
+    var newTab_label = tabs.last().locator(".lm-TabBar-tabLabel");
     await expect(newTab_label).toHaveText("Formgrader");
 
   }
@@ -203,10 +202,10 @@ test('local formgrader', async ({
 //     await expect(page.locator("#formgrader_list > .list_item a")).toHaveCount(1);
 
 //     await page.locator("#formgrader_list > .list_item a").click();
-//     await expect(page.locator("#jp-main-dock-panel .lm-TabBar-tab.p-TabBar-tab")).toHaveCount(3);
+//     await expect(page.locator("#jp-main-dock-panel .lm-TabBar-tab")).toHaveCount(3);
 
-//     var tabs = page.locator("#jp-main-dock-panel .lm-TabBar-tab.p-TabBar-tab");
-//     var newTab_label = tabs.last().locator(".lm-TabBar-tabLabel.p-TabBar-tabLabel");
+//     var tabs = page.locator("#jp-main-dock-panel .lm-TabBar-tab");
+//     var newTab_label = tabs.last().locator(".lm-TabBar-tabLabel");
 //     await expect(newTab_label).toHaveText("Formgrader");
 
 //   }

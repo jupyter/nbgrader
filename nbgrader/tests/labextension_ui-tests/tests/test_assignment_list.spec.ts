@@ -1,5 +1,5 @@
 import { test, galata, IJupyterLabPageFixture } from '@jupyterlab/galata';
-import { expect, Locator, Page } from '@playwright/test';
+import { APIRequestContext, expect, Locator, Page } from '@playwright/test';
 import {
   execute_command,
   create_env,
@@ -29,9 +29,9 @@ const is_windows = os.platform().startsWith('win')
 /*
  * Create environment
  */
-test.beforeEach(async ({ baseURL, tmpPath }) => {
-  if (baseURL === undefined) throw new Error("BaseURL is undefined.");
-  const contents = galata.newContentsHelper(baseURL);
+test.beforeEach(async ({ request, tmpPath }) => {
+  if (request === undefined) throw new Error("Request is undefined.");
+  const contents = galata.newContentsHelper(request);
 
   await contents.createDirectory(tmpPath);
 
@@ -44,14 +44,14 @@ test.beforeEach(async ({ baseURL, tmpPath }) => {
 /*
  * delete temp directories at the end of test
  */
-test.afterEach(async ({ baseURL, tmpPath }) => {
+test.afterEach(async ({ request, tmpPath }) => {
   if (!is_windows){
     fs.rmSync(exchange_dir, { recursive: true, force: true });
     fs.rmSync(cache_dir, { recursive: true, force: true });
   }
 
-  if (baseURL === undefined) throw new Error("BaseURL is undefined.");
-  const contents = galata.newContentsHelper(baseURL);
+  if (request === undefined) throw new Error("Request is undefined.");
+  const contents = galata.newContentsHelper(request);
   await contents.deleteDirectory(tmpPath);
 
   if (await contents.fileExists("nbgrader_config.py")) contents.deleteFile("nbgrader_config.py");
@@ -62,9 +62,9 @@ test.afterEach(async ({ baseURL, tmpPath }) => {
 /*
  * Create a nbgrader file system and modify config
  */
-const add_courses = async (page:IJupyterLabPageFixture, baseURL:string, tmpPath:string) => {
+const add_courses = async (page:IJupyterLabPageFixture, request:APIRequestContext, tmpPath:string) => {
 
-  const contents = galata.newContentsHelper(baseURL);
+  const contents = galata.newContentsHelper(request);
 
   // copy files from the user guide
   const source = path.resolve(__dirname, "..", "..", "..", "docs", "source", "user_guide", "source");
@@ -91,15 +91,15 @@ const add_courses = async (page:IJupyterLabPageFixture, baseURL:string, tmpPath:
  */
 const open_assignment_list = async (page:IJupyterLabPageFixture) => {
 
-  await expect(page.locator("#jp-main-dock-panel .lm-TabBar-tab.p-TabBar-tab")).toHaveCount(1);
+  await expect(page.locator("#jp-main-dock-panel .lm-TabBar-tab")).toHaveCount(1);
 
   await page.keyboard.press('Control+Shift+c');
   await page.locator('#modal-command-palette li[data-command="nbgrader:open-assignment-list"]').click();
 
-  await expect(page.locator("#jp-main-dock-panel .lm-TabBar-tab.p-TabBar-tab")).toHaveCount(2);
+  await expect(page.locator("#jp-main-dock-panel .lm-TabBar-tab")).toHaveCount(2);
 
-  var tabs = page.locator("#jp-main-dock-panel .lm-TabBar-tab.p-TabBar-tab");
-  var newTab_label = tabs.last().locator(".lm-TabBar-tabLabel.p-TabBar-tabLabel");
+  var tabs = page.locator("#jp-main-dock-panel .lm-TabBar-tab");
+  var newTab_label = tabs.last().locator(".lm-TabBar-tabLabel");
   await expect(newTab_label).toHaveText("Assignments");
 
 }
@@ -156,21 +156,21 @@ test('Open assignment list tab from menu', async({
   page
   }) => {
 
-    const nbgrader_menu = page.locator('#jp-menu-panel div.lm-MenuBar-itemLabel.p-MenuBar-itemLabel:text("Nbgrader")');
+    const nbgrader_menu = page.locator('#jp-menu-panel div.lm-MenuBar-itemLabel:text("Nbgrader")');
     const assignmentList_menu = page.locator('#jp-mainmenu-nbgrader-menu li[data-command="nbgrader:open-assignment-list"]');
-    const tabs = page.locator("#jp-main-dock-panel .lm-TabBar-tab.p-TabBar-tab");
-    const lastTab_label = tabs.last().locator(".lm-TabBar-tabLabel.p-TabBar-tabLabel");
+    const tabs = page.locator("#jp-main-dock-panel .lm-TabBar-tab");
+    const lastTab_label = tabs.last().locator(".lm-TabBar-tabLabel");
 
     await expect(tabs).toHaveCount(1);
 
-    // Check main menu exists    
+    // Check main menu exists
     await expect(nbgrader_menu).toHaveCount(1);
 
     // Open assignment list from the menu
-    await nbgrader_menu.click();    
+    await nbgrader_menu.click();
     await assignmentList_menu.click();
 
-    await expect(tabs).toHaveCount(2);        
+    await expect(tabs).toHaveCount(2);
     await expect(lastTab_label).toHaveText("Assignments");
 
     // Close the last tab
@@ -190,16 +190,16 @@ test('Open assignment list tab from menu', async({
  */
 test('Show assignment list', async({
   page,
-  baseURL,
+  request,
   tmpPath
   }) => {
 
     test.skip(is_windows, 'This feature is not implemented for Windows');
 
-    if (baseURL === undefined) throw new Error("BaseURL is undefined.");
+    if (request === undefined) throw new Error("Request is undefined.");
 
     await create_env(page, tmpPath, exchange_dir, cache_dir, is_windows);
-    await add_courses(page, baseURL, tmpPath);
+    await add_courses(page, request, tmpPath);
     await open_assignment_list(page);
 
     // Wait for DOM of each status
@@ -226,16 +226,16 @@ test('Show assignment list', async({
  */
 test('Multiple released assignments', async({
   page,
-  baseURL,
+  request,
   tmpPath
   }) => {
 
     test.skip(is_windows, 'This feature is not implemented for Windows');
 
-    if (baseURL === undefined) throw new Error("BaseURL is undefined.");
+    if (request === undefined) throw new Error("Request is undefined.");
 
     await create_env(page, tmpPath, exchange_dir, cache_dir, is_windows);
-    await add_courses(page, baseURL, tmpPath);
+    await add_courses(page, request, tmpPath);
     await open_assignment_list(page);
 
     // release two assignments
@@ -262,16 +262,16 @@ test('Multiple released assignments', async({
  */
 test('Fetch assignments', async({
   page,
-  baseURL,
+  request,
   tmpPath
   }) => {
 
     test.skip(is_windows, 'This feature is not implemented for Windows');
 
-    if (baseURL === undefined) throw new Error("BaseURL is undefined.");
+    if (request === undefined) throw new Error("Request is undefined.");
 
     await create_env(page, tmpPath, exchange_dir, cache_dir, is_windows);
-    await add_courses(page, baseURL, tmpPath);
+    await add_courses(page, request, tmpPath);
     await open_assignment_list(page);
 
     // release some assignments
@@ -296,7 +296,7 @@ test('Fetch assignments', async({
     expect(rows.first().locator('.item_course').first()).toHaveText("xyz 200");
 
     // check that the directory has been created
-    const contents = galata.newContentsHelper(baseURL);
+    const contents = galata.newContentsHelper(request);
     expect(contents.directoryExists('ps.01'));
 
     // expand assignment notebooks
@@ -314,17 +314,17 @@ test('Fetch assignments', async({
  */
 test('Submit assignments', async({
   page,
-  baseURL,
+  request,
   tmpPath
   }) => {
 
     test.skip(is_windows, 'This feature is not implemented for Windows');
 
-    if (baseURL === undefined) throw new Error("BaseURL is undefined.");
+    if (request === undefined) throw new Error("Request is undefined.");
 
     // create directories and config files, and open assignment_list tab
     await create_env(page, tmpPath, exchange_dir, cache_dir, is_windows);
-    await add_courses(page, baseURL, tmpPath);
+    await add_courses(page, request, tmpPath);
     await open_assignment_list(page);
 
     // release some assignments
@@ -376,17 +376,17 @@ test('Submit assignments', async({
  */
 test('submit assignment missing notebook', async ({
   page,
-  baseURL,
+  request,
   tmpPath
   }) => {
 
     test.skip(is_windows, 'This feature is not implemented for Windows');
 
-    if (baseURL === undefined) throw new Error("BaseURL is undefined.");
+    if (request === undefined) throw new Error("Request is undefined.");
 
     // create directories and config files, and open assignment_list tab
     const rootDir = await create_env(page, tmpPath, exchange_dir, cache_dir, is_windows);
-    await add_courses(page, baseURL, tmpPath);
+    await add_courses(page, request, tmpPath);
     await open_assignment_list(page);
 
     // release some assignments
@@ -417,7 +417,7 @@ test('submit assignment missing notebook', async ({
     expect(rows).toHaveCount(2);
 
     // rename the assignment notebook file
-    const contents = galata.newContentsHelper(baseURL);
+    const contents = galata.newContentsHelper(request);
     expect(await contents.fileExists(`${tmpPath}/ps.01/problem 1.ipynb`));
     await contents.renameFile(
       `${tmpPath}/ps.01/problem 1.ipynb`,
@@ -462,16 +462,16 @@ test('submit assignment missing notebook', async ({
  */
 test('Fetch a second assignment', async({
   page,
-  baseURL,
+  request,
   tmpPath
   }) => {
 
     test.skip(is_windows, 'This feature is not implemented for Windows');
 
-    if (baseURL === undefined) throw new Error("BaseURL is undefined.");
+    if (request === undefined) throw new Error("Request is undefined.");
 
     await create_env(page, tmpPath, exchange_dir, cache_dir, is_windows);
-    await add_courses(page, baseURL, tmpPath);
+    await add_courses(page, request, tmpPath);
     await open_assignment_list(page);
 
     // release some assignments
@@ -503,7 +503,7 @@ test('Fetch a second assignment', async({
     expect(rows.first().locator('.item_course').first()).toHaveText("abc101");
 
     // check that the directory has been created
-    const contents = galata.newContentsHelper(baseURL);
+    const contents = galata.newContentsHelper(request);
     expect(contents.directoryExists('Problem Set 1'));
 
     // expand assignment notebooks
@@ -522,17 +522,17 @@ test('Fetch a second assignment', async({
  */
 test('Submit another assignments', async({
   page,
-  baseURL,
+  request,
   tmpPath
   }) => {
 
     test.skip(is_windows, 'This feature is not implemented for Windows');
 
-    if (baseURL === undefined) throw new Error("BaseURL is undefined.");
+    if (request === undefined) throw new Error("Request is undefined.");
 
     // create directories and config files, and open assignment_list tab
     await create_env(page, tmpPath, exchange_dir, cache_dir, is_windows);
-    await add_courses(page, baseURL, tmpPath);
+    await add_courses(page, request, tmpPath);
     await open_assignment_list(page);
 
     // release some assignments
@@ -572,17 +572,17 @@ test('Submit another assignments', async({
  */
 test('Validate OK', async({
   page,
-  baseURL,
+  request,
   tmpPath
   }) => {
 
     test.skip(is_windows, 'This feature is not implemented for Windows');
 
-    if (baseURL === undefined) throw new Error("BaseURL is undefined.");
+    if (request === undefined) throw new Error("Request is undefined.");
 
     // create directories and config files, and open assignment_list tab
     await create_env(page, tmpPath, exchange_dir, cache_dir, is_windows);
-    await add_courses(page, baseURL, tmpPath);
+    await add_courses(page, request, tmpPath);
     await open_assignment_list(page);
 
     // release some assignments
@@ -622,17 +622,17 @@ test('Validate OK', async({
  */
 test('Validate failure', async({
   page,
-  baseURL,
+  request,
   tmpPath
   }) => {
 
     test.skip(is_windows, 'This feature is not implemented for Windows');
 
-    if (baseURL === undefined) throw new Error("BaseURL is undefined.");
+    if (request === undefined) throw new Error("Request is undefined.");
 
     // create directories and config files, and open assignment_list tab
     await create_env(page, tmpPath, exchange_dir, cache_dir, is_windows);
-    await add_courses(page, baseURL, tmpPath);
+    await add_courses(page, request, tmpPath);
     await open_assignment_list(page);
 
     // release some assignments
@@ -672,17 +672,17 @@ test('Validate failure', async({
  */
 test('Missing exchange directory', async({
   page,
-  baseURL,
+  request,
   tmpPath
   }) => {
 
     test.skip(is_windows, 'This feature is not implemented for Windows');
 
-    if (baseURL === undefined) throw new Error("BaseURL is undefined.");
+    if (request === undefined) throw new Error("Request is undefined.");
 
     // create directories and config files
     await create_env(page, tmpPath, exchange_dir, cache_dir, is_windows);
-    await add_courses(page, baseURL, tmpPath);
+    await add_courses(page, request, tmpPath);
 
     // delete exchange directory
     fs.rmSync(exchange_dir, { recursive: true, force: true });

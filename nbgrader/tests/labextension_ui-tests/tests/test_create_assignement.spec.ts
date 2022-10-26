@@ -18,11 +18,11 @@ const nb_files = ["blank.ipynb", "task.ipynb", "old-schema.ipynb"];
 /*
  * copy notebook files before each test
  */
-test.beforeEach(async ({ baseURL, tmpPath }) => {
+test.beforeEach(async ({ request, tmpPath }) => {
 
-    if (baseURL === undefined) throw new Error("BaseURL is undefined.");
+    if (request === undefined) throw new Error("Request is undefined.");
 
-    const contents = galata.newContentsHelper(baseURL);
+    const contents = galata.newContentsHelper(request);
     nb_files.forEach(elem => {
          contents.uploadFile(
             path.resolve(
@@ -37,11 +37,11 @@ test.beforeEach(async ({ baseURL, tmpPath }) => {
 /*
  * delete temp directory at the end of test
  */
-test.afterAll(async ({ baseURL, tmpPath }) => {
+test.afterAll(async ({ request, tmpPath }) => {
 
-    if (baseURL === undefined) throw new Error("BaseURL is undefined.");
+    if (request === undefined) throw new Error("Request is undefined.");
 
-    const contents = galata.newContentsHelper(baseURL);
+    const contents = galata.newContentsHelper(request);
     await contents.deleteDirectory(tmpPath);
 
     if (await contents.fileExists("nbgrader_config.py")) contents.deleteFile("nbgrader_config.py");
@@ -55,9 +55,9 @@ test.afterAll(async ({ baseURL, tmpPath }) => {
 const open_notebook = async (page:IJupyterLabPageFixture, notebook:string) => {
 
     var filename = notebook + '.ipynb';
-    var tab_count = await page.locator("#jp-main-dock-panel .lm-TabBar-tab.p-TabBar-tab").count();
+    var tab_count = await page.locator("#jp-main-dock-panel .lm-TabBar-tab").count();
     await page.locator(`#filebrowser .jp-DirListing-content .jp-DirListing-itemText span:text-is('${filename}')`).dblclick();
-    await expect(page.locator("#jp-main-dock-panel .lm-TabBar-tab.p-TabBar-tab")).toHaveCount(tab_count + 1);
+    await expect(page.locator("#jp-main-dock-panel .lm-TabBar-tab")).toHaveCount(tab_count + 1);
     await page.waitForSelector(".jp-Notebook-cell");
 
 }
@@ -86,7 +86,7 @@ const activate_toolbar = async (page:IJupyterLabPageFixture) => {
         }
     }
 
-    const widget_button = page.locator(".lm-TabBar-tab.p-TabBar-tab[title='nbgrader Create Assignment']");
+    const widget_button = page.locator(".lm-TabBar-tab[title='nbgrader Create Assignment']");
     const button_position = await widget_button.boundingBox();
 
     if (button_position === null) throw new Error("Cannot get the position of the create assignment button.");
