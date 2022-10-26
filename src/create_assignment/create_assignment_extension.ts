@@ -3,20 +3,14 @@ import {
   Dialog,
   Styling
 } from '@jupyterlab/apputils';
-
 import {
   Cell,
   ICellModel
 } from '@jupyterlab/cells';
-
-// import {
-//   IChangedArgs
-// } from '@jupyterlab/coreutils';
-
+import { IChangedArgs } from '@jupyterlab/coreutils';
 import {
   DocumentRegistry
 } from '@jupyterlab/docregistry';
-
 import {
   INotebookModel,
   INotebookTracker,
@@ -24,30 +18,26 @@ import {
   NotebookPanel
 } from '@jupyterlab/notebook';
 import { CellList } from '@jupyterlab/notebook/lib/celllist';
-
 import {
   IObservableJSON,
   IObservableList,
   IObservableMap,
 } from '@jupyterlab/observables';
-
 import {
   ReadonlyPartialJSONValue
 } from '@lumino/coreutils';
-
 import {
   Message
 } from '@lumino/messaging';
-
 import {
   ISignal,
   Signal
 } from '@lumino/signaling';
-
 import {
   Panel,
   Widget
 } from '@lumino/widgets';
+
 import {
   CellModel,
   CellType,
@@ -236,8 +226,9 @@ export class CreateAssignmentWidget extends Panel {
  */
 class CellWidget extends Panel {
 
-  constructor(cellModel: ICellModel) {
+  constructor(cellModel: ICellModel, notebookPanel?: NotebookPanel) {
     super();
+    this._notebookPanel = notebookPanel;
     this._cellModel = cellModel;
     this._cellModel.metadata.changed.connect(
       this._onMetadataChange, this
@@ -247,6 +238,10 @@ class CellWidget extends Panel {
     this._initMetadata(cellModel);
     this.addClass(CSS_CELL_WIDGET);
     this.node.addEventListener('click', this._onClick.bind(this));
+    this.cellModel.stateChanged.connect(this._onStateChange, this);
+
+    // Try to update the prompt (works only if cell widget has been created).
+    this._updatePrompt();
   }
 
   /**
@@ -275,6 +270,8 @@ class CellWidget extends Panel {
       this._onMetadataChange, this
     );
     this.node.removeEventListener('click', this._onClick);
+    this.cellModel.stateChanged.disconnect(this._onStateChange, this);
+
     if (this._taskInput != null) {
       this._taskInput.onchange = null;
     }
@@ -298,24 +295,46 @@ class CellWidget extends Panel {
   /**
    * Sets this cell as active/focused.
    */
-   setActive(active: boolean): void {
+  setActive(active: boolean): void {
     if (active) {
       this.addClass(CSS_MOD_ACTIVE);
-    }
-    else {
+
+      // This _updatePrompt() call is a hack to create a prompt when a new cell is
+      // added in cellList. Indeed the listener catches that a new cell model is added
+      // to cellList, but not that the cell widget is created in the NotebookPanel.
+      // The prompt is a copy of the one from the cell widget but there is no listener
+      // on its creation. When a new cell is created, it is activated, so we use here
+      // this activation to create the prompt.
+      this._updatePrompt();
+    } else {
       this.removeClass(CSS_MOD_ACTIVE);
     }
   }
 
-  // private getCellStateChangedListener(
-  //     srcPrompt: HTMLElement, destPrompt: HTMLElement):
-  //     (model: ICellModel, changedArgs: IChangedArgs<any, any, string>) => void {
-  //   return (model: ICellModel, changedArgs: IChangedArgs<any, any, string>) => {
-  //     if (changedArgs.name == 'executionCount') {
-  //       destPrompt.innerText = srcPrompt.innerText;
-  //     }
-  //   }
-  // }
+  /**
+   * Copy the prompt of the cell widget of the notebook.
+   */
+  private _updatePrompt() {
+    this._headerElement.removeChild(this._promptNode);
+    const cell: Cell = this._notebookPanel.content.widgets.find(widget => {
+      return widget.model.id === this.cellModel.id
+    });
+    if (cell && cell.promptNode){
+      this._promptNode = cell.promptNode.cloneNode(true) as HTMLElement;
+    } else {
+      this._promptNode = document.createElement('div');
+    }
+    this._headerElement.insertBefore(this._promptNode, this._headerElement.firstChild);
+  }
+
+  private _onStateChange(
+    model: ICellModel,
+    changedArgs: IChangedArgs<any, any, string>
+  ) {
+    if (changedArgs.name == 'executionCount') {
+      this._updatePrompt();
+    }
+  }
 
   private _onMetadataChange (
     metadata: IObservableJSON,
@@ -383,6 +402,7 @@ class CellWidget extends Panel {
     }
     bodyElement.appendChild(fragment);
     this.node.appendChild(bodyElement);
+    this._headerElement = headerElement;
     this._lock = headerElement.getElementsByTagName('a')[0];
     this._gradeId = idElement;
     this._points = pointsElement;
@@ -403,12 +423,8 @@ class CellWidget extends Panel {
   private _newHeaderElement(): HTMLDivElement {
     const element = document.createElement('div');
     element.className = CSS_CELL_HEADER;
-    // if (this.cell && this.cell.promptNode) {
-    //   const promptNode =  this.cell.promptNode.cloneNode(true) as HTMLElement;
-    //   element.appendChild(promptNode);
-    //   this.cell.stateChanged.connect(this.getCellStateChangedListener(
-    //     this.cell.promptNode, promptNode));
-    // }
+    this._promptNode = document.createElement('div');
+    element.appendChild(this._promptNode);
     const lockElement = document.createElement('a');
     lockElement.className = CSS_LOCK_BUTTON;
     const listElement = document.createElement('li');
@@ -552,6 +568,9 @@ class CellWidget extends Panel {
   }
 
   private _cellModel: ICellModel;
+  private _notebookPanel: NotebookPanel | null;
+  private _promptNode: HTMLElement;
+  private _headerElement: HTMLDivElement;
   private _click = new Signal<this, void>(this);
   private _lock: HTMLAnchorElement;
   private _gradeId: HTMLDivElement;
@@ -621,7 +640,7 @@ class NotebookWidget extends Panel {
 
   constructor(panel: NotebookPanel) {
     super();
-    this._activeCell = panel.content.activeCell.model;
+    this._activeCellModel = panel.content.activeCell.model;
     this._notebookPanel = panel;
     this.addClass(CSS_NOTEBOOK_WIDGET);
     this._initCellWidgets(panel.content);
@@ -654,7 +673,7 @@ class NotebookWidget extends Panel {
     this.notebookPanel?.disposed?.disconnect(this._onNotebookDisposed, this);
 
     this.notebookPanel?.dispose();
-    this._activeCell = null;
+    this._activeCellModel = null;
     this._cellMetadataChanged = null;
     this._cellWidgets = null;
     this._metadataChangedHandlers = null;
@@ -682,7 +701,7 @@ class NotebookWidget extends Panel {
   ) {
     switch (args.type) {
       case 'add': {
-      this._addCellWidget(args.newValues[0], args.newIndex);
+        this._addCellWidget(args.newValues[0], args.newIndex);
       break;
       }
       case 'move': {
@@ -703,8 +722,8 @@ class NotebookWidget extends Panel {
           this._cellWidgets.get(oldCell).dispose();
           this._cellWidgets.delete(oldCell);
           const cellWidget = this._addCellWidget(newCell, args.newIndex);
-          cellWidget.setActive(this._activeCell === newCell);
-          if (this._activeCell === newCell) {
+          cellWidget.setActive(this._activeCellModel === newCell);
+          if (this._activeCellModel === newCell) {
             this._scrollIntoViewNearest(cellWidget);
           }
         }
@@ -712,9 +731,9 @@ class NotebookWidget extends Panel {
     }
   }
 
-  private _addCellWidget(cell: ICellModel, index = undefined as number): CellWidget {
-    const cellWidget = new CellWidget(cell);
-    this._cellWidgets.set(cell, cellWidget);
+  private _addCellWidget(cellModel: ICellModel, index = undefined as number): CellWidget {
+    const cellWidget = new CellWidget(cellModel, this._notebookPanel);
+    this._cellWidgets.set(cellModel, cellWidget);
     if (index == null) {
       this.addWidget(cellWidget);
     }
@@ -723,7 +742,7 @@ class NotebookWidget extends Panel {
     }
     cellWidget.click.connect(this._activeCellWidgetListener, this);
     const metadataChangedHandler = this._getMetadataChangedHandler(cellWidget);
-    cell.metadata.changed.connect(metadataChangedHandler);
+    cellModel.metadata.changed.connect(metadataChangedHandler);
     this._metadataChangedHandlers.set(cellWidget, metadataChangedHandler);
     return cellWidget;
   }
@@ -741,21 +760,22 @@ class NotebookWidget extends Panel {
   /**
    * Called when the selected cell on notebook panel changes.
    */
-  private _onActiveCellChange(notebook: Notebook, cell: Cell) {
-    if (this._activeCell != null) {
-      const activeWidget = this._cellWidgets.get(this._activeCell);
+  private async _onActiveCellChange(notebook: Notebook, cell: Cell) {
+    if (this._activeCellModel != null) {
+      const activeWidget = this._cellWidgets.get(this._activeCellModel);
       if (activeWidget != null) {
         activeWidget.setActive(false);
       }
     }
     if (cell != null) {
+      await cell.ready;
       const activeWidget = this._cellWidgets.get(cell.model);
       if (activeWidget != null) {
         activeWidget.setActive(true);
         this._scrollIntoViewNearest(activeWidget);
       }
     }
-    this._activeCell = cell.model;
+    this._activeCellModel = cell.model;
   }
 
   /**
@@ -913,7 +933,7 @@ class NotebookWidget extends Panel {
     }
   }
 
-  private _activeCell = null as ICellModel;
+  private _activeCellModel = null as ICellModel;
   private _cellMetadataChanged = new Signal<this, CellWidget>(this);
   private _cellWidgets = new Map<ICellModel, CellWidget>();
   private _metadataChangedHandlers = new Map<
