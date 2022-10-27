@@ -351,12 +351,17 @@ class NbGrader(JupyterApp):
         if self.config_file:
             paths = [os.path.abspath("{}.py".format(self.config_file))]
         else:
-            paths = [os.path.join(x, "{}.py".format(self.config_file_name)) for x in self.config_file_paths]
+            config_dir = self.config_file_paths.copy()
+            config_dir.insert(0, os.getcwd())
+            paths = [os.path.join(x, "{}.py".format(self.config_file_name)) for x in config_dir]
 
         if not any(os.path.exists(x) for x in paths):
             self.log.warning("No nbgrader_config.py file found (rerun with --debug to see where nbgrader is looking)")
 
         super(NbGrader, self).load_config_file(**kwargs)
+
+        # Load also config from current working directory
+        super(JupyterApp, self).load_config_file(self.config_file_name, os.getcwd())
 
     def start(self) -> None:
         super(NbGrader, self).start()
