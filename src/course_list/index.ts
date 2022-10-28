@@ -139,7 +139,10 @@ export const course_list_extension: JupyterFrontEndPlugin<void> = {
 
         // Attach the widget to the main area if it's not there
         if(!widget.isAttached){
-          if (notebookTree) notebookTree.addWidget(widget);
+          if (notebookTree){
+            notebookTree.addWidget(widget);
+            notebookTree.currentWidget = widget;
+          }
           else app.shell.add(widget, 'main');
         }
 
