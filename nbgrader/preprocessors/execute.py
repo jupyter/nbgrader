@@ -29,11 +29,11 @@ class Execute(NbGraderPreprocessor, ExecutePreprocessor):
         True,
         help=dedent(
             """
-            If ``False`` (default), when a cell raises an error the
+            If ``False``, when a cell raises an error the
             execution is stopped and a ``CellExecutionError``
             is raised, except if the error name is in
             ``allow_error_names``.
-            If ``True``, execution errors are ignored and the execution
+            If ``True`` (default), execution errors are ignored and the execution
             is continued until the end of the notebook. Output from
             exceptions is included in the cell output in both cases.
             """
@@ -44,10 +44,10 @@ class Execute(NbGraderPreprocessor, ExecutePreprocessor):
         True,
         help=dedent(
             """
-            If ``False`` (default), then the kernel will continue waiting for
+            If ``False``, then the kernel will continue waiting for
             iopub messages until it receives a kernel idle message, or until a
             timeout occurs, at which point the currently executing cell will be
-            skipped. If ``True``, then an error will be raised after the first
+            skipped. If ``True`` (default), then an error will be raised after the first
             timeout. This option generally does not need to be used, but may be
             useful in contexts where there is the possibility of executing
             notebooks with memory-consuming infinite loops.
@@ -57,6 +57,7 @@ class Execute(NbGraderPreprocessor, ExecutePreprocessor):
 
     timeout = Integer(
         30,
+        allow_none=True,
         help=dedent(
             """
             The time to wait (in seconds) for output from executions.
