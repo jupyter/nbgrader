@@ -6,11 +6,11 @@ import { promisify } from 'util';
 import * as path from 'path';
 import * as fs from 'fs';
 
-const async_exec = promisify(exec)
+const asyncExec = promisify(exec)
 
 
-export const execute_command = async (command: string) => {
-  const { stdout, stderr } = await async_exec(command);
+export const executeCommand = async (command: string) => {
+  const { stdout, stderr } = await asyncExec(command);
   if (stderr) {
     if (stderr.includes("ERROR")){
       console.log(`stderr: ${stderr}`);
@@ -23,19 +23,13 @@ export const execute_command = async (command: string) => {
 /*
  * Create a copy of default config file, append exchange directories to config file, and populate database
  */
-export const create_env = async (
-  page:IJupyterLabPageFixture,
-  tmpPath:string,
-  exchange_dir:string,
-  cache_dir:string,
-  is_windows:boolean
-  ): Promise<string> => {
-
-  var content = await page.locator('#jupyter-config-data').textContent();
-
-  if (content === null) throw new Error("Cannot get the server root directory.");
-
-  const rootDir = JSON.parse(content)['serverRoot'];
+export const createEnv = async (
+  rootDir: string,
+  tmpPath: string,
+  exchange_dir: string,
+  cache_dir: string,
+  is_windows: boolean
+  ): Promise<void> => {
 
   /* Add config_file to jupyter root directory, and change to that directory.
   TODO : test on windows, the config file may change (see nbextension test)
@@ -65,39 +59,38 @@ c.Exchange.assignment_dir = r"${path.resolve(rootDir, tmpPath)}"
   }
 
   /* Fill database */
-  await execute_command("nbgrader db assignment add 'Problem Set 1'");
-  await execute_command("nbgrader db assignment add ps.01");
-  await execute_command("nbgrader db student add Bitdiddle --first-name Ben --last-name B");
-  await execute_command("nbgrader db student add Hacker --first-name Alyssa --last-name H");
-  await execute_command("nbgrader db student add Reasoner --first-name Louis --last-name R");
+  await executeCommand("nbgrader db assignment add 'Problem Set 1'");
+  await executeCommand("nbgrader db assignment add ps.01");
+  await executeCommand("nbgrader db student add Bitdiddle --first-name Ben --last-name B");
+  await executeCommand("nbgrader db student add Hacker --first-name Alyssa --last-name H");
+  await executeCommand("nbgrader db student add Reasoner --first-name Louis --last-name R");
 
-  return rootDir;
 }
 
 /*
  * Wait for error modal
  */
-export const wait_for_error_modal = async (page:IJupyterLabPageFixture) => {
+export const waitForErrorModal = async (page: IJupyterLabPageFixture) => {
   await expect(page.locator(".nbgrader-ErrorDialog")).toHaveCount(1);
 }
 
 /*
 * Close error modal
 */
-export const close_error_modal = async (page:IJupyterLabPageFixture) => {
+export const closeErrorModal = async (page: IJupyterLabPageFixture) => {
   await page.locator(".nbgrader-ErrorDialog button.jp-Dialog-button").click();
 }
 
 /*
  * Wait for success modal
  */
-export const wait_for_success_modal = async (page:IJupyterLabPageFixture) => {
+export const waitForSuccessModal = async (page: IJupyterLabPageFixture) => {
   await expect(page.locator(".nbgrader-SuccessDialog")).toHaveCount(1);
 }
 
 /*
 * Close success modal
 */
-export const close_success_modal = async (page:IJupyterLabPageFixture) => {
+export const closeSuccessModal = async (page: IJupyterLabPageFixture) => {
   await page.locator(".nbgrader-SuccessDialog button.jp-Dialog-button").click();
 }

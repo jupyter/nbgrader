@@ -47,7 +47,7 @@ function activate_extension (
   panel.addWidget(createAssignmentWidget);
   panel.id = 'nbgrader-create_assignemnt';
   panel.title.label = 'Create Assignment';
-  panel.title.caption = 'nbgrader Create Assignment';
+  panel.title.caption = 'Nbgrader Create Assignment';
 
   app.shell.add(panel, 'right');
   console.debug('Extension "create_assignment" activated.');

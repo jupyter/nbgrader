@@ -35,8 +35,10 @@
     "clean:labextension": "rimraf nbgrader/labextension",
     "clean:all": "jlpm clean:lib && jlpm clean:labextension",
     "install:labextension": "jlpm build",
-    "start:test": "python ./nbgrader/tests/labextension_ui-tests/run_jupyter_lab.py",
+    "start:test": "python ./nbgrader/tests/ui-tests/utils/run_jupyter_lab.py",
+    "start:test:notebook": "python ./nbgrader/tests/ui-tests/utils/run_jupyter_notebook.py",
     "test": "jlpm playwright test",
+    "test:notebook": "jlpm playwright test --config=playwright.notebook.config.ts",
     "watch": "run-p watch:src watch:labextension",
     "watch:src": "tsc -w",
     "watch:labextension": "jupyter labextension watch ."
