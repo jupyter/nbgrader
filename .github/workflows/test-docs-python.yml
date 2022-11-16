@@ -1,7 +1,7 @@
 # This is a GitHub workflow defining a set of jobs with a set of steps.
 # ref: https://docs.github.com/en/free-pro-team@latest/actions/reference/workflow-syntax-for-github-actions
 #
-name: Test python-nbextensions-doc
+name: Test python-doc
 
 on:
   pull_request:
@@ -29,7 +29,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [windows-latest, ubuntu-22.04]
-        group: ["docs", "nbextensions", "python"]
+        group: ["docs", "python"]
         python: ["3.8", "3.9", "3.10", "3.11"]
         exclude:
           - os: windows-latest
@@ -38,10 +38,6 @@ jobs:
             group: docs
           - python: "3.9"
             group: docs
-          - python: "3.10"
-            group: docs
-          - python: "3.8"
-            group: nbextensions
     steps:
       # This is how you set an environment variable in a GitHub workflow that
       # will be available in following steps as if you would used `export
@@ -51,10 +47,6 @@ jobs:
           if [ "${{ matrix.group }}" == "docs" ]; then
               echo "GROUP=docs" >> $GITHUB_ENV
               echo "TIMEOUT_MINUTES=15" >> $GITHUB_ENV
-          fi
-          if [ "${{ matrix.group }}" == "nbextensions" ]; then
-              echo "GROUP=nbextensions" >> $GITHUB_ENV
-              echo "TIMEOUT_MINUTES=25" >> $GITHUB_ENV
           fi
           if [ "${{ matrix.group }}" == "python" ]; then
               echo "GROUP=python" >> $GITHUB_ENV

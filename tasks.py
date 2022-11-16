@@ -32,7 +32,7 @@ def _check_if_directory_in_path(pth, target):
     return False
 
 
-def docs(ns, args):
+def docs(ns):
     del ns  # unused
     run('git clean -fdX nbgrader/docs')
     if not WINDOWS:
@@ -43,7 +43,7 @@ def docs(ns, args):
     run('make -C nbgrader/docs linkcheck')
 
 
-def cleandocs(ns, args):
+def cleandocs(ns):
     del ns  # unused
     run('python nbgrader/docs/source/clear_docs.py')
 
