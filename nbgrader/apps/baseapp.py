@@ -95,6 +95,9 @@ class NbGrader(JupyterApp):
                      subapps: bool = False) -> None:
         handler = handler_class(*handler_args)
 
+        # Since traitlets >= 5.2 the log_level is not set for a new handler, and is set to '0'
+        handler.setLevel(self.log_level)
+
         if color:
             log_format = self.log_format
         else:
