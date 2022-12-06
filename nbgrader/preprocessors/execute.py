@@ -1,5 +1,5 @@
 from nbconvert.preprocessors import ExecutePreprocessor, CellExecutionError
-from traitlets import Bool, List, Integer
+from traitlets import Bool, List, Integer, validate, TraitError
 from textwrap import dedent
 
 from . import NbGraderPreprocessor
@@ -57,7 +57,6 @@ class Execute(NbGraderPreprocessor, ExecutePreprocessor):
 
     timeout = Integer(
         30,
-        allow_none=True,
         help=dedent(
             """
             The time to wait (in seconds) for output from executions.
@@ -89,6 +88,13 @@ class Execute(NbGraderPreprocessor, ExecutePreprocessor):
         for CI environments when tests are flaky.
         """)
     ).tag(config=True)
+
+    @validate('timeout')
+    def _validate_timeout(self, proposal):
+        value = int(proposal['value'])
+        if value <= 0:
+            raise TraitError("the timeout should be a positive value")
+        return value
 
     def on_cell_executed(self, **kwargs):
         cell = kwargs['cell']
