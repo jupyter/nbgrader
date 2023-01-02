@@ -36,7 +36,7 @@ dependencies = [
     "Jinja2>=3",
     "jsonschema>=3",
     "jupyter_client<8",
-    "jupyter_server>=1.12",
+    "jupyter_server>=1.12,<2",
     "jupyterlab<4",
     "jupyterlab_server",
     "MarkupSafe<2.2.0",
