@@ -44,21 +44,21 @@
     "watch:labextension": "jupyter labextension watch ."
   },
   "dependencies": {
-    "@jupyter-notebook/application": "^7.0.0-alpha.7",
-    "@jupyter-notebook/tree": "^7.0.0-alpha.7",
-    "@jupyterlab/application": "^4.0.0-alpha.15",
-    "@jupyterlab/apputils": "^4.0.0-alpha.15",
-    "@jupyterlab/cells": "^4.0.0-alpha.15",
-    "@jupyterlab/coreutils": "^6.0.0-alpha.15",
-    "@jupyterlab/launcher": "^4.0.0-alpha.15",
-    "@jupyterlab/notebook": "^4.0.0-alpha.15",
-    "@jupyterlab/services": "^7.0.0-alpha.15",
-    "@jupyterlab/settingregistry": "^4.0.0-alpha.15"
+    "@jupyter-notebook/application": "^7.0.0-alpha.10",
+    "@jupyter-notebook/tree": "^7.0.0-alpha.10",
+    "@jupyterlab/application": "^4.0.0-alpha.17",
+    "@jupyterlab/apputils": "^4.0.0-alpha.17",
+    "@jupyterlab/cells": "^4.0.0-alpha.17",
+    "@jupyterlab/coreutils": "^6.0.0-alpha.17",
+    "@jupyterlab/launcher": "^4.0.0-alpha.17",
+    "@jupyterlab/notebook": "^4.0.0-alpha.17",
+    "@jupyterlab/services": "^7.0.0-alpha.17",
+    "@jupyterlab/settingregistry": "^4.0.0-alpha.17"
   },
   "devDependencies": {
-    "@jupyterlab/builder": "^4.0.0-alpha.15",
-    "@jupyterlab/galata": "^5.0.0-alpha.15",
-    "@playwright/test": "^1.21.1",
+    "@jupyterlab/builder": "^4.0.0-alpha.17",
+    "@jupyterlab/galata": "^5.0.0-alpha.17",
+    "@playwright/test": "^1.29.0",
     "@types/codemirror": "^5.60.5",
     "@typescript-eslint/eslint-plugin": "^4.8.1",
     "@typescript-eslint/parser": "^4.8.1",
@@ -75,7 +75,7 @@
     "stylelint-config-recommended": "^6.0.0",
     "stylelint-config-standard": "~24.0.0",
     "stylelint-prettier": "^2.0.0",
-    "typescript": "~4.7.3"
+    "typescript": "~4.9.3"
   },
   "sideEffects": [
     "style/*.css",

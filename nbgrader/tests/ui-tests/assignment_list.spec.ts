@@ -1,5 +1,5 @@
-import { test as jupyterLabTest, galata, IJupyterLabPageFixture } from '@jupyterlab/galata';
-import { APIRequestContext, expect, Locator, Page } from '@playwright/test';
+import { test as jupyterLabTest, galata, IJupyterLabPageFixture, expect } from '@jupyterlab/galata';
+import { APIRequestContext, Locator } from '@playwright/test';
 import * as path from 'path';
 import * as os from 'os';
 import * as fs from 'fs';

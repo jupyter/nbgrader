@@ -1,5 +1,4 @@
-import { test as jupyterLabTest, galata, IJupyterLabPageFixture } from "@jupyterlab/galata";
-import { expect } from "@playwright/test";
+import { test as jupyterLabTest, galata, IJupyterLabPageFixture, expect } from "@jupyterlab/galata";
 
 import * as fs from "fs";
 import * as os from "os";

@@ -1,10 +1,10 @@
-import { test as jupyterLabTest, galata, IJupyterLabPageFixture } from "@jupyterlab/galata";
-import { expect } from "@playwright/test";
+import { test as jupyterLabTest, galata, IJupyterLabPageFixture, expect } from "@jupyterlab/galata";
 import * as path from "path";
 import * as fs from 'fs';
 
 import { test as notebookTest } from './utils/notebook_fixtures';
 import { waitForErrorModal, closeErrorModal } from "./utils/test_utils";
+import { NotebookPanel } from "@jupyterlab/notebook";
 
 const testDir = process.env.NBGRADER_TEST_DIR || '';
 if (!testDir){
@@ -100,7 +100,7 @@ const openNotebook = async (page: IJupyterLabPageFixture, notebook: string) => {
  */
 const saveCurrentNotebook = async (page: IJupyterLabPageFixture) => {
   return await page.evaluate(async () => {
-    var nb = window.jupyterapp.shell.currentWidget;
+    var nb = window.jupyterapp.shell.currentWidget as NotebookPanel;
     await nb.context.save();
   });
 
@@ -148,8 +148,8 @@ const getCellMetadata = async (
   cell_number: number = 0
 ) => {
   return await page.evaluate((cell_num) => {
-    var nb = window.jupyterapp.shell.currentWidget;
-    return nb.model.cells.get(cell_num).metadata.get("nbgrader");
+    var nb = window.jupyterapp.shell.currentWidget as NotebookPanel;
+    return nb.model?.cells.get(cell_num)?.getMetadata("nbgrader");
   }, cell_number);
 };
 

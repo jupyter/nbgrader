@@ -15,7 +15,7 @@ defaults:
     shell: bash
 
 jobs:
-  test_labextensions:
+  ui-test:
     runs-on: ${{ matrix.os }}
     timeout-minutes: 40
 
