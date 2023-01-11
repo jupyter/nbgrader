@@ -42,7 +42,7 @@ dependencies = [
     "jupyterlab_server",
     "nbclient>=0.6.1",
     "nbconvert>=6",
-    "notebook>=7.0.0a10",
+    "notebook>=7.0.0a9",
     "python-dateutil>=2.8",
     "rapidfuzz>=1.8",
     "requests>=2.26",
