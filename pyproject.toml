@@ -37,7 +37,7 @@ dependencies = [
     "Jinja2>=3",
     "jsonschema>=3",
     "jupyter_client<9",
-    "jupyter_server>=1.16",
+    "jupyter_server>=2",
     "jupyterlab>=4.0.0a32",
     "jupyterlab_server",
     "nbclient>=0.6.1",
@@ -47,7 +47,6 @@ dependencies = [
     "rapidfuzz>=1.8",
     "requests>=2.26",
     "sqlalchemy>=1.4,<3",
-    "traitlets>5.0,<6",
 ]
 version = "0.8.4"
 
@@ -71,6 +70,7 @@ tests = [
     "jupyter_packaging",
     "nbval",
     "pytest-cov",
+    "pytest-jupyter",
     "pytest-rerunfailures",
     "pytest-tornasync",
     "pytest-xdist",
