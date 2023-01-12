@@ -1,25 +1,10 @@
-import {
-  ILayoutRestorer,
-  JupyterFrontEnd,
-  JupyterFrontEndPlugin
-} from '@jupyterlab/application';
+import { JupyterFrontEnd } from '@jupyterlab/application';
 
-import {
-  ICommandPalette,
-  MainAreaWidget,
-  WidgetTracker
-} from '@jupyterlab/apputils';
-
-import {
-  Widget,
-  // TabPanel
-} from '@lumino/widgets';
+import { Widget } from '@lumino/widgets';
 
 import {
   PageConfig
 } from '@jupyterlab/coreutils';
-
-import { INotebookTree } from '@jupyter-notebook/tree';
 
 import {
   requestAPI,
@@ -27,12 +12,7 @@ import {
   AssignmentList
 } from './assignmentlist';
 
-
-const PLUGIN_ID = 'nbgrader:assignment-list';
-const COMMAND_NAME = "nbgrader:open-assignment-list";
-
-
-class AssignmentListWidget extends Widget {
+export class AssignmentListWidget extends Widget {
 
   app: JupyterFrontEnd;
 
@@ -168,74 +148,3 @@ class AssignmentListWidget extends Widget {
   }
 
 }
-
-export const assignment_list_extension: JupyterFrontEndPlugin<void> = {
-  id: PLUGIN_ID,
-  autoStart: true,
-  requires: [ICommandPalette],
-  optional: [ILayoutRestorer, INotebookTree],
-  activate: (
-    app: JupyterFrontEnd,
-    palette: ICommandPalette,
-    restorer: ILayoutRestorer | null,
-    notebookTree: INotebookTree | null
-  )=> {
-
-    // Declare a widget variable
-    let widget: MainAreaWidget<AssignmentListWidget>;
-
-    // Add an application command
-    const command: string = COMMAND_NAME;
-
-    // Track the widget state
-    let tracker = new WidgetTracker<MainAreaWidget<AssignmentListWidget>>({
-      namespace: 'nbgrader-assignment-list'
-    });
-
-    app.commands.addCommand(command,{
-      label: 'Assignment List',
-      execute: () => {
-        if(!widget || widget.isDisposed){
-          const content = new AssignmentListWidget(app);
-          widget = new MainAreaWidget({content});
-          widget.id = 'nbgrader-assignment-list';
-          widget.addClass('nbgrader-mainarea-widget');
-          widget.title.label = 'Assignments';
-          widget.title.closable = true;
-        }
-        if(!tracker.has(widget)){
-          // Track the state of the widget for later restoration
-          tracker.add(widget);
-        }
-
-        // Attach the widget to the main area if it's not there
-        if(!widget.isAttached){
-          if (notebookTree){
-            notebookTree.addWidget(widget);
-            notebookTree.currentWidget = widget;
-          }
-          else app.shell.add(widget, 'main');
-        }
-
-        widget.content.update();
-
-        app.shell.activateById(widget.id);
-      }
-    });
-
-    // Add the command to the palette
-    palette.addItem({command, category: 'nbgrader'});
-
-    // Restore the widget state
-    if (restorer != null) {
-      restorer.restore(tracker, {
-        command,
-        name: () => 'nbgrader-assignment-list'
-      });
-    }
-
-    console.debug('JupyterLab extension assignment-list is activated!');
-  }
-};
-
-export default assignment_list_extension;

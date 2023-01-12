@@ -1,31 +1,16 @@
-import {
-  JupyterFrontEnd,
-  JupyterFrontEndPlugin
-} from '@jupyterlab/application';
+import { IDisposable, DisposableDelegate } from '@lumino/disposable';
 
-import {
-  IDisposable, DisposableDelegate
-} from '@lumino/disposable';
+import { ToolbarButton, Dialog } from '@jupyterlab/apputils';
 
-import {
-  ToolbarButton, Dialog
-} from '@jupyterlab/apputils';
+import { DocumentRegistry } from '@jupyterlab/docregistry';
 
-import {
-  DocumentRegistry
-} from '@jupyterlab/docregistry';
-
-import {
-  NotebookPanel, INotebookModel
-} from '@jupyterlab/notebook';
+import { NotebookPanel, INotebookModel } from '@jupyterlab/notebook';
 
 import { requestAPI } from './validateassignment';
 
 import { showNbGraderDialog, validate } from '../common/validate';
 
 var nbgrader_version = "0.8.4"; // TODO: hardcoded value
-
-const PLUGIN_ID = "nbgrader:validate-assignment"
 
 class ValidateButton extends ToolbarButton {
   private _buttonCallback = this.newButtonCallback();
@@ -120,11 +105,9 @@ class ValidateButton extends ToolbarButton {
         return;
       }
 
-      // tests/test-docregistry/src/context.spec.ts:98
       this.setButtonDisabled();
       this.setButtonLabel('Saving...');
       this.panel.context.saveState.connect(this.saveCallback);
-      // examples/notebook/src/commands.ts:79
       this.panel.context.save();
     }
   }
@@ -190,17 +173,3 @@ export class ButtonExtension implements DocumentRegistry.IWidgetExtension<Notebo
     });
   }
 }
-
-/**
- * Initialization data for the validate_assignment extension.
- */
-export const validate_assignment_extension: JupyterFrontEndPlugin<void> = {
-  id: PLUGIN_ID,
-  autoStart: true,
-  activate: (app: JupyterFrontEnd) => {
-    console.log('JupyterLab extension validate-assignment is activated!');
-    app.docRegistry.addWidgetExtension('Notebook', new ButtonExtension());
-  }
-};
-
-export default validate_assignment_extension;

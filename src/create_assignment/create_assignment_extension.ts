@@ -103,6 +103,17 @@ export class CreateAssignmentWidget extends Panel {
     }
   }
 
+  /**
+   * Is the widget available (is there a notebook file visible in main area) ?
+   */
+  isAvailable(): boolean {
+    if (this._activeNotebook === null) {
+      return false;
+    } else {
+      return this._activeNotebook.isVisible;
+    }
+  }
+
   /*
    * Check if the widget must be visible :
    *  -> is there an active Notebook visible in main panel ?

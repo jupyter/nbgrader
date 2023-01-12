@@ -1,21 +1,10 @@
-import {
-    ILayoutRestorer,
-    JupyterFrontEnd,
-    JupyterFrontEndPlugin
-} from '@jupyterlab/application';
-
-import { ICommandPalette, MainAreaWidget, WidgetTracker } from '@jupyterlab/apputils';
+import { JupyterFrontEnd } from '@jupyterlab/application';
 
 import { Widget } from '@lumino/widgets';
 
 import { requestAPI, CourseList } from './courselist';
 
-import { INotebookTree } from '@jupyter-notebook/tree';
-
-const PLUGIN_ID = "nbgrader:course-list";
-const COMMAND_NAME = "nbgrader:open-course-list";
-
-class CourseListWidget extends Widget {
+export class CourseListWidget extends Widget {
   version_alert: HTMLDivElement;
   courselist: CourseList;
   app: JupyterFrontEnd;
@@ -96,74 +85,3 @@ class CourseListWidget extends Widget {
           });
     }
 }
-
-/**
- * Initialization data for the course_list extension.
- */
-export const course_list_extension: JupyterFrontEndPlugin<void> = {
-  id: PLUGIN_ID,
-  autoStart: true,
-  requires: [ICommandPalette],
-  optional: [ILayoutRestorer, INotebookTree],
-
-  activate: (
-    app: JupyterFrontEnd,
-    palette: ICommandPalette,
-    restorer: ILayoutRestorer | null,
-    notebookTree: INotebookTree | null
-  ) => {
-
-    let widget: MainAreaWidget<CourseListWidget>;
-
-    const command:string = COMMAND_NAME;
-
-    // Track the widget state
-    let tracker = new WidgetTracker<MainAreaWidget<CourseListWidget>>({
-      namespace: 'nbgrader-course-list'
-    });
-
-    app.commands.addCommand(command, {
-      label: 'Course List',
-      execute: () => {
-        if (!widget || widget.isDisposed) {
-          const content = new CourseListWidget(app);
-          widget = new MainAreaWidget({content});
-          widget.id = 'nbgrader-course-list';
-          widget.addClass('nbgrader-mainarea-widget');
-          widget.title.label = 'Courses';
-          widget.title.closable = true;
-        }
-        if (!tracker.has(widget)) {
-          tracker.add(widget);
-        }
-
-        // Attach the widget to the main area if it's not there
-        if(!widget.isAttached){
-          if (notebookTree){
-            notebookTree.addWidget(widget);
-            notebookTree.currentWidget = widget;
-          }
-          else app.shell.add(widget, 'main');
-        }
-
-        widget.content.update();
-
-        app.shell.activateById(widget.id);
-      }
-    })
-
-    palette.addItem({ command, category: "nbgrader" });
-
-    // Restore the widget state
-    if (restorer != null){
-      restorer.restore(tracker, {
-        command,
-        name: () => 'nbgrader-course-list'
-      });
-    }
-
-    console.debug('JupyterLab extension course-list is activated!');
-  }
-};
-
-export default course_list_extension;
