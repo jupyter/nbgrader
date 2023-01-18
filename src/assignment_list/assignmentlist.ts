@@ -247,6 +247,21 @@ class Assignment {
     return container;
   };
 
+  private fetch_error(data: { value: any; }): void {
+
+    const body_title = React.createElement('p', null, 'Assignment not fetched:');
+    const body_content = React.createElement('pre', null, data.value);
+    const body = React.createElement("div", {'id': 'fetch-message'}, [body_title, body_content]);
+
+    showNbGraderDialog({
+      title: "Fetch Failed",
+      body: body,
+      buttons: [Dialog.okButton()]
+    }, true);
+
+
+  };
+
   private submit_error(data: { value: any; }): void {
 
     const body_title = React.createElement('p', null, 'Assignment not submitted:');
@@ -255,6 +270,21 @@ class Assignment {
 
     showNbGraderDialog({
       title: "Invalid Submission",
+      body: body,
+      buttons: [Dialog.okButton()]
+    }, true);
+
+
+  };
+
+  private fetchfeedback_error(data: { value: any; }): void {
+
+    const body_title = React.createElement('p', null, 'Feedback not fetched:');
+    const body_content = React.createElement('pre', null, data.value);
+    const body = React.createElement("div", {'id': 'fetchfeedback-message'}, [body_title, body_content]);
+
+    showNbGraderDialog({
+      title: "Fetch Failed",
       body: body,
       buttons: [Dialog.okButton()]
     }, true);
@@ -282,7 +312,13 @@ class Assignment {
             method: 'POST'
           });
 
-          that.on_refresh(reply);
+          if(!reply.success){
+              that.fetch_error(reply);
+              button.innerText = 'Fetch'
+              button.removeAttribute('disabled')
+            }else{
+              that.on_refresh(reply);
+            }
         } catch (reason) {
           remove_children(container);
           container.innerText = 'Error fetching assignment.';
@@ -335,7 +371,13 @@ class Assignment {
             method: 'POST'
           });
 
-          that.on_refresh(reply);
+          if(!reply.success){
+              that.fetchfeedback_error(reply);
+              button.innerText = 'Fetch Feedback'
+              button.removeAttribute('disabled')
+            }else{
+              that.on_refresh(reply);
+            }
 
         } catch (reason) {
           remove_children(container);
