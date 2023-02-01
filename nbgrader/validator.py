@@ -254,7 +254,7 @@ class Validator(LoggingConfigurable):
                 # it's a markdown cell, so we can't do anything
                 if score is None:
                     pass
-                elif score < max_score:
+                elif score < max_score or (max_score == 0 and utils.has_failed(cell)):
                     failed.append(cell)
             elif self.validate_all and cell.cell_type == 'code':
                 for output in cell.outputs:
