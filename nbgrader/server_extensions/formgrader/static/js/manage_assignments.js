@@ -498,27 +498,8 @@ var insertRow = function (table) {
 
 var createAssignmentModal = function () {
     var modal;
-    var _sanitise_givencode = function (value) {
-        if (value) {
-            value = value.replaceAll(/\\/g, "∖");  // set miuhs U+2216
-            value = value.replaceAll(/{/g, "｛");  // full width left curly U+FF5B
-            value = value.replaceAll(/}/g, "｝");  /// full width right curly U+FF5D
-            value = value.replaceAll(/\(/g, "（");  // full width left brace U+FF08
-            value = value.replaceAll(/\)/g, "）");  // full width right brace U+FF09
-            value = value.replaceAll(/\[/g, "［");  // full width square U+FF3B
-            value = value.replaceAll(/\]/g, "］");  // full width square U+FF3D
-            value = value.replaceAll(/\//g, "∕");  // divisional slash U+2215
-            value = value.replaceAll(/\$/g, "＄");  // Fullwidth Dollar Sign U+FF04
-            value = value.replaceAll(/\^/g, "＾");  // Fullwidth Circumflex Accent U+FF3E
-            value = value.replaceAll(/\+/g, "➕");  // Heavy Plus Sign U+2795
-            value = value.replaceAll(/\?/g, "❔");  // White Question Mark Ornament U+2754 (❓=U+2753)
-            value = value.replaceAll(/\*/g, "★");  // Black Star U+2605
-            value = value.replaceAll(/\|/g, "❘");  // Light Vertical Bar U+2758
-            value = value.replaceAll(/[\n\r\t\f]/g, "");  // removed carriage movements
-        }
-        return value
-    }
     var createAssignment = function () {
+        var bad_character_regex = /[+\(\)\/\\\[\]\{\}\$\^]/;
         var name = modal.find(".name").val();
         var duedate = modal.find(".duedate").val();
         var timezone = modal.find(".timezone").val();
@@ -533,7 +514,15 @@ var createAssignmentModal = function () {
             modal.modal('hide');
             return;
         }
-        name = _sanitise_givencode(name);
+        if (bad_character_regex.test(name)) {
+            var err = $("#create-error");
+            err.text("Assignment names may not include any of the characters +\(\)[]{}/\\$^");
+            err.show();
+            return;
+        } else {
+            var err = $("#create-error");
+            err.hide();
+        }
 
         var model = new Assignment({
             "name": name,

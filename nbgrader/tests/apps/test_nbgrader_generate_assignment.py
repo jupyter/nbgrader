@@ -10,7 +10,6 @@ from textwrap import dedent
 from ...api import Gradebook
 from .. import run_nbgrader
 from .base import BaseTestApp
-from ...utils import sanitise_givencode
 
 
 class TestNbGraderGenerateAssignment(BaseTestApp):
@@ -56,13 +55,17 @@ class TestNbGraderGenerateAssignment(BaseTestApp):
         assert os.path.isfile(join(course_dir, "release", "ps1", "foo.ipynb"))
 
     def test_single_file_bad_assignment_name(self, course_dir, temp_cwd):
-        """Test that an assignment name with bad characters is renamed."""
-        badName = 'abc (12/34) {not|really?}[^e$]'
-        transformedName = sanitise_givencode(badName)
-        self._empty_notebook(join(course_dir, 'source', transformedName, 'foo.ipynb'))
-
-        run_nbgrader(["generate_assignment", badName])
-        assert os.path.isfile(join(course_dir, "release", transformedName, "foo.ipynb"))
+        """Test that an error is thrown when the assignment name is invalid."""
+        self._empty_notebook(join(course_dir, 'source', 'foo+bar', 'foo.ipynb'))
+        with pytest.raises(traitlets.TraitError):
+            run_nbgrader(["generate_assignment", "foo+bar"])
+        assert not os.path.isfile(join(course_dir, "release", "foo+bar", "foo.ipynb"))
+        with pytest.raises(traitlets.TraitError):
+            run_nbgrader(["generate_assignment", "123 (abc)"], retcode=1)
+        assert not os.path.isfile(join(course_dir, "release", "123 (abc)", "foo.ipynb"))
+        with pytest.raises(traitlets.TraitError):
+            run_nbgrader(["generate_assignment", "123/abc"], retcode=1)
+        assert not os.path.isfile(join(course_dir, "release", "123/abc", "foo.ipynb"))
 
     def test_multiple_files(self, course_dir):
         """Can multiple files be assigned?"""

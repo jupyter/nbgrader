@@ -6,7 +6,7 @@ from textwrap import dedent
 from traitlets.config import LoggingConfigurable
 from traitlets import Integer, Bool, Unicode, List, default, validate, TraitError
 
-from .utils import full_split, parse_utc, sanitise_givencode
+from .utils import full_split, parse_utc
 from traitlets.utils.bunch import Bunch
 import datetime
 from typing import Optional
@@ -21,20 +21,12 @@ class CourseDirectory(LoggingConfigurable):
             A key that is unique per instructor and course. This can be
             specified, either by setting the config option, or using the
             --course option on the command line.
-
-            Certain characters (braces, slashes, and some punctuation)
-            _may_ cause issues, so are substituted for high-end unicode
-            look-alikes.
             """
         )
     ).tag(config=True)
 
     @validate('course_id')
-    def _validate_course_id(self, proposal: list) -> str:
-        value = proposal['value']
-        proposal['value'] = sanitise_givencode(value)
-        if proposal['value'] != value:
-            self.log.warning("course_id '%s' had unacceptable charcaters, and transformed to '%s'", value, proposal['value'])
+    def _validate_course_id(self, proposal):
         if proposal['value'].strip() != proposal['value']:
             self.log.warning("course_id '%s' has trailing whitespace, stripping it away", proposal['value'])
         return proposal['value'].strip()
@@ -87,19 +79,16 @@ class CourseDirectory(LoggingConfigurable):
             config option, passing an argument on the command line, or using the
             --assignment option on the command line.
 
-            Certain characters (braces, slashes, and some punctuation)
-            _will_ cause issues, so are substituted for high-end unicode
-            look-alikes.
+            The assignment name cannot include any of the characters +()/\\[]\{\}$^
             """
         )
     ).tag(config=True)
 
     @validate('assignment_id')
     def _validate_assignment_id(self, proposal: Bunch) -> str:
-        value = proposal['value']
-        proposal['value'] = sanitise_givencode(value)
-        if proposal['value'] != value:
-            self.log.warning("assignment_id '%s' had unacceptable charcaters, and transformed to '%s'", value, proposal['value'])
+        bad_characters = r'+()/\\[]{}$^'
+        if set(proposal['value']) & set(bad_characters):
+            raise TraitError(f'Assignment names may not contain the following characters: {bad_characters}')
         if proposal['value'].strip() != proposal['value']:
             self.log.warning("assignment_id '%s' has trailing whitespace, stripping it away", proposal['value'])
         return proposal['value'].strip()

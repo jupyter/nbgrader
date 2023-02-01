@@ -29,6 +29,12 @@ class TestNbGraderValidate(BaseTestApp):
         output = run_nbgrader(["validate", "my_subdir/open_relative_file.ipynb"], stdout=True)
         assert output.strip() == "Success! Your notebook passes all the tests."
 
+    def test_validate_zero_points(self):
+      """Does validation correctly fail when cell has zero points?"""
+      self._copy_file(join("files", "validation-zero-points.ipynb"), "validation-zero-points.ipynb")
+      output = run_nbgrader(["validate", "validation-zero-points.ipynb"], stdout=True)
+      assert output.splitlines()[0] == "VALIDATION FAILED ON 1 CELL(S)! If you submit your assignment as it is, you WILL NOT"
+
     def test_invert_validate_unchanged(self):
         """Does the inverted validation pass on an unchanged notebook?"""
         self._copy_file(join("files", "submitted-unchanged.ipynb"), "submitted-unchanged.ipynb")

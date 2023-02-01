@@ -44,7 +44,9 @@ class TestNbGraderGenerateSolution(BaseTestApp):
     def test_single_file_bad_assignment_name(self, course_dir, temp_cwd):
         """Test that an error is thrown when the assignment name is invalid."""
         self._empty_notebook(join(course_dir, 'source', 'foo+bar', 'foo.ipynb'))
-        assert not os.path.isfile(join(course_dir, "solution", "foo➕bar", "foo.ipynb"))
+        with pytest.raises(traitlets.TraitError):
+            run_nbgrader(["generate_solution", "foo+bar"])
+        assert not os.path.isfile(join(course_dir, "solution", "foo+bar", "foo.ipynb"))
 
     def test_multiple_files(self, course_dir):
         """Can multiple files be assigned?"""

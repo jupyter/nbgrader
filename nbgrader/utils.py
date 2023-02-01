@@ -10,7 +10,6 @@ import logging
 import traceback
 import contextlib
 import fnmatch
-import re
 
 from setuptools.archive_util import unpack_archive
 from setuptools.archive_util import unpack_tarfile
@@ -61,6 +60,18 @@ def is_locked(cell: NotebookNode) -> bool:
         return True
     else:
         return cell.metadata['nbgrader'].get('locked', False)
+
+
+def has_failed(cell: NotebookNode) -> bool:
+    """Returns True if the cell contains an output indicative of an error"""
+    if not cell.cell_type == 'code':
+        return False
+    for output in cell.outputs:
+        if output.output_type == 'error' or output.output_type == "stream" and output.name == "stderr":
+            return True
+    # Otherwise assume all is fine
+    return False
+
 
 def get_partial_grade(output, max_points, log=None):
     """
@@ -563,24 +574,3 @@ def notebook_hash(path, unique_key=None):
 def make_unique_key(course_id, assignment_id, notebook_id, student_id, timestamp):
     return "+".join([
         course_id, assignment_id, notebook_id, student_id, timestamp])
-
-# Swap all low-order characters that have meaning in regexp for similar high-order
-# unicode equivelants.
-def sanitise_givencode(value: str=None) -> str:
-    if value:
-        value = re.sub(r"\\", "∖", value)  # set minus U+2216
-        value = re.sub(r"{", "｛", value)  # full width left curly U+FF5B
-        value = re.sub(r"}", "｝", value)  # full width right curly U+FF5D
-        value = re.sub(r"\(", "（", value)  # full width left brace U+FF08
-        value = re.sub(r"\)", "）", value)  # full width right brace U+FF09
-        value = re.sub(r"\[", "［", value)  # full width square U+FF3B
-        value = re.sub(r"\]", "］", value)  # full width square U+FF3D
-        value = re.sub(r"/", "∕", value)  # divisional slash U+2215
-        value = re.sub(r"\$", "＄", value)  # Fullwidth Dollar Sign U+FF04
-        value = re.sub(r"\^", "＾", value)  # Fullwidth Circumflex Accent U+FF3E
-        value = re.sub(r"\+", "➕", value)  # Heavy Plus Sign U+2795
-        value = re.sub(r"\?", "❔", value)  # White Question Mark Ornament U+2754 (❓=U+2753)
-        value = re.sub(r"\*", "★", value)  # Black Star U+2605
-        value = re.sub(r"\|", "❘", value)  # Light Vertical Bar U+2758
-        value = re.sub(r"[\n\r\t\f]", "", value)  # removed carriage movements
-    return value
