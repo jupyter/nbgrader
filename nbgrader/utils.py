@@ -61,6 +61,18 @@ def is_locked(cell: NotebookNode) -> bool:
     else:
         return cell.metadata['nbgrader'].get('locked', False)
 
+
+def has_failed(cell: NotebookNode) -> bool:
+    """Returns True if the cell contains an output indicative of an error"""
+    if not cell.cell_type == 'code':
+        return False
+    for output in cell.outputs:
+        if output.output_type == 'error' or output.output_type == "stream" and output.name == "stderr":
+            return True
+    # Otherwise assume all is fine
+    return False
+
+
 def get_partial_grade(output, max_points, log=None):
     """
     Calculates partial grade for a cell, based on contents of
