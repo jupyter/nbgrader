@@ -29,7 +29,7 @@ const pluginIDs = {
 /**
  * The command IDs
  */
-const commandIDs = {
+export const commandIDs = {
   openAssignmentsList: 'nbgrader:open-assignment-list',
   openCoursesList: 'nbgrader:open-course-list',
   openFormgrader: 'nbgrader:open-formgrader',
@@ -256,7 +256,7 @@ const formgraderExtension: JupyterFrontEndPlugin<void> = {
     app.commands.addCommand(commandIDs.openFormgrader, {
     label: 'Formgrader',
     execute: args => {
-      if(!widget){
+      if (!widget) {
         const settings = ServerConnection.makeSettings();
         const url = (args.url as string) || URLExt.join(settings.baseUrl, "formgrader");
 
@@ -268,18 +268,19 @@ const formgraderExtension: JupyterFrontEndPlugin<void> = {
         widget.title.closable = true;
         }
 
-        if(!tracker.has(widget)){
+        if (!tracker.has(widget)) {
           // Track the state of the widget for later restoration
           tracker.add(widget);
         }
 
         // Attach the widget to the main area if it's not there
-        if(!widget.isAttached){
-          if (notebookTree){
+        if (notebookTree){
+          if (!widget.isAttached){
             notebookTree.addWidget(widget);
-            notebookTree.currentWidget = widget;
           }
-          else app.shell.add(widget, 'main');
+          notebookTree.currentWidget = widget;
+        } else if (!widget.isAttached) {
+          app.shell.add(widget, 'main');
         }
 
         widget.content.update();
