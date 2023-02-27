@@ -15,7 +15,7 @@ Using nbgrader with JupyterHub
     :doc:`/user_guide/philosophy`
         More details on how the nbgrader hierarchy is structured.
 
-    `JupyterHub Documentation <https://jupyterhub.readthedocs.io/en/latest/getting-started/index.html>`_
+    `JupyterHub Documentation <https://jupyterhub.readthedocs.io/en/stable>`_
         Detailed documentation describing how JupyterHub works, which is very
         much required reading if you want to integrate the formgrader with
         JupyterHub.
