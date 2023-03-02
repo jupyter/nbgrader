@@ -68,6 +68,7 @@ const availableExtensionsManager: JupyterFrontEndPlugin<void> = {
     }
 
     const nbgraderMenu = new Menu({ commands: app.commands });
+    nbgraderMenu.id = 'jp-mainmenu-nbgrader';
     nbgraderMenu.title.label = 'Nbgrader';
 
     if (mainExtensions || labShell) {

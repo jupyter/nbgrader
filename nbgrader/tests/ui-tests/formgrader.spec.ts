@@ -290,7 +290,7 @@ test("Open formgrader tab from menu", async ({ page, tmpPath }) => {
   if (isNotebook) await page.goto(`tree/${tmpPath}`);
 
   const nbgrader_menu = page.locator(`${menuPanelId} div.lm-MenuBar-itemLabel:text("Nbgrader")`);
-  const formgrader_menu = page.locator('#jp-mainmenu-nbgrader-menu li[data-command="nbgrader:open-formgrader"]');
+  const formgrader_menu = page.locator('#jp-mainmenu-nbgrader li[data-command="nbgrader:open-formgrader"]');
   const tabs = page.locator(`${mainPanelId} .lm-TabBar-tab`);
   const lastTab_label = tabs.last().locator('.lm-TabBar-tabLabel');
 

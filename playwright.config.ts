@@ -2,22 +2,12 @@
  * Configuration for Playwright using default from @jupyterlab/galata
  */
 
-import type { PlaywrightTestConfig } from '@playwright/test';
+var baseConfig = require('@jupyterlab/galata/lib/playwright-config');
 
-const config: PlaywrightTestConfig = {
+module.exports = {
+  ...baseConfig,
   testDir: './nbgrader/tests/ui-tests',
-  testMatch: '**/*.spec.ts',
-  testIgnore: '**/node_modules/**/*',
-  timeout: 60000,
-  reporter: [[process.env.CI ? 'dot' : 'list'], ['html', { outputFolder: 'playwright-tests' }]],
   workers: 1,
-  use: {
-    // Context options
-    viewport: { width: 1024, height: 768 },
-    // Artifacts
-    video: 'retain-on-failure'
-  },
-
   webServer: {
     command: 'jlpm start:test',
     url: 'http://localhost:8888/lab',
@@ -26,5 +16,3 @@ const config: PlaywrightTestConfig = {
   },
 
 };
-
-export default config;

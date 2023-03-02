@@ -236,7 +236,7 @@ test("Open assignment list tab from menu", async ({ page, tmpPath }) => {
 
   const nbgrader_menu = page.locator(`${menuPanelId} div.lm-MenuBar-itemLabel:text("Nbgrader")`);
   const assignmentList_menu = page.locator(
-    '#jp-mainmenu-nbgrader-menu li[data-command="nbgrader:open-assignment-list"]'
+    '#jp-mainmenu-nbgrader li[data-command="nbgrader:open-assignment-list"]'
   );
   const tabs = page.locator(`${mainPanelId} .lm-TabBar-tab`);
   const lastTab_label = tabs.last().locator('.lm-TabBar-tabLabel');
