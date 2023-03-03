@@ -9,7 +9,14 @@ import {
     close_error_modal
 } from "./test_utils";
 
-test.use({ tmpPath: 'nbgrader-create-assignments-test' });
+test.use({
+  tmpPath: 'nbgrader-validate-assignments-test',
+  mockSettings: {
+    '@jupyterlab/apputils-extension:notification': {
+      fetchNews: 'false'
+    }
+  }
+});
 
 const nb_files = [
     "data.txt",
@@ -28,7 +35,7 @@ const nb_files = [
 test.beforeEach(async ({ baseURL, tmpPath }) => {
 
   if (baseURL === undefined) throw new Error("BaseURL is undefined.");
-  
+
   const contents = galata.newContentsHelper(baseURL);
   nb_files.forEach(elem => {
         contents.uploadFile(

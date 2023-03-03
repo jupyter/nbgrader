@@ -6,8 +6,14 @@ import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
 
-
-test.use({ tmpPath: 'nbgrader-course-list-test' });
+test.use({
+  tmpPath: 'nbgrader-course-list-test',
+  mockSettings: {
+    '@jupyterlab/apputils-extension:notification': {
+      fetchNews: 'false'
+    }
+  }
+});
 
 var exchange_dir:string;
 var cache_dir: string;

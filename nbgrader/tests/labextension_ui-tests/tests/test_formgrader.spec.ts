@@ -13,7 +13,14 @@ import * as fs from 'fs';
 
 const is_windows = os.platform().startsWith('win')
 
-test.use({ tmpPath: 'nbgrader-formgrader-test' });
+test.use({
+  tmpPath: 'nbgrader-formgrader-test',
+  mockSettings: {
+    '@jupyterlab/apputils-extension:notification': {
+      fetchNews: 'false'
+    }
+  }
+});
 
 // const db = new sqlite3.Database("gradebook.db");
 
