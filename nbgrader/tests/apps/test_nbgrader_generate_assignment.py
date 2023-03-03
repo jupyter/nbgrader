@@ -60,6 +60,12 @@ class TestNbGraderGenerateAssignment(BaseTestApp):
         with pytest.raises(traitlets.TraitError):
             run_nbgrader(["generate_assignment", "foo+bar"])
         assert not os.path.isfile(join(course_dir, "release", "foo+bar", "foo.ipynb"))
+        with pytest.raises(traitlets.TraitError):
+            run_nbgrader(["generate_assignment", "123 (abc)"], retcode=1)
+        assert not os.path.isfile(join(course_dir, "release", "123 (abc)", "foo.ipynb"))
+        with pytest.raises(traitlets.TraitError):
+            run_nbgrader(["generate_assignment", "123/abc"], retcode=1)
+        assert not os.path.isfile(join(course_dir, "release", "123/abc", "foo.ipynb"))
 
     def test_multiple_files(self, course_dir):
         """Can multiple files be assigned?"""

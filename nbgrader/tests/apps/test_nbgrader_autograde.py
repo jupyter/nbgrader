@@ -990,6 +990,7 @@ class TestNbGraderAutograde(BaseTestApp):
         run_nbgrader(["autograde", "ps1", "--db", db])
 
     def test_infinite_loop(self, db, course_dir):
+        # pytest.skip("this test has been hanging for over 90 minutes!")
         run_nbgrader(["db", "assignment", "add", "ps1", "--db", db, "--duedate",
                       "2015-02-02 14:58:23.948203 America/Los_Angeles"])
         run_nbgrader(["db", "student", "add", "foo", "--db", db])

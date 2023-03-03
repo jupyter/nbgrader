@@ -970,6 +970,45 @@ def test_add_new_assignment(browser, port, gradebook):
 
 
 @pytest.mark.nbextensions
+def test_new_assignment_excludes_bad_characters(browser, port, gradebook):
+    utils._load_gradebook_page(browser, port, "")
+    n = len(browser.find_elements(By.CSS_SELECTOR, "tbody tr"))
+
+    # click the "add new assignment" button
+    utils._click_link(browser, "Add new assignment...")
+    utils._wait_for_element(browser, "add-assignment-modal")
+    WebDriverWait(browser, 10).until(EC.visibility_of_element_located((By.CSS_SELECTOR, "#add-assignment-modal .save")))
+
+    # repeat the '+' from above
+    elem = browser.find_element(By.CSS_SELECTOR, "#add-assignment-modal .name")
+    elem.click()
+    elem.send_keys("ps2+a")
+
+    # click save and wait for the error message to appear
+    utils._click_element(browser, "#add-assignment-modal .save")
+    WebDriverWait(browser, 10).until(EC.visibility_of_element_located((By.CSS_SELECTOR, "#create-error")))
+
+    # Try round brackets
+    elem = browser.find_element(By.CSS_SELECTOR, "#add-assignment-modal .name")
+    elem.clear()
+    elem.click()
+    elem.send_keys("ps2 (123)")
+
+    # click save and wait for the error message to appear
+    utils._click_element(browser, "#add-assignment-modal .save")
+    WebDriverWait(browser, 10).until(EC.visibility_of_element_located((By.CSS_SELECTOR, "#create-error")))
+
+    # Try forward slash
+    elem = browser.find_element(By.CSS_SELECTOR, "#add-assignment-modal .name")
+    elem.clear()
+    elem.click()
+    elem.send_keys("ps2/123")
+
+    # click save and wait for the error message to appear
+    utils._click_element(browser, "#add-assignment-modal .save")
+    WebDriverWait(browser, 10).until(EC.visibility_of_element_located((By.CSS_SELECTOR, "#create-error")))
+
+@pytest.mark.nbextensions
 def test_edit_assignment(browser, port, gradebook):
     utils._load_gradebook_page(browser, port, "")
 

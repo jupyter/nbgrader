@@ -124,7 +124,9 @@ package-lock.json
 .goutputstream*
 .idea
 .mypy_cache
-
+.envrc
+.node-version
+.direnv/
 
 # playwright output tests directory
 playwright-tests/
