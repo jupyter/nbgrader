@@ -12,7 +12,14 @@ import * as path from 'path';
 import * as os from 'os';
 import * as fs from 'fs';
 
-test.use({ tmpPath: 'nbgrader-assignment-list-test' });
+test.use({
+  tmpPath: 'nbgrader-assignment-list-test',
+  mockSettings: {
+    '@jupyterlab/apputils-extension:notification': {
+      fetchNews: 'false'
+    }
+  }
+});
 
 var exchange_dir:string;
 var cache_dir: string;
