@@ -4,7 +4,14 @@ import * as path from 'path';
 
 import { wait_for_error_modal, close_error_modal } from "./test_utils";
 
-test.use({ tmpPath: 'nbgrader-create-assignments-test' });
+test.use({
+  tmpPath: 'nbgrader-create-assignments-test',
+  mockSettings: {
+    '@jupyterlab/apputils-extension:notification': {
+      fetchNews: 'false'
+    }
+  }
+});
 
 const nb_files = ["blank.ipynb", "task.ipynb", "old-schema.ipynb"];
 

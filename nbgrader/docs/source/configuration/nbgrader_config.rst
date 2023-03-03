@@ -33,7 +33,7 @@ Use Case 1: nbgrader and ``jupyter notebook`` run in the same directory
 The easiest way to use nbgrader and the formgrader extension is to run both
 from the same directory. For example::
 
-    nbgrader quickstart ./course101
+    nbgrader quickstart course101
     cd ./course101
     jupyter notebook
 
