@@ -38,11 +38,11 @@ jobs:
       - name: Configure environment variables from job flags
         run: |
           echo "GROUP=${{ matrix.group }}" >> $GITHUB_ENV
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Install node
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v3
         with:
-          node-version: '17.x'
+          node-version: '18.x'
       # NOTE: actions/setup-python@v2 can make use of a cache within the GitHub
       #       Action virtual environment and setup extremely fast. 3.9 isn't
       #       available in this cache as of November 2020.
