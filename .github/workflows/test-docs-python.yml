@@ -38,6 +38,8 @@ jobs:
             group: docs
           - python: "3.9"
             group: docs
+          - python: "3.10"
+            group: docs
     steps:
       # This is how you set an environment variable in a GitHub workflow that
       # will be available in following steps as if you would used `export
