@@ -105,6 +105,11 @@ class TestNbGraderAutograde(BaseTestApp):
         self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
         run_nbgrader(["generate_assignment", "ps1", "--db", db])
 
+        # This exploit previously caused cell executions that would indefinitely hang.
+        # See: https://github.com/ipython/ipython/commit/fd34cf5
+        with open("nbgrader_config.py", "a") as fh:
+            fh.write("""c.Execute.timeout = None""")
+
         self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "submitted", "foo", "ps1", "p1.ipynb"))
         self._copy_file(join("files", "submitted-changed.ipynb"), join(course_dir, "submitted", "bar", "ps1", "p1.ipynb"))
         self._copy_file(join("files", "submitted-cheat-attempt.ipynb"), join(course_dir, "submitted", "spam", "ps1", "p1.ipynb"))
@@ -995,7 +1000,7 @@ class TestNbGraderAutograde(BaseTestApp):
         run_nbgrader(["db", "student", "add", "foo", "--db", db])
         run_nbgrader(["db", "student", "add", "bar", "--db", db])
         with open("nbgrader_config.py", "a") as fh:
-            fh.write("""c.ExecutePreprocessor.timeout = 1""")
+            fh.write("""c.Execute.timeout = 1""")
 
         self._copy_file(join("files", "infinite-loop.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
         run_nbgrader(["generate_assignment", "ps1", "--db", db])

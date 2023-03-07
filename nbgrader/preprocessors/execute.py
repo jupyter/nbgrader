@@ -14,57 +14,31 @@ class UnresponsiveKernelError(Exception):
 
 class Execute(NbGraderPreprocessor, ExecutePreprocessor):
 
+    timeout = Integer(
+        30,
+        help=ExecutePreprocessor.timeout.help,
+        allow_none=True,
+    ).tag(config=True)
+
     interrupt_on_timeout = Bool(
         True,
-        help=dedent(
-            """
-            If execution of a cell times out, interrupt the kernel and
-            continue executing other cells rather than throwing an error and
-            stopping.
-            """
-        )
+        help=ExecutePreprocessor.interrupt_on_timeout.help
     ).tag(config=True)
 
     allow_errors = Bool(
         True,
         help=dedent(
             """
-            If ``False``, when a cell raises an error the
-            execution is stopped and a ``CellExecutionError``
-            is raised, except if the error name is in
-            ``allow_error_names``.
-            If ``True`` (default), execution errors are ignored and the execution
-            is continued until the end of the notebook. Output from
-            exceptions is included in the cell output in both cases.
+            When a cell execution results in an error, continue executing the rest of
+            the notebook. If False, the thrown nbclient exception would break aspects of
+            output rendering.
             """
         ),
-    ).tag(config=True)
+    )
 
     raise_on_iopub_timeout = Bool(
         True,
-        help=dedent(
-            """
-            If ``False``, then the kernel will continue waiting for
-            iopub messages until it receives a kernel idle message, or until a
-            timeout occurs, at which point the currently executing cell will be
-            skipped. If ``True`` (default), then an error will be raised after the first
-            timeout. This option generally does not need to be used, but may be
-            useful in contexts where there is the possibility of executing
-            notebooks with memory-consuming infinite loops.
-            """
-        ),
-    ).tag(config=True)
-
-    timeout = Integer(
-        30,
-        help=dedent(
-            """
-            The time to wait (in seconds) for output from executions.
-            If a cell execution takes longer, a TimeoutError is raised.
-            ``None`` or ``-1`` will disable the timeout. If ``timeout_func`` is set,
-            it overrides ``timeout``.
-            """
-        )
+        help=ExecutePreprocessor.raise_on_iopub_timeout.help
     ).tag(config=True)
 
     error_on_timeout = {
@@ -88,13 +62,6 @@ class Execute(NbGraderPreprocessor, ExecutePreprocessor):
         for CI environments when tests are flaky.
         """)
     ).tag(config=True)
-
-    @validate('timeout')
-    def _validate_timeout(self, proposal):
-        value = int(proposal['value'])
-        if value <= 0:
-            raise TraitError("the timeout should be a positive value")
-        return value
 
     def on_cell_executed(self, **kwargs):
         cell = kwargs['cell']
