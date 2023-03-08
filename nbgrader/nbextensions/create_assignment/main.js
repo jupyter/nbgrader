@@ -12,7 +12,7 @@ define([
     var nbgrader_preset_name = "Create Assignment";
     var nbgrader_highlight_cls = "nbgrader-highlight";
     var nbgrader_cls = "nbgrader-cell";
-    var nbgrader_schema_version = 3;
+    var nbgrader_schema_version = 4;
     var warning;
 
     var CellToolbar = celltoolbar.CellToolbar;
