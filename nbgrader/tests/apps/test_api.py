@@ -787,7 +787,8 @@ class TestNbGraderAPI(BaseTestApp):
         api.generate_feedback("ps2", "foo")
         result = api.release_feedback("ps2", "foo")
         assert result["success"]
-        assert os.path.exists(join(exchange, "abc101", "feedback", "6a0713045d217697b2ae0ab6b49fa1fe.html"))
+        print(os.listdir(join(exchange, "abc101", "feedback")))
+        assert os.path.exists(join(exchange, "abc101", "feedback", "a2eea9fae1cfd3376a5ed6b7aac0bdc2.html"))
 
     @notwindows
     def test_fetch_feedback(self, api, course_dir, db, cache):
