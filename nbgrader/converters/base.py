@@ -387,25 +387,32 @@ class BaseConverter(LoggingConfigurable):
 
                 # convert all the notebooks
                 for notebook_filename in self.notebooks:
-                    self.convert_single_notebook(notebook_filename)
+                    try:
+                        self.convert_single_notebook(notebook_filename)
+
+                    # Exceptions that shouldn't interrupt the entire conversion process should go here
+                    # Those that should go in outer try/except
+                    except UnresponsiveKernelError:
+                        self.log.error(
+                            "While processing assignment %s, the kernel became "
+                            "unresponsive and we could not interrupt it. This probably "
+                            "means that the students' code has an infinite loop that "
+                            "consumes a lot of memory or something similar. nbgrader "
+                            "doesn't know how to deal with this problem, so you will "
+                            "have to manually edit the students' code (for example, to "
+                            "just throw an error rather than enter an infinite loop). ",
+                            assignment)
+                        errors.append((gd['assignment_id'], gd['student_id']))
+                        _handle_failure(gd)
+
+                    except Exception as e:
+                        raise e
 
                 # set assignment permissions
                 self.set_permissions(gd['assignment_id'], gd['student_id'])
                 self.run_post_convert_hook()
 
-            except UnresponsiveKernelError:
-                self.log.error(
-                    "While processing assignment %s, the kernel became "
-                    "unresponsive and we could not interrupt it. This probably "
-                    "means that the students' code has an infinite loop that "
-                    "consumes a lot of memory or something similar. nbgrader "
-                    "doesn't know how to deal with this problem, so you will "
-                    "have to manually edit the students' code (for example, to "
-                    "just throw an error rather than enter an infinite loop). ",
-                    assignment)
-                errors.append((gd['assignment_id'], gd['student_id']))
-                _handle_failure(gd)
-
+            # Exceptions that should interrupt the entire conversion go here
             except sqlalchemy.exc.OperationalError:
                 _handle_failure(gd)
                 self.log.error(traceback.format_exc())

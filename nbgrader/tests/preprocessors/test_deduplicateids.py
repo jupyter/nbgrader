@@ -25,8 +25,8 @@ class TestDeduplicateIds(BaseTestPreprocessor):
 
         nb, resources = preprocessor.preprocess(nb, {})
 
-        assert nb.cells[0].metadata.nbgrader == {}
-        assert nb.cells[1].metadata.nbgrader != {}
+        assert nb.cells[0].metadata.nbgrader != {}
+        assert nb.cells[1].metadata.nbgrader == {}
 
     def test_duplicate_solution_cell(self, preprocessor):
         cell1 = create_solution_cell("hello", "code", "foo")
@@ -37,8 +37,8 @@ class TestDeduplicateIds(BaseTestPreprocessor):
 
         nb, resources = preprocessor.preprocess(nb, {})
 
-        assert nb.cells[0].metadata.nbgrader == {}
-        assert nb.cells[1].metadata.nbgrader != {}
+        assert nb.cells[0].metadata.nbgrader != {}
+        assert nb.cells[1].metadata.nbgrader == {}
 
     def test_duplicate_locked_cell(self, preprocessor):
         cell1 = create_locked_cell("hello", "code", "foo")
@@ -49,5 +49,5 @@ class TestDeduplicateIds(BaseTestPreprocessor):
 
         nb, resources = preprocessor.preprocess(nb, {})
 
-        assert nb.cells[0].metadata.nbgrader == {}
-        assert nb.cells[1].metadata.nbgrader != {}
+        assert nb.cells[0].metadata.nbgrader != {}
+        assert nb.cells[1].metadata.nbgrader == {}
