@@ -1,5 +1,6 @@
 import os
 import re
+import sys
 
 from textwrap import dedent
 
@@ -315,3 +316,7 @@ class CourseDirectory(LoggingConfigurable):
                     "Invalid timestamp string: {}".format(timestamp_path))
         else:
             return None
+
+    def fail(self, msg, *args):
+        self.log.error(msg, *args)
+        sys.exit(1)
