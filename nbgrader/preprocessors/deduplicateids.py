@@ -12,14 +12,8 @@ class DeduplicateIds(NbGraderPreprocessor):
         # keep track of grade ids encountered so far
         self.grade_ids = set([])
 
-        # reverse cell order
-        nb.cells = nb.cells[::-1]
-
         # process each cell in reverse order
         nb, resources = super(DeduplicateIds, self).preprocess(nb, resources)
-
-        # unreverse cell order
-        nb.cells = nb.cells[::-1]
 
         return nb, resources
 
