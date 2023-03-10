@@ -28,19 +28,19 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [windows-latest, ubuntu-20.04]
+        os: [windows-latest, ubuntu-22.04]
         group: ["docs", "nbextensions", "python"]
-        python: ["3.7", "3.8", "3.9", "3.10"]
+        python: ["3.8", "3.9", "3.10", "3.11"]
         exclude:
           - os: windows-latest
-            group: docs
-          - python: "3.7"
             group: docs
           - python: "3.8"
             group: docs
           - python: "3.9"
             group: docs
-          - python: "3.7"
+          - python: "3.10"
+            group: docs
+          - python: "3.8"
             group: nbextensions
     steps:
       # This is how you set an environment variable in a GitHub workflow that
