@@ -17,6 +17,7 @@ from nbconvert.writers import FilesWriter
 from ..coursedir import CourseDirectory
 from ..utils import find_all_files, rmtree, remove
 from ..preprocessors.execute import UnresponsiveKernelError
+from ..postprocessors import DuplicateIdError
 from ..nbgraderformat import SchemaTooOldError, SchemaTooNewError
 import typing
 from nbconvert.exporters.exporter import ResourcesDict
@@ -404,6 +405,13 @@ class BaseConverter(LoggingConfigurable):
                             assignment)
                         errors.append((gd['assignment_id'], gd['student_id']))
                         _handle_failure(gd)
+
+                    except DuplicateIdError:
+                        self.log.error(
+                            f"Encountered a cell with duplicate id when processing {notebook_filename}. "
+                            "Autograding with skipping cells marked as duplicate."
+                        )
+                        errors.append((gd['assignment_id'], gd['student_id']))
 
                     # Raise unhandled exceptions for the outer try/except
                     except Exception as e:
