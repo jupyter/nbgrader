@@ -391,7 +391,7 @@ class BaseConverter(LoggingConfigurable):
                         self.convert_single_notebook(notebook_filename)
 
                     # Exceptions that shouldn't interrupt the entire conversion process should go here
-                    # Those that should go in outer try/except
+                    # Those that should interrupt go in the outer try/except
                     except UnresponsiveKernelError:
                         self.log.error(
                             "While processing assignment %s, the kernel became "
@@ -405,6 +405,7 @@ class BaseConverter(LoggingConfigurable):
                         errors.append((gd['assignment_id'], gd['student_id']))
                         _handle_failure(gd)
 
+                    # Raise unhandled exceptions for the outer try/except
                     except Exception as e:
                         raise e
 
