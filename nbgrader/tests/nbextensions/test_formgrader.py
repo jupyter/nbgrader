@@ -20,7 +20,7 @@ from .. import run_nbgrader
 from ...api import Gradebook, MissingEntry
 from . import formgrade_utils as utils
 from .conftest import notwindows, _make_nbserver, _make_browser, _close_nbserver, _close_browser
-from ...utils import rmtree
+from ...utils import rmtree, sanitise_givencode
 
 
 if sys.platform == 'win32':
@@ -913,7 +913,7 @@ def test_add_new_assignment(browser, port, gradebook):
     # set the name and dudedate
     elem = browser.find_element(By.CSS_SELECTOR, "#add-assignment-modal .name")
     elem.click()
-    elem.send_keys("ps2+a")
+    elem.send_keys("ps2 ")
     elem = browser.find_element(By.CSS_SELECTOR, "#add-assignment-modal .duedate")
     elem.click()
     browser.execute_script("arguments[0].value = '2017-07-05T17:00';", elem)
@@ -924,18 +924,7 @@ def test_add_new_assignment(browser, port, gradebook):
 
     # click save and wait for the error message to appear
     utils._click_element(browser, "#add-assignment-modal .save")
-    WebDriverWait(browser, 10).until(EC.visibility_of_element_located((By.CSS_SELECTOR, "#create-error")))
 
-    # set a valid name
-    elem = browser.find_element(By.CSS_SELECTOR, "#add-assignment-modal .name")
-    elem.clear()
-    elem.click()
-    # check with a name containing whitespace, as this should be stripped
-    # away and handled by the interface
-    elem.send_keys("ps2 ")
-
-    # click save and wait for the modal to close
-    utils._click_element(browser, "#add-assignment-modal .save")
     modal_not_present = lambda browser: browser.execute_script("""return $("#add-assignment-modal").length === 0;""")
     WebDriverWait(browser, 10).until(modal_not_present)
 
@@ -970,7 +959,9 @@ def test_add_new_assignment(browser, port, gradebook):
 
 
 @pytest.mark.nbextensions
-def test_new_assignment_excludes_bad_characters(browser, port, gradebook):
+def test_new_assignment_corrects_bad_characters(browser, port, gradebook):
+    badName = 'xyz (12/34*) + {not|really?}[^e$]'
+    goodName = sanitise_givencode(badName)
     utils._load_gradebook_page(browser, port, "")
     n = len(browser.find_elements(By.CSS_SELECTOR, "tbody tr"))
 
@@ -979,34 +970,27 @@ def test_new_assignment_excludes_bad_characters(browser, port, gradebook):
     utils._wait_for_element(browser, "add-assignment-modal")
     WebDriverWait(browser, 10).until(EC.visibility_of_element_located((By.CSS_SELECTOR, "#add-assignment-modal .save")))
 
-    # repeat the '+' from above
+    # set the name and dudedate
     elem = browser.find_element(By.CSS_SELECTOR, "#add-assignment-modal .name")
     elem.click()
-    elem.send_keys("ps2+a")
 
-    # click save and wait for the error message to appear
+    # check with a name containing whitespace, as this should be stripped
+    # away and handled by the interface
+    elem.send_keys(badName)
+
+    # click save and wait for the modal to close
     utils._click_element(browser, "#add-assignment-modal .save")
-    WebDriverWait(browser, 10).until(EC.visibility_of_element_located((By.CSS_SELECTOR, "#create-error")))
+    modal_not_present = lambda browser: browser.execute_script("""return $("#add-assignment-modal").length === 0;""")
+    WebDriverWait(browser, 10).until(modal_not_present)
 
-    # Try round brackets
-    elem = browser.find_element(By.CSS_SELECTOR, "#add-assignment-modal .name")
-    elem.clear()
-    elem.click()
-    elem.send_keys("ps2 (123)")
+    # wait until both rows are present
+    rows_present = lambda browser: len(browser.find_elements(By.CSS_SELECTOR, "tbody tr")) == (n + 1)
+    WebDriverWait(browser, 10).until(rows_present)
 
-    # click save and wait for the error message to appear
-    utils._click_element(browser, "#add-assignment-modal .save")
-    WebDriverWait(browser, 10).until(EC.visibility_of_element_located((By.CSS_SELECTOR, "#create-error")))
-
-    # Try forward slash
-    elem = browser.find_element(By.CSS_SELECTOR, "#add-assignment-modal .name")
-    elem.clear()
-    elem.click()
-    elem.send_keys("ps2/123")
-
-    # click save and wait for the error message to appear
-    utils._click_element(browser, "#add-assignment-modal .save")
-    WebDriverWait(browser, 10).until(EC.visibility_of_element_located((By.CSS_SELECTOR, "#create-error")))
+    # check that the new row is correct - index is from 0, length from 1.
+    #  'n' will be the last entry
+    row = browser.find_elements(By.CSS_SELECTOR, "tbody tr")[n]
+    assert row.find_element(By.CSS_SELECTOR, ".name").text == goodName
 
 @pytest.mark.nbextensions
 def test_edit_assignment(browser, port, gradebook):
