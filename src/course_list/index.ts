@@ -123,7 +123,7 @@ export const course_list_extension: JupyterFrontEndPlugin<void> = {
         app.commands.addCommand(command, {
             label: 'Course List',
             execute: () => {
-                if (!widget) {
+                if (!widget || widget.isDisposed) {
                     const content = new CourseListWidget(app);
                     widget = new MainAreaWidget({content});
                     widget.id = 'nbgrader-course-list'

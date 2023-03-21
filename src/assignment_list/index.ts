@@ -192,7 +192,7 @@ export const assignment_list_extension: JupyterFrontEndPlugin<void> = {
     app.commands.addCommand(command,{
       label: 'Assignment List',
       execute: () => {
-        if(!widget){
+        if(!widget || widget.isDisposed){
           const content = new AssignmentListWidget(app);
           widget = new MainAreaWidget({content});
           widget.id = 'nbgrader-assignment-list';

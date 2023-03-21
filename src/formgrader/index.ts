@@ -78,7 +78,7 @@ export const formgrader_extension: JupyterFrontEndPlugin<void> = {
     app.commands.addCommand(command,{
     label: 'Formgrader',
     execute: async args => {
-      if(!widget){
+      if(!widget || widget.isDisposed){
         const settings = ServerConnection.makeSettings();
         const url = (args.url as string) || URLExt.join(settings.baseUrl, "formgrader");
 
