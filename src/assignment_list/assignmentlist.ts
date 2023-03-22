@@ -271,7 +271,7 @@ class Assignment {
     var that = this;
     if (this.data['status'] === 'released') {
 
-      button.innerText = "fetch";
+      button.innerText = "Fetch";
       button.onclick = async function(){
         button.innerText = 'Fetching...';
         button.setAttribute('disabled', 'disabled');
