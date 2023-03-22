@@ -49,7 +49,7 @@ dependencies = [
     "rapidfuzz>=1.8",
     "requests>=2.26",
     "sqlalchemy>=1.4,<2",
-    "traitlets<5.7.0",
+    "traitlets>5.0,<6",
 ]
 version = "0.8.1"
 
