@@ -2,6 +2,7 @@
 from nbgrader.exchange.abc import (Exchange, ExchangeError, ExchangeCollect, ExchangeFetch, ExchangeFetchAssignment,
                                    ExchangeFetchFeedback, ExchangeList, ExchangeReleaseAssignment, ExchangeRelease,
                                    ExchangeReleaseFeedback, ExchangeSubmit, ExchangeReleaseFeedback)
+from nbgrader.exchange import default
 from .exchange_factory import ExchangeFactory
 
 __all__ = [

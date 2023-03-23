@@ -149,35 +149,28 @@ class NbGrader(JupyterApp):
             if len(app.class_traits(config=True)) > 0:
                 classes.append(app)
 
+        def _collect_configurables(module):
+            """Return a list of all configurable classes from a module"""
+
+            for name in module.__all__:
+                cls = getattr(module, name)
+                if hasattr(cls, "class_traits") and cls.class_traits(config=True):
+                    classes.append(cls)
+
         # include plugins that have configurable options
-        for pg_name in plugins.__all__:
-            pg = getattr(plugins, pg_name)
-            if pg.class_traits(config=True):
-                classes.append(pg)
+        _collect_configurables(plugins)
 
         # include all preprocessors that have configurable options
-        for pp_name in preprocessors.__all__:
-            pp = getattr(preprocessors, pp_name)
-            if len(pp.class_traits(config=True)) > 0:
-                classes.append(pp)
+        _collect_configurables(preprocessors)
 
-        # include all the exchange actions
-        for ex_name in exchange.__all__:
-            ex = getattr(exchange, ex_name)
-            if hasattr(ex, "class_traits") and ex.class_traits(config=True):
-                classes.append(ex)
+        # include all the abstract exchange actions
+        _collect_configurables(exchange)
 
         # include all the default exchange actions
-        for ex_name in exchange.default.__all__:
-            ex = getattr(exchange, ex_name)
-            if hasattr(ex, "class_traits") and ex.class_traits(config=True):
-                classes.append(ex)
+        _collect_configurables(exchange.default)
 
         # include all the converters
-        for ex_name in converters.__all__:
-            ex = getattr(converters, ex_name)
-            if hasattr(ex, "class_traits") and ex.class_traits(config=True):
-                classes.append(ex)
+        _collect_configurables(converters)
 
         return classes
 
