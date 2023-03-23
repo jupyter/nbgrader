@@ -20,8 +20,6 @@ export class AssignmentListWidget extends Widget {
     super();
     this.app = app;
 
-    console.log('Initializing the assignments list widget');
-
     var assignment_html = ([
       '<div id="assignments" class="tab-pane">',
       '  <div id="assignments_toolbar" class="row list_toolbar">',

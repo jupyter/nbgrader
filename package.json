@@ -44,20 +44,20 @@
     "watch:labextension": "jupyter labextension watch ."
   },
   "dependencies": {
-    "@jupyter-notebook/application": "^7.0.0-alpha.13",
-    "@jupyter-notebook/tree": "^7.0.0-alpha.13",
-    "@jupyterlab/application": "^4.0.0-alpha.19",
-    "@jupyterlab/apputils": "^4.0.0-alpha.19",
-    "@jupyterlab/cells": "^4.0.0-alpha.19",
-    "@jupyterlab/coreutils": "^6.0.0-alpha.19",
-    "@jupyterlab/launcher": "^4.0.0-alpha.19",
-    "@jupyterlab/notebook": "^4.0.0-alpha.19",
-    "@jupyterlab/services": "^7.0.0-alpha.19",
-    "@jupyterlab/settingregistry": "^4.0.0-alpha.19"
+    "@jupyter-notebook/application": "^7.0.0-alpha.17",
+    "@jupyter-notebook/tree": "^7.0.0-alpha.17",
+    "@jupyterlab/application": "^4.0.0-alpha.22",
+    "@jupyterlab/apputils": "^4.0.0-alpha.22",
+    "@jupyterlab/cells": "^4.0.0-alpha.22",
+    "@jupyterlab/coreutils": "^6.0.0-alpha.22",
+    "@jupyterlab/launcher": "^4.0.0-alpha.22",
+    "@jupyterlab/notebook": "^4.0.0-alpha.22",
+    "@jupyterlab/services": "^7.0.0-alpha.22",
+    "@jupyterlab/settingregistry": "^4.0.0-alpha.22"
   },
   "devDependencies": {
-    "@jupyterlab/builder": "^4.0.0-alpha.19",
-    "@jupyterlab/galata": "^5.0.0-alpha.19",
+    "@jupyterlab/builder": "^4.0.0-alpha.22",
+    "@jupyterlab/galata": "^5.0.0-alpha.22",
     "@playwright/test": "^1.30.0",
     "@types/codemirror": "^5.60.5",
     "@typescript-eslint/eslint-plugin": "^4.8.1",

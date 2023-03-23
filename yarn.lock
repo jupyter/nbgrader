@@ -424,7 +424,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@jupyter-notebook/application@npm:^7.0.0-alpha.13, @jupyter-notebook/application@npm:^7.0.0-beta.4":
+"@jupyter-notebook/application@npm:^7.0.0-alpha.17, @jupyter-notebook/application@npm:^7.0.0-beta.4":
   version: 7.0.0-beta.4
   resolution: "@jupyter-notebook/application@npm:7.0.0-beta.4"
   dependencies:
@@ -443,7 +443,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@jupyter-notebook/tree@npm:^7.0.0-alpha.13":
+"@jupyter-notebook/tree@npm:^7.0.0-alpha.17":
   version: 7.0.0-beta.4
   resolution: "@jupyter-notebook/tree@npm:7.0.0-beta.4"
   dependencies:
@@ -481,7 +481,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@jupyterlab/application@npm:^4.0.0-alpha.19, @jupyterlab/application@npm:^4.0.1, @jupyterlab/application@npm:^4.0.2":
+"@jupyterlab/application@npm:^4.0.0-alpha.22, @jupyterlab/application@npm:^4.0.1, @jupyterlab/application@npm:^4.0.2":
   version: 4.0.2
   resolution: "@jupyterlab/application@npm:4.0.2"
   dependencies:
@@ -509,7 +509,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@jupyterlab/apputils@npm:^4.0.0-alpha.19, @jupyterlab/apputils@npm:^4.1.1, @jupyterlab/apputils@npm:^4.1.2":
+"@jupyterlab/apputils@npm:^4.0.0-alpha.22, @jupyterlab/apputils@npm:^4.1.1, @jupyterlab/apputils@npm:^4.1.2":
   version: 4.1.2
   resolution: "@jupyterlab/apputils@npm:4.1.2"
   dependencies:
@@ -552,7 +552,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@jupyterlab/builder@npm:^4.0.0-alpha.19":
+"@jupyterlab/builder@npm:^4.0.0-alpha.22":
   version: 4.0.2
   resolution: "@jupyterlab/builder@npm:4.0.2"
   dependencies:
@@ -593,7 +593,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@jupyterlab/cells@npm:^4.0.0-alpha.19, @jupyterlab/cells@npm:^4.0.2":
+"@jupyterlab/cells@npm:^4.0.0-alpha.22, @jupyterlab/cells@npm:^4.0.2":
   version: 4.0.2
   resolution: "@jupyterlab/cells@npm:4.0.2"
   dependencies:
@@ -721,7 +721,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@jupyterlab/coreutils@npm:^6.0.0-alpha.19, @jupyterlab/coreutils@npm:^6.0.1, @jupyterlab/coreutils@npm:^6.0.2":
+"@jupyterlab/coreutils@npm:^6.0.0-alpha.22, @jupyterlab/coreutils@npm:^6.0.1, @jupyterlab/coreutils@npm:^6.0.2":
   version: 6.0.2
   resolution: "@jupyterlab/coreutils@npm:6.0.2"
   dependencies:
@@ -891,7 +891,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@jupyterlab/galata@npm:^5.0.0-alpha.19":
+"@jupyterlab/galata@npm:^5.0.0-alpha.22":
   version: 5.0.2
   resolution: "@jupyterlab/galata@npm:5.0.2"
   dependencies:
@@ -918,7 +918,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@jupyterlab/launcher@npm:^4.0.0-alpha.19":
+"@jupyterlab/launcher@npm:^4.0.0-alpha.22":
   version: 4.0.2
   resolution: "@jupyterlab/launcher@npm:4.0.2"
   dependencies:
@@ -981,7 +981,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@jupyterlab/notebook@npm:^4.0.0-alpha.19, @jupyterlab/notebook@npm:^4.0.2":
+"@jupyterlab/notebook@npm:^4.0.0-alpha.22, @jupyterlab/notebook@npm:^4.0.2":
   version: 4.0.2
   resolution: "@jupyterlab/notebook@npm:4.0.2"
   dependencies:
@@ -1082,7 +1082,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@jupyterlab/services@npm:^7.0.0-alpha.19, @jupyterlab/services@npm:^7.0.1, @jupyterlab/services@npm:^7.0.2":
+"@jupyterlab/services@npm:^7.0.0-alpha.22, @jupyterlab/services@npm:^7.0.1, @jupyterlab/services@npm:^7.0.2":
   version: 7.0.2
   resolution: "@jupyterlab/services@npm:7.0.2"
   dependencies:
@@ -1101,7 +1101,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@jupyterlab/settingregistry@npm:^4.0.0-alpha.19, @jupyterlab/settingregistry@npm:^4.0.1, @jupyterlab/settingregistry@npm:^4.0.2":
+"@jupyterlab/settingregistry@npm:^4.0.0-alpha.22, @jupyterlab/settingregistry@npm:^4.0.1, @jupyterlab/settingregistry@npm:^4.0.2":
   version: 4.0.2
   resolution: "@jupyterlab/settingregistry@npm:4.0.2"
   dependencies:
@@ -5426,18 +5426,18 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "nbgrader@workspace:."
   dependencies:
-    "@jupyter-notebook/application": ^7.0.0-alpha.13
-    "@jupyter-notebook/tree": ^7.0.0-alpha.13
-    "@jupyterlab/application": ^4.0.0-alpha.19
-    "@jupyterlab/apputils": ^4.0.0-alpha.19
-    "@jupyterlab/builder": ^4.0.0-alpha.19
-    "@jupyterlab/cells": ^4.0.0-alpha.19
-    "@jupyterlab/coreutils": ^6.0.0-alpha.19
-    "@jupyterlab/galata": ^5.0.0-alpha.19
-    "@jupyterlab/launcher": ^4.0.0-alpha.19
-    "@jupyterlab/notebook": ^4.0.0-alpha.19
-    "@jupyterlab/services": ^7.0.0-alpha.19
-    "@jupyterlab/settingregistry": ^4.0.0-alpha.19
+    "@jupyter-notebook/application": ^7.0.0-alpha.17
+    "@jupyter-notebook/tree": ^7.0.0-alpha.17
+    "@jupyterlab/application": ^4.0.0-alpha.22
+    "@jupyterlab/apputils": ^4.0.0-alpha.22
+    "@jupyterlab/builder": ^4.0.0-alpha.22
+    "@jupyterlab/cells": ^4.0.0-alpha.22
+    "@jupyterlab/coreutils": ^6.0.0-alpha.22
+    "@jupyterlab/galata": ^5.0.0-alpha.22
+    "@jupyterlab/launcher": ^4.0.0-alpha.22
+    "@jupyterlab/notebook": ^4.0.0-alpha.22
+    "@jupyterlab/services": ^7.0.0-alpha.22
+    "@jupyterlab/settingregistry": ^4.0.0-alpha.22
     "@playwright/test": ^1.30.0
     "@types/codemirror": ^5.60.5
     "@typescript-eslint/eslint-plugin": ^4.8.1

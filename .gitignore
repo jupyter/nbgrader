@@ -25,6 +25,8 @@ var/
 # built labextension
 tsconfig.tsbuildinfo
 nbgrader/labextension/
+# Yarn cache
+.yarn/
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
