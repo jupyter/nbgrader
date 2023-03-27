@@ -202,3 +202,6 @@ default = ""
 [[tool.tbump.field]]
 name = "release"
 default = ""
+
+[tool.check-wheel-contents]
+ignore = ["W002"]
