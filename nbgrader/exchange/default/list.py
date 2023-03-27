@@ -128,23 +128,36 @@ class ExchangeList(ABCExchangeList, Exchange):
                     local_feedback_checksum = None
 
                 # Also look to see if there is feedback available to fetch.
-                unique_key = make_unique_key(
-                    info['course_id'],
-                    info['assignment_id'],
-                    nb_info['notebook_id'],
-                    info['student_id'],
-                    info['timestamp'])
-                self.log.debug("Unique key is: {}".format(unique_key))
-                nb_hash = notebook_hash(notebook, unique_key)
-                exchange_feedback_path = os.path.join(
-                    self.root, info['course_id'], 'feedback', '{0}.html'.format(nb_hash))
-                has_exchange_feedback = os.path.isfile(exchange_feedback_path)
-                if not has_exchange_feedback:
-                    # Try looking for legacy feedback.
-                    nb_hash = notebook_hash(notebook)
+
+                # Check if a secret is provided (new method)
+                # If not, fall back to using make_unique_key
+                submission_secret_path = os.path.join(path, "submission_secret.txt")
+                if os.path.isfile(submission_secret_path):
+                    with open(submission_secret_path) as fh:
+                        submission_secret = fh.read()
+                    nb_hash = notebook_hash(secret=submission_secret, notebook_id=nb_info["notebook_id"])
                     exchange_feedback_path = os.path.join(
                         self.root, info['course_id'], 'feedback', '{0}.html'.format(nb_hash))
                     has_exchange_feedback = os.path.isfile(exchange_feedback_path)
+                else:
+                    unique_key = make_unique_key(
+                        info['course_id'],
+                        info['assignment_id'],
+                        nb_info['notebook_id'],
+                        info['student_id'],
+                        info['timestamp'])
+                    self.log.debug("Unique key is: {}".format(unique_key))
+                    nb_hash = notebook_hash(notebook, unique_key)
+                    exchange_feedback_path = os.path.join(
+                        self.root, info['course_id'], 'feedback', '{0}.html'.format(nb_hash))
+                    has_exchange_feedback = os.path.isfile(exchange_feedback_path)
+                    if not has_exchange_feedback:
+                        # Try looking for legacy feedback.
+                        nb_hash = notebook_hash(notebook)
+                        exchange_feedback_path = os.path.join(
+                            self.root, info['course_id'], 'feedback', '{0}.html'.format(nb_hash))
+                        has_exchange_feedback = os.path.isfile(exchange_feedback_path)
+
                 if has_exchange_feedback:
                     exchange_feedback_checksum = _checksum(exchange_feedback_path)
                 else:
