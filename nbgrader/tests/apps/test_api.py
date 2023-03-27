@@ -773,7 +773,7 @@ class TestNbGraderAPI(BaseTestApp):
         result = api.release_feedback("ps1", "foo")
         assert result["success"]
         assert os.path.isdir(join(exchange, "abc101", "feedback"))
-        assert os.path.exists(join(exchange, "abc101", "feedback", "c600ef68c434c3d136bb5e68ea874169.html"))
+        assert os.path.exists(join(exchange, "abc101", "feedback", "4121ffb4f7dc3379302744b9f5d8a5e9.html"))
         # add another assignment
         self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "source", "ps2", "p2.ipynb"))
         api.generate_assignment("ps2")
@@ -783,7 +783,7 @@ class TestNbGraderAPI(BaseTestApp):
         api.generate_feedback("ps2", "foo")
         result = api.release_feedback("ps2", "foo")
         assert result["success"]
-        assert os.path.exists(join(exchange, "abc101", "feedback", "e190e1f234b633832f2069f4f8a3a680.html"))
+        assert os.path.exists(join(exchange, "abc101", "feedback", "d741d5390b0e52956e9e7b61f4946cf6.html"))
 
     @notwindows
     def test_fetch_feedback(self, api, course_dir, db, cache):

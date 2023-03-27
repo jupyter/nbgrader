@@ -563,8 +563,20 @@ def capture_log(app, fmt="[%(levelname)s] %(message)s"):
     return result
 
 
-def notebook_hash(path, unique_key=None):
+def notebook_hash(path=None, unique_key=None, secret=None, notebook_id=None):
+    # Ensure right options for only one hash method is given,
+    # path (or path and unique key) for legacy hashing
+    # secret for new method where we have submission_secret.txt,
+    # decoupling notebook state from submission (to allow editing by instructor after submission)
+    assert bool(path) ^ (bool(secret) & bool(notebook_id))
     m = hashlib.md5()
+
+    # new method
+    if secret:
+        m.update(to_bytes(secret))
+        m.update(to_bytes(notebook_id))
+        return m.hexdigest()
+    # legacy
     m.update(open(path, 'rb').read())
     if unique_key:
         m.update(to_bytes(unique_key))
