@@ -204,4 +204,4 @@ name = "release"
 default = ""
 
 [tool.check-wheel-contents]
-ignore = ["W002"]
+ignore = ["W002", "W004"]
