@@ -149,6 +149,7 @@ after-bump-version = [
 before-build-npm = [
     "python -m pip install 'jupyterlab<4'",
     "jlpm",
+    "jlpm build:prod",
 ]
 before-build-python = [
     "jlpm clean:all",
