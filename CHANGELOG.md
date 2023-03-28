@@ -4,6 +4,56 @@ A summary of changes to nbgrader.
 
 <!-- <START NEW CHANGELOG ENTRY> -->
 
+## 0.8.2
+
+([Full Changelog](https://github.com/jupyter/nbgrader/compare/v0.8.1...f262e3b37b30af59ab2fcc31a245cec6360c2271))
+
+### Enhancements made
+
+- Make execute preprocessor traits configurable [#1690](https://github.com/jupyter/nbgrader/pull/1690) ([@tmetzl](https://github.com/tmetzl))
+
+### Bugs fixed
+
+- Fix validation for failed cells with zero points [#1731](https://github.com/jupyter/nbgrader/pull/1731) ([@tuncbkose](https://github.com/tuncbkose))
+- Changed quickstart example [#1725](https://github.com/jupyter/nbgrader/pull/1725) ([@tuncbkose](https://github.com/tuncbkose))
+- Fix view feedback link when root_dir is set [#1675](https://github.com/jupyter/nbgrader/pull/1675) ([@brichet](https://github.com/brichet))
+- Fix Docker image for demo [#1674](https://github.com/jupyter/nbgrader/pull/1674) ([@brichet](https://github.com/brichet))
+- Debug installation methods [#1671](https://github.com/jupyter/nbgrader/pull/1671) ([@blink1073](https://github.com/blink1073))
+
+### Maintenance and upkeep improvements
+
+- Update to Jupyter Releaser v2 [#1766](https://github.com/jupyter/nbgrader/pull/1766) ([@jtpio](https://github.com/jtpio))
+- Updates yarn network timeout [#1765](https://github.com/jupyter/nbgrader/pull/1765) ([@brichet](https://github.com/brichet))
+- Removes dependency to MarkupSafe\<2.2.0 [#1764](https://github.com/jupyter/nbgrader/pull/1764) ([@brichet](https://github.com/brichet))
+- Unpin nbclassic [#1763](https://github.com/jupyter/nbgrader/pull/1763) ([@brichet](https://github.com/brichet))
+- Loosen the traitlets version requirement [#1760](https://github.com/jupyter/nbgrader/pull/1760) ([@shreve](https://github.com/shreve))
+- Bump webpack from 5.73.0 to 5.76.1 [#1754](https://github.com/jupyter/nbgrader/pull/1754) ([@dependabot](https://github.com/dependabot))
+- Bump vega from 5.22.1 to 5.24.0 [#1752](https://github.com/jupyter/nbgrader/pull/1752) ([@dependabot](https://github.com/dependabot))
+- Upgrade python requirement [#1750](https://github.com/jupyter/nbgrader/pull/1750) ([@brichet](https://github.com/brichet))
+- Unpin dependency on pytest and pytest-xdist [#1748](https://github.com/jupyter/nbgrader/pull/1748) ([@brichet](https://github.com/brichet))
+- Adapts timeout in tests to avoid cancelled nbextension tests [#1745](https://github.com/jupyter/nbgrader/pull/1745) ([@brichet](https://github.com/brichet))
+- Remove the notification during UI tests, to fix a failing test [#1743](https://github.com/jupyter/nbgrader/pull/1743) ([@brichet](https://github.com/brichet))
+- Remove codecov badge [#1741](https://github.com/jupyter/nbgrader/pull/1741) ([@brichet](https://github.com/brichet))
+- Fixes for testing CI [#1737](https://github.com/jupyter/nbgrader/pull/1737) ([@tuncbkose](https://github.com/tuncbkose))
+- Bump http-cache-semantics from 4.1.0 to 4.1.1 [#1732](https://github.com/jupyter/nbgrader/pull/1732) ([@dependabot](https://github.com/dependabot))
+- Bump json5 from 1.0.1 to 1.0.2 [#1720](https://github.com/jupyter/nbgrader/pull/1720) ([@dependabot](https://github.com/dependabot))
+- Pin jupyter_server\<2 [#1719](https://github.com/jupyter/nbgrader/pull/1719) ([@brichet](https://github.com/brichet))
+- Update traitlets requirement from \<5.2.0 to \<5.7.0 [#1704](https://github.com/jupyter/nbgrader/pull/1704) ([@dependabot](https://github.com/dependabot))
+- Bump loader-utils from 1.4.0 to 1.4.2 [#1702](https://github.com/jupyter/nbgrader/pull/1702) ([@dependabot](https://github.com/dependabot))
+- Allow current working directory for nbgrader config file only [#1698](https://github.com/jupyter/nbgrader/pull/1698) ([@brichet](https://github.com/brichet))
+- Bump pytest-xdist from 2.5.0 to 3.0.2 [#1695](https://github.com/jupyter/nbgrader/pull/1695) ([@dependabot](https://github.com/dependabot))
+- Bump pytest from 7.1.2 to 7.2.0 [#1694](https://github.com/jupyter/nbgrader/pull/1694) ([@dependabot](https://github.com/dependabot))
+- Update nbclassic requirement from \<0.4.0 to \<0.5.0 [#1693](https://github.com/jupyter/nbgrader/pull/1693) ([@dependabot](https://github.com/dependabot))
+- Fixes selenium tests [#1677](https://github.com/jupyter/nbgrader/pull/1677) ([@brichet](https://github.com/brichet))
+
+### Contributors to this release
+
+([GitHub contributors page for this release](https://github.com/jupyter/nbgrader/graphs/contributors?from=2022-09-27&to=2023-03-28&type=c))
+
+[@blink1073](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Ablink1073+updated%3A2022-09-27..2023-03-28&type=Issues) | [@brichet](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Abrichet+updated%3A2022-09-27..2023-03-28&type=Issues) | [@dependabot](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Adependabot+updated%3A2022-09-27..2023-03-28&type=Issues) | [@github-actions](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Agithub-actions+updated%3A2022-09-27..2023-03-28&type=Issues) | [@jtpio](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Ajtpio+updated%3A2022-09-27..2023-03-28&type=Issues) | [@meeseeksmachine](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Ameeseeksmachine+updated%3A2022-09-27..2023-03-28&type=Issues) | [@perllaghu](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Aperllaghu+updated%3A2022-09-27..2023-03-28&type=Issues) | [@shreve](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Ashreve+updated%3A2022-09-27..2023-03-28&type=Issues) | [@tmetzl](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Atmetzl+updated%3A2022-09-27..2023-03-28&type=Issues) | [@tuncbkose](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Atuncbkose+updated%3A2022-09-27..2023-03-28&type=Issues)
+
+<!-- <END NEW CHANGELOG ENTRY> -->
+
 ## 0.8.1
 
 ([Full Changelog](https://github.com/jupyter/nbgrader/compare/v0.8.0...9a85dc1fb76c2f39cd50ea1a3c2619c660905300))
@@ -17,8 +67,6 @@ A summary of changes to nbgrader.
 ([GitHub contributors page for this release](https://github.com/jupyter/nbgrader/graphs/contributors?from=2022-08-22&to=2022-09-26&type=c))
 
 [@blink1073](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Ablink1073+updated%3A2022-08-22..2022-09-26&type=Issues) | [@github-actions](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Agithub-actions+updated%3A2022-08-22..2022-09-26&type=Issues)
-
-<!-- <END NEW CHANGELOG ENTRY> -->
 
 ## 0.8.0
 
