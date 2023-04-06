@@ -215,6 +215,7 @@ class TestNbGraderList(BaseTestApp):
         self._submit("ps1", exchange, cache)
         filename, = os.listdir(os.path.join(exchange, "abc101", "inbound"))
         timestamp = filename.split("+")[2]
+        print(self._list(exchange, cache, "ps1", flags=["--inbound"]))
         assert self._list(exchange, cache, "ps1", flags=["--inbound"]) == dedent(
             """
             [ListApp | INFO] Submitted assignments:

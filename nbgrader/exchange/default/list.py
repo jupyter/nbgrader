@@ -129,7 +129,7 @@ class ExchangeList(ABCExchangeList, Exchange):
 
                 # Also look to see if there is feedback available to fetch.
 
-                # Check if a secret is provided (new method)
+                # Check if a secret is provided
                 # If not, fall back to using make_unique_key
                 submission_secret_path = os.path.join(path, "submission_secret.txt")
                 if os.path.isfile(submission_secret_path):

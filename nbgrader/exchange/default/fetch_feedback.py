@@ -49,7 +49,7 @@ class ExchangeFetchFeedback(Exchange, ABCExchangeFetchFeedback):
             pattern = os.path.join(self.cache_path, submission, "*.ipynb")
             notebooks = glob.glob(pattern)
 
-            # Check if a secret is provided (new method)
+            # Check if a secret is provided
             submission_secret = None
             submission_secret_path = os.path.join(self.cache_path, submission, "submission_secret.txt")
             if os.path.isfile(submission_secret_path):
@@ -59,7 +59,7 @@ class ExchangeFetchFeedback(Exchange, ABCExchangeFetchFeedback):
             for notebook in notebooks:
                 notebook_id = os.path.splitext(os.path.split(notebook)[-1])[0]
 
-                # If a secret is provided (new method), use that
+                # If a secret is provided, use that
                 # If not, fall back to using make_unique_key
                 if submission_secret:
                     nb_hash = notebook_hash(secret=submission_secret, notebook_id=notebook_id)
