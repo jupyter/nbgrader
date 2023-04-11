@@ -37,11 +37,13 @@ var SubmittedNotebookUI = Backbone.View.extend({
     showName: function () {
         this.$reveal.parent().find(".name-shown").show();
         this.$reveal.parent().find(".name-hidden").hide();
+        updateToggleNamesButtonLabel();
     },
 
     hideName: function () {
         this.$reveal.parent().find(".name-hidden").show();
         this.$reveal.parent().find(".name-shown").hide();
+        updateToggleNamesButtonLabel();
     },
 
     render: function () {
@@ -185,6 +187,33 @@ var loadSubmittedNotebooks = function () {
             models.loaded = true;
         }
     });
+};
+
+// at least one hidden name -> label="Show All Names"
+// no hidden name -> label="Hide All Names"
+let updateToggleNamesButtonLabel = function() {
+    const button = document.getElementById("toggle_names");
+    const icons = document.getElementsByClassName("glyphicon name-hidden");
+    const icon_array = [...icons];
+    if (icon_array.some(el => el.checkVisibility())){
+        button.innerHTML = "Show All Names";
+    } else{
+        button.innerHTML = "Hide All Names";
+    }
+};
+
+// button to toggle all student names
+let toggleAllNames = function () {
+    let icons;
+    const button = document.getElementById("toggle_names");
+    const names_hidden = (button.innerHTML === "Show All Names");
+    if (names_hidden){
+        icons = document.getElementsByClassName("glyphicon name-hidden");
+    } else {
+        icons = document.getElementsByClassName("glyphicon name-shown");
+    }
+    let icon_array = [...icons];
+    icon_array.forEach(x => x.click());
 };
 
 var models = undefined;

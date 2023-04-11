@@ -17,6 +17,11 @@ var notebook_id = "{{ notebook_id }}";
 </ol>
 {%- endblock -%}
 
+<!-- Button to toggle all student names -->
+{%- block messages -%}
+<button id="toggle_names" onclick="toggleAllNames()">Show All Names</button>
+{%- endblock -%}
+
 {%- block table_header -%}
 <tr>
   <th></th>
