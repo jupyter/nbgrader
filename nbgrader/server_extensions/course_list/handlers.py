@@ -12,8 +12,8 @@ from textwrap import dedent
 from urllib.parse import urlparse
 
 from jupyter_server.utils import url_path_join as ujoin
-from jupyter_server.base.handlers import JupyterHandler
 from jupyter_core.paths import jupyter_config_path
+from notebook.base.handlers import IPythonHandler as JupyterHandler
 
 from ...apps import NbGrader
 from ...auth import Authenticator

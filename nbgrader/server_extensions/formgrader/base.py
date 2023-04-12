@@ -3,7 +3,7 @@ import json
 import functools
 
 from tornado import web
-from jupyter_server.base.handlers import JupyterHandler
+from notebook.base.handlers import IPythonHandler as JupyterHandler
 from ...api import Gradebook
 from ...apps.api import NbGraderAPI
 

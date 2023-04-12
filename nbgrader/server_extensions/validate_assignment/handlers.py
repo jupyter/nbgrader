@@ -8,9 +8,9 @@ from tornado import web
 from textwrap import dedent
 
 from jupyter_server.utils import url_path_join as ujoin
-from jupyter_server.base.handlers import JupyterHandler
 from traitlets.config import Config
 from jupyter_core.paths import jupyter_config_path
+from notebook.base.handlers import IPythonHandler as JupyterHandler
 
 from ...apps import NbGrader
 from ...validator import Validator

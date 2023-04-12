@@ -9,10 +9,10 @@ from tornado import web
 from textwrap import dedent
 
 from jupyter_server.utils import url_path_join as ujoin
-from jupyter_server.base.handlers import JupyterHandler
 from traitlets import Unicode, default
 from traitlets.config import LoggingConfigurable, Config
 from jupyter_core.paths import jupyter_config_path
+from notebook.base.handlers import IPythonHandler as JupyterHandler
 
 from ...exchange import ExchangeFactory, ExchangeError
 from ...apps import NbGrader
