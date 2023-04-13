@@ -8,7 +8,6 @@ A system for assigning and grading Jupyter notebooks.
 
 [![Notebook Tests](https://img.shields.io/github/actions/workflow/status/jupyter/nbgrader/test-docs-python-nbextensions.yml?logo=github&label=Notebook%20Tests)](https://github.com/jupyter/nbgrader/actions/workflows/test-docs-python-nbextensions.yml)
 [![Lab Tests](https://img.shields.io/github/actions/workflow/status/jupyter/nbgrader/test-labextensions.yml?logo=github&label=Lab%20Tests)](https://github.com/jupyter/nbgrader/actions/workflows/test-labextensions.yml)
-![Codecov](https://img.shields.io/codecov/c/github/jupyter/nbgrader?logo=codecov)
 
 [![Google Group](https://img.shields.io/badge/Google%20Group-Jupyter%20Project-blue.svg?logo=googlechat)](https://groups.google.com/forum/#!forum/jupyter)
 [![Discourse](https://img.shields.io/badge/Discourse-Jupyter-blue.svg?logo=discourse)](https://discourse.jupyter.org/search?q=nbgrader)
