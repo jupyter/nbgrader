@@ -66,7 +66,6 @@ docs = [
     "sphinx_rtd_theme",
 ]
 tests = [
-    "codecov",
     "coverage",
     "jupyter_packaging",
     "nbval",
