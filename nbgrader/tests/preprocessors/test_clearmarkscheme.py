@@ -108,3 +108,77 @@ class TestClearMarkScheme(BaseTestPreprocessor):
         """Is the test notebook processed without error?"""
         nb = self._read_nb(os.path.join("files", "test_taskcell.ipynb"))
         preprocessor.preprocess(nb, {})
+
+    # attachment detection tests
+    def test_attachment_in_mark_scheme(self, preprocessor):
+        """Is an error raised when there is an attachment in the marking scheme?"""
+        source = dedent(
+            """
+            assert True
+            ### BEGIN MARK SCHEME
+            ![](attachment:image.png)
+            ### END MARK SCHEME
+            """
+        ).strip()
+        cell = create_task_cell(source, 'markdown', 'some-task-id', 2)
+        with pytest.raises(RuntimeError):
+            preprocessor._remove_mark_scheme_region(cell)
+
+        source = dedent(
+            """
+            assert True
+            ### BEGIN MARK SCHEME
+            ![alt text](attachment:answers.png)
+            ### END MARK SCHEME
+            """
+        ).strip()
+        cell = create_task_cell(source, 'markdown', 'some-task-id', 2)
+        with pytest.raises(RuntimeError):
+            preprocessor._remove_mark_scheme_region(cell)
+
+        source = dedent(
+            """
+            assert True
+            ### BEGIN MARK SCHEME
+            Text text text text text.
+            ![](attachment:image1.jpg)
+            Grade grade grade.
+            ![](attachment:image2.png)
+            Mark mark mark mark.
+            ### END MARK SCHEME
+            """
+        ).strip()
+        cell = create_task_cell(source, 'markdown', 'some-task-id', 2)
+        with pytest.raises(RuntimeError):
+            preprocessor._remove_mark_scheme_region(cell)
+
+    def test_attachment_suppress_error(self, preprocessor):
+        """Can the error be suppressed?"""
+        source = dedent(
+            """
+            assert True
+            ### BEGIN MARK SCHEME
+            ![](attachment:image.png)
+            ### END MARK SCHEME
+            """
+        ).strip()
+        cell = create_task_cell(source, 'markdown', 'some-task-id', 2)
+        preprocessor.check_attachment_leakage = False
+        removed_test = preprocessor._remove_mark_scheme_region(cell)
+        assert removed_test
+        assert cell.source == "assert True"
+
+    def test_attachment_not_in_mark_scheme(self, preprocessor):
+        """Attachments outside of marking schemes shouldn't be touched"""
+        source = dedent(
+            """
+            ![](attachment:image.png)
+            ### BEGIN MARK SCHEME
+            assert True
+            ### END MARK SCHEME
+            """
+        ).strip()
+        cell = create_task_cell(source, 'markdown', 'some-task-id', 2)
+        removed_test = preprocessor._remove_mark_scheme_region(cell)
+        assert removed_test
+        assert cell.source == "![](attachment:image.png)"
