@@ -131,7 +131,7 @@ const assignmentListExtension: JupyterFrontEndPlugin<void> = {
     app.commands.addCommand(commandIDs.openAssignmentsList, {
       label: 'Assignment List',
       execute: () => {
-        if(!widget){
+        if(!widget || widget.isDisposed){
           const content = new AssignmentListWidget(app);
           widget = new MainAreaWidget({content});
           widget.id = 'nbgrader-assignment-list';
@@ -195,7 +195,7 @@ const courseListExtension: JupyterFrontEndPlugin<void> = {
     app.commands.addCommand(commandIDs.openCoursesList, {
       label: 'Course List',
       execute: () => {
-        if (!widget) {
+        if (!widget || widget.isDisposed) {
           const content = new CourseListWidget(app);
           widget = new MainAreaWidget({content});
           widget.id = 'nbgrader-course-list';
@@ -257,7 +257,7 @@ const formgraderExtension: JupyterFrontEndPlugin<void> = {
     app.commands.addCommand(commandIDs.openFormgrader, {
     label: 'Formgrader',
     execute: args => {
-      if (!widget) {
+      if (!widget || widget.isDisposed) {
         const settings = ServerConnection.makeSettings();
         const url = (args.url as string) || URLExt.join(settings.baseUrl, "formgrader");
 
