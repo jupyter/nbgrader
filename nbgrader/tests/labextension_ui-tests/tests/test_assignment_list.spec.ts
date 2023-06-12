@@ -156,19 +156,33 @@ test('Open assignment list tab from menu', async({
   page
   }) => {
 
-    await expect(page.locator("#jp-main-dock-panel .lm-TabBar-tab.p-TabBar-tab")).toHaveCount(1);
-    // Check main menu exists
-    await expect(page.locator('#jp-menu-panel div.lm-MenuBar-itemLabel.p-MenuBar-itemLabel:text("Nbgrader")')).toHaveCount(1);
-    await page.locator('#jp-menu-panel div.lm-MenuBar-itemLabel.p-MenuBar-itemLabel:text("Nbgrader")').click();
+    const nbgrader_menu = page.locator('#jp-menu-panel div.lm-MenuBar-itemLabel.p-MenuBar-itemLabel:text("Nbgrader")');
+    const assignmentList_menu = page.locator('#jp-mainmenu-nbgrader-menu li[data-command="nbgrader:open-assignment-list"]');
+    const tabs = page.locator("#jp-main-dock-panel .lm-TabBar-tab.p-TabBar-tab");
+    const lastTab_label = tabs.last().locator(".lm-TabBar-tabLabel.p-TabBar-tabLabel");
 
-    await page.locator('#jp-mainmenu-nbgrader-menu li[data-command="nbgrader:open-assignment-list"]').click();
+    await expect(tabs).toHaveCount(1);
 
-    await expect(page.locator("#jp-main-dock-panel .lm-TabBar-tab.p-TabBar-tab")).toHaveCount(2);
+    // Check main menu exists    
+    await expect(nbgrader_menu).toHaveCount(1);
 
-    var tabs = page.locator("#jp-main-dock-panel .lm-TabBar-tab.p-TabBar-tab");
-    var newTab_label = tabs.last().locator(".lm-TabBar-tabLabel.p-TabBar-tabLabel");
-    await expect(newTab_label).toHaveText("Assignments");
+    // Open assignment list from the menu
+    await nbgrader_menu.click();    
+    await assignmentList_menu.click();
 
+    await expect(tabs).toHaveCount(2);        
+    await expect(lastTab_label).toHaveText("Assignments");
+
+    // Close the last tab
+    await tabs.last().locator(".jp-icon-hover.lm-TabBar-tabCloseIcon").click();
+    await expect(tabs).toHaveCount(1);
+
+    // Open again
+    await nbgrader_menu.click();
+    await assignmentList_menu.click();
+
+    await expect(tabs).toHaveCount(2);
+    await expect(lastTab_label).toHaveText("Assignments");
 });
 
 /*
