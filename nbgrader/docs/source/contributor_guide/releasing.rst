@@ -71,7 +71,7 @@ This list should then be included in the changelog.
 Bump the version number
 -----------------------
 
-The version number is bumped using `tbump <https://github.com/dmerejkowsky/tbump>`_ :
+The version number is bumped using `tbump <https://github.com/your-tools/tbump>`_ :
 ``tbump <VERSION> --no-push``
 
 The version number should have been changed in the following files :
@@ -165,7 +165,7 @@ Change to development version
 Bump the version again, this time to development. For example, if the release
 was ``0.3.0``, then the new version should be ``0.4.0.dev``.
 
-Use `tbump <https://github.com/dmerejkowsky/tbump>`_ again :
+Use `tbump <https://github.com/your-tools/tbump>`_ again :
 ``tbump 0.4.0.dev --no-push`` (change the version number with the correct one)
 
 As a reminder, the files concerned are :

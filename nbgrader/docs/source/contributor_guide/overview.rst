@@ -8,4 +8,4 @@ expectations are for contributions.
 
 In general, the guidelines for opening issues, submitting PRs, code style,
 testing, and documentation, are the same as the `IPython contribution
-guidelines <https://github.com/ipython/ipython/blob/master/CONTRIBUTING.md>`_.
+guidelines <https://github.com/ipython/ipython/blob/main/CONTRIBUTING.md>`_.

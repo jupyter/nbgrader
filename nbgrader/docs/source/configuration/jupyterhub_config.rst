@@ -37,7 +37,7 @@ integrate with JupyterHub so that all grading can occur on the same server.
     logfile so that you can more easily debug problems. To do so, you can set
     a config option, for example ``NbGrader.logfile = "/usr/local/share/jupyter/nbgrader.log"``.
 
-Each of these use cases also has a corresponding demo in the `demos folder <https://github.com/jupyter/nbgrader/tree/master/demos>`_ of the GitHub repository.
+Each of these use cases also has a corresponding demo in the `demos folder <https://github.com/jupyter/nbgrader/tree/main/demos>`_ of the GitHub repository.
 
 Example Use Case: One Class, One Grader
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -68,7 +68,7 @@ Example Use Case: One Class, Multiple Graders
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 If you have multiple graders, then you can set up a `shared notebook server
-<https://github.com/jupyterhub/jupyterhub/tree/master/examples/service-notebook>`_
+<https://github.com/jupyterhub/jupyterhub/tree/main/examples/service-notebook>`_
 as a JupyterHub service. I recommend creating a separate grader account (such
 as ``grader-course101``) for this server to have access to.
 
@@ -189,7 +189,7 @@ JupyterHub Authentication
 
 With the advent of JupyterHubAuthPlugin, nbgrader will ask JupyterHub which students are enrolled in which courses and only show them assignments from those respective courses (note that the ``JupyterHubAuthPlugin`` requires JupyterHub version 0.8 or higher). Similarly, nbgrader will ask JupyterHub which instructors have access to which courses and only show them formgrader links for those courses.
 
-On the JupyterHub side of things, to differentiate student from instructor, groups need to be named ``formgrade-{course_id}`` for instructors and and grader accounts, and ``nbgrader-{course_id}`` for students. The course service additionally needs to have an API token set that is from a JupyterHub admin (see `JupyterHub documentation <https://jupyterhub.readthedocs.io/en/stable/reference/rest.html#create-an-api-token>`_).
+On the JupyterHub side of things, to differentiate student from instructor, groups need to be named ``formgrade-{course_id}`` for instructors and and grader accounts, and ``nbgrader-{course_id}`` for students. The course service additionally needs to have an API token set that is from a JupyterHub admin (see `JupyterHub documentation <https://jupyterhub.readthedocs.io/en/stable/howto/rest.html#create-an-api-token>`_).
 
 As in the case of multiple graders for a single class, if you have multiple
 classes on the same JupyterHub instance, then you will need to create multiple

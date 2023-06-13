@@ -6,7 +6,7 @@ Pull requests
 Development workflow
 --------------------
 We follow the development workflow described in the `IPython contribution
-guidelines <https://github.com/ipython/ipython/blob/master/CONTRIBUTING.md>`_
+guidelines <https://github.com/ipython/ipython/blob/main/CONTRIBUTING.md>`_
 and `IPython contributing wiki
 <https://github.com/ipython/ipython/wiki/Dev:-GitHub-workflow>`_.
 
