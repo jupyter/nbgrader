@@ -9,7 +9,7 @@ Editing source files
 --------------------
 
 * ReStructured Text: The rst files should be fairly straightforward to edit. Here is
-  `a quick reference of rst syntax <http://docutils.sourceforge.net/docs/user/rst/quickref.html>`_.
+  `a quick reference of rst syntax <https://docutils.sourceforge.io/docs/user/rst/quickref.html>`_.
   Some of the rst files also use `Sphinx autodoc <https://www.sphinx-doc.org/en/master/usage/extensions/autodoc.html>`_.
 
 * Jupyter Notebooks: The Jupyter notebooks are written in Python and should be written so that
@@ -36,7 +36,7 @@ While the documentation gets built automatically on Read The Docs, the notebooks
 However, executing the notebooks is easy to do!
 
 Our docs are built with `nbconvert <https://nbconvert.readthedocs.io/en/latest/>`_,
-`Pandoc <https://pandoc.org/>`_, and `Sphinx <http://www.sphinx-doc.org/en/master/>`_.
+`Pandoc <https://pandoc.org/>`_, and `Sphinx <https://www.sphinx-doc.org/en/master/>`_.
 To build the docs locally, run the following command::
 
     python tasks.py docs

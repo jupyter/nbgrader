@@ -4,7 +4,7 @@ Modifying the Database
 Sometimes new features require modifying the database, such as adding a new
 column. Implementing such changes is fine, but can cause compatibility problems
 for users who are using an older version of the database schema. To resolve
-this issue, we use `alembic <https://alembic.zzzcomputing.com/en/latest/index.html>`_ to handle database migrations.
+this issue, we use `alembic <https://alembic.sqlalchemy.org/en/latest/index.html>`_ to handle database migrations.
 
 To use alembic to migrate the database schema, first run the following
 command::
@@ -26,7 +26,7 @@ called ``extra_credit`` to the ``grade`` table:
         op.drop_column('grade', 'extra_credit')
 
 Please see the `alembic documentation
-<https://alembic.zzzcomputing.com/en/latest/index.html>`_ for further details on
+<https://alembic.sqlalchemy.org/en/latest/index.html>`_ for further details on
 how these files work. Additionally, note that you both need to update the
 database schema in ``nbgrader/api.py`` (this describes how to create **new**
 databases) as well as using alembic to describe what changes need to be made to
