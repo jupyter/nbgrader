@@ -499,6 +499,7 @@ var insertRow = function (table) {
 var createAssignmentModal = function () {
     var modal;
     var createAssignment = function () {
+        var bad_character_regex = /[+\(\)\/\\\[\]\{\}\$\^]/;
         var name = modal.find(".name").val();
         var duedate = modal.find(".duedate").val();
         var timezone = modal.find(".timezone").val();
@@ -513,9 +514,9 @@ var createAssignmentModal = function () {
             modal.modal('hide');
             return;
         }
-        if (name.indexOf("+") != -1) {
+        if (bad_character_regex.test(name)) {
             var err = $("#create-error");
-            err.text("Assignment names may not include the '+' character.");
+            err.text("Assignment names may not include any of the characters +\(\)[]{}/\\$^");
             err.show();
             return;
         } else {

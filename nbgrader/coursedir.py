@@ -78,14 +78,17 @@ class CourseDirectory(LoggingConfigurable):
             The assignment name. This MUST be specified, either by setting the
             config option, passing an argument on the command line, or using the
             --assignment option on the command line.
+
+            The assignment name cannot include any of the characters +()/\\[]\{\}$^
             """
         )
     ).tag(config=True)
 
     @validate('assignment_id')
     def _validate_assignment_id(self, proposal: Bunch) -> str:
-        if '+' in proposal['value']:
-            raise TraitError('Assignment names should not contain the following characters: +')
+        bad_characters = r'+()/\\[]{}$^'
+        if set(proposal['value']) & set(bad_characters):
+            raise TraitError(f'Assignment names may not contain the following characters: {bad_characters}')
         if proposal['value'].strip() != proposal['value']:
             self.log.warning("assignment_id '%s' has trailing whitespace, stripping it away", proposal['value'])
         return proposal['value'].strip()
