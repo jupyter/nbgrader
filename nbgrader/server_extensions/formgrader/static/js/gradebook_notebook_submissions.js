@@ -195,7 +195,7 @@ let updateToggleNamesButtonLabel = function() {
     const button = document.getElementById("toggle_names");
     const icons = document.getElementsByClassName("glyphicon name-hidden");
     const icon_array = [...icons];
-    if (icon_array.some(el => el.checkVisibility())){
+    if (icon_array.some(el => $(el).is(':visible'))){
         button.innerHTML = "Show All Names";
     } else{
         button.innerHTML = "Hide All Names";

@@ -279,6 +279,38 @@ def test_gradebook3_show_hide_names(browser, port, gradebook):
 
 
 @pytest.mark.nbextensions
+def test_gradebook_toggle_names_button(browser, port, gradebook):
+    problem = gradebook.find_assignment("Problem Set 1").notebooks[0]
+    utils._load_gradebook_page(browser, port, "gradebook/Problem Set 1/{}".format(problem.name))
+    submissions = problem.submissions
+    submissions.sort(key=lambda x: x.id)
+
+    button = browser.find_element(By.ID, "toggle_names")
+    row1 = browser.find_element(By.CSS_SELECTOR, "tbody tr")
+    col1 = row1.find_element(By.CSS_SELECTOR, "td")
+    hidden = col1.find_element(By.CSS_SELECTOR, ".glyphicon.name-hidden")
+    shown = col1.find_element(By.CSS_SELECTOR, ".glyphicon.name-shown")
+
+    # At the start, all names are hidden
+    assert button.text == "Show All Names"
+    assert hidden.is_displayed()
+    assert not shown.is_displayed()
+
+    # Clicking should make names shown
+    button.click()
+    assert button.text == "Hide All Names"
+    assert not hidden.is_displayed()
+    assert shown.is_displayed()
+
+    # If there is at least one hidden, button should default to showing all names
+    shown.click()
+    assert button.text == "Show All Names"
+    button.click()
+    assert not hidden.is_displayed()
+    assert shown.is_displayed()
+
+
+@pytest.mark.nbextensions
 def test_load_student1(browser, port, gradebook):
     # load the student view
     utils._load_gradebook_page(browser, port, "manage_students")
