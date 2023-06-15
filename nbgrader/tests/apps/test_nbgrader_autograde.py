@@ -1081,3 +1081,27 @@ class TestNbGraderAutograde(BaseTestApp):
             submission = gb.find_submission("ps1", "foo")
             nb1, = submission.notebooks
             assert nb1.score == 0
+
+    def test_autograde_timeout(self, db, course_dir):
+        """Does autograde accept timeout configuration correctly?"""
+        run_nbgrader(["db", "assignment", "add", "ps1", "--db", db, "--duedate",
+                      "2015-02-02 14:58:23.948203 America/Los_Angeles"])
+        run_nbgrader(["db", "student", "add", "foo", "--db", db])
+        run_nbgrader(["db", "student", "add", "bar", "--db", db])
+
+        self._copy_file(join("files", "timeout.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
+        run_nbgrader(["generate_assignment", "ps1", "--db", db])
+
+        self._copy_file(join("files", "timeout.ipynb"), join(course_dir, "submitted", "foo", "ps1", "p1.ipynb"))
+        self._copy_file(join("files", "timeout.ipynb"), join(course_dir, "submitted", "bar", "ps1", "p1.ipynb"))
+
+        output = run_nbgrader(["autograde", "ps1", "--db", db, "--student", "foo"])
+        # timeout=2 secs, 1 was causing an asyncio error on Windows
+        output = run_nbgrader(["autograde", "ps1", "--db", db, "--student", "bar", "--Execute.timeout=2"])
+
+        # Check timeout config changes function based on timeout config
+        with Gradebook(db) as gb:
+            notebook = gb.find_submission_notebook("p1", "ps1", "foo")
+            assert notebook.score == 1
+            notebook = gb.find_submission_notebook("p1", "ps1", "bar")
+            assert notebook.score == 0
