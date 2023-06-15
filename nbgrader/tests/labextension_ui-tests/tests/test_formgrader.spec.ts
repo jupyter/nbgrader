@@ -511,6 +511,55 @@ test('Gradebook3 show hide names', async ({
 });
 
 /*
+  Toggle name visibility button
+ */
+test('Gradebook toggle names button', async ({
+  page,
+  baseURL,
+  tmpPath
+}) => {
+
+  test.skip(is_windows, 'This test does not work on Windows');
+
+  if (baseURL === undefined) throw new Error("BaseURL is undefined.");
+
+  // create environment
+  await create_env(page, tmpPath, exchange_dir, cache_dir, is_windows);
+  await add_courses(page, baseURL, tmpPath);
+  await open_formgrader(page);
+
+  // get formgrader iframe
+  const iframe = page.mainFrame().childFrames()[0];
+
+  // Change iframe URL to gradebook Problem Set 1
+  await iframe.goto(`${baseURL}/formgrader/gradebook/Problem Set 1/Problem 1`);
+  await check_formgrader_breadcrumbs(iframe, ["Manual Grading", "Problem Set 1", "Problem 1"]);
+
+  const button = iframe.locator("[id='toggle_names']").first()
+  const hidden = iframe.locator("td .glyphicon.name-hidden").first();
+  const shown = iframe.locator("td .glyphicon.name-shown").first();
+
+  // At the start, all names are hidden
+  await expect(button).toHaveText("Show All Names", {useInnerText: true});
+  await expect(hidden).toBeVisible();
+  await expect(shown).toBeHidden();
+
+  // Clicking should make names shown
+  await button.click();
+  await expect(button).toHaveText("Hide All Names", {useInnerText: true});
+  await expect(hidden).toBeHidden();
+  await expect(shown).toBeVisible();
+
+  // If there is at least one hidden, button should default to showing all names
+  await shown.click();
+  await expect(button).toHaveText("Show All Names", {useInnerText: true});
+  await button.click();
+  await expect(hidden).toBeHidden();
+  await expect(shown).toBeVisible();
+
+});
+
+/*
  * Load students and test students links
  */
 test('Load students', async ({
