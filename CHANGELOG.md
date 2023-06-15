@@ -4,6 +4,35 @@ A summary of changes to nbgrader.
 
 <!-- <START NEW CHANGELOG ENTRY> -->
 
+## 0.8.3
+
+([Full Changelog](https://github.com/jupyter/nbgrader/compare/v0.8.2...6b0ec9fd6a909692f346d98ecf0a5f52bf25e5e0))
+
+### Enhancements made
+
+- Add maximum size for entire directory as submission option [#1666](https://github.com/jupyter/nbgrader/pull/1666) ([@franswel](https://github.com/franswel))
+- Toggle visibility of all student names [#1775](https://github.com/jupyter/nbgrader/pull/1775) ([@tuncbkose](https://github.com/tuncbkose))
+- Timeout configuration in validation and error message [#1730](https://github.com/jupyter/nbgrader/pull/1730) ([@tuncbkose](https://github.com/tuncbkose))
+
+### Bugs fixed
+
+- Recreate nbgrader widgets after they are disposed. [#1773](https://github.com/jupyter/nbgrader/pull/1773) ([@ykazakov](https://github.com/ykazakov))
+- Fix blank tab names and labextension button label [#1756](https://github.com/jupyter/nbgrader/pull/1756) ([@tuncbkose](https://github.com/tuncbkose))
+
+### Maintenance and upkeep improvements
+
+- Fix documentation links [#1790](https://github.com/jupyter/nbgrader/pull/1790) ([@brichet](https://github.com/brichet))
+- Fix selenium deprecation for nbextension tests [#1789](https://github.com/jupyter/nbgrader/pull/1789) ([@tuncbkose](https://github.com/tuncbkose))
+- Upgrade to support jupyter_client 8 [#1778](https://github.com/jupyter/nbgrader/pull/1778) ([@shreve](https://github.com/shreve))
+
+### Contributors to this release
+
+([GitHub contributors page for this release](https://github.com/jupyter/nbgrader/graphs/contributors?from=2023-03-28&to=2023-06-15&type=c))
+
+[@brichet](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Abrichet+updated%3A2023-03-28..2023-06-15&type=Issues) | [@franswel](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Afranswel+updated%3A2023-03-28..2023-06-15&type=Issues) | [@github-actions](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Agithub-actions+updated%3A2023-03-28..2023-06-15&type=Issues) | [@shreve](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Ashreve+updated%3A2023-03-28..2023-06-15&type=Issues) | [@tuncbkose](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Atuncbkose+updated%3A2023-03-28..2023-06-15&type=Issues) | [@ykazakov](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Aykazakov+updated%3A2023-03-28..2023-06-15&type=Issues)
+
+<!-- <END NEW CHANGELOG ENTRY> -->
+
 ## 0.8.2
 
 ([Full Changelog](https://github.com/jupyter/nbgrader/compare/v0.8.1...f262e3b37b30af59ab2fcc31a245cec6360c2271))
@@ -51,8 +80,6 @@ A summary of changes to nbgrader.
 ([GitHub contributors page for this release](https://github.com/jupyter/nbgrader/graphs/contributors?from=2022-09-27&to=2023-03-28&type=c))
 
 [@blink1073](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Ablink1073+updated%3A2022-09-27..2023-03-28&type=Issues) | [@brichet](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Abrichet+updated%3A2022-09-27..2023-03-28&type=Issues) | [@dependabot](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Adependabot+updated%3A2022-09-27..2023-03-28&type=Issues) | [@github-actions](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Agithub-actions+updated%3A2022-09-27..2023-03-28&type=Issues) | [@jtpio](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Ajtpio+updated%3A2022-09-27..2023-03-28&type=Issues) | [@meeseeksmachine](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Ameeseeksmachine+updated%3A2022-09-27..2023-03-28&type=Issues) | [@perllaghu](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Aperllaghu+updated%3A2022-09-27..2023-03-28&type=Issues) | [@shreve](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Ashreve+updated%3A2022-09-27..2023-03-28&type=Issues) | [@tmetzl](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Atmetzl+updated%3A2022-09-27..2023-03-28&type=Issues) | [@tuncbkose](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Atuncbkose+updated%3A2022-09-27..2023-03-28&type=Issues)
-
-<!-- <END NEW CHANGELOG ENTRY> -->
 
 ## 0.8.1
 
