@@ -36,7 +36,7 @@ dependencies = [
     "ipywidgets>=7.6",
     "Jinja2>=3",
     "jsonschema>=3",
-    "jupyter_client<8",
+    "jupyter_client<9",
     "jupyter_server>=1.12,<2",
     "jupyterlab<4",
     "jupyterlab_server",

@@ -5,6 +5,7 @@ from textwrap import dedent
 from . import NbGraderPreprocessor
 from nbconvert.exporters.exporter import ResourcesDict
 from nbformat.notebooknode import NotebookNode
+from jupyter_client.manager import AsyncKernelManager
 from typing import Any, Optional, Tuple
 
 
@@ -66,6 +67,11 @@ class Execute(NbGraderPreprocessor, ExecutePreprocessor):
         for CI environments when tests are flaky.
         """)
     ).tag(config=True)
+
+    def __init__(self, *args, **kwargs):
+        # nbconvert < 7.3.1 used the sync version of this, which doesn't work for us.
+        kwargs.setdefault('kernel_manager_class', AsyncKernelManager)
+        super().__init__(*args, **kwargs)
 
     def on_cell_executed(self, **kwargs):
         cell = kwargs['cell']
