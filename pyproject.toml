@@ -76,7 +76,6 @@ tests = [
     "pytest-xdist",
     "pytest",
     "requests-mock",
-    "selenium>=4.3",
     "wheel",
 ]
 
@@ -176,15 +175,6 @@ version_template = '({major}, {minor}, {patch}, "{channel}", "{release}")'
 
 [[tool.tbump.file]]
 src = "pyproject.toml"
-
-[[tool.tbump.file]]
-src = "nbgrader/nbextensions/assignment_list/main.js"
-
-[[tool.tbump.file]]
-src = "nbgrader/nbextensions/course_list/main.js"
-
-[[tool.tbump.file]]
-src = "nbgrader/nbextensions/validate_assignment/main.js"
 
 [[tool.tbump.file]]
 src = "src/assignment_list/index.ts"

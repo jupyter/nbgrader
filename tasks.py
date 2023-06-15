@@ -105,8 +105,8 @@ def tests(ns, args):
 
     elif ns.group == 'all':
         _run_tests(mark=None, skip=ns.skip, junitxml=ns.junitxml)
-        _run_ts_test()
-        _run_ts_test(notebook=True)
+        _run_ts_test(args)
+        _run_ts_test(args, notebook=True)
 
     else:
         raise ValueError("Invalid test group: {}".format(ns.group))
