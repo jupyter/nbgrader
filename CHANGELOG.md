@@ -4,6 +4,28 @@ A summary of changes to nbgrader.
 
 <!-- <START NEW CHANGELOG ENTRY> -->
 
+## 0.8.4
+
+([Full Changelog](https://github.com/jupyter/nbgrader/compare/v0.8.3...83a0429e32e5d146a638dfeef6cee9fad7f277ab))
+
+### Enhancements made
+
+- Upgrade to sqlalchemy>=2 [#1788](https://github.com/jupyter/nbgrader/pull/1788) ([@tuncbkose](https://github.com/tuncbkose))
+- Check marking schemes for attachments to prevent leakage [#1783](https://github.com/jupyter/nbgrader/pull/1783) ([@tuncbkose](https://github.com/tuncbkose))
+
+### Maintenance and upkeep improvements
+
+- Pin sphinx\<7 [#1791](https://github.com/jupyter/nbgrader/pull/1791) ([@brichet](https://github.com/brichet))
+- Upgrade to sqlalchemy>=2 [#1788](https://github.com/jupyter/nbgrader/pull/1788) ([@tuncbkose](https://github.com/tuncbkose))
+
+### Contributors to this release
+
+([GitHub contributors page for this release](https://github.com/jupyter/nbgrader/graphs/contributors?from=2023-06-15&to=2023-06-16&type=c))
+
+[@brichet](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Abrichet+updated%3A2023-06-15..2023-06-16&type=Issues) | [@github-actions](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Agithub-actions+updated%3A2023-06-15..2023-06-16&type=Issues) | [@tuncbkose](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Atuncbkose+updated%3A2023-06-15..2023-06-16&type=Issues)
+
+<!-- <END NEW CHANGELOG ENTRY> -->
+
 ## 0.8.3
 
 ([Full Changelog](https://github.com/jupyter/nbgrader/compare/v0.8.2...6b0ec9fd6a909692f346d98ecf0a5f52bf25e5e0))
@@ -30,8 +52,6 @@ A summary of changes to nbgrader.
 ([GitHub contributors page for this release](https://github.com/jupyter/nbgrader/graphs/contributors?from=2023-03-28&to=2023-06-15&type=c))
 
 [@brichet](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Abrichet+updated%3A2023-03-28..2023-06-15&type=Issues) | [@franswel](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Afranswel+updated%3A2023-03-28..2023-06-15&type=Issues) | [@github-actions](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Agithub-actions+updated%3A2023-03-28..2023-06-15&type=Issues) | [@shreve](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Ashreve+updated%3A2023-03-28..2023-06-15&type=Issues) | [@tuncbkose](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Atuncbkose+updated%3A2023-03-28..2023-06-15&type=Issues) | [@ykazakov](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Aykazakov+updated%3A2023-03-28..2023-06-15&type=Issues)
-
-<!-- <END NEW CHANGELOG ENTRY> -->
 
 ## 0.8.2
 

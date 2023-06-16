@@ -1,6 +1,6 @@
 {
   "name": "nbgrader",
-  "version": "0.8.3",
+  "version": "0.8.4",
   "description": "nbgrader nodejs dependencies",
   "keywords": [
     "jupyter",
