@@ -14,12 +14,12 @@ class ClearMarkScheme(NbGraderPreprocessor):
 
     begin_mark_scheme_delimeter = Unicode(
         "BEGIN MARK SCHEME",
-        help="The delimiter marking the beginning of hidden tests cases"
+        help="The delimiter marking the beginning of a marking scheme region"
     ).tag(config=True)
 
     end_mark_scheme_delimeter = Unicode(
         "END MARK SCHEME",
-        help="The delimiter marking the end of hidden tests cases"
+        help="The delimiter marking the end of a marking scheme region"
     ).tag(config=True)
 
     enforce_metadata = Bool(
@@ -31,6 +31,16 @@ class ClearMarkScheme(NbGraderPreprocessor):
             things to break if you are using the full nbgrader pipeline. ONLY
             disable this option if you are only ever planning to use nbgrader
             assign.
+            """
+        )
+    ).tag(config=True)
+
+    check_attachment_leakage = Bool(
+        True,
+        help=dedent(
+            """
+            Whether or not to check if a marking scheme region contains an attachment,
+            in order to prevent leakage to student version of notebooks.
             """
         )
     ).tag(config=True)
@@ -50,6 +60,7 @@ class ClearMarkScheme(NbGraderPreprocessor):
         new_lines = []
         in_ms = False
         removed_ms = False
+        attachment_regex = r"!\[.*\]\(attachment:.+?\)"
 
         for line in lines:
             # begin the test area
@@ -66,6 +77,18 @@ class ClearMarkScheme(NbGraderPreprocessor):
             # end the solution area
             elif self.end_mark_scheme_delimeter in line:
                 in_ms = False
+
+            elif self.check_attachment_leakage and in_ms and re.search(attachment_regex, line):
+                raise RuntimeError(
+                    """
+                    Encountered an attachment in a marking scheme.
+                    This can leak to student notebooks. 
+                    You might want to embed your image instead, like here:
+                    https://github.com/jupyter/nbgrader/issues/1782#issuecomment-1541493629.
+                    You can suppress this check with ClearMarkScheme.check_attachment_leakage=False.
+                    For more info: https://github.com/jupyter/nbgrader/issues/1782
+                    """
+                )
 
             # add lines as long as it's not in the hidden tests region
             elif not in_ms:
