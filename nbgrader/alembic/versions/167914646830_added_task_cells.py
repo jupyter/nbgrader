@@ -79,13 +79,13 @@ def upgrade():
     )
 
     connection = op.get_bind()
-    results = connection.execute(sa.select([
+    results = connection.execute(sa.select(
         old_grade_table.c.name,
         old_grade_table.c.id,
         old_grade_table.c.cell_type,
         old_grade_table.c.notebook_id,
         old_grade_table.c.max_score
-        ])).fetchall()
+        )).fetchall()
 
     # copy info to the base_cell table
     base_grade_cells = [
@@ -109,11 +109,11 @@ def upgrade():
     op.bulk_insert(new_grade_table, grade_cells)
 
     # now transfer the solution cells...
-    results = connection.execute(sa.select([
+    results = connection.execute(sa.select(
         old_solution_table.c.name,
         old_solution_table.c.id,
         old_solution_table.c.notebook_id,
-        ])).fetchall()
+        )).fetchall()
 
     # copy info to the base_cell table
     base_solution_cells = [
