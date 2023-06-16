@@ -67,4 +67,4 @@ jobs:
         with:
           name: nbgrader-uitests-${{ matrix.group }}-${{ matrix.os }}-python${{ matrix.python }}
           path: |
-            playwright-tests
+            playwright-report
