@@ -44,38 +44,49 @@
     "watch:labextension": "jupyter labextension watch ."
   },
   "dependencies": {
-    "@jupyter-notebook/application": "^7.0.0-alpha.17",
-    "@jupyter-notebook/tree": "^7.0.0-alpha.17",
-    "@jupyterlab/application": "^4.0.0-alpha.22",
-    "@jupyterlab/apputils": "^4.0.0-alpha.22",
-    "@jupyterlab/cells": "^4.0.0-alpha.22",
-    "@jupyterlab/coreutils": "^6.0.0-alpha.22",
-    "@jupyterlab/launcher": "^4.0.0-alpha.22",
-    "@jupyterlab/notebook": "^4.0.0-alpha.22",
-    "@jupyterlab/services": "^7.0.0-alpha.22",
-    "@jupyterlab/settingregistry": "^4.0.0-alpha.22"
+    "@jupyter-notebook/application": "^7.0.0-beta.4",
+    "@jupyter-notebook/tree": "^7.0.0-beta.4",
+    "@jupyter/ydoc": "^0.3.4",
+    "@jupyterlab/application": "^4.0.0",
+    "@jupyterlab/apputils": "^4.0.0",
+    "@jupyterlab/cells": "^4.0.0",
+    "@jupyterlab/coreutils": "^6.0.0",
+    "@jupyterlab/docregistry": "^4.0.0",
+    "@jupyterlab/launcher": "^4.0.0",
+    "@jupyterlab/mainmenu": "^4.0.0",
+    "@jupyterlab/nbformat": "^4.0.0",
+    "@jupyterlab/notebook": "^4.0.0",
+    "@jupyterlab/observables": "^5.0.0",
+    "@jupyterlab/services": "^7.0.0",
+    "@jupyterlab/settingregistry": "^4.0.0",
+    "@lumino/coreutils": "^2.0.0",
+    "@lumino/disposable": "^2.0.0",
+    "@lumino/messaging": "^2.0.0",
+    "@lumino/signaling": "^2.0.0",
+    "@lumino/widgets": "^2.0.0"
   },
   "devDependencies": {
-    "@jupyterlab/builder": "^4.0.0-alpha.22",
-    "@jupyterlab/galata": "^5.0.0-alpha.22",
-    "@playwright/test": "^1.30.0",
+    "@jupyterlab/builder": "^4.0.0",
+    "@jupyterlab/galata": "^5.0.0",
+    "@playwright/test": "^1.32.2",
     "@types/codemirror": "^5.60.5",
-    "@typescript-eslint/eslint-plugin": "^4.8.1",
-    "@typescript-eslint/parser": "^4.8.1",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
     "bower": "*",
-    "eslint": "^7.14.0",
-    "eslint-config-prettier": "^6.15.0",
-    "eslint-plugin-prettier": "^3.1.4",
-    "mkdirp": "^1.0.3",
+    "eslint": "^8.0.0",
+    "eslint-config-prettier": "^8.0.0",
+    "eslint-plugin-prettier": "^4.0.0",
+    "mkdirp": "^1.0.4",
     "npm-run-all": "^4.1.5",
     "prettier": "^2.1.1",
+    "react": "^18.2.0",
     "rimraf": "^3.0.2",
     "stylelint": "^14.3.0",
     "stylelint-config-prettier": "^9.0.3",
     "stylelint-config-recommended": "^6.0.0",
     "stylelint-config-standard": "~24.0.0",
     "stylelint-prettier": "^2.0.0",
-    "typescript": "~4.9.3"
+    "typescript": "~5.0.4"
   },
   "sideEffects": [
     "style/*.css",
@@ -97,7 +108,6 @@
       }
     },
     "extension": true,
-    "outputDir": "nbgrader/labextension",
-    "schemaDir": "schema"
+    "outputDir": "nbgrader/labextension"
   }
 }

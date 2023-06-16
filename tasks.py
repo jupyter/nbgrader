@@ -85,7 +85,7 @@ def _run_ts_test(args, notebook=False):
     if notebook:
         os.environ["NBGRADER_TEST_IS_NOTEBOOK"] = "1"
 
-    cmd = ['jlpm', f'test{":notebook" if notebook else ""}', '--retries=1'] + args
+    cmd = ['jlpm', f'test{":notebook" if notebook else ""}', '--retries=2'] + args
     run(" ".join(cmd))
 
 
