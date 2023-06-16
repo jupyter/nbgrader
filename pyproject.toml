@@ -61,7 +61,7 @@ dev = [
 ]
 docs = [
     "myst-parser",
-    "sphinx<7",
+    "sphinx<8",
     "sphinx-autodoc-typehints",
     "sphinx_rtd_theme",
 ]
