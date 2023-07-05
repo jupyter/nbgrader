@@ -580,10 +580,10 @@ export class CourseList{
   dropdown_selector: string;
   refresh_selector: string;
   assignment_list: AssignmentList;
-  current_course: string;
+  current_course: { [key: string]: string }
   options = new Map();
   base_url: string;
-  data : string[];
+  data : { [key: string]: string }[];
   course_list_element : HTMLUListElement;
   default_course_element: HTMLButtonElement;
   dropdown_element: HTMLButtonElement;
@@ -673,7 +673,7 @@ private handle_load_list(data: { success: any; value: any; }): void {
   }
 };
 
-private load_list_success(data: string[]): void {
+private load_list_success(data: { [key: string]: string }[]): void {
   this.data = data;
   this.disable_list()
   this.clear_list();
@@ -698,28 +698,28 @@ private load_list_success(data: string[]): void {
   }
 };
 
-private change_course(course: string): void {
+private change_course(course: { [key: string]: string }): void {
   this.disable_list();
   if (this.current_course !== undefined) {
-      this.default_course_element.innerText = course;
+      this.default_course_element.innerText = course['course_title'];
   }
   this.current_course = course;
-  this.default_course_element.innerText = this.current_course;
+  this.default_course_element.innerText = this.current_course['course_title'];
   var success = ()=>{this.load_assignment_list_success()};
-  this.assignment_list.load_list(course, success);
+  this.assignment_list.load_list(course['course_id'], success);
 };
 
 private load_assignment_list_success(): void {
   if (this.data) {
       var that = this;
-      var set_course = function (course: string) {
+      var set_course = function (course: { [key: string]: string }) {
           return function () { that.change_course(course); };
       }
 
       for (var i=0; i<this.data.length; i++) {
         var a = document.createElement('a');
         a.href = '#';
-        a.innerText = this.data[i];
+        a.innerText = this.data[i]['course_title'];
         var element = document.createElement('li');
         element.append(a);
         element.onclick = set_course(this.data[i]);
