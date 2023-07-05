@@ -16,6 +16,7 @@ from .latesubmissions import AssignLatePenalties
 from .clearhiddentests import ClearHiddenTests
 from .clearmarkingscheme import ClearMarkScheme
 from .overwritekernelspec import OverwriteKernelspec
+from .limittestcellheights import LimitTestCellHeights
 
 __all__ = [
     "AssignLatePenalties",
@@ -35,4 +36,5 @@ __all__ = [
     "ClearHiddenTests",
     "ClearMarkScheme",
     "OverwriteKernelspec",
+    "LimitTestCellHeights"
 ]
