@@ -310,6 +310,54 @@ test('Fetch assignments', async({
   });
 
 /*
+ * Test fetch failure
+ */
+test('Fetch failure', async({
+  page,
+  baseURL,
+  tmpPath
+  }) => {
+
+    test.skip(is_windows, 'This feature is not implemented for Windows');
+
+    if (baseURL === undefined) throw new Error("BaseURL is undefined.");
+
+    // create directories and config files, and open assignment_list tab
+    await create_env(page, tmpPath, exchange_dir, cache_dir, is_windows);
+    await add_courses(page, baseURL, tmpPath);
+    await open_assignment_list(page);
+
+    // release some assignments
+    await execute_command("nbgrader generate_assignment 'Problem Set 1' --force");
+    await execute_command("nbgrader release_assignment 'Problem Set 1' --course 'abc101' --force");
+    await execute_command("nbgrader generate_assignment 'ps.01' --force");
+    await execute_command("nbgrader release_assignment 'ps.01' --course 'xyz 200' --force");
+
+    // refresh assignment list
+    await page.locator('#refresh_assignments_list').click();
+
+    // select one course
+    await select_course(page, 'abc101');
+
+    // remove write permissions
+    // check that there is only one released, and try fetch it
+    // then restore permissions again
+    await fs.chmod("nbgrader-assignment-list-test", 0o555, err => {});
+    var rows = await wait_for_list(page, 'released', 1);
+    await rows.first().locator('.item_status button').click();
+    await new Promise(resolve => setTimeout(resolve, 1000)); // to make sure permissions are not restored too fast
+    await fs.chmod("nbgrader-assignment-list-test", 0o755, err => {});
+
+    // check that there is still only one released
+    rows = await wait_for_list(page, 'released', 1);
+
+    // Check and close the error message
+    await wait_for_error_modal(page);
+    await close_error_modal(page);
+
+});
+
+/*
  * Test submit assignment
  */
 test('Submit assignments', async({
@@ -711,3 +759,117 @@ test('Missing exchange directory', async({
     expect(rows.first().locator('.item_course')).toHaveText("abc101");
 
 });
+
+/*
+ * Test fetching feedback
+ */
+test('Fetch feedback', async({
+  page,
+  baseURL,
+  tmpPath
+  }) => {
+
+    test.skip(is_windows, 'This feature is not implemented for Windows');
+
+    if (baseURL === undefined) throw new Error("BaseURL is undefined.");
+
+    // create directories and config files, and open assignment_list tab
+    await create_env(page, tmpPath, exchange_dir, cache_dir, is_windows);
+    await add_courses(page, baseURL, tmpPath);
+    await open_assignment_list(page);
+
+    // release some assignments
+    await execute_command("nbgrader generate_assignment 'Problem Set 1' --force");
+    await execute_command("nbgrader release_assignment 'Problem Set 1' --course 'abc101' --force");
+    await execute_command("nbgrader generate_assignment 'ps.01' --force");
+    await execute_command("nbgrader release_assignment 'ps.01' --course 'xyz 200' --force");
+
+    // refresh assignment list
+    await page.locator('#refresh_assignments_list').click();
+
+    // select one course
+    await select_course(page, 'xyz 200');
+
+    // check that there is only one released, and fetch it
+    var rows = await wait_for_list(page, 'released', 1);
+    await rows.first().locator('.item_status button').click();
+
+    // check that there is only one fetched and submit
+    rows = await wait_for_list(page, 'fetched', 1);
+    await rows.first().locator('.item_status button:text("Submit")').click();
+
+    // collect submitted assignment and process it
+    await execute_command("nbgrader collect 'ps.01' --course 'xyz 200'");
+    await execute_command("nbgrader autograde 'ps.01' --course 'xyz 200'");
+    await execute_command("nbgrader generate_feedback 'ps.01' --course 'xyz 200'");
+    await execute_command("nbgrader release_feedback 'ps.01' --course 'xyz 200'");
+
+    // check that there is only one submitted and fetch feedback
+    rows = await wait_for_list(page, 'submitted', 1);
+    await rows.first().locator('.item_status button:text("Fetch feedback")').click();
+
+    // check that there is only one fetched
+    rows = await wait_for_list(page, 'submitted', 1);
+    expect(rows.first().locator('.item_name').first()).toHaveText("ps.01");
+    expect(rows.first().locator('.item_course').first()).toHaveText("xyz 200");
+
+    // check that the directory has been created
+    const contents = galata.newContentsHelper(baseURL);
+    expect(contents.directoryExists('ps.01/feedback'));
+  });
+
+/*
+ * Test fetch feedback failure
+ */
+test('Fetch feedback failure', async({
+  page,
+  baseURL,
+  tmpPath
+  }) => {
+
+    test.skip(is_windows, 'This feature is not implemented for Windows');
+
+    if (baseURL === undefined) throw new Error("BaseURL is undefined.");
+
+    // create directories and config files, and open assignment_list tab
+    await create_env(page, tmpPath, exchange_dir, cache_dir, is_windows);
+    await add_courses(page, baseURL, tmpPath);
+    await open_assignment_list(page);
+
+    // release some assignments
+    await execute_command("nbgrader generate_assignment 'Problem Set 1' --force");
+    await execute_command("nbgrader release_assignment 'Problem Set 1' --course 'abc101' --force");
+    await execute_command("nbgrader generate_assignment 'ps.01' --force");
+    await execute_command("nbgrader release_assignment 'ps.01' --course 'xyz 200' --force");
+
+    // refresh assignment list
+    await page.locator('#refresh_assignments_list').click();
+
+    // select one course
+    await select_course(page, 'xyz 200');
+
+    // check that there is only one released, and fetch it
+    var rows = await wait_for_list(page, 'released', 1);
+    await rows.first().locator('.item_status button').click();
+
+    // check that there is only one fetched and submit
+    rows = await wait_for_list(page, 'fetched', 1);
+    await rows.first().locator('.item_status button:text("Submit")').click();
+
+    // collect submitted assignment and process it
+    await execute_command("nbgrader collect 'ps.01' --course 'xyz 200'");
+    await execute_command("nbgrader autograde 'ps.01' --course 'xyz 200'");
+    await execute_command("nbgrader generate_feedback 'ps.01' --course 'xyz 200'");
+    await execute_command("nbgrader release_feedback 'ps.01' --course 'xyz 200'");
+
+    // check that there is only one submitted and try fetching feedback
+    await fs.chmod("nbgrader-assignment-list-test/ps.01", 0o555, err => {console.log(err)});
+    rows = await wait_for_list(page, 'submitted', 1);
+    await rows.first().locator('.item_status button:text("Fetch Feedback")').click();
+    await new Promise(resolve => setTimeout(resolve, 5000)); // to make sure permissions are not restored too fast
+    await fs.chmod("nbgrader-assignment-list-test/ps.01", 0o755, err => {});
+
+    // Check and close the error message
+    await wait_for_error_modal(page);
+    await close_error_modal(page);
+  });
