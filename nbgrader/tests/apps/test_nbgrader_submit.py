@@ -249,3 +249,15 @@ class TestNbGraderSubmit(BaseTestApp):
         with pytest.raises(RuntimeError):
             self._submit("ps1", exchange, cache,
                         flags=['--CourseDirectory.max_dir_size=3'])
+
+    def test_ensure_timestamp(self, exchange, cache, course_dir):
+        # Ensure timestamp is created even if something goes wrong in submitting
+        # If timestamp is not created, feedback workflow can be broken
+        # see: https://github.com/jupyter/nbgrader/pull/1755
+        self._release_and_fetch("ps1", exchange, cache, course_dir)
+        os.chmod("ps1/p1.ipynb", 0o244)
+        with pytest.raises(OSError):
+            self._submit("ps1", exchange, cache)
+        os.chmod("ps1/p1.ipynb", 0o644)
+        dirname = os.listdir(join(exchange, "abc101", "inbound"))[0]
+        assert os.path.isfile(join(exchange, "abc101", "inbound", dirname, "timestamp.txt"))
