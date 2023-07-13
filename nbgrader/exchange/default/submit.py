@@ -131,15 +131,23 @@ class ExchangeSubmit(Exchange, ABCExchangeSubmit):
         self.log.info("Source: {}".format(self.src_path))
         self.log.info("Destination: {}".format(dest_path))
 
+        errors = []
+
         # copy to the real location
         self.check_filename_diff()
-        self.do_copy(self.src_path, dest_path)
-        with open(os.path.join(dest_path, "timestamp.txt"), "w") as fh:
-            fh.write(self.timestamp)
-        self.set_perms(
-            dest_path,
-            fileperms=(S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH),
-            dirperms=(S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH))
+        try:
+            self.do_copy(self.src_path, dest_path)
+        except OSError as err:
+            errors.append(err)
+
+        # Create timestamp even if copying is incomplete to not break later functions
+        if os.path.isdir(dest_path):
+            with open(os.path.join(dest_path, "timestamp.txt"), "w") as fh:
+                fh.write(self.timestamp)
+            self.set_perms(
+                dest_path,
+                fileperms=(S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH),
+                dirperms=(S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH))
 
         # Make this 0777=ugo=rwx so the instructor can delete later. Hidden from other users by the timestamp.
         os.chmod(
@@ -150,10 +158,16 @@ class ExchangeSubmit(Exchange, ABCExchangeSubmit):
         # also copy to the cache
         if not os.path.isdir(self.cache_path):
             os.makedirs(self.cache_path)
-        self.do_copy(self.src_path, cache_path)
+        try:
+            self.do_copy(self.src_path, cache_path)
+        except OSError as err:
+            errors.append(err)  # probably duplicates from above
         with open(os.path.join(cache_path, "timestamp.txt"), "w") as fh:
             fh.write(self.timestamp)
 
         self.log.info("Submitted as: {} {} {}".format(
             self.coursedir.course_id, self.coursedir.assignment_id, str(self.timestamp)
         ))
+
+        if errors:
+            raise OSError(errors)

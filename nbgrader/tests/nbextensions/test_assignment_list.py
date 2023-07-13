@@ -470,6 +470,69 @@ def test_validate_failure(browser, port, class_files, tempdir):
 
 @pytest.mark.nbextensions
 @notwindows
+def test_fetch_failure(browser, port, class_files, tempdir):
+    # remove already fetched assignment to try fetching again
+    if os.path.exists("ps.01"):
+        shutil.rmtree('ps.01')
+    _load_assignments_list(browser, port)
+    _wait_until_loaded(browser)
+
+    # choose the course "xyz 200"
+    _change_course(browser, "xyz 200")
+
+    # remove write permissions, click the "fetch" button, and restore permissions
+    os.chmod(tempdir, 0o555)
+    rows = _wait_for_list(browser, "released", 1)
+    rows[0].find_element(By.CSS_SELECTOR, ".item_status button").click()
+    os.chmod(tempdir, 0o755)
+
+    # wait for the modal dialog to appear
+    _wait_for_modal(browser)
+
+    # check that error message is given
+    modal = browser.find_element(By.ID, "fetch-message")
+    assert modal.text[:23] == "Assignment not fetched:"
+
+    # close the modal dialog
+    _dismiss_modal(browser)
+
+
+@pytest.mark.nbextensions
+@notwindows
+def test_fetch_feedback_failure(browser, port, class_files, tempdir):
+    _load_assignments_list(browser, port)
+    _wait_until_loaded(browser)
+
+    # generate fetchable feedback
+    run_nbgrader(["fetch_assignment", "ps.01", "--course", "xyz 200"])
+    run_nbgrader(["submit", "ps.01", "--course", "xyz 200"])
+    run_nbgrader(["collect", "ps.01", "--course", "xyz 200"])
+    run_nbgrader(["autograde", "ps.01", "--course", "xyz 200"])
+    run_nbgrader(["generate_feedback", "ps.01", "--course", "xyz 200"])
+    run_nbgrader(["release_feedback", "ps.01", "--course", "xyz 200"])
+
+    # choose the course "xyz 200"
+    _change_course(browser, "xyz 200")
+
+    # try fetching feedback without write permissions
+    os.chmod(os.path.join(tempdir, "ps.01"), 0o555)
+    rows = _wait_for_list(browser, "submitted", 1)
+    rows[0].find_element(By.CSS_SELECTOR, ".item_status button").click()
+    os.chmod(os.path.join(tempdir, "ps.01"), 0o755)
+
+    # wait for the modal dialog to appear
+    _wait_for_modal(browser)
+
+    # check that error message is given
+    modal = browser.find_element(By.ID, "fetchfeedback-message")
+    assert modal.text[:21] == "Feedback not fetched:"
+
+    # close the modal dialog
+    _dismiss_modal(browser)
+
+
+@pytest.mark.nbextensions
+@notwindows
 def test_missing_exchange(exchange, browser, port, class_files, tempdir):
     # remove the exchange directory and fetched assignments
     rmtree(exchange)

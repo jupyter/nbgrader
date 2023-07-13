@@ -313,8 +313,11 @@ class AssignmentActionHandler(BaseAssignmentHandler):
         if action == 'fetch':
             assignment_id = data['assignment_id']
             course_id = data['course_id']
-            self.manager.fetch_assignment(course_id, assignment_id)
-            self.finish(json.dumps(self.manager.list_assignments(course_id=course_id)))
+            output = self.manager.fetch_assignment(course_id, assignment_id)
+            if output["success"]:
+                self.finish(json.dumps(self.manager.list_assignments(course_id=course_id)))
+            else:
+                self.finish(json.dumps(output))
         elif action == 'submit':
             assignment_id = data['assignment_id']
             course_id = data['course_id']
@@ -326,8 +329,11 @@ class AssignmentActionHandler(BaseAssignmentHandler):
         elif action == 'fetch_feedback':
             assignment_id = data['assignment_id']
             course_id = data['course_id']
-            self.manager.fetch_feedback(course_id, assignment_id)
-            self.finish(json.dumps(self.manager.list_assignments(course_id=course_id)))
+            output = self.manager.fetch_feedback(course_id, assignment_id)
+            if output["success"]:
+                self.finish(json.dumps(self.manager.list_assignments(course_id=course_id)))
+            else:
+                self.finish(json.dumps(output))
 
 
 class CourseListHandler(BaseAssignmentHandler):

@@ -1,10 +1,14 @@
+#fetch-message p,
 #submission-message p,
+#fetchfeedback-message p,
 #validation-message p {
     margin-bottom: 1em;
     padding-top: 1em;
 }
 
+#fetch-message pre,
 #submission-message pre,
+#fetchfeedback-message pre,
 #validation-message pre {
     border: solid var(--jp-border-color2) 1px;
     padding: 5px;

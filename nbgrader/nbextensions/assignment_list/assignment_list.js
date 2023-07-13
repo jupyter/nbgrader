@@ -381,6 +381,25 @@ define([
         return container;
     };
 
+    Assignment.prototype.fetch_error = function (data) {
+        var body = $('<div/>').attr('id', 'fetch-message');
+
+        body.append(
+            $('<div/>').append(
+                $('<p/>').text('Assignment not fetched:')
+            )
+        );
+        body.append(
+            $('<pre/>').text(data.value)
+        );
+
+        dialog.modal({
+            title: "Fetch failed",
+            body: body,
+            buttons: { OK: { class : "btn-primary" } }
+        });
+    };
+
     Assignment.prototype.submit_error = function (data) {
         var body = $('<div/>').attr('id', 'submission-message');
 
@@ -395,6 +414,25 @@ define([
 
         dialog.modal({
             title: "Invalid Submission",
+            body: body,
+            buttons: { OK: { class : "btn-primary" } }
+        });
+    };
+
+    Assignment.prototype.fetchfeedback_error = function (data) {
+        var body = $('<div/>').attr('id', 'fetchfeedback-message');
+
+        body.append(
+            $('<div/>').append(
+                $('<p/>').text('Feedback not fetched:')
+            )
+        );
+        body.append(
+            $('<pre/>').text(data.value)
+        );
+
+        dialog.modal({
+            title: "Fetch Feedback failed",
             body: body,
             buttons: { OK: { class : "btn-primary" } }
         });
@@ -417,7 +455,15 @@ define([
                     },
                     type : "POST",
                     dataType : "json",
-                    success : $.proxy(that.on_refresh, that),
+                    success : function (data, status, xhr) {
+                        if (!data.success) {
+                            that.fetch_error(data);
+                            button.text('Fetch');
+                            button.removeAttr('disabled');
+                        } else {
+                            that.on_refresh(data, status, xhr);
+                        }
+                    },
                     error : function (xhr, status, error) {
                         container.empty().text("Error fetching assignment.");
                         utils.log_ajax_error(xhr, status, error);
@@ -479,7 +525,15 @@ define([
                     },
                     type : "POST",
                     dataType : "json",
-                    success : $.proxy(that.on_refresh, that),
+                    success : function (data, status, xhr) {
+                        if (!data.success) {
+                            that.fetchfeedback_error(data);
+                            button.text('Fetch Feedback');
+                            button.removeAttr('disabled');
+                        } else {
+                            that.on_refresh(data, status, xhr);
+                        }
+                    },
                     error : function (xhr, status, error) {
                         container.empty().text("Error fetching feedback.");
                         utils.log_ajax_error(xhr, status, error);
