@@ -69,19 +69,16 @@ install_nbgrader () {
 
     # Install global extensions, and disable them globally. We will re-enable
     # specific ones for different user accounts in each demo.
-    jupyter nbextension install --symlink --sys-prefix --py nbgrader --overwrite
-    jupyter nbextension disable --sys-prefix --py nbgrader
     jupyter labextension develop --overwrite .
-    jupyter labextension disable --level=sys_prefix nbgrader/assignment-list
-    jupyter labextension disable --level=sys_prefix nbgrader/formgrader
-    jupyter labextension disable --level=sys_prefix nbgrader/course-list
-    jupyter labextension disable --level=sys_prefix nbgrader/create-assignment
-    jupyter serverextension disable --sys-prefix --py nbgrader
+    jupyter labextension disable --level=sys_prefix nbgrader:assignment-list
+    jupyter labextension disable --level=sys_prefix nbgrader:formgrader
+    jupyter labextension disable --level=sys_prefix nbgrader:course-list
+    jupyter labextension disable --level=sys_prefix nbgrader:create-assignment
+    jupyter server extension disable --sys-prefix --py nbgrader
 
     # Everybody gets the validate extension, however.
-    jupyter nbextension enable --sys-prefix validate_assignment/main --section=notebook
     jupyter labextension enable --level=sys_prefix nbgrader/validate_assignment
-    jupyter serverextension enable --sys-prefix nbgrader.server_extensions.validate_assignment
+    jupyter server extension enable --sys-prefix nbgrader.server_extensions.validate_assignment
 
     # Reset exchange.
     rm -rf "${exchange_root}"

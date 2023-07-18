@@ -1,7 +1,7 @@
 [build-system]
 requires = [
     "hatchling>=1.10.0",
-    "jupyterlab<4",
+    "jupyterlab>=4",
 ]
 build-backend = "hatchling.build"
 
@@ -9,7 +9,7 @@ build-backend = "hatchling.build"
 name = "nbgrader"
 description = "A system for assigning and grading notebooks"
 readme = "README.md"
-requires-python = ">=3.7"
+requires-python = ">=3.8"
 authors = [
     { name = "Jupyter Development Team", email = "jupyter@googlegroups.com" },
 ]
@@ -37,17 +37,16 @@ dependencies = [
     "Jinja2>=3",
     "jsonschema>=3",
     "jupyter_client<9",
-    "jupyter_server>=1.12,<2",
-    "jupyterlab<4",
+    "jupyter_server>=2",
+    "jupyterlab>=4",
     "jupyterlab_server",
     "nbclient>=0.6.1",
     "nbconvert>=6",
-    "notebook>=6.4,<7",
+    "notebook>=7.0.0b4",
     "python-dateutil>=2.8",
     "rapidfuzz>=1.8",
     "requests>=2.26",
     "sqlalchemy>=1.4,<3",
-    "traitlets>5.0,<6",
 ]
 version = "0.8.4"
 
@@ -71,12 +70,12 @@ tests = [
     "jupyter_packaging",
     "nbval",
     "pytest-cov",
+    "pytest-jupyter",
     "pytest-rerunfailures",
     "pytest-tornasync",
     "pytest-xdist",
     "pytest",
     "requests-mock",
-    "selenium>=4.3",
     "wheel",
 ]
 
@@ -147,7 +146,7 @@ after-bump-version = [
     "python tools/post-bump.py",
 ]
 before-build-npm = [
-    "python -m pip install 'jupyterlab<4'",
+    "python -m pip install 'jupyterlab>=4'",
     "jlpm",
     "jlpm build:prod",
 ]
@@ -176,15 +175,6 @@ version_template = '({major}, {minor}, {patch}, "{channel}", "{release}")'
 
 [[tool.tbump.file]]
 src = "pyproject.toml"
-
-[[tool.tbump.file]]
-src = "nbgrader/nbextensions/assignment_list/main.js"
-
-[[tool.tbump.file]]
-src = "nbgrader/nbextensions/course_list/main.js"
-
-[[tool.tbump.file]]
-src = "nbgrader/nbextensions/validate_assignment/main.js"
 
 [[tool.tbump.file]]
 src = "src/assignment_list/index.ts"

@@ -4,6 +4,8 @@ import { URLExt } from '@jupyterlab/coreutils';
 
 import { ServerConnection } from '@jupyterlab/services';
 
+import { commandIDs } from '../index';
+
 /**
  * Call the API extension
  *
@@ -27,7 +29,7 @@ export async function requestAPI<T>(
   try {
     response = await ServerConnection.makeRequest(requestUrl, init, settings);
   } catch (error) {
-    throw new ServerConnection.NetworkError(error);
+    throw new ServerConnection.NetworkError(error as TypeError);
   }
 
   const data = await response.json();
@@ -56,7 +58,7 @@ function createElementFromCourse(data: any, app: JupyterFrontEnd) {
     if (data['kind'] == 'local') {
       anchor.href = '#';
       anchor.onclick = function() {
-        app.commands.execute('nbgrader:open-formgrader', data);
+        app.commands.execute(commandIDs.openFormgrader, data);
       }
     }
     else {

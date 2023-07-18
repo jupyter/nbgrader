@@ -79,9 +79,9 @@ The version number should have been changed in the following files :
 - ``pyproject.toml``
 - ``package.json``
 - ``nbgrader/_version.py``
-- ``nbgrader/nbextensions/assignment_list/main.js``
-- ``nbgrader/nbextensions/course_list/main.js``
-- ``nbgrader/nbextensions/validate_assignment/main.js``
+- ``src/assignment_list/index.ts``
+- ``src/course_list/index.ts``
+- ``src/validate_assignment/index.ts``
 
 Rebuild the documentation
 -------------------------
@@ -173,6 +173,6 @@ As a reminder, the files concerned are :
 - ``pyproject.toml``
 - ``package.json``
 - ``nbgrader/_version.py``
-- ``nbgrader/nbextensions/assignment_list/main.js``
-- ``nbgrader/nbextensions/course_list/main.js``
-- ``nbgrader/nbextensions/validate_assignment/main.js``
+- ``src/assignment_list/index.ts``
+- ``src/course_list/index.ts``
+- ``src/validate_assignment/index.ts``
