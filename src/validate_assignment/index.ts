@@ -10,7 +10,7 @@ import { requestAPI } from './validateassignment';
 
 import { showNbGraderDialog, validate } from '../common/validate';
 
-var nbgrader_version = "0.8.4"; // TODO: hardcoded value
+var nbgrader_version = "0.9.0a0"; // TODO: hardcoded value
 
 class ValidateButton extends ToolbarButton {
   private _buttonCallback = this.newButtonCallback();
