@@ -14,3 +14,5 @@ echo 'c = get_config()' > nbgrader_config.py
 echo 'c.CourseDirectory.root = "./example_course"' >> nbgrader_config.py
 echo 'c.Exchange.root = "./example_course_exchange"' >> nbgrader_config.py
 echo 'c.Exchange.assignment_dir = "./example_course"' >> nbgrader_config.py
+
+echo 'c.Exchange.root = "../example_course_exchange"' >> example_course/nbgrader_config.py
