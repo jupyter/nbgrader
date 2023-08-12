@@ -22,7 +22,7 @@ Extensions will be automatically installed after the installation of nbgrader.
 
 The installation will activated 4 server extensions
 (formgrader, assignment_list, course_list and validate_assignment)
-and 5 labextensions (formgrader, assignment_list, course_list, validate_assignment and create_assignment).
+and 5 labextensions (formgrader, assignment-list, course-list, validate-assignment and create-assignment).
 
 The server extensions can be disabled individually by running::
 
@@ -33,19 +33,19 @@ The server extensions can be disabled individually by running::
 
 The labextensions are all enabled by default, but can be disabled individually by running::
 
-    jupyter labextension disable nbgrader/formgrader
-    jupyter labextension disable nbgrader/assignment-list
-    jupyter labextension disable nbgrader/course-list
-    jupyter labextension disable nbgrader/create-assignment
-    jupyter labextension disable nbgrader/validate-assignment
+    jupyter labextension disable nbgrader:formgrader
+    jupyter labextension disable nbgrader:assignment-list
+    jupyter labextension disable nbgrader:course-list
+    jupyter labextension disable nbgrader:create-assignment
+    jupyter labextension disable nbgrader:validate-assignment
 
 or enabled::
 
-    jupyter labextension enable nbgrader/formgrader
-    jupyter labextension enable nbgrader/assignment-list
-    jupyter labextension enable nbgrader/course-list
-    jupyter labextension enable nbgrader/create-assignment
-    jupyter labextension enable nbgrader/validate-assignment
+    jupyter labextension enable nbgrader:formgrader
+    jupyter labextension enable nbgrader:assignment-list
+    jupyter labextension enable nbgrader:course-list
+    jupyter labextension enable nbgrader:create-assignment
+    jupyter labextension enable nbgrader:validate-assignment
 
 To work properly, the **assignment list**, **formgrader**, **course list** and **validate assignment**
 extensions require both the labextension and server extension. The **create
@@ -81,21 +81,21 @@ You may want to only install one of the nbgrader extensions. To do this, follow
 the above steps to install everything and then disable the extension you don't
 need. For example, to disable the Assignment List extension::
 
-    jupyter labextension disable --level=sys_prefix nbgrader/assignment_list
+    jupyter labextension disable --level=sys_prefix nbgrader:assignment-list
     jupyter server extension disable --sys-prefix nbgrader.server_extensions.assignment_list
 
 or to disable the Create Assignment extension::
 
-    jupyter labextension disable --level=sys_prefix nbgrader/create_assignment
+    jupyter labextension disable --level=sys_prefix nbgrader:create-assignment
 
 or to disable the Formgrader extension::
 
-    jupyter labextension disable --level=sys_prefix nbgrader/formgrader
+    jupyter labextension disable --level=sys_prefix nbgrader:formgrader
     jupyter server extension disable --sys-prefix nbgrader.server_extensions.formgrader
 
 or to disable the Course List extension::
 
-    jupyter labextension disable --level=sys_prefix nbgrader/course_list
+    jupyter labextension disable --level=sys_prefix nbgrader:course-list
     jupyter server extension disable --sys-prefix nbgrader.server_extensions.course_list
 
 For example lets assume you have installed nbgrader via `Anaconda
@@ -106,12 +106,12 @@ only want the *create assignment* extension available to a specific user and
 not everyone else. First you will need to disable the *create assignment*
 extension for everyone else::
 
-    jupyter labextension disable nbgrader/create_assignment
+    jupyter labextension disable nbgrader:create-assignment
 
 Log in with the specific user and then enable the *create assignment* extension
 only for that user::
 
-    jupyter labextension enable --level=user nbgrader/create_assignment
+    jupyter labextension enable --level=user nbgrader:create-assignment
 
 Finally to see all installed labextensions/server extensions, run::
 
