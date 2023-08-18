@@ -77,7 +77,7 @@ install_nbgrader () {
     jupyter server extension disable --sys-prefix --py nbgrader
 
     # Everybody gets the validate extension, however.
-    jupyter labextension enable --level=sys_prefix nbgrader/validate_assignment
+    jupyter labextension enable --level=sys_prefix nbgrader:validate-assignment
     jupyter server extension enable --sys-prefix nbgrader.server_extensions.validate_assignment
 
     # Reset exchange.
