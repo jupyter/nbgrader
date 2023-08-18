@@ -1,7 +1,7 @@
 [build-system]
 requires = [
     "hatchling>=1.10.0",
-    "jupyterlab>=4",
+    "jupyterlab>=4.0.2,<5",
 ]
 build-backend = "hatchling.build"
 
@@ -23,7 +23,7 @@ keywords = [
 classifiers = [
     "Framework :: Jupyter",
     "Framework :: Jupyter :: JupyterLab",
-    "Framework :: Jupyter :: JupyterLab :: 3",
+    "Framework :: Jupyter :: JupyterLab :: 4",
     "Framework :: Jupyter :: JupyterLab :: Extensions",
     "Framework :: Jupyter :: JupyterLab :: Extensions :: Prebuilt",
     "License :: OSI Approved :: BSD License",
@@ -38,11 +38,11 @@ dependencies = [
     "jsonschema>=3",
     "jupyter_client<9",
     "jupyter_server>=2",
-    "jupyterlab>=4",
+    "jupyterlab>=4.0.2,<5",
     "jupyterlab_server",
     "nbclient>=0.6.1",
     "nbconvert>=6",
-    "notebook>=7.0.0",
+    "notebook>=7.0.2,<8",
     "python-dateutil>=2.8",
     "rapidfuzz>=1.8",
     "requests>=2.26",
