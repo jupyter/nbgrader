@@ -18,5 +18,7 @@ c.JupyterNotebookApp.expose_app_in_browser = True
 
 c.LabServerApp.extra_labextensions_path = str(Path(jupyterlab.__file__).parent / "galata")
 
+c.FileContentsManager.delete_to_trash = False
+
 # Uncomment to set server log level to debug level
 # c.ServerApp.log_level = "DEBUG"
