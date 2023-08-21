@@ -142,6 +142,18 @@ class CourseDirectory(LoggingConfigurable):
         )
     ).tag(config=True)
 
+    source_with_tests_directory = Unicode(
+        'source_with_tests',
+        help=dedent(
+            """
+            The name of the directory that contains notebooks with both solutions
+            and instantiated test code (i.e., all AUTOTEST directives are removed
+            and replaced by actual test code). This corresponds to the
+            `nbgrader_step` variable in the `directory_structure` config option.
+            """
+        )
+    ).tag(config=True)
+
     submitted_directory = Unicode(
         'submitted',
         help=dedent(

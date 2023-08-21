@@ -15,6 +15,7 @@ class ClearSolutions(NbGraderPreprocessor):
 
     code_stub = Dict(
         dict(python="# YOUR CODE HERE\nraise NotImplementedError()",
+             R="# YOUR CODE HERE\nfail()",
              matlab="% YOUR CODE HERE\nerror('No Answer Given!')",
              octave="% YOUR CODE HERE\nerror('No Answer Given!')",
              sas="/* YOUR CODE HERE */\n %notImplemented;",

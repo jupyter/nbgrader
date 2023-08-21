@@ -8,6 +8,7 @@ from ..api import Gradebook, MissingEntry
 from .base import BaseConverter, NbGraderException
 from ..preprocessors import (
     IncludeHeaderFooter,
+    InstantiateTests,
     ClearSolutions,
     LockCells,
     ComputeChecksums,
@@ -57,6 +58,7 @@ class GenerateAssignment(BaseConverter):
 
     preprocessors = List([
         IncludeHeaderFooter,
+        InstantiateTests,
         LockCells,
         ClearSolutions,
         ClearOutput,

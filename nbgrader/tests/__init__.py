@@ -251,3 +251,18 @@ def get_free_ports(n):
     for s in sockets:
         s.close()
     return ports
+
+def create_autotest_solution_cell():
+    source = """
+    answer = 'answer'
+    """
+    cell = new_code_cell(source=source)
+    return cell
+
+
+def create_autotest_test_cell():
+    source = """
+    ### AUTOTEST answer
+    """
+    cell = new_code_cell(source=source)
+    return cell
