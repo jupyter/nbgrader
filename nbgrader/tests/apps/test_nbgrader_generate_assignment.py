@@ -114,12 +114,12 @@ class TestNbGraderGenerateAssignment(BaseTestApp):
         assert "HASHED" not in foo
 
     def test_generate_source_with_tests_flag(self, course_dir, temp_cwd):
-        """Does setting the flag --generate_source_with_tests also create a notebook with solution and tests in the
+        """Does setting the flag --source_with_tests also create a notebook with solution and tests in the
         source_with_tests directory"""
         self._copy_file(join("files", "autotest-simple.ipynb"), join(course_dir, "source", "ps1", "foo.ipynb"))
         self._copy_file(join("files", "tests.yml"), join(course_dir, "source", "ps1", "tests.yml"))
         run_nbgrader(["db", "assignment", "add", "ps1"])
-        run_nbgrader(["generate_assignment", "ps1", "--generate_source_with_tests"])
+        run_nbgrader(["generate_assignment", "ps1", "--source_with_tests"])
         assert os.path.isfile(join(course_dir, "release", "ps1", "foo.ipynb"))
         assert os.path.isfile(join(course_dir, "source_with_tests", "ps1", "foo.ipynb"))
 
