@@ -84,14 +84,18 @@ nbgrader/docs/source/user_guide/managing_assignment_files_manually.rst
 nbgrader/docs/source/user_guide/managing_the_database.rst
 nbgrader/docs/source/user_guide/autograded/bitdiddle/ps1/problem1.html
 nbgrader/docs/source/user_guide/autograded/bitdiddle/ps1/problem2.html
+nbgrader/docs/source/user_guide/autograded/bitdiddle/ps1/problem3.html
 nbgrader/docs/source/user_guide/autograded/hacker/ps1/problem1.html
 nbgrader/docs/source/user_guide/autograded/hacker/ps1/problem2.html
+nbgrader/docs/source/user_guide/autograded/hacker/ps1/problem3.html
 nbgrader/docs/source/user_guide/downloaded/ps1/archive/ps1_hacker_attempt_2016-01-30-20-30-10_problem1.html
 nbgrader/docs/source/user_guide/release/ps1/problem1.html
 nbgrader/docs/source/user_guide/release/ps1/problem2.html
+nbgrader/docs/source/user_guide/release/ps1/problem3.html
 nbgrader/docs/source/user_guide/source/header.html
 nbgrader/docs/source/user_guide/source/ps1/problem1.html
 nbgrader/docs/source/user_guide/source/ps1/problem2.html
+nbgrader/docs/source/user_guide/source/ps1/problem3.html
 
 # components stuff
 node_modules
