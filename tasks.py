@@ -101,7 +101,7 @@ def tests(ns, args):
         _run_ts_test(args)
 
     elif ns.group == 'docs':
-        docs(ns)
+        docs(ns, args)
 
     elif ns.group == 'all':
         _run_tests(mark=None, skip=ns.skip, junitxml=ns.junitxml)
