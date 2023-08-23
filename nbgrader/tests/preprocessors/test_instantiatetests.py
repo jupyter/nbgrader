@@ -73,7 +73,7 @@ class TestInstantiateTests(BaseTestPreprocessor):
         }
 
         nb, resources = preprocessor.preprocess(nb, resources)
-        assert "Autotest region detected in a non-grade cell; " in caplog.text
+        assert "AutoTest region detected in a non-grade cell; " in caplog.text
 
     # test that an error is thrown when we have an AUTOTEST directive in a non-grade cell
     def test_error_autotest_nongrade(self, preprocessor, caplog):
@@ -92,7 +92,7 @@ class TestInstantiateTests(BaseTestPreprocessor):
         with pytest.raises(Exception):
             nb, resources = preprocessor.preprocess(nb, resources)
 
-        assert "Autotest region detected in a non-grade cell; " in caplog.text
+        assert "AutoTest region detected in a non-grade cell; " in caplog.text
 
     # test that invalid python statements in AUTOTEST directives cause errors
     def test_error_bad_autotest_code(self, preprocessor):
