@@ -116,7 +116,7 @@ class InstantiateTests(NbGraderPreprocessor):
                 if kernel_name not in self.sanitizers:
                     raise ValueError(f"Kernel {kernel_name} has not been specified in InstantiateTests.sanitizers")
                 self.log.debug(f"Found kernel {kernel_name}")
-                self.kernel_name = kernel_name
+                resources["kernel_name"] = kernel_name
 
                 # load the template tests file
                 self.log.debug('Loading template tests file')
@@ -156,7 +156,7 @@ class InstantiateTests(NbGraderPreprocessor):
         is_grade_flag = utils.is_grade(cell)
 
         # get the comment string for this language
-        comment_str = self.comment_strs[self.kernel_name]
+        comment_str = self.comment_strs[resources["kernel_name"]]
 
         # split the code lines into separate strings
         lines = cell.source.split("\n")
@@ -283,7 +283,7 @@ class InstantiateTests(NbGraderPreprocessor):
         or perhaps cannot be loaded, it will attempt to load the default_tests.yaml file with the course_directory
         """
         self.log.debug('loading template tests.yml...')
-        self.log.debug(f'kernel_name: {self.kernel_name}')
+        self.log.debug(f'kernel_name: {resources["kernel_name"]}')
         try:
             with open(os.path.join(resources['metadata']['path'], self.autotest_filename), 'r') as tests_file:
                 tests = yaml.safe_load(tests_file)
@@ -313,7 +313,7 @@ class InstantiateTests(NbGraderPreprocessor):
             raise
 
         # get kernel specific data
-        tests = tests[self.kernel_name]
+        tests = tests[resources["kernel_name"]]
 
         # get the test templates
         self.test_templates_by_type = tests['templates']
