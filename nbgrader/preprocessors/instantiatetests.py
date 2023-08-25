@@ -418,22 +418,3 @@ class InstantiateTests(NbGraderPreprocessor):
             self.log.error("Runtime error from the kernel: \n%s\n%s\n%s", content['ename'], content['evalue'], content['traceback'])
             raise CellExecutionError(content['traceback'], content['ename'], content['evalue'])
         return
-
-## TODO: do we need this? commenting out for now; will add back in if it causes errors
-#def timestamp(msg: Optional[Dict] = None) -> str:
-#    if msg and 'header' in msg:  # The test mocks don't provide a header, so tolerate that
-#        msg_header = msg['header']
-#        if 'date' in msg_header and isinstance(msg_header['date'], datetime.datetime):
-#            try:
-#                # reformat datetime into expected format
-#                formatted_time = datetime.datetime.strftime(
-#                    msg_header['date'], '%Y-%m-%dT%H:%M:%S.%fZ'
-#                )
-#                if (
-#                        formatted_time
-#                ):  # docs indicate strftime may return empty string, so let's catch that too
-#                    return formatted_time
-#            except Exception:
-#                pass  # fallback to a local time
-#
-#    return datetime.datetime.utcnow().isoformat() + 'Z'
