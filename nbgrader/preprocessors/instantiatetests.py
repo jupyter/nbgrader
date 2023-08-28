@@ -259,14 +259,14 @@ class InstantiateTests(NbGraderPreprocessor):
                 # add an empty line after this block of test code
                 new_lines.append('')
 
+        # add the final success code and execute it
+        if is_grade_flag and self.global_tests_loaded and (self.autotest_delimiter in cell.source) and (self.success_code is not None):
+            new_lines.append(self.success_code)
+            non_autotest_code_lines.append(self.success_code)
+
         # run the trailing non-autotest lines, if any remain
         if len(non_autotest_code_lines) > 0:
             self._execute_code_snippet("\n".join(non_autotest_code_lines))
-
-        # add the final success message
-        if is_grade_flag and self.global_tests_loaded:
-            if self.autotest_delimiter in cell.source:
-                new_lines.append(self.success_code)
 
         # replace the cell source
         cell.source = "\n".join(new_lines)
@@ -322,7 +322,7 @@ class InstantiateTests(NbGraderPreprocessor):
         self.dispatch_template = tests['dispatch']
 
         # get the success message template
-        self.success_code = tests['success']
+        self.success_code = tests.get('success', None)
 
         # get the hash code template
         self.hash_template = tests['hash']
