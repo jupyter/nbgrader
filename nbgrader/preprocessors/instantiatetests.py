@@ -115,7 +115,7 @@ class InstantiateTests(NbGraderPreprocessor):
                     raise ValueError(f"Kernel {kernel_name} has not been specified in InstantiateTests.comment_strs")
                 if kernel_name not in self.sanitizers:
                     raise ValueError(f"Kernel {kernel_name} has not been specified in InstantiateTests.sanitizers")
-                self.log.debug(f"Found kernel {kernel_name}")
+                self.log.debug("Found kernel %s", kernel_name)
                 resources["kernel_name"] = kernel_name
 
                 # load the template tests file
@@ -124,10 +124,10 @@ class InstantiateTests(NbGraderPreprocessor):
                 self.global_tests_loaded = True
 
                 # set up the sanitizer
-                self.log.debug('Setting sanitizer for kernel {kernel_name}')
+                self.log.debug('Setting sanitizer for kernel %s', kernel_name)
                 self.sanitizer = self.sanitizers[kernel_name]
                 #start the kernel
-                self.log.debug('Starting client for kernel {kernel_name}')
+                self.log.debug('Starting client for kernel %s', kernel_name)
                 km, self.kc = start_new_kernel(kernel_name = kernel_name)
 
                 # run the preprocessor
@@ -214,7 +214,7 @@ class InstantiateTests(NbGraderPreprocessor):
             # appears in the line before the self.autotest_delimiter token
             use_hash = (self.hashed_delimiter in line[:line.find(self.autotest_delimiter)])
             if use_hash:
-                self.log.debug('Hashing delimiter found, using template: ' + self.hash_template)
+                self.log.debug('Hashing delimiter found, using template: %s', self.hash_template)
             else:
                 self.log.debug('Hashing delimiter not found')
 
@@ -233,18 +233,18 @@ class InstantiateTests(NbGraderPreprocessor):
 
             # generate the test for each snippet
             for snippet in snippets:
-                self.log.debug('Running autotest generation for snippet ' + snippet)
+                self.log.debug('Running autotest generation for snippet %s', snippet)
 
                 # create a random salt for this test
                 if use_hash:
                     salt = secrets.token_hex(8)
-                    self.log.debug('Using salt: ' + salt)
+                    self.log.debug('Using salt: %s', salt)
                 else:
                     salt = None
 
                 # get the normalized(/hashed) template tests for this code snippet
                 self.log.debug(
-                    'Instantiating normalized' + ('/hashed ' if use_hash else ' ') + 'test templates based on type')
+                    'Instantiating normalized%s test templates based on type', ' & hashed' if use_hash else '')
                 instantiated_tests, test_values, fail_messages = self._instantiate_tests(snippet, salt)
 
                 # add all the lines to the cell
@@ -253,7 +253,7 @@ class InstantiateTests(NbGraderPreprocessor):
                 for i in range(len(instantiated_tests)):
                     check_code = template.render(snippet=instantiated_tests[i], value=test_values[i],
                                                  message=fail_messages[i])
-                    self.log.debug('Test: ' + check_code)
+                    self.log.debug('Test: %s', check_code)
                     new_lines.append(check_code)
 
                 # add an empty line after this block of test code
@@ -283,7 +283,7 @@ class InstantiateTests(NbGraderPreprocessor):
         or perhaps cannot be loaded, it will attempt to load the default_tests.yaml file with the course_directory
         """
         self.log.debug('loading template autotests.yml...')
-        self.log.debug(f'kernel_name: {resources["kernel_name"]}')
+        self.log.debug('kernel_name: %s', resources["kernel_name"])
         try:
             with open(os.path.join(resources['metadata']['path'], self.autotest_filename), 'r') as tests_file:
                 tests = yaml.safe_load(tests_file)
@@ -342,7 +342,7 @@ class InstantiateTests(NbGraderPreprocessor):
         template = j2.Environment(loader=j2.BaseLoader).from_string(self.dispatch_template)
         dispatch_code = template.render(snippet=snippet)
         dispatch_result = self._execute_code_snippet(dispatch_code)
-        self.log.debug('Dispatch result returned by kernel: ', dispatch_result)
+        self.log.debug('Dispatch result returned by kernel: %s', dispatch_result)
         # get the test code; if the type isn't in our dict, just default to 'default'
         # if default isn't in the tests code, this will throw an error
         try:
