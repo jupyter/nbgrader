@@ -33,7 +33,7 @@ class InstantiateTests(NbGraderPreprocessor):
     tests = None
 
     autotest_filename = Unicode(
-        "tests.yml",
+        "autotests.yml",
         help="The filename where automatic testing code is stored"
     ).tag(config=True)
 
@@ -279,10 +279,10 @@ class InstantiateTests(NbGraderPreprocessor):
     # -------------------------------------------------------------------------------------
     def _load_test_template_file(self, resources):
         """
-        attempts to load the tests.yml file within the assignment directory. In case such file is not found
+        attempts to load the autotests.yml file within the assignment directory. In case such file is not found
         or perhaps cannot be loaded, it will attempt to load the default_tests.yaml file with the course_directory
         """
-        self.log.debug('loading template tests.yml...')
+        self.log.debug('loading template autotests.yml...')
         self.log.debug(f'kernel_name: {resources["kernel_name"]}')
         try:
             with open(os.path.join(resources['metadata']['path'], self.autotest_filename), 'r') as tests_file:
@@ -292,7 +292,7 @@ class InstantiateTests(NbGraderPreprocessor):
         except FileNotFoundError:
             # if there is no tests file, just load a default tests dict
             self.log.warning(
-                'No tests.yml file found in the assignment directory. Loading the default tests.yml file in the course root directory')
+                'No autotests.yml file found in the assignment directory. Loading the default autotests.yml file in the course root directory')
             # tests = {}
             try:
                 with open(os.path.join(self.autotest_filename), 'r') as tests_file:
@@ -300,15 +300,15 @@ class InstantiateTests(NbGraderPreprocessor):
             except FileNotFoundError:
                 # if there is no tests file, just create a default empty tests dict
                 self.log.warning(
-                    'No tests.yml file found. If AUTOTESTS appears in testing cells, an error will be thrown.')
+                    'No autotests.yml file found. If AUTOTESTS appears in testing cells, an error will be thrown.')
                 tests = {}
             except yaml.parser.ParserError as e:
-                self.log.error('tests.yml contains invalid YAML code.')
+                self.log.error('autotests.yml contains invalid YAML code.')
                 self.log.error(e.msg)
                 raise
 
         except yaml.parser.ParserError as e:
-            self.log.error('tests.yml contains invalid YAML code.')
+            self.log.error('autotests.yml contains invalid YAML code.')
             self.log.error(e.msg)
             raise
 
@@ -348,13 +348,13 @@ class InstantiateTests(NbGraderPreprocessor):
         try:
             tests = self.test_templates_by_type.get(dispatch_result, self.test_templates_by_type['default'])
         except KeyError:
-            self.log.error('tests.yml must contain a top-level "default" key with corresponding test code')
+            self.log.error('autotests.yml must contain a top-level "default" key with corresponding test code')
             raise
         try:
             test_templs = [t['test'] for t in tests]
             fail_msgs = [t['fail'] for t in tests]
         except KeyError:
-            self.log.error('each type in tests.yml must have a list of dictionaries with a "test" and "fail" key')
+            self.log.error('each type in autotests.yml must have a list of dictionaries with a "test" and "fail" key')
             self.log.error('the "test" item should store the test template code, '
                            'and the "fail" item should store a failure message')
             raise

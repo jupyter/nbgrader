@@ -122,10 +122,10 @@ class QuickStartApp(NbGrader):
         ignore_html = shutil.ignore_patterns("*.html")
         shutil.copytree(example, os.path.join(course_path, "source"), ignore=ignore_html)
 
-        # copying the tests.yml file to the course directory
+        # copying the autotests.yml file to the course directory
         tests_file_path = os.path.abspath(os.path.join(
-            os.path.dirname(__file__), '..', 'docs', 'source', 'user_guide', 'tests.yml'))
-        shutil.copyfile(tests_file_path, os.path.join(course_path, 'tests.yml'))
+            os.path.dirname(__file__), '..', 'docs', 'source', 'user_guide', 'autotests.yml'))
+        shutil.copyfile(tests_file_path, os.path.join(course_path, 'autotests.yml'))
 
         # create the config file
         self.log.info("Generating example config file...")

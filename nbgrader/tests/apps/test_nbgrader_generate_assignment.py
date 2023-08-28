@@ -50,11 +50,11 @@ class TestNbGraderGenerateAssignment(BaseTestApp):
     def test_autotests_simple(self, course_dir, temp_cwd):
         """Can a notebook with simple autotests be generated with a default yaml location, and is autotest code removed?"""
         self._copy_file(join("files", "autotest-simple.ipynb"), join(course_dir, "source", "ps1", "foo.ipynb"))
-        self._copy_file(join("files", "tests.yml"), join(course_dir, "tests.yml"))
+        self._copy_file(join("files", "autotests.yml"), join(course_dir, "autotests.yml"))
         run_nbgrader(["db", "assignment", "add", "ps1"])
         run_nbgrader(["generate_assignment", "ps1"])
         assert os.path.isfile(join(course_dir, "release", "ps1", "foo.ipynb"))
-        assert not os.path.isfile(join(course_dir, "release", "ps1", "tests.yml"))
+        assert not os.path.isfile(join(course_dir, "release", "ps1", "autotests.yml"))
 
         foo = self._file_contents(join(course_dir, "release", "ps1", "foo.ipynb"))
         assert "AUTOTEST" not in foo
@@ -62,11 +62,11 @@ class TestNbGraderGenerateAssignment(BaseTestApp):
     def test_autotests_simple(self, course_dir, temp_cwd):
         """Can a notebook with simple autotests be generated with an assignment-specific yaml, and is autotest code removed?"""
         self._copy_file(join("files", "autotest-simple.ipynb"), join(course_dir, "source", "ps1", "foo.ipynb"))
-        self._copy_file(join("files", "tests.yml"), join(course_dir, "source", "ps1", "tests.yml"))
+        self._copy_file(join("files", "autotests.yml"), join(course_dir, "source", "ps1", "autotests.yml"))
         run_nbgrader(["db", "assignment", "add", "ps1"])
         run_nbgrader(["generate_assignment", "ps1"])
         assert os.path.isfile(join(course_dir, "release", "ps1", "foo.ipynb"))
-        assert os.path.isfile(join(course_dir, "release", "ps1", "tests.yml"))
+        assert os.path.isfile(join(course_dir, "release", "ps1", "autotests.yml"))
 
         foo = self._file_contents(join(course_dir, "release", "ps1", "foo.ipynb"))
         assert "AUTOTEST" not in foo
@@ -81,7 +81,7 @@ class TestNbGraderGenerateAssignment(BaseTestApp):
     def test_autotests_fancy(self, course_dir, temp_cwd):
         """Can a more complicated autotests notebook be generated, and is autotest code removed?"""
         self._copy_file(join("files", "autotest-multi.ipynb"), join(course_dir, "source", "ps1", "foo.ipynb"))
-        self._copy_file(join("files", "tests.yml"), join(course_dir, "tests.yml"))
+        self._copy_file(join("files", "autotests.yml"), join(course_dir, "autotests.yml"))
         run_nbgrader(["db", "assignment", "add", "ps1"])
         run_nbgrader(["generate_assignment", "ps1"])
         assert os.path.isfile(join(course_dir, "release", "ps1", "foo.ipynb"))
@@ -92,7 +92,7 @@ class TestNbGraderGenerateAssignment(BaseTestApp):
     def test_autotests_hidden(self, course_dir, temp_cwd):
         """Can a notebook with hidden autotest be generated, and is autotest/hidden sections removed?"""
         self._copy_file(join("files", "autotest-hidden.ipynb"), join(course_dir, "source", "ps1", "foo.ipynb"))
-        self._copy_file(join("files", "tests.yml"), join(course_dir, "tests.yml"))
+        self._copy_file(join("files", "autotests.yml"), join(course_dir, "autotests.yml"))
         run_nbgrader(["db", "assignment", "add", "ps1"])
         run_nbgrader(["generate_assignment", "ps1"])
         assert os.path.isfile(join(course_dir, "release", "ps1", "foo.ipynb"))
@@ -104,7 +104,7 @@ class TestNbGraderGenerateAssignment(BaseTestApp):
     def test_autotests_hashed(self, course_dir, temp_cwd):
         """Can a notebook with hashed autotests be generated, and is hashed autotest code removed?"""
         self._copy_file(join("files", "autotest-hashed.ipynb"), join(course_dir, "source", "ps1", "foo.ipynb"))
-        self._copy_file(join("files", "tests.yml"), join(course_dir, "tests.yml"))
+        self._copy_file(join("files", "autotests.yml"), join(course_dir, "autotests.yml"))
         run_nbgrader(["db", "assignment", "add", "ps1"])
         run_nbgrader(["generate_assignment", "ps1"])
         assert os.path.isfile(join(course_dir, "release", "ps1", "foo.ipynb"))
@@ -117,7 +117,7 @@ class TestNbGraderGenerateAssignment(BaseTestApp):
         """Does setting the flag --source_with_tests also create a notebook with solution and tests in the
         source_with_tests directory"""
         self._copy_file(join("files", "autotest-simple.ipynb"), join(course_dir, "source", "ps1", "foo.ipynb"))
-        self._copy_file(join("files", "tests.yml"), join(course_dir, "source", "ps1", "tests.yml"))
+        self._copy_file(join("files", "autotests.yml"), join(course_dir, "source", "ps1", "autotests.yml"))
         run_nbgrader(["db", "assignment", "add", "ps1"])
         run_nbgrader(["generate_assignment", "ps1", "--source_with_tests"])
         assert os.path.isfile(join(course_dir, "release", "ps1", "foo.ipynb"))

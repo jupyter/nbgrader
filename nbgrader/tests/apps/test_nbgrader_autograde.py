@@ -102,7 +102,7 @@ class TestNbGraderAutograde(BaseTestApp):
         run_nbgrader(["db", "student", "add", "bar", "--db", db])
 
         self._copy_file(join("files", "autotest-simple.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
-        self._copy_file(join("files", "tests.yml"), join(course_dir, "tests.yml"))
+        self._copy_file(join("files", "autotests.yml"), join(course_dir, "autotests.yml"))
         run_nbgrader(["generate_assignment", "ps1", "--db", db])
 
         self._copy_file(join("files", "autotest-simple-unchanged.ipynb"), join(course_dir, "submitted", "foo", "ps1", "p1.ipynb"))
@@ -132,7 +132,7 @@ class TestNbGraderAutograde(BaseTestApp):
         run_nbgrader(["db", "student", "add", "bar", "--db", db])
 
         self._copy_file(join("files", "autotest-hashed.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
-        self._copy_file(join("files", "tests.yml"), join(course_dir, "tests.yml"))
+        self._copy_file(join("files", "autotests.yml"), join(course_dir, "autotests.yml"))
         run_nbgrader(["generate_assignment", "ps1", "--db", db])
 
         self._copy_file(join("files", "autotest-hashed-unchanged.ipynb"), join(course_dir, "submitted", "foo", "ps1", "p1.ipynb"))
@@ -162,7 +162,7 @@ class TestNbGraderAutograde(BaseTestApp):
         run_nbgrader(["db", "student", "add", "bar", "--db", db])
 
         self._copy_file(join("files", "autotest-multi.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
-        self._copy_file(join("files", "tests.yml"), join(course_dir, "tests.yml"))
+        self._copy_file(join("files", "autotests.yml"), join(course_dir, "autotests.yml"))
         run_nbgrader(["generate_assignment", "ps1", "--db", db])
 
         self._copy_file(join("files", "autotest-multi-unchanged.ipynb"), join(course_dir, "submitted", "foo", "ps1", "p1.ipynb"))
@@ -944,7 +944,7 @@ class TestNbGraderAutograde(BaseTestApp):
             fh.write("""c.ClearSolutions.code_stub=dict(python="# YOUR CODE HERE")""")
 
         self._copy_file(join("files", "autotest-hidden.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
-        self._copy_file(join("files", "tests.yml"), join(course_dir, "tests.yml"))
+        self._copy_file(join("files", "autotests.yml"), join(course_dir, "autotests.yml"))
         run_nbgrader(["generate_assignment", "ps1", "--db", db])
 
         self._copy_file(join("files", "autotest-hidden-unchanged.ipynb"), join(course_dir, "submitted", "foo", "ps1", "p1.ipynb"))
