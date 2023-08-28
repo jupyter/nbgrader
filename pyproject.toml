@@ -60,9 +60,9 @@ dev = [
 ]
 docs = [
     "myst-parser",
-    "sphinx",
+    "sphinx>=7,<8",
     "sphinx-autodoc-typehints",
-    "sphinx_rtd_theme",
+    "sphinx_rtd_theme>=1.3",
 ]
 tests = [
     "codecov",
