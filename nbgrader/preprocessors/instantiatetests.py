@@ -292,14 +292,14 @@ class InstantiateTests(NbGraderPreprocessor):
             self.log.debug(tests)
 
         except FileNotFoundError:
-            # if there is no tests file, just load a default tests dict
+            # if there is no tests file, try to load default tests dict
             self.log.warning(
                 'No autotests.yml file found in the assignment directory. Loading the default autotests.yml file in the course root directory')
             try:
                 with open(os.path.join(self.autotest_filename), 'r') as tests_file:
                     tests = yaml.safe_load(tests_file)
             except FileNotFoundError:
-                # if there is no tests file, just create a default empty tests dict
+                # if there is not even a default tests file, re-raise the FileNotFound error
                 self.log.error('No autotests.yml file found, but there were autotest directives found in the notebook. ')
                 raise
             except yaml.parser.ParserError as e:
