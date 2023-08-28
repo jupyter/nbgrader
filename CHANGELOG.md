@@ -1,7 +1,5 @@
 A summary of changes to nbgrader.
 
-## 0.7.x
-
 <!-- <START NEW CHANGELOG ENTRY> -->
 
 ## 0.9.0a1
@@ -266,6 +264,8 @@ A summary of changes to nbgrader.
 ([GitHub contributors page for this release](https://github.com/jupyter/nbgrader/graphs/contributors?from=2022-05-07&to=2022-06-28&type=c))
 
 [@brichet](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Abrichet+updated%3A2022-05-07..2022-06-28&type=Issues) | [@jhamrick](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Ajhamrick+updated%3A2022-05-07..2022-06-28&type=Issues) | [@jtpio](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Ajtpio+updated%3A2022-05-07..2022-06-28&type=Issues) | [@minrk](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Aminrk+updated%3A2022-05-07..2022-06-28&type=Issues) | [@perllaghu](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Aperllaghu+updated%3A2022-05-07..2022-06-28&type=Issues) | [@rkdarst](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Arkdarst+updated%3A2022-05-07..2022-06-28&type=Issues)
+
+## 0.7.x
 
 ### 0.7.1
 
