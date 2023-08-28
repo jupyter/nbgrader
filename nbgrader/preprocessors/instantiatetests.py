@@ -214,6 +214,8 @@ class InstantiateTests(NbGraderPreprocessor):
             # appears in the line before the self.autotest_delimiter token
             use_hash = (self.hashed_delimiter in line[:line.find(self.autotest_delimiter)])
             if use_hash:
+                if self.hash_template is None:
+                    raise ValueError('Found a hashing delimiter, but the hash property has not been set in autotests.yml')
                 self.log.debug('Hashing delimiter found, using template: %s', self.hash_template)
             else:
                 self.log.debug('Hashing delimiter not found')
@@ -323,7 +325,7 @@ class InstantiateTests(NbGraderPreprocessor):
         self.success_code = tests.get('success', None)
 
         # get the hash code template
-        self.hash_template = tests['hash']
+        self.hash_template = tests.get('hash', None)
 
         # get the hash code template
         self.check_template = tests['check']
