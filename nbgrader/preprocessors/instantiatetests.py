@@ -128,7 +128,7 @@ class InstantiateTests(NbGraderPreprocessor):
                 self.sanitizer = self.sanitizers[kernel_name]
                 #start the kernel
                 self.log.debug('Starting client for kernel %s', kernel_name)
-                km, self.kc = start_new_kernel(kernel_name = kernel_name)
+                km, self.kc = start_new_kernel(kernel_name=kernel_name)
 
                 # run the preprocessor
                 self.log.debug('Running InstantiateTests preprocessor')
