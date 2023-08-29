@@ -262,7 +262,12 @@ class InstantiateTests(NbGraderPreprocessor):
                 new_lines.append('')
 
         # add the final success code and execute it
-        if is_grade_flag and self.global_tests_loaded and (self.autotest_delimiter in cell.source) and (self.success_code is not None):
+        if (
+            is_grade_flag 
+            and self.global_tests_loaded 
+            and (self.autotest_delimiter in cell.source) 
+            and (self.success_code is not None)
+        ):
             new_lines.append(self.success_code)
             non_autotest_code_lines.append(self.success_code)
 
