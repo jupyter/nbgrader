@@ -210,7 +210,144 @@ Automatic test code generation
 
 nbgrader now supports generating test code automatically
 using ``### AUTOTEST`` and ``### HASHED AUTOTEST`` statements.
+In this section, you can find more detail on how this works and 
+how to customize the test generation process. 
+Suppose you ask students to create a ``foo`` function that adds 5 to
+an integer. In the source copy of the notebook, you might write something like
 
-TODO
-- autotest.yml syntax
-- using ``--source-with-tests``
+.. code:: python
+    
+    ### BEGIN SOLUTION
+    def foo(x):
+      return x + 5
+    ### END SOLUTION
+
+In a test cell, you would normally then write test code manually to probe various aspects of the solution.
+For example, you might check that the function increments 3 to 8 properly, and that the type
+of the output is an integer.
+
+.. code:: python
+
+    assert isinstance(foo(3), int), "incrementing an int by 5 should return an int"
+    assert foo(3) == 8, "3+5 should be 8"
+
+nbgrader now provides functionality to automate this process. Instead of writing tests explicitly,
+you can instead specify *what you want to test*, and let nbgrader decide *how to test it* automatically.
+
+.. code:: python
+
+    ### AUTOTEST foo(3)
+
+This directive indicates that you want to check ``foo(3)`` in the student's notebook, and make sure it 
+aligns with the value of ``foo(3)`` in the current source copy. You can write any valid expression (in the 
+language of your notebook) after the ``### AUTOTEST`` directive. For example, you could write
+
+.. code:: python
+
+   ### AUTOTEST (foo(3) - 5 == 3)
+
+to generate test code for the expression ``foo(3)-5==3`` (i.e., a boolean value), and make sure that evaluating
+the student's copy of this expression has a result that aligns with the source version (i.e., ``True``). You can write multiple
+``### AUTOTEST`` directives in one cell. You can also separate multiple expressions on one line with semicolons:
+
+.. code:: python
+
+   ### AUTOTEST foo(3); foo(4); foo(5) != 8
+
+These directives will insert code into student notebooks where the solution is available in plaintext. If you want to
+obfuscate the answers in the student copy, you should instead use a ``### HASHED AUTOTEST``, which will produce
+a student notebook where the answers are hashed and not viewable by students.
+
+When you generate an assignment containing ``### AUTOTEST`` (or ``### HASHED AUTOTEST``) statements, nbgrader looks for a file
+named ``autotests.yml`` that contains instructions on how to generate test code. It first looks 
+in the assignment directory itself (in case you want to specify special tests for just that assignment), and if it is 
+not found there, nbgrader searches in the course root directory.
+The ``autotests.yml`` file is a `YAML <https://yaml.org/>`__ file that looks something like this:
+
+.. code:: yaml
+
+    python3:
+        setup: "from hashlib import sha1"
+        hash: 'sha1({{snippet}}.encode("utf-8")+b"{{salt}}").hexdigest()'
+        dispatch: "type({{snippet}})"
+        normalize: "str({{snippet}})"
+        check: 'assert {{snippet}} == """{{value}}""", """{{message}}"""'
+        success: "print('Success!')"
+
+        templates:
+            default:
+                - test: "type({{snippet}})"
+                  fail: "type of {{snippet}} is not correct"
+
+                - test: "{{snippet}}"
+                  fail: "value of {{snippet}} is not correct"
+
+            int:
+                - test: "type({{snippet}})"
+                  fail: "type of {{snippet}} is not int. Please make sure it is int and not np.int64, etc. You can cast your value into an int using int()"
+
+                - test: "{{snippet}}"
+                  fail: "value of {{snippet}} is not correct"
+
+The outermost  level in the YAML file (the example shows an entry for ``python3``) specifies which kernel the configuration applies to. ``autotests.yml`` can 
+have separate sections for multiple kernels / languages. The ``autotests.yml`` file uses `Jinja templates <https://jinja.palletsprojects.com/en/3.1.x/>`__ to 
+specify snippets of code that will be executed/inserted into Jupyter notebooks in the process of generating the assignment. You should familiarize yourself 
+with the basics of Jinja templates before proceeding. For each kernel, there are a few configuration settings possible:
+
+- **dispatch:** When you write ``### AUTOTEST foo(3)``, nbgrader needs to know how to test ``foo(3)``. It does so by executing ``foo(3)``, then checking its *type*,
+  and then running tests corresponding to that type in the ``autotests.yml`` file. Specifically, when generating an assignment, nbgrader substitutes the ``{{snippet}}`` template
+  variable with the expression ``foo(3)``, and then evaluates the dispatch code based on that. In this case, nbgrader runs ``type(foo(3))``, which will 
+  return ``int``, so nbgrader will know to test ``foo(3)`` using tests for integer variables.
+- **templates:** Once nbgrader determines the type of the expression ``foo(3)``, it will look for that type in the list of templates for the kernel. In this case,
+  it will find the ``int`` type in the list (it will use the **default** if the type is not found). Each type will have associated with it a 
+  list of **test**/**fail** template pairs, which tell nbgrader what tests to run 
+  and what messages to print in the event of a failure. Once again, ``{{snippet}}`` will be replaced by the ``foo(3)`` expression. In ``autotests.yml`` above, the 
+  ``int`` type has two tests: one that checks type of the expression, and one that checks its value. In this case, the student notebook will have 
+  two tests: one that checks the value of ``type(foo(3))``, and one that checks the value of ``foo(3)``.
+- **normalize:** For each test code expression (for example, ``type(foo(3))`` as mentioned previously), nbgrader will execute code using the corresponding 
+  Jupyter kernel, which will respond with a result in the form of a *string*. So nbgrader now knows that if it runs ``type(foo(3))`` at this 
+  point in the notebook, and converts the output to a string (i.e., *normalizes it*), it should obtain ``"int"``. However, nbgrader does not know how to convert output to a string; that
+  depends on the kernel! So the normalize code template tells nbgrader how to convert an expression to a string. In the ``autotests.yml`` example above, the 
+  normalize template suggests that nbgrader should try to compare ``str(type(foo(3)))`` to ``"int"``. 
+- **check:** This is the code template that will be inserted into the student notebook to run each test. The template has three variables. ``{{snippet}}`` is the normalized
+  test code. The ``{{value}}`` is the evaluated version of that test code, based on the source notebook. The ``{{message}}`` is
+  text that will be printed in the event of a test failure. In the example above, the check code template tells nbgrader to insert an ``assert`` statement to run the test.
+- **hash (optional):** This is a code template that is responsible for hashing (i.e., obfuscating) the answers in the student notebok. The template has two variables.
+  ``{{snippet}}`` represents the expression that will be hashed, and ``{{salt}}`` is used for nbgrader to insert a `salt <https://en.wikipedia.org/wiki/Salt_(cryptography)>`__ 
+  prior to hashing. The salt helps avoid students being able to identify hashes from common question types. For example, a true/false question has only two possible answers;
+  without a salt, students would be able to recognize the hashes of ``True`` and ``False`` in their notebooks. By adding a salt, nbgrader makes the hashed version of the answer 
+  different for each question, preventing identifying answers based on their hashes.
+- **setup (optional):** This is a code template that will be run at the beginning of all test cells containing ``### AUTOTEST`` or ``### HASHED AUTOTEST`` directives. It is often used to import
+  special packages that only the test code requires. In the example above, the setup code is used to import the ``sha1`` function from ``hashlib``, which is necessary
+  for hashed test generation.
+- **success (optional):** This is a code template that will be added to the end of all test cells containing ``### AUTOTEST`` or ``### HASHED AUTOTEST`` directives. In the 
+  generated student version of the notebook,
+  this code will run if all the tests pass. In the example ``autotests.yml`` file above, the success code is used to run ``print('Success!')``, i.e., simply print a message to
+  indicate that all tests in the cell passed.
+
+.. note::
+
+   For assignments with ``### AUTOTEST`` and ``### HASHED AUTOTEST`` directives, it is often handy
+   to have an editable copy of the assignment with solutions *and* test code inserted. You can
+   use ``nbgrader generate_assignment --source_with_tests`` to generate this version of an assignment,
+   which will appear in the ``source_with_tests/`` folder in the course repository.
+
+.. warning::
+
+   The default ``autotests.yml`` test templates file included with the repository has tests for many
+   common data types (``int``, ``dict``, ``list``, ``float``, etc). It also has a ``default`` test template
+   that it will try to apply to any types that do not have specified tests. If you want to automatically
+   generate your own tests for custom types, you will need to implement those test templates in ``autotests.yml``. That being said, custom
+   object types often have standard Python types as class attributes. Sometimes an easier option is to use nbgrader to test these
+   attributes automatically instead. For example, if ``obj`` is a complicated type with no specific test template available,
+   but ``obj`` has an ``int`` attribute ``x``, you could consider testing that attribute directly, e.g., ``### AUTOTEST obj.x``.
+
+.. warning::
+
+   The InstantiateTests preprocessor in nbgrader is responsible for generating test code from ``### AUTOTEST`` 
+   directives and the ``autotests.yml`` file. It has some configuration parameters not yet mentioned here.
+   The most important of these is the ``InstantiateTests.sanitizers`` dictionary, which tells nbgrader how to 
+   clean up the string output from each kind of Jupyter kernel before using it in the process of generating tests. We have 
+   implemented sanitizers for popular kernels in nbgrader already, but you might need to add your own.
+
+
