@@ -194,3 +194,23 @@ containerization system. For details on using ``envkernel`` with
 singularity, see the `README
 <https://github.com/NordicHPC/envkernel/blob/master/README.md>`_ of
 ``envkernel``.
+
+.. _customizing-autotests:
+
+Automatic test code generation
+---------------------------------------
+
+.. versionadded:: 0.9.0
+
+.. seealso::
+
+  :ref:`autograder-tests-cell-automatic-test-code`
+    General introduction to automatic test code generation.
+
+
+nbgrader now supports generating test code automatically
+using ``### AUTOTEST`` and ``### HASHED AUTOTEST`` statements.
+
+TODO
+- autotest.yml syntax
+- using ``--source-with-tests``
