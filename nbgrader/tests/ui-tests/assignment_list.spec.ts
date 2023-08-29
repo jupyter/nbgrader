@@ -124,10 +124,6 @@ const addCourses = async (request: APIRequestContext, tmpPath: string) => {
     `${tmpPath}/source/Problem Set 1/problem2.ipynb`,
     `${tmpPath}/source/Problem Set 1/Problem 2.ipynb`
   );
-  // don't run autotest in the ui tests
-  await contents.deleteFile(
-    `${tmpPath}/source/Problem Set 1/problem3.ipynb`
-  );
 
   await contents.createDirectory(`${tmpPath}/source/ps.01`);
   await contents.uploadFile(
