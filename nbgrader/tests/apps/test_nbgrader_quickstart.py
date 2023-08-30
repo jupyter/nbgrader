@@ -39,6 +39,13 @@ class TestNbGraderQuickStart(BaseTestApp):
         # nbgrader generate_assignment should work
         run_nbgrader(["generate_assignment", "ps1"])
 
+        # there should be no autotests in any notebook in ps1
+        for nb in os.listdir(os.path.join("source", "ps1")):
+            if not nb.endswith(".ipynb"):
+                continue
+            with open(os.path.join("source", "ps1", nb), 'r') as f:
+                assert "AUTOTEST" not in f.read()
+
     def test_quickstart_overwrite_course_folder_if_structure_not_present(self):
         """Is the quickstart example properly generated?"""
 
@@ -129,6 +136,8 @@ class TestNbGraderQuickStart(BaseTestApp):
         # it should succeed if --force is given
         os.remove(os.path.join("example", "nbgrader_config.py"))
         run_nbgrader(["quickstart", "example", "--force", "--autotest"])
+
+        # ensure both autotests.yml and nbgrader_config.py are in the course root dir
         assert os.path.exists(os.path.join("example", "nbgrader_config.py"))
         assert os.path.exists(os.path.join("example", "autotests.yml"))
 
@@ -142,3 +151,12 @@ class TestNbGraderQuickStart(BaseTestApp):
 
         # nbgrader generate_assignment should work
         run_nbgrader(["generate_assignment", "ps1"])
+
+        # there should be autotests in at least one notebook in ps1
+        found_autotest = False
+        for nb in os.listdir(os.path.join("source", "ps1")):
+            if not nb.endswith(".ipynb"):
+                continue
+            with open(os.path.join("source", "ps1", nb), 'r') as f:
+                found_autotest = found_autotest or ("AUTOTEST" in f.read())
+        assert found_autotest
