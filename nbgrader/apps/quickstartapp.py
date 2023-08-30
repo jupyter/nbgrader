@@ -126,7 +126,7 @@ class QuickStartApp(NbGrader):
         if not os.path.isdir(course_path):
             os.mkdir(course_path)
 
-        # populating it with an example
+        # populate it with an example
         self.log.info("Copying example from the user guide...")
         example = os.path.abspath(os.path.join(
             os.path.dirname(__file__), '..', 'docs', 'source', 'user_guide', 'source'))
@@ -135,9 +135,11 @@ class QuickStartApp(NbGrader):
                 os.path.dirname(__file__), '..', 'docs', 'source', 'user_guide', 'autotests.yml'))
             shutil.copyfile(tests_file_path, os.path.join(course_path, 'autotests.yml'))
             ignored_files = shutil.ignore_patterns("*.html", "ps2", "ps1")
+            shutil.copytree(example, os.path.join(course_path, "source"), ignore=ignored_files)
+            os.rename(os.path.join(course_path, "source", "ps1_autotest"), os.path.join(course_path, "source", "ps1"))
         else:
             ignored_files = shutil.ignore_patterns("*.html", "ps2", "autotests.yml", "ps1_autotest")
-        shutil.copytree(example, os.path.join(course_path, "source"), ignore=ignored_files)
+            shutil.copytree(example, os.path.join(course_path, "source"), ignore=ignored_files)
 
         # create the config file
         self.log.info("Generating example config file...")

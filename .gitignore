@@ -92,6 +92,9 @@ nbgrader/docs/source/user_guide/release/ps1/problem2.html
 nbgrader/docs/source/user_guide/source/header.html
 nbgrader/docs/source/user_guide/source/ps1/problem1.html
 nbgrader/docs/source/user_guide/source/ps1/problem2.html
+nbgrader/docs/source/user_guide/source/ps1_autotest/problem1.html
+nbgrader/docs/source/user_guide/source/ps1_autotest/problem2.html
+nbgrader/docs/source/user_guide/source/ps2/problem.html
 
 # components stuff
 node_modules
