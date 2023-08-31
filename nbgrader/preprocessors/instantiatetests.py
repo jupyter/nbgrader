@@ -248,7 +248,7 @@ class InstantiateTests(NbGraderPreprocessor):
                 # create a salt for this test
                 if use_hash:
                     salt_int += 1
-                    salt = hex(salt_int)
+                    salt = hex(salt_int)[2:]
                     self.log.debug('Using salt: %s', salt)
                 else:
                     salt = None
