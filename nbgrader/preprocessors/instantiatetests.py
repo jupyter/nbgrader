@@ -118,6 +118,9 @@ class InstantiateTests(NbGraderPreprocessor):
                 self.log.debug("Found kernel %s", kernel_name)
                 resources["kernel_name"] = kernel_name
 
+                # get the resources path from the notebook
+                resources_path = resources.get('metadata', {}).get('path', None)
+
                 # load the template tests file
                 self.log.debug('Loading template tests file')
                 self._load_test_template_file(resources)
@@ -126,9 +129,9 @@ class InstantiateTests(NbGraderPreprocessor):
                 # set up the sanitizer
                 self.log.debug('Setting sanitizer for kernel %s', kernel_name)
                 self.sanitizer = self.sanitizers[kernel_name]
-                #start the kernel
-                self.log.debug('Starting client for kernel %s', kernel_name)
-                km, self.kc = start_new_kernel(kernel_name=kernel_name)
+                #start the kernel with the specified kernel and in the local path of the notebook
+                self.log.debug('Starting client for kernel %s at path %s', kernel_name, resources_path if resources_path is not None else '')
+                km, self.kc = start_new_kernel(kernel_name=kernel_name, cwd=resources_path)
 
                 # run the preprocessor
                 self.log.debug('Running InstantiateTests preprocessor')
@@ -263,9 +266,9 @@ class InstantiateTests(NbGraderPreprocessor):
 
         # add the final success code and execute it
         if (
-            is_grade_flag 
-            and self.global_tests_loaded 
-            and (self.autotest_delimiter in cell.source) 
+            is_grade_flag
+            and self.global_tests_loaded
+            and (self.autotest_delimiter in cell.source)
             and (self.success_code is not None)
         ):
             new_lines.append(self.success_code)
