@@ -89,13 +89,13 @@ class TestInstantiateTests(BaseTestPreprocessor):
         assert nb1['cells'][1]['source'] == nb2['cells'][1]['source']
 
     # test that autotest starts a kernel that uses the `path` metadata as working directory
-    def test_kernel_workingdir(self, preprocessor, caplog):
+    # with the right path, the kernel should load the file
+    def test_kernel_right_workingdir(self, preprocessor, caplog):
         sol_cell = create_autotest_solution_cell()
         test_cell = create_autotest_test_cell()
         load_cell = create_file_loader_cell('grades.csv')
         test_cell.metadata['nbgrader'] = {'grade': True}
 
-        # with the right path, the kernel should load the file
         nb = new_notebook()
         nb.metadata['kernelspec'] = {
             "name": "python3"
@@ -108,7 +108,14 @@ class TestInstantiateTests(BaseTestPreprocessor):
         }
         nb, resources = preprocessor.preprocess(nb, resources)
 
-        # without the right path, the kernel should report an error
+    # test that autotest starts a kernel that uses the `path` metadata as working directory
+    # without the right path, the kernel should report an error
+    def test_kernel_wrong_workingdir(self, preprocessor, caplog):
+        sol_cell = create_autotest_solution_cell()
+        test_cell = create_autotest_test_cell()
+        load_cell = create_file_loader_cell('grades.csv')
+        test_cell.metadata['nbgrader'] = {'grade': True}
+
         nb = new_notebook()
         nb.metadata['kernelspec'] = {
             "name": "python3"
@@ -125,6 +132,7 @@ class TestInstantiateTests(BaseTestPreprocessor):
         shutil.copyfile('nbgrader/docs/source/user_guide/autotests.yml', 'nbgrader/docs/source/user_guide/source/autotests.yml')
         with pytest.raises(Exception):
             nb, resources = preprocessor.preprocess(nb, resources)
+        # remove the temporary resource
         os.remove('nbgrader/docs/source/user_guide/source/autotests.yml')
 
         assert "FileNotFoundError" in caplog.text
