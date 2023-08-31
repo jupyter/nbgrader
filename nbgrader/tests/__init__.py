@@ -266,3 +266,11 @@ def create_autotest_test_cell():
     """
     cell = new_code_cell(source=source)
     return cell
+
+def create_file_loader_cell(filename):
+    source = f"""
+    with open('{filename}', 'r') as f:
+        tmp = f.read()
+    """
+    cell = create_regular_cell(source, 'code')
+    return cell
