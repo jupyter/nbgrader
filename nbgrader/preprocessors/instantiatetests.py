@@ -5,9 +5,9 @@ import re
 from .. import utils
 from traitlets import Bool, List, Integer, Unicode, Dict, Callable
 from textwrap import dedent
-import secrets
 import asyncio
 import inspect
+import hashlib
 import typing as t
 from nbformat import NotebookNode
 from queue import Empty
@@ -161,6 +161,11 @@ class InstantiateTests(NbGraderPreprocessor):
         # get the comment string for this language
         comment_str = self.comment_strs[resources["kernel_name"]]
 
+        # seed the salt generator for this cell 
+        # avoid actual random seeds so that release versions are consistent across
+        # calls to nbgrader generate_assignment
+        salt_int = int(hashlib.sha256((cell.source+str(index)).encode('utf-8')).hexdigest(), 16) % 10**6
+        
         # split the code lines into separate strings
         lines = cell.source.split("\n")
 
@@ -240,9 +245,10 @@ class InstantiateTests(NbGraderPreprocessor):
             for snippet in snippets:
                 self.log.debug('Running autotest generation for snippet %s', snippet)
 
-                # create a random salt for this test
+                # create a salt for this test
                 if use_hash:
-                    salt = secrets.token_hex(8)
+                    salt_int += 1
+                    salt = hex(salt_int)
                     self.log.debug('Using salt: %s', salt)
                 else:
                     salt = None
