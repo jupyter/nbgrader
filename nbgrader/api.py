@@ -9,7 +9,7 @@ from sqlalchemy import (create_engine, ForeignKey, Column, String, Text,
                         DateTime, Interval, Float, Enum, UniqueConstraint,
                         Boolean, inspect, text)
 from sqlalchemy.orm import (sessionmaker, scoped_session, relationship,
-                            column_property, DeclarativeBase)
+                            column_property, declarative_base)
 from sqlalchemy.orm.exc import NoResultFound, FlushError
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.exc import IntegrityError, StatementError
@@ -25,8 +25,7 @@ from typing import List, Any, Optional, Union
 from .auth import Authenticator
 
 
-class Base(DeclarativeBase):
-    pass
+Base = declarative_base()
 
 
 def new_uuid() -> str:
