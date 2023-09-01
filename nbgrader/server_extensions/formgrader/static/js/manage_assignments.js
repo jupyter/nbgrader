@@ -34,7 +34,6 @@ var AssignmentUI = Backbone.View.extend({
         this.listenTo(this.model, "request", this.animateSaving);
         this.listenTo(this.model, "sync", this.closeModal);
 
-        this.is_lab = options.is_lab || false;
         this.render();
     },
 
@@ -102,17 +101,17 @@ var AssignmentUI = Backbone.View.extend({
         var name = this.model.get("name")
         this.$name.attr("data-order", name);
 
-        /* Append link with :
-         *     - href if this is a Notebook<7 environment
-         *     - click listener to send message to iframe parent if this is Jupyter Lab environment
-         */
+        // Append link with a listener to send message to iframe parent.
+        // NOTE: the formgrade UI is embedded in an iframe.
         this.$name.append($("<a/>")
             .text(name)
-            .attr("target", self.is_lab ? undefined : "_blank")
-            .attr("href", self.is_lab ? undefined : base_url + "/tree/" + url_prefix + "/" + this.model.get("source_path"))
-            .click(self.is_lab ? function(){
-                window.parent.postMessage(jlab_go_to_path(url_prefix + "/" + this_assignment.model.get("source_path")), '*');
-            } : undefined)
+            .attr("href", "#")
+            .click(function() {
+                window.parent.postMessage(
+                    jlab_go_to_path(url_prefix + "/" + this_assignment.model.get("source_path")),
+                    '*'
+                );
+            })
         );
 
         // duedate
@@ -141,7 +140,9 @@ var AssignmentUI = Backbone.View.extend({
             .click(_.bind(this.openModal, this))
             .append($("<span/>")
                 .addClass("glyphicon glyphicon-pencil")
-                .attr("aria-hidden", "true")));
+                .attr("aria-hidden", "true")
+            )
+        );
 
         // generate student version
         this.$assign.append($("<a/>")
@@ -149,24 +150,28 @@ var AssignmentUI = Backbone.View.extend({
             .click(_.bind(this.assign, this))
             .append($("<span/>")
                 .addClass("glyphicon glyphicon-education")
-                .attr("aria-hidden", "true")));
+                .attr("aria-hidden", "true")
+            )
+        );
 
         // preview student version
         var release_path = this.model.get("release_path");
         if (release_path) {
-            /* Append link with :
-             *     - href if this is a Notebook<7 environment
-             *     - click listener to send message to iframe parent if this is Jupyter Lab environment
-             */
+            // Append link with a listener to send message to iframe parent.
+            // NOTE: the formgrade UI is embedded in an iframe.
             this.$preview.append($("<a/>")
-                .attr("target", self.is_lab ? undefined : "_blank")
-                .attr("href", self.is_lab ? undefined : base_url + "/tree/" + url_prefix + "/" + release_path)
-                .click(self.is_lab ? function(){
-                        window.parent.postMessage(jlab_go_to_path(url_prefix + "/" + release_path), '*');
-                    } : undefined)
+                .attr("href", "#")
+                .click(function() {
+                    window.parent.postMessage(
+                        jlab_go_to_path(url_prefix + "/" + release_path),
+                        '*'
+                    );
+                })
                 .append($("<span/>")
                     .addClass("glyphicon glyphicon-search")
-                    .attr("aria-hidden", "true")));
+                    .attr("aria-hidden", "true")
+                )
+            );
         }
 
         // release
@@ -178,14 +183,18 @@ var AssignmentUI = Backbone.View.extend({
                     .click(_.bind(this.release, this))
                     .append($("<span/>")
                         .addClass("glyphicon glyphicon-cloud-upload")
-                        .attr("aria-hidden", "true")));
+                        .attr("aria-hidden", "true")
+                    )
+                );
             } else {
                 this.$release.append($("<a/>")
                     .attr("href", "#")
                     .click(_.bind(this.unrelease, this))
                     .append($("<span/>")
                         .addClass("glyphicon glyphicon-remove")
-                        .attr("aria-hidden", "true")));
+                        .attr("aria-hidden", "true")
+                    )
+                );
             }
         }
 
@@ -197,7 +206,9 @@ var AssignmentUI = Backbone.View.extend({
                     .click(_.bind(this.collect, this))
                     .append($("<span/>")
                         .addClass("glyphicon glyphicon-cloud-download")
-                        .attr("aria-hidden", "true")));
+                        .attr("aria-hidden", "true")
+                    )
+                );
             }
         }
 
@@ -209,27 +220,32 @@ var AssignmentUI = Backbone.View.extend({
         } else {
             this.$num_submissions.append($("<a/>")
                 .attr("href", base_url + "/formgrader/manage_submissions/" + this.model.get("name"))
-                .text(num_submissions));
+                .text(num_submissions)
+            );
         }
 
         // generate feedback
         if (num_submissions > 0) {
             this.$generate_feedback.append($("<a/>")
-		.attr("href", "#")
+                .attr("href", "#")
                 .click(_.bind(this.generate_feedback, this))
-		.append($("<span/>")
-		   .addClass("glyphicon glyphicon-comment")
-                   .attr("aria-hidden", "true")));
+                .append($("<span/>")
+                    .addClass("glyphicon glyphicon-comment")
+                    .attr("aria-hidden", "true")
+                )
+            );
         }
 
         //  feedback
         if (num_submissions > 0) {
             this.$release_feedback.append($("<a/>")
-		.attr("href", "#")
+                .attr("href", "#")
                 .click(_.bind(this.release_feedback, this))
-		.append($("<span/>")
-		   .addClass("glyphicon glyphicon-envelope")
-                   .attr("aria-hidden", "true")));
+                .append($("<span/>")
+                    .addClass("glyphicon glyphicon-envelope")
+                    .attr("aria-hidden", "true")
+                )
+            );
         }
 
     },
@@ -579,7 +595,7 @@ var createAssignmentModal = function () {
     modal = createModal("add-assignment-modal", "Add New Assignment", body, footer);
 };
 
-var loadAssignments = function (is_lab=false) {
+var loadAssignments = function () {
     var tbl = $("#main-table");
 
     models = new Assignments();
@@ -591,8 +607,7 @@ var loadAssignments = function (is_lab=false) {
             models.each(function (model) {
                 var view = new AssignmentUI({
                     "model": model,
-                    "el": insertRow(tbl),
-                    "is_lab": is_lab
+                    "el": insertRow(tbl)
                 });
                 views.push(view);
             });
@@ -605,8 +620,7 @@ var loadAssignments = function (is_lab=false) {
 var models = undefined;
 var views = [];
 
-var is_lab = is_lab || false;
 
 $(window).on('load', function () {
-    loadAssignments(is_lab);
+    loadAssignments();
 });
