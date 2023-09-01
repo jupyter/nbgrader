@@ -109,11 +109,7 @@ def load_jupyter_server_extension(nbapp):
 
     formgrader = FormgradeExtension(parent=nbapp)
 
-    # compatibility between notebook.notebookapp.NotebookApp and jupyter_server.serverapp.ServerApp
-    if nbapp.name == 'jupyter-notebook':
-        formgrader.root_dir = nbapp.notebook_dir
-    else:
-        formgrader.root_dir = nbapp.root_dir
+    formgrader.root_dir = nbapp.root_dir
 
     formgrader.log = nbapp.log
     formgrader.initialize([])

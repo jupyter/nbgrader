@@ -139,11 +139,7 @@ def load_jupyter_server_extension(nbapp):
     webapp = nbapp.web_app
     base_url = webapp.settings['base_url']
 
-    # compatibility between notebook.notebookapp.NotebookApp and jupyter_server.serverapp.ServerApp
-    if nbapp.name == 'jupyter-notebook':
-        webapp.settings['root_dir'] = nbapp.notebook_dir
-    else:
-        webapp.settings['root_dir'] = nbapp.root_dir
+    webapp.settings['root_dir'] = nbapp.root_dir
 
     webapp.add_handlers(".*$", [
         (ujoin(base_url, pat), handler)

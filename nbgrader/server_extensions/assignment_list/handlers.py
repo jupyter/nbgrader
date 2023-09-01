@@ -383,11 +383,7 @@ def load_jupyter_server_extension(nbapp):
     webapp = nbapp.web_app
     webapp.settings['assignment_list_manager'] = AssignmentList(parent=nbapp)
 
-    # compatibility between notebook.notebookapp.NotebookApp and jupyter_server.serverapp.ServerApp
-    if nbapp.name == 'jupyter-notebook':
-        webapp.settings['assignment_list_manager'].root_dir = nbapp.notebook_dir
-    else:
-        webapp.settings['assignment_list_manager'].root_dir = nbapp.root_dir
+    webapp.settings['assignment_list_manager'].root_dir = nbapp.root_dir
 
     base_url = webapp.settings['base_url']
     webapp.add_handlers(".*$", [
