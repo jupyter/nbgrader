@@ -9,7 +9,7 @@ export class CourseListWidget extends Widget {
   courselist: CourseList;
   app: JupyterFrontEnd;
 
-  constructor(app: JupyterFrontEnd) {
+  constructor(app: JupyterFrontEnd, isNotebook: boolean) {
     super();
     this.app = app;
     var maindiv = document.createElement('div') as HTMLDivElement;
@@ -55,7 +55,7 @@ export class CourseListWidget extends Widget {
     formgraderlist.classList.add('list_container');
 
     // further initialization of formgraderlist is in here
-    this.courselist = new CourseList(formgraderlist, this.app);
+    this.courselist = new CourseList(formgraderlist, this.app, isNotebook);
 
     panelbody.appendChild(formgraderlist);
     panel.appendChild(panelbody);

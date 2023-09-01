@@ -65,8 +65,8 @@ c.JupyterHub.services = [
         ],
         'user': 'grader-course101',
         'environment': {
-            # specify formgrader as default landing page
-            'JUPYTERHUB_DEFAULT_URL': '/formgrader'
+            # specify lab as default landing page
+            'JUPYTERHUB_DEFAULT_URL': '/lab'
         },
         'cwd': '/home/grader-course101',
     }

@@ -79,7 +79,7 @@ class CourseListHandler(JupyterHandler):
         if status:
             raise gen.Return([{
                 'course_id': coursedir.course_id,
-                'url': base_url + '/formgrader',
+                'url': base_url + '/lab',
                 'kind': 'local'
             }])
 
@@ -102,7 +102,7 @@ class CourseListHandler(JupyterHandler):
         if not coursedir.course_id:
             raise gen.Return([])
 
-        url = self.get_base_url() + "/services/" + coursedir.course_id + "/formgrader"
+        url = self.get_base_url() + "/services/" + coursedir.course_id
         auth = get_jupyterhub_authorization()
         http_client = AsyncHTTPClient()
         try:
@@ -113,7 +113,7 @@ class CourseListHandler(JupyterHandler):
 
         courses = [{
             'course_id': coursedir.course_id,
-            'url': url,
+            'url': url + "/lab",
             'kind': 'jupyterhub'
         }]
         raise gen.Return(courses)
@@ -156,7 +156,7 @@ class CourseListHandler(JupyterHandler):
             service = services[course]
             courses.append({
                 'course_id': course,
-                'url': self.get_base_url() + service['prefix'].rstrip('/') + "/formgrader",
+                'url': self.get_base_url() + service['prefix'].rstrip('/') + "/lab",
                 'kind': 'jupyterhub'
             })
 

@@ -196,7 +196,7 @@ const courseListExtension: JupyterFrontEndPlugin<void> = {
       label: 'Course List',
       execute: () => {
         if (!widget || widget.isDisposed) {
-          const content = new CourseListWidget(app);
+          const content = new CourseListWidget(app, notebookTree !== null);
           widget = new MainAreaWidget({content});
           widget.id = 'nbgrader-course-list';
           widget.addClass('nbgrader-mainarea-widget');
