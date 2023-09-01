@@ -94,6 +94,97 @@ class TestNbGraderAutograde(BaseTestApp):
             assert comment1.comment == None
             assert comment2.comment == None
 
+
+    def test_grade_autotest(self, db, course_dir):
+        """Can files including autotest commands be graded?"""
+        run_nbgrader(["db", "assignment", "add", "ps1", "--db", db, "--duedate", "2015-02-02 14:58:23.948203 America/Los_Angeles"])
+        run_nbgrader(["db", "student", "add", "foo", "--db", db])
+        run_nbgrader(["db", "student", "add", "bar", "--db", db])
+
+        self._copy_file(join("files", "autotest-simple.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
+        self._copy_file(join("files", "autotests.yml"), join(course_dir, "autotests.yml"))
+        run_nbgrader(["generate_assignment", "ps1", "--db", db])
+
+        self._copy_file(join("files", "autotest-simple-unchanged.ipynb"), join(course_dir, "submitted", "foo", "ps1", "p1.ipynb"))
+        self._copy_file(join("files", "autotest-simple-changed.ipynb"), join(course_dir, "submitted", "bar", "ps1", "p1.ipynb"))
+        run_nbgrader(["autograde", "ps1", "--db", db])
+
+        assert os.path.isfile(join(course_dir, "autograded", "foo", "ps1", "p1.ipynb"))
+        assert not os.path.isfile(join(course_dir, "autograded", "foo", "ps1", "timestamp.txt"))
+        assert os.path.isfile(join(course_dir, "autograded", "bar", "ps1", "p1.ipynb"))
+        assert not os.path.isfile(join(course_dir, "autograded", "bar", "ps1", "timestamp.txt"))
+
+        with Gradebook(db) as gb:
+            notebook = gb.find_submission_notebook("p1", "ps1", "foo")
+            assert notebook.score == 0
+            assert notebook.max_score == 1
+            assert notebook.needs_manual_grade == False
+
+            notebook = gb.find_submission_notebook("p1", "ps1", "bar")
+            assert notebook.score == 1
+            assert notebook.max_score == 1
+            assert notebook.needs_manual_grade == False
+
+    def test_grade_hashed_autotest(self, db, course_dir):
+        """Can files including hashed autotest commands be graded?"""
+        run_nbgrader(["db", "assignment", "add", "ps1", "--db", db, "--duedate", "2015-02-02 14:58:23.948203 America/Los_Angeles"])
+        run_nbgrader(["db", "student", "add", "foo", "--db", db])
+        run_nbgrader(["db", "student", "add", "bar", "--db", db])
+
+        self._copy_file(join("files", "autotest-hashed.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
+        self._copy_file(join("files", "autotests.yml"), join(course_dir, "autotests.yml"))
+        run_nbgrader(["generate_assignment", "ps1", "--db", db])
+
+        self._copy_file(join("files", "autotest-hashed-unchanged.ipynb"), join(course_dir, "submitted", "foo", "ps1", "p1.ipynb"))
+        self._copy_file(join("files", "autotest-hashed-changed.ipynb"), join(course_dir, "submitted", "bar", "ps1", "p1.ipynb"))
+        run_nbgrader(["autograde", "ps1", "--db", db])
+
+        assert os.path.isfile(join(course_dir, "autograded", "foo", "ps1", "p1.ipynb"))
+        assert not os.path.isfile(join(course_dir, "autograded", "foo", "ps1", "timestamp.txt"))
+        assert os.path.isfile(join(course_dir, "autograded", "bar", "ps1", "p1.ipynb"))
+        assert not os.path.isfile(join(course_dir, "autograded", "bar", "ps1", "timestamp.txt"))
+
+        with Gradebook(db) as gb:
+            notebook = gb.find_submission_notebook("p1", "ps1", "foo")
+            assert notebook.score == 0
+            assert notebook.max_score == 1
+            assert notebook.needs_manual_grade == False
+
+            notebook = gb.find_submission_notebook("p1", "ps1", "bar")
+            assert notebook.score == 1
+            assert notebook.max_score == 1
+            assert notebook.needs_manual_grade == False
+
+    def test_grade_complex_autotest(self, db, course_dir):
+        """Can files including complicated autotest commands be graded?"""
+        run_nbgrader(["db", "assignment", "add", "ps1", "--db", db, "--duedate", "2015-02-02 14:58:23.948203 America/Los_Angeles"])
+        run_nbgrader(["db", "student", "add", "foo", "--db", db])
+        run_nbgrader(["db", "student", "add", "bar", "--db", db])
+
+        self._copy_file(join("files", "autotest-multi.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
+        self._copy_file(join("files", "autotests.yml"), join(course_dir, "autotests.yml"))
+        run_nbgrader(["generate_assignment", "ps1", "--db", db])
+
+        self._copy_file(join("files", "autotest-multi-unchanged.ipynb"), join(course_dir, "submitted", "foo", "ps1", "p1.ipynb"))
+        self._copy_file(join("files", "autotest-multi-changed.ipynb"), join(course_dir, "submitted", "bar", "ps1", "p1.ipynb"))
+        run_nbgrader(["autograde", "ps1", "--db", db])
+
+        assert os.path.isfile(join(course_dir, "autograded", "foo", "ps1", "p1.ipynb"))
+        assert not os.path.isfile(join(course_dir, "autograded", "foo", "ps1", "timestamp.txt"))
+        assert os.path.isfile(join(course_dir, "autograded", "bar", "ps1", "p1.ipynb"))
+        assert not os.path.isfile(join(course_dir, "autograded", "bar", "ps1", "timestamp.txt"))
+
+        with Gradebook(db) as gb:
+            notebook = gb.find_submission_notebook("p1", "ps1", "foo")
+            assert notebook.score == 0
+            assert notebook.max_score == 4
+            assert notebook.needs_manual_grade == False
+
+            notebook = gb.find_submission_notebook("p1", "ps1", "bar")
+            assert notebook.score == 3
+            assert notebook.max_score == 4
+            assert notebook.needs_manual_grade == False
+
     def test_showtraceback_exploit(self, db, course_dir):
         """Can students exploit showtraceback to hide errors from all future cell outputs to receive free points for incorrect cells?"""
         run_nbgrader(["db", "assignment", "add", "ps1", "--db", db, "--duedate", "2015-02-02 14:58:23.948203 America/Los_Angeles"])
@@ -841,6 +932,95 @@ class TestNbGraderAutograde(BaseTestApp):
             submission = gb.find_submission("ps1", "foo")
             nb1 = submission.notebooks[0]
             assert nb1.score == 1.5
+
+    def test_hidden_tests_autotest(self, db, course_dir):
+        """Can files with hidden autotests be graded?"""
+        run_nbgrader(["db", "assignment", "add", "ps1", "--db", db, "--duedate",
+                      "2015-02-02 14:58:23.948203 America/Los_Angeles"])
+        run_nbgrader(["db", "student", "add", "foo", "--db", db])
+        run_nbgrader(["db", "student", "add", "bar", "--db", db])
+        run_nbgrader(["db", "student", "add", "baz", "--db", db])
+        with open("nbgrader_config.py", "a") as fh:
+            fh.write("""c.ClearSolutions.code_stub=dict(python="# YOUR CODE HERE")""")
+
+        self._copy_file(join("files", "autotest-hidden.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
+        self._copy_file(join("files", "autotests.yml"), join(course_dir, "autotests.yml"))
+        run_nbgrader(["generate_assignment", "ps1", "--db", db])
+
+        self._copy_file(join("files", "autotest-hidden-unchanged.ipynb"), join(course_dir, "submitted", "foo", "ps1", "p1.ipynb"))
+        self._copy_file(join("files", "autotest-hidden-changed-wrong.ipynb"), join(course_dir, "submitted", "bar", "ps1", "p1.ipynb"))
+        self._copy_file(join("files", "autotest-hidden-changed-right.ipynb"), join(course_dir, "submitted", "baz", "ps1", "p1.ipynb"))
+
+        # make sure submitted validates for both bar and baz (should only fail on hidden tests), but not foo (missing any input and visible type checks will fail)
+        output = run_nbgrader([
+            "validate", join(course_dir, "submitted", "foo", "ps1", "p1.ipynb"),
+        ], stdout=True)
+        assert output.splitlines()[0] == (
+            "VALIDATION FAILED ON 1 CELL(S)! If you submit your assignment "
+            "as it is, you WILL NOT"
+        )
+        output = run_nbgrader([
+            "validate", join(course_dir, "submitted", "bar", "ps1", "p1.ipynb")
+        ], stdout=True)
+        assert output.strip() == "Success! Your notebook passes all the tests."
+
+        output = run_nbgrader([
+            "validate", join(course_dir, "submitted", "baz", "ps1", "p1.ipynb")
+        ], stdout=True)
+        assert output.strip() == "Success! Your notebook passes all the tests."
+
+        # autograde
+        run_nbgrader(["autograde", "ps1", "--db", db])
+        assert os.path.exists(join(course_dir, "autograded", "foo", "ps1", "p1.ipynb"))
+        assert os.path.exists(join(course_dir, "autograded", "bar", "ps1", "p1.ipynb"))
+        assert os.path.exists(join(course_dir, "autograded", "baz", "ps1", "p1.ipynb"))
+
+        # make sure hidden tests are placed back in autograded
+        sub_nb = join(course_dir, "autograded", "foo", "ps1", "p1.ipynb")
+        with io.open(sub_nb, mode='r', encoding='utf-8') as nb:
+            source = nb.read()
+        assert "BEGIN HIDDEN TESTS" in source
+        sub_nb = join(course_dir, "autograded", "bar", "ps1", "p1.ipynb")
+        with io.open(sub_nb, mode='r', encoding='utf-8') as nb:
+            source = nb.read()
+        assert "BEGIN HIDDEN TESTS" in source
+        sub_nb = join(course_dir, "autograded", "baz", "ps1", "p1.ipynb")
+        with io.open(sub_nb, mode='r', encoding='utf-8') as nb:
+            source = nb.read()
+        assert "BEGIN HIDDEN TESTS" in source
+
+        # make sure autograded for foo does not validate, should fail on visible and hidden tests
+        output = run_nbgrader([
+            "validate", join(course_dir, "autograded", "foo", "ps1", "p1.ipynb"),
+        ], stdout=True)
+        assert output.splitlines()[0] == (
+            "VALIDATION FAILED ON 1 CELL(S)! If you submit your assignment "
+            "as it is, you WILL NOT"
+        )
+        # make sure autograded for bar does not, should fail on hidden tests
+        output = run_nbgrader([
+            "validate", join(course_dir, "autograded", "bar", "ps1", "p1.ipynb"),
+        ], stdout=True)
+        assert output.splitlines()[0] == (
+            "VALIDATION FAILED ON 1 CELL(S)! If you submit your assignment "
+            "as it is, you WILL NOT"
+        )
+        # make sure autograded for bar validates, should succeed on hidden tests
+        output = run_nbgrader([
+            "validate", join(course_dir, "autograded", "baz", "ps1", "p1.ipynb"),
+        ], stdout=True)
+        assert output.strip() == "Success! Your notebook passes all the tests."
+
+        with Gradebook(db) as gb:
+            submission = gb.find_submission("ps1", "foo")
+            nb1 = submission.notebooks[0]
+            assert nb1.score == 0
+            submission = gb.find_submission("ps1", "bar")
+            nb1 = submission.notebooks[0]
+            assert nb1.score == 0
+            submission = gb.find_submission("ps1", "baz")
+            nb1 = submission.notebooks[0]
+            assert nb1.score == 1
 
     def test_handle_failure(self, course_dir):
         run_nbgrader(["db", "assignment", "add", "ps1", "--duedate",

@@ -8,6 +8,7 @@ from .savecells import SaveCells
 from .overwritecells import OverwriteCells
 from .checkcellmetadata import CheckCellMetadata
 from .execute import Execute
+from .instantiatetests import InstantiateTests
 from .getgrades import GetGrades
 from .clearoutput import ClearOutput
 from .limitoutput import LimitOutput
@@ -28,6 +29,7 @@ __all__ = [
     "OverwriteCells",
     "CheckCellMetadata",
     "Execute",
+    "InstantiateTests",
     "GetGrades",
     "ClearOutput",
     "LimitOutput",

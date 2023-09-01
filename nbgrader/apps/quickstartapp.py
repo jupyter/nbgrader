@@ -40,6 +40,15 @@ flags = {
             """
         )
     ),
+    'autotest': (
+        {'QuickStartApp': {'autotest': True}},
+        dedent(
+            """
+            Create notebook assignments that have examples of automatic test generation via
+            ### AUTOTEST and ### HASHED AUTOTEST statements.
+            """
+        )
+    ),
 }
 
 class QuickStartApp(NbGrader):
@@ -72,6 +81,8 @@ class QuickStartApp(NbGrader):
         """
 
     force = Bool(False, help="Whether to overwrite existing files").tag(config=True)
+
+    autotest = Bool(False, help="Whether to use automatic test generation in example files").tag(config=True)
 
     @default("classes")
     def _classes_default(self):
@@ -115,12 +126,20 @@ class QuickStartApp(NbGrader):
         if not os.path.isdir(course_path):
             os.mkdir(course_path)
 
-        # populating it with an example
+        # populate it with an example
         self.log.info("Copying example from the user guide...")
         example = os.path.abspath(os.path.join(
             os.path.dirname(__file__), '..', 'docs', 'source', 'user_guide', 'source'))
-        ignore_html = shutil.ignore_patterns("*.html")
-        shutil.copytree(example, os.path.join(course_path, "source"), ignore=ignore_html)
+        if self.autotest:
+            tests_file_path = os.path.abspath(os.path.join(
+                os.path.dirname(__file__), '..', 'docs', 'source', 'user_guide', 'autotests.yml'))
+            shutil.copyfile(tests_file_path, os.path.join(course_path, 'autotests.yml'))
+            ignored_files = shutil.ignore_patterns("*.html", "ps1")
+            shutil.copytree(example, os.path.join(course_path, "source"), ignore=ignored_files)
+            os.rename(os.path.join(course_path, "source", "ps1_autotest"), os.path.join(course_path, "source", "ps1"))
+        else:
+            ignored_files = shutil.ignore_patterns("*.html", "autotests.yml", "ps1_autotest")
+            shutil.copytree(example, os.path.join(course_path, "source"), ignore=ignored_files)
 
         # create the config file
         self.log.info("Generating example config file...")

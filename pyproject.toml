@@ -47,6 +47,7 @@ dependencies = [
     "rapidfuzz>=1.8",
     "requests>=2.26",
     "sqlalchemy>=1.4,<3",
+    "PyYAML>=6.0",
 ]
 version = "0.9.0a1"
 
