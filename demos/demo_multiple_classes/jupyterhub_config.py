@@ -101,8 +101,8 @@ c.JupyterHub.services = [
         'user': 'grader-course101',
         'cwd': '/home/grader-course101',
         'environment': {
-            # specify formgrader as default landing page
-            'JUPYTERHUB_DEFAULT_URL': '/formgrader'
+            # specify lab as default landing page
+            'JUPYTERHUB_DEFAULT_URL': '/lab'
         },
         'api_token': '{{course101_token}}',
     },
@@ -116,8 +116,8 @@ c.JupyterHub.services = [
         'user': 'grader-course123',
         'cwd': '/home/grader-course123',
         'environment': {
-            # specify formgrader as default landing page
-            'JUPYTERHUB_DEFAULT_URL': '/formgrader'
+            # specify lab as default landing page
+            'JUPYTERHUB_DEFAULT_URL': '/lab'
         },
         'api_token': '{{course123_token}}',
     },

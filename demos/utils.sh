@@ -42,10 +42,6 @@ setup_nbgrader () {
     ${runas} mkdir -p "${HOME}/.jupyter"
     ${runas} cp "${config}" "${HOME}/.jupyter/nbgrader_config.py"
     ${runas} chown "${USER}:${USER}" "${HOME}/.jupyter/nbgrader_config.py"
-
-    cp "/root/formgrader_workspace.json" "${HOME}/formgrader_workspace.json"
-    chown "${USER}:${USER}" "${HOME}/formgrader_workspace.json"
-    ${runas} jupyter lab workspaces import "${HOME}/formgrader_workspace.json"
 }
 
 setup_jupyterhub () {

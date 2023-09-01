@@ -41,7 +41,7 @@ export async function requestAPI<T>(
   return data;
 }
 
-function createElementFromCourse(data: any, app: JupyterFrontEnd) {
+function createElementFromCourse(data: any, app: JupyterFrontEnd, isNotebook:boolean) {
     var element = document.createElement('div') as HTMLDivElement;
     element.classList.add('list_item','row');
 
@@ -54,16 +54,18 @@ function createElementFromCourse(data: any, app: JupyterFrontEnd) {
     var anchor = document.createElement('a') as HTMLAnchorElement;
     anchor.href = '#';
     anchor.innerText = data['course_id'];
-
     if (data['kind'] == 'local') {
       anchor.href = '#';
       anchor.onclick = function() {
         app.commands.execute(commandIDs.openFormgrader, data);
       }
-    }
-    else {
+    } else {
       const url = data['url'] as string;
-      anchor.href = URLExt.join(url.replace(/formgrader$/, 'lab'), 'workspaces', 'formgrader');
+      if (isNotebook) {
+        anchor.href = URLExt.join(url.replace(/lab\/?$/, 'tree'));
+      } else {
+        anchor.href = url
+      }
       anchor.target = 'blank';
     }
 
@@ -85,9 +87,15 @@ export class CourseList {
     listerror: HTMLDivElement;
     listerrortext: HTMLDivElement;
     app: JupyterFrontEnd;
+    private _isNotebook: boolean;
 
-    constructor(public course_list_element: HTMLDivElement, app: JupyterFrontEnd) {
+    constructor(
+      public course_list_element: HTMLDivElement,
+      app: JupyterFrontEnd,
+      isNotebook: boolean
+    ) {
         this.app = app;
+        this._isNotebook = isNotebook;
         this.listplaceholder = document.createElement('div') as HTMLDivElement;
         this.listplaceholder.id = 'formgrader_list_placeholder';
         this.listplaceholder.classList.add('list_placeholder');
@@ -170,7 +178,9 @@ export class CourseList {
             this.listplaceholder.hidden = true;
         }
         for (var i=0; i<len; i++) {
-            this.course_list_element.appendChild(createElementFromCourse(data[i], this.app));
+            this.course_list_element.appendChild(
+              createElementFromCourse(data[i], this.app, this._isNotebook)
+            );
         }
 
     }
