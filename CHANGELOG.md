@@ -4,6 +4,27 @@ A summary of changes to nbgrader.
 
 <!-- <START NEW CHANGELOG ENTRY> -->
 
+## 0.8.5
+
+([Full Changelog](https://github.com/jupyter/nbgrader/compare/v0.8.4...7079e6af82abb4baeda4fcca4cbcab238cfe32d1))
+
+### Enhancements made
+
+- Add missing grade_cells before autograding [#1770](https://github.com/jupyter/nbgrader/pull/1770) ([@tuncbkose](https://github.com/tuncbkose))
+
+### Bugs fixed
+
+- Revert change breaking sqlalchemy 1.4.x [#1823](https://github.com/jupyter/nbgrader/pull/1823) ([@brichet](https://github.com/brichet))
+- Add missing grade_cells before autograding [#1770](https://github.com/jupyter/nbgrader/pull/1770) ([@tuncbkose](https://github.com/tuncbkose))
+
+### Contributors to this release
+
+([GitHub contributors page for this release](https://github.com/jupyter/nbgrader/graphs/contributors?from=2023-06-16&to=2023-09-04&type=c))
+
+[@brichet](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Abrichet+updated%3A2023-06-16..2023-09-04&type=Issues) | [@github-actions](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Agithub-actions+updated%3A2023-06-16..2023-09-04&type=Issues) | [@jtpio](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Ajtpio+updated%3A2023-06-16..2023-09-04&type=Issues) | [@lahwaacz](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Alahwaacz+updated%3A2023-06-16..2023-09-04&type=Issues) | [@meeseeksmachine](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Ameeseeksmachine+updated%3A2023-06-16..2023-09-04&type=Issues) | [@trevorcampbell](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Atrevorcampbell+updated%3A2023-06-16..2023-09-04&type=Issues)
+
+<!-- <END NEW CHANGELOG ENTRY> -->
+
 ## 0.8.4
 
 ([Full Changelog](https://github.com/jupyter/nbgrader/compare/v0.8.3...83a0429e32e5d146a638dfeef6cee9fad7f277ab))
@@ -23,8 +44,6 @@ A summary of changes to nbgrader.
 ([GitHub contributors page for this release](https://github.com/jupyter/nbgrader/graphs/contributors?from=2023-06-15&to=2023-06-16&type=c))
 
 [@brichet](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Abrichet+updated%3A2023-06-15..2023-06-16&type=Issues) | [@github-actions](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Agithub-actions+updated%3A2023-06-15..2023-06-16&type=Issues) | [@tuncbkose](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Atuncbkose+updated%3A2023-06-15..2023-06-16&type=Issues)
-
-<!-- <END NEW CHANGELOG ENTRY> -->
 
 ## 0.8.3
 
