@@ -2,6 +2,41 @@ A summary of changes to nbgrader.
 
 <!-- <START NEW CHANGELOG ENTRY> -->
 
+## 0.9.0
+
+([Full Changelog](https://github.com/jupyter/nbgrader/compare/v0.9.0a1...6db380039dab377157620516ae49eafcf7537fc8))
+
+### Enhancements made
+
+- New Feature: Auto-generation of test code [#1817](https://github.com/jupyter/nbgrader/pull/1817) ([@trevorcampbell](https://github.com/trevorcampbell))
+- Add missing grade_cells before autograding [#1770](https://github.com/jupyter/nbgrader/pull/1770) ([@tuncbkose](https://github.com/tuncbkose))
+
+### Bugs fixed
+
+- Revert change breaking sqlalchemy 1.4.x [#1823](https://github.com/jupyter/nbgrader/pull/1823) ([@brichet](https://github.com/brichet))
+- Fix jquery in documentation, and update documentation [#1819](https://github.com/jupyter/nbgrader/pull/1819) ([@brichet](https://github.com/brichet))
+- Add unused arg for docs/cleandocs [#1815](https://github.com/jupyter/nbgrader/pull/1815) ([@trevorcampbell](https://github.com/trevorcampbell))
+- Add missing grade_cells before autograding [#1770](https://github.com/jupyter/nbgrader/pull/1770) ([@tuncbkose](https://github.com/tuncbkose))
+
+### Maintenance and upkeep improvements
+
+- Clean remaining code relative to Notebook\<7 [#1824](https://github.com/jupyter/nbgrader/pull/1824) ([@brichet](https://github.com/brichet))
+- Update lab and notebook dependencies [#1812](https://github.com/jupyter/nbgrader/pull/1812) ([@brichet](https://github.com/brichet))
+
+### Documentation improvements
+
+- Fix jquery in documentation, and update documentation [#1819](https://github.com/jupyter/nbgrader/pull/1819) ([@brichet](https://github.com/brichet))
+- Add unused arg for docs/cleandocs [#1815](https://github.com/jupyter/nbgrader/pull/1815) ([@trevorcampbell](https://github.com/trevorcampbell))
+- Fix labextension plugin IDs in the docs [#1811](https://github.com/jupyter/nbgrader/pull/1811) ([@lahwaacz](https://github.com/lahwaacz))
+
+### Contributors to this release
+
+([GitHub contributors page for this release](https://github.com/jupyter/nbgrader/graphs/contributors?from=2023-07-21&to=2023-09-04&type=c))
+
+[@brichet](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Abrichet+updated%3A2023-07-21..2023-09-04&type=Issues) | [@github-actions](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Agithub-actions+updated%3A2023-07-21..2023-09-04&type=Issues) | [@lahwaacz](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Alahwaacz+updated%3A2023-07-21..2023-09-04&type=Issues) | [@trevorcampbell](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Atrevorcampbell+updated%3A2023-07-21..2023-09-04&type=Issues) | [@tuncbkose](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Atuncbkose+updated%3A2023-07-21..2023-09-04&type=Issues)
+
+<!-- <END NEW CHANGELOG ENTRY> -->
+
 ## 0.9.0a1
 
 ([Full Changelog](https://github.com/jupyter/nbgrader/compare/v0.9.0a0...2d7dc7c0b758c5f61a34b7cc4a0fd2f04d748bb4))
@@ -19,8 +54,6 @@ A summary of changes to nbgrader.
 ([GitHub contributors page for this release](https://github.com/jupyter/nbgrader/graphs/contributors?from=2023-07-18&to=2023-07-21&type=c))
 
 [@brichet](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Abrichet+updated%3A2023-07-18..2023-07-21&type=Issues) | [@github-actions](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Agithub-actions+updated%3A2023-07-18..2023-07-21&type=Issues)
-
-<!-- <END NEW CHANGELOG ENTRY> -->
 
 ## 0.9.0a0
 
