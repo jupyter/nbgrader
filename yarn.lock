@@ -492,20 +492,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@jupyter/ydoc@npm:^0.3.4":
-  version: 0.3.4
-  resolution: "@jupyter/ydoc@npm:0.3.4"
-  dependencies:
-    "@jupyterlab/nbformat": ^3.0.0 || ^4.0.0-alpha.15
-    "@lumino/coreutils": ^1.11.0 || ^2.0.0-alpha.6
-    "@lumino/disposable": ^1.10.0 || ^2.0.0-alpha.6
-    "@lumino/signaling": ^1.10.0 || ^2.0.0-alpha.6
-    y-protocols: ^1.0.5
-    yjs: ^13.5.40
-  checksum: edd14a01be6ceac437d3ebfb5f7a2d2c8eac60fec91e48d8d2ef2bef9f1423b4350c57dba25b3b043759ffb61b601a3815c1ea56532d1d707e3fbeb5df86b7e6
-  languageName: node
-  linkType: hard
-
 "@jupyter/ydoc@npm:^1.0.2":
   version: 1.0.2
   resolution: "@jupyter/ydoc@npm:1.0.2"
@@ -993,7 +979,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@jupyterlab/nbformat@npm:^3.0.0 || ^4.0.0-alpha.15, @jupyterlab/nbformat@npm:^3.0.0 || ^4.0.0-alpha.21 || ^4.0.0, @jupyterlab/nbformat@npm:^4.0.4, @jupyterlab/nbformat@npm:^4.0.5":
+"@jupyterlab/nbformat@npm:^3.0.0 || ^4.0.0-alpha.21 || ^4.0.0, @jupyterlab/nbformat@npm:^4.0.4, @jupyterlab/nbformat@npm:^4.0.5":
   version: 4.0.5
   resolution: "@jupyterlab/nbformat@npm:4.0.5"
   dependencies:
@@ -1423,7 +1409,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@lumino/coreutils@npm:^1.11.0 || ^2.0.0, @lumino/coreutils@npm:^1.11.0 || ^2.0.0-alpha.6, @lumino/coreutils@npm:^1.11.0 || ^2.1.2, @lumino/coreutils@npm:^2.1.1, @lumino/coreutils@npm:^2.1.2":
+"@lumino/coreutils@npm:^1.11.0 || ^2.0.0, @lumino/coreutils@npm:^1.11.0 || ^2.1.2, @lumino/coreutils@npm:^2.1.1, @lumino/coreutils@npm:^2.1.2":
   version: 2.1.2
   resolution: "@lumino/coreutils@npm:2.1.2"
   checksum: 7865317ac0676b448d108eb57ab5d8b2a17c101995c0f7a7106662d9fe6c859570104525f83ee3cda12ae2e326803372206d6f4c1f415a5b59e4158a7b81066f
@@ -1447,7 +1433,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@lumino/disposable@npm:^1.10.0 || ^2.0.0, @lumino/disposable@npm:^1.10.0 || ^2.0.0-alpha.6, @lumino/disposable@npm:^2.1.2":
+"@lumino/disposable@npm:^1.10.0 || ^2.0.0, @lumino/disposable@npm:^2.1.2":
   version: 2.1.2
   resolution: "@lumino/disposable@npm:2.1.2"
   dependencies:
@@ -1508,7 +1494,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@lumino/signaling@npm:^1.10.0 || ^2.0.0, @lumino/signaling@npm:^1.10.0 || ^2.0.0-alpha.6, @lumino/signaling@npm:^2.1.1, @lumino/signaling@npm:^2.1.2":
+"@lumino/signaling@npm:^1.10.0 || ^2.0.0, @lumino/signaling@npm:^2.1.1, @lumino/signaling@npm:^2.1.2":
   version: 2.1.2
   resolution: "@lumino/signaling@npm:2.1.2"
   dependencies:
@@ -5458,7 +5444,7 @@ __metadata:
   dependencies:
     "@jupyter-notebook/application": ^7.0.2
     "@jupyter-notebook/tree": ^7.0.2
-    "@jupyter/ydoc": ^0.3.4
+    "@jupyter/ydoc": ^1.0.2
     "@jupyterlab/application": ^4.0.4
     "@jupyterlab/apputils": ^4.1.4
     "@jupyterlab/builder": ^4.0.4
