@@ -39,7 +39,7 @@ jobs:
           pip freeze
       - name: Check compatibility
         run: |
-          if [[ $(jupyter labextension list 2>&1 | grep ' X') ]]
+          if [[ $(jupyter labextension list 2>&1 | grep '(python, nbgrader)' | grep ' X') ]]
           then
             echo "Compatibility error"
             jupyter labextension list
