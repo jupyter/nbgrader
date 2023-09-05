@@ -16,11 +16,8 @@ defaults:
 
 jobs:
   labextension-compatibility:
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-22.04
     timeout-minutes: 10
-    strategy:
-      matrix:
-        os: [windows-latest, ubuntu-22.04]
     steps:
       - uses: actions/checkout@v3
       - name: Install node
@@ -30,7 +27,7 @@ jobs:
       # NOTE: actions/setup-python@v2 can make use of a cache within the GitHub
       #       Action virtual environment and setup extremely fast. 3.9 isn't
       #       available in this cache as of November 2020.
-      - name: Install Python ${{ matrix.python }}
+      - name: Install Python
         uses: actions/setup-python@v2
       - name: Install package
         run: |
