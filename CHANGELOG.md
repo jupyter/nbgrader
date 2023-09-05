@@ -2,6 +2,22 @@ A summary of changes to nbgrader.
 
 <!-- <START NEW CHANGELOG ENTRY> -->
 
+## 0.9.1
+
+([Full Changelog](https://github.com/jupyter/nbgrader/compare/v0.9.0...7922f769c4b30e9fb9260a7b8a39e7365373f980))
+
+### Maintenance and upkeep improvements
+
+- Labextension compatibility [#1827](https://github.com/jupyter/nbgrader/pull/1827) ([@brichet](https://github.com/brichet))
+
+### Contributors to this release
+
+([GitHub contributors page for this release](https://github.com/jupyter/nbgrader/graphs/contributors?from=2023-09-04&to=2023-09-05&type=c))
+
+[@brichet](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Abrichet+updated%3A2023-09-04..2023-09-05&type=Issues)
+
+<!-- <END NEW CHANGELOG ENTRY> -->
+
 ## 0.9.0
 
 ([Full Changelog](https://github.com/jupyter/nbgrader/compare/v0.9.0a1...6db380039dab377157620516ae49eafcf7537fc8))
@@ -34,8 +50,6 @@ A summary of changes to nbgrader.
 ([GitHub contributors page for this release](https://github.com/jupyter/nbgrader/graphs/contributors?from=2023-07-21&to=2023-09-04&type=c))
 
 [@brichet](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Abrichet+updated%3A2023-07-21..2023-09-04&type=Issues) | [@github-actions](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Agithub-actions+updated%3A2023-07-21..2023-09-04&type=Issues) | [@lahwaacz](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Alahwaacz+updated%3A2023-07-21..2023-09-04&type=Issues) | [@trevorcampbell](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Atrevorcampbell+updated%3A2023-07-21..2023-09-04&type=Issues) | [@tuncbkose](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Atuncbkose+updated%3A2023-07-21..2023-09-04&type=Issues)
-
-<!-- <END NEW CHANGELOG ENTRY> -->
 
 ## 0.9.0a1
 
