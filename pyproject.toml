@@ -9,7 +9,7 @@ build-backend = "hatchling.build"
 name = "nbgrader"
 description = "A system for assigning and grading notebooks"
 readme = "README.md"
-requires-python = ">=3.7"
+requires-python = ">=3.8"
 authors = [
     { name = "Jupyter Development Team", email = "jupyter@googlegroups.com" },
 ]
