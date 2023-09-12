@@ -109,7 +109,6 @@ exclude = [
 
 [tool.hatch.build.targets.wheel.shared-data]
 "etc/jupyter/jupyter_server_config.d" = "etc/jupyter/jupyter_server_config.d"
-"etc/jupyter/jupyter_notebook_config.json" = "etc/jupyter/jupyter_notebook_config.json"
 "nbgrader/labextension/static" = "share/jupyter/labextensions/nbgrader/static"
 "install.json" = "share/jupyter/labextensions/nbgrader/install.json"
 "nbgrader/labextension/package.json" = "share/jupyter/labextensions/nbgrader/package.json"
