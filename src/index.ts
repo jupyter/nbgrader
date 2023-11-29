@@ -1,4 +1,4 @@
-import { ILabShell, ILayoutRestorer, JupyterFrontEnd, JupyterFrontEndPlugin } from "@jupyterlab/application";
+import { ILabShell, ILayoutRestorer, IRouter, JupyterFrontEnd, JupyterFrontEndPlugin } from "@jupyterlab/application";
 import { ICommandPalette, MainAreaWidget, WidgetTracker } from "@jupyterlab/apputils";
 import { PageConfig, URLExt } from "@jupyterlab/coreutils";
 import { IMainMenu } from '@jupyterlab/mainmenu';
@@ -239,11 +239,12 @@ const courseListExtension: JupyterFrontEndPlugin<void> = {
 const formgraderExtension: JupyterFrontEndPlugin<void> = {
   id: pluginIDs.formgrader,
   autoStart: true,
-  optional: [ILayoutRestorer, INotebookTree],
+  optional: [ILayoutRestorer, INotebookTree, IRouter],
   activate: (
     app: JupyterFrontEnd,
     restorer: ILayoutRestorer | null,
-    notebookTree: INotebookTree | null
+    notebookTree: INotebookTree | null,
+    router: IRouter | null
   ) => {
     // Declare a widget variable
     let widget: MainAreaWidget<FormgraderWidget>;
@@ -288,6 +289,15 @@ const formgraderExtension: JupyterFrontEndPlugin<void> = {
         app.shell.activateById(widget.id);
       }
     });
+
+    // Open formgrader from URL.
+    if (router) {
+      const formgraderPattern = /(\?|&)formgrader=true/;
+      router.register({
+        command: commandIDs.openFormgrader,
+        pattern: formgraderPattern
+      });
+    }
 
     // Restore the widget state
     if (restorer != null){

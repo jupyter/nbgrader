@@ -62,7 +62,7 @@ function createElementFromCourse(data: any, app: JupyterFrontEnd, isNotebook:boo
     } else {
       const url = data['url'] as string;
       if (isNotebook) {
-        anchor.href = URLExt.join(url.replace(/lab\/?$/, 'tree'));
+        anchor.href = url.replace(/\/lab(\/|\?)?/, '/tree$1');
       } else {
         anchor.href = url
       }
