@@ -178,7 +178,6 @@ const courseListExtension: JupyterFrontEndPlugin<void> = {
   id: pluginIDs.coursesList,
   autoStart: true,
   optional: [ILayoutRestorer, INotebookTree],
-
   activate: (
     app: JupyterFrontEnd,
     restorer: ILayoutRestorer | null,

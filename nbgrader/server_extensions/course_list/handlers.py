@@ -79,7 +79,7 @@ class CourseListHandler(JupyterHandler):
         if status:
             raise gen.Return([{
                 'course_id': coursedir.course_id,
-                'url': base_url + '/lab',
+                'url': base_url + '/formgrader',
                 'kind': 'local'
             }])
 
