@@ -46,6 +46,7 @@ dependencies = [
     "python-dateutil>=2.8",
     "rapidfuzz>=1.8",
     "requests>=2.26",
+    "setuptools",
     "sqlalchemy>=1.4,<3",
     "PyYAML>=6.0",
 ]
