@@ -79,7 +79,7 @@ class CourseListHandler(JupyterHandler):
         if status:
             raise gen.Return([{
                 'course_id': coursedir.course_id,
-                'url': base_url + '/lab',
+                'url': base_url + '/formgrader',
                 'kind': 'local'
             }])
 
@@ -113,7 +113,7 @@ class CourseListHandler(JupyterHandler):
 
         courses = [{
             'course_id': coursedir.course_id,
-            'url': url + "/lab",
+            'url': url + "/lab?formgrader=true",
             'kind': 'jupyterhub'
         }]
         raise gen.Return(courses)
@@ -156,7 +156,7 @@ class CourseListHandler(JupyterHandler):
             service = services[course]
             courses.append({
                 'course_id': course,
-                'url': self.get_base_url() + service['prefix'].rstrip('/') + "/lab",
+                'url': self.get_base_url() + service['prefix'].rstrip('/') + "/lab?formgrader=true",
                 'kind': 'jupyterhub'
             })
 
