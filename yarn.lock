@@ -6985,11 +6985,11 @@ __metadata:
   linkType: hard
 
 "systeminformation@npm:^5.8.6":
-  version: 5.18.15
-  resolution: "systeminformation@npm:5.18.15"
+  version: 5.21.18
+  resolution: "systeminformation@npm:5.21.18"
   bin:
     systeminformation: lib/cli.js
-  checksum: 15555c2c0fac29ca8146153c5b9ad146f5fe5ffe109f0cbc20d2d2b902f8b4d2cc57a1add233edc4914c13f984b96250a51ce351bd570a1ac6ba369ed3caa974
+  checksum: 8cd17aac622b97182c75e49905cd723efd997169bf397aa494bc343fc6c313a2447ba1dbc1545b6c4348d905f83d57784521301c02a4717814c85a0568030ee4
   conditions: (os=darwin | os=linux | os=win32 | os=freebsd | os=openbsd | os=netbsd | os=sunos | os=android)
   languageName: node
   linkType: hard
