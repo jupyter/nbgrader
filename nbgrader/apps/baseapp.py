@@ -163,9 +163,6 @@ class NbGrader(JupyterApp):
         # include all preprocessors that have configurable options
         _collect_configurables(preprocessors)
 
-        # include all the abstract exchange actions
-        _collect_configurables(exchange)
-
         # include all the default exchange actions
         _collect_configurables(exchange.default)
 
