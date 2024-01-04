@@ -1,5 +1,5 @@
 import datetime
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 
 from textwrap import dedent
 
@@ -17,6 +17,10 @@ class ExchangeError(Exception):
 
 
 class ABCExchange(LoggingConfigurable):
+    """
+    The abstract Exchange, which underlies every step in the exchange process.
+    """
+
     assignment_dir = Unicode(
         ".",
         help=dedent(
