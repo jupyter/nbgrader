@@ -3,6 +3,7 @@ import re
 import sys
 
 from tornado import web
+from traitlets.config.loader import Config
 
 from .base import BaseHandler, check_xsrf, check_notebook_dir
 from ...api import MissingEntry
@@ -16,8 +17,8 @@ class FormgraderHandler(BaseHandler):
         formgrader = self.settings['nbgrader_formgrader']
         path = self.get_argument('path', os.getcwd())
         path = os.path.abspath(path)
+        formgrader.config = Config()
         formgrader.config_dir = path
-        formgrader.load_config_file()
         formgrader.initialize([], root=path)
         self.redirect('/formgrader/manage_assignments/')
 
