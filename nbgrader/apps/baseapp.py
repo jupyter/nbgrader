@@ -313,10 +313,10 @@ class NbGrader(JupyterApp):
         format_excepthook(etype, evalue, tb)
 
     @catch_config_error
-    def initialize(self, argv: TypingList[str] = None) -> None:
+    def initialize(self, argv: TypingList[str] = None, root: str = '') -> None:
         self.update_config(self.build_extra_config())
         self.init_syspath()
-        self.coursedir = CourseDirectory(parent=self)
+        self.coursedir = CourseDirectory(parent=self, root=root)
         super(NbGrader, self).initialize(argv)
 
         # load config that is in the coursedir directory

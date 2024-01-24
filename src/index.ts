@@ -1,6 +1,7 @@
 import { ILabShell, ILayoutRestorer, IRouter, JupyterFrontEnd, JupyterFrontEndPlugin } from "@jupyterlab/application";
 import { ICommandPalette, MainAreaWidget, WidgetTracker } from "@jupyterlab/apputils";
 import { PageConfig, URLExt } from "@jupyterlab/coreutils";
+import { IDefaultFileBrowser } from "@jupyterlab/filebrowser";
 import { IMainMenu } from '@jupyterlab/mainmenu';
 import { INotebookTracker } from "@jupyterlab/notebook";
 import { ServerConnection } from "@jupyterlab/services";
@@ -33,6 +34,7 @@ export const commandIDs = {
   openAssignmentsList: 'nbgrader:open-assignment-list',
   openCoursesList: 'nbgrader:open-course-list',
   openFormgrader: 'nbgrader:open-formgrader',
+  openFormgraderLocal: 'nbgrader:open-formgrader-local',
   openCreateAssignment: 'nbgrader:open-create-assignment'
 }
 
@@ -75,6 +77,7 @@ const availableExtensionsManager: JupyterFrontEndPlugin<void> = {
       nbgraderMenu.addItem({ command: commandIDs.openAssignmentsList });
       nbgraderMenu.addItem({ command: commandIDs.openCoursesList });
       nbgraderMenu.addItem({ command: commandIDs.openFormgrader });
+      nbgraderMenu.addItem({ command: commandIDs.openFormgraderLocal });
 
       if (palette) {
         palette.addItem({
@@ -87,6 +90,10 @@ const availableExtensionsManager: JupyterFrontEndPlugin<void> = {
         });
         palette.addItem({
           command: commandIDs.openFormgrader,
+          category: 'nbgrader'
+        });
+        palette.addItem({
+          command: commandIDs.openFormgraderLocal,
           category: 'nbgrader'
         });
       }
@@ -239,9 +246,10 @@ const courseListExtension: JupyterFrontEndPlugin<void> = {
 const formgraderExtension: JupyterFrontEndPlugin<void> = {
   id: pluginIDs.formgrader,
   autoStart: true,
-  optional: [ILayoutRestorer, INotebookTree, IRouter],
+  optional: [IDefaultFileBrowser, ILayoutRestorer, INotebookTree, IRouter],
   activate: (
     app: JupyterFrontEnd,
+    defaultFileBrowser: IDefaultFileBrowser,
     restorer: ILayoutRestorer | null,
     notebookTree: INotebookTree | null,
     router: IRouter | null
@@ -254,39 +262,58 @@ const formgraderExtension: JupyterFrontEndPlugin<void> = {
       namespace: 'nbgrader-formgrader'
     });
 
-    app.commands.addCommand(commandIDs.openFormgrader, {
-    label: 'Formgrader',
-    execute: args => {
+    const openFormgrader = (url: string) => {
       if (!widget || widget.isDisposed) {
-        const settings = ServerConnection.makeSettings();
-        const url = (args.url as string) || URLExt.join(settings.baseUrl, "formgrader");
-
         const content = new FormgraderWidget(app, url);
 
         widget = new MainAreaWidget({content});
         widget.id = 'formgrader';
         widget.title.label = 'Formgrader';
         widget.title.closable = true;
+      }
+
+      if (!tracker.has(widget)) {
+        // Track the state of the widget for later restoration
+        tracker.add(widget);
+      }
+
+      // Attach the widget to the main area if it's not there
+      if (notebookTree){
+        if (!widget.isAttached){
+          notebookTree.addWidget(widget);
         }
+        notebookTree.currentWidget = widget;
+      } else if (!widget.isAttached) {
+        app.shell.add(widget, 'main');
+      }
 
-        if (!tracker.has(widget)) {
-          // Track the state of the widget for later restoration
-          tracker.add(widget);
+      widget.content.update();
+
+      app.shell.activateById(widget.id);
+    }
+
+    app.commands.addCommand(commandIDs.openFormgrader, {
+      label: 'Formgrader',
+      execute: args => {
+        const settings = ServerConnection.makeSettings();
+        let url = (args.url as string) || URLExt.join(settings.baseUrl, 'formgrader');
+        openFormgrader(url);
+      }
+    });
+
+    app.commands.addCommand(commandIDs.openFormgraderLocal, {
+      label: 'Formgrader (local)',
+      execute: args => {
+        let path = ''
+        if (defaultFileBrowser) {
+          path = encodeURIComponent(defaultFileBrowser.model.path);
         }
-
-        // Attach the widget to the main area if it's not there
-        if (notebookTree){
-          if (!widget.isAttached){
-            notebookTree.addWidget(widget);
-          }
-          notebookTree.currentWidget = widget;
-        } else if (!widget.isAttached) {
-          app.shell.add(widget, 'main');
+        const settings = ServerConnection.makeSettings();
+        let url = (args.url as string) || URLExt.join(settings.baseUrl, 'formgrader');
+        if (path) {
+          url += `?path=${path}`;
         }
-
-        widget.content.update();
-
-        app.shell.activateById(widget.id);
+        openFormgrader(url);
       }
     });
 

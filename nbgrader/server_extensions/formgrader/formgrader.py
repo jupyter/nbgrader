@@ -33,10 +33,8 @@ class FormgradeExtension(NbGrader):
         return relpath
 
     def load_config(self):
-        paths = jupyter_config_path()
-        paths.insert(0, os.getcwd())
         app = NbGrader()
-        app.config_file_paths.append(paths)
+        app.config_dir = self.config_dir
         app.load_config_file()
 
         return app.config
@@ -72,7 +70,6 @@ class FormgradeExtension(NbGrader):
         # Configure the formgrader settings
         tornado_settings = dict(
             nbgrader_formgrader=self,
-            nbgrader_coursedir=self.coursedir,
             nbgrader_authenticator=self.authenticator,
             nbgrader_exporter=HTMLExporter(config=self.config),
             nbgrader_gradebook=None,

@@ -51,6 +51,7 @@
     "@jupyterlab/cells": "^4.2.0",
     "@jupyterlab/coreutils": "^6.2.0",
     "@jupyterlab/docregistry": "^4.2.0",
+    "@jupyterlab/filebrowser": "^4.2.0",
     "@jupyterlab/mainmenu": "^4.2.0",
     "@jupyterlab/nbformat": "^4.2.0",
     "@jupyterlab/notebook": "^4.2.0",

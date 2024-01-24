@@ -8,19 +8,34 @@ from .base import BaseHandler, check_xsrf, check_notebook_dir
 from ...api import MissingEntry
 
 
+class FormgraderHandler(BaseHandler):
+    @web.authenticated
+    @check_xsrf
+    @check_notebook_dir
+    def get(self):
+        formgrader = self.settings['nbgrader_formgrader']
+        path = self.get_argument('path', os.getcwd())
+        path = os.path.abspath(path)
+        formgrader.config_dir = path
+        formgrader.load_config_file()
+        formgrader.initialize([], root=path)
+        self.redirect('/formgrader/manage_assignments/')
+
+
 class ManageAssignmentsHandler(BaseHandler):
     @web.authenticated
     @check_xsrf
     @check_notebook_dir
     def get(self):
+        api = self.api
         html = self.render(
             "manage_assignments.tpl",
             url_prefix=self.url_prefix,
             base_url=self.base_url,
             windows=(sys.prefix == 'win32'),
-            course_id=self.api.course_id,
-            exchange=self.api.exchange_root,
-            exchange_missing=self.api.exchange_missing)
+            course_id=api.course_id,
+            exchange=api.exchange_root,
+            exchange_missing=api.exchange_missing)
         self.write(html)
 
 
@@ -282,7 +297,7 @@ fonts_path = os.path.join(components_path, 'bootstrap', 'fonts')
 _navigation_regex = r"(?P<action>next_incorrect|prev_incorrect|next|prev)"
 
 default_handlers = [
-    (r"/formgrader/?", ManageAssignmentsHandler),
+    (r"/formgrader/?", FormgraderHandler),
     (r"/formgrader/manage_assignments/?", ManageAssignmentsHandler),
     (r"/formgrader/manage_submissions/([^/]+)/?", ManageSubmissionsHandler),
 

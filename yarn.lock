@@ -504,6 +504,7 @@ __metadata:
     "@jupyterlab/cells": ^4.2.0
     "@jupyterlab/coreutils": ^6.2.0
     "@jupyterlab/docregistry": ^4.2.0
+    "@jupyterlab/filebrowser": ^4.2.0
     "@jupyterlab/galata": ^5.2.0
     "@jupyterlab/mainmenu": ^4.2.0
     "@jupyterlab/nbformat": ^4.2.0
@@ -936,7 +937,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@jupyterlab/filebrowser@npm:^4.2.2, @jupyterlab/filebrowser@npm:~4.2.0":
+"@jupyterlab/filebrowser@npm:^4.2.0, @jupyterlab/filebrowser@npm:^4.2.2, @jupyterlab/filebrowser@npm:~4.2.0":
   version: 4.2.2
   resolution: "@jupyterlab/filebrowser@npm:4.2.2"
   dependencies:
