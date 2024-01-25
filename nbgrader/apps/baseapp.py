@@ -316,7 +316,10 @@ class NbGrader(JupyterApp):
     def initialize(self, argv: TypingList[str] = None, root: str = '') -> None:
         self.update_config(self.build_extra_config())
         self.init_syspath()
-        self.coursedir = CourseDirectory(parent=self, root=root)
+        if root:
+            self.coursedir = CourseDirectory(parent=self, root=root)
+        else:
+            self.coursedir = CourseDirectory(parent=self)
         super(NbGrader, self).initialize(argv)
 
         # load config that is in the coursedir directory

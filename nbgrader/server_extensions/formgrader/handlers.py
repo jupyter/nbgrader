@@ -3,6 +3,7 @@ import re
 import sys
 
 from tornado import web
+from jupyter_core.paths import jupyter_config_dir
 from traitlets.config.loader import Config
 
 from .base import BaseHandler, check_xsrf, check_notebook_dir
@@ -15,12 +16,18 @@ class FormgraderHandler(BaseHandler):
     @check_notebook_dir
     def get(self):
         formgrader = self.settings['nbgrader_formgrader']
-        path = self.get_argument('path', os.getcwd())
-        path = os.path.abspath(path)
-        formgrader.config = Config()
-        formgrader.config_dir = path
-        formgrader.initialize([], root=path)
-        self.redirect('/formgrader/manage_assignments/')
+        path = self.get_argument('path', '')
+        if path:
+            path = os.path.abspath(path)
+            formgrader.config = Config()
+            formgrader.config_dir = path
+            formgrader.initialize([], root=path)
+        else:
+            if formgrader.config != self.settings['initial_config']:
+                formgrader.config = self.settings['initial_config']
+                formgrader.config_dir = jupyter_config_dir()
+                formgrader.initialize([])
+        self.redirect(f"{self.base_url}/formgrader/manage_assignments/")
 
 
 class ManageAssignmentsHandler(BaseHandler):
