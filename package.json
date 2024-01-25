@@ -107,6 +107,7 @@
       }
     },
     "extension": true,
-    "outputDir": "nbgrader/labextension"
+    "outputDir": "nbgrader/labextension",
+    "schemaDir": "schema"
   }
 }

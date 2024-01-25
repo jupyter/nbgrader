@@ -1,0 +1,14 @@
+{
+  "title": "Nbgrader -> Formgrader",
+  "description": "Option of the formgrader extension.",
+  "properties": {
+    "local_config": {
+      "type": "boolean",
+      "title": "Allow local nbgrader config file",
+      "description": "This setting allow the use of a local config file for formgrader.",
+      "default": false
+    }
+  },
+  "additionalProperties": false,
+  "type": "object"
+}
