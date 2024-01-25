@@ -55,6 +55,22 @@ Manage Assignments
     </div>
   </div>
 </div>
+{% if current_config %}
+<div class="panel-group" id="config" role="tablist" aria-multiselectable="true">
+  <div class="panel panel-default">
+    <div class="panel-heading" role="tab" id="headingConfig">
+      <h4 class="panel-title">
+        <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseConfig" aria-expanded="false" aria-controls="collapseConfig">
+          Current configuration (click to expand)
+        </a>
+      </h4>
+    </div>
+    <div id="collapseConfig" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingConfig">
+      <pre class="panel-body">{{ current_config }}</pre>
+    </div>
+  </div>
+</div>
+{% endif %}
 {% if windows %}
 <div class="alert alert-warning" id="warning-windows">
 Windows operating system detected. Please note that the "release" and "collect"
