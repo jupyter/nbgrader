@@ -1,13 +1,13 @@
 # coding: utf-8
 
 import os
+from textwrap import dedent
 
 from nbconvert.exporters import HTMLExporter
-from traitlets import default
+from traitlets import Bool, default
 from tornado import web
 from jinja2 import Environment, FileSystemLoader
 from jupyter_server.utils import url_path_join as ujoin
-from jupyter_core.paths import jupyter_config_path
 
 from . import handlers, apihandlers
 from ...apps.baseapp import NbGrader
@@ -17,6 +17,17 @@ class FormgradeExtension(NbGrader):
 
     name = u'formgrade'
     description = u'Grade a notebook using an HTML form'
+
+    debug = Bool(
+        False,
+        help=dedent(
+            """
+            Whether to display the loaded configuration in the 'Formgrader ->
+            Manage Assignments' panel. This can help debugging some misconfiguration
+            when using several files.
+            """
+        )
+    ).tag(config=True)
 
     @property
     def root_dir(self):

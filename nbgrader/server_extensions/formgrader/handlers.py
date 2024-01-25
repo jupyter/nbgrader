@@ -1,6 +1,7 @@
 import os
 import re
 import sys
+import json
 
 from tornado import web
 from jupyter_core.paths import jupyter_config_dir
@@ -35,6 +36,15 @@ class ManageAssignmentsHandler(BaseHandler):
     @check_xsrf
     @check_notebook_dir
     def get(self):
+        formgrader = self.settings['nbgrader_formgrader']
+        current_config = {}
+        if formgrader.debug:
+            try:
+                current_config = json.dumps(formgrader.config, indent=2)
+            except TypeError:
+                current_config = formgrader.config
+                self.log.warn("Formgrader config is not serializable")
+
         api = self.api
         html = self.render(
             "manage_assignments.tpl",
@@ -43,7 +53,8 @@ class ManageAssignmentsHandler(BaseHandler):
             windows=(sys.prefix == 'win32'),
             course_id=api.course_id,
             exchange=api.exchange_root,
-            exchange_missing=api.exchange_missing)
+            exchange_missing=api.exchange_missing,
+            current_config= current_config)
         self.write(html)
 
 
