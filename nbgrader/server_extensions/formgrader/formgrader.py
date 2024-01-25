@@ -75,7 +75,8 @@ class FormgradeExtension(NbGrader):
             nbgrader_gradebook=None,
             nbgrader_db_url=self.coursedir.db_url,
             nbgrader_jinja2_env=jinja_env,
-            nbgrader_bad_setup=nbgrader_bad_setup
+            nbgrader_bad_setup=nbgrader_bad_setup,
+            initial_config=self.config
         )
 
         webapp.settings.update(tornado_settings)
