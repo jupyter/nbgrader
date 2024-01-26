@@ -20,6 +20,7 @@ class FormgraderHandler(BaseHandler):
         path = self.get_argument('path', '')
         if path:
             path = os.path.abspath(path)
+            formgrader.load_cwd_config = False
             formgrader.config = Config()
             formgrader.config_dir = path
             formgrader.initialize([], root=path)
@@ -28,6 +29,7 @@ class FormgraderHandler(BaseHandler):
                 formgrader.config = self.settings['initial_config']
                 formgrader.config_dir = jupyter_config_dir()
                 formgrader.initialize([])
+            formgrader.load_cwd_config = True
         self.redirect(f"{self.base_url}/formgrader/manage_assignments/")
 
 
