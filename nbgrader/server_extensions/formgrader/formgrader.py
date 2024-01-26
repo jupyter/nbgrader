@@ -45,6 +45,7 @@ class FormgradeExtension(NbGrader):
 
     def load_config(self):
         app = NbGrader()
+        app.load_cwd_config = self.load_cwd_config
         app.config_dir = self.config_dir
         app.load_config_file()
 
