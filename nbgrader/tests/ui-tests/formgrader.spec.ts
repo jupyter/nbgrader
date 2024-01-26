@@ -353,7 +353,7 @@ test("Load manage assignments", async ({ page, baseURL, request, tmpPath }) => {
   const iframe = page.mainFrame().childFrames()[0];
 
   await checkFormgraderBreadcrumbs(iframe, ["Assignments"]);
-  expect(iframe.url()).toBe(encodeURI(`${baseURL}/formgrader`));
+  expect(iframe.url()).toBe(encodeURI(`${baseURL}/formgrader/manage_assignments`));
 
   // expect the current path in tree tab to be the tmpPath.
   await switchTab(page, 'Files');

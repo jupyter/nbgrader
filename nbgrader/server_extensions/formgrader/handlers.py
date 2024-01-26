@@ -30,7 +30,7 @@ class FormgraderHandler(BaseHandler):
                 formgrader.config_dir = jupyter_config_dir()
                 formgrader.initialize([])
             formgrader.load_cwd_config = True
-        self.redirect(f"{self.base_url}/formgrader/manage_assignments/")
+        self.redirect(f"{self.base_url}/formgrader/manage_assignments")
 
 
 class ManageAssignmentsHandler(BaseHandler):
