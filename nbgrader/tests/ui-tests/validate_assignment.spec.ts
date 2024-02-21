@@ -107,7 +107,7 @@ const openNotebook = async (page: IJupyterLabPageFixture, notebook: string) => {
   await expect(page.locator("#jp-main-dock-panel .lm-TabBar-tab")).toHaveCount(
     tab_count + 1
   );
-  await page.locator(".jp-Notebook-cell").waitFor();
+  await page.locator(".jp-Notebook-cell").first().waitFor();
 };
 
 /*
