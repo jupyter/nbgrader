@@ -111,7 +111,7 @@ const openCoursesList = async (page: IJupyterLabPageFixture) => {
 
   var newTab_label = tabs.last().locator(".lm-TabBar-tabLabel");
   await expect(newTab_label).toHaveText("Courses");
-  await page.waitForSelector("#formgrader_list");
+  await page.locator("#formgrader_list").waitFor();
 };
 
 /*

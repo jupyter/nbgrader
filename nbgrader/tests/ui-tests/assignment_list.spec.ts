@@ -205,7 +205,7 @@ const expandFetched = async (
   await page
     .locator(`#fetched_assignments_list a:text("${assignment}")`)
     .click();
-  await page.waitForSelector(`${item_id}.collapse.in`);
+  await page.locator(`${item_id}.collapse.in`).waitFor();
 
   const rows = page.locator(`${item_id} .list_item`);
   for (var i = 1; i < (await rows.count()); i++) {
@@ -281,9 +281,9 @@ test("Show assignment list", async ({ page, request, tmpPath }) => {
   await openAssignmentList(page);
 
   // Wait for DOM of each status
-  await page.waitForSelector("#released_assignments_list");
-  await page.waitForSelector("#fetched_assignments_list");
-  await page.waitForSelector("#submitted_assignments_list");
+  await page.locator("#released_assignments_list").waitFor();
+  await page.locator("#fetched_assignments_list").waitFor();
+  await page.locator("#submitted_assignments_list").waitFor();
 
   // release an assignment
   await executeCommand("nbgrader generate_assignment 'Problem Set 1' --force");

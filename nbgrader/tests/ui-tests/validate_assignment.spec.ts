@@ -107,7 +107,7 @@ const openNotebook = async (page: IJupyterLabPageFixture, notebook: string) => {
   await expect(page.locator("#jp-main-dock-panel .lm-TabBar-tab")).toHaveCount(
     tab_count + 1
   );
-  await page.waitForSelector(".jp-Notebook-cell");
+  await page.locator(".jp-Notebook-cell").waitFor();
 };
 
 /*
@@ -146,7 +146,7 @@ test("Validation failure", async ({ page, tmpPath }) => {
   await page.locator("jp-button.validate-button").click();
   await waitForErrorModal(page);
 
-  await page.waitForSelector(".nbgrader-ErrorDialog .validation-failed");
+  await page.locator(".nbgrader-ErrorDialog .validation-failed").waitFor();
 
   // close the modal
   await closeErrorModal(page);
@@ -168,7 +168,7 @@ test("Validation grade cell changed", async ({ page, tmpPath }) => {
   await page.locator("jp-button.validate-button").click();
   await waitForErrorModal(page);
 
-  await page.waitForSelector(".nbgrader-ErrorDialog .validation-changed");
+  await page.locator(".nbgrader-ErrorDialog .validation-changed").waitFor();
 
   // close the modal
   await closeErrorModal(page);
@@ -190,7 +190,7 @@ test("Validation locked cell changed", async ({ page, tmpPath }) => {
   await page.locator("jp-button.validate-button").click();
   await waitForErrorModal(page);
 
-  await page.waitForSelector(".nbgrader-ErrorDialog .validation-changed");
+  await page.locator(".nbgrader-ErrorDialog .validation-changed").waitFor();
 
   // close the modal
   await closeErrorModal(page);
@@ -212,7 +212,7 @@ test("Validation open relative file", async ({ page, tmpPath }) => {
   await page.locator("jp-button.validate-button").click();
   await waitForSuccessModal(page);
 
-  await page.waitForSelector(".nbgrader-SuccessDialog .validation-success");
+  await page.locator(".nbgrader-SuccessDialog .validation-success").waitFor();
 
   // close the modal
   await closeSuccessModal(page);
@@ -234,7 +234,7 @@ test("Validation grade cell type changed", async ({ page, tmpPath }) => {
   await page.locator("jp-button.validate-button").click();
   await waitForErrorModal(page);
 
-  await page.waitForSelector(".nbgrader-ErrorDialog .validation-type-changed");
+  await page.locator(".nbgrader-ErrorDialog .validation-type-changed").waitFor();
 
   // close the modal
   await closeErrorModal(page);
@@ -256,7 +256,7 @@ test("Validation answer cell type changed", async ({ page, tmpPath }) => {
   await page.locator("jp-button.validate-button").click();
   await waitForErrorModal(page);
 
-  await page.waitForSelector(".nbgrader-ErrorDialog .validation-type-changed");
+  await page.locator(".nbgrader-ErrorDialog .validation-type-changed").waitFor();
 
   // close the modal
   await closeErrorModal(page);

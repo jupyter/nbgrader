@@ -353,30 +353,34 @@ test("Load manage assignments", async ({ page, baseURL, request, tmpPath }) => {
 
   // expect the current path in tree tab to be the tmpPath.
   await switchTab(page, 'Files');
-  await page.waitForSelector(
-    `.jp-FileBrowser-crumbs > span.jp-BreadCrumbs-item[title="${tmpPath}"]`
-  );
+  await page
+    .locator(`.jp-FileBrowser-crumbs > span.jp-BreadCrumbs-item[title="/${tmpPath}"]`)
+    .waitFor();
 
   // click on the "Problem Set 1" link and check if file browser has changed of directory
   await switchTab(page, 'Formgrader');
 
   await clickLink(iframe, "Problem Set 1");
   await switchTab(page, 'Files');
-  await page.waitForSelector(
-    `.jp-FileBrowser-crumbs > span.jp-BreadCrumbs-item[title="${tmpPath.concat(
-      "/source/Problem Set 1"
-    )}"]`
-  );
+  await page
+    .locator(
+      `.jp-FileBrowser-crumbs > span.jp-BreadCrumbs-item[title="/${tmpPath.concat(
+        "/source/Problem Set 1"
+      )}"]`
+    )
+    .waitFor();
 
   // click on preview link and check if file browser has changed of directory
   await switchTab(page, 'Formgrader');
   await iframe.locator("td.preview .glyphicon").click();
   await switchTab(page, 'Files');
-  await page.waitForSelector(
-    `.jp-FileBrowser-crumbs > span.jp-BreadCrumbs-item[title="${tmpPath.concat(
-      "/release/Problem Set 1"
-    )}"]`
-  );
+  await page
+    .locator(
+      `.jp-FileBrowser-crumbs > span.jp-BreadCrumbs-item[title="/${tmpPath.concat(
+        "/release/Problem Set 1"
+      )}"]`
+    )
+    .waitFor();
 
   // click on the first number of submissions and check that iframe has change URL
   await switchTab(page, 'Formgrader');
