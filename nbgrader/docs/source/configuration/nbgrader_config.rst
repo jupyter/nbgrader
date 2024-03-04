@@ -65,8 +65,34 @@ For example, the ``nbgrader_config.py`` that the notebook knows about could be p
 
 Then you would additionally have a config file at ``/path/to/course/directory/nbgrader_config.py``.
 
+Use Case 3: using config from a specific sub directory
+------------------------------------------------------
 
-Use Case 3: nbgrader and JupyterHub
+.. warning::
+
+    This option should not be used with a JupyterHub installation, as it modifies
+    certain objects in the running instance, and can probably prevent other users
+    from using *formgrader* correctly. If you have a JupyterHub installation,
+    you should use the settings described in the following section.
+
+You may need to use a dedicated configuration file for each course without configuring
+JupyterHub for all courses. In this case, the config file used will be the one from the
+current directory in the filebrowser panel, instead of the one from the directory where
+the jupyter server started.
+
+This option is not enabled by default. It can be enabled by using the settings panel:
+*Nbgrader -> Formgrader* and check *Allow local nbgrader config file*.
+
+A new item is displayed in the *nbgrader* menu (or in the command palette), to open
+formgrader from the local director: *Formgrader (local)*.
+
+.. warning::
+
+    If paths are used in the configuration file, note that the root of the relative
+    paths will always be the directory where the jupyter server was started, and not
+    the directory containing the ``nbgrader_config.py`` file.
+
+Use Case 4: nbgrader and JupyterHub
 -----------------------------------
 
 .. seealso::
