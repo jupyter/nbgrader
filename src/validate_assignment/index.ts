@@ -133,7 +133,7 @@ class ValidateButton extends ToolbarButton {
   }
 
   private setButtonDisabled(disabled: boolean = true): void {
-    const button = this.node.getElementsByTagName('button')[0];
+    const button = this.node.getElementsByTagName('jp-button')[0];
     if (disabled) {
       button.setAttribute('disabled', 'disabled');
     } else {
