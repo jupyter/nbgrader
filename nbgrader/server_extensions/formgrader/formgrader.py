@@ -19,7 +19,7 @@ class FormgradeExtension(NbGrader):
     description = u'Grade a notebook using an HTML form'
 
     debug = Bool(
-        False,
+        True,
         help=dedent(
             """
             Whether to display the loaded configuration in the 'Formgrader ->

@@ -70,9 +70,9 @@ Use Case 3: using config from a specific sub directory
 
 .. warning::
 
-    This option should not be used with a JupyterHub installation, as it modifies
+    This option should not be used with a multiuser Jupyterlab instance, as it modifies
     certain objects in the running instance, and can probably prevent other users
-    from using *formgrader* correctly. If you have a JupyterHub installation,
+    from using *formgrader* correctly. Also, if you have a JupyterHub installation,
     you should use the settings described in the following section.
 
 You may need to use a dedicated configuration file for each course without configuring
