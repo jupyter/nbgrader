@@ -59,15 +59,16 @@ test.beforeEach(async ({ request, tmpPath }) => {
 /*
  * Delete temp directory at the end of test.
  */
-test.afterAll(async ({ request, tmpPath }) => {
+test.afterEach(async ({ request, page, tmpPath }) => {
   if (request === undefined) throw new Error("Request is undefined.");
 
-  const contents = galata.newContentsHelper(request);
+  const contents = galata.newContentsHelper(request, page);
   await contents.deleteDirectory(tmpPath);
 
-  if (await contents.fileExists("nbgrader_config.py"))
-    contents.deleteFile("nbgrader_config.py");
-  contents.uploadFile(
+  if (await contents.fileExists("nbgrader_config.py")) {
+    await contents.deleteFile("nbgrader_config.py");
+  }
+  await contents.uploadFile(
     path.resolve(__dirname, "./files/nbgrader_config.py"),
     "nbgrader_config.py"
   );

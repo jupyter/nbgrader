@@ -77,19 +77,20 @@ test.beforeEach(async ({ request, tmpPath }) => {
 /*
  * delete temp directories at the end of test
  */
-test.afterEach(async ({ request, tmpPath }) => {
+test.afterEach(async ({ request, page, tmpPath }) => {
   if (!isWindows) {
     fs.rmSync(exchange_dir, { recursive: true, force: true });
     fs.rmSync(cache_dir, { recursive: true, force: true });
   }
 
   if (request === undefined) throw new Error("Request is undefined.");
-  const contents = galata.newContentsHelper(request);
+  const contents = galata.newContentsHelper(request, page);
   await contents.deleteDirectory(tmpPath);
 
-  if (await contents.fileExists("nbgrader_config.py"))
-    contents.deleteFile("nbgrader_config.py");
-  contents.uploadFile(
+  if (await contents.fileExists("nbgrader_config.py")){
+    await contents.deleteFile("nbgrader_config.py");
+  }
+  await contents.uploadFile(
     path.resolve(__dirname, "./files/nbgrader_config.py"),
     "nbgrader_config.py"
   );
@@ -98,8 +99,12 @@ test.afterEach(async ({ request, tmpPath }) => {
 /*
  * Create a nbgrader file system and modify config
  */
-const addCourses = async (request: APIRequestContext, tmpPath: string) => {
-  const contents = galata.newContentsHelper(request);
+const addCourses = async (
+  request: APIRequestContext,
+  page: IJupyterLabPageFixture,
+  tmpPath: string
+) => {
+  const contents = galata.newContentsHelper(request, page);
 
   // copy files from the user guide
   const source = path.resolve(
@@ -277,7 +282,7 @@ test("Show assignment list", async ({ page, request, tmpPath }) => {
   if (isNotebook) await page.goto(`tree/${tmpPath}`);
 
   await createEnv(testDir, tmpPath, exchange_dir, cache_dir, isWindows);
-  await addCourses(request, tmpPath);
+  await addCourses(request, page, tmpPath);
   await openAssignmentList(page);
 
   // Wait for DOM of each status
@@ -311,7 +316,7 @@ test("Multiple released assignments", async ({ page, request, tmpPath }) => {
   if (isNotebook) await page.goto(`tree/${tmpPath}`);
 
   await createEnv(testDir, tmpPath, exchange_dir, cache_dir, isWindows);
-  await addCourses(request, tmpPath);
+  await addCourses(request, page, tmpPath);
   await openAssignmentList(page);
 
   // release two assignments
@@ -347,7 +352,7 @@ test("Fetch assignments", async ({ page, request, tmpPath }) => {
   if (isNotebook) await page.goto(`tree/${tmpPath}`);
 
   await createEnv(testDir, tmpPath, exchange_dir, cache_dir, isWindows);
-  await addCourses(request, tmpPath);
+  await addCourses(request, page, tmpPath);
   await openAssignmentList(page);
 
   // release some assignments
@@ -400,7 +405,7 @@ test("Submit assignments", async ({ page, request, tmpPath }) => {
 
   // create directories and config files, and open assignment_list tab
   await createEnv(testDir, tmpPath, exchange_dir, cache_dir, isWindows);
-  await addCourses(request, tmpPath);
+  await addCourses(request, page, tmpPath);
   await openAssignmentList(page);
 
   // release some assignments
@@ -468,7 +473,7 @@ test("submit assignment missing notebook", async ({
 
   // create directories and config files, and open assignment_list tab
   await createEnv(testDir, tmpPath, exchange_dir, cache_dir, isWindows);
-  await addCourses(request, tmpPath);
+  await addCourses(request, page, tmpPath);
   await openAssignmentList(page);
 
   // release some assignments
@@ -556,7 +561,7 @@ test("Fetch a second assignment", async ({ page, request, tmpPath }) => {
   if (isNotebook) await page.goto(`tree/${tmpPath}`);
 
   await createEnv(testDir, tmpPath, exchange_dir, cache_dir, isWindows);
-  await addCourses(request, tmpPath);
+  await addCourses(request, page, tmpPath);
   await openAssignmentList(page);
 
   // release some assignments
@@ -627,7 +632,7 @@ test("Submit another assignments", async ({ page, request, tmpPath }) => {
 
   // create directories and config files, and open assignment_list tab
   await createEnv(testDir, tmpPath, exchange_dir, cache_dir, isWindows);
-  await addCourses(request, tmpPath);
+  await addCourses(request, page, tmpPath);
   await openAssignmentList(page);
 
   // release some assignments
@@ -681,7 +686,7 @@ test("Validate OK", async ({ page, request, tmpPath }) => {
 
   // create directories and config files, and open assignment_list tab
   await createEnv(testDir, tmpPath, exchange_dir, cache_dir, isWindows);
-  await addCourses(request, tmpPath);
+  await addCourses(request, page, tmpPath);
   await openAssignmentList(page);
 
   // release some assignments
@@ -731,7 +736,7 @@ test("Validate failure", async ({ page, request, tmpPath }) => {
 
   // create directories and config files, and open assignment_list tab
   await createEnv(testDir, tmpPath, exchange_dir, cache_dir, isWindows);
-  await addCourses(request, tmpPath);
+  await addCourses(request, page, tmpPath);
   await openAssignmentList(page);
 
   // release some assignments
@@ -785,7 +790,7 @@ test("Missing exchange directory", async ({ page, request, tmpPath }) => {
 
   // create directories and config files
   await createEnv(testDir, tmpPath, exchange_dir, cache_dir, isWindows);
-  await addCourses(request, tmpPath);
+  await addCourses(request, page, tmpPath);
 
   // delete exchange directory
   fs.rmSync(exchange_dir, { recursive: true, force: true });
