@@ -63,6 +63,8 @@ test.beforeEach(async ({ request, tmpPath }) => {
   if (request === undefined) throw new Error("Request is undefined.");
 
   const contents = galata.newContentsHelper(request);
+  await contents.createDirectory(tmpPath);
+
   nbFiles.forEach((elem) => {
     contents.uploadFile(
       path.resolve(__dirname, `./files/${elem}`),
