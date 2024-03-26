@@ -889,7 +889,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@jupyterlab/filebrowser@npm:^4.1.2, @jupyterlab/filebrowser@npm:~4.1.1":
+"@jupyterlab/filebrowser@npm:^4.1.0, @jupyterlab/filebrowser@npm:^4.1.2, @jupyterlab/filebrowser@npm:~4.1.1":
   version: 4.1.2
   resolution: "@jupyterlab/filebrowser@npm:4.1.2"
   dependencies:
@@ -5547,6 +5547,7 @@ __metadata:
     "@jupyterlab/cells": ^4.1.0
     "@jupyterlab/coreutils": ^6.1.0
     "@jupyterlab/docregistry": ^4.1.0
+    "@jupyterlab/filebrowser": ^4.1.0
     "@jupyterlab/galata": ^5.1.0
     "@jupyterlab/mainmenu": ^4.1.0
     "@jupyterlab/nbformat": ^4.1.0

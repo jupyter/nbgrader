@@ -1,0 +1,14 @@
+{
+  "title": "Nbgrader -> Formgrader",
+  "description": "Option of the formgrader extension.",
+  "properties": {
+    "local_config": {
+      "type": "boolean",
+      "title": "Allow local nbgrader config file",
+      "description": "This setting allows the use of a local config file for formgrader.\nWARNING: using the local configuration file has consequences for the server, it should not be used if several users are using the same instance of Jupyterlab.",
+      "default": false
+    }
+  },
+  "additionalProperties": false,
+  "type": "object"
+}
