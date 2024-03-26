@@ -79,6 +79,11 @@ test.beforeEach(async ({ request, tmpPath }) => {
 test.afterEach(async ({ request, page, tmpPath }) => {
   if (request === undefined) throw new Error("Request is undefined.");
 
+  // Close opened notebook.
+  while (await page.notebook.isAnyActive()) {
+    await page.notebook.close();
+  }
+
   const contents = galata.newContentsHelper(request, page);
   await contents.deleteDirectory(tmpPath);
 
@@ -92,28 +97,6 @@ test.afterEach(async ({ request, page, tmpPath }) => {
 });
 
 /*
- * Open a notebook file.
- * NOTES:
- *  This function is only useful if testing extension in JupyterLab.
- *  In Notebook tests we open a new browser tab instead.
- */
-const openNotebook = async (page: IJupyterLabPageFixture, notebook: string) => {
-  var filename = notebook + ".ipynb";
-  var tab_count = await page
-    .locator("#jp-main-dock-panel .lm-TabBar-tab")
-    .count();
-  await page
-    .locator(
-      `#filebrowser .jp-DirListing-content .jp-DirListing-itemText span:text-is('${filename}')`
-    )
-    .dblclick();
-  await expect(page.locator("#jp-main-dock-panel .lm-TabBar-tab")).toHaveCount(
-    tab_count + 1
-  );
-  await page.locator(".jp-Notebook-cell").first().waitFor();
-};
-
-/*
  * Test validation success
  */
 test("Validation success", async ({ page, tmpPath }) => {
@@ -122,7 +105,7 @@ test("Validation success", async ({ page, tmpPath }) => {
   if (isNotebook) {
     await page.goto(`notebooks/${tmpPath}/submitted-changed.ipynb`);
   } else {
-    await openNotebook(page, "submitted-changed");
+    await page.filebrowser.open("submitted-changed.ipynb");
   }
 
   // click on validate, and expect a success modal
@@ -142,7 +125,7 @@ test("Validation failure", async ({ page, tmpPath }) => {
   if (isNotebook) {
     await page.goto(`notebooks/${tmpPath}/submitted-unchanged.ipynb`);
   } else {
-    await openNotebook(page, "submitted-unchanged");
+    await page.filebrowser.open("submitted-unchanged.ipynb");
   }
 
   // click on validate, and expect an error modal
@@ -164,7 +147,7 @@ test("Validation grade cell changed", async ({ page, tmpPath }) => {
   if (isNotebook) {
     await page.goto(`notebooks/${tmpPath}/submitted-grade-cell-changed.ipynb`);
   } else {
-    await openNotebook(page, "submitted-grade-cell-changed");
+    await page.filebrowser.open("submitted-grade-cell-changed.ipynb");
   }
 
   // click on validate, and expect an error modal
@@ -186,7 +169,7 @@ test("Validation locked cell changed", async ({ page, tmpPath }) => {
   if (isNotebook) {
     await page.goto(`notebooks/${tmpPath}/submitted-locked-cell-changed.ipynb`);
   } else {
-    await openNotebook(page, "submitted-locked-cell-changed");
+    await page.filebrowser.open("submitted-locked-cell-changed.ipynb");
   }
 
   // click on validate, and expect an error modal
@@ -208,7 +191,7 @@ test("Validation open relative file", async ({ page, tmpPath }) => {
   if (isNotebook) {
     await page.goto(`notebooks/${tmpPath}/open_relative_file.ipynb`);
   } else {
-    await openNotebook(page, "open_relative_file");
+    await page.filebrowser.open("open_relative_file.ipynb");
   }
 
   // click on validate, and expect a success modal
@@ -230,7 +213,7 @@ test("Validation grade cell type changed", async ({ page, tmpPath }) => {
   if (isNotebook) {
     await page.goto(`notebooks/${tmpPath}/submitted-grade-cell-type-changed.ipynb`);
   } else {
-    await openNotebook(page, "submitted-grade-cell-type-changed");
+    await page.filebrowser.open("submitted-grade-cell-type-changed.ipynb");
   }
 
   // click on validate, and expect an error modal
@@ -252,7 +235,7 @@ test("Validation answer cell type changed", async ({ page, tmpPath }) => {
   if (isNotebook) {
     await page.goto(`notebooks/${tmpPath}/submitted-answer-cell-type-changed.ipynb`);
   } else {
-    await openNotebook(page, "submitted-answer-cell-type-changed");
+    await page.filebrowser.open("submitted-answer-cell-type-changed.ipynb");
   }
 
   // click on validate, and expect an error modal
