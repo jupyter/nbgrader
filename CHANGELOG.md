@@ -2,6 +2,32 @@ A summary of changes to nbgrader.
 
 <!-- <START NEW CHANGELOG ENTRY> -->
 
+## 0.9.2
+
+([Full Changelog](https://github.com/jupyter/nbgrader/compare/v0.9.1...9876829b6be4fccce621ffee907bd5f9ac400c44))
+
+### Bugs fixed
+
+- Fix formgrader link from course_list [#1848](https://github.com/jupyter/nbgrader/pull/1848) ([@brichet](https://github.com/brichet))
+
+### Maintenance and upkeep improvements
+
+- Upgrade nbval to keep compatibillity with pytest [#1867](https://github.com/jupyter/nbgrader/pull/1867) ([@brichet](https://github.com/brichet))
+- Bump Jupyterlab to >=4.1.0 and Notebook to >=7.1.0 [#1864](https://github.com/jupyter/nbgrader/pull/1864) ([@brichet](https://github.com/brichet))
+- Bump ip from 2.0.0 to 2.0.1 [#1863](https://github.com/jupyter/nbgrader/pull/1863) ([@dependabot](https://github.com/dependabot))
+- Bump postcss from 8.4.28 to 8.4.32 [#1851](https://github.com/jupyter/nbgrader/pull/1851) ([@dependabot](https://github.com/dependabot))
+- Bump systeminformation from 5.18.15 to 5.21.18 [#1850](https://github.com/jupyter/nbgrader/pull/1850) ([@dependabot](https://github.com/dependabot))
+- Add a dependency to setuptools [#1849](https://github.com/jupyter/nbgrader/pull/1849) ([@brichet](https://github.com/brichet))
+- Remove jupyter_notebook_config.json since notebook server is not supported anymore [#1807](https://github.com/jupyter/nbgrader/pull/1807) ([@lahwaacz](https://github.com/lahwaacz))
+
+### Contributors to this release
+
+([GitHub contributors page for this release](https://github.com/jupyter/nbgrader/graphs/contributors?from=2023-09-05&to=2024-03-26&type=c))
+
+[@brichet](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Abrichet+updated%3A2023-09-05..2024-03-26&type=Issues) | [@dependabot](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Adependabot+updated%3A2023-09-05..2024-03-26&type=Issues) | [@github-actions](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Agithub-actions+updated%3A2023-09-05..2024-03-26&type=Issues) | [@lahwaacz](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Alahwaacz+updated%3A2023-09-05..2024-03-26&type=Issues) | [@nthiery](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Anthiery+updated%3A2023-09-05..2024-03-26&type=Issues)
+
+<!-- <END NEW CHANGELOG ENTRY> -->
+
 ## 0.9.1
 
 ([Full Changelog](https://github.com/jupyter/nbgrader/compare/v0.9.0...7922f769c4b30e9fb9260a7b8a39e7365373f980))
@@ -15,8 +41,6 @@ A summary of changes to nbgrader.
 ([GitHub contributors page for this release](https://github.com/jupyter/nbgrader/graphs/contributors?from=2023-09-04&to=2023-09-05&type=c))
 
 [@brichet](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Abrichet+updated%3A2023-09-04..2023-09-05&type=Issues)
-
-<!-- <END NEW CHANGELOG ENTRY> -->
 
 ## 0.9.0
 
