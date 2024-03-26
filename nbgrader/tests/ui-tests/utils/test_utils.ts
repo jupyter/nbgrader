@@ -59,7 +59,7 @@ c.Exchange.assignment_dir = r"${path.resolve(rootDir, tmpPath)}"
   }
 
   /* Fill database */
-  await executeCommand("nbgrader db assignment add 'Problem Set 1'");
+  await executeCommand("nbgrader db assignment add \"Problem Set 1\"");
   await executeCommand("nbgrader db assignment add ps.01");
   await executeCommand("nbgrader db student add Bitdiddle --first-name Ben --last-name B");
   await executeCommand("nbgrader db student add Hacker --first-name Alyssa --last-name H");
