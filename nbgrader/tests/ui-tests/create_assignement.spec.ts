@@ -65,6 +65,11 @@ test.beforeEach(async ({ request, tmpPath }) => {
 test.afterEach(async ({ request, page, tmpPath }) => {
   if (request === undefined) throw new Error("Request is undefined.");
 
+  // Close opened notebook.
+  while (await page.notebook.isAnyActive()) {
+    await page.notebook.close();
+  }
+
   const contents = galata.newContentsHelper(request, page);
   await contents.deleteDirectory(tmpPath);
 
@@ -76,41 +81,6 @@ test.afterEach(async ({ request, page, tmpPath }) => {
     "nbgrader_config.py"
   );
 });
-
-/*
- * Open a notebook file.
- * NOTES:
- *  This function is only useful if testing extension in JupyterLab.
- *  In Notebook tests we open a new browser tab instead.
- */
-const openNotebook = async (page: IJupyterLabPageFixture, notebook: string) => {
-  var filename = notebook + ".ipynb";
-  var tab_count = await page
-    .locator("#jp-main-dock-panel .lm-TabBar-tab")
-    .count();
-  await page
-    .locator(
-      `#filebrowser .jp-DirListing-content .jp-DirListing-itemText span:text-is('${filename}')`
-    )
-    .dblclick();
-  await expect(page.locator("#jp-main-dock-panel .lm-TabBar-tab")).toHaveCount(
-    tab_count + 1
-  );
-  await page.locator(".jp-Notebook-cell").waitFor();
-};
-
-/*
- * Save the current notebook file.
- */
-const saveCurrentNotebook = async (page: IJupyterLabPageFixture) => {
-  return await page.evaluate(async () => {
-    var nb = window.jupyterapp.shell.currentWidget as NotebookPanel;
-    await nb.context.save();
-  });
-
-  // TODO : ensure metadata has been saved
-  // Read local file ?
-};
 
 /*
  * Activate assignment toolbar.
@@ -236,7 +206,7 @@ test("manual cell", async ({ page, tmpPath }) => {
   if (isNotebook) {
     await page.goto(`notebooks/${tmpPath}/blank.ipynb`);
   } else {
-    await openNotebook(page, "blank");
+    await page.filebrowser.open("blank.ipynb");
   }
 
   await activateToolbar(page);
@@ -263,12 +233,12 @@ test("manual cell", async ({ page, tmpPath }) => {
   await setId(page);
   expect(await getCellMetadata(page)).toHaveProperty("grade_id", "foo");
 
-  await saveCurrentNotebook(page);
+  await page.notebook.save();
 
   await selectInToolbar(page, "");
   expect(await getCellMetadata(page)).toBeUndefined();
 
-  await saveCurrentNotebook(page);
+  await page.notebook.save();
 });
 
 /*
@@ -279,7 +249,7 @@ test("task cell", async ({ page, tmpPath }) => {
   if (isNotebook) {
     await page.goto(`notebooks/${tmpPath}/task.ipynb`);
   } else {
-    await openNotebook(page, "task");
+    await page.filebrowser.open("task.ipynb");
   }
 
   await activateToolbar(page);
@@ -305,12 +275,12 @@ test("task cell", async ({ page, tmpPath }) => {
   await setId(page);
   expect(await getCellMetadata(page)).toHaveProperty("grade_id", "foo");
 
-  await saveCurrentNotebook(page);
+  await page.notebook.save();
 
   await selectInToolbar(page, "");
   expect(await getCellMetadata(page)).toBeUndefined();
 
-  await saveCurrentNotebook(page);
+  await page.notebook.save();
 });
 
 /*
@@ -321,7 +291,7 @@ test("solution cell", async ({ page, tmpPath }) => {
   if (isNotebook) {
     await page.goto(`notebooks/${tmpPath}/blank.ipynb`);
   } else {
-    await openNotebook(page, "blank");
+    await page.filebrowser.open("blank.ipynb");
   }
 
   await activateToolbar(page);
@@ -343,12 +313,12 @@ test("solution cell", async ({ page, tmpPath }) => {
   await setId(page);
   expect(await getCellMetadata(page)).toHaveProperty("grade_id", "foo");
 
-  await saveCurrentNotebook(page);
+  await page.notebook.save();
 
   await selectInToolbar(page, "");
   expect(await getCellMetadata(page)).toBeUndefined();
 
-  await saveCurrentNotebook(page);
+  await page.notebook.save();
 });
 
 /*
@@ -359,7 +329,7 @@ test("tests cell", async ({ page, tmpPath }) => {
   if (isNotebook) {
     await page.goto(`notebooks/${tmpPath}/blank.ipynb`);
   } else {
-    await openNotebook(page, "blank");
+    await page.filebrowser.open("blank.ipynb");
   }
 
   await activateToolbar(page);
@@ -386,12 +356,12 @@ test("tests cell", async ({ page, tmpPath }) => {
   await setId(page);
   expect(await getCellMetadata(page)).toHaveProperty("grade_id", "foo");
 
-  await saveCurrentNotebook(page);
+  await page.notebook.save();
 
   await selectInToolbar(page, "");
   expect(await getCellMetadata(page)).toBeUndefined();
 
-  await saveCurrentNotebook(page);
+  await page.notebook.save();
 });
 
 /*
@@ -402,7 +372,7 @@ test("tests to solution cell", async ({ page, tmpPath }) => {
   if (isNotebook) {
     await page.goto(`notebooks/${tmpPath}/blank.ipynb`);
   } else {
-    await openNotebook(page, "blank");
+    await page.filebrowser.open("blank.ipynb");
   }
 
   await activateToolbar(page);
@@ -429,7 +399,7 @@ test("tests to solution cell", async ({ page, tmpPath }) => {
   await setId(page);
   expect(await getCellMetadata(page)).toHaveProperty("grade_id", "foo");
 
-  await saveCurrentNotebook(page);
+  await page.notebook.save();
 
   await selectInToolbar(page, "solution");
   var metadata = await getCellMetadata(page);
@@ -437,11 +407,11 @@ test("tests to solution cell", async ({ page, tmpPath }) => {
   expect(metadata).toHaveProperty("grade", false);
   expect(metadata).toHaveProperty("locked", false);
   expect(metadata["points"]).toBeUndefined();
-  await saveCurrentNotebook(page);
+  await page.notebook.save();
 
   await selectInToolbar(page, "");
   expect(await getCellMetadata(page)).toBeUndefined();
-  await saveCurrentNotebook(page);
+  await page.notebook.save();
 });
 
 /*
@@ -452,7 +422,7 @@ test("locked cell", async ({ page, tmpPath }) => {
   if (isNotebook) {
     await page.goto(`notebooks/${tmpPath}/blank.ipynb`);
   } else {
-    await openNotebook(page, "blank");
+    await page.filebrowser.open("blank.ipynb");
   }
 
   await activateToolbar(page);
@@ -475,11 +445,11 @@ test("locked cell", async ({ page, tmpPath }) => {
   await setId(page);
   expect(await getCellMetadata(page)).toHaveProperty("grade_id", "foo");
 
-  await saveCurrentNotebook(page);
+  await page.notebook.save();
 
   await selectInToolbar(page, "");
   expect(await getCellMetadata(page)).toBeUndefined();
-  await saveCurrentNotebook(page);
+  await page.notebook.save();
 });
 
 /*
@@ -490,7 +460,7 @@ test("tab key", async ({ page, tmpPath }) => {
   if (isNotebook) {
     await page.goto(`notebooks/${tmpPath}/blank.ipynb`);
   } else {
-    await openNotebook(page, "blank");
+    await page.filebrowser.open("blank.ipynb");
   }
 
   await activateToolbar(page);
@@ -519,7 +489,7 @@ test("total points", async ({ page, tmpPath }) => {
   if (isNotebook) {
     await page.goto(`notebooks/${tmpPath}/blank.ipynb`);
   } else {
-    await openNotebook(page, "blank");
+    await page.filebrowser.open("blank.ipynb");
   }
 
   await activateToolbar(page);
@@ -573,7 +543,7 @@ test("task total points", async ({ page, tmpPath }) => {
   if (isNotebook) {
     await page.goto(`notebooks/${tmpPath}/task.ipynb`);
   } else {
-    await openNotebook(page, "task");
+    await page.filebrowser.open("task.ipynb");
   }
 
   await activateToolbar(page);
@@ -627,7 +597,7 @@ test("cell ids", async ({ page, tmpPath }) => {
   if (isNotebook) {
     await page.goto(`notebooks/${tmpPath}/blank.ipynb`);
   } else {
-    await openNotebook(page, "blank");
+    await page.filebrowser.open("blank.ipynb");
   }
 
   await activateToolbar(page);
@@ -637,7 +607,7 @@ test("cell ids", async ({ page, tmpPath }) => {
   await setId(page, "");
 
   // wait for error on saving with empty id
-  await saveCurrentNotebook(page);
+  await page.notebook.save();
   await waitForErrorModal(page);
   await closeErrorModal(page);
 
@@ -652,7 +622,7 @@ test("cell ids", async ({ page, tmpPath }) => {
   await setId(page, "foo", 1);
 
   // wait for error on saving with empty id
-  await saveCurrentNotebook(page);
+  await page.notebook.save();
   await waitForErrorModal(page);
   await closeErrorModal(page);
 });
@@ -665,7 +635,7 @@ test("task cell ids", async ({ page, tmpPath }) => {
   if (isNotebook) {
     await page.goto(`notebooks/${tmpPath}/task.ipynb`);
   } else {
-    await openNotebook(page, "task");
+    await page.filebrowser.open("task.ipynb");
   }
 
   await activateToolbar(page);
@@ -675,7 +645,7 @@ test("task cell ids", async ({ page, tmpPath }) => {
   await setId(page, "");
 
   // wait for error on saving with empty id
-  await saveCurrentNotebook(page);
+  await page.notebook.save();
   await waitForErrorModal(page);
   await closeErrorModal(page);
 
@@ -690,7 +660,7 @@ test("task cell ids", async ({ page, tmpPath }) => {
   await setId(page, "foo", 1);
 
   // wait for error on saving with empty id
-  await saveCurrentNotebook(page);
+  await page.notebook.save();
   await waitForErrorModal(page);
   await closeErrorModal(page);
 });
@@ -703,7 +673,7 @@ test("negative points", async ({ page, tmpPath }) => {
   if (isNotebook) {
     await page.goto(`notebooks/${tmpPath}/blank.ipynb`);
   } else {
-    await openNotebook(page, "blank");
+    await page.filebrowser.open("blank.ipynb");
   }
 
   await activateToolbar(page);
@@ -732,7 +702,7 @@ test("task negative points", async ({ page, tmpPath }) => {
   if (isNotebook) {
     await page.goto(`notebooks/${tmpPath}/task.ipynb`);
   } else {
-    await openNotebook(page, "task");
+    await page.filebrowser.open("task.ipynb");
   }
 
   await activateToolbar(page);
@@ -760,7 +730,7 @@ test("schema version", async ({ page, tmpPath }) => {
   if (isNotebook) {
     await page.goto(`notebooks/${tmpPath}/old-schema.ipynb`);
   } else {
-    await openNotebook(page, "old-schema");
+    await page.filebrowser.open("old-schema.ipynb");
   }
 
   // activate toolbar should show an error modal
@@ -777,7 +747,7 @@ test("invalid nbgrader cell type", async ({ page, tmpPath }) => {
   if (isNotebook) {
     await page.goto(`notebooks/${tmpPath}/blank.ipynb`);
   } else {
-    await openNotebook(page, "blank");
+    await page.filebrowser.open("blank.ipynb");
   }
 
   await activateToolbar(page);
@@ -798,7 +768,7 @@ test("invalid nbgrader cell type", async ({ page, tmpPath }) => {
   await setId(page);
   expect(await getCellMetadata(page)).toHaveProperty("grade_id", "foo");
 
-  await saveCurrentNotebook(page);
+  await page.notebook.save();
 
   // change the cell to markdown
   await page.locator(".jp-Cell .jp-InputArea-prompt").first().click();
