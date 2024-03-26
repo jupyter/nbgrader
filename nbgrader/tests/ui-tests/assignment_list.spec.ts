@@ -240,6 +240,15 @@ test("Open assignment list tab from menu", async ({ page, tmpPath }) => {
 
   if (isNotebook) await page.goto(`tree/${tmpPath}`);
 
+  // Creating the config file is useful to avoid server error about the exchange
+  // directory not writable.
+  // This is not required for the test, only to have cleaner logs.
+  await createEnv(testDir, tmpPath, exchange_dir, cache_dir, isWindows);
+  fs.copyFileSync(
+    path.resolve(testDir, "nbgrader_config.py"),
+    path.resolve(testDir, tmpPath, "nbgrader_config.py")
+  );
+
   const nbgrader_menu = page.locator(`${menuPanelId} div.lm-MenuBar-itemLabel:text("Nbgrader")`);
   const assignmentList_menu = page.locator(
     '#jp-mainmenu-nbgrader li[data-command="nbgrader:open-assignment-list"]'
