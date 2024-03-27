@@ -82,6 +82,19 @@ test.afterEach(async ({ request, page, tmpPath }) => {
   );
 });
 
+/**
+ * Save the current active notebook.
+ * TODO: use only the page.notebook helper when it work with notebook.
+ */
+const saveNotebook = async (page: IJupyterLabPageFixture): Promise<void> => {
+  if (isNotebook) {
+    await page.evaluate(async () => {
+      await window.galata.saveActiveNotebook();
+    });
+  } else {
+    await page.notebook.save();
+  }
+}
 /*
  * Activate assignment toolbar.
  */
@@ -233,12 +246,12 @@ test("manual cell", async ({ page, tmpPath }) => {
   await setId(page);
   expect(await getCellMetadata(page)).toHaveProperty("grade_id", "foo");
 
-  await page.notebook.save();
+  await saveNotebook(page);
 
   await selectInToolbar(page, "");
   expect(await getCellMetadata(page)).toBeUndefined();
 
-  await page.notebook.save();
+  await saveNotebook(page);
 });
 
 /*
@@ -275,12 +288,12 @@ test("task cell", async ({ page, tmpPath }) => {
   await setId(page);
   expect(await getCellMetadata(page)).toHaveProperty("grade_id", "foo");
 
-  await page.notebook.save();
+  await saveNotebook(page);
 
   await selectInToolbar(page, "");
   expect(await getCellMetadata(page)).toBeUndefined();
 
-  await page.notebook.save();
+  await saveNotebook(page);
 });
 
 /*
@@ -313,12 +326,12 @@ test("solution cell", async ({ page, tmpPath }) => {
   await setId(page);
   expect(await getCellMetadata(page)).toHaveProperty("grade_id", "foo");
 
-  await page.notebook.save();
+  await saveNotebook(page);
 
   await selectInToolbar(page, "");
   expect(await getCellMetadata(page)).toBeUndefined();
 
-  await page.notebook.save();
+  await saveNotebook(page);
 });
 
 /*
@@ -356,12 +369,12 @@ test("tests cell", async ({ page, tmpPath }) => {
   await setId(page);
   expect(await getCellMetadata(page)).toHaveProperty("grade_id", "foo");
 
-  await page.notebook.save();
+  await saveNotebook(page);
 
   await selectInToolbar(page, "");
   expect(await getCellMetadata(page)).toBeUndefined();
 
-  await page.notebook.save();
+  await saveNotebook(page);
 });
 
 /*
@@ -399,7 +412,7 @@ test("tests to solution cell", async ({ page, tmpPath }) => {
   await setId(page);
   expect(await getCellMetadata(page)).toHaveProperty("grade_id", "foo");
 
-  await page.notebook.save();
+  await saveNotebook(page);
 
   await selectInToolbar(page, "solution");
   var metadata = await getCellMetadata(page);
@@ -407,11 +420,11 @@ test("tests to solution cell", async ({ page, tmpPath }) => {
   expect(metadata).toHaveProperty("grade", false);
   expect(metadata).toHaveProperty("locked", false);
   expect(metadata["points"]).toBeUndefined();
-  await page.notebook.save();
+  await saveNotebook(page);
 
   await selectInToolbar(page, "");
   expect(await getCellMetadata(page)).toBeUndefined();
-  await page.notebook.save();
+  await saveNotebook(page);
 });
 
 /*
@@ -445,11 +458,11 @@ test("locked cell", async ({ page, tmpPath }) => {
   await setId(page);
   expect(await getCellMetadata(page)).toHaveProperty("grade_id", "foo");
 
-  await page.notebook.save();
+  await saveNotebook(page);
 
   await selectInToolbar(page, "");
   expect(await getCellMetadata(page)).toBeUndefined();
-  await page.notebook.save();
+  await saveNotebook(page);
 });
 
 /*
@@ -607,7 +620,7 @@ test("cell ids", async ({ page, tmpPath }) => {
   await setId(page, "");
 
   // wait for error on saving with empty id
-  await page.notebook.save();
+  await saveNotebook(page);
   await waitForErrorModal(page);
   await closeErrorModal(page);
 
@@ -622,7 +635,7 @@ test("cell ids", async ({ page, tmpPath }) => {
   await setId(page, "foo", 1);
 
   // wait for error on saving with empty id
-  await page.notebook.save();
+  await saveNotebook(page);
   await waitForErrorModal(page);
   await closeErrorModal(page);
 });
@@ -645,7 +658,7 @@ test("task cell ids", async ({ page, tmpPath }) => {
   await setId(page, "");
 
   // wait for error on saving with empty id
-  await page.notebook.save();
+  await saveNotebook(page);
   await waitForErrorModal(page);
   await closeErrorModal(page);
 
@@ -660,7 +673,7 @@ test("task cell ids", async ({ page, tmpPath }) => {
   await setId(page, "foo", 1);
 
   // wait for error on saving with empty id
-  await page.notebook.save();
+  await saveNotebook(page);
   await waitForErrorModal(page);
   await closeErrorModal(page);
 });
@@ -768,7 +781,7 @@ test("invalid nbgrader cell type", async ({ page, tmpPath }) => {
   await setId(page);
   expect(await getCellMetadata(page)).toHaveProperty("grade_id", "foo");
 
-  await page.notebook.save();
+  await saveNotebook(page);
 
   // change the cell to markdown
   await page.locator(".jp-Cell .jp-InputArea-prompt").first().click();
