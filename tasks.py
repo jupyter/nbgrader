@@ -82,9 +82,6 @@ def _run_ts_test(args, notebook=False):
     root_dir = mkdtemp(prefix="nbgrader-galata-")
     os.environ["NBGRADER_TEST_DIR"] = root_dir
 
-    if notebook:
-        os.environ["NBGRADER_TEST_IS_NOTEBOOK"] = "1"
-
     cmd = ['jlpm', f'test{":notebook" if notebook else ""}', '--retries=2'] + args
     run(" ".join(cmd))
 
