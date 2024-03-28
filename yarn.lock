@@ -492,6 +492,53 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@jupyter/nbgrader@workspace:.":
+  version: 0.0.0-use.local
+  resolution: "@jupyter/nbgrader@workspace:."
+  dependencies:
+    "@jupyter-notebook/application": ^7.1.0
+    "@jupyter-notebook/tree": ^7.1.0
+    "@jupyter/ydoc": ^1.1.1
+    "@jupyterlab/application": ^4.1.0
+    "@jupyterlab/apputils": ^4.2.0
+    "@jupyterlab/builder": ^4.1.0
+    "@jupyterlab/cells": ^4.1.0
+    "@jupyterlab/coreutils": ^6.1.0
+    "@jupyterlab/docregistry": ^4.1.0
+    "@jupyterlab/galata": ^5.1.0
+    "@jupyterlab/mainmenu": ^4.1.0
+    "@jupyterlab/nbformat": ^4.1.0
+    "@jupyterlab/notebook": ^4.1.0
+    "@jupyterlab/observables": ^5.1.0
+    "@jupyterlab/services": ^7.1.0
+    "@jupyterlab/settingregistry": ^4.1.0
+    "@lumino/coreutils": ^2.1.2
+    "@lumino/disposable": ^2.1.2
+    "@lumino/messaging": ^2.0.1
+    "@lumino/signaling": ^2.1.2
+    "@lumino/widgets": ^2.3.1
+    "@playwright/test": ^1.32.2
+    "@types/codemirror": ^5.60.5
+    "@typescript-eslint/eslint-plugin": ^5.0.0
+    "@typescript-eslint/parser": ^5.0.0
+    bower: "*"
+    eslint: ^8.0.0
+    eslint-config-prettier: ^8.0.0
+    eslint-plugin-prettier: ^4.0.0
+    mkdirp: ^1.0.4
+    npm-run-all: ^4.1.5
+    prettier: ^2.1.1
+    react: ^18.2.0
+    rimraf: ^3.0.2
+    stylelint: ^14.3.0
+    stylelint-config-prettier: ^9.0.3
+    stylelint-config-recommended: ^6.0.0
+    stylelint-config-standard: ~24.0.0
+    stylelint-prettier: ^2.0.0
+    typescript: ~5.0.4
+  languageName: unknown
+  linkType: soft
+
 "@jupyter/react-components@npm:^0.15.2":
   version: 0.15.2
   resolution: "@jupyter/react-components@npm:0.15.2"
@@ -5533,53 +5580,6 @@ __metadata:
   checksum: 23ad088b08f898fc9b53011d7bb78ec48e79de7627e01ab5518e806033861bef68d5b0cd0e2205c2f36690ac9571ff6bcb05eb777ced2eeda8d4ac5b44592c3d
   languageName: node
   linkType: hard
-
-"nbgrader@workspace:.":
-  version: 0.0.0-use.local
-  resolution: "nbgrader@workspace:."
-  dependencies:
-    "@jupyter-notebook/application": ^7.1.0
-    "@jupyter-notebook/tree": ^7.1.0
-    "@jupyter/ydoc": ^1.1.1
-    "@jupyterlab/application": ^4.1.0
-    "@jupyterlab/apputils": ^4.2.0
-    "@jupyterlab/builder": ^4.1.0
-    "@jupyterlab/cells": ^4.1.0
-    "@jupyterlab/coreutils": ^6.1.0
-    "@jupyterlab/docregistry": ^4.1.0
-    "@jupyterlab/galata": ^5.1.0
-    "@jupyterlab/mainmenu": ^4.1.0
-    "@jupyterlab/nbformat": ^4.1.0
-    "@jupyterlab/notebook": ^4.1.0
-    "@jupyterlab/observables": ^5.1.0
-    "@jupyterlab/services": ^7.1.0
-    "@jupyterlab/settingregistry": ^4.1.0
-    "@lumino/coreutils": ^2.1.2
-    "@lumino/disposable": ^2.1.2
-    "@lumino/messaging": ^2.0.1
-    "@lumino/signaling": ^2.1.2
-    "@lumino/widgets": ^2.3.1
-    "@playwright/test": ^1.32.2
-    "@types/codemirror": ^5.60.5
-    "@typescript-eslint/eslint-plugin": ^5.0.0
-    "@typescript-eslint/parser": ^5.0.0
-    bower: "*"
-    eslint: ^8.0.0
-    eslint-config-prettier: ^8.0.0
-    eslint-plugin-prettier: ^4.0.0
-    mkdirp: ^1.0.4
-    npm-run-all: ^4.1.5
-    prettier: ^2.1.1
-    react: ^18.2.0
-    rimraf: ^3.0.2
-    stylelint: ^14.3.0
-    stylelint-config-prettier: ^9.0.3
-    stylelint-config-recommended: ^6.0.0
-    stylelint-config-standard: ~24.0.0
-    stylelint-prettier: ^2.0.0
-    typescript: ~5.0.4
-  languageName: unknown
-  linkType: soft
 
 "negotiator@npm:^0.6.3":
   version: 0.6.3
