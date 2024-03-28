@@ -105,13 +105,13 @@ class MetadataValidatorV2(BaseMetadataValidator):
             ids.add(grade_id)
 
 
-def read_v2(source: typing.io.TextIO, as_version: int, **kwargs: typing.Any) -> NotebookNode:
+def read_v2(source: typing.TextIO, as_version: int, **kwargs: typing.Any) -> NotebookNode:
     nb = _read(source, as_version, **kwargs)
     MetadataValidatorV2().validate_nb(nb)
     return nb
 
 
-def write_v2(nb: NotebookNode, fp: typing.io.TextIO, **kwargs: typing.Any) -> None:
+def write_v2(nb: NotebookNode, fp: typing.TextIO, **kwargs: typing.Any) -> None:
     MetadataValidatorV2().validate_nb(nb)
     _write(nb, fp, **kwargs)
 
