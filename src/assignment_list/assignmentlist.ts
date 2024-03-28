@@ -226,7 +226,7 @@ class Assignment {
 
   private make_link(): HTMLSpanElement {
     var container = document.createElement('span');;
-    container.classList.add('item_name', 'col-sm-6');
+    container.classList.add('item_name', 'col-sm-4');
 
     var link;
     if (this.data['status'] === 'fetched') {
@@ -264,7 +264,7 @@ class Assignment {
 
   private make_button(): HTMLSpanElement{
     var container = document.createElement('span');
-    container.classList.add('item_status', 'col-sm-4')
+    container.classList.add('item_status', 'col-sm-2')
     var button = document.createElement('button');
     button.classList.add('btn', 'btn-primary', 'btn-xs')
     container.append(button);
@@ -353,9 +353,13 @@ class Assignment {
 
   private make_row(): void {
     var row = document.createElement('div');
-    row.classList.add('col-md-12');
+    row.classList.add('col-md-14');
     var link = this.make_link();
     row.append(link);
+    var dl = document.createElement('span');
+    dl.classList.add('item_deadline', 'col-sm-4')
+    dl.innerText = this.data['due_date'] || '';
+    row.append(dl)
     var s = document.createElement('span');
     s.classList.add('item_course', 'col-sm-2')
     s.innerText = this.data['course_id']
@@ -498,7 +502,7 @@ class Notebook{
   private make_button(): HTMLSpanElement {
     var that = this;
     var container = document.createElement('span');
-    container.classList.add('item_status', 'col-sm-4');
+    container.classList.add('item_status', 'col-sm-2');
     var button = document.createElement('button')
     button.classList.add('btn', 'btn-default', 'btn-xs')
 
