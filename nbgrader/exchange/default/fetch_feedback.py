@@ -48,35 +48,57 @@ class ExchangeFetchFeedback(Exchange, ABCExchangeFetchFeedback):
                     self.coursedir.course_id, assignment_id, timestamp))
             pattern = os.path.join(self.cache_path, submission, "*.ipynb")
             notebooks = glob.glob(pattern)
+
+            # Check if a secret is provided (new method)
+            submission_secret = None
+            submission_secret_path = os.path.join(self.cache_path, submission, "submission_secret.txt")
+            if os.path.isfile(submission_secret_path):
+                with open(submission_secret_path) as fh:
+                    submission_secret = fh.read()
+
             for notebook in notebooks:
                 notebook_id = os.path.splitext(os.path.split(notebook)[-1])[0]
-                unique_key = make_unique_key(
-                    self.coursedir.course_id,
-                    assignment_id,
-                    notebook_id,
-                    student_id,
-                    timestamp)
 
-                # Look for the feedback using new-style of feedback
-                self.log.debug("Unique key is: {}".format(unique_key))
-                nb_hash = notebook_hash(notebook, unique_key)
-                feedbackpath = os.path.join(self.outbound_path, '{0}.html'.format(nb_hash))
-                if os.path.exists(feedbackpath):
-                    self.feedback_files.append((notebook_id, timestamp, feedbackpath))
-                    self.log.info(
-                        "Found feedback for '{}/{}/{}' submitted at {}".format(
-                            self.coursedir.course_id, assignment_id, notebook_id, timestamp))
-                    continue
+                # If a secret is provided (new method), use that
+                # If not, fall back to using make_unique_key
+                if submission_secret:
+                    nb_hash = notebook_hash(secret=submission_secret, notebook_id=notebook_id)
+                    feedbackpath = os.path.join(self.outbound_path, '{0}.html'.format(nb_hash))
+                    if os.path.exists(feedbackpath):
+                        self.feedback_files.append((notebook_id, timestamp, feedbackpath))
+                        self.log.info(
+                            "Found feedback for '{}/{}/{}' submitted at {}".format(
+                                self.coursedir.course_id, assignment_id, notebook_id, timestamp))
+                        continue
 
-                # If it doesn't exist, try the legacy hashing
-                nb_hash = notebook_hash(notebook)
-                feedbackpath = os.path.join(self.outbound_path, '{0}.html'.format(nb_hash))
-                if os.path.exists(feedbackpath):
-                    self.feedback_files.append((notebook_id, timestamp, feedbackpath))
-                    self.log.warning(
-                        "Found legacy feedback for '{}/{}/{}' submitted at {}".format(
-                            self.coursedir.course_id, assignment_id, notebook_id, timestamp))
-                    continue
+                else:
+
+                    unique_key = make_unique_key(
+                        self.coursedir.course_id,
+                        assignment_id,
+                        notebook_id,
+                        student_id,
+                        timestamp)
+
+                    # Try legacy hashing 1
+                    nb_hash = notebook_hash(notebook, unique_key)
+                    feedbackpath = os.path.join(self.outbound_path, '{0}.html'.format(nb_hash))
+                    if os.path.exists(feedbackpath):
+                        self.feedback_files.append((notebook_id, timestamp, feedbackpath))
+                        self.log.info(
+                            "Found feedback for '{}/{}/{}' submitted at {}".format(
+                                self.coursedir.course_id, assignment_id, notebook_id, timestamp))
+                        continue
+
+                    # If it doesn't exist, try legacy hashing 2
+                    nb_hash = notebook_hash(notebook)
+                    feedbackpath = os.path.join(self.outbound_path, '{0}.html'.format(nb_hash))
+                    if os.path.exists(feedbackpath):
+                        self.feedback_files.append((notebook_id, timestamp, feedbackpath))
+                        self.log.warning(
+                            "Found legacy feedback for '{}/{}/{}' submitted at {}".format(
+                                self.coursedir.course_id, assignment_id, notebook_id, timestamp))
+                        continue
 
                 # If we reached here, then there's no feedback available
                 self.log.warning(

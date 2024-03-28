@@ -1,5 +1,6 @@
 import base64
 import os
+import secrets
 from stat import (
     S_IRUSR, S_IWUSR, S_IXUSR,
     S_IRGRP, S_IWGRP, S_IXGRP,
@@ -121,6 +122,7 @@ class ExchangeSubmit(Exchange, ABCExchangeSubmit):
 
     def copy_files(self):
         self.init_release()
+        submission_secret = secrets.token_hex(64)
 
         dest_path = os.path.join(self.inbound_path, self.assignment_filename)
         if self.add_random_string:
@@ -136,6 +138,8 @@ class ExchangeSubmit(Exchange, ABCExchangeSubmit):
         self.do_copy(self.src_path, dest_path)
         with open(os.path.join(dest_path, "timestamp.txt"), "w") as fh:
             fh.write(self.timestamp)
+        with open(os.path.join(dest_path, "submission_secret.txt"), "w") as fh:
+            fh.write(submission_secret)
         self.set_perms(
             dest_path,
             fileperms=(S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH),
@@ -153,6 +157,8 @@ class ExchangeSubmit(Exchange, ABCExchangeSubmit):
         self.do_copy(self.src_path, cache_path)
         with open(os.path.join(cache_path, "timestamp.txt"), "w") as fh:
             fh.write(self.timestamp)
+        with open(os.path.join(cache_path, "submission_secret.txt"), "w") as fh:
+            fh.write(submission_secret)
 
         self.log.info("Submitted as: {} {} {}".format(
             self.coursedir.course_id, self.coursedir.assignment_id, str(self.timestamp)
