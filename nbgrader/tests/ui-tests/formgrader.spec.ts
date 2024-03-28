@@ -72,7 +72,7 @@ test.beforeEach(async ({ request, tmpPath }) => {
 /*
  * delete temp directories at the end of test
  */
-test.afterEach(async ({ request, tmpPath }) => {
+test.afterEach(async ({ request, page, tmpPath }) => {
   if (!isWindows) {
     fs.rmSync(exchange_dir, { recursive: true, force: true });
     fs.rmSync(cache_dir, { recursive: true, force: true });
@@ -80,12 +80,14 @@ test.afterEach(async ({ request, tmpPath }) => {
 
   if (request === undefined) throw new Error("Request is undefined.");
 
-  const contents = galata.newContentsHelper(request);
+  const contents = galata.newContentsHelper(request, page);
   await contents.deleteDirectory(tmpPath);
 
-  if (await contents.fileExists("nbgrader_config.py"))
-    contents.deleteFile("nbgrader_config.py");
-  contents.uploadFile(
+  if (await contents.fileExists("nbgrader_config.py")){
+    await contents.deleteFile("nbgrader_config.py");
+  }
+
+  await contents.uploadFile(
     path.resolve(__dirname, "./files/nbgrader_config.py"),
     "nbgrader_config.py"
   );
@@ -94,8 +96,12 @@ test.afterEach(async ({ request, tmpPath }) => {
 /*
  * Create a nbgrader file system
  */
-const addCourses = async (request: APIRequestContext, tmpPath: string) => {
-  const contents = galata.newContentsHelper(request);
+const addCourses = async (
+  request: APIRequestContext,
+  page: IJupyterLabPageFixture,
+  tmpPath: string
+) => {
+  const contents = galata.newContentsHelper(request, page);
 
   // copy files from the user guide
   const source_path = path.resolve(
@@ -342,7 +348,7 @@ test("Load manage assignments", async ({ page, baseURL, request, tmpPath }) => {
 
   // create environment
   await createEnv(testDir, tmpPath, exchange_dir, cache_dir, isWindows);
-  await addCourses(request, tmpPath);
+  await addCourses(request, page, tmpPath);
   await openFormgrader(page);
 
   // get formgrader iframe and check for breadcrumbs
@@ -394,7 +400,7 @@ test("Load manage submissions", async ({ page, baseURL, request, tmpPath }) => {
 
   // create environment
   await createEnv(testDir, tmpPath, exchange_dir, cache_dir, isWindows);
-  await addCourses(request, tmpPath);
+  await addCourses(request, page, tmpPath);
   await openFormgrader(page);
 
   // get formgrader iframe
@@ -455,7 +461,7 @@ test("Load gradebook1", async ({ page, baseURL, request, tmpPath }) => {
 
   // create environment
   await createEnv(testDir, tmpPath, exchange_dir, cache_dir, isWindows);
-  await addCourses(request, tmpPath);
+  await addCourses(request, page, tmpPath);
   await openFormgrader(page);
 
   // get formgrader iframe
@@ -490,7 +496,7 @@ test("Load gradebook2", async ({ page, baseURL, request, tmpPath }) => {
 
   // create environment
   await createEnv(testDir, tmpPath, exchange_dir, cache_dir, isWindows);
-  await addCourses(request, tmpPath);
+  await addCourses(request, page, tmpPath);
   await openFormgrader(page);
 
   // get formgrader iframe
@@ -541,7 +547,7 @@ test("Load gradebook3", async ({ page, baseURL, request, tmpPath }) => {
 
   // create environment
   await createEnv(testDir, tmpPath, exchange_dir, cache_dir, isWindows);
-  await addCourses(request, tmpPath);
+  await addCourses(request, page, tmpPath);
   await openFormgrader(page);
 
   // get formgrader iframe
@@ -632,7 +638,7 @@ test("Gradebook3 show hide names", async ({
 
   // create environment
   await createEnv(testDir, tmpPath, exchange_dir, cache_dir, isWindows);
-  await addCourses(request, tmpPath);
+  await addCourses(request, page, tmpPath);
   await openFormgrader(page);
 
   // get formgrader iframe
@@ -686,7 +692,7 @@ test('Gradebook toggle names button', async ({
 
     // create environment
     await createEnv(testDir, tmpPath, exchange_dir, cache_dir, isWindows);
-    await addCourses(request, tmpPath);
+    await addCourses(request, page, tmpPath);
     await openFormgrader(page);
 
     // get formgrader iframe
@@ -736,7 +742,7 @@ test("Load students", async ({ page, baseURL, request, tmpPath }) => {
 
   // create environment
   await createEnv(testDir, tmpPath, exchange_dir, cache_dir, isWindows);
-  await addCourses(request, tmpPath);
+  await addCourses(request, page, tmpPath);
   await openFormgrader(page);
 
   // get formgrader iframe
@@ -784,7 +790,7 @@ test("Load students submissions", async ({
 
   // create environment
   await createEnv(testDir, tmpPath, exchange_dir, cache_dir, isWindows);
-  await addCourses(request, tmpPath);
+  await addCourses(request, page, tmpPath);
   await openFormgrader(page);
 
   // get formgrader iframe
@@ -829,7 +835,7 @@ test("Switch views", async ({ page, baseURL, request, tmpPath }) => {
 
   // create environment
   await createEnv(testDir, tmpPath, exchange_dir, cache_dir, isWindows);
-  await addCourses(request, tmpPath);
+  await addCourses(request, page, tmpPath);
   await openFormgrader(page);
 
   // get formgrader iframe

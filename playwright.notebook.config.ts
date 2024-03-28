@@ -13,10 +13,9 @@ module.exports = {
     appPath: '',
   },
   webServer: {
-    command: 'jlpm start:test:notebook',
+    command: 'jlpm start:test',
     url: 'http://localhost:8888/tree',
     timeout: 120 * 1000,
     reuseExistingServer: !process.env.CI,
-  },
-
+  }
 };
