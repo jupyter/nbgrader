@@ -14,6 +14,10 @@ class DeadlineManager:
 
         dir_name = os.path.join(self.config.Exchange.root, self.config.CourseDirectory.course_id)
         file_path = os.path.join(dir_name, self.config.Exchange.deadline_file)
+        if not os.path.exists(file_path):
+            self.log.warning("No deadlines file found at {}".format(file_path))
+            return assignments
+
         deadlines = self._read_deadlines(file_path)
         for assignment in assignments:
             if assignment["assignment_id"] in deadlines:
@@ -39,9 +43,9 @@ class DeadlineManager:
         
         if self.config.CourseDirectory.groupshared:
             st_mode = os.stat(file_path).st_mode
-            if st_mode & 0o660 != 0o660:
+            if st_mode & 0o664 != 0o664:
                 try:
-                    os.chmod(file_path, (st_mode | 0o660) & 0o777)
+                    os.chmod(file_path, (st_mode | 0o664) & 0o777)
                 except PermissionError:
                     self.log.warning("Could not update permissions of %s to make it groupshared", file_path)
                 
