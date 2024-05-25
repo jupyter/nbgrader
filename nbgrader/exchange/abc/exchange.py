@@ -36,6 +36,11 @@ class Exchange(LoggingConfigurable):
         help="Format string for timestamps"
     ).tag(config=True)
 
+    deadline_file = Unicode(
+        "deadlines.txt",
+        help="File for storing deadlines"
+    ).tag(config=True)
+
     @validate('timestamp_format')
     def _valid_timestamp_format(self, proposal):
         try:

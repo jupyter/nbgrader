@@ -14,7 +14,7 @@ class DeadlineManager:
 
         dir_name = os.path.join(self.config.Exchange.root, self.config.CourseDirectory.course_id)
         file_path = os.path.join(dir_name, self.config.Exchange.deadline_file)
-        if not os.path.exists(file_path):
+        if not os.path.exists(file_path) or not os.path.isfile(file_path):
             self.log.warning("No deadlines file found at {}".format(file_path))
             return assignments
 
