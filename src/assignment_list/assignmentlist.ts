@@ -13,6 +13,7 @@ import { PageConfig } from '@jupyterlab/coreutils';
 import * as React from 'react';
 
 import { showNbGraderDialog, validate } from '../common/validate';
+import { showDialog } from '@jupyterlab/apputils';
 
 export class AssignmentList {
 
@@ -262,7 +263,54 @@ class Assignment {
 
   };
 
-  private make_button(): HTMLSpanElement{
+  private static async proceedLateSubmissionWarning(): Promise<any> {
+
+    // const body_title = React.createElement('p', null, "You're submitting after the deadline. Your submission might not be graded.");
+    // const body = React.createElement("div", {'id': 'late-submission-message'}, [body_title]);
+    // showNbGraderDialog({
+    //   title: "Late Submission",
+    //   body: body,
+    //   buttons: [Dialog.okButton()]
+    // }, true);
+
+    return showDialog({
+      title: 'Late Submission', // Can be text or a react element
+      body: 'The assignment is past due date. Would you like to proceed?', // Can be text, a widget or a react element
+      host: document.body, // Parent element for rendering the dialog
+      buttons: [ // List of buttons
+        {
+          label: 'cancel', // Button label
+          caption: 'cancel submission', // Button title
+          className: '', // Additional button CSS class
+          accept: false, // Whether this button will discard or accept the dialog
+          displayType: 'default', // applies 'default' or 'warn' styles
+          ariaLabel: '',
+          iconClass: 'closeIcon',
+          iconLabel: 'Cancel',
+          actions: []
+        },
+        {
+          label: 'submit', // Button label
+          caption: 'proceed', // Button title
+          className: '', // Additional button CSS class
+          accept: true, // Whether this button will discard or accept the dialog
+          displayType: 'default', // applies 'default' or 'warn' styles
+          ariaLabel: '',
+          iconClass: 'checkIcon',
+          iconLabel: 'Submit',
+          actions: []
+        },
+      ],
+      defaultButton: 0, // Index of the default button
+      focusNodeSelector: '.my-input', // Selector for focussing an input element when dialog opens
+      hasClose: false, // Whether to display a close button or not
+      renderer: undefined // To define customized dialog structure
+    }).then((result => {
+      return result.button.accept;
+    }));
+  };
+
+  private async make_button(): Promise<HTMLSpanElement>{
     var container = document.createElement('span');
     container.classList.add('item_status', 'col-sm-2')
     var button = document.createElement('button');
@@ -294,9 +342,28 @@ class Assignment {
       }
     } else if (this.data.status == 'fetched') {
         button.innerText = "Submit";
+        let pastDueDate = false;
+        if (!!this.data['due_date']) {
+          // Extract date from string
+          var due_date = new Date(this.data['due_date'].substring(0, this.data['due_date'].lastIndexOf(" ")));
+          var now = new Date();
+          pastDueDate = (due_date < now)
+        }
+        if (pastDueDate) {
+          button.innerText = 'Late Submit';
+          // button.style.opacity = '0.65';
+        }
         button.onclick = async function(){
+          if (pastDueDate) {
+            const proceed = await Assignment.proceedLateSubmissionWarning();
+            if (!proceed) {
+              return;
+            }
+          }
+          
           button.innerText = 'submitting...';
           button.setAttribute('disabled', 'disabled');
+          
           const dataToSend = { course_id: that.data['course_id'], assignment_id: that.data['assignment_id']};
           try {
             const reply = await requestAPI<any>('assignments/submit', {
@@ -351,7 +418,7 @@ class Assignment {
     return container;
   };
 
-  private make_row(): void {
+  private async make_row(): Promise<void> {
     var row = document.createElement('div');
     row.classList.add('col-md-14');
     var link = this.make_link();
@@ -400,7 +467,8 @@ class Assignment {
         }
     }
 
-    row.append(this.make_button());
+    const btn = await this.make_button();
+    row.append(btn);
     this.element.innerHTML= ''
 
     this.element.append(row);
