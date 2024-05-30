@@ -41,14 +41,13 @@ class DeadlineManager:
             for assignment, deadline in deadlines.items():
                 fh.write(f"{assignment}/{deadline}\n")
         
-        if self.config.CourseDirectory.groupshared:
-            st_mode = os.stat(file_path).st_mode
-            if st_mode & 0o664 != 0o664:
-                try:
-                    os.chmod(file_path, (st_mode | 0o664) & 0o777)
-                except PermissionError:
-                    self.log.warning("Could not update permissions of %s to make it groupshared", file_path)
-                
+        access_mode = 0o664 if self.config.CourseDirectory.groupshared else 0o644
+        st_mode = os.stat(file_path).st_mode
+        if st_mode & access_mode != access_mode:
+            try:
+                os.chmod(file_path, (st_mode | access_mode) & 0o777)
+            except PermissionError:
+                self.log.warning("Could not update permissions of %s", file_path)
     
     def _format_deadline(self, deadline):
         """Format the deadline."""
