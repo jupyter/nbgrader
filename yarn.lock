@@ -498,7 +498,7 @@ __metadata:
   dependencies:
     "@jupyter-notebook/application": ^7.1.0
     "@jupyter-notebook/tree": ^7.1.0
-    "@jupyter/ydoc": ^1.1.1
+    "@jupyter/ydoc": ^2.0.0
     "@jupyterlab/application": ^4.1.0
     "@jupyterlab/apputils": ^4.2.0
     "@jupyterlab/builder": ^4.1.0
@@ -573,6 +573,20 @@ __metadata:
     y-protocols: ^1.0.5
     yjs: ^13.5.40
   checksum: a239b1dd57cfc9ba36c06ac5032a1b6388849ae01a1d0db0d45094f71fdadf4d473b4bf8becbef0cfcdc85cae505361fbec0822b02da5aa48e06b66f742dd7a0
+  languageName: node
+  linkType: hard
+
+"@jupyter/ydoc@npm:^2.0.0":
+  version: 2.0.1
+  resolution: "@jupyter/ydoc@npm:2.0.1"
+  dependencies:
+    "@jupyterlab/nbformat": ^3.0.0 || ^4.0.0-alpha.21 || ^4.0.0
+    "@lumino/coreutils": ^1.11.0 || ^2.0.0
+    "@lumino/disposable": ^1.10.0 || ^2.0.0
+    "@lumino/signaling": ^1.10.0 || ^2.0.0
+    y-protocols: ^1.0.5
+    yjs: ^13.5.40
+  checksum: f5f29e1ff3327ebc1cf326f53634e03c4c7bf7733d235087fe26975c16eebd404f23c2f3ba88b6e04b1927846be7162b09b8b8719a4b29e51d0299c745018cbb
   languageName: node
   linkType: hard
 

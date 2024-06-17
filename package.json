@@ -46,7 +46,7 @@
   "dependencies": {
     "@jupyter-notebook/application": "^7.1.0",
     "@jupyter-notebook/tree": "^7.1.0",
-    "@jupyter/ydoc": "^1.1.1",
+    "@jupyter/ydoc": "^2.0.0",
     "@jupyterlab/application": "^4.1.0",
     "@jupyterlab/apputils": "^4.2.0",
     "@jupyterlab/cells": "^4.1.0",
