@@ -18,12 +18,12 @@ import { ButtonExtension } from "./validate_assignment/index";
  * The plugin IDs
  */
 const pluginIDs = {
-  menus: 'nbgrader:menu',
-  assignmentsList: 'nbgrader:assignment-list',
-  coursesList: 'nbgrader:course-list',
-  formgrader: 'nbgrader:formgrader',
-  createAssignment: 'nbgrader:create-assignment',
-  validateAssignment: 'nbgrader:validate-assignment'
+  menus: '@jupyter/nbgrader:menu',
+  assignmentsList: '@jupyter/nbgrader:assignment-list',
+  coursesList: '@jupyter/nbgrader:course-list',
+  formgrader: '@jupyter/nbgrader:formgrader',
+  createAssignment: '@jupyter/nbgrader:create-assignment',
+  validateAssignment: '@jupyter/nbgrader:validate-assignment'
 }
 
 /**
