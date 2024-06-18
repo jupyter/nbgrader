@@ -1,5 +1,5 @@
 import { test as jupyterLabTest, galata, IJupyterLabPageFixture } from "@jupyterlab/galata";
-import { APIRequestContext, expect, Frame } from "@playwright/test";
+import { APIRequestContext, expect, Frame, Locator} from "@playwright/test";
 import * as path from "path";
 import * as os from "os";
 import * as fs from "fs";
@@ -27,6 +27,7 @@ let mainPanelTabCount = 1;
 const baseTestUse = {
   tmpPath: tempPath,
   mockSettings: {
+    ...galata.DEFAULT_SETTINGS,
     '@jupyterlab/apputils-extension:notification': {
       fetchNews: 'false'
     }
@@ -57,6 +58,14 @@ test.beforeEach(async ({ request, tmpPath }) => {
   if (request === undefined) throw new Error("Request is undefined.");
 
   const contents = galata.newContentsHelper(request);
+
+  if (await contents.fileExists("nbgrader_config.py")) {
+    await contents.deleteFile("nbgrader_config.py");
+  }
+  await contents.uploadFile(
+    path.resolve(__dirname, "./files/nbgrader_config.py"),
+    "nbgrader_config.py"
+  );
 
   await contents.createDirectory(tmpPath);
 
@@ -90,6 +99,22 @@ test.afterEach(async ({ request, page, tmpPath }) => {
   const contents = galata.newContentsHelper(request, page);
   await contents.deleteDirectory(tmpPath);
 });
+
+const openSettings = async (page: IJupyterLabPageFixture): Promise<Locator> => {
+  await page.evaluate(async () => {
+    await window.jupyterapp.commands.execute('settingeditor:open');
+  });
+
+  // Activate the settings tab, sometimes it does not automatically.
+  const settingsTab = page
+    .getByRole('main')
+    .locator('.lm-TabBar-tab[data-id="setting-editor"]');
+  await settingsTab.click();
+  await page.waitForCondition(
+    async () => (await settingsTab.getAttribute('aria-selected')) === 'true'
+  );
+  return (await page.activity.getPanelLocator('Settings')) as Locator;
+};
 
 /*
  * Create a nbgrader file system
@@ -348,7 +373,6 @@ test("Load manage assignments", async ({ page, baseURL, request, tmpPath }) => {
   await createEnv(testDir, tmpPath, exchange_dir, cache_dir, isWindows);
   await addCourses(request, page, tmpPath);
   await openFormgrader(page);
-
   // get formgrader iframe and check for breadcrumbs
   const iframe = page.mainFrame().childFrames()[0];
 
@@ -859,4 +883,138 @@ test("Switch views", async ({ page, baseURL, request, tmpPath }) => {
       );
     }
   }
+});
+
+/**
+ * Local Formgrader.
+ */
+test.describe('#localFormgrader', () => {
+  test("Should have formgrader settings", async ({ page, tmpPath }) => {
+    test.skip(isWindows, "This test does not work on Windows");
+
+    if (isNotebook) await page.goto(`tree/${tmpPath}`);
+
+    const settings = await openSettings(page);
+    const formgraderSettings = settings.locator(
+      '.jp-PluginList-entry[data-id="@jupyter/nbgrader:formgrader"]'
+    );
+    await expect(formgraderSettings).toBeVisible();
+
+    await formgraderSettings.click();
+    const settingsList = settings.locator('.jp-SettingsPanel fieldset > .form-group');
+    await expect(settingsList).toHaveCount(1);
+    await expect(
+      settingsList.locator('input').first()
+    ).toHaveAttribute('type', 'checkbox');
+    await expect(
+      settingsList.locator('input').first()
+    ).not.toBeChecked();
+    await expect(
+      settingsList.locator('label').first()
+    ).toHaveText('Allow local nbgrader config file');
+  });
+
+  test('should add option to open formgrader locally', async ({ page, tmpPath }) => {
+    if (isNotebook) await page.goto(`tree/${tmpPath}`);
+
+    const nbgrader_menu = page.locator(
+      `${menuPanelId} div.lm-MenuBar-itemLabel:text("Nbgrader")`
+    );
+    const formgrader_menu = page.locator(
+      '#jp-mainmenu-nbgrader li[data-command="nbgrader:open-formgrader-local"]'
+    );
+    await nbgrader_menu.click();
+    expect(formgrader_menu).toHaveCount(0);
+
+    const settings = await openSettings(page);
+    const formgraderSettings = settings.locator(
+      '.jp-PluginList-entry[data-id="@jupyter/nbgrader:formgrader"]'
+    );
+    await formgraderSettings.click();
+    await settings
+      .locator('.jp-SettingsPanel fieldset > .form-group input')
+      .first()
+      .check();
+
+    // wait for the settings to be saved
+    const settingsTab = page
+      .getByRole('main')
+      .locator('.lm-TabBar-tab[data-id="setting-editor"]');
+    await expect(settingsTab).toHaveAttribute('class', /jp-mod-dirty/);
+    await expect(settingsTab).not.toHaveAttribute('class', /jp-mod-dirty/);
+    await nbgrader_menu.click();
+    expect(formgrader_menu).toHaveCount(1);
+  });
+
+  test('should open formgrader locally', async ({ page, tmpPath }) => {
+    if (isNotebook) await page.goto(`tree/${tmpPath}`);
+
+    const nbgraderMenu = page.locator(
+      `${menuPanelId} div.lm-MenuBar-itemLabel:text("Nbgrader")`
+    );
+    const formgraderMenu = page.locator(
+      '#jp-mainmenu-nbgrader li[data-command="nbgrader:open-formgrader"]'
+    );
+    const localFormgraderMenu = page.locator(
+      '#jp-mainmenu-nbgrader li[data-command="nbgrader:open-formgrader-local"]'
+    );
+
+    const settings = await openSettings(page);
+    const formgraderSettings = settings.locator(
+      '.jp-PluginList-entry[data-id="@jupyter/nbgrader:formgrader"]'
+    );
+    await formgraderSettings.click();
+    await settings
+      .locator('.jp-SettingsPanel fieldset > .form-group input')
+      .first()
+      .check();
+
+    // wait for the settings to be saved
+    const settingsTab = page
+      .getByRole('main')
+      .locator('.lm-TabBar-tab[data-id="setting-editor"]');
+    await expect(settingsTab).toHaveAttribute('class', /jp-mod-dirty/);
+    await expect(settingsTab).not.toHaveAttribute('class', /jp-mod-dirty/);
+
+    // Add a local formgrader in another directory
+    const newDirectory = path.resolve(testDir, 'localFormgrader');
+
+    if (fs.existsSync(newDirectory)) {
+      fs.rmSync(newDirectory, { recursive: true});
+    }
+    fs.mkdirSync(newDirectory);
+    fs.copyFileSync(
+      path.resolve(testDir, "nbgrader_config.py"),
+      path.resolve(testDir, tmpPath, "nbgrader_config.py")
+    );
+
+    var text_to_append = `
+c.CourseDirectory.course_id = "test_course"
+c.Exchange.root = r"${exchange_dir}"
+c.Exchange.cache = r"${cache_dir}"
+c.Exchange.assignment_dir = r"${newDirectory}"
+
+`;
+
+    fs.appendFileSync(
+      path.resolve(newDirectory, "nbgrader_config.py"),
+      text_to_append
+    );
+
+    // open regular formgrader and expect warning because of wrong configuration
+    await nbgraderMenu.click();
+    await formgraderMenu.click();
+    let iframe = page.mainFrame().childFrames()[0];
+    await (await iframe.frameElement()).contentFrame();
+    await expect(iframe.locator('#warning-exchange')).toBeAttached();
+    await page.activity.closeAll();
+
+    // open local formgrader and expect no warning
+    await page.filebrowser.openDirectory('localFormgrader');
+    await nbgraderMenu.click();
+    await localFormgraderMenu.click();
+    iframe = page.mainFrame().childFrames()[0];
+    await (await iframe.frameElement()).contentFrame();
+    await expect(iframe.locator('#warning-exchange')).not.toBeAttached();
+  });
 });
