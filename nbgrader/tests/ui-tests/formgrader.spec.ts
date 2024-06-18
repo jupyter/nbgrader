@@ -888,7 +888,6 @@ test("Switch views", async ({ page, baseURL, request, tmpPath }) => {
  */
 test.describe('#localFormgrader', () => {
   test("Should have formgrader settings", async ({ page, tmpPath }) => {
-    test.skip(isWindows, "This test does not work on Windows");
 
     if (isNotebook) await page.goto(`tree/${tmpPath}`);
 
@@ -944,6 +943,7 @@ test.describe('#localFormgrader', () => {
   });
 
   test('should open formgrader locally', async ({ page, tmpPath }) => {
+    test.skip(isWindows, "This test does not work on Windows");
     if (isNotebook) await page.goto(`tree/${tmpPath}`);
 
     const nbgraderMenu = page.locator(
