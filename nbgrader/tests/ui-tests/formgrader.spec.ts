@@ -100,20 +100,18 @@ test.afterEach(async ({ request, page, tmpPath }) => {
   await contents.deleteDirectory(tmpPath);
 });
 
-const openSettings = async (page: IJupyterLabPageFixture): Promise<Locator> => {
+const openSettings = async (page: IJupyterLabPageFixture): Promise<Locator[]> => {
   await page.evaluate(async () => {
     await window.jupyterapp.commands.execute('settingeditor:open');
   });
 
   // Activate the settings tab, sometimes it does not automatically.
-  const settingsTab = page
-    .getByRole('main')
-    .locator('.lm-TabBar-tab[data-id="setting-editor"]');
+  const settingsTab = page.getByRole('tab', { name: 'Settings', exact: true });
   await settingsTab.click();
   await page.waitForCondition(
     async () => (await settingsTab.getAttribute('aria-selected')) === 'true'
   );
-  return (await page.activity.getPanelLocator('Settings')) as Locator;
+  return [(await page.activity.getPanelLocator('Settings')) as Locator, settingsTab];
 };
 
 /*
@@ -894,7 +892,7 @@ test.describe('#localFormgrader', () => {
 
     if (isNotebook) await page.goto(`tree/${tmpPath}`);
 
-    const settings = await openSettings(page);
+    const [settings, settingsTab] = await openSettings(page);
     const formgraderSettings = settings.locator(
       '.jp-PluginList-entry[data-id="@jupyter/nbgrader:formgrader"]'
     );
@@ -914,7 +912,7 @@ test.describe('#localFormgrader', () => {
     ).toHaveText('Allow local nbgrader config file');
   });
 
-  test('should add option to open formgrader locally', async ({ page, tmpPath }) => {
+  test('should add a menu item to open formgrader locally', async ({ page, tmpPath }) => {
     if (isNotebook) await page.goto(`tree/${tmpPath}`);
 
     const nbgrader_menu = page.locator(
@@ -924,9 +922,11 @@ test.describe('#localFormgrader', () => {
       '#jp-mainmenu-nbgrader li[data-command="nbgrader:open-formgrader-local"]'
     );
     await nbgrader_menu.click();
-    expect(formgrader_menu).toHaveCount(0);
+    await expect(formgrader_menu).not.toBeVisible();
+    // close the menu
+    await nbgrader_menu.click();
 
-    const settings = await openSettings(page);
+    const [settings, settingsTab] = await openSettings(page);
     const formgraderSettings = settings.locator(
       '.jp-PluginList-entry[data-id="@jupyter/nbgrader:formgrader"]'
     );
@@ -937,9 +937,6 @@ test.describe('#localFormgrader', () => {
       .check();
 
     // wait for the settings to be saved
-    const settingsTab = page
-      .getByRole('main')
-      .locator('.lm-TabBar-tab[data-id="setting-editor"]');
     await expect(settingsTab).toHaveAttribute('class', /jp-mod-dirty/);
     await expect(settingsTab).not.toHaveAttribute('class', /jp-mod-dirty/);
     await nbgrader_menu.click();
@@ -959,7 +956,7 @@ test.describe('#localFormgrader', () => {
       '#jp-mainmenu-nbgrader li[data-command="nbgrader:open-formgrader-local"]'
     );
 
-    const settings = await openSettings(page);
+    const [settings, settingsTab] = await openSettings(page);
     const formgraderSettings = settings.locator(
       '.jp-PluginList-entry[data-id="@jupyter/nbgrader:formgrader"]'
     );
@@ -970,9 +967,6 @@ test.describe('#localFormgrader', () => {
       .check();
 
     // wait for the settings to be saved
-    const settingsTab = page
-      .getByRole('main')
-      .locator('.lm-TabBar-tab[data-id="setting-editor"]');
     await expect(settingsTab).toHaveAttribute('class', /jp-mod-dirty/);
     await expect(settingsTab).not.toHaveAttribute('class', /jp-mod-dirty/);
 
@@ -1007,10 +1001,18 @@ c.Exchange.assignment_dir = r"${newDirectory}"
     let iframe = page.mainFrame().childFrames()[0];
     await (await iframe.frameElement()).contentFrame();
     await expect(iframe.locator('#warning-exchange')).toBeAttached();
-    await page.activity.closeAll();
+
+    const formgraderTab = page.getByRole('tab', { name: 'Formgrader', exact: true });
+    await formgraderTab.locator('.lm-TabBar-tabCloseIcon').click();
 
     // open local formgrader and expect no warning
-    await page.filebrowser.openDirectory('localFormgrader');
+    if (isNotebook) {
+      await page.getByRole('tab', { name: 'Files', exact: true }).click();
+      await page.locator('.jp-BreadCrumbs-home').click();
+      await page.getByText('localFormgrader').last().click({ clickCount: 2});
+    } else {
+      await page.filebrowser.openDirectory('localFormgrader');
+    }
     await nbgraderMenu.click();
     await localFormgraderMenu.click();
     iframe = page.mainFrame().childFrames()[0];
