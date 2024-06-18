@@ -110,10 +110,7 @@ exclude = [
 
 [tool.hatch.build.targets.wheel.shared-data]
 "etc/jupyter/jupyter_server_config.d" = "etc/jupyter/jupyter_server_config.d"
-"nbgrader/labextension/static" = "share/jupyter/labextensions/nbgrader/static"
-"install.json" = "share/jupyter/labextensions/nbgrader/install.json"
-"nbgrader/labextension/package.json" = "share/jupyter/labextensions/nbgrader/package.json"
-"nbgrader/labextension/schemas/nbgrader" = "share/jupyter/labextensions/nbgrader/schemas/nbgrader"
+"nbgrader/labextension" = "share/jupyter/labextensions/@jupyter/nbgrader"
 
 [tool.hatch.build.hooks.jupyter-builder]
 dependencies = [
