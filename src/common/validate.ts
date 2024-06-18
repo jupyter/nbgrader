@@ -5,7 +5,10 @@ import { Widget } from '@lumino/widgets';
 const CSS_ERROR_DIALOG = 'nbgrader-ErrorDialog'
 const CSS_SUCCESS_DIALOG = 'nbgrader-SuccessDialog'
 
-export function showNbGraderDialog<T>(options: Partial<Dialog.IOptions<T>> = {}, error: boolean = false): Promise<Dialog.IResult<T>> {
+export function showNbGraderDialog<T extends Widget>(
+  options: Partial<Dialog.IOptions<T>> = {},
+  error: boolean = false
+): Promise<Dialog.IResult<T>> {
   const dialog = new Dialog(options);
 
   if (error) dialog.addClass(CSS_ERROR_DIALOG);
@@ -123,7 +126,7 @@ export function validate(
 
   let b: Widget;
   b = new Widget({node: body});
-  showNbGraderDialog({
+  showNbGraderDialog<Widget>({
     title: "Validation Results",
     body: b,
     buttons: [Dialog.okButton()]
