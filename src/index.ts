@@ -47,9 +47,9 @@ const availableExtensionsManager: JupyterFrontEndPlugin<void> = {
   activate: (
     app: JupyterFrontEnd,
     mainMenu: IMainMenu,
-    palette: ICommandPalette,
-    labShell: ILabShell,
-    notebookShell: INotebookShell
+    palette: ICommandPalette | null,
+    labShell: ILabShell | null,
+    notebookShell: INotebookShell | null
   ) => {
 
     let mainExtensions = false;

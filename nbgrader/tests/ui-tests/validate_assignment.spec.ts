@@ -79,9 +79,11 @@ test.beforeEach(async ({ request, tmpPath }) => {
 test.afterEach(async ({ request, page, tmpPath }) => {
   if (request === undefined) throw new Error("Request is undefined.");
 
-  // Close opened notebook.
-  while (await page.notebook.isAnyActive()) {
-    await page.notebook.close();
+  if (!notebookTest) {
+    // Close opened notebook.
+    while (await page.notebook.isAnyActive()) {
+      await page.notebook.close();
+    }
   }
 
   const contents = galata.newContentsHelper(request, page);

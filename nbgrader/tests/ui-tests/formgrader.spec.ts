@@ -21,7 +21,7 @@ const tempPath = 'nbgrader-formgrader-test';
 
 let test = jupyterLabTest;
 let mainPanelId = '#jp-main-dock-panel';
-let menuPanelId = '#jp-menu-panel';
+let menuPanelId = '#jp-MainMenu';
 let mainPanelTabCount = 1;
 
 const baseTestUse = {
@@ -41,7 +41,6 @@ if (isNotebook) {
     autoGoto: false
   });
   mainPanelId = '#main-panel';
-  menuPanelId = '#menu-panel';
   mainPanelTabCount = 2;
 }
 else {
