@@ -94,6 +94,7 @@ test.afterEach(async ({ request, page, tmpPath }) => {
       await page.notebook.close();
     }
   }
+  await page.kernel.shutdownAll();
 
   const contents = galata.newContentsHelper(request, page);
   await contents.deleteDirectory(tmpPath);
@@ -108,7 +109,8 @@ test("Validation success", async ({ page, tmpPath }) => {
   if (isNotebook) {
     await page.goto(`notebooks/${tmpPath}/submitted-changed.ipynb`);
   } else {
-    await page.filebrowser.open("submitted-changed.ipynb");
+    await page.notebook.open("submitted-changed.ipynb");
+    await page.notebook.activate("submitted-changed.ipynb");
   }
 
   // click on validate, and expect a success modal
@@ -128,7 +130,8 @@ test("Validation failure", async ({ page, tmpPath }) => {
   if (isNotebook) {
     await page.goto(`notebooks/${tmpPath}/submitted-unchanged.ipynb`);
   } else {
-    await page.filebrowser.open("submitted-unchanged.ipynb");
+    await page.notebook.open("submitted-unchanged.ipynb");
+    await page.notebook.activate("submitted-unchanged.ipynb");
   }
 
   // click on validate, and expect an error modal
@@ -150,7 +153,8 @@ test("Validation grade cell changed", async ({ page, tmpPath }) => {
   if (isNotebook) {
     await page.goto(`notebooks/${tmpPath}/submitted-grade-cell-changed.ipynb`);
   } else {
-    await page.filebrowser.open("submitted-grade-cell-changed.ipynb");
+    await page.notebook.open("submitted-grade-cell-changed.ipynb");
+    await page.notebook.activate("submitted-grade-cell-changed.ipynb");
   }
 
   // click on validate, and expect an error modal
@@ -172,7 +176,8 @@ test("Validation locked cell changed", async ({ page, tmpPath }) => {
   if (isNotebook) {
     await page.goto(`notebooks/${tmpPath}/submitted-locked-cell-changed.ipynb`);
   } else {
-    await page.filebrowser.open("submitted-locked-cell-changed.ipynb");
+    await page.notebook.open("submitted-locked-cell-changed.ipynb");
+    await page.notebook.activate("submitted-locked-cell-changed.ipynb");
   }
 
   // click on validate, and expect an error modal
@@ -194,7 +199,8 @@ test("Validation open relative file", async ({ page, tmpPath }) => {
   if (isNotebook) {
     await page.goto(`notebooks/${tmpPath}/open_relative_file.ipynb`);
   } else {
-    await page.filebrowser.open("open_relative_file.ipynb");
+    await page.notebook.open("open_relative_file.ipynb");
+    await page.notebook.activate("open_relative_file.ipynb");
   }
 
   // click on validate, and expect a success modal
@@ -216,7 +222,8 @@ test("Validation grade cell type changed", async ({ page, tmpPath }) => {
   if (isNotebook) {
     await page.goto(`notebooks/${tmpPath}/submitted-grade-cell-type-changed.ipynb`);
   } else {
-    await page.filebrowser.open("submitted-grade-cell-type-changed.ipynb");
+    await page.notebook.open("submitted-grade-cell-type-changed.ipynb");
+    await page.notebook.activate("submitted-grade-cell-type-changed.ipynb");
   }
 
   // click on validate, and expect an error modal
@@ -238,7 +245,8 @@ test("Validation answer cell type changed", async ({ page, tmpPath }) => {
   if (isNotebook) {
     await page.goto(`notebooks/${tmpPath}/submitted-answer-cell-type-changed.ipynb`);
   } else {
-    await page.filebrowser.open("submitted-answer-cell-type-changed.ipynb");
+    await page.notebook.open("submitted-answer-cell-type-changed.ipynb");
+    await page.notebook.activate("submitted-answer-cell-type-changed.ipynb");
   }
 
   // click on validate, and expect an error modal

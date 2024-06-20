@@ -63,7 +63,6 @@ test.beforeEach(async ({ request, tmpPath }) => {
   if (await contents.fileExists("nbgrader_config.py")){
     await contents.deleteFile("nbgrader_config.py");
   }
-
   await contents.uploadFile(
     path.resolve(__dirname, "./files/nbgrader_config.py"),
     "nbgrader_config.py"

@@ -79,6 +79,7 @@ test.afterEach(async ({ request, page, tmpPath }) => {
       await page.notebook.close();
     }
   }
+  await page.kernel.shutdownAll();
 
   const contents = galata.newContentsHelper(request, page);
   await contents.deleteDirectory(tmpPath);
@@ -221,7 +222,8 @@ test("manual cell", async ({ page, tmpPath }) => {
   if (isNotebook) {
     await page.goto(`notebooks/${tmpPath}/blank.ipynb`);
   } else {
-    await page.filebrowser.open("blank.ipynb");
+    await page.notebook.open("blank.ipynb");
+    await page.notebook.activate("blank.ipynb");
   }
 
   await activateToolbar(page);
@@ -262,7 +264,8 @@ test("task cell", async ({ page, tmpPath }) => {
   if (isNotebook) {
     await page.goto(`notebooks/${tmpPath}/task.ipynb`);
   } else {
-    await page.filebrowser.open("task.ipynb");
+    await page.notebook.open("task.ipynb");
+    await page.notebook.activate("task.ipynb");
   }
 
   await activateToolbar(page);
@@ -302,7 +305,8 @@ test("solution cell", async ({ page, tmpPath }) => {
   if (isNotebook) {
     await page.goto(`notebooks/${tmpPath}/blank.ipynb`);
   } else {
-    await page.filebrowser.open("blank.ipynb");
+    await page.notebook.open("blank.ipynb");
+    await page.notebook.activate("blank.ipynb");
   }
 
   await activateToolbar(page);
@@ -338,7 +342,8 @@ test("tests cell", async ({ page, tmpPath }) => {
   if (isNotebook) {
     await page.goto(`notebooks/${tmpPath}/blank.ipynb`);
   } else {
-    await page.filebrowser.open("blank.ipynb");
+    await page.notebook.open("blank.ipynb");
+    await page.notebook.activate("blank.ipynb");
   }
 
   await activateToolbar(page);
@@ -379,7 +384,8 @@ test("tests to solution cell", async ({ page, tmpPath }) => {
   if (isNotebook) {
     await page.goto(`notebooks/${tmpPath}/blank.ipynb`);
   } else {
-    await page.filebrowser.open("blank.ipynb");
+    await page.notebook.open("blank.ipynb");
+    await page.notebook.activate("blank.ipynb");
   }
 
   await activateToolbar(page);
@@ -428,7 +434,8 @@ test("locked cell", async ({ page, tmpPath }) => {
   if (isNotebook) {
     await page.goto(`notebooks/${tmpPath}/blank.ipynb`);
   } else {
-    await page.filebrowser.open("blank.ipynb");
+    await page.notebook.open("blank.ipynb");
+    await page.notebook.activate("blank.ipynb");
   }
 
   await activateToolbar(page);
@@ -465,7 +472,8 @@ test("tab key", async ({ page, tmpPath }) => {
   if (isNotebook) {
     await page.goto(`notebooks/${tmpPath}/blank.ipynb`);
   } else {
-    await page.filebrowser.open("blank.ipynb");
+    await page.notebook.open("blank.ipynb");
+    await page.notebook.activate("blank.ipynb");
   }
 
   await activateToolbar(page);
@@ -494,7 +502,8 @@ test("total points", async ({ page, tmpPath }) => {
   if (isNotebook) {
     await page.goto(`notebooks/${tmpPath}/blank.ipynb`);
   } else {
-    await page.filebrowser.open("blank.ipynb");
+    await page.notebook.open("blank.ipynb");
+    await page.notebook.activate("blank.ipynb");
   }
 
   await activateToolbar(page);
@@ -548,7 +557,8 @@ test("task total points", async ({ page, tmpPath }) => {
   if (isNotebook) {
     await page.goto(`notebooks/${tmpPath}/task.ipynb`);
   } else {
-    await page.filebrowser.open("task.ipynb");
+    await page.notebook.open("task.ipynb");
+    await page.notebook.activate("task.ipynb");
   }
 
   await activateToolbar(page);
@@ -602,7 +612,8 @@ test("cell ids", async ({ page, tmpPath }) => {
   if (isNotebook) {
     await page.goto(`notebooks/${tmpPath}/blank.ipynb`);
   } else {
-    await page.filebrowser.open("blank.ipynb");
+    await page.notebook.open("blank.ipynb");
+    await page.notebook.activate("blank.ipynb");
   }
 
   await activateToolbar(page);
@@ -640,7 +651,8 @@ test("task cell ids", async ({ page, tmpPath }) => {
   if (isNotebook) {
     await page.goto(`notebooks/${tmpPath}/task.ipynb`);
   } else {
-    await page.filebrowser.open("task.ipynb");
+    await page.notebook.open("task.ipynb");
+    await page.notebook.activate("task.ipynb");
   }
 
   await activateToolbar(page);
@@ -678,7 +690,8 @@ test("negative points", async ({ page, tmpPath }) => {
   if (isNotebook) {
     await page.goto(`notebooks/${tmpPath}/blank.ipynb`);
   } else {
-    await page.filebrowser.open("blank.ipynb");
+    await page.notebook.open("blank.ipynb");
+    await page.notebook.activate("blank.ipynb");
   }
 
   await activateToolbar(page);
@@ -707,7 +720,8 @@ test("task negative points", async ({ page, tmpPath }) => {
   if (isNotebook) {
     await page.goto(`notebooks/${tmpPath}/task.ipynb`);
   } else {
-    await page.filebrowser.open("task.ipynb");
+    await page.notebook.open("task.ipynb");
+    await page.notebook.activate("task.ipynb");
   }
 
   await activateToolbar(page);
@@ -735,7 +749,8 @@ test("schema version", async ({ page, tmpPath }) => {
   if (isNotebook) {
     await page.goto(`notebooks/${tmpPath}/old-schema.ipynb`);
   } else {
-    await page.filebrowser.open("old-schema.ipynb");
+    await page.notebook.open("old-schema.ipynb");
+    await page.notebook.activate("old-schema.ipynb");
   }
 
   // activate toolbar should show an error modal
@@ -752,7 +767,8 @@ test("invalid nbgrader cell type", async ({ page, tmpPath }) => {
   if (isNotebook) {
     await page.goto(`notebooks/${tmpPath}/blank.ipynb`);
   } else {
-    await page.filebrowser.open("blank.ipynb");
+    await page.notebook.open("blank.ipynb");
+    await page.notebook.activate("blank.ipynb");
   }
 
   await activateToolbar(page);
