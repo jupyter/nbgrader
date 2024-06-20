@@ -63,6 +63,15 @@ test.beforeEach(async ({ request, tmpPath }) => {
   if (request === undefined) throw new Error("Request is undefined.");
 
   const contents = galata.newContentsHelper(request);
+
+  if (await contents.fileExists("nbgrader_config.py")) {
+    await contents.deleteFile("nbgrader_config.py");
+  }
+  await contents.uploadFile(
+    path.resolve(__dirname, "./files/nbgrader_config.py"),
+    "nbgrader_config.py"
+  );
+
   await contents.createDirectory(tmpPath);
 
   nbFiles.forEach((elem) => {
@@ -79,7 +88,7 @@ test.beforeEach(async ({ request, tmpPath }) => {
 test.afterEach(async ({ request, page, tmpPath }) => {
   if (request === undefined) throw new Error("Request is undefined.");
 
-  if (!notebookTest) {
+  if (!isNotebook) {
     // Close opened notebook.
     while (await page.notebook.isAnyActive()) {
       await page.notebook.close();
@@ -88,14 +97,6 @@ test.afterEach(async ({ request, page, tmpPath }) => {
 
   const contents = galata.newContentsHelper(request, page);
   await contents.deleteDirectory(tmpPath);
-
-  if (await contents.fileExists("nbgrader_config.py")) {
-    await contents.deleteFile("nbgrader_config.py");
-  }
-  await contents.uploadFile(
-    path.resolve(__dirname, "./files/nbgrader_config.py"),
-    "nbgrader_config.py"
-  );
 });
 
 /*

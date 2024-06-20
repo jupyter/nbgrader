@@ -49,6 +49,14 @@ test.beforeEach(async ({ request, tmpPath }) => {
 
   const contents = galata.newContentsHelper(request);
 
+  if (await contents.fileExists("nbgrader_config.py")) {
+    await contents.deleteFile("nbgrader_config.py");
+  }
+  await contents.uploadFile(
+    path.resolve(__dirname, "./files/nbgrader_config.py"),
+    "nbgrader_config.py"
+  );
+
   await contents.createDirectory(tmpPath);
 
   nbFiles.forEach((elem) => {
@@ -65,7 +73,7 @@ test.beforeEach(async ({ request, tmpPath }) => {
 test.afterEach(async ({ request, page, tmpPath }) => {
   if (request === undefined) throw new Error("Request is undefined.");
 
-  if (!notebookTest) {
+  if (!isNotebook) {
     // Close opened notebook.
     while (await page.notebook.isAnyActive()) {
       await page.notebook.close();
@@ -74,14 +82,6 @@ test.afterEach(async ({ request, page, tmpPath }) => {
 
   const contents = galata.newContentsHelper(request, page);
   await contents.deleteDirectory(tmpPath);
-
-  if (await contents.fileExists("nbgrader_config.py")) {
-    await contents.deleteFile("nbgrader_config.py");
-  }
-  await contents.uploadFile(
-    path.resolve(__dirname, "./files/nbgrader_config.py"),
-    "nbgrader_config.py"
-  );
 });
 
 /**
@@ -252,8 +252,6 @@ test("manual cell", async ({ page, tmpPath }) => {
 
   await selectInToolbar(page, "");
   expect(await getCellMetadata(page)).toBeUndefined();
-
-  await saveNotebook(page);
 });
 
 /*
@@ -294,8 +292,6 @@ test("task cell", async ({ page, tmpPath }) => {
 
   await selectInToolbar(page, "");
   expect(await getCellMetadata(page)).toBeUndefined();
-
-  await saveNotebook(page);
 });
 
 /*
@@ -332,8 +328,6 @@ test("solution cell", async ({ page, tmpPath }) => {
 
   await selectInToolbar(page, "");
   expect(await getCellMetadata(page)).toBeUndefined();
-
-  await saveNotebook(page);
 });
 
 /*
@@ -375,8 +369,6 @@ test("tests cell", async ({ page, tmpPath }) => {
 
   await selectInToolbar(page, "");
   expect(await getCellMetadata(page)).toBeUndefined();
-
-  await saveNotebook(page);
 });
 
 /*
@@ -426,7 +418,6 @@ test("tests to solution cell", async ({ page, tmpPath }) => {
 
   await selectInToolbar(page, "");
   expect(await getCellMetadata(page)).toBeUndefined();
-  await saveNotebook(page);
 });
 
 /*
@@ -464,7 +455,6 @@ test("locked cell", async ({ page, tmpPath }) => {
 
   await selectInToolbar(page, "");
   expect(await getCellMetadata(page)).toBeUndefined();
-  await saveNotebook(page);
 });
 
 /*
