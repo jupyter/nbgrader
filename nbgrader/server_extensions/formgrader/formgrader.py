@@ -1,13 +1,13 @@
 # coding: utf-8
 
 import os
+from textwrap import dedent
 
 from nbconvert.exporters import HTMLExporter
-from traitlets import default
+from traitlets import Bool, default
 from tornado import web
 from jinja2 import Environment, FileSystemLoader
 from jupyter_server.utils import url_path_join as ujoin
-from jupyter_core.paths import jupyter_config_path
 
 from . import handlers, apihandlers
 from ...apps.baseapp import NbGrader
@@ -17,6 +17,17 @@ class FormgradeExtension(NbGrader):
 
     name = u'formgrade'
     description = u'Grade a notebook using an HTML form'
+
+    debug = Bool(
+        True,
+        help=dedent(
+            """
+            Whether to display the loaded configuration in the 'Formgrader ->
+            Manage Assignments' panel. This can help debugging some misconfiguration
+            when using several files.
+            """
+        )
+    ).tag(config=True)
 
     @property
     def root_dir(self):
@@ -33,10 +44,9 @@ class FormgradeExtension(NbGrader):
         return relpath
 
     def load_config(self):
-        paths = jupyter_config_path()
-        paths.insert(0, os.getcwd())
         app = NbGrader()
-        app.config_file_paths.append(paths)
+        app.load_cwd_config = self.load_cwd_config
+        app.config_dir = self.config_dir
         app.load_config_file()
 
         return app.config
@@ -72,13 +82,13 @@ class FormgradeExtension(NbGrader):
         # Configure the formgrader settings
         tornado_settings = dict(
             nbgrader_formgrader=self,
-            nbgrader_coursedir=self.coursedir,
             nbgrader_authenticator=self.authenticator,
             nbgrader_exporter=HTMLExporter(config=self.config),
             nbgrader_gradebook=None,
             nbgrader_db_url=self.coursedir.db_url,
             nbgrader_jinja2_env=jinja_env,
-            nbgrader_bad_setup=nbgrader_bad_setup
+            nbgrader_bad_setup=nbgrader_bad_setup,
+            initial_config=self.config
         )
 
         webapp.settings.update(tornado_settings)

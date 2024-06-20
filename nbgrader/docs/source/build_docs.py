@@ -5,6 +5,7 @@ import re
 import shutil
 import sys
 import nbgrader.apps
+import nbgrader.server_extensions.formgrader
 
 from textwrap import dedent
 from clear_docs import run, clear_notebooks
@@ -92,6 +93,7 @@ def autogen_config(root):
 
     print('Generating example configuration file')
     config = nbgrader.apps.NbGraderApp().document_config_options()
+    config += nbgrader.server_extensions.formgrader.formgrader.FormgradeExtension().document_config_options()
     destination = os.path.join(root, 'configuration', 'config_options.rst')
     with open(destination, 'w') as f:
         f.write(header)

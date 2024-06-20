@@ -64,6 +64,8 @@ class NbGrader(JupyterApp):
     aliases = nbgrader_aliases
     flags = nbgrader_flags
 
+    load_cwd_config = True
+
     _log_formatter_cls = LogFormatter
 
     @default("log_level")
@@ -313,10 +315,13 @@ class NbGrader(JupyterApp):
         format_excepthook(etype, evalue, tb)
 
     @catch_config_error
-    def initialize(self, argv: TypingList[str] = None) -> None:
+    def initialize(self, argv: TypingList[str] = None, root: str = '') -> None:
         self.update_config(self.build_extra_config())
         self.init_syspath()
-        self.coursedir = CourseDirectory(parent=self)
+        if root:
+            self.coursedir = CourseDirectory(parent=self, root=root)
+        else:
+            self.coursedir = CourseDirectory(parent=self)
         super(NbGrader, self).initialize(argv)
 
         # load config that is in the coursedir directory
@@ -355,7 +360,8 @@ class NbGrader(JupyterApp):
             paths = [os.path.abspath("{}.py".format(self.config_file))]
         else:
             config_dir = self.config_file_paths.copy()
-            config_dir.insert(0, os.getcwd())
+            if self.load_cwd_config:
+                config_dir.insert(0, os.getcwd())
             paths = [os.path.join(x, "{}.py".format(self.config_file_name)) for x in config_dir]
 
         if not any(os.path.exists(x) for x in paths):
@@ -363,8 +369,9 @@ class NbGrader(JupyterApp):
 
         super(NbGrader, self).load_config_file(**kwargs)
 
-        # Load also config from current working directory
-        super(JupyterApp, self).load_config_file(self.config_file_name, os.getcwd())
+        if (self.load_cwd_config):
+            # Load also config from current working directory
+            super(JupyterApp, self).load_config_file(self.config_file_name, os.getcwd())
 
     def start(self) -> None:
         super(NbGrader, self).start()

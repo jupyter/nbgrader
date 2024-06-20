@@ -16,7 +16,7 @@ class BaseHandler(JupyterHandler):
 
     @property
     def db_url(self):
-        return self.settings['nbgrader_coursedir'].db_url
+        return self.coursedir.db_url
 
     @property
     def url_prefix(self):
@@ -24,7 +24,7 @@ class BaseHandler(JupyterHandler):
 
     @property
     def coursedir(self):
-        return self.settings['nbgrader_coursedir']
+        return self.settings['nbgrader_formgrader'].coursedir
 
     @property
     def authenticator(self):

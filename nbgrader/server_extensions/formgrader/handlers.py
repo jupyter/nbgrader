@@ -1,11 +1,36 @@
 import os
 import re
 import sys
+import json
 
 from tornado import web
+from jupyter_core.paths import jupyter_config_dir
+from traitlets.config.loader import Config
 
 from .base import BaseHandler, check_xsrf, check_notebook_dir
 from ...api import MissingEntry
+
+
+class FormgraderHandler(BaseHandler):
+    @web.authenticated
+    @check_xsrf
+    @check_notebook_dir
+    def get(self):
+        formgrader = self.settings['nbgrader_formgrader']
+        path = self.get_argument('path', '')
+        if path:
+            path = os.path.abspath(path)
+            formgrader.load_cwd_config = False
+            formgrader.config = Config()
+            formgrader.config_dir = path
+            formgrader.initialize([], root=path)
+        else:
+            if formgrader.config != self.settings['initial_config']:
+                formgrader.config = self.settings['initial_config']
+                formgrader.config_dir = jupyter_config_dir()
+                formgrader.initialize([])
+            formgrader.load_cwd_config = True
+        self.redirect(f"{self.base_url}/formgrader/manage_assignments")
 
 
 class ManageAssignmentsHandler(BaseHandler):
@@ -13,14 +38,25 @@ class ManageAssignmentsHandler(BaseHandler):
     @check_xsrf
     @check_notebook_dir
     def get(self):
+        formgrader = self.settings['nbgrader_formgrader']
+        current_config = {}
+        if formgrader.debug:
+            try:
+                current_config = json.dumps(formgrader.config, indent=2)
+            except TypeError:
+                current_config = formgrader.config
+                self.log.warn("Formgrader config is not serializable")
+
+        api = self.api
         html = self.render(
             "manage_assignments.tpl",
             url_prefix=self.url_prefix,
             base_url=self.base_url,
             windows=(sys.prefix == 'win32'),
-            course_id=self.api.course_id,
-            exchange=self.api.exchange_root,
-            exchange_missing=self.api.exchange_missing)
+            course_id=api.course_id,
+            exchange=api.exchange_root,
+            exchange_missing=api.exchange_missing,
+            current_config= current_config)
         self.write(html)
 
 
@@ -282,7 +318,7 @@ fonts_path = os.path.join(components_path, 'bootstrap', 'fonts')
 _navigation_regex = r"(?P<action>next_incorrect|prev_incorrect|next|prev)"
 
 default_handlers = [
-    (r"/formgrader/?", ManageAssignmentsHandler),
+    (r"/formgrader/?", FormgraderHandler),
     (r"/formgrader/manage_assignments/?", ManageAssignmentsHandler),
     (r"/formgrader/manage_submissions/([^/]+)/?", ManageSubmissionsHandler),
 
