@@ -2,6 +2,39 @@ A summary of changes to nbgrader.
 
 <!-- <START NEW CHANGELOG ENTRY> -->
 
+## 0.9.3
+
+([Full Changelog](https://github.com/jupyter/nbgrader/compare/v0.9.2...f3878c749fee3733f29f91fb5f6c1c81a51e2a4c))
+
+### Enhancements made
+
+- Open formgrader with a local configuration file [#1859](https://github.com/jupyter/nbgrader/pull/1859) ([@brichet](https://github.com/brichet))
+
+### Bugs fixed
+
+- Make hashing independent of notebook content [#1774](https://github.com/jupyter/nbgrader/pull/1774) ([@tuncbkose](https://github.com/tuncbkose))
+
+### Maintenance and upkeep improvements
+
+- Install the labextension in the correct directory  [#1893](https://github.com/jupyter/nbgrader/pull/1893) ([@brichet](https://github.com/brichet))
+- bump jupyterlab, notebook and ydoc dependencies [#1892](https://github.com/jupyter/nbgrader/pull/1892) ([@brichet](https://github.com/brichet))
+- Transfer the NPM package to @jupyter namespace [#1875](https://github.com/jupyter/nbgrader/pull/1875) ([@brichet](https://github.com/brichet))
+- Update Release Scripts [#1874](https://github.com/jupyter/nbgrader/pull/1874) ([@blink1073](https://github.com/blink1073))
+- Fix the confusing server errors during UI tests [#1871](https://github.com/jupyter/nbgrader/pull/1871) ([@brichet](https://github.com/brichet))
+- Remove use of deprecated typing.io [#1855](https://github.com/jupyter/nbgrader/pull/1855) ([@shreve](https://github.com/shreve))
+
+### Documentation improvements
+
+- Fixed LaTeX rendering in some demo notebooks [#1890](https://github.com/jupyter/nbgrader/pull/1890) ([@ZiadAmerr](https://github.com/ZiadAmerr))
+
+### Contributors to this release
+
+([GitHub contributors page for this release](https://github.com/jupyter/nbgrader/graphs/contributors?from=2024-03-26&to=2024-06-20&type=c))
+
+[@blink1073](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Ablink1073+updated%3A2024-03-26..2024-06-20&type=Issues) | [@brichet](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Abrichet+updated%3A2024-03-26..2024-06-20&type=Issues) | [@github-actions](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Agithub-actions+updated%3A2024-03-26..2024-06-20&type=Issues) | [@nthiery](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Anthiery+updated%3A2024-03-26..2024-06-20&type=Issues) | [@shreve](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Ashreve+updated%3A2024-03-26..2024-06-20&type=Issues) | [@trevorcampbell](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Atrevorcampbell+updated%3A2024-03-26..2024-06-20&type=Issues) | [@tuncbkose](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Atuncbkose+updated%3A2024-03-26..2024-06-20&type=Issues) | [@ZiadAmerr](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3AZiadAmerr+updated%3A2024-03-26..2024-06-20&type=Issues)
+
+<!-- <END NEW CHANGELOG ENTRY> -->
+
 ## 0.9.2
 
 ([Full Changelog](https://github.com/jupyter/nbgrader/compare/v0.9.1...9876829b6be4fccce621ffee907bd5f9ac400c44))
@@ -25,8 +58,6 @@ A summary of changes to nbgrader.
 ([GitHub contributors page for this release](https://github.com/jupyter/nbgrader/graphs/contributors?from=2023-09-05&to=2024-03-26&type=c))
 
 [@brichet](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Abrichet+updated%3A2023-09-05..2024-03-26&type=Issues) | [@dependabot](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Adependabot+updated%3A2023-09-05..2024-03-26&type=Issues) | [@github-actions](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Agithub-actions+updated%3A2023-09-05..2024-03-26&type=Issues) | [@lahwaacz](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Alahwaacz+updated%3A2023-09-05..2024-03-26&type=Issues) | [@nthiery](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Anthiery+updated%3A2023-09-05..2024-03-26&type=Issues)
-
-<!-- <END NEW CHANGELOG ENTRY> -->
 
 ## 0.9.1
 
