@@ -60,6 +60,14 @@ test.beforeEach(async ({ request, tmpPath }) => {
 
   await contents.createDirectory(tmpPath);
 
+  if (await contents.fileExists("nbgrader_config.py")){
+    await contents.deleteFile("nbgrader_config.py");
+  }
+  await contents.uploadFile(
+    path.resolve(__dirname, "./files/nbgrader_config.py"),
+    "nbgrader_config.py"
+  );
+
   if (!isWindows) {
     exchange_dir = fs.mkdtempSync(
       path.join(os.tmpdir(), "nbgrader_exchange_test_")
@@ -71,22 +79,15 @@ test.beforeEach(async ({ request, tmpPath }) => {
 /*
  * delete temp directories at the end of test
  */
-test.afterEach(async ({ request, tmpPath }) => {
+test.afterEach(async ({ request, page, tmpPath }) => {
   if (request === undefined) throw new Error("Request is undefined.");
-  const contents = galata.newContentsHelper(request);
+  const contents = galata.newContentsHelper(request, page);
   await contents.deleteDirectory(tmpPath);
 
   if (!isWindows) {
     fs.rmSync(exchange_dir, { recursive: true, force: true });
     fs.rmSync(cache_dir, { recursive: true, force: true });
   }
-
-  if (await contents.fileExists("nbgrader_config.py"))
-    contents.deleteFile("nbgrader_config.py");
-  contents.uploadFile(
-    path.resolve(__dirname, "./files/nbgrader_config.py"),
-    "nbgrader_config.py"
-  );
 });
 
 /*

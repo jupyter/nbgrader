@@ -48,7 +48,7 @@ jobs:
         run: |
           if [ "${{ matrix.group }}" == "docs" ]; then
               echo "GROUP=docs" >> $GITHUB_ENV
-              echo "TIMEOUT_MINUTES=15" >> $GITHUB_ENV
+              echo "TIMEOUT_MINUTES=20" >> $GITHUB_ENV
           fi
           if [ "${{ matrix.group }}" == "python" ]; then
               echo "GROUP=python" >> $GITHUB_ENV
