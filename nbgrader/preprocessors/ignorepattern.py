@@ -1,6 +1,6 @@
 from . import NbGraderPreprocessor
 
-from traitlets import Unicode
+from traitlets import Unicode, Bool
 from nbformat.notebooknode import NotebookNode
 from nbconvert.exporters.exporter import ResourcesDict
 from typing import Tuple
@@ -11,6 +11,7 @@ class IgnorePattern(NbGraderPreprocessor):
     """Preprocessor for removing cell outputs that match a particular pattern"""
     
     pattern = Unicode("", help="The regular expression to remove from stderr").tag(config=True)
+    enabled = Bool(False, help="Whether to use this preprocessor when running nbgrader").tag(config=True)
     
     def preprocess_cell(self,
                         cell: NotebookNode,
