@@ -4,6 +4,7 @@ import functools
 
 from tornado import web
 from jupyter_server.base.handlers import JupyterHandler
+from jupyter_server.utils import url_path_join, url_is_absolute
 from ...api import Gradebook
 from ...apps.api import NbGraderAPI
 
@@ -41,7 +42,10 @@ class BaseHandler(JupyterHandler):
 
     @property
     def mathjax_url(self):
-        return self.settings['mathjax_url']
+        url = self.settings.get("mathjax_url", "")
+        if not url or url_is_absolute(url):
+            return url
+        return url_path_join(self.base_url or "/", url)
 
     @property
     def exporter(self):

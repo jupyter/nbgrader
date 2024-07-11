@@ -3,7 +3,6 @@
 {%- block head -%}
 <script>
 var url_prefix = "{{ url_prefix }}";
-var is_lab = {% if is_lab %}true{% else %}false{% endif %};
 </script>
 
 <script src="{{ base_url }}/formgrader/static/js/manage_assignments.js"></script>
