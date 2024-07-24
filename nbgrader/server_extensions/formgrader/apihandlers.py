@@ -279,6 +279,21 @@ class AutogradeHandler(BaseApiHandler):
         self.write(json.dumps(self.api.autograde(assignment_id, student_id)))
 
 
+class ExtensionHandler(BaseApiHandler):
+    @web.authenticated
+    @check_xsrf
+    @check_notebook_dir
+    def post(self, assignment_id, student_id):
+        data = self.get_json_body()
+        try:
+            minutes = int(data.get('minutes', 0))
+            hours = int(data.get('hours', 0))
+            days = int(data.get('days', 0))
+        except ValueError:
+            raise web.HTTPError(400, "Invalid extension time")
+        self.write(json.dumps(self.api.grant_extension_to_student(assignment_id, student_id, minutes, hours, days)))
+
+
 class GenerateAllFeedbackHandler(BaseApiHandler):
     @web.authenticated
     @check_xsrf
@@ -330,6 +345,7 @@ default_handlers = [
     (r"/formgrader/api/submissions/([^/]+)", SubmissionCollectionHandler),
     (r"/formgrader/api/submission/([^/]+)/([^/]+)", SubmissionHandler),
     (r"/formgrader/api/submission/([^/]+)/([^/]+)/autograde", AutogradeHandler),
+    (r"/formgrader/api/submission/extension/([^/]+)/([^/]+)", ExtensionHandler),
 
     (r"/formgrader/api/submitted_notebooks/([^/]+)/([^/]+)", SubmittedNotebookCollectionHandler),
     (r"/formgrader/api/submitted_notebook/([^/]+)/flag", FlagSubmissionHandler),
