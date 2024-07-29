@@ -284,7 +284,12 @@ var SubmissionUI = Backbone.View.extend({
         var body = $("<table/>").addClass("table table-striped form-table");
         var tableBody = $("<tbody/>");
         body.append(tableBody);
-
+        
+        var weeks = $("<tr/>");
+        tableBody.append(weeks);
+        weeks.append($("<td/>").addClass("align-middle").text("Weeks"));
+        weeks.append($("<td/>").append($("<input/>").addClass("modal-weeks").attr({type: "number", min: 0, step: 1, value: this.modal_extension_weeks})));
+        
         var days = $("<tr/>");
         tableBody.append(days);
         days.append($("<td/>").addClass("align-middle").text("Days"));
@@ -313,11 +318,14 @@ var SubmissionUI = Backbone.View.extend({
 
         this.$modal = createModal("grant-extension-modal", "Granting Extension to " + this.model.get("student"), body, footer);
         
-        var extension = new Date(this.model.get("extension") || '1970-01-01T00:00:00Z');
-        var modal_extension_days = Math.trunc(extension.getTime() / 86400000);
-        var modal_extension_hours = extension.getHours();
-        var modal_extension_minutes = extension.getMinutes();
+        var extension = this.model.get("extension") || 0;
+        var modal_extension_days = Math.trunc(extension / 86400);
+        var modal_extension_weeks = Math.trunc(modal_extension_days / 7);
+        modal_extension_days = modal_extension_days % 7;
+        var modal_extension_hours = Math.trunc((extension % 86400) / 3600);
+        var modal_extension_minutes = Math.trunc((extension % 3600) / 60);
 
+        this.$modal.find("input.modal-weeks").val(modal_extension_weeks);
         this.$modal.find("input.modal-days").val(modal_extension_days);
         this.$modal.find("input.modal-hours").val(modal_extension_hours);
         this.$modal.find("input.modal-minutes").val(modal_extension_minutes);
@@ -327,6 +335,7 @@ var SubmissionUI = Backbone.View.extend({
     save: function () {
         this.animateSaving();
         
+        var weeks = this.$modal.find("input.modal-weeks").val() || 0;
         var days = this.$modal.find("input.modal-days").val() || 0;
         var hours = this.$modal.find("input.modal-hours").val() || 0;
         var minutes = this.$modal.find("input.modal-minutes").val() || 0;
@@ -342,7 +351,8 @@ var SubmissionUI = Backbone.View.extend({
             data: JSON.stringify({
                 minutes: minutes,
                 hours: hours,
-                days: days
+                days: days,
+                weeks: weeks,
             }),
             })
             .done(_.bind(this.grant_extension_log, this));
@@ -380,6 +390,7 @@ var SubmissionUI = Backbone.View.extend({
         if (this.$modal) {
             this.$modal.modal('hide')
             this.$modal = undefined;
+            this.modal_extension_weeks = 0;
             this.modal_extension_days = 0;
             this.modal_extension_hours = 0;
             this.modal_extension_minutes = 0;

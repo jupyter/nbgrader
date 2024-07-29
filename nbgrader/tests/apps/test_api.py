@@ -837,8 +837,8 @@ class TestNbGraderAPI(BaseTestApp):
         api.generate_assignment("ps1")
         api.autograde("ps1", "foo")
 
-        result = api.grant_extension_to_student("ps1", "foo", 1, 2, 3)
+        result = api.grant_extension_to_student("ps1", "foo", 1, 2, 3, 4)
         assert result["success"]
         
         extension = api.get_submission("ps1", "foo")["extension"]
-        assert extension == datetime(1970, 1, 4, 2, 1).isoformat()
+        assert extension == timedelta(weeks=4, days=3, hours=2, minutes=1).total_seconds()

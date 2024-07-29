@@ -618,7 +618,7 @@ class NbGraderAPI(LoggingConfigurable):
             submission["autograded"] = True
             submission["submitted"] = True
             if submission["extension"]:
-                submission["extension"] = (submission["extension"] + datetime.datetime(1970, 1, 1)).isoformat()
+                submission["extension"] = submission["extension"].total_seconds()
             submissions.append(submission)
 
         for student_id in ungraded:
@@ -1165,7 +1165,7 @@ class NbGraderAPI(LoggingConfigurable):
             ret_dic["value"] = sorted(assignments, key=lambda x: (x['course_id'], x['assignment_id']))
         return ret_dic
     
-    def grant_extension_to_student(self, assignment_id, student_id, minutes, hours, days):
+    def grant_extension_to_student(self, assignment_id, student_id, minutes, hours, days, weeks):
         """Grants extension for a particular assignment and student.
 
         Arguments
@@ -1180,6 +1180,8 @@ class NbGraderAPI(LoggingConfigurable):
             The number of hours to extend the assignment deadline
         days: int
             The number of days to extend the assignment deadline
+        weeks: int
+            The number of weeks to extend the assignment deadline
 
         Returns
         -------
@@ -1193,7 +1195,7 @@ class NbGraderAPI(LoggingConfigurable):
         """
         with self.gradebook as gb:
             try:
-                gb.grant_extension(assignment_id, student_id, minutes, hours, days)
+                gb.grant_extension(assignment_id, student_id, minutes, hours, days, weeks)
             except InvalidEntry as e:
                 return {"success": False, "error": str(e)}
         return {"success": True}

@@ -614,7 +614,7 @@ class SubmittedAssignment(Base):
             "task_score": self.task_score,
             "max_task_score": self.max_task_score,
             "needs_manual_grade": self.needs_manual_grade,
-            "extension": (self.extension + datetime.datetime(1970, 1, 1)).isoformat() if self.extension is not None else None,
+            "extension": self.extension.total_seconds() if self.extension is not None else None,
         }
 
     def __repr__(self) -> str:

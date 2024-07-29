@@ -289,9 +289,10 @@ class ExtensionHandler(BaseApiHandler):
             minutes = int(data.get('minutes', 0))
             hours = int(data.get('hours', 0))
             days = int(data.get('days', 0))
+            weeks = int(data.get('weeks', 0))
         except ValueError:
             raise web.HTTPError(400, "Invalid extension time")
-        self.write(json.dumps(self.api.grant_extension_to_student(assignment_id, student_id, minutes, hours, days)))
+        self.write(json.dumps(self.api.grant_extension_to_student(assignment_id, student_id, minutes, hours, days, weeks)))
 
 
 class GenerateAllFeedbackHandler(BaseApiHandler):
