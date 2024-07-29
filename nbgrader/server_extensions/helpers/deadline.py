@@ -1,3 +1,4 @@
+import json
 import os
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
@@ -37,9 +38,17 @@ class DeadlineManager:
     
     def _write_deadlines(self, file_path, deadlines):
         """Write the deadlines to the deadlines file and sets access permissions."""
-        with open(file_path, "w") as fh:
-            for assignment, deadline in deadlines.items():
-                fh.write(f"{assignment}/{deadline}\n")
+        try:
+            json.dump(deadlines, open(file_path, "w"))
+        except (FileNotFoundError, PermissionError) as e:
+            self.log.error("The path to file does not exist or not permitted: %s", e)
+            return
+        except IsADirectoryError:
+            self.log.error("The path to file is a directory: %s", file_path)
+            return
+        except TypeError:
+            self.log.error("Invalid data type to write in file: %s", deadlines)
+            return
         
         access_mode = 0o664 if self.config.CourseDirectory.groupshared else 0o644
         st_mode = os.stat(file_path).st_mode
@@ -54,35 +63,27 @@ class DeadlineManager:
         tz = "UTC"  # Default timezone
         if self.config.Exchange.timezone:
             tz = self.config.Exchange.timezone
-        try:
-             tzinfo = ZoneInfo(tz)
-        except ZoneInfoNotFoundError:
-            self.log.error("Invalid deadline format: {}".format(deadline))
-            tzinfo = ZoneInfo("UTC")
+        # try:
+        #      tzinfo = ZoneInfo(tz)
+        # except ZoneInfoNotFoundError:
+        #     self.log.error("Invalid deadline format: {}".format(deadline))
+        #     tzinfo = ZoneInfo("UTC")
             
         return utils.parse_utc(deadline) \
             .replace(tzinfo=ZoneInfo("UTC")) \
-            .astimezone(tzinfo) \
-            .strftime("%Y-%m-%d %H:%M:%S %Z")
+            .isoformat()  # ?
+            # .strftime("%Y-%m-%d %H:%M:%S %Z")
+            # .astimezone(tzinfo) \
 
     def _read_deadlines(self, file_path):
         """Read the deadlines from the deadlines file."""
 
         try:
-            with open(file_path, "r") as fh:
-                lines = fh.readlines()       
+            entries = json.load(open(file_path, "r"))
         except FileNotFoundError:
             self.log.warning("No deadlines file found at {}".format(file_path))
             return {}
-        return self._parse_deadlines(lines)
-        
-    def _parse_deadlines(self, lines):
-        """Parse the deadlines from the lines."""
-        deadlines = {}
-        for line in lines:
-            parts = line.split("/")
-            if len(parts) != 2:
-                self.log.warning("Invalid deadline line: {}".format(line))
-            assignment, deadline = parts
-            deadlines[assignment.strip()] = deadline.strip()
-        return deadlines
+        except json.JSONDecodeError:
+            self.log.warning("Invalid JSON in deadlines file at {}".format(file_path))
+            return {}
+        return entries

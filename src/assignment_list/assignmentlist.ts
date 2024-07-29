@@ -345,13 +345,13 @@ class Assignment {
         let pastDueDate = false;
         if (!!this.data['due_date']) {
           // Extract date from string
-          var due_date = new Date(this.data['due_date'].substring(0, this.data['due_date'].lastIndexOf(" ")));
-          var now = new Date();
+          var due_date = new Date(this.data['due_date'].substring(0, this.data['due_date'].lastIndexOf(" ")))
+              .getTime();
+          var now = new Date().getTime();
           pastDueDate = (due_date < now)
         }
         if (pastDueDate) {
           button.innerText = 'Late Submit';
-          // button.style.opacity = '0.65';
         }
         button.onclick = async function(){
           if (pastDueDate) {
