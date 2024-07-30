@@ -1,6 +1,6 @@
 import json
 import os
-from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
+from zoneinfo import ZoneInfo
 
 from ... import utils
 
@@ -60,20 +60,10 @@ class DeadlineManager:
     
     def _format_deadline(self, deadline):
         """Format the deadline."""
-        tz = "UTC"  # Default timezone
-        if self.config.Exchange.timezone:
-            tz = self.config.Exchange.timezone
-        # try:
-        #      tzinfo = ZoneInfo(tz)
-        # except ZoneInfoNotFoundError:
-        #     self.log.error("Invalid deadline format: {}".format(deadline))
-        #     tzinfo = ZoneInfo("UTC")
-            
+        
         return utils.parse_utc(deadline) \
             .replace(tzinfo=ZoneInfo("UTC")) \
-            .isoformat()  # ?
-            # .strftime("%Y-%m-%d %H:%M:%S %Z")
-            # .astimezone(tzinfo) \
+            .isoformat()
 
     def _read_deadlines(self, file_path):
         """Read the deadlines from the deadlines file."""

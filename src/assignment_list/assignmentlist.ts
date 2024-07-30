@@ -344,16 +344,14 @@ class Assignment {
         button.innerText = "Submit";
         let pastDueDate = false;
         if (!!this.data['due_date']) {
-          // Extract date from string
-          var due_date = new Date(this.data['due_date'].substring(0, this.data['due_date'].lastIndexOf(" ")))
-              .getTime();
+          var due_date = new Date(this.data['due_date']).getTime();
           var now = new Date().getTime();
           pastDueDate = (due_date < now)
         }
         if (pastDueDate) {
           button.innerText = 'Late Submit';
         }
-        button.onclick = async function(){
+        button.onclick = async function() {
           if (pastDueDate) {
             const proceed = await Assignment.proceedLateSubmissionWarning();
             if (!proceed) {
@@ -371,11 +369,11 @@ class Assignment {
               method: 'POST'
             });
 
-            if(!reply.success){
+            if (!reply.success) {
               that.submit_error(reply);
               button.innerText = 'Submit'
               button.removeAttribute('disabled')
-            }else{
+            } else {
               that.on_refresh(reply);
             }
 
@@ -386,9 +384,7 @@ class Assignment {
               `Error on POST /assignment_list/assignments/submit ${dataToSend}.\n${reason}`
             );
           }
-
         }
-
 
     } else if (this.data.status == 'submitted') {
       button.innerText = "Fetch Feedback";
@@ -425,7 +421,7 @@ class Assignment {
     row.append(link);
     var dl = document.createElement('span');
     dl.classList.add('item_deadline', 'col-sm-4')
-    dl.innerText = this.data['due_date'] || '';
+    dl.innerText = new Date(this.data['due_date']).toLocaleString().replace(',', '') || '';
     row.append(dl)
     var s = document.createElement('span');
     s.classList.add('item_course', 'col-sm-2')
