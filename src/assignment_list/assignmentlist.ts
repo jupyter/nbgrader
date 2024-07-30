@@ -260,51 +260,42 @@ class Assignment {
       buttons: [Dialog.okButton()]
     }, true);
 
-
   };
 
   private static async proceedLateSubmissionWarning(): Promise<any> {
 
-    // const body_title = React.createElement('p', null, "You're submitting after the deadline. Your submission might not be graded.");
-    // const body = React.createElement("div", {'id': 'late-submission-message'}, [body_title]);
-    // showNbGraderDialog({
-    //   title: "Late Submission",
-    //   body: body,
-    //   buttons: [Dialog.okButton()]
-    // }, true);
-
     return showDialog({
-      title: 'Late Submission', // Can be text or a react element
-      body: 'The assignment is past due date. Would you like to proceed?', // Can be text, a widget or a react element
-      host: document.body, // Parent element for rendering the dialog
-      buttons: [ // List of buttons
+      title: 'Late Submission',
+      body: 'The assignment is past due date. Would you like to proceed?',
+      host: document.body,
+      buttons: [
         {
-          label: 'cancel', // Button label
-          caption: 'cancel submission', // Button title
-          className: '', // Additional button CSS class
-          accept: false, // Whether this button will discard or accept the dialog
-          displayType: 'default', // applies 'default' or 'warn' styles
+          label: 'cancel',
+          caption: 'cancel submission',
+          className: '',
+          accept: false,
+          displayType: 'default',
           ariaLabel: '',
           iconClass: 'closeIcon',
           iconLabel: 'Cancel',
           actions: []
         },
         {
-          label: 'submit', // Button label
-          caption: 'proceed', // Button title
-          className: '', // Additional button CSS class
-          accept: true, // Whether this button will discard or accept the dialog
-          displayType: 'default', // applies 'default' or 'warn' styles
+          label: 'submit',
+          caption: 'proceed',
+          className: '',
+          accept: true,
+          displayType: 'default',
           ariaLabel: '',
           iconClass: 'checkIcon',
           iconLabel: 'Submit',
           actions: []
         },
       ],
-      defaultButton: 0, // Index of the default button
-      focusNodeSelector: '.my-input', // Selector for focussing an input element when dialog opens
-      hasClose: false, // Whether to display a close button or not
-      renderer: undefined // To define customized dialog structure
+      defaultButton: 0,
+      focusNodeSelector: '.my-input',
+      hasClose: false,
+      renderer: undefined
     }).then((result => {
       return result.button.accept;
     }));
@@ -421,7 +412,9 @@ class Assignment {
     row.append(link);
     var dl = document.createElement('span');
     dl.classList.add('item_deadline', 'col-sm-4')
-    dl.innerText = new Date(this.data['due_date']).toLocaleString().replace(',', '') || '';
+    dl.innerText = !!this.data['due_date']
+      ? new Date(this.data['due_date']).toLocaleString().replace(',', '')
+      : '';
     row.append(dl)
     var s = document.createElement('span');
     s.classList.add('item_course', 'col-sm-2')
@@ -477,7 +470,7 @@ const remove_children = function (element: HTMLElement) {
   element.innerHTML = '';
 }
 
-class Submission{
+class Submission {
 
   element: any;
   data: any;
