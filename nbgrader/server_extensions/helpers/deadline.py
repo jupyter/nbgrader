@@ -6,15 +6,18 @@ from ... import utils
 
 
 class DeadlineManager:
-    def __init__(self, config, logger):
-        self.config = config
+    def __init__(self, exchange_root, coursedir, logger):
+        self.exchange_root = exchange_root
+        self.coursedir = coursedir
         self.log = logger
     
     def fetch_deadlines(self, assignments):
         """Fetch the deadline for the given course id and assignments."""
-
-        dir_name = os.path.join(self.config.Exchange.root, self.config.CourseDirectory.course_id)
-        file_path = os.path.join(dir_name, self.config.Exchange.deadline_file)
+        if not self.exchange_root:  # Non-FS based exchange
+            return assignments
+        
+        dir_name = os.path.join(self.exchange_root, self.coursedir.course_id)
+        file_path = os.path.join(dir_name, self.coursedir.deadline_file)
         if not os.path.exists(file_path) or not os.path.isfile(file_path):
             self.log.warning("No deadlines file found at {}".format(file_path))
             return assignments
@@ -27,10 +30,13 @@ class DeadlineManager:
    
     def update_or_add_deadline(self, assignment_id, deadline):
         """Add a deadline in the deadlines file or update it if it exists."""
+        if not self.exchange_root:  # Non-FS based exchange
+            return
+        
         deadline = self._format_deadline(deadline)
         
-        dir_name = os.path.join(self.config.Exchange.root, self.config.CourseDirectory.course_id)
-        file_path = os.path.join(dir_name, self.config.Exchange.deadline_file)
+        dir_name = os.path.join(self.exchange_root, self.coursedir.course_id)
+        file_path = os.path.join(dir_name, self.coursedir.deadline_file)
         deadlines = self._read_deadlines(file_path)
         deadlines[assignment_id] = deadline
         
@@ -50,7 +56,7 @@ class DeadlineManager:
             self.log.error("Invalid data type to write in file: %s", deadlines)
             return
         
-        access_mode = 0o664 if self.config.CourseDirectory.groupshared else 0o644
+        access_mode = 0o664 if self.coursedir.groupshared else 0o644
         st_mode = os.stat(file_path).st_mode
         if st_mode & access_mode != access_mode:
             try:

@@ -84,7 +84,7 @@ class AssignmentList(LoggingConfigurable):
                     authenticator=authenticator,
                     config=config)
                 assignments = lister.start()
-                assignments = DeadlineManager(config, self.log) \
+                assignments = DeadlineManager(config.Exchange.root, coursedir, self.log) \
                     .fetch_deadlines(assignments)
 
             except Exception as e:

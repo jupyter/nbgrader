@@ -144,7 +144,7 @@ class AssignmentHandler(BaseApiHandler):
         assignment = {"duedate": duedate}
         assignment_id = assignment_id.strip()
         self.gradebook.update_or_create_assignment(assignment_id, **assignment)
-        DeadlineManager(self.api._trait_values["config"], self.log) \
+        DeadlineManager(self.api.exchange_root, self.coursedir, self.log) \
             .update_or_add_deadline(assignment_id, duedate)
         sourcedir = os.path.abspath(self.coursedir.format_path(self.coursedir.source_directory, '.', assignment_id))
         if not os.path.isdir(sourcedir):
