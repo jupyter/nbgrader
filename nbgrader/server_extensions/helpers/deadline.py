@@ -52,8 +52,8 @@ class DeadlineManager:
         except IsADirectoryError:
             self.log.error("The path to file is a directory: %s", file_path)
             return
-        except TypeError:
-            self.log.error("Invalid data type to write in file: %s", deadlines)
+        except:
+            self.log.error("An unexpected error occurred while writing deadlines")
             return
         
         access_mode = 0o664 if self.coursedir.groupshared else 0o644
@@ -63,6 +63,8 @@ class DeadlineManager:
                 os.chmod(file_path, (st_mode | access_mode) & 0o777)
             except PermissionError:
                 self.log.warning("Could not update permissions of %s", file_path)
+            except:
+                self.log.error("An unexpected error occurred while updating permissions of %s", file_path)
     
     def _format_deadline(self, deadline):
         """Format the deadline."""
@@ -76,10 +78,13 @@ class DeadlineManager:
 
         try:
             entries = json.load(open(file_path, "r"))
-        except FileNotFoundError:
-            self.log.warning("No deadlines file found at {}".format(file_path))
+        except (FileNotFoundError, PermissionError):
+            self.log.warning("No deadlines file found or accessible at {}".format(file_path))
             return {}
         except json.JSONDecodeError:
             self.log.warning("Invalid JSON in deadlines file at {}".format(file_path))
+            return {}
+        except:
+            self.log.error("An unexpected error occurred while loading deadlines")
             return {}
         return entries
