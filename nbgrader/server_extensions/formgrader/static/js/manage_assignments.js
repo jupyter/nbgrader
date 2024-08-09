@@ -96,22 +96,14 @@ var AssignmentUI = Backbone.View.extend({
 
     render: function () {
         this.clear();
-        var this_assignment = this;
+
         // assignment name
         var name = this.model.get("name")
         this.$name.attr("data-order", name);
 
-        // Append link with a listener to send message to iframe parent.
-        // NOTE: the formgrade UI is embedded in an iframe.
         this.$name.append($("<a/>")
             .text(name)
-            .attr("href", "#")
-            .click(function() {
-                window.parent.postMessage(
-                    jlab_go_to_path(url_prefix + "/" + this_assignment.model.get("source_path")),
-                    '*'
-                );
-            })
+            .map(linkTo("directory", url_prefix + "/" + this.model.get("source_path")))
         );
 
         // duedate
@@ -157,16 +149,8 @@ var AssignmentUI = Backbone.View.extend({
         // preview student version
         var release_path = this.model.get("release_path");
         if (release_path) {
-            // Append link with a listener to send message to iframe parent.
-            // NOTE: the formgrade UI is embedded in an iframe.
             this.$preview.append($("<a/>")
-                .attr("href", "#")
-                .click(function() {
-                    window.parent.postMessage(
-                        jlab_go_to_path(url_prefix + "/" + release_path),
-                        '*'
-                    );
-                })
+                .map(linkTo("directory", url_prefix + "/" + release_path))
                 .append($("<span/>")
                     .addClass("glyphicon glyphicon-search")
                     .attr("aria-hidden", "true")
@@ -619,7 +603,6 @@ var loadAssignments = function () {
 
 var models = undefined;
 var views = [];
-
 
 $(window).on('load', function () {
     loadAssignments();

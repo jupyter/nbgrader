@@ -87,3 +87,44 @@ var insertDataTable = function (tbl) {
         }]
     });
 };
+
+var linkTo = function (type, path) {
+    /*
+     * Connect a link in the appropriate manner for the context.
+     * - If we're in the outermost frame, assume notebook and use an href.
+     * - If we're in an iframe, assume lab and send a message.
+     */
+    if (window === window.top) {
+        var prefix = {
+            notebook: "/notebooks/",
+            file: "/edit/",
+            directory: "/tree/"
+        }[type];
+
+        return (_, el) => {
+            return $(el)
+                .attr("href", prefix + path)
+                .attr("target", "_blank")[0];
+        };
+    } else {
+        var command = {
+            notebook: "docmanager:open",
+            file: "docmanager:open",
+            directory: "filebrowser:go-to-path",
+        }[type];
+
+        return (_, el) => {
+            return $(el)
+                .attr("href", "#")
+                .click(() => {
+                    window.parent.postMessage(
+                        JSON.stringify({
+                            "command": command,
+                            "arguments": {"path": path}
+                        }),
+                        "*"
+                    );
+                })[0];
+        }
+    }
+}

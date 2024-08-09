@@ -288,6 +288,10 @@ texinfo_documents = [
 # If true, do not generate a @detailmenu in the "Top" node's menu.
 #texinfo_no_detailmenu = False
 
+linkcheck_ignore = [
+    # Assume GitHub contributor search links for this repo are always valid
+    r"https://github.com/search\?q=repo%3Ajupyter%2Fnbgrader\+involves%3A.*type=Issues",
+]
 
 # Example configuration for intersphinx: refer to the Python standard library.
 intersphinx_mapping = {'python': ('http://docs.python.org/', None)}
