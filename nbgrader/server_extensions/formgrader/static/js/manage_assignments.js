@@ -34,7 +34,6 @@ var AssignmentUI = Backbone.View.extend({
         this.listenTo(this.model, "request", this.animateSaving);
         this.listenTo(this.model, "sync", this.closeModal);
 
-        this.is_lab = options.is_lab || false;
         this.render();
     },
 
@@ -97,22 +96,14 @@ var AssignmentUI = Backbone.View.extend({
 
     render: function () {
         this.clear();
-        var this_assignment = this;
+
         // assignment name
         var name = this.model.get("name")
         this.$name.attr("data-order", name);
 
-        /* Append link with :
-         *     - href if this is a Notebook<7 environment
-         *     - click listener to send message to iframe parent if this is Jupyter Lab environment
-         */
         this.$name.append($("<a/>")
             .text(name)
-            .attr("target", self.is_lab ? undefined : "_blank")
-            .attr("href", self.is_lab ? undefined : base_url + "/tree/" + url_prefix + "/" + this.model.get("source_path"))
-            .click(self.is_lab ? function(){
-                window.parent.postMessage(jlab_go_to_path(url_prefix + "/" + this_assignment.model.get("source_path")), '*');
-            } : undefined)
+            .map(linkTo("directory", url_prefix + "/" + this.model.get("source_path")))
         );
 
         // duedate
@@ -154,16 +145,8 @@ var AssignmentUI = Backbone.View.extend({
         // preview student version
         var release_path = this.model.get("release_path");
         if (release_path) {
-            /* Append link with :
-             *     - href if this is a Notebook<7 environment
-             *     - click listener to send message to iframe parent if this is Jupyter Lab environment
-             */
             this.$preview.append($("<a/>")
-                .attr("target", self.is_lab ? undefined : "_blank")
-                .attr("href", self.is_lab ? undefined : base_url + "/tree/" + url_prefix + "/" + release_path)
-                .click(self.is_lab ? function(){
-                        window.parent.postMessage(jlab_go_to_path(url_prefix + "/" + release_path), '*');
-                    } : undefined)
+                .map(linkTo("directory", url_prefix + "/" + release_path))
                 .append($("<span/>")
                     .addClass("glyphicon glyphicon-search")
                     .attr("aria-hidden", "true")));
@@ -215,20 +198,20 @@ var AssignmentUI = Backbone.View.extend({
         // generate feedback
         if (num_submissions > 0) {
             this.$generate_feedback.append($("<a/>")
-		.attr("href", "#")
+                .attr("href", "#")
                 .click(_.bind(this.generate_feedback, this))
-		.append($("<span/>")
-		   .addClass("glyphicon glyphicon-comment")
+                .append($("<span/>")
+                    .addClass("glyphicon glyphicon-comment")
                    .attr("aria-hidden", "true")));
         }
 
         //  feedback
         if (num_submissions > 0) {
             this.$release_feedback.append($("<a/>")
-		.attr("href", "#")
+                .attr("href", "#")
                 .click(_.bind(this.release_feedback, this))
-		.append($("<span/>")
-		   .addClass("glyphicon glyphicon-envelope")
+                .append($("<span/>")
+                    .addClass("glyphicon glyphicon-envelope")
                    .attr("aria-hidden", "true")));
         }
 
@@ -579,7 +562,7 @@ var createAssignmentModal = function () {
     modal = createModal("add-assignment-modal", "Add New Assignment", body, footer);
 };
 
-var loadAssignments = function (is_lab=false) {
+var loadAssignments = function () {
     var tbl = $("#main-table");
 
     models = new Assignments();
@@ -592,7 +575,6 @@ var loadAssignments = function (is_lab=false) {
                 var view = new AssignmentUI({
                     "model": model,
                     "el": insertRow(tbl),
-                    "is_lab": is_lab
                 });
                 views.push(view);
             });
@@ -605,8 +587,6 @@ var loadAssignments = function (is_lab=false) {
 var models = undefined;
 var views = [];
 
-var is_lab = is_lab || false;
-
 $(window).on('load', function () {
-    loadAssignments(is_lab);
+    loadAssignments();
 });

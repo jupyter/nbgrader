@@ -107,9 +107,6 @@ def load_jupyter_server_extension(nbapp):
     nbapp.log.info("Loading the formgrader nbgrader serverextension")
     webapp = nbapp.web_app
 
-    # Save which kind of application is running : Jupyterlab like or classic Notebook
-    webapp.settings['is_jlab'] = not (nbapp.name == 'jupyter-notebook')
-
     formgrader = FormgradeExtension(parent=nbapp)
 
     # compatibility between notebook.notebookapp.NotebookApp and jupyter_server.serverapp.ServerApp

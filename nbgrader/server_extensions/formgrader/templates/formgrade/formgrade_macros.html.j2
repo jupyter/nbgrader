@@ -20,6 +20,7 @@ var base_url = "{{ resources.base_url }}/formgrader";
 <script src="{{ resources.base_url }}/formgrader/static/js/formgrade_keyboardmanager.js"></script>
 <script src="{{ resources.base_url }}/formgrader/static/js/formgrade_models.js"></script>
 <script src="{{ resources.base_url }}/formgrader/static/js/formgrade.js"></script>
+<script src="{{ resources.base_url }}/formgrader/static/js/utils.js"></script>
 <script type="text/javascript">
 function toggle_name(on) {
   $(".name-shown").tooltip('hide');
@@ -33,12 +34,11 @@ function toggle_name(on) {
   }
 }
 
-function jlab_open_notebook(notebook_path) {
-  return JSON.stringify({
-    "command": "docmanager:open",
-    "arguments": {"path": notebook_path}
+$(document).ready(function() {
+  $("[data-link]").each(function() {
+    $(this).map(linkTo("notebook", $(this).data("link"))).removeAttr("data-link");
   });
-}
+});
 </script>
 
 <link rel="stylesheet" href="{{ resources.base_url }}/formgrader/static/components/bootstrap/css/bootstrap.min.css" />
@@ -64,20 +64,12 @@ function jlab_open_notebook(notebook_path) {
             <li><a href="{{ resources.base_url }}/formgrader/gradebook/{{ resources.assignment_id }}/{{ resources.notebook_id }}">{{ resources.notebook_id }}</a></li>
             <li class="active live-notebook">
               <a class="name-hidden" data-toggle="tooltip" data-placement="bottom" title="Open live notebook"
-                {%- if is_lab -%}
-                onclick='window.parent.postMessage(jlab_open_notebook("{{ resources.notebook_path }}"), "*");'
-                {%- else -%}
-                target="_blank" href="{{ resources.base_url }}/notebooks/{{ resources.notebook_path }}"
-                {%- endif -%}
+                data-link="{{ resources.notebook_path }}"
               >
                 Submission #{{ resources.index + 1 }}
               </a>
               <a class="name-shown" data-toggle="tooltip" data-placement="bottom" title="Open live notebook"
-                {%- if is_lab -%}
-                onclick='window.parent.postMessage(jlab_open_notebook("{{ resources.notebook_path }}"), "*"); '
-                {%- else -%}
-                target="_blank" href="{{ resources.base_url }}/notebooks/{{ resources.notebook_path }}"
-                {%- endif -%}
+                data-link="{{ resources.notebook_path }}"
               >
                 {%- if resources.last_name and resources.first_name -%}
                 {{ resources.last_name }}, {{ resources.first_name }}
