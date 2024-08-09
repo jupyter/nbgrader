@@ -145,7 +145,6 @@ class SubmissionHandler(BaseHandler):
             'base_url': self.base_url,
             'student': student_id,
             'last_name': submission.student.last_name,
-            'last_name': submission.student.last_name,
             'first_name': submission.student.first_name,
             'notebook_path': self.url_prefix + '/' + relative_path
         }
