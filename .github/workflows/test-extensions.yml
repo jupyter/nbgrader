@@ -91,7 +91,7 @@ jobs:
           python tasks.py tests --group=${{ matrix.group }}
       - name: Upload Playwright Test report
         if: always()
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: nbgrader-uitests-${{ matrix.group }}-${{ matrix.os }}-python${{ matrix.python }}
           path: |
