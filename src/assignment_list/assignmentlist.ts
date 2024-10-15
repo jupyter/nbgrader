@@ -301,9 +301,9 @@ class Assignment {
         refetchButton.setAttribute('title', 'If you broke any of your assignment files and you want to redownload them, delete those files and click this button to refetch the original version of those files.')
         container.append(refetchButton);
         
-        refetchButton.innerText = 'Refetch';
+        refetchButton.innerText = 'Fetch missing files';
         refetchButton.onclick = async function(){
-          refetchButton.innerText = 'Refetching...';
+          refetchButton.innerText = 'Fetching missing files...';
           refetchButton.setAttribute('disabled', 'disabled');
           const dataToSend = { course_id: that.data['course_id'], assignment_id: that.data['assignment_id']};
           try {
@@ -316,7 +316,7 @@ class Assignment {
 
           } catch (reason) {
             remove_children(container);
-            container.innerText = 'Error refetching assignment.';
+            container.innerText = 'Error fetching missing files.';
             console.error(
               `Error on POST /assignment_list/fetch_missing ${dataToSend}.\n${reason}`
             );
