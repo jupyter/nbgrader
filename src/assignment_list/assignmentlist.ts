@@ -226,7 +226,7 @@ class Assignment {
 
   private make_link(): HTMLSpanElement {
     var container = document.createElement('span');;
-    container.classList.add('item_name', 'col-sm-6');
+    container.classList.add('item_name', 'col-sm-4');
 
     var link;
     if (this.data['status'] === 'fetched') {
@@ -360,10 +360,22 @@ class Assignment {
     s.classList.add('item_course', 'col-sm-2')
     s.innerText = this.data['course_id']
     row.append(s)
+    var score = document.createElement('span');
+    score.classList.add('item_status', 'col-sm-2');
+    score.setAttribute('style', 'text-align:left');
+    row.append(score);
+
+    var score_heading = document.getElementById(this.options.get('score_heading_id'));
+    var show_score = score_heading && this.data['score'] != null && this.data['max_score'] != null;
+    score_heading.style.visibility = show_score ? 'visible' : 'hidden';
 
     var id, element;
     var children = document.createElement('div');
     if (this.data['status'] == 'submitted') {
+      if (show_score) {
+        score.innerText = this.data['score'] + '/' + this.data['max_score'];
+      }
+
       id = this.escape_id() + '-submissions';
       children.id = id;
       children.classList.add('panel-collapse', 'list_container', 'assignment-notebooks');
