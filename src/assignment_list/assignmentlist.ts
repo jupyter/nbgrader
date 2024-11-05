@@ -88,6 +88,8 @@ export class AssignmentList {
   private load_list_success(data: string | any[]): void {
     this.clear_list(false);
 
+    var total_score = 0;
+    var total_max_score = 0;
     var len = data.length;
     for (var i=0; i<len; i++) {
         var element = document.createElement('div');
@@ -102,8 +104,16 @@ export class AssignmentList {
         } else if (data[i]['status'] === 'submitted') {
           this.submitted_element.append(element);
           (<HTMLDivElement>this.submitted_element.children.namedItem('submitted_assignments_list_placeholder')).hidden = true;
+          
+          if (data[i]['score'] != null && data[i]['max_score'] != null) {
+            total_score += data[i]['score'];
+            total_max_score += data[i]['max_score'];
+          }
         }
     }
+    
+    var total_score_element = document.getElementById(this.options.get('total_score_id'));
+    total_score_element.innerText = total_score + '/' + total_max_score;
 
     var assignments  = this.fetched_element.getElementsByClassName('assignment-notebooks-link');
     for(let a of assignments){
@@ -365,9 +375,9 @@ class Assignment {
     score.setAttribute('style', 'text-align:left');
     row.append(score);
 
-    var score_heading = document.getElementById(this.options.get('score_heading_id'));
-    var show_score = score_heading && this.data['score'] != null && this.data['max_score'] != null;
-    score_heading.style.visibility = show_score ? 'visible' : 'hidden';
+    var score_heading_element = document.getElementById(this.options.get('score_heading_id'));
+    var show_score = score_heading_element && this.data['score'] != null && this.data['max_score'] != null;
+    score_heading_element.style.visibility = show_score ? 'visible' : 'hidden';
 
     var id, element;
     var children = document.createElement('div');
