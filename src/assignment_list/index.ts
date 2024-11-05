@@ -98,7 +98,7 @@ export class AssignmentListWidget extends Widget {
       '          </div>',
       '        </div>',
       '      </div>',
-      '      <div class="panel-heading">',
+      '      <div id="total-score-row" class="panel-heading">',
       '        <span class="col-sm-6"><b>Total Score</b></span>',
       '        <b id="total-score"></b>',
       '      </div>',
@@ -114,6 +114,7 @@ export class AssignmentListWidget extends Widget {
     let options = new Map();
     options.set('base_url',base_url);
     options.set('score_heading_id', 'score-heading');
+    options.set('total_score_container_id', 'total-score-row');
     options.set('total_score_id', 'total-score');
     var assignment_l = new AssignmentList(this,
       'released_assignments_list',

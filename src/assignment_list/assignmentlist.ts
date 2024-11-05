@@ -90,6 +90,7 @@ export class AssignmentList {
 
     var total_score = 0;
     var total_max_score = 0;
+    var show_score = false;
     var len = data.length;
     for (var i=0; i<len; i++) {
         var element = document.createElement('div');
@@ -108,12 +109,24 @@ export class AssignmentList {
           if (data[i]['score'] != null && data[i]['max_score'] != null) {
             total_score += data[i]['score'];
             total_max_score += data[i]['max_score'];
+            show_score = true;
           }
         }
     }
-    
+   
+    var score_heading_element = document.getElementById(this.options.get('score_heading_id'));
+    var total_score_container = document.getElementById(this.options.get('total_score_container_id'));
     var total_score_element = document.getElementById(this.options.get('total_score_id'));
-    total_score_element.innerText = total_score + '/' + total_max_score;
+    
+    if (score_heading_element) {
+      score_heading_element.style.visibility = show_score ? 'visible' : 'hidden';
+    }
+    if (total_score_container) {
+      total_score_container.style.visibility = show_score ? 'visible' : 'hidden';
+    }
+    if (total_score_element) {
+      total_score_element.innerText = `${total_score}/${total_max_score}`;
+    }
 
     var assignments  = this.fetched_element.getElementsByClassName('assignment-notebooks-link');
     for(let a of assignments){
@@ -375,14 +388,10 @@ class Assignment {
     score.setAttribute('style', 'text-align:left');
     row.append(score);
 
-    var score_heading_element = document.getElementById(this.options.get('score_heading_id'));
-    var show_score = score_heading_element && this.data['score'] != null && this.data['max_score'] != null;
-    score_heading_element.style.visibility = show_score ? 'visible' : 'hidden';
-
     var id, element;
     var children = document.createElement('div');
     if (this.data['status'] == 'submitted') {
-      if (show_score) {
+      if (this.data['score'] != null && this.data['max_score'] != null) {
         score.innerText = this.data['score'] + '/' + this.data['max_score'];
       }
 
