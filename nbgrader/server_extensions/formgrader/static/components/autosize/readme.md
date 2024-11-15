@@ -36,4 +36,4 @@ autosize(document.querySelector('textarea'));
 autosize($('textarea'));
 ```
 
-Released under the [MIT License](http://www.opensource.org/licenses/mit-license.php)
+Released under the [MIT License](https://opensource.org/license/mit)
