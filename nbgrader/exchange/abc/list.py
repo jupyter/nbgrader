@@ -1,8 +1,8 @@
 from traitlets import Bool
-from .exchange import Exchange
+from .exchange import ABCExchange
 
 
-class ExchangeList(Exchange):
+class ABCExchangeList(ABCExchange):
 
     inbound = Bool(False, help="List inbound files rather than outbound.").tag(config=True)
     cached = Bool(False, help="List assignments in submission cache.").tag(config=True)
@@ -20,7 +20,7 @@ class ExchangeList(Exchange):
         if self.inbound and self.cached:
             self.fail("Options --inbound and --cached are incompatible.")
 
-        super(ExchangeList, self).start()
+        super(ABCExchangeList, self).start()
 
         if self.remove:
             return self.remove_files()
