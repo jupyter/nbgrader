@@ -2,6 +2,39 @@ A summary of changes to nbgrader.
 
 <!-- <START NEW CHANGELOG ENTRY> -->
 
+## 0.9.4
+
+([Full Changelog](https://github.com/jupyter/nbgrader/compare/v0.9.3...ba2a40491ff0f9ae0a08baeb9cf0c92ab670a05c))
+
+### Enhancements made
+
+- New Autograde Preprocessor: IgnorePattern [#1904](https://github.com/jupyter/nbgrader/pull/1904) ([@AlirezaT99](https://github.com/AlirezaT99))
+
+### Bugs fixed
+
+- Set CSP frame-ancestors 'self' for nbgrader handlers [#1915](https://github.com/jupyter/nbgrader/pull/1915) ([@jeflem](https://github.com/jeflem))
+- Backport PR 1902 - Eliminate compatibility issues in supporting notebook and jupyterlab [#1912](https://github.com/jupyter/nbgrader/pull/1912) ([@brichet](https://github.com/brichet))
+- groupshared feedback re-release fix [#1667](https://github.com/jupyter/nbgrader/pull/1667) ([@franswel](https://github.com/franswel))
+
+### Maintenance and upkeep improvements
+
+- Bump webpack from 5.92.0 to 5.96.1 [#1939](https://github.com/jupyter/nbgrader/pull/1939) ([@dependabot](https://github.com/dependabot))
+- Prevent dependabot from using yarn 4 [#1938](https://github.com/jupyter/nbgrader/pull/1938) ([@brichet](https://github.com/brichet))
+- Upgrade upload-artifact action [#1928](https://github.com/jupyter/nbgrader/pull/1928) ([@brichet](https://github.com/brichet))
+- Bump micromatch from 4.0.7 to 4.0.8 [#1920](https://github.com/jupyter/nbgrader/pull/1920) ([@dependabot](https://github.com/dependabot))
+
+### Documentation improvements
+
+- Fix labextension plugin IDs in the docs and demos [#1927](https://github.com/jupyter/nbgrader/pull/1927) ([@lahwaacz](https://github.com/lahwaacz))
+
+### Contributors to this release
+
+([GitHub contributors page for this release](https://github.com/jupyter/nbgrader/graphs/contributors?from=2024-06-20&to=2024-11-18&type=c))
+
+[@AlirezaT99](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3AAlirezaT99+updated%3A2024-06-20..2024-11-18&type=Issues) | [@brichet](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Abrichet+updated%3A2024-06-20..2024-11-18&type=Issues) | [@dependabot](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Adependabot+updated%3A2024-06-20..2024-11-18&type=Issues) | [@franswel](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Afranswel+updated%3A2024-06-20..2024-11-18&type=Issues) | [@github-actions](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Agithub-actions+updated%3A2024-06-20..2024-11-18&type=Issues) | [@jeflem](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Ajeflem+updated%3A2024-06-20..2024-11-18&type=Issues) | [@lahwaacz](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Alahwaacz+updated%3A2024-06-20..2024-11-18&type=Issues)
+
+<!-- <END NEW CHANGELOG ENTRY> -->
+
 ## 0.9.3
 
 ([Full Changelog](https://github.com/jupyter/nbgrader/compare/v0.9.2...f3878c749fee3733f29f91fb5f6c1c81a51e2a4c))
@@ -32,8 +65,6 @@ A summary of changes to nbgrader.
 ([GitHub contributors page for this release](https://github.com/jupyter/nbgrader/graphs/contributors?from=2024-03-26&to=2024-06-20&type=c))
 
 [@blink1073](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Ablink1073+updated%3A2024-03-26..2024-06-20&type=Issues) | [@brichet](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Abrichet+updated%3A2024-03-26..2024-06-20&type=Issues) | [@github-actions](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Agithub-actions+updated%3A2024-03-26..2024-06-20&type=Issues) | [@nthiery](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Anthiery+updated%3A2024-03-26..2024-06-20&type=Issues) | [@shreve](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Ashreve+updated%3A2024-03-26..2024-06-20&type=Issues) | [@trevorcampbell](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Atrevorcampbell+updated%3A2024-03-26..2024-06-20&type=Issues) | [@tuncbkose](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Atuncbkose+updated%3A2024-03-26..2024-06-20&type=Issues) | [@ZiadAmerr](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3AZiadAmerr+updated%3A2024-03-26..2024-06-20&type=Issues)
-
-<!-- <END NEW CHANGELOG ENTRY> -->
 
 ## 0.9.2
 
