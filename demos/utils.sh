@@ -58,6 +58,7 @@ setup_jupyterhub () {
 
     # Copy config file.
     cp jupyterhub_config.py "${jupyterhub_root}/jupyterhub_config.py"
+    cp jupyter_server_config.py /usr/local/etc/jupyter/jupyter_server_config.py
 }
 
 enable_create_assignment () {

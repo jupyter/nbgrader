@@ -20,6 +20,20 @@ Using nbgrader with JupyterHub
         much required reading if you want to integrate the formgrader with
         JupyterHub.
 
+.. warning::
+
+    For security reasons, ``iframe`` are not allowed with JupyterHub from version 4.1. The
+    documentation about this security change is at
+    `mitigating-same-origin-deployments <https://jupyterhub.readthedocs.io/en/stable/explanation/websecurity.html#mitigating-same-origin-deployments>`_.
+
+    In the current version of nbgrader, the ``formgrader`` UI is embedded in an ``iframe``, to
+    be available in a new tab of Jupyterlab or Notebook. Therefore, the ``formgrader`` UI can't
+    be loaded when using ``jupyterhub>=4.1``, and shows a blank panel instead.
+
+    There are several ways to use the ``formgrader`` with ``jupyterhub>=4.1``, see details
+    at :ref:`jupyterhub-4.1`.
+
+
 For instructors running a class with JupyterHub, nbgrader offers several tools
 that optimize and enrich the instructors' and students' experience of sharing
 the same system. By integrating with JupyterHub, nbgrader streamlines the
@@ -331,3 +345,55 @@ API
     .. automethod:: add_student_to_course
 
     .. automethod:: remove_student_from_course
+
+
+.. _jupyterhub-4.1:
+
+Formgrader with ``jupyterhub>=4.1``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+As explained above in the warning, ``jupyterhub>=4.1`` does not allow iframe for security
+reasons, which lead to blank panel instead of the ``formgrader`` UI.
+
+Below are different ways to use the ``formgrader`` UI with ``jupyterhub>=4.1``.
+
+Opening the ``formgrader`` UI in a new browser tab
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Web browsers are able to open iframes in a new browser tab, which allows using the
+``formgrader`` without any additional setting on the jupyterhub server.
+For example with Firefox, right clicking on the iframe shows a context menu to open the
+contents in a new browser tab.
+
+.. image:: images/jupyterhub_4.1_iframe.png
+
+Although this solution isn't the most practical, it does allow to use ```formgrader``
+without having to update the configuration and without adding vulnerabilities to the application.
+
+Enabling JupyterHub subdomains
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Enabling per-user and per-service subdomains with ``JupyterHub.enable_subdomains = True``
+allows to securely use iframes with JupyterHub.
+With subdomains enabled, `frame-ancestors 'self'` allows embedding the iframe only on pages
+served by the user's own server.
+
+In this case, the ``"frame-ancestor 'self'"`` can be restored in the application:
+
+.. code:: python
+
+    c.ServerApp.tornado_settings = {}
+    c.ServerApp.tornado_settings["headers"] = {
+        "Content-Security-Policy": "frame-ancestors 'self'"
+    }
+
+in e.g. ``/usr/local/etc/jupyter/jupyter_server_config.py``.
+
+Trusting users (less secure)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+If you trust users and are aware of the security vulnerability, it is also possible to
+enable the iframe with the same configuration as above, without subdomains.
+
+This is the solution used in the JupyterHub docker
+`demo <https://github.com/jupyter/nbgrader/tree/main/demos>`_.
