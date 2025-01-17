@@ -356,7 +356,7 @@ As explained above in the warning, ``jupyterhub>=4.1`` does not allow iframe for
 reason, which lead a blank panel instead of the ``formgrader`` UI.
 
 Opening the ``formgrader`` UI in a new browser tab
---------------------------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Web browsers allow to open iframe in a new browser tab, which allow using the ``formgrader``
 without any additional setting.
@@ -368,7 +368,7 @@ Although this solution isn't the most practical, it does allow to use ```formgra
 without having to update the configuration and without adding vulnerabilities to the application.
 
 Enabling JupyterHub subdomains
-------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Enabling per-user and per-service subdomains with ``JupyterHub.enable_subdomains = True``
 allows to securely use iframes with JupyterHub.
@@ -387,7 +387,7 @@ In this case, the ``"frame-ancestor 'self'"`` can be restored in the application
 in e.g. ``/usr/local/etc/jupyter/jupyter_server_config.py``.
 
 Trusting users (less secure)
-----------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 If you trust users and are aware of the security vulnerability, it is also possible to
 enable the iframe with the same configuration as above without subdomains.
