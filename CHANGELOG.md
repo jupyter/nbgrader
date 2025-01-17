@@ -2,6 +2,26 @@ A summary of changes to nbgrader.
 
 <!-- <START NEW CHANGELOG ENTRY> -->
 
+## 0.9.5
+
+([Full Changelog](https://github.com/jupyter/nbgrader/compare/v0.9.4...73e137511ac1dc02e95790d4fd6d4d88dab42325))
+
+### Bugs fixed
+
+- Revert #1915 for security reason [#1947](https://github.com/jupyter/nbgrader/pull/1947) ([@brichet](https://github.com/brichet))
+
+### Maintenance and upkeep improvements
+
+- Bump cross-spawn from 6.0.5 to 6.0.6 [#1943](https://github.com/jupyter/nbgrader/pull/1943) ([@dependabot](https://github.com/dependabot))
+
+### Contributors to this release
+
+([GitHub contributors page for this release](https://github.com/jupyter/nbgrader/graphs/contributors?from=2024-11-18&to=2025-01-17&type=c))
+
+[@brichet](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Abrichet+updated%3A2024-11-18..2025-01-17&type=Issues) | [@dependabot](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Adependabot+updated%3A2024-11-18..2025-01-17&type=Issues) | [@github-actions](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Agithub-actions+updated%3A2024-11-18..2025-01-17&type=Issues)
+
+<!-- <END NEW CHANGELOG ENTRY> -->
+
 ## 0.9.4
 
 ([Full Changelog](https://github.com/jupyter/nbgrader/compare/v0.9.3...ba2a40491ff0f9ae0a08baeb9cf0c92ab670a05c))
@@ -32,8 +52,6 @@ A summary of changes to nbgrader.
 ([GitHub contributors page for this release](https://github.com/jupyter/nbgrader/graphs/contributors?from=2024-06-20&to=2024-11-18&type=c))
 
 [@AlirezaT99](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3AAlirezaT99+updated%3A2024-06-20..2024-11-18&type=Issues) | [@brichet](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Abrichet+updated%3A2024-06-20..2024-11-18&type=Issues) | [@dependabot](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Adependabot+updated%3A2024-06-20..2024-11-18&type=Issues) | [@franswel](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Afranswel+updated%3A2024-06-20..2024-11-18&type=Issues) | [@github-actions](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Agithub-actions+updated%3A2024-06-20..2024-11-18&type=Issues) | [@jeflem](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Ajeflem+updated%3A2024-06-20..2024-11-18&type=Issues) | [@lahwaacz](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Alahwaacz+updated%3A2024-06-20..2024-11-18&type=Issues)
-
-<!-- <END NEW CHANGELOG ENTRY> -->
 
 ## 0.9.3
 
