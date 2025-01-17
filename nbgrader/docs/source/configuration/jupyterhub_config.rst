@@ -22,15 +22,15 @@ Using nbgrader with JupyterHub
 
 .. warning::
 
-    For security reason, ``iframe`` are not allowed with JupyterHub from version 4.1. The
+    For security reasons, ``iframe`` are not allowed with JupyterHub from version 4.1. The
     documentation about this security change is at
     `mitigating-same-origin-deployments <https://jupyterhub.readthedocs.io/en/stable/explanation/websecurity.html#mitigating-same-origin-deployments>`_.
 
-    In the current version of nbgrader, The ``formgrader`` UI embedded in an ``iframe`` to
-    be available in a new tab of Jupyterlab or Notebook. Therefore, the formgrader UI can'tab
+    In the current version of nbgrader, the ``formgrader`` UI is embedded in an ``iframe``, to
+    be available in a new tab of Jupyterlab or Notebook. Therefore, the ``formgrader`` UI can't
     be loaded when using ``jupyterhub>=4.1``, and shows a blank panel instead.
 
-    There are several way to use the ``formgrader`` with ``jupyterhub>=4.1``, see details
+    There are several ways to use the ``formgrader`` with ``jupyterhub>=4.1``, see details
     at :ref:`jupyterhub-4.1`.
 
 
@@ -353,14 +353,17 @@ Formgrader with ``jupyterhub>=4.1``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 As explained above in the warning, ``jupyterhub>=4.1`` does not allow iframe for security
-reason, which lead a blank panel instead of the ``formgrader`` UI.
+reasons, which lead to blank panel instead of the ``formgrader`` UI.
+
+Below are different ways to use the ``formgrader`` UI with ``jupyterhub>=4.1``.
 
 Opening the ``formgrader`` UI in a new browser tab
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Web browsers allow to open iframe in a new browser tab, which allow using the ``formgrader``
-without any additional setting.
-For example with Firefox, right clicking on the iframe shows a context menu to open the content in a new browser tab.
+Web browsers are able to open iframes in a new browser tab, which allows using the
+``formgrader`` without any additional setting on the jupyterhub server.
+For example with Firefox, right clicking on the iframe shows a context menu to open the
+contents in a new browser tab.
 
 .. image:: images/jupyterhub_4.1_iframe.png
 
@@ -372,7 +375,7 @@ Enabling JupyterHub subdomains
 
 Enabling per-user and per-service subdomains with ``JupyterHub.enable_subdomains = True``
 allows to securely use iframes with JupyterHub.
-Then even if embedding in an IFrame is allowed, the host page does not have access to the
+Then, even if embedding in an IFrame is allowed, the host page does not have access to the
 contents of the frame.
 
 In this case, the ``"frame-ancestor 'self'"`` can be restored in the application:
@@ -390,7 +393,7 @@ Trusting users (less secure)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 If you trust users and are aware of the security vulnerability, it is also possible to
-enable the iframe with the same configuration as above without subdomains.
+enable the iframe with the same configuration as above, without subdomains.
 
 This is the solution used in the JupyterHub docker
 `demo <https://github.com/jupyter/nbgrader/tree/main/demos>`_.
