@@ -375,8 +375,8 @@ Enabling JupyterHub subdomains
 
 Enabling per-user and per-service subdomains with ``JupyterHub.enable_subdomains = True``
 allows to securely use iframes with JupyterHub.
-Then, even if embedding in an IFrame is allowed, the host page does not have access to the
-contents of the frame.
+With subdomains enabled, `frame-ancestors 'self'` allows embedding the iframe only on pages
+served by the user's own server.
 
 In this case, the ``"frame-ancestor 'self'"`` can be restored in the application:
 
