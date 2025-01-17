@@ -60,10 +60,6 @@ class BaseHandler(JupyterHandler):
         api.log_level = level
         return api
 
-    def initialize(self):
-        super().initialize()
-        self.set_header("Content-Security-Policy", "frame-ancestors 'self'")
-
     def render(self, name, **ns):
         template = self.settings['nbgrader_jinja2_env'].get_template(name)
         return template.render(**ns)
