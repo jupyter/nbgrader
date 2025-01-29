@@ -31,6 +31,21 @@ class CourseDirectory(LoggingConfigurable):
             self.log.warning("course_id '%s' has trailing whitespace, stripping it away", proposal['value'])
         return proposal['value'].strip()
 
+    course_title = Unicode(
+        '',
+        help=dedent(
+            """
+            A human readable course name for display purposes.
+            """
+        )
+    ).tag(config=True)
+
+    @validate('course_title')
+    def _validate_course_title(self, proposal):
+        if proposal['value'].strip() != proposal['value']:
+            self.log.warning("course_title '%s' has trailing whitespace, stripping it away", proposal['value'])
+        return proposal['value'].strip()
+
     student_id = Unicode(
         "*",
         help=dedent(
