@@ -88,6 +88,9 @@ export class AssignmentList {
   private load_list_success(data: string | any[]): void {
     this.clear_list(false);
 
+    var total_score = 0;
+    var total_max_score = 0;
+    var show_score = false;
     var len = data.length;
     for (var i=0; i<len; i++) {
         var element = document.createElement('div');
@@ -102,7 +105,27 @@ export class AssignmentList {
         } else if (data[i]['status'] === 'submitted') {
           this.submitted_element.append(element);
           (<HTMLDivElement>this.submitted_element.children.namedItem('submitted_assignments_list_placeholder')).hidden = true;
+          
+          if (data[i]['score'] != null && data[i]['max_score'] != null) {
+            total_score += data[i]['score'];
+            total_max_score += data[i]['max_score'];
+            show_score = true;
+          }
         }
+    }
+   
+    var score_heading_element = document.getElementById(this.options.get('score_heading_id'));
+    var total_score_container = document.getElementById(this.options.get('total_score_container_id'));
+    var total_score_element = document.getElementById(this.options.get('total_score_id'));
+    
+    if (score_heading_element) {
+      score_heading_element.style.visibility = show_score ? 'visible' : 'hidden';
+    }
+    if (total_score_container) {
+      total_score_container.style.visibility = show_score ? 'visible' : 'hidden';
+    }
+    if (total_score_element) {
+      total_score_element.innerText = `${total_score}/${total_max_score}`;
     }
 
     var assignments  = this.fetched_element.getElementsByClassName('assignment-notebooks-link');
@@ -226,7 +249,7 @@ class Assignment {
 
   private make_link(): HTMLSpanElement {
     var container = document.createElement('span');;
-    container.classList.add('item_name', 'col-sm-6');
+    container.classList.add('item_name', 'col-sm-4');
 
     var link;
     if (this.data['status'] === 'fetched') {
@@ -360,10 +383,18 @@ class Assignment {
     s.classList.add('item_course', 'col-sm-2')
     s.innerText = this.data['course_id']
     row.append(s)
+    var score = document.createElement('span');
+    score.classList.add('item_status', 'col-sm-2');
+    score.setAttribute('style', 'text-align:left');
+    row.append(score);
 
     var id, element;
     var children = document.createElement('div');
     if (this.data['status'] == 'submitted') {
+      if (this.data['score'] != null && this.data['max_score'] != null) {
+        score.innerText = this.data['score'] + '/' + this.data['max_score'];
+      }
+
       id = this.escape_id() + '-submissions';
       children.id = id;
       children.classList.add('panel-collapse', 'list_container', 'assignment-notebooks');
