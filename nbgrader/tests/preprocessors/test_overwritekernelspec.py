@@ -57,3 +57,22 @@ class TestOverwriteKernelSpec(BaseTestPreprocessor):
         notebook = gradebook.find_notebook("test", "ps0")
         assert nb.metadata['kernelspec'] == kernelspec
         assert json.loads(notebook.kernelspec) == kernelspec
+
+    def test_overwrite_kernelspec_null_spec(self, preprocessors, resources, gradebook):
+        # Create a notebook without a kernelspec
+        gradebook.add_notebook("test", "ps0")
+
+        kernelspec = dict(
+            display_name="Python 3",
+            name="python3",
+            language="python",
+        )
+
+        nb = new_notebook()
+        nb.metadata["kernelspec"] = kernelspec
+        nb, resources = preprocessors[1].preprocess(nb, resources)
+
+        validate(nb)
+        notebook = gradebook.find_notebook("test", "ps0")
+        assert notebook.kernelspec is None
+        assert nb.metadata["kernelspec"] == kernelspec
