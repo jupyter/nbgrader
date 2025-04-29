@@ -766,8 +766,8 @@ class Grade(Base):
     cell_id = Column(String(32), ForeignKey('base_cell.id'))
 
     #: The type of cell this grade corresponds to, inherited from
-    #: :class:`~nbgrader.api.GradeCell`
-    cell_type = association_proxy('cell', 'cell_type')
+    #: :class:`~nbgrader.api.GradeCell` or :class:`~nbgrader.api.TaskCell`
+    cell_type = None
 
     #: The student who this grade is assigned to, represented by a
     #: :class:`~nbgrader.api.Student` object
@@ -798,15 +798,7 @@ class Grade(Base):
 
     #: The maximum possible score that can be assigned, inherited from
     #: :class:`~nbgrader.api.GradeCell`
-    max_score_gradecell = None
-    max_score_taskcell = None
-
-    @property
-    def max_score(self):
-        if self.max_score_taskcell:
-            return self.max_score_taskcell
-        else:
-            return self.max_score_gradecell
+    max_score = None
 
     #: Whether the autograded score is a result of failed autograder tests. This
     #: is True if the autograder score is zero and the cell type is "code", and
@@ -990,30 +982,9 @@ Grade.max_score_taskcell = column_property(
     .where(Grade.cell_id == TaskCell.id)
     .correlate_except(TaskCell)
     .scalar_subquery(), deferred=True)
+
 # a grade is either from a grade cell or a task cell , so only one will not be none
 Grade.max_score = column_property(func.coalesce(Grade.max_score_gradecell, Grade.max_score_taskcell, 0.0), deferred=True)
-
-# try defining the cell_type_**** as athe result of a search as for the max_score
-# and not through the relationship
-
-Grade.cell_type_from_taskcell = column_property(
-    select(TaskCell.cell_type)
-    .select_from(TaskCell)
-    .where(Grade.cell_id == TaskCell.id)
-    .correlate_except(TaskCell)
-    .scalar_subquery(), deferred=True)
-
-Grade.cell_type_from_gradecell = column_property(
-    select(GradeCell.cell_type)
-    .select_from(GradeCell)
-    .where(Grade.cell_id == GradeCell.id)
-    .correlate_except(GradeCell)
-    .scalar_subquery(), deferred=True)
-
-Grade.cell_type = column_property(
-    select(func.coalesce(Grade.cell_type_from_gradecell, Grade.cell_type_from_taskcell))
-    .scalar_subquery()
-)
 
 
 Notebook.max_score_gradecell = column_property(
@@ -1271,6 +1242,9 @@ Grade.cell_type_taskcell = column_property(
     .correlate_except(TaskCell)
     .scalar_subquery(), deferred=True)
 
+Grade.cell_type = column_property(
+    func.coalesce(Grade.cell_type_gradecell, Grade.cell_type_taskcell)
+)
 
 # Failed tests
 
