@@ -227,7 +227,7 @@ const openFormgrader = async (page: IJupyterLabPageFixture) => {
     mainPanelTabCount
   );
 
-  await page.keyboard.press("Control+Shift+c");
+  await page.keyboard.press("ControlOrMeta+Shift+c");
   await page
     .locator(
       '#modal-command-palette li[data-command="nbgrader:open-formgrader"]'
