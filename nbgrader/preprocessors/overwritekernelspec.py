@@ -17,8 +17,10 @@ class OverwriteKernelspec(NbGraderPreprocessor):
         db_url = resources['nbgrader']['db_url']
 
         with Gradebook(db_url) as gb:
-            kernelspec = json.loads(
-                gb.find_notebook(notebook_id, assignment_id).kernelspec)
+            kernelspec = gb.find_notebook(notebook_id, assignment_id).kernelspec
+            if kernelspec is not None:
+                kernelspec = json.loads(kernelspec)
+
             self.log.debug("Source notebook kernelspec: {}".format(kernelspec))
             self.log.debug(
                 "Submitted notebook kernelspec: {}"
