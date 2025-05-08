@@ -1,6 +1,7 @@
 import os
 import re
 from textwrap import dedent
+from pathlib import Path
 
 from traitlets import List, Bool, default
 
@@ -93,20 +94,17 @@ class GenerateAssignment(BaseConverter):
     def _clean_old_notebooks(self, assignment_id: str, student_id: str) -> None:
         with Gradebook(self.coursedir.db_url, self.coursedir.course_id) as gb:
             assignment = gb.find_assignment(assignment_id)
-            regexp = re.escape(os.path.sep).join([
-                self._format_source("(?P<assignment_id>.*)", "(?P<student_id>.*)", escape=True),
-                "(?P<notebook_id>.*).ipynb"
-            ])
+            assignment_dir = Path(self._format_source(assignment_id, student_id))
 
             # find a set of notebook ids for new notebooks
             new_notebook_ids = set([])
             for notebook in self.notebooks:
-                m = re.match(regexp, notebook)
-                if m is None:
-                    raise NbGraderException("Could not match '%s' with regexp '%s'", notebook, regexp)
-                gd = m.groupdict()
-                if gd['assignment_id'] == assignment_id and gd['student_id'] == student_id:
-                    new_notebook_ids.add(gd['notebook_id'])
+                notebook = Path(notebook)
+
+                if not notebook.is_relative_to(assignment_dir):
+                    continue
+
+                new_notebook_ids.add(notebook.stem)
 
             # pull out the existing notebook ids
             old_notebook_ids = set(x.name for x in assignment.notebooks)

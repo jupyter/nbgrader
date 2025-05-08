@@ -1,15 +1,15 @@
 import os
 import re
-
+import datetime
+import typing
+from pathlib import Path
 from textwrap import dedent
 
 from traitlets.config import LoggingConfigurable
 from traitlets import Integer, Bool, Unicode, List, default, validate, TraitError
 
-from .utils import full_split, parse_utc
+from .utils import parse_utc, is_ignored
 from traitlets.utils.bunch import Bunch
-import datetime
-from typing import Optional
 
 
 class CourseDirectory(LoggingConfigurable):
@@ -302,7 +302,13 @@ class CourseDirectory(LoggingConfigurable):
         )
     ).tag(config=True)
 
-    def format_path(self, nbgrader_step: str, student_id: str, assignment_id: str, escape: bool = False) -> str:
+    def format_path(
+        self,
+        nbgrader_step: str,
+        student_id: str = '.',
+        assignment_id: str = '.',
+        escape: bool = False
+    ) -> str:
         kwargs = dict(
             nbgrader_step=nbgrader_step,
             student_id=student_id,
@@ -310,18 +316,66 @@ class CourseDirectory(LoggingConfigurable):
         )
 
         if escape:
-            structure = [x.format(**kwargs) for x in full_split(self.directory_structure)]
-            if len(structure) == 0 or not structure[0].startswith(os.sep):
-                base = [re.escape(self.root)]
-            else:
-                base = []
-            path = re.escape(os.path.sep).join(base + structure)
+            base = Path(re.escape(self.root))
         else:
-            path = os.path.join(self.root, self.directory_structure.format(**kwargs))
+            base = Path(self.root)
 
-        return path
+        path = base / self.directory_structure.format(**kwargs)
 
-    def get_existing_timestamp(self, dest_path: str) -> Optional[datetime.datetime]:
+        return str(path)
+
+    def find_assignments(self,
+        nbgrader_step: str = "*",
+        student_id: str = "*",
+        assignment_id: str = "*",
+    ) -> typing.List[typing.Dict]:
+        """
+        Find all entries that match the given criteria.
+
+        The default value for each acts as a wildcard. To exclude a directory, use
+        a value of "." (e.g. nbgrader_step="source", student_id=".").
+
+        Returns:
+            A list of dicts containing input values, one per matching directory.
+        """
+
+        results = []
+
+        kwargs = dict(
+            nbgrader_step=nbgrader_step,
+            student_id=student_id,
+            assignment_id=assignment_id
+        )
+
+        # Locate all matching directories using a glob
+        dirs = list(
+            filter(
+                lambda p: p.is_dir() and not is_ignored(p.name, self.ignore),
+                Path(self.root).glob(self.directory_structure.format(**kwargs))
+            )
+        )
+
+        if not dirs:
+            return results
+
+        # Create a regex to capture the wildcard values
+        pattern_args = {
+            key: value.replace("*", f"(?P<{key}>.*)")
+            for key, value in kwargs.items()
+        }
+
+        # Convert to a Path and back to a string to remove any instances of `/.`
+        pattern = str(Path(self.directory_structure.format(**pattern_args)))
+
+        for dir in dirs:
+            match = re.match(pattern, str(dir.relative_to(self.root)))
+            if match:
+                results.append({ **kwargs, **match.groupdict() })
+
+        return results
+
+
+    def get_existing_timestamp(self, dest_path: str) -> typing.Optional[datetime.datetime]:
         """Get the timestamp, as a datetime object, of an existing submission."""
         timestamp_path = os.path.join(dest_path, 'timestamp.txt')
         if os.path.exists(timestamp_path):
