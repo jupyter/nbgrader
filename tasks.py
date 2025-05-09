@@ -117,10 +117,9 @@ def aftersuccess(ns, args):
 
 
 def js(ns, args):
-    run('npm install')
-    run('./node_modules/.bin/bower install --config.interactive=false')
+    run('jlpm install', cwd='nbgrader/server_extensions/formgrader/static')
     if ns.clean:
-        run('git clean -fdX nbgrader/server_extensions/formgrader/static/components')
+        run('git clean -fdX nbgrader/server_extensions/formgrader/static/node_modules')
 
 
 def install(ns, args):
