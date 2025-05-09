@@ -1,5 +1,6 @@
 import pytest
 import os
+import re
 
 from traitlets.config import Config
 
@@ -24,7 +25,8 @@ def test_coursedir_format_path(conf):
     expected = os.path.join(coursedir.root, "step", "student_id", "assignment_id")
     assert coursedir.format_path("step", "student_id", "assignment_id") == expected
 
-    expected = os.path.join(coursedir.root.replace("-", r"\-"), "step", "student_id", "assignment_id")
+    escaped = re.escape(coursedir.root)
+    expected = os.path.join(escaped, "step", "student_id", "assignment_id")
     assert coursedir.format_path("step", "student_id", "assignment_id", escape=True) == expected
 
 
