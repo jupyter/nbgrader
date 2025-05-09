@@ -77,17 +77,17 @@ class MetadataValidatorV3(BaseMetadataValidator):
 
         # check that markdown cells are grade AND solution (not either/or)
         if not task:
-            if cell.cell_type == "markdown" and grade and not solution:
+            if cell.cell_type in ("markdown", "raw") and grade and not solution:
                 raise ValidationError(
-                    "Markdown grade cell '{}' is not marked as a solution cell".format(
+                    "Markdown/raw grade cell '{}' is not marked as a solution cell".format(
                         meta['grade_id']))
-            if cell.cell_type == "markdown" and not grade and solution:
+            if cell.cell_type in ("markdown", "raw") and not grade and solution:
                 raise ValidationError(
-                    "Markdown solution cell is not marked as a grade cell: {}".format(cell.source))
+                    "Markdown/raw solution cell is not marked as a grade cell: {}".format(cell.source))
         else:
-            if cell.cell_type != "markdown":
+            if cell.cell_type not in ("markdown", "raw"):
                 raise ValidationError(
-                    "Task cells have to be markdown: {}".format(cell.source))
+                    "Task cells have to be markdown or raw: {}".format(cell.source))
 
     def validate_nb(self, nb: NotebookNode) -> None:
         super(MetadataValidatorV3, self).validate_nb(nb)
