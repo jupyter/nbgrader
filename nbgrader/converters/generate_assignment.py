@@ -101,7 +101,7 @@ class GenerateAssignment(BaseConverter):
             for notebook in self.notebooks:
                 notebook = Path(notebook)
 
-                if not notebook.is_relative_to(assignment_dir):
+                if assignment_dir not in notebook.parents:
                     continue
 
                 new_notebook_ids.add(notebook.stem)
