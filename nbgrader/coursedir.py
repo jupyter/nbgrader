@@ -1,5 +1,6 @@
 import os
 import re
+import sys
 import datetime
 import typing
 from pathlib import Path
@@ -366,6 +367,10 @@ class CourseDirectory(LoggingConfigurable):
 
         # Convert to a Path and back to a string to remove any instances of `/.`
         pattern = str(Path(self.directory_structure.format(**pattern_args)))
+
+        if sys.platform == 'win32':
+            # Escape backslashes on Windows
+            pattern = pattern.replace('\\', r'\\')
 
         for dir in dirs:
             match = re.match(pattern, str(dir.relative_to(self.root)))
