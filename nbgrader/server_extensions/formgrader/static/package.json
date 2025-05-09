@@ -1,0 +1,43 @@
+{
+  "name": "nbgrader-formgrader",
+  "version": "1.0.0",
+  "description": "The formgrader dependencies",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jupyter/nbgrader.git"
+  },
+  "browser": {},
+  "keywords": [
+    "jupyter",
+    "jupyterlab",
+    "notebook"
+  ],
+  "author": {
+    "name": "Jupyter Development Team",
+    "email": "jupyter@googlegroups.com"
+  },
+  "license": "BSD-3-Clause",
+  "bugs": {
+    "url": "https://github.com/jupyter/nbgrader/issues"
+  },
+  "dependencies": {
+    "autosize": "^3.0.0",
+    "backbone": "^1.1.2",
+    "bootstrap": "^3.3.0",
+    "datatables.net": "^2.1.1",
+    "datatables.net-bs": "^2.1.1",
+    "jquery": "^3.5.1",
+    "jquery-color": "^2.2.0",
+    "underscore": "^1.7.0"
+  },
+  "resolutions": {
+    "autosize": "3.0.8",
+    "backbone": "1.1.2",
+    "bootstrap": "3.3.4",
+    "datatables.net": "2.1.1",
+    "datatables.net-bs": "2.1.1",
+    "jquery": "3.5.1",
+    "jquery-color": "2.2.0",
+    "underscore": "1.7.0"
+  }
+}

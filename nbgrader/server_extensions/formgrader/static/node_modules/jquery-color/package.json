@@ -1,0 +1,72 @@
+{
+  "name": "jquery-color",
+  "title": "jQuery Color",
+  "description": "jQuery plugin for color manipulation and animation support.",
+  "version": "2.2.0",
+  "homepage": "https://github.com/jquery/jquery-color",
+  "author": {
+    "name": "OpenJS Foundation and other contributors",
+    "url": "https://github.com/jquery/jquery-color/blob/2.2.0/AUTHORS.txt"
+  },
+  "scripts": {
+    "ci": "grunt ci",
+    "test": "grunt ci"
+  },
+  "maintainers": [
+    {
+      "name": "Corey Frang",
+      "email": "gnarf37@gmail.com"
+    },
+    {
+      "name": "Michał Gołębiowski-Owczarek",
+      "email": "m.goleb@gmail.com",
+      "url": "https://github.com/mgol"
+    }
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/jquery/jquery-color.git"
+  },
+  "bugs": "https://github.com/jquery/jquery-color/issues",
+  "license": "MIT",
+  "main": "dist/jquery.color.js",
+  "files": [
+    "dist",
+    "README.md",
+    "AUTHORS.txt",
+    "LICENSE.txt"
+  ],
+  "dependencies": {},
+  "peerDependencies": {
+    "jquery": ">=1.11.0"
+  },
+  "devDependencies": {
+    "commitplease": "3.2.0",
+    "eslint-config-jquery": "3.0.0",
+    "grunt": "1.1.0",
+    "grunt-bowercopy": "1.2.5",
+    "grunt-cli": "1.3.2",
+    "grunt-compare-size": "0.4.2",
+    "grunt-contrib-concat": "1.0.1",
+    "grunt-contrib-qunit": "3.1.0",
+    "grunt-contrib-uglify": "4.0.1",
+    "grunt-eslint": "22.0.0",
+    "grunt-git-authors": "3.2.0",
+    "load-grunt-tasks": "5.1.0",
+    "testswarm": "1.1.0"
+  },
+  "commitplease": {
+    "components": [
+      "All",
+      "Build",
+      "Core",
+      "Readme",
+      "Test"
+    ]
+  },
+  "keywords": [
+    "color",
+    "animation",
+    "jquery-plugin"
+  ]
+}
