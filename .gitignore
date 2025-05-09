@@ -104,6 +104,12 @@ nbgrader/server_extensions/formgrader/static/node_modules/bootstrap/js
 nbgrader/server_extensions/formgrader/static/node_modules/bootstrap/grunt
 nbgrader/server_extensions/formgrader/static/node_modules/jquery/external
 nbgrader/server_extensions/formgrader/static/node_modules/jquery/src
+nbgrader/server_extensions/formgrader/static/node_modules/underscore/amd
+nbgrader/server_extensions/formgrader/static/node_modules/underscore/cjs
+nbgrader/server_extensions/formgrader/static/node_modules/underscore/modules
+nbgrader/server_extensions/formgrader/static/node_modules/underscore/underscore-esm*
+nbgrader/server_extensions/formgrader/static/node_modules/underscore/underscore-node*
+nbgrader/server_extensions/formgrader/static/node_modules/underscore/underscore-umd*
 
 !nbgrader/server_extensions/formgrader/static/node_modules/autosize/dist
 !nbgrader/server_extensions/formgrader/static/node_modules/bootstrap/dist

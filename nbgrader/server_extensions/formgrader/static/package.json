@@ -28,7 +28,7 @@
     "datatables.net-bs": "^2.1.1",
     "jquery": "^3.5.1",
     "jquery-color": "^2.2.0",
-    "underscore": "^1.7.0"
+    "underscore": "^1.13.0"
   },
   "resolutions": {
     "autosize": "3.0.8",
@@ -37,7 +37,6 @@
     "datatables.net": "2.1.1",
     "datatables.net-bs": "2.1.1",
     "jquery": "3.5.1",
-    "jquery-color": "2.2.0",
-    "underscore": "1.7.0"
+    "jquery-color": "2.2.0"
   }
 }
