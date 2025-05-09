@@ -275,7 +275,7 @@ var AssignmentUI = Backbone.View.extend({
         this.$name.text("Please wait...");
         $.post(base_url + "/formgrader/api/assignment/" + this.model.get("name") + "/unrelease")
             .done(_.bind(this.unrelease_success, this))
-            .fail(_.bind(this.unrelase_failure, this));
+            .fail(_.bind(this.unrelease_failure, this));
     },
 
     unrelease_success: function (response) {

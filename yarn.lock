@@ -521,7 +521,6 @@ __metadata:
     "@types/codemirror": ^5.60.5
     "@typescript-eslint/eslint-plugin": ^5.0.0
     "@typescript-eslint/parser": ^5.0.0
-    bower: "*"
     eslint: ^8.0.0
     eslint-config-prettier: ^8.0.0
     eslint-plugin-prettier: ^4.0.0
@@ -2846,15 +2845,6 @@ __metadata:
   version: 5.2.2
   resolution: "big.js@npm:5.2.2"
   checksum: b89b6e8419b097a8fb4ed2399a1931a68c612bce3cfd5ca8c214b2d017531191070f990598de2fc6f3f993d91c0f08aa82697717f6b3b8732c9731866d233c9e
-  languageName: node
-  linkType: hard
-
-"bower@npm:*":
-  version: 1.8.14
-  resolution: "bower@npm:1.8.14"
-  bin:
-    bower: bin/bower
-  checksum: 47e8af8a0a9cf8849ecd3c2c20deb522e0663044c210dfdf78c3aa3e85e6234a9b9d1ed3f96833649672ea80c743f03db5a5a5691989604a14cf99d0d59fc31b
   languageName: node
   linkType: hard
 
