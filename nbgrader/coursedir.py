@@ -310,6 +310,13 @@ class CourseDirectory(LoggingConfigurable):
         assignment_id: str = '.',
         escape: bool = False
     ) -> str:
+        """
+        Produce an absolute path to an assignment directory.
+
+        When escape=True, the non-passed elements of the path are regex-escaped, so the
+        resulting string can be used as a pattern to match path components.
+        """
+
         kwargs = dict(
             nbgrader_step=nbgrader_step,
             student_id=student_id,
@@ -323,7 +330,10 @@ class CourseDirectory(LoggingConfigurable):
 
         path = base / self.directory_structure.format(**kwargs)
 
-        return str(path)
+        if escape:
+            return path.anchor + re.escape(os.path.sep).join(path.parts[1:])
+        else:
+            return str(path)
 
     def find_assignments(self,
         nbgrader_step: str = "*",

@@ -20,24 +20,25 @@ def test_coursedir_configurable(conf, course_dir):
     assert coursedir.root == course_dir
 
 
-def test_coursedir_format_path(conf):
+@pytest.mark.parametrize("root", [None, os.path.sep + "[special]~root"])
+def test_coursedir_format_path(conf, root):
+    if root is not None:
+        conf.CourseDirectory.root = root
     coursedir = CourseDirectory(config=conf)
 
-    expected = os.path.join(coursedir.root, "step", "student_id", "assignment_id")
-    assert coursedir.format_path("step", "student_id", "assignment_id") == expected
+    # The default includes the un-escaped root
+    path = os.path.join(coursedir.root, "step", "student_id", "assignment1")
+    assert coursedir.format_path("step", "student_id", "assignment1") == path
 
+    # The escape=True option escapes the root and path separators
     escaped = Path(re.escape(coursedir.root))
-    expected = str(escaped / "step" / "student_id" / "assignment_id")
-    assert coursedir.format_path("step", "student_id", "assignment_id", escape=True) == expected
+    expected = escaped.anchor + re.escape(os.path.sep).join(
+        (escaped / "step" / "student_id" / "(?P<assignment_id>.*)").parts[1:])
 
+    actual = coursedir.format_path("step", "student_id", "(?P<assignment_id>.*)", escape=True)
+    assert actual == expected
 
-def test_coursedir_format_path_with_specials(conf):
-    conf.CourseDirectory.root = "/[test] root"
-    coursedir = CourseDirectory(config=conf)
-
-    expected = os.path.join("/[test] root", "step", "student_id", "assignment_id")
-    assert coursedir.format_path("step", "student_id", "assignment_id") == expected
-
-    escaped = Path(re.escape(coursedir.root))
-    expected = str(escaped / "step" / "student_id" / "assignment_id")
-    assert coursedir.format_path("step", "student_id", "assignment_id", escape=True) == expected
+    # The escape=True option produces a regex pattern which can match paths
+    match = re.match(actual, path)
+    assert match is not None
+    assert match.group("assignment_id") == "assignment1"
