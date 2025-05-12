@@ -329,7 +329,8 @@ class CourseDirectory(LoggingConfigurable):
                 parts = list(structure.parts)
             else:
                 anchor = base.anchor
-                parts = [re.escape(part) for part in base._tail] + list(structure.parts)
+                parts = [re.escape(part) for part in base.parts if part != anchor]
+                parts += list(structure.parts)
             return re.escape(anchor) + re.escape(os.path.sep).join(parts)
         else:
             return str(base / structure)
