@@ -332,8 +332,6 @@ class CourseDirectory(LoggingConfigurable):
                 parts = [re.escape(part) for part in base._tail] + list(structure.parts)
             return re.escape(anchor) + re.escape(os.path.sep).join(parts)
         else:
-            if structure.is_absolute():
-                return str(structure)
             return str(base / structure)
 
     def find_assignments(self,
