@@ -20,7 +20,11 @@ def test_coursedir_configurable(conf, course_dir):
     assert coursedir.root == course_dir
 
 
-@pytest.mark.parametrize("root", [None, os.path.sep + "[special]~root"])
+@pytest.mark.parametrize("root", [
+    None, # Keep the course_dir fixture
+    os.path.sep + "[special]~root",
+    "C:\\Users\\Student",
+])
 def test_coursedir_format_path(conf, root):
     if root is not None:
         conf.CourseDirectory.root = root

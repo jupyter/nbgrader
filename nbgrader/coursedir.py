@@ -316,24 +316,25 @@ class CourseDirectory(LoggingConfigurable):
         When escape=True, the non-passed elements of the path are regex-escaped, so the
         resulting string can be used as a pattern to match path components.
         """
-
         kwargs = dict(
             nbgrader_step=nbgrader_step,
             student_id=student_id,
             assignment_id=assignment_id
         )
-
+        base = Path(self.root)
+        structure = Path(self.directory_structure.format(**kwargs))
         if escape:
-            base = Path(re.escape(self.root))
+            if structure.is_absolute():
+                anchor = structure.anchor
+                parts = list(structure.parts)
+            else:
+                anchor = base.anchor
+                parts = [re.escape(part) for part in base._tail] + list(structure.parts)
+            return re.escape(anchor) + re.escape(os.path.sep).join(parts)
         else:
-            base = Path(self.root)
-
-        path = base / self.directory_structure.format(**kwargs)
-
-        if escape:
-            return path.anchor + re.escape(os.path.sep).join(path.parts[1:])
-        else:
-            return str(path)
+            if structure.is_absolute():
+                return str(structure)
+            return str(base / structure)
 
     def find_assignments(self,
         nbgrader_step: str = "*",
