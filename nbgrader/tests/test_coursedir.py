@@ -7,27 +7,16 @@ from traitlets.config import Config
 
 from nbgrader.coursedir import CourseDirectory
 
-
-@pytest.fixture
-def conf(course_dir):
-    conf = Config()
-    conf.CourseDirectory.root = course_dir
-    return conf
-
-
-def test_coursedir_configurable(conf, course_dir):
-    coursedir = CourseDirectory(config=conf)
-    assert coursedir.root == course_dir
-
-
 @pytest.mark.parametrize("root", [
     None, # Keep the course_dir fixture
     os.path.sep + "[special]~root",
     "C:\\Users\\Student",
 ])
-def test_coursedir_format_path(conf, root):
-    if root is not None:
-        conf.CourseDirectory.root = root
+def test_coursedir_format_path(course_dir, root):
+    conf = Config()
+    if root is None:
+        root = course_dir
+    conf.CourseDirectory.root = root
     coursedir = CourseDirectory(config=conf)
 
     # The default includes the un-escaped root
@@ -35,9 +24,11 @@ def test_coursedir_format_path(conf, root):
     assert coursedir.format_path("step", "student_id", "assignment1") == path
 
     # The escape=True option escapes the root and path separators
-    escaped = Path(re.escape(coursedir.root))
-    expected = escaped.anchor + re.escape(os.path.sep).join(
-        (escaped / "step" / "student_id" / "(?P<assignment_id>.*)").parts[1:])
+    root = Path(coursedir.root)
+    expected = re.escape(root.anchor) + re.escape(os.path.sep).join([
+        *[re.escape(part) for part in root.parts[1:]],
+        "step", "student_id", "(?P<assignment_id>.*)"
+    ])
 
     actual = coursedir.format_path("step", "student_id", "(?P<assignment_id>.*)", escape=True)
     assert actual == expected
