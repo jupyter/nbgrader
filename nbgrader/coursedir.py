@@ -361,7 +361,7 @@ class CourseDirectory(LoggingConfigurable):
         # Locate all matching directories using a glob
         dirs = list(
             filter(
-                lambda p: p.is_dir() and not is_ignored(p.name, self.ignore),
+                lambda p: p.is_dir() and not is_ignored(p.relative_to(self.root), self.ignore),
                 Path(self.root).glob(self.directory_structure.format(**kwargs))
             )
         )
@@ -385,7 +385,7 @@ class CourseDirectory(LoggingConfigurable):
         for dir in dirs:
             match = re.match(pattern, str(dir.relative_to(self.root)))
             if match:
-                results.append({ **kwargs, **match.groupdict() })
+                results.append({ **kwargs, **match.groupdict(), 'path': dir })
 
         return results
 
@@ -436,7 +436,7 @@ class CourseDirectory(LoggingConfigurable):
         }
 
         # Convert to a Path and back to a string to remove any instances of `/.`
-        pattern = str(Path(pattern.format(**pattern_args)))
+        pattern = str(Path(pattern.replace(".", r"\.").format(**pattern_args)))
 
         if sys.platform == 'win32':
             # Escape backslashes on Windows
@@ -445,7 +445,7 @@ class CourseDirectory(LoggingConfigurable):
         for file in files:
             match = re.match(pattern, str(file.relative_to(self.root)))
             if match:
-                results.append({ **kwargs, **match.groupdict(), "path": file})
+                results.append({ **kwargs, **match.groupdict(), "path": file })
 
         return results
 
