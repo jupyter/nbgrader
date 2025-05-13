@@ -341,7 +341,7 @@ class CourseDirectory(LoggingConfigurable):
         assignment_id: str = "*",
     ) -> typing.List[typing.Dict]:
         """
-        Find all entries that match the given criteria.
+        Find all directories that match the given criteria.
 
         The default value for each acts as a wildcard. To exclude a directory, use
         a value of "." (e.g. nbgrader_step="source", student_id=".").
@@ -389,6 +389,65 @@ class CourseDirectory(LoggingConfigurable):
 
         return results
 
+    def find_notebooks(
+        self,
+        nbgrader_step: str = "*",
+        student_id: str = "*",
+        assignment_id: str = "*",
+        notebook_id: str = "*",
+        ext: str = "ipynb",
+    ) -> typing.List[typing.Dict]:
+        """
+        Find all notebooks that match the given criteria.
+
+        The default value for each acts as a wildcard. To exclude a directory, use
+        a value of "." (e.g. nbgrader_step="source", student_id=".").
+
+        Returns:
+            A list of dicts containing input values, one per matching directory.
+        """
+
+        results = []
+
+        kwargs = dict(
+            nbgrader_step=nbgrader_step,
+            student_id=student_id,
+            assignment_id=assignment_id,
+            notebook_id=notebook_id,
+            ext=ext,
+        )
+
+        pattern = os.path.join(self.directory_structure, "{notebook_id}.{ext}")
+
+        # Locate all matching files using a glob
+        files = list(
+            filter(
+                lambda p: p.is_file() and not is_ignored(p.name, self.ignore),
+                Path(self.root).glob(pattern.format(**kwargs))
+            )
+        )
+
+        if not files:
+            return results
+
+        pattern_args = {
+            key: value.replace("*", f"(?P<{key}>.*)")
+            for key, value in kwargs.items()
+        }
+
+        # Convert to a Path and back to a string to remove any instances of `/.`
+        pattern = str(Path(pattern.format(**pattern_args)))
+
+        if sys.platform == 'win32':
+            # Escape backslashes on Windows
+            pattern = pattern.replace('\\', r'\\')
+
+        for file in files:
+            match = re.match(pattern, str(file.relative_to(self.root)))
+            if match:
+                results.append({ **kwargs, **match.groupdict(), "path": file})
+
+        return results
 
     def get_existing_timestamp(self, dest_path: str) -> typing.Optional[datetime.datetime]:
         """Get the timestamp, as a datetime object, of an existing submission."""

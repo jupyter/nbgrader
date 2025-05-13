@@ -1,11 +1,8 @@
-import glob
-import re
 import sys
 import os
 import logging
 import warnings
 import typing
-from pathlib import Path
 
 from traitlets.config import LoggingConfigurable, Config, get_config
 from traitlets import Instance, Enum, Unicode, observe
@@ -386,6 +383,7 @@ class NbGraderAPI(LoggingConfigurable):
             A list of dictionaries containing information about each notebook
 
         """
+        notebooks = []
         with self.gradebook as gb:
             try:
                 assignment = gb.find_assignment(assignment_id)
@@ -394,7 +392,6 @@ class NbGraderAPI(LoggingConfigurable):
 
             # if the assignment exists in the database
             if assignment and assignment.notebooks:
-                notebooks = []
                 for notebook in assignment.notebooks:
                     x = notebook.to_dict()
                     x["average_score"] = gb.average_notebook_score(notebook.name, assignment.name)
@@ -405,16 +402,13 @@ class NbGraderAPI(LoggingConfigurable):
 
             # if it doesn't exist in the database
             else:
-                sourcedir = Path(self.coursedir.format_path(
-                    self.coursedir.source_directory,
+                for notebook in self.coursedir.find_notebooks(
+                    nbgrader_step=self.coursedir.source_directory,
                     student_id='.',
-                    assignment_id=assignment_id))
-
-                notebooks = []
-                for filename in sourcedir.glob("*.ipynb"):
-                    notebook_id = filename.stem
+                    assignment_id=assignment_id
+                ):
                     notebooks.append({
-                        "name": notebook_id,
+                        "name": notebook['notebook_id'],
                         "id": None,
                         "average_score": 0,
                         "average_code_score": 0,
