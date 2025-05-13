@@ -368,16 +368,6 @@ def find_all_notebooks(path):
     return notebooks
 
 
-def full_split(path: str) -> Tuple[str, ...]:
-    rest, last = os.path.split(path)
-    if last == path:
-        return (path,)
-    elif rest == path:
-        return (rest,)
-    else:
-        return full_split(rest) + (last,)
-
-
 @contextlib.contextmanager
 def chdir(dirname: str) -> Iterator:
     currdir = os.getcwd()
