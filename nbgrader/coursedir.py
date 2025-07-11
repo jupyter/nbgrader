@@ -438,12 +438,12 @@ class CourseDirectory(LoggingConfigurable):
             for key, value in kwargs.items()
         }
 
+        # Escape backslashes on Windows before doing any other escaping
+        if sys.platform == 'win32':
+            pattern = pattern.replace('\\', r'\\')
+
         # Convert to a Path and back to a string to remove any instances of `/.`
         pattern = str(Path(pattern.replace(".", r"\.").format(**pattern_args)))
-
-        if sys.platform == 'win32':
-            # Escape backslashes on Windows
-            pattern = pattern.replace('\\', r'\\')
 
         for file in files:
             match = re.match(pattern, str(file.relative_to(self.root)))
