@@ -5,6 +5,7 @@ import datetime
 import typing
 from pathlib import Path
 from textwrap import dedent
+import logging
 
 from traitlets.config import LoggingConfigurable
 from traitlets import Integer, Bool, Unicode, List, default, validate, TraitError
@@ -379,11 +380,13 @@ class CourseDirectory(LoggingConfigurable):
         }
 
         # Convert to a Path and back to a string to remove any instances of `/.`
-        pattern = str(Path(self.directory_structure.format(**pattern_args)))
+        pattern = str(self.directory_structure)
 
+        # Escape backslashes on Windows before doing any other escaping
         if sys.platform == 'win32':
-            # Escape backslashes on Windows
             pattern = pattern.replace('\\', r'\\')
+
+        pattern = str(Path(self.directory_structure.format(**pattern_args)))
 
         for dir in dirs:
             match = re.match(pattern, str(dir.relative_to(self.root)))
@@ -438,14 +441,21 @@ class CourseDirectory(LoggingConfigurable):
             for key, value in kwargs.items()
         }
 
+        logging.error("unescaped pattern: %s", pattern)
+
         # Escape backslashes on Windows before doing any other escaping
         if sys.platform == 'win32':
             pattern = pattern.replace('\\', r'\\')
 
+        logging.error("winescaped pattern: %s", pattern)
+
         # Convert to a Path and back to a string to remove any instances of `/.`
         pattern = str(Path(pattern.replace(".", r"\.").format(**pattern_args)))
 
+        logging.error("final pattern: %s", pattern)
+
         for file in files:
+            logging.error("file: %s", file.relative_to(self.root))
             match = re.match(pattern, str(file.relative_to(self.root)))
             if match:
                 results.append({ **kwargs, **match.groupdict(), "path": file })
