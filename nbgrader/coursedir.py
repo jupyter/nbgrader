@@ -361,7 +361,10 @@ class CourseDirectory(LoggingConfigurable):
         # Locate all matching directories using a glob
         dirs = list(
             filter(
-                lambda p: p.is_dir() and not is_ignored(p.relative_to(self.root), self.ignore),
+                lambda p: (
+                    p.is_dir()
+                    and not is_ignored(str(p.relative_to(self.root)), self.ignore)
+                ),
                 Path(self.root).glob(self.directory_structure.format(**kwargs))
             )
         )
