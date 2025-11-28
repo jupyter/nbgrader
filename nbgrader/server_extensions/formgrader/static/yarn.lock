@@ -21,10 +21,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"bootstrap@npm:3.3.4":
-  version: 3.3.4
-  resolution: "bootstrap@npm:3.3.4"
-  checksum: ffb91ee0b335f600362b49442f8bee5365215c59170a1c5a876edea16ea07e245d01f0ebab878a1c6567c6e847e64713f5db660ee9b778d5ceb223328437f677
+"bootstrap@npm:5.0.0":
+  version: 5.0.0
+  resolution: "bootstrap@npm:5.0.0"
+  peerDependencies:
+    "@popperjs/core": ^2.9.2
+  checksum: 93c11f45fc990fa38e9c74bbba22e57c626eab7fba9c7fc4a3f8ba007e756597098a9990684877542d0a9407893cfe104e6e7fd39da2ebdd5133b4f94d03ea4d
   languageName: node
   linkType: hard
 
@@ -69,7 +71,7 @@ __metadata:
   dependencies:
     autosize: ^3.0.0
     backbone: ^1.1.2
-    bootstrap: ^3.3.0
+    bootstrap: ^5.0.0
     datatables.net: ^2.1.1
     datatables.net-bs: ^2.1.1
     jquery: ^3.5.1
