@@ -1,8 +1,8 @@
 from traitlets import Bool
 
-from .exchange import Exchange
+from .exchange import ABCExchange
 
 
-class ExchangeFetchAssignment(Exchange):
+class ABCExchangeFetchAssignment(ABCExchange):
 
     replace_missing_files = Bool(False, help="Whether to replace missing files on fetch").tag(config=True)
