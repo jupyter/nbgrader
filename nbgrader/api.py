@@ -613,7 +613,8 @@ class SubmittedAssignment(Base):
             "max_written_score": self.max_written_score,
             "task_score": self.task_score,
             "max_task_score": self.max_task_score,
-            "needs_manual_grade": self.needs_manual_grade
+            "needs_manual_grade": self.needs_manual_grade,
+            "extension": self.extension.total_seconds() if self.extension is not None else None,
         }
 
     def __repr__(self) -> str:
@@ -3090,7 +3091,8 @@ class Gradebook(object):
             func.coalesce(written_scores.c.max_written_score, 0.0),
             func.coalesce(task_scores.c.task_score, 0.0),
             func.coalesce(task_scores.c.max_task_score, 0.0),
-            _manual_grade
+            _manual_grade,
+            SubmittedAssignment.extension
         ).select_from(SubmittedAssignment
         ).join(SubmittedNotebook).join(Assignment).join(Student).join(Grade)\
          .outerjoin(code_scores, SubmittedAssignment.id == code_scores.c.id)\
@@ -3119,7 +3121,7 @@ class Gradebook(object):
             "score", "max_score", "code_score", "max_code_score",
             "written_score", "max_written_score",
             "task_score", "max_task_score",
-            "needs_manual_grade"
+            "needs_manual_grade", "extension"
         ]
         return [dict(zip(keys, x)) for x in assignments]
 

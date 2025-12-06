@@ -1,3 +1,4 @@
+import datetime
 import glob
 import re
 import sys
@@ -11,7 +12,7 @@ from traitlets import Instance, Enum, Unicode, observe
 from ..coursedir import CourseDirectory
 from ..converters import GenerateAssignment, Autograde, GenerateFeedback, GenerateSolution
 from ..exchange import ExchangeFactory, ExchangeError
-from ..api import MissingEntry, Gradebook, Student, SubmittedAssignment
+from ..api import MissingEntry, InvalidEntry, Gradebook, Student, SubmittedAssignment
 from ..utils import parse_utc, temp_attrs, capture_log, as_timezone, to_numeric_tz
 from ..auth import Authenticator
 
@@ -525,6 +526,7 @@ class NbGraderAPI(LoggingConfigurable):
                 "autograded": False,
                 "submitted": True,
                 "student": student_id,
+                "extension": None,
             }
 
             if student_id not in students:
@@ -569,6 +571,7 @@ class NbGraderAPI(LoggingConfigurable):
                 "autograded": False,
                 "submitted": False,
                 "student": student_id,
+                "extension": None,
             }
 
             if student_id not in students:
@@ -614,6 +617,8 @@ class NbGraderAPI(LoggingConfigurable):
                 submission["display_timestamp"] = None
             submission["autograded"] = True
             submission["submitted"] = True
+            if submission["extension"]:
+                submission["extension"] = submission["extension"].total_seconds()
             submissions.append(submission)
 
         for student_id in ungraded:
@@ -1159,3 +1164,38 @@ class NbGraderAPI(LoggingConfigurable):
             assignments = lister_rel.start()
             ret_dic["value"] = sorted(assignments, key=lambda x: (x['course_id'], x['assignment_id']))
         return ret_dic
+    
+    def grant_extension_to_student(self, assignment_id, student_id, minutes, hours, days, weeks):
+        """Grants extension for a particular assignment and student.
+
+        Arguments
+        ---------
+        assignment_id: string
+            The name of the assignment
+        student_id: string
+            The unique id of the student
+        minutes: int
+            The number of minutes to extend the assignment deadline
+        hours: int
+            The number of hours to extend the assignment deadline
+        days: int
+            The number of days to extend the assignment deadline
+        weeks: int
+            The number of weeks to extend the assignment deadline
+
+        Returns
+        -------
+        result: dict
+            A dictionary with the following keys (error and log may or may not be present):
+
+            - success (bool): whether or not the operation completed successfully
+            - error (string): formatted traceback
+            - log (string): captured log output
+
+        """
+        with self.gradebook as gb:
+            try:
+                gb.grant_extension(assignment_id, student_id, minutes, hours, days, weeks)
+            except InvalidEntry as e:
+                return {"success": False, "error": str(e)}
+        return {"success": True}

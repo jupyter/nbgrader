@@ -21,6 +21,10 @@ var SubmissionUI = Backbone.View.extend({
         this.$autograde = this.$el.find(".autograde");
         this.$generate_feedback = this.$el.find(".generate-feedback");
         this.$release_feedback = this.$el.find(".release-feedback");
+        this.$grant_extension = this.$el.find(".grant-extension");
+        
+        this.$modal = undefined;
+        this.$modal_save = undefined;
 
         this.listenTo(this.model, "sync", this.render);
 
@@ -36,6 +40,7 @@ var SubmissionUI = Backbone.View.extend({
         this.$autograde.empty();
         this.$generate_feedback.empty();
         this.$release_feedback.empty();
+        this.$grant_extension.empty();
     },
 
     render: function () {
@@ -127,6 +132,14 @@ var SubmissionUI = Backbone.View.extend({
             .click(_.bind(this.release_feedback, this))
             .append($("<span/>")
                 .addClass("glyphicon glyphicon-envelope")
+                .attr("aria-hidden", "true")));
+
+        // grant extension
+        this.$grant_extension.append($("<a/>")
+            .attr("href", "#")
+            .click(_.bind(this.grant_extension, this))
+            .append($("<span/>")
+                .addClass("glyphicon glyphicon-calendar")
                 .attr("aria-hidden", "true")));
     },
 
@@ -256,6 +269,137 @@ var SubmissionUI = Backbone.View.extend({
             "There was an error releasing feedback for '" + assignment + "' for student '" + student + "'.");
     },
 
+    grant_extension: function () {
+        if (!this.model.get("autograded")) {
+            createModal(
+                "error-modal",
+                "Error",
+                "Extensions cannot be granted for ungraded submissions.");
+            return;
+        }
+        this.openModal();
+    },
+
+    openModal: function () {
+        var body = $("<table/>").addClass("table table-striped form-table");
+        var tableBody = $("<tbody/>");
+        body.append(tableBody);
+        
+        var weeks = $("<tr/>");
+        tableBody.append(weeks);
+        weeks.append($("<td/>").addClass("align-middle").text("Weeks"));
+        weeks.append($("<td/>").append($("<input/>").addClass("modal-weeks").attr({type: "number", min: 0, step: 1, value: this.modal_extension_weeks})));
+        
+        var days = $("<tr/>");
+        tableBody.append(days);
+        days.append($("<td/>").addClass("align-middle").text("Days"));
+        days.append($("<td/>").append($("<input/>").addClass("modal-days").attr({type: "number", min: 0, step: 1, value: this.modal_extension_days})));
+
+        var hours = $("<tr/>");
+        tableBody.append(hours);
+        hours.append($("<td/>").addClass("align-middle").text("Hours"));
+        hours.append($("<td/>").append($("<input/>").addClass("modal-hours").attr({type: "number", min: 0, step: 1, value: this.modal_extension_hours})));
+
+        var minutes = $("<tr/>");
+        tableBody.append(minutes);
+        minutes.append($("<td/>").addClass("align-middle").text("Minutes"));
+        minutes.append($("<td/>").append($("<input/>").addClass("modal-minutes").attr({type: "number", min: 0, step: 1, value: this.modal_extension_minutes})));
+
+        var footer = $("<div/>");
+        footer.append($("<button/>")
+            .addClass("btn btn-primary save")
+            .attr("type", "button")
+            .text("Save"));
+        footer.append($("<button/>")
+            .addClass("btn btn-danger")
+            .attr("type", "button")
+            .attr("data-dismiss", "modal")
+            .text("Cancel"));
+
+        this.$modal = createModal("grant-extension-modal", "Granting Extension to " + this.model.get("student"), body, footer);
+        
+        var extension = this.model.get("extension") || 0;
+        var modal_extension_days = Math.trunc(extension / 86400);
+        var modal_extension_weeks = Math.trunc(modal_extension_days / 7);
+        modal_extension_days = modal_extension_days % 7;
+        var modal_extension_hours = Math.trunc((extension % 86400) / 3600);
+        var modal_extension_minutes = Math.trunc((extension % 3600) / 60);
+
+        this.$modal.find("input.modal-weeks").val(modal_extension_weeks);
+        this.$modal.find("input.modal-days").val(modal_extension_days);
+        this.$modal.find("input.modal-hours").val(modal_extension_hours);
+        this.$modal.find("input.modal-minutes").val(modal_extension_minutes);
+        this.$modal.find("button.save").click(_.bind(this.save, this));
+    },
+
+    save: function () {
+        this.animateSaving();
+        
+        var weeks = this.$modal.find("input.modal-weeks").val() || 0;
+        var days = this.$modal.find("input.modal-days").val() || 0;
+        var hours = this.$modal.find("input.modal-hours").val() || 0;
+        var minutes = this.$modal.find("input.modal-minutes").val() || 0;
+
+        this.closeModal();
+        let student = this.model.get("student");
+        let assignment = this.model.get("name");
+
+        $.ajax({
+            url: base_url + '/formgrader/api/submission/extension/' + assignment + '/' + student,
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({
+                minutes: minutes,
+                hours: hours,
+                days: days,
+                weeks: weeks,
+            }),
+            })
+            .done(_.bind(this.grant_extension_log, this));
+    },
+
+    grant_extension_log: function (response) {
+        this.model.fetch();
+        response = JSON.parse(response);
+        var student = this.model.get("student");
+        var assignment = this.model.get("name");
+        if (response["success"]) {
+            createLogModal(
+                "success-modal",
+                "Success",
+                "Successfully granted extension to '" + assignment + "' for student '" + student + "'.",
+                response["log"]);
+
+        } else {
+            createLogModal(
+                "error-modal",
+                "Error",
+                "There was an error granting extension to '" + assignment + "' for student '" + student + "':",
+                response["log"],
+                response["error"]);
+        }
+    },
+
+    animateSaving: function () {
+        if (this.$modal_save) {
+            this.$modal_save.text("Saving...");
+        }
+    },
+
+    closeModal: function () {
+        if (this.$modal) {
+            this.$modal.modal('hide')
+            this.$modal = undefined;
+            this.modal_extension_weeks = 0;
+            this.modal_extension_days = 0;
+            this.modal_extension_hours = 0;
+            this.modal_extension_minutes = 0;
+            this.$modal_save = undefined;
+        }
+
+        this.render();
+    },
+
 });
 
 var insertRow = function (table) {
@@ -268,6 +412,7 @@ var insertRow = function (table) {
     row.append($("<td/>").addClass("text-center autograde"));
     row.append($("<td/>").addClass("text-center generate-feedback"));
     row.append($("<td/>").addClass("text-center release-feedback"));
+    row.append($("<td/>").addClass("text-center grant-extension"));
     table.append(row)
     return row;
 };
