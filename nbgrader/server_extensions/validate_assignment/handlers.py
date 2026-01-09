@@ -38,7 +38,10 @@ class ValidateAssignmentHandler(JupyterHandler):
         return app.config
 
     def validate_notebook(self, path):
-        fullpath = os.path.join(self.root_dir, path)
+        fullpath = os.path.normpath(os.path.join(self.root_dir, path))
+        root_normalized = os.path.normpath(self.root_dir)
+        if not fullpath.startswith(root_normalized + os.sep):
+            raise web.HTTPError(403, "Access denied: path outside allowed directory")
 
         try:
             config = self.load_config()
