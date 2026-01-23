@@ -13,6 +13,7 @@ import { PageConfig } from '@jupyterlab/coreutils';
 import * as React from 'react';
 
 import { showNbGraderDialog, validate } from '../common/validate';
+import { showDialog } from '@jupyterlab/apputils';
 
 export class AssignmentList {
 
@@ -226,7 +227,7 @@ class Assignment {
 
   private make_link(): HTMLSpanElement {
     var container = document.createElement('span');;
-    container.classList.add('item_name', 'col-sm-6');
+    container.classList.add('item_name', 'col-sm-4');
 
     var link;
     if (this.data['status'] === 'fetched') {
@@ -259,12 +260,50 @@ class Assignment {
       buttons: [Dialog.okButton()]
     }, true);
 
-
   };
 
-  private make_button(): HTMLSpanElement{
+  private static async proceedLateSubmissionWarning(): Promise<any> {
+
+    return showDialog({
+      title: 'Late Submission',
+      body: 'The assignment is past due date. Would you like to proceed?',
+      host: document.body,
+      buttons: [
+        {
+          label: 'cancel',
+          caption: 'cancel submission',
+          className: '',
+          accept: false,
+          displayType: 'default',
+          ariaLabel: '',
+          iconClass: 'closeIcon',
+          iconLabel: 'Cancel',
+          actions: []
+        },
+        {
+          label: 'submit',
+          caption: 'proceed',
+          className: '',
+          accept: true,
+          displayType: 'default',
+          ariaLabel: '',
+          iconClass: 'checkIcon',
+          iconLabel: 'Submit',
+          actions: []
+        },
+      ],
+      defaultButton: 0,
+      focusNodeSelector: '.my-input',
+      hasClose: false,
+      renderer: undefined
+    }).then((result => {
+      return result.button.accept;
+    }));
+  };
+
+  private async make_button(): Promise<HTMLSpanElement>{
     var container = document.createElement('span');
-    container.classList.add('item_status', 'col-sm-4')
+    container.classList.add('item_status', 'col-sm-2')
     var button = document.createElement('button');
     button.classList.add('btn', 'btn-primary', 'btn-xs')
     container.append(button);
@@ -294,9 +333,26 @@ class Assignment {
       }
     } else if (this.data.status == 'fetched') {
         button.innerText = "Submit";
-        button.onclick = async function(){
+        let pastDueDate = false;
+        if (!!this.data['due_date']) {
+          var due_date = new Date(this.data['due_date']).getTime();
+          var now = new Date().getTime();
+          pastDueDate = (due_date < now)
+        }
+        if (pastDueDate) {
+          button.innerText = 'Late Submit';
+        }
+        button.onclick = async function() {
+          if (pastDueDate) {
+            const proceed = await Assignment.proceedLateSubmissionWarning();
+            if (!proceed) {
+              return;
+            }
+          }
+          
           button.innerText = 'submitting...';
           button.setAttribute('disabled', 'disabled');
+          
           const dataToSend = { course_id: that.data['course_id'], assignment_id: that.data['assignment_id']};
           try {
             const reply = await requestAPI<any>('assignments/submit', {
@@ -304,11 +360,11 @@ class Assignment {
               method: 'POST'
             });
 
-            if(!reply.success){
+            if (!reply.success) {
               that.submit_error(reply);
               button.innerText = 'Submit'
               button.removeAttribute('disabled')
-            }else{
+            } else {
               that.on_refresh(reply);
             }
 
@@ -319,9 +375,7 @@ class Assignment {
               `Error on POST /assignment_list/assignments/submit ${dataToSend}.\n${reason}`
             );
           }
-
         }
-
 
     } else if (this.data.status == 'submitted') {
       button.innerText = "Fetch Feedback";
@@ -351,11 +405,17 @@ class Assignment {
     return container;
   };
 
-  private make_row(): void {
+  private async make_row(): Promise<void> {
     var row = document.createElement('div');
-    row.classList.add('col-md-12');
+    row.classList.add('col-md-14');
     var link = this.make_link();
     row.append(link);
+    var dl = document.createElement('span');
+    dl.classList.add('item_deadline', 'col-sm-4')
+    dl.innerText = !!this.data['due_date']
+      ? new Date(this.data['due_date']).toLocaleString().replace(',', '')
+      : '';
+    row.append(dl)
     var s = document.createElement('span');
     s.classList.add('item_course', 'col-sm-2')
     s.innerText = this.data['course_id']
@@ -396,7 +456,8 @@ class Assignment {
         }
     }
 
-    row.append(this.make_button());
+    const btn = await this.make_button();
+    row.append(btn);
     this.element.innerHTML= ''
 
     this.element.append(row);
@@ -409,7 +470,7 @@ const remove_children = function (element: HTMLElement) {
   element.innerHTML = '';
 }
 
-class Submission{
+class Submission {
 
   element: any;
   data: any;
@@ -498,7 +559,7 @@ class Notebook{
   private make_button(): HTMLSpanElement {
     var that = this;
     var container = document.createElement('span');
-    container.classList.add('item_status', 'col-sm-4');
+    container.classList.add('item_status', 'col-sm-2');
     var button = document.createElement('button')
     button.classList.add('btn', 'btn-default', 'btn-xs')
 
