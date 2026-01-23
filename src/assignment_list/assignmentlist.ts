@@ -293,6 +293,36 @@ class Assignment {
 
       }
     } else if (this.data.status == 'fetched') {
+        var refetchButton = document.createElement('button');
+        refetchButton.classList.add('btn', 'btn-danger', 'btn-xs');
+        refetchButton.setAttribute('data-bs-toggle', 'tooltip');
+        refetchButton.setAttribute('data-bs-placement', 'top');
+        refetchButton.setAttribute('style', 'background:#d43f3a; margin-left:5px');
+        refetchButton.setAttribute('title', 'If you broke any of your assignment files and you want to redownload them, delete those files and click this button to refetch the original version of those files.')
+        container.append(refetchButton);
+        
+        refetchButton.innerText = 'Fetch missing files';
+        refetchButton.onclick = async function(){
+          refetchButton.innerText = 'Fetching missing files...';
+          refetchButton.setAttribute('disabled', 'disabled');
+          const dataToSend = { course_id: that.data['course_id'], assignment_id: that.data['assignment_id']};
+          try {
+            const reply = await requestAPI<any>('assignments/fetch_missing', {
+              body: JSON.stringify(dataToSend),
+              method: 'POST'
+            });
+
+            that.on_refresh(reply);
+
+          } catch (reason) {
+            remove_children(container);
+            container.innerText = 'Error fetching missing files.';
+            console.error(
+              `Error on POST /assignment_list/fetch_missing ${dataToSend}.\n${reason}`
+            );
+          }
+        }
+
         button.innerText = "Submit";
         button.onclick = async function(){
           button.innerText = 'submitting...';
