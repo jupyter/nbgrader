@@ -49,6 +49,7 @@ dependencies = [
     "setuptools",
     "sqlalchemy>=1.4,<3",
     "PyYAML>=6.0",
+    "lxml>=5.3.0",
 ]
 version = "0.9.5"
 
