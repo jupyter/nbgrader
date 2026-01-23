@@ -1,10 +1,17 @@
 # nbgrader
 
-Build: [![Build](https://img.shields.io/github/workflow/status/jupyter/nbgrader/Test?logo=github&label=tests)](https://github.com/jupyter/nbgrader/actions)
-Forum: [![Google Group](https://img.shields.io/badge/-Google%20Group-lightgrey.svg)](https://groups.google.com/forum/#!forum/jupyter)
-Cite: [![DOI](https://jose.theoj.org/papers/10.21105/jose.00032/status.svg)](https://doi.org/10.21105/jose.00032)
-
 A system for assigning and grading Jupyter notebooks.
+
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/jupyter/nbgrader/main)
+[![PyPI](https://img.shields.io/pypi/v/nbgrader?logo=pypi)](https://pypi.org/project/nbgrader/)
+[![Read the Docs](https://img.shields.io/readthedocs/nbgrader?logo=readthedocs)](https://nbgrader.readthedocs.io/en/stable/)
+
+[![Notebook Tests](https://img.shields.io/github/actions/workflow/status/jupyter/nbgrader/test-docs-python-nbextensions.yml?logo=github&label=Notebook%20Tests)](https://github.com/jupyter/nbgrader/actions/workflows/test-docs-python-nbextensions.yml)
+[![Lab Tests](https://img.shields.io/github/actions/workflow/status/jupyter/nbgrader/test-labextensions.yml?logo=github&label=Lab%20Tests)](https://github.com/jupyter/nbgrader/actions/workflows/test-labextensions.yml)
+
+[![Google Group](https://img.shields.io/badge/Google%20Group-Jupyter%20Project-blue.svg?logo=googlechat)](https://groups.google.com/forum/#!forum/jupyter)
+[![Discourse](https://img.shields.io/badge/Discourse-Jupyter-blue.svg?logo=discourse)](https://discourse.jupyter.org/search?q=nbgrader)
+[![DOI](https://jose.theoj.org/papers/10.21105/jose.00032/status.svg)](https://doi.org/10.21105/jose.00032)
 
 [Documentation can be found on Read the Docs.](https://nbgrader.readthedocs.io/en/stable/)
 
