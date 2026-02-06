@@ -28,7 +28,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [windows-latest, ubuntu-22.04]
+        os: [windows-latest, ubuntu-latest]
         group: ["docs", "python"]
         python: ["3.10", "3.11", "3.12", "3.13"]
         exclude:
@@ -54,18 +54,11 @@ jobs:
               echo "GROUP=python" >> $GITHUB_ENV
               echo "TIMEOUT_MINUTES=20" >> $GITHUB_ENV
           fi
-      - uses: actions/checkout@v3
-      - name: Install node
-        uses: actions/setup-node@v3
+      - uses: actions/checkout@v4
+      - name: Base Setup
+        uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
         with:
-          node-version: '18.x'
-      # NOTE: actions/setup-python@v2 can make use of a cache within the GitHub
-      #       Action virtual environment and setup extremely fast. 3.9 isn't
-      #       available in this cache as of November 2020.
-      - name: Install Python ${{ matrix.python }}
-        uses: actions/setup-python@v2
-        with:
-          python-version: ${{ matrix.python }}
+          python_version: ${{ matrix.python }}
       - name: Run pre-commit
         if: matrix.group == 'docs'
         run: |
@@ -95,7 +88,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
       - uses: jupyterlab/maintainer-tools/.github/actions/make-sdist@v1
 
