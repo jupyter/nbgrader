@@ -293,6 +293,12 @@ linkcheck_ignore = [
     r"https://github.com/search\?q=repo%3Ajupyter%2Fnbgrader\+involves%3A.*type=Issues",
 ]
 
+linkcheck_request_headers = {
+    "*": {
+        "method": "GET",
+    }
+}
+
 # Example configuration for intersphinx: refer to the Python standard library.
 intersphinx_mapping = {'python': ('http://docs.python.org/', None)}
 
