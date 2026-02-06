@@ -57,7 +57,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [windows-latest, ubuntu-22.04]
-        python: ["3.10", "3.11"]
+        python: ["3.10", "3.13"]
         group: ["labextensions", "nbextensions"]
     steps:
       # This is how you set an environment variable in a GitHub workflow that

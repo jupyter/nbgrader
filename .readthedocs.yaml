@@ -1,9 +1,9 @@
 version: 2
 build:
-  os: ubuntu-20.04
+  os: ubuntu-latest
   tools:
     python: "3"
-    nodejs: "16"
+    nodejs: "20"
 sphinx:
   builder: html
   configuration: nbgrader/docs/source/conf.py

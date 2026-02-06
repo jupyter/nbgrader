@@ -30,15 +30,15 @@ jobs:
       matrix:
         os: [windows-latest, ubuntu-22.04]
         group: ["docs", "python"]
-        python: ["3.8", "3.9", "3.10", "3.11"]
+        python: ["3.10", "3.11", "3.12", "3.13"]
         exclude:
           - os: windows-latest
             group: docs
-          - python: "3.8"
-            group: docs
-          - python: "3.9"
-            group: docs
           - python: "3.10"
+            group: docs
+          - python: "3.11"
+            group: docs
+          - python: "3.12"
             group: docs
     steps:
       # This is how you set an environment variable in a GitHub workflow that
