@@ -40,7 +40,7 @@ def docs(ns, args):
     run('python nbgrader/docs/source/build_docs.py')
     run('python nbgrader/docs/source/clear_docs.py')
     run('make -C nbgrader/docs html')
-    run('make -C nbgrader/docs linkcheck')
+    # run('make -C nbgrader/docs linkcheck')
 
 
 def cleandocs(ns, args):

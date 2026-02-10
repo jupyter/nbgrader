@@ -16,19 +16,12 @@ defaults:
 
 jobs:
   labextension-compatibility:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v3
-      - name: Install node
-        uses: actions/setup-node@v3
-        with:
-          node-version: '18.x'
-      # NOTE: actions/setup-python@v2 can make use of a cache within the GitHub
-      #       Action virtual environment and setup extremely fast. 3.9 isn't
-      #       available in this cache as of November 2020.
-      - name: Install Python
-        uses: actions/setup-python@v2
+      - uses: actions/checkout@v4
+      - name: Base Setup
+        uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
       - name: Install package
         run: |
           python -m pip install --upgrade pip wheel setuptools
@@ -56,8 +49,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [windows-latest, ubuntu-22.04]
-        python: ["3.10", "3.11"]
+        os: [windows-latest, ubuntu-latest]
+        python: ["3.10", "3.13"]
         group: ["labextensions", "nbextensions"]
     steps:
       # This is how you set an environment variable in a GitHub workflow that
@@ -66,18 +59,11 @@ jobs:
       - name: Configure environment variables from job flags
         run: |
           echo "GROUP=${{ matrix.group }}" >> $GITHUB_ENV
-      - uses: actions/checkout@v3
-      - name: Install node
-        uses: actions/setup-node@v3
+      - uses: actions/checkout@v4
+      - name: Base Setup
+        uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
         with:
-          node-version: '18.x'
-      # NOTE: actions/setup-python@v2 can make use of a cache within the GitHub
-      #       Action virtual environment and setup extremely fast. 3.9 isn't
-      #       available in this cache as of November 2020.
-      - name: Install Python ${{ matrix.python }}
-        uses: actions/setup-python@v2
-        with:
-          python-version: ${{ matrix.python }}
+          python_version: ${{ matrix.python }}
       - name: Install Python dependencies
         run: |
           python -m pip install --upgrade pip wheel setuptools
