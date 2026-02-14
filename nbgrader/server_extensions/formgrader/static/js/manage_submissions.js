@@ -135,7 +135,8 @@ var SubmissionUI = Backbone.View.extend({
         this.$student_name.text("Please wait...");
         var student = this.model.get("student");
         var assignment = this.model.get("name");
-        $.post(base_url + "/formgrader/api/submission/" + assignment + "/" + student + "/autograde")
+        var encodedURI = encodeURI(base_url + "/formgrader/api/submission/" + assignment + "/" + student + "/autograde")
+        $.post(encodedURI)
             .done(_.bind(this.autograde_success, this))
             .fail(_.bind(this.autograde_failure, this));
     },
