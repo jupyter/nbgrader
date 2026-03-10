@@ -103,7 +103,7 @@ var AssignmentUI = Backbone.View.extend({
 
         this.$name.append($("<a/>")
             .text(name)
-            .map(linkTo("directory", url_prefix + "/" + this.model.get("source_path")))
+            .map(linkTo("directory", url_prefix + "/" + this.model.get("source_path"), base_url))
         );
 
         // duedate
@@ -150,7 +150,7 @@ var AssignmentUI = Backbone.View.extend({
         var release_path = this.model.get("release_path");
         if (release_path) {
             this.$preview.append($("<a/>")
-                .map(linkTo("directory", url_prefix + "/" + release_path))
+                .map(linkTo("directory", url_prefix + "/" + release_path, base_url))
                 .append($("<span/>")
                     .addClass("glyphicon glyphicon-search")
                     .attr("aria-hidden", "true")
