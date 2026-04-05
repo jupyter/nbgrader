@@ -276,12 +276,13 @@ def is_ignored(filename: str, ignore_globs: List[str] = None) -> bool:
     """Determines whether a filename should be ignored, based on whether it
     matches any file glob in the given list. Note that this only matches on the
     base filename itself, not the full path."""
+
     if ignore_globs is None:
         return False
-    dirname = os.path.dirname(filename)
+
+    basename = os.path.basename(filename)
     for expr in ignore_globs:
-        globs = glob.glob(os.path.join(dirname, expr))
-        if filename in globs:
+        if fnmatch.fnmatch(basename, expr):
             return True
     return False
 
@@ -366,16 +367,6 @@ def find_all_notebooks(path):
             notebooks.append(os.path.relpath(_file, rootpath))
     notebooks.sort()
     return notebooks
-
-
-def full_split(path: str) -> Tuple[str, ...]:
-    rest, last = os.path.split(path)
-    if last == path:
-        return (path,)
-    elif rest == path:
-        return (rest,)
-    else:
-        return full_split(rest) + (last,)
 
 
 @contextlib.contextmanager
