@@ -53,7 +53,8 @@ function createElementFromCourse(data: any, app: JupyterFrontEnd, isNotebook:boo
 
     var anchor = document.createElement('a') as HTMLAnchorElement;
     anchor.href = '#';
-    anchor.innerText = data['course_id'];
+    anchor.innerText = data['course_title'];
+
     if (data['kind'] == 'local') {
       anchor.href = '#';
       anchor.onclick = function() {
