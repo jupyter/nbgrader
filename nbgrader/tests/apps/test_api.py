@@ -261,6 +261,9 @@ class TestNbGraderAPI(BaseTestApp):
         a = api.get_assignment("ps1")
         assert a["duedate_timezone"] in ["-0400", "-0500"]
 
+        # Generate the assignment so it exists in the database
+        run_nbgrader(["generate_assignment", "ps1", "--db", db])
+
         # Verify duedate with non-UTC timezone
         with api.gradebook as gb:
             assignment = gb.find_assignment("ps1")
