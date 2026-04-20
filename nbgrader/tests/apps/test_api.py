@@ -245,6 +245,34 @@ class TestNbGraderAPI(BaseTestApp):
         target["num_submissions"] = 2
         assert a == target
 
+    @notwindows
+    def test_get_assignment_custom_timezone(self, api, course_dir, db, exchange):
+        """Test that duedate_timezone reflects a non-UTC configured timezone."""
+        self._copy_file(join("files", "test.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
+
+        # Default (UTC) should return +0000
+        a = api.get_assignment("ps1")
+        assert a["duedate_timezone"] == "+0000"
+        assert a["duedate_notimezone"] is None
+        assert a["display_duedate"] is None
+
+        # Configure a non-UTC timezone
+        api.timezone = "US/Eastern"
+        a = api.get_assignment("ps1")
+        assert a["duedate_timezone"] in ["-0400", "-0500"]
+
+        # Verify duedate with non-UTC timezone
+        with api.gradebook as gb:
+            assignment = gb.find_assignment("ps1")
+            assignment.duedate = parse_utc("2017-07-05 12:00:00 UTC")
+            gb.db.commit()
+
+        a = api.get_assignment("ps1")
+        assert a["duedate_timezone"] in ["-0400", "-0500"]
+        # July is EDT (-0400), so 12:00 UTC = 08:00 EDT
+        assert a["duedate_notimezone"] == "2017-07-05T08:00:00"
+        assert "EDT" in a["display_duedate"] or "EST" in a["display_duedate"]
+
     def test_get_assignments(self, api, course_dir):
         assert api.get_assignments() == []
 

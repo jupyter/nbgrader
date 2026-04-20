@@ -844,6 +844,58 @@ test("Load students submissions", async ({
 });
 
 /*
+ * Test due date defaults in create and edit modals
+ */
+test("Due date defaults", async ({ page, baseURL, request, tmpPath }) => {
+  test.skip(isWindows, "This test does not work on Windows");
+
+  if (baseURL === undefined) throw new Error("BaseURL is undefined.");
+
+  if (isNotebook) await page.goto(`tree/${tmpPath}`);
+
+  // create environment
+  await createEnv(testDir, tmpPath, exchange_dir, cache_dir, isWindows);
+  await addCourses(request, page, tmpPath);
+  await openFormgrader(page);
+
+  const iframe = page.mainFrame().childFrames()[0];
+
+  // Test 1: Create modal — timezone should be pre-filled, date field empty
+  await iframe.click('text=Add new assignment...');
+  const createModal = iframe.locator('#add-assignment-modal');
+  await expect(createModal).toBeVisible();
+
+  // Timezone should be pre-filled with server default
+  const timezoneValue = await createModal.locator('input.timezone').inputValue();
+  expect(timezoneValue).toMatch(/^[+-]\d{4}$/);
+
+  // Date field should be empty before interaction
+  const duedateBeforeFocus = await createModal.locator('input.duedate').inputValue();
+  expect(duedateBeforeFocus).toBe('');
+
+  // Test 2: Clicking into the date field should default to today at midnight
+  await createModal.locator('input.duedate').click();
+  const duedateAfterFocus = await createModal.locator('input.duedate').inputValue();
+  expect(duedateAfterFocus).toMatch(/^\d{4}-\d{2}-\d{2}T00:00$/);
+
+  // Test 3: Save without a name should dismiss the modal (no assignment created)
+  await createModal.locator('button.save').click();
+
+  // Test 4: Create an assignment without touching the date field — should have no due date
+  await iframe.click('text=Add new assignment...');
+  const createModal2 = iframe.locator('#add-assignment-modal');
+  await expect(createModal2).toBeVisible();
+
+  await createModal2.locator('input.name').fill('test-no-duedate');
+  // Clear the duedate field (in case focus triggered during name entry)
+  await createModal2.locator('input.duedate').fill('');
+  await createModal2.locator('button.save').click();
+
+  // Verify the assignment shows "None" for due date
+  await expect(iframe.locator('td.duedate:text("None")')).toHaveCount(2);
+});
+
+/*
  * Switch views
  */
 test("Switch views", async ({ page, baseURL, request, tmpPath }) => {
