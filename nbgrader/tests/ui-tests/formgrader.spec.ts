@@ -861,7 +861,7 @@ test("Due date defaults", async ({ page, baseURL, request, tmpPath }) => {
   const iframe = page.mainFrame().childFrames()[0];
 
   // Test 1: Create modal — timezone should be pre-filled, date field empty
-  await iframe.click('text=Add new assignment...');
+  await iframe.click('a:text("Add new assignment...")');
   const createModal = iframe.locator('#add-assignment-modal');
   await expect(createModal).toBeVisible();
 
@@ -882,7 +882,7 @@ test("Due date defaults", async ({ page, baseURL, request, tmpPath }) => {
   await createModal.locator('button.save').click();
 
   // Test 4: Create an assignment without touching the date field — should have no due date
-  await iframe.click('text=Add new assignment...');
+  await iframe.click('a:text("Add new assignment...")');
   const createModal2 = iframe.locator('#add-assignment-modal');
   await expect(createModal2).toBeVisible();
 
