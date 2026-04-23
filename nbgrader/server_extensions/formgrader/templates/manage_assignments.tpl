@@ -3,6 +3,7 @@
 {%- block head -%}
 <script>
 var url_prefix = "{{ url_prefix }}";
+var default_timezone = "{{ default_timezone }}";
 </script>
 
 <script src="{{ base_url }}/formgrader/static/js/manage_assignments.js"></script>
