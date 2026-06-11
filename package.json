@@ -67,7 +67,7 @@
   "devDependencies": {
     "@jupyterlab/builder": "^4.2.0",
     "@jupyterlab/galata": "^5.2.0",
-    "@playwright/test": "^1.32.2",
+    "@playwright/test": "^1.60.0",
     "@types/codemirror": "^5.60.5",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
