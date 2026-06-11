@@ -12,7 +12,7 @@ clone the nbgrader repository::
 Installing and building nbgrader
 -------------------------------------
 Building nbgrader jupyterlab extension requires nodejs to be installed.
-We recommand using `conda environment <https://docs.conda.io/en/latest/miniconda.html>`_ with `mamba <https://mamba.readthedocs.io/en/latest/>`_::
+We recommand using `miniconda environment <https://www.anaconda.com/docs/getting-started/miniconda/main>`_ with `mamba <https://mamba.readthedocs.io/en/latest/>`_::
 
     # create a new environment
     mamba create -n nbgrader -c conda-forge python nodejs -y

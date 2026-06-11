@@ -71,7 +71,7 @@ jobs:
           pip freeze
       - name: Install Playwright
         run: |
-          npx playwright install
+          npx playwright install chromium --only-shell
       - name: Run playwright tests
         run: |
           python tasks.py tests --group=${{ matrix.group }}
