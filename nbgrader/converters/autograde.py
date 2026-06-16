@@ -10,6 +10,7 @@ from .base import BaseConverter, NbGraderException
 from ..preprocessors import (
     AssignLatePenalties, ClearOutput, DeduplicateIds, OverwriteCells, SaveAutoGrades,
     Execute, LimitOutput, OverwriteKernelspec, CheckCellMetadata, IgnorePattern)
+from ..postprocessors import CheckDuplicateFlag
 from ..api import Gradebook, MissingEntry
 from .. import utils
 
@@ -196,3 +197,6 @@ class Autograde(BaseConverter):
                 super(Autograde, self).convert_single_notebook(notebook_filename)
         finally:
             self._sanitizing = True
+
+        self.log.info(f"Post-processing {notebook_filename}")
+        CheckDuplicateFlag(notebook_filename)

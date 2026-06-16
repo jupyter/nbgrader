@@ -7,7 +7,7 @@ import {
 } from '@lumino/coreutils';
 
 const NBGRADER_KEY = 'nbgrader';
-export const NBGRADER_SCHEMA_VERSION = 3;
+export const NBGRADER_SCHEMA_VERSION = 4;
 
 /**
  * A namespace for conversions between {@link NbgraderMetadata} and

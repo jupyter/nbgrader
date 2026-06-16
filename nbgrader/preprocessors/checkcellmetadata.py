@@ -13,7 +13,8 @@ class CheckCellMetadata(NbGraderPreprocessor):
             MetadataValidator().validate_nb(nb)
         except ValidationError:
             self.log.error(traceback.format_exc())
-            msg = "Notebook failed to validate; the nbgrader metadata may be corrupted."
+            msg = "Notebook failed to validate; the nbgrader metadata may be corrupted " \
+                  "or a cell might have been duplicated."
             self.log.error(msg)
             raise ValidationError(msg)
 

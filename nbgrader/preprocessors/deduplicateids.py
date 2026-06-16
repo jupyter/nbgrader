@@ -1,5 +1,6 @@
 from .. import utils
 from . import NbGraderPreprocessor
+from ..nbgraderformat import SCHEMA_REQUIRED
 from nbconvert.exporters.exporter import ResourcesDict
 from nbformat.notebooknode import NotebookNode
 from typing import Tuple
@@ -12,14 +13,8 @@ class DeduplicateIds(NbGraderPreprocessor):
         # keep track of grade ids encountered so far
         self.grade_ids = set([])
 
-        # reverse cell order
-        nb.cells = nb.cells[::-1]
-
         # process each cell in reverse order
         nb, resources = super(DeduplicateIds, self).preprocess(nb, resources)
-
-        # unreverse cell order
-        nb.cells = nb.cells[::-1]
 
         return nb, resources
 
@@ -33,7 +28,10 @@ class DeduplicateIds(NbGraderPreprocessor):
         grade_id = cell.metadata.nbgrader['grade_id']
         if grade_id in self.grade_ids:
             self.log.warning("Cell with id '%s' exists multiple times!", grade_id)
-            cell.metadata.nbgrader = {}
+            # Replace problematic metadata and leave message
+            cell.source = "# THIS CELL CONTAINED A DUPLICATE ID DURING AUTOGRADING\n" + cell.source
+            cell.metadata.nbgrader = SCHEMA_REQUIRED #| {"duplicate": True}  # doesn't work in python 3.8
+            cell.metadata.nbgrader["duplicate"] = True
         else:
             self.grade_ids.add(grade_id)
 
