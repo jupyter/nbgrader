@@ -1,3 +1,11 @@
+var getDefaultDuedate = function () {
+    var now = new Date();
+    var year = now.getFullYear();
+    var month = String(now.getMonth() + 1).padStart(2, '0');
+    var day = String(now.getDate()).padStart(2, '0');
+    return year + '-' + month + '-' + day + 'T00:00';
+};
+
 var Assignment = Backbone.Model.extend({
     idAttribute: 'name',
     urlRoot: base_url + "/formgrader/api/assignment"
@@ -74,6 +82,13 @@ var AssignmentUI = Backbone.View.extend({
         this.$modal.find("input.modal-name").val(this.model.get("name"));
         this.$modal_duedate = this.$modal.find("input.modal-duedate");
         this.$modal_duedate.val(this.model.get("duedate_notimezone"));
+        if (!this.model.get("duedate_notimezone")) {
+            this.$modal_duedate.one('focus', function () {
+                if (!$(this).val()) {
+                    $(this).val(getDefaultDuedate());
+                }
+            });
+        }
         this.$modal_timezone = this.$modal.find("input.modal-timezone");
         this.$modal_timezone.val(this.model.get("duedate_timezone"));
         this.$modal_save = this.$modal.find("button.save");
@@ -577,6 +592,15 @@ var createAssignmentModal = function () {
         .text("Cancel"));
 
     modal = createModal("add-assignment-modal", "Add New Assignment", body, footer);
+
+    // Default to today-at-midnight on first interaction
+    modal.find(".duedate").one('focus', function () {
+        if (!$(this).val()) {
+            $(this).val(getDefaultDuedate());
+        }
+    });
+    // Pre-fill timezone from server config
+    modal.find(".timezone").val(default_timezone);
 };
 
 var loadAssignments = function () {
