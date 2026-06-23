@@ -1,5 +1,3 @@
-import os
-import re
 from textwrap import dedent
 
 from traitlets import List, Bool, default

@@ -181,11 +181,11 @@ class Autograde(BaseConverter):
         for pp in preprocessors:
             self.exporter.register_preprocessor(pp)
 
-    def convert_single_notebook(self, notebook_filename: str) -> None:
+    def convert_single_notebook(self, notebook_filename: str, assignment_id: str, student_id: str) -> None:
         self.log.info("Sanitizing %s", notebook_filename)
         self._sanitizing = True
         self._init_preprocessors()
-        super(Autograde, self).convert_single_notebook(notebook_filename)
+        super(Autograde, self).convert_single_notebook(notebook_filename, assignment_id, student_id)
 
         notebook_filename = os.path.join(self.writer.build_directory, os.path.basename(notebook_filename))
         self.log.info("Autograding %s", notebook_filename)
@@ -193,6 +193,6 @@ class Autograde(BaseConverter):
         self._init_preprocessors()
         try:
             with utils.setenv(NBGRADER_EXECUTION='autograde'):
-                super(Autograde, self).convert_single_notebook(notebook_filename)
+                super(Autograde, self).convert_single_notebook(notebook_filename, assignment_id, student_id)
         finally:
             self._sanitizing = True

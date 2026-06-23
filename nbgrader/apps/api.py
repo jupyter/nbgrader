@@ -1,9 +1,8 @@
-import glob
-import re
 import sys
 import os
 import logging
 import warnings
+import typing
 
 from traitlets.config import LoggingConfigurable, Config, get_config
 from traitlets import Instance, Enum, Unicode, observe
@@ -123,7 +122,7 @@ class NbGraderAPI(LoggingConfigurable):
         """
         return Gradebook(self.coursedir.db_url, self.course_id)
 
-    def get_source_assignments(self):
+    def get_source_assignments(self) -> typing.Set[str]:
         """Get the names of all assignments in the `source` directory.
 
         Returns
@@ -132,29 +131,14 @@ class NbGraderAPI(LoggingConfigurable):
             A set of assignment names
 
         """
-        filenames = glob.glob(self.coursedir.format_path(
-            self.coursedir.source_directory,
-            student_id='.',
-            assignment_id='*'))
 
-        assignments = set([])
-        for filename in filenames:
-            # skip files that aren't directories
-            if not os.path.isdir(filename):
-                continue
-
-            # parse out the assignment name
-            regex = self.coursedir.format_path(
-                self.coursedir.source_directory,
-                student_id='.',
-                assignment_id='(?P<assignment_id>.*)',
-                escape=True)
-
-            matches = re.match(regex, filename)
-            if matches:
-                assignments.add(matches.groupdict()['assignment_id'])
-
-        return assignments
+        return {
+            entry['assignment_id'] for entry in
+            self.coursedir.find_assignments(
+                nbgrader_step=self.coursedir.source_directory,
+                student_id=".",
+            )
+        }
 
     def get_released_assignments(self):
         """Get the names of all assignments that have been released to the
@@ -194,32 +178,14 @@ class NbGraderAPI(LoggingConfigurable):
             A set of student ids
 
         """
-        # get the names of all student submissions in the `submitted` directory
-        filenames = glob.glob(self.coursedir.format_path(
-            self.coursedir.submitted_directory,
-            student_id='*',
-            assignment_id=assignment_id))
 
-        students = set([])
-        for filename in filenames:
-            # skip files that aren't directories
-            if not os.path.isdir(filename):
-                continue
-
-            # parse out the student id
-            if assignment_id == "*":
-                assignment_id = ".*"
-            regex = self.coursedir.format_path(
-                self.coursedir.submitted_directory,
-                student_id='(?P<student_id>.*)',
-                assignment_id=assignment_id,
-                escape=True)
-
-            matches = re.match(regex, filename)
-            if matches:
-                students.add(matches.groupdict()['student_id'])
-
-        return students
+        return {
+            entry['student_id'] for entry in
+            self.coursedir.find_assignments(
+                nbgrader_step=self.coursedir.submitted_directory,
+                assignment_id=assignment_id
+            )
+        }
 
     def get_submitted_timestamp(self, assignment_id, student_id):
         """Gets the timestamp of a submitted assignment.
@@ -243,10 +209,7 @@ class NbGraderAPI(LoggingConfigurable):
             student_id,
             assignment_id))
 
-        timestamp_pth = os.path.join(assignment_dir, 'timestamp.txt')
-        if os.path.exists(timestamp_pth):
-            with open(timestamp_pth, 'r') as fh:
-                return parse_utc(fh.read().strip())
+        return self.coursedir.get_existing_timestamp(assignment_dir)
 
     def get_autograded_students(self, assignment_id):
         """Get the ids of students whose submission for a given assignment
@@ -420,6 +383,7 @@ class NbGraderAPI(LoggingConfigurable):
             A list of dictionaries containing information about each notebook
 
         """
+        notebooks = []
         with self.gradebook as gb:
             try:
                 assignment = gb.find_assignment(assignment_id)
@@ -428,7 +392,6 @@ class NbGraderAPI(LoggingConfigurable):
 
             # if the assignment exists in the database
             if assignment and assignment.notebooks:
-                notebooks = []
                 for notebook in assignment.notebooks:
                     x = notebook.to_dict()
                     x["average_score"] = gb.average_notebook_score(notebook.name, assignment.name)
@@ -439,23 +402,13 @@ class NbGraderAPI(LoggingConfigurable):
 
             # if it doesn't exist in the database
             else:
-                sourcedir = self.coursedir.format_path(
-                    self.coursedir.source_directory,
+                for notebook in self.coursedir.find_notebooks(
+                    nbgrader_step=self.coursedir.source_directory,
                     student_id='.',
-                    assignment_id=assignment_id)
-                escaped_sourcedir = self.coursedir.format_path(
-                    self.coursedir.source_directory,
-                    student_id='.',
-                    assignment_id=assignment_id,
-                    escape=True)
-
-                notebooks = []
-                for filename in glob.glob(os.path.join(sourcedir, "*.ipynb")):
-                    regex = re.escape(os.path.sep).join([escaped_sourcedir, "(?P<notebook_id>.*).ipynb"])
-                    matches = re.match(regex, filename)
-                    notebook_id = matches.groupdict()['notebook_id']
+                    assignment_id=assignment_id
+                ):
                     notebooks.append({
-                        "name": notebook_id,
+                        "name": notebook['notebook_id'],
                         "id": None,
                         "average_score": 0,
                         "average_code_score": 0,
