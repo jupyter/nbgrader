@@ -1,8 +1,8 @@
 from traitlets import Bool
 
-from .exchange import Exchange
+from .exchange import ABCExchange
 
 
-class ExchangeReleaseAssignment(Exchange):
+class ABCExchangeReleaseAssignment(ABCExchange):
 
     force = Bool(False, help="Force overwrite existing files in the exchange.").tag(config=True)

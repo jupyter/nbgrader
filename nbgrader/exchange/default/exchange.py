@@ -17,6 +17,10 @@ from nbgrader.utils import check_directory, ignore_patterns, self_owned
 
 
 class Exchange(ABCExchange):
+    """
+    The default implementation of an Exchange based on the local file system.
+    """
+
     root = Unicode(
         "/usr/local/share/nbgrader/exchange",
         help="The nbgrader exchange directory writable to everyone. MUST be preexisting."

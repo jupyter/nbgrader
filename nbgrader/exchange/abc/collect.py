@@ -1,9 +1,9 @@
 from traitlets import Bool
 
-from .exchange import Exchange
+from .exchange import ABCExchange
 
 
-class ExchangeCollect(Exchange):
+class ABCExchangeCollect(ABCExchange):
 
     update = Bool(
         False,
