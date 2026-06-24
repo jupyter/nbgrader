@@ -12,7 +12,7 @@ import traitlets.log
 from jupyter_core.application import JupyterApp
 from textwrap import dedent
 from tornado.log import LogFormatter
-from traitlets import Unicode, List, Bool, Instance, default
+from traitlets import Unicode, List, Bool, Instance, default, Dict
 from traitlets.config.application import catch_config_error
 from traitlets.config.loader import Config
 
@@ -67,6 +67,16 @@ class NbGrader(JupyterApp):
     load_cwd_config = True
 
     _log_formatter_cls = LogFormatter
+
+    course_titles = Dict(
+        {},
+        help=dedent(
+            """
+            Dict mapping course IDs to human readable course titles. If there is
+            no title for a course, ID is shown.
+            """
+        )
+    ).tag(config=True)
 
     @default("log_level")
     def _log_level_default(self) -> int:
