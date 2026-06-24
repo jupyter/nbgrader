@@ -193,7 +193,7 @@ class AssignmentList(LoggingConfigurable):
 
         return retvalue
 
-    def fetch_assignment(self, course_id, assignment_id):
+    def fetch_assignment(self, course_id, assignment_id, replace_missing_files=False):
         with self.get_assignment_dir_config() as config:
             try:
                 config = self.load_config()
@@ -205,7 +205,9 @@ class AssignmentList(LoggingConfigurable):
                 fetch = ExchangeFactory(config=config).FetchAssignment(
                     coursedir=coursedir,
                     authenticator=authenticator,
-                    config=config)
+                    config=config,
+                    replace_missing_files=replace_missing_files
+                    )
                 fetch.start()
 
             except:
@@ -310,22 +312,22 @@ class AssignmentActionHandler(BaseAssignmentHandler):
         except web.MissingArgumentError:
             data = self.get_json_body()
 
+        assignment_id = data['assignment_id']
+        course_id = data['course_id']
+
         if action == 'fetch':
-            assignment_id = data['assignment_id']
-            course_id = data['course_id']
             self.manager.fetch_assignment(course_id, assignment_id)
             self.finish(json.dumps(self.manager.list_assignments(course_id=course_id)))
+        elif action == 'fetch_missing':
+            self.manager.fetch_assignment(course_id, assignment_id, replace_missing_files=True)
+            self.finish(json.dumps(self.manager.list_assignments(course_id=course_id)))
         elif action == 'submit':
-            assignment_id = data['assignment_id']
-            course_id = data['course_id']
             output = self.manager.submit_assignment(course_id, assignment_id)
             if output['success']:
                 self.finish(json.dumps(self.manager.list_assignments(course_id=course_id)))
             else:
                 self.finish(json.dumps(output))
         elif action == 'fetch_feedback':
-            assignment_id = data['assignment_id']
-            course_id = data['course_id']
             self.manager.fetch_feedback(course_id, assignment_id)
             self.finish(json.dumps(self.manager.list_assignments(course_id=course_id)))
 
@@ -367,7 +369,7 @@ class NbGraderVersionHandler(BaseAssignmentHandler):
 #-----------------------------------------------------------------------------
 
 
-_assignment_action_regex = r"(?P<action>fetch|submit|fetch_feedback)"
+_assignment_action_regex = r"(?P<action>fetch|fetch_missing|submit|fetch_feedback)"
 
 default_handlers = [
     (r"/assignments", AssignmentListHandler),
