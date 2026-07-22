@@ -39,7 +39,7 @@ and grade notebooks.
 
 ### SciPy 2017 overview talk (click to view on YouTube)
 
-[![nbgrader: A Tool for Creating and Grading Assignments in the Jupyter Notebook | SciPy 2017 ](http://img.youtube.com/vi/5WUm0QuJdFw/0.jpg)](http://www.youtube.com/watch?v=5WUm0QuJdFw "nbgrader: A Tool for Creating and Grading Assignments in the Jupyter Notebook | SciPy 2017 ")
+[![nbgrader: A Tool for Creating and Grading Assignments in the Jupyter Notebook | SciPy 2017 ](https://img.youtube.com/vi/5WUm0QuJdFw/0.jpg)](https://www.youtube.com/watch?v=5WUm0QuJdFw "nbgrader: A Tool for Creating and Grading Assignments in the Jupyter Notebook | SciPy 2017 ")
 
 ## Installation
 
