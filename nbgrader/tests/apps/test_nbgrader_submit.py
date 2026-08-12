@@ -244,8 +244,9 @@ class TestNbGraderSubmit(BaseTestApp):
 
     def test_submit_max_dir_size(self, exchange, cache, course_dir):
         self._release_and_fetch("ps1", exchange, cache, course_dir)
-        self._make_file(join("ps1", "small_file"), contents="x" * 2000)
-        self._make_file(join("ps1", "large_file"), contents="x" * 2001)
-        with pytest.raises(RuntimeError):
-            self._submit("ps1", exchange, cache,
-                        flags=['--CourseDirectory.max_dir_size=3'])
+        self._make_file(join("ps1", "feedback", "large_file"), contents="x" * 4000)
+        self._submit("ps1", exchange, cache,
+                     flags=['--CourseDirectory.max_dir_size=8'])
+        filename, = os.listdir(join(exchange, "abc101", "inbound"))
+        assert exists(join(exchange, "abc101", "inbound", filename, "p1.ipynb"))
+        assert not exists(join(exchange, "abc101", "inbound", filename, "feedback"))
