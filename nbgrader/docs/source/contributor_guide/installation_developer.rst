@@ -33,3 +33,19 @@ enabled when installing ``nbgrader``.
 To install lab extension in developer mode::
 
     jupyter labextension develop --overwrite .
+
+.. _installing-firefox-headless-webdriver:
+
+Installing Firefox for browser tests
+------------------------------------
+The browser-based tests use Playwright and run in headless mode by default.
+After installing the Python and JavaScript dependencies, install the Firefox
+browser binary with::
+
+    npx playwright install firefox
+
+Playwright downloads the browser version it expects, so a separate
+``geckodriver`` installation is not required.  To run the same browser used
+by the continuous integration workflow, install Chromium instead::
+
+    npx playwright install chromium
