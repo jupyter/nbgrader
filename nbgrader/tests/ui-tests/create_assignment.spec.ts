@@ -298,6 +298,32 @@ test("task cell", async ({ page, tmpPath }) => {
 });
 
 /*
+ * Test that manually graded task cells are only available for markdown cells.
+ */
+test("task cell option is only available for markdown cells", async ({ page, tmpPath }) => {
+
+  if (isNotebook) {
+    await page.goto(`notebooks/${tmpPath}/blank.ipynb`);
+  } else {
+    await page.notebook.open("blank.ipynb");
+    await page.notebook.activate("blank.ipynb");
+  }
+
+  await activateToolbar(page);
+
+  const taskOption = page
+    .locator(".nbgrader-NotebookWidget select")
+    .first()
+    .locator("option[value='task']");
+  await expect(taskOption).toHaveCount(0);
+
+  await page.locator(".jp-Cell .jp-InputArea-prompt").first().click();
+  await page.keyboard.press("m");
+
+  await expect(taskOption).toHaveCount(1);
+});
+
+/*
  * Test manipulating a solution graded cell
  */
 test("solution cell", async ({ page, tmpPath }) => {
