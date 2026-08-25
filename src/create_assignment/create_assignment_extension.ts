@@ -463,6 +463,9 @@ class CellWidget extends Panel {
       ['tests', 'Autograded tests'],
       ['readonly', 'Read-only']
     ]);
+    if (this.cellModel.type !== 'markdown') {
+      options.delete('task');
+    }
     if (this.cellModel.type !== 'code') {
       options.delete('solution');
       options.delete('tests');
