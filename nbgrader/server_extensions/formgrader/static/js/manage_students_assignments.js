@@ -1,7 +1,7 @@
 var StudentSubmission = Backbone.Model.extend({});
 var StudentSubmissions = Backbone.Collection.extend({
     model: StudentSubmission,
-    url: base_url + "/formgrader/api/student_submissions/" + student_id
+    url: base_url + "/formgrader/api/student_submissions/" + encodeURIComponent(student_id)
 });
 
 var StudentSubmissionUI = Backbone.View.extend({
@@ -40,7 +40,7 @@ var StudentSubmissionUI = Backbone.View.extend({
             this.$name.text(name + " (not autograded)");
         } else {
             this.$name.append($("<a/>")
-                .attr("href", base_url + "/formgrader/manage_students/" + student_id + "/" + name)
+                .attr("href", base_url + "/formgrader/manage_students/" + encodeURIComponent(student_id) + "/" + encodeURIComponent(name))
                 .text(name));
         }
 

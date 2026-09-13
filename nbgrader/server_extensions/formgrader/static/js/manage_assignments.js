@@ -203,7 +203,7 @@ var AssignmentUI = Backbone.View.extend({
             this.$num_submissions.text(0);
         } else {
             this.$num_submissions.append($("<a/>")
-                .attr("href", base_url + "/formgrader/manage_submissions/" + this.model.get("name"))
+                .attr("href", base_url + "/formgrader/manage_submissions/" + encodeURIComponent(this.model.get("name")))
                 .text(num_submissions)
             );
         }
@@ -237,7 +237,7 @@ var AssignmentUI = Backbone.View.extend({
     assign: function () {
         this.clear();
         this.$name.text("Please wait...");
-        $.post(base_url + "/formgrader/api/assignment/" + this.model.get("name") + "/assign")
+        $.post(base_url + "/formgrader/api/assignment/" + encodeURIComponent(this.model.get("name")) + "/assign")
             .done(_.bind(this.assign_success, this))
             .fail(_.bind(this.assign_failure, this));
     },
@@ -273,7 +273,7 @@ var AssignmentUI = Backbone.View.extend({
     unrelease: function () {
         this.clear();
         this.$name.text("Please wait...");
-        $.post(base_url + "/formgrader/api/assignment/" + this.model.get("name") + "/unrelease")
+        $.post(base_url + "/formgrader/api/assignment/" + encodeURIComponent(this.model.get("name")) + "/unrelease")
             .done(_.bind(this.unrelease_success, this))
             .fail(_.bind(this.unrelease_failure, this));
     },
@@ -309,7 +309,7 @@ var AssignmentUI = Backbone.View.extend({
     release: function () {
         this.clear();
         this.$name.text("Please wait...");
-        $.post(base_url + "/formgrader/api/assignment/" + this.model.get("name") + "/release")
+        $.post(base_url + "/formgrader/api/assignment/" + encodeURIComponent(this.model.get("name")) + "/release")
             .done(_.bind(this.release_success, this))
             .fail(_.bind(this.release_failure, this));
     },
@@ -345,7 +345,7 @@ var AssignmentUI = Backbone.View.extend({
     collect: function () {
         this.clear();
         this.$name.text("Please wait...");
-        $.post(base_url + "/formgrader/api/assignment/" + this.model.get("name") + "/collect")
+        $.post(base_url + "/formgrader/api/assignment/" + encodeURIComponent(this.model.get("name")) + "/collect")
             .done(_.bind(this.collect_success, this))
             .fail(_.bind(this.collect_failure, this));
     },
@@ -397,7 +397,7 @@ var AssignmentUI = Backbone.View.extend({
     generate_feedback: function () {
         this.clear();
         this.$name.text("Please wait...");
-        $.post(base_url + "/formgrader/api/assignment/" + this.model.get("name") + "/generate_feedback")
+        $.post(base_url + "/formgrader/api/assignment/" + encodeURIComponent(this.model.get("name")) + "/generate_feedback")
             .done(_.bind(this.generate_feedback_success, this))
             .fail(_.bind(this.generate_feedback_failure, this));
     },
@@ -433,7 +433,7 @@ var AssignmentUI = Backbone.View.extend({
     release_feedback: function () {
         this.clear();
         this.$name.text("Please wait...");
-        $.post(base_url + "/formgrader/api/assignment/" + this.model.get("name") + "/release_feedback")
+        $.post(base_url + "/formgrader/api/assignment/" + encodeURIComponent(this.model.get("name")) + "/release_feedback")
             .done(_.bind(this.release_feedback_success, this))
             .fail(_.bind(this.release_feedback_failure, this));
     },

@@ -1,7 +1,7 @@
 var SubmittedNotebook = Backbone.Model.extend({});
 var SubmittedNotebooks = Backbone.Collection.extend({
     model: SubmittedNotebook,
-    url: base_url + "/formgrader/api/submitted_notebooks/" + assignment_id + "/" + notebook_id
+    url: base_url + "/formgrader/api/submitted_notebooks/" + encodeURIComponent(assignment_id) + "/" + encodeURIComponent(notebook_id)
 });
 
 var SubmittedNotebookUI = Backbone.View.extend({
@@ -68,11 +68,11 @@ var SubmittedNotebookUI = Backbone.View.extend({
         this.$name.attr("data-order", this.model.get("index"));
         this.$name.append($("<a/>")
             .addClass("name-hidden")
-            .attr("href", base_url + "/formgrader/submissions/" + this.model.get("id"))
+            .attr("href", base_url + "/formgrader/submissions/" + encodeURIComponent(this.model.get("id")))
             .text("Submission #" + (this.model.get("index") + 1)));
         this.$name.append($("<a/>")
             .addClass("name-shown")
-            .attr("href", base_url + "/formgrader/submissions/" + this.model.get("id"))
+            .attr("href", base_url + "/formgrader/submissions/" + encodeURIComponent(this.model.get("id")))
             .text(name));
 
         // score
