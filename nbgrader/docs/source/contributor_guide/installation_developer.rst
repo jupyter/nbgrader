@@ -32,4 +32,4 @@ enabled when installing ``nbgrader``.
 
 To install lab extension in developer mode::
 
-    jupyter labextension develop --overwrite .
+    jupyter-builder develop --overwrite .
