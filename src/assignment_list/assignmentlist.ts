@@ -106,7 +106,8 @@ export class AssignmentList {
     }
 
     var assignments  = this.fetched_element.getElementsByClassName('assignment-notebooks-link');
-    for(let a of assignments){
+    for(let i = 0; i < assignments.length; i++){
+      const a = assignments[i];
       var icon = document.createElement('i');
       icon.classList.add('fa', 'fa-caret-right');
       a.append(icon);
