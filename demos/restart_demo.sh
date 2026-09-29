@@ -69,7 +69,7 @@ install_nbgrader () {
 
     # Install global extensions, and disable them globally. We will re-enable
     # specific ones for different user accounts in each demo.
-    jupyter labextension develop --overwrite .
+    jupyter-builder develop --overwrite .
     jupyter labextension disable --level=sys_prefix @jupyter/nbgrader:assignment-list
     jupyter labextension disable --level=sys_prefix @jupyter/nbgrader:formgrader
     jupyter labextension disable --level=sys_prefix @jupyter/nbgrader:course-list
