@@ -873,10 +873,18 @@ test("Due date defaults", async ({ page, baseURL, request, tmpPath }) => {
   const duedateBeforeFocus = await createModal.locator('input.duedate').inputValue();
   expect(duedateBeforeFocus).toBe('');
 
-  // Test 2: Clicking into the date field should default to today at midnight
+  // Test 2: Clicking into the date field should default to tomorrow at midnight
+  const expectedDuedate = await iframe.evaluate(() => {
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const year = tomorrow.getFullYear();
+    const month = String(tomorrow.getMonth() + 1).padStart(2, '0');
+    const day = String(tomorrow.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}T00:00`;
+  });
   await createModal.locator('input.duedate').click();
   const duedateAfterFocus = await createModal.locator('input.duedate').inputValue();
-  expect(duedateAfterFocus).toMatch(/^\d{4}-\d{2}-\d{2}T00:00$/);
+  expect(duedateAfterFocus).toBe(expectedDuedate);
 
   // Test 3: Save without a name should dismiss the modal (no assignment created)
   await createModal.locator('button.save').click();

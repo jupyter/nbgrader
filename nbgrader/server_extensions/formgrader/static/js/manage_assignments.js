@@ -1,5 +1,6 @@
 var getDefaultDuedate = function () {
     var now = new Date();
+    now.setDate(now.getDate() + 1);
     var year = now.getFullYear();
     var month = String(now.getMonth() + 1).padStart(2, '0');
     var day = String(now.getDate()).padStart(2, '0');
@@ -593,7 +594,7 @@ var createAssignmentModal = function () {
 
     modal = createModal("add-assignment-modal", "Add New Assignment", body, footer);
 
-    // Default to today-at-midnight on first interaction
+    // Default to tomorrow-at-midnight on first interaction
     modal.find(".duedate").one('focus', function () {
         if (!$(this).val()) {
             $(this).val(getDefaultDuedate());
