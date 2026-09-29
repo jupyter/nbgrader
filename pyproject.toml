@@ -1,7 +1,7 @@
 [build-system]
 requires = [
     "hatchling>=1.10.0",
-    "jupyterlab>=4.2.0,<5",
+    "jupyter-builder>=1.2.3",
 ]
 build-backend = "hatchling.build"
 
@@ -9,7 +9,7 @@ build-backend = "hatchling.build"
 name = "nbgrader"
 description = "A system for assigning and grading notebooks"
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 authors = [
     { name = "Jupyter Development Team", email = "jupyter@googlegroups.com" },
 ]
