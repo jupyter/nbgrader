@@ -17,6 +17,7 @@
     "rootDir": "src",
     "strict": true,
     "strictNullChecks": false,
+    "lib": ["ES2022", "DOM"],
     "target": "es2018",
     "types": []
   },
