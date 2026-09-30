@@ -9,6 +9,7 @@ from traitlets.config.loader import Config
 
 from .base import BaseHandler, check_xsrf, check_notebook_dir
 from ...api import MissingEntry
+from ...utils import to_numeric_tz
 
 
 class FormgraderHandler(BaseHandler):
@@ -56,7 +57,8 @@ class ManageAssignmentsHandler(BaseHandler):
             course_id=api.course_id,
             exchange=api.exchange_root,
             exchange_missing=api.exchange_missing,
-            current_config= current_config)
+            current_config=current_config,
+            default_timezone=to_numeric_tz(api.timezone))
         self.write(html)
 
 
