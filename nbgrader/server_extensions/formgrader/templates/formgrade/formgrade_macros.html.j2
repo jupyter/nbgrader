@@ -50,7 +50,7 @@ $(document).ready(function() {
       <div class="col-md-2">
         <ul class="nav navbar-nav navbar-left">
           <li class="previous">
-            <a data-toggle="tooltip" data-trigger="hover" data-placement="right" title="{{ resources.index }} remaining" href="{{ resources.base_url }}/formgrader/submissions/{{ resources.submission_id }}/prev">
+            <a data-toggle="tooltip" data-trigger="hover" data-placement="right" title="{{ resources.index }} remaining" href="{{ resources.base_url }}/formgrader/submissions/{{ resources.submission_id|urlencode }}/prev">
             &larr; Prev
             </a>
           </li>
@@ -60,8 +60,8 @@ $(document).ready(function() {
         <ul class="nav text-center">
           <ul class="breadcrumb">
             <li><a href="{{ resources.base_url }}/formgrader/gradebook">Manual Grading</a></li>
-            <li><a href="{{ resources.base_url }}/formgrader/gradebook/{{ resources.assignment_id }}">{{ resources.assignment_id }}</a></li>
-            <li><a href="{{ resources.base_url }}/formgrader/gradebook/{{ resources.assignment_id }}/{{ resources.notebook_id }}">{{ resources.notebook_id }}</a></li>
+            <li><a href="{{ resources.base_url }}/formgrader/gradebook/{{ resources.assignment_id|urlencode }}">{{ resources.assignment_id }}</a></li>
+            <li><a href="{{ resources.base_url }}/formgrader/gradebook/{{ resources.assignment_id|urlencode }}/{{ resources.notebook_id|urlencode }}">{{ resources.notebook_id }}</a></li>
             <li class="active live-notebook">
               <a class="name-hidden" data-toggle="tooltip" data-placement="bottom" title="Open live notebook"
                 data-link="{{ resources.notebook_path }}"
@@ -86,7 +86,7 @@ $(document).ready(function() {
       <div class="col-md-2">
         <ul class="nav navbar-nav navbar-right">
           <li class="next">
-            <a class="tabbable" data-trigger="hover" data-toggle="tooltip" data-placement="left" title="{{ resources.total - (resources.index + 1) }} remaining" href="{{ resources.base_url }}/formgrader/submissions/{{ resources.submission_id }}/next">
+            <a class="tabbable" data-trigger="hover" data-toggle="tooltip" data-placement="left" title="{{ resources.total - (resources.index + 1) }} remaining" href="{{ resources.base_url }}/formgrader/submissions/{{ resources.submission_id|urlencode }}/next">
             Next &rarr;
             </a>
           </li>

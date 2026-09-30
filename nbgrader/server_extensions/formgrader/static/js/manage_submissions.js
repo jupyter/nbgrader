@@ -1,11 +1,11 @@
 var Submission = Backbone.Model.extend({
     idAttribute: 'student',
-    urlRoot: base_url + "/formgrader/api/submission/" + assignment_id
+    urlRoot: base_url + "/formgrader/api/submission/" + encodeURIComponent(assignment_id)
 });
 
 var Submissions = Backbone.Collection.extend({
     model: Submission,
-    url: base_url + "/formgrader/api/submissions/" + assignment_id
+    url: base_url + "/formgrader/api/submissions/" + encodeURIComponent(assignment_id)
 });
 
 var SubmissionUI = Backbone.View.extend({
@@ -53,7 +53,7 @@ var SubmissionUI = Backbone.View.extend({
         this.$student_name.attr("data-order", name);
         if (this.model.get("autograded")) {
             this.$student_name.append($("<a/>")
-                .attr("href", base_url + "/formgrader/manage_students/" + student + "/" + assignment)
+                .attr("href", base_url + "/formgrader/manage_students/" + encodeURIComponent(student) + "/" + encodeURIComponent(assignment))
                 .text(name));
         } else {
             this.$student_name.text(name);
@@ -135,7 +135,7 @@ var SubmissionUI = Backbone.View.extend({
         this.$student_name.text("Please wait...");
         var student = this.model.get("student");
         var assignment = this.model.get("name");
-        $.post(base_url + "/formgrader/api/submission/" + assignment + "/" + student + "/autograde")
+        $.post(base_url + "/formgrader/api/submission/" + encodeURIComponent(assignment) + "/" + encodeURIComponent(student) + "/autograde")
             .done(_.bind(this.autograde_success, this))
             .fail(_.bind(this.autograde_failure, this));
     },
@@ -177,7 +177,7 @@ var SubmissionUI = Backbone.View.extend({
         this.$student_name.text("Please wait...");
         var student = this.model.get("student");
         var assignment = this.model.get("name");
-        $.post(base_url + "/formgrader/api/assignment/" + assignment + "/" + student + "/generate_feedback")
+        $.post(base_url + "/formgrader/api/assignment/" + encodeURIComponent(assignment) + "/" + encodeURIComponent(student) + "/generate_feedback")
             .done(_.bind(this.generate_feedback_success, this))
             .fail(_.bind(this.generate_feedback_failure, this));
     },
@@ -219,7 +219,7 @@ var SubmissionUI = Backbone.View.extend({
         this.$student_name.text("Please wait...");
         var student = this.model.get("student");
         var assignment = this.model.get("name");
-        $.post(base_url + "/formgrader/api/assignment/" + assignment + "/" + student + "/release_feedback")
+        $.post(base_url + "/formgrader/api/assignment/" + encodeURIComponent(assignment) + "/" + encodeURIComponent(student) + "/release_feedback")
             .done(_.bind(this.release_feedback_success, this))
             .fail(_.bind(this.release_feedback_failure, this));
     },

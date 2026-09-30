@@ -1,7 +1,7 @@
 var Notebook = Backbone.Model.extend({});
 var Notebooks = Backbone.Collection.extend({
     model: Notebook,
-    url: base_url + "/formgrader/api/notebooks/" + assignment_id
+    url: base_url + "/formgrader/api/notebooks/" + encodeURIComponent(assignment_id)
 });
 
 var NotebookUI = Backbone.View.extend({
@@ -35,7 +35,7 @@ var NotebookUI = Backbone.View.extend({
         var name = this.model.get("name");
         this.$name.attr("data-order", name);
         this.$name.append($("<a/>")
-            .attr("href", base_url + "/formgrader/gradebook/" + assignment_id + "/" + name)
+            .attr("href", base_url + "/formgrader/gradebook/" + encodeURIComponent(assignment_id) + "/" + encodeURIComponent(name))
             .text(name));
 
         // average score

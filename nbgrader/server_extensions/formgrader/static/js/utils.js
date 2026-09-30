@@ -103,7 +103,7 @@ var linkTo = function (type, path) {
 
         return (_, el) => {
             return $(el)
-                .attr("href", prefix + path)
+                .attr("href", prefix + path.split("/").map(encodeURIComponent).join("/"))
                 .attr("target", "_blank")[0];
         };
     } else {

@@ -31,7 +31,7 @@ var AssignmentUI = Backbone.View.extend({
         var name = this.model.get("name");
         this.$name.attr("data-order", name);
         this.$name.append($("<a/>")
-            .attr("href", base_url + "/formgrader/gradebook/" + name)
+            .attr("href", base_url + "/formgrader/gradebook/" + encodeURIComponent(name))
             .text(name));
 
         // duedate

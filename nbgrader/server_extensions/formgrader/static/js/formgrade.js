@@ -124,7 +124,7 @@ FormGrader.prototype.loadComments = function () {
 };
 
 FormGrader.prototype.navigateTo = function (location) {
-    return this.base_url + '/submissions/' + this.submission_id + '/' + location + '?index=' + this.current_index;
+    return this.base_url + '/submissions/' + encodeURIComponent(this.submission_id) + '/' + location + '?index=' + this.current_index;
 };
 
 FormGrader.prototype.nextAssignment = function () {
@@ -302,7 +302,7 @@ FormGrader.prototype.configureScrolling = function () {
 FormGrader.prototype.flag = function () {
     $.ajax({
         'method': 'POST',
-        'url': base_url + '/api/submitted_notebook/' + submission_id + '/flag',
+        'url': base_url + '/api/submitted_notebook/' + encodeURIComponent(submission_id) + '/flag',
         'headers': {'X-CSRFToken': getCookie("_xsrf")},
         'success': function (data, status, xhr) {
             var elem = $("#statusmessage");

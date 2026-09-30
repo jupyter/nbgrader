@@ -1,7 +1,7 @@
 var StudentSubmittedNotebook = Backbone.Model.extend({});
 var StudentSubmittedNotebooks = Backbone.Collection.extend({
     model: StudentSubmittedNotebook,
-    url: base_url + "/formgrader/api/student_notebook_submissions/" + student_id + "/" + assignment_id
+    url: base_url + "/formgrader/api/student_notebook_submissions/" + encodeURIComponent(student_id) + "/" + encodeURIComponent(assignment_id)
 });
 
 var StudentSubmittedNotebookUI = Backbone.View.extend({
@@ -42,7 +42,7 @@ var StudentSubmittedNotebookUI = Backbone.View.extend({
             this.$name.append(name + " (file missing)");
         } else {
             this.$name.append($("<a/>")
-                .attr("href", base_url + "/formgrader/submissions/" + this.model.get("id"))
+                .attr("href", base_url + "/formgrader/submissions/" + encodeURIComponent(this.model.get("id")))
                 .text(name));
         }
 

@@ -100,7 +100,7 @@ var StudentUI = Backbone.View.extend({
         var name = last_name + ", " + first_name;
         this.$name.attr("data-order", name);
         this.$name.append($("<a/>")
-            .attr("href", base_url + "/formgrader/manage_students/" + this.model.get("id"))
+            .attr("href", base_url + "/formgrader/manage_students/" + encodeURIComponent(this.model.get("id")))
             .text(name));
 
         // id

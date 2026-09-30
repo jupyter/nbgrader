@@ -4,6 +4,7 @@ import sys
 import json
 
 from tornado import web
+from tornado.escape import url_escape
 from jupyter_core.paths import jupyter_config_dir
 from traitlets.config.loader import Config
 
@@ -166,7 +167,8 @@ class SubmissionHandler(BaseHandler):
 class SubmissionNavigationHandler(BaseHandler):
 
     def _assignment_notebook_list_url(self, assignment_id, notebook_id):
-        return '{}/formgrader/gradebook/{}/{}'.format(self.base_url, assignment_id, notebook_id)
+        return '{}/formgrader/gradebook/{}/{}'.format(
+            self.base_url, url_escape(assignment_id, plus=False), url_escape(notebook_id, plus=False))
 
     def _submission_url(self, submission_id):
         url = '{}/formgrader/submissions/{}'.format(self.base_url, submission_id)
