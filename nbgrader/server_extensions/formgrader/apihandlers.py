@@ -5,6 +5,7 @@ from tornado import web
 
 from .base import BaseApiHandler, check_xsrf, check_notebook_dir
 from ...api import MissingEntry
+from ...utils import parse_utc
 
 
 class StatusHandler(BaseApiHandler):
@@ -140,6 +141,10 @@ class AssignmentHandler(BaseApiHandler):
         timezone = data.get("duedate_timezone", None)
         if duedate and timezone:
             duedate = duedate + " " + timezone
+        try:
+            duedate = parse_utc(duedate)
+        except (ValueError, OverflowError):
+            raise web.HTTPError(400, "Invalid due date or timezone: %s", duedate)
         assignment = {"duedate": duedate}
         assignment_id = assignment_id.strip()
         self.gradebook.update_or_create_assignment(assignment_id, **assignment)

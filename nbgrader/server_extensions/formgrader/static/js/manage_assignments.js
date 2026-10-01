@@ -554,7 +554,15 @@ var createAssignmentModal = function () {
             "el": row
         });
         views.push(view);
-        model.save();
+        model.save(null, {
+            error: function () {
+                tbl.parent().DataTable().row(row).remove().draw();
+                createModal(
+                    "error-modal",
+                    "Error",
+                    "There was an error creating '" + name + "'. Please check that the due date and timezone are valid.");
+            }
+        });
         tbl.parent().DataTable().row.add(row).draw();
 
         modal.modal('hide');
