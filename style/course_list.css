@@ -66,7 +66,7 @@
     padding-right: 0;
 }
 
-#courses .list_item .item_name, #courses .list_item .item_course{
+#courses .list_item .item_name, #courses .list_item .item_course .item_deadline{
     display: inline-block;
     width: 16.66666667%;
 }

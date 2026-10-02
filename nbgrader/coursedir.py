@@ -225,6 +225,11 @@ class CourseDirectory(LoggingConfigurable):
         )
     ).tag(config=True)
 
+    deadline_file = Unicode(
+        "deadlines.json",
+        help="File for storing deadlines"
+    ).tag(config=True)
+
     groupshared = Bool(
         False,
         help=dedent(
