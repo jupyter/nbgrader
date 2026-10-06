@@ -140,5 +140,10 @@ further details on how the quickstart command works, please run::
 
     nbgrader quickstart --help
 
+Before using the default exchange, follow the
+:doc:`instructions for setting up the exchange <managing_assignment_files>`;
+the exchange directory must be created manually and be readable and writable
+by all users.
+
 For an explanation of how this directory is arranged, and what the different
 files are in it, continue reading on in :doc:`philosophy`.
