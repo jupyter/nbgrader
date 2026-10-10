@@ -529,9 +529,10 @@ var createAssignmentModal = function () {
             modal.modal('hide');
             return;
         }
-        if (name.indexOf("+") != -1) {
+        // keep in sync with CourseDirectory._validate_assignment_id
+        if (/[+\/\\\[\]]/.test(name)) {
             var err = $("#create-error");
-            err.text("Assignment names may not include the '+' character.");
+            err.text("Assignment names may not include any of the characters: + / \\ [ ]");
             err.show();
             return;
         } else {

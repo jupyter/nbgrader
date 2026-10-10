@@ -10,7 +10,7 @@ from datetime import datetime
 
 from ...apps.api import NbGraderAPI
 from ...coursedir import CourseDirectory
-from ...utils import rmtree, get_username, parse_utc
+from ...utils import rmtree, get_username, parse_utc, notebook_hash
 from .. import run_nbgrader
 from .base import BaseTestApp
 from .conftest import notwindows, windows
@@ -71,6 +71,16 @@ class TestNbGraderAPI(BaseTestApp):
         self._empty_notebook(join(course_dir, "submitted", "bar", "ps1", "problem1.ipynb"))
         self._make_file(join(course_dir, "submitted", "blah"))
         assert api.get_submitted_students("ps1") == {"foo", "bar"}
+        assert api.get_submitted_students("*") == {"foo", "bar"}
+
+    def test_get_submitted_students_special_characters(self, api, course_dir):
+        # regression test for #1738 / #1843: regex special characters in the
+        # assignment name made the submission count come out as zero
+        assignment_id = "123 (abc)"
+        self._empty_notebook(join(course_dir, "submitted", "foo", assignment_id, "problem1.ipynb"))
+        self._empty_notebook(join(course_dir, "submitted", "bar", "ps1", "problem1.ipynb"))
+        assert api.get_submitted_students(assignment_id) == {"foo"}
+        assert api.get_submitted_students("ps1") == {"bar"}
         assert api.get_submitted_students("*") == {"foo", "bar"}
 
     def test_get_submitted_timestamp(self, api, course_dir):
@@ -335,6 +345,13 @@ class TestNbGraderAPI(BaseTestApp):
         target["max_score"] = 6
         target["max_written_score"] = 1
         assert n1 == target
+
+    def test_get_notebooks_special_characters(self, api, course_dir):
+        assignment_id = "123 (abc)"
+        self._copy_file(join("files", "test.ipynb"), join(course_dir, "source", assignment_id, "p1.ipynb"))
+        n1, = api.get_notebooks(assignment_id)
+        assert n1["name"] == "p1"
+        assert n1["id"] is None
 
     def test_get_submission(self, api, course_dir, db):
         keys = set([
@@ -734,6 +751,26 @@ class TestNbGraderAPI(BaseTestApp):
         assert os.path.exists(join(course_dir, "submitted", username, "ps1", "p1.ipynb"))
 
     @notwindows
+    def test_collect_special_characters(self, api, course_dir, db, exchange):
+        assignment_id = "123 (abc)"
+        self._copy_file(join("files", "submitted-unchanged.ipynb"),
+                        join(course_dir, "source", assignment_id, "p1.ipynb"))
+        result = api.generate_assignment(assignment_id)
+        assert result["success"]
+        result = api.release_assignment(assignment_id)
+        assert result["success"]
+
+        run_nbgrader(["fetch_assignment", assignment_id, "--course", "abc101", "--Exchange.root={}".format(exchange)])
+        run_nbgrader(["submit", assignment_id, "--course", "abc101", "--Exchange.root={}".format(exchange)])
+        username = get_username()
+        result = api.collect(assignment_id)
+        assert result["success"]
+        assert "Collecting submission" in result["log"]
+        assert os.path.exists(join(course_dir, "submitted", username, assignment_id, "p1.ipynb"))
+        assert api.get_submitted_students(assignment_id) == {username}
+        assert api.get_assignment(assignment_id)["num_submissions"] == 1
+
+    @notwindows
     def test_autograde(self, api, course_dir, db):
         self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
         api.generate_assignment("ps1")
@@ -819,6 +856,20 @@ class TestNbGraderAPI(BaseTestApp):
         result = api.release_feedback("ps2", "foo")
         assert result["success"]
         assert os.path.exists(join(exchange, "abc101", "feedback", "6a0713045d217697b2ae0ab6b49fa1fe.html"))
+
+    @notwindows
+    def test_release_feedback_special_characters(self, api, course_dir, exchange):
+        assignment_id = "123 (abc)"
+        feedback_dir = join(course_dir, "feedback", "foo", assignment_id)
+        self._make_file(join(feedback_dir, "p1.html"), "<html></html>")
+        self._copy_file(join("files", "timestamp.txt"), join(feedback_dir, "timestamp.txt"))
+        self._copy_file(join("files", "submission_secret.txt"), join(feedback_dir, "submission_secret.txt"))
+        result = api.release_feedback(assignment_id, "foo")
+        assert result["success"]
+        with open(join(feedback_dir, "submission_secret.txt")) as fh:
+            secret = fh.read()
+        checksum = notebook_hash(secret=secret, notebook_id="p1")
+        assert os.path.exists(join(exchange, "abc101", "feedback", "{}.html".format(checksum)))
 
     @notwindows
     def test_fetch_feedback(self, api, course_dir, db, cache):
