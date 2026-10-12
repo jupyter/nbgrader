@@ -1173,7 +1173,7 @@ def test_submittedassignment_to_dict(submissions):
         'id', 'name', 'student', 'timestamp', 'score', 'max_score', 'code_score',
         'max_code_score', 'written_score', 'max_written_score',
         'task_score', 'max_task_score',
-        'needs_manual_grade', 'last_name', 'first_name'}
+        'needs_manual_grade', 'last_name', 'first_name', 'extension'}
 
     assert sad['id'] == sa.id
     assert sad['name'] == 'foo'
