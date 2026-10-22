@@ -43,7 +43,7 @@ class ExchangeReleaseFeedback(Exchange, ABCExchangeReleaseFeedback):
                 self.coursedir.format_path(
                     self.coursedir.feedback_directory,
                     "(?P<student_id>.*)",
-                    self.coursedir.assignment_id, escape=True),
+                    re.escape(self.coursedir.assignment_id), escape=True),
                 "(?P<notebook_id>.*).html"
             ])
 

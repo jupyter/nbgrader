@@ -136,12 +136,21 @@ class TestNbGraderGenerateAssignment(BaseTestApp):
         run_nbgrader(["assign", "ps1"])
         assert os.path.isfile(join(course_dir, "release", "ps1", "foo.ipynb"))
 
-    def test_single_file_bad_assignment_name(self, course_dir, temp_cwd):
+    @pytest.mark.parametrize("assignment_id", ["foo+bar", "test 1/2", "test 1\\2", "123 [abc]"])
+    def test_single_file_bad_assignment_name(self, course_dir, temp_cwd, assignment_id):
         """Test that an error is thrown when the assignment name is invalid."""
-        self._empty_notebook(join(course_dir, 'source', 'foo+bar', 'foo.ipynb'))
+        self._empty_notebook(join(course_dir, 'source', assignment_id, 'foo.ipynb'))
         with pytest.raises(traitlets.TraitError):
-            run_nbgrader(["generate_assignment", "foo+bar"])
-        assert not os.path.isfile(join(course_dir, "release", "foo+bar", "foo.ipynb"))
+            run_nbgrader(["generate_assignment", assignment_id])
+        assert not os.path.isfile(join(course_dir, "release", assignment_id, "foo.ipynb"))
+
+    @pytest.mark.parametrize("assignment_id", ["123 (abc)", "hw {1}", "ps 1.2"])
+    def test_single_file_special_characters(self, course_dir, temp_cwd, assignment_id):
+        """Can an assignment whose name contains regex special characters be generated?"""
+        self._empty_notebook(join(course_dir, 'source', assignment_id, 'foo.ipynb'))
+        run_nbgrader(["db", "assignment", "add", assignment_id])
+        run_nbgrader(["generate_assignment", assignment_id])
+        assert os.path.isfile(join(course_dir, "release", assignment_id, "foo.ipynb"))
 
     def test_multiple_files(self, course_dir):
         """Can multiple files be assigned?"""

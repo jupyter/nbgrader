@@ -208,11 +208,13 @@ class NbGraderAPI(LoggingConfigurable):
 
             # parse out the student id
             if assignment_id == "*":
-                assignment_id = ".*"
+                assignment_regex = ".*"
+            else:
+                assignment_regex = re.escape(assignment_id)
             regex = self.coursedir.format_path(
                 self.coursedir.submitted_directory,
                 student_id='(?P<student_id>.*)',
-                assignment_id=assignment_id,
+                assignment_id=assignment_regex,
                 escape=True)
 
             matches = re.match(regex, filename)
@@ -446,7 +448,7 @@ class NbGraderAPI(LoggingConfigurable):
                 escaped_sourcedir = self.coursedir.format_path(
                     self.coursedir.source_directory,
                     student_id='.',
-                    assignment_id=assignment_id,
+                    assignment_id=re.escape(assignment_id),
                     escape=True)
 
                 notebooks = []
