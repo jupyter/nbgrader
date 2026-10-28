@@ -25,9 +25,15 @@ class LimitOutput(NbGraderPreprocessor):
 
         length = 0
         new_outputs = []
+        stderr_truncated = False
         for output in cell.outputs:
             if output.output_type == 'stream':
                 if length == self.max_lines:
+                    # Preserve the grading failure signal with at most one extra line.
+                    if output.name == 'stderr' and not stderr_truncated:
+                        output.text = "... Output truncated ..."
+                        new_outputs.append(output)
+                        stderr_truncated = True
                     continue
 
                 text = output.text.split("\n")
