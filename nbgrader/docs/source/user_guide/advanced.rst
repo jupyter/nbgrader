@@ -103,7 +103,8 @@ following preprocessors can be applied to other nbconvert workflows:
   another notebook.
 - ``LimitOutput`` -- limits the amount of output any given
   cell can have. If a cell has too many lines of outputs, they will be
-  truncated.
+  truncated. If stderr is dropped by the stream output limit, one extra stderr
+  truncation marker is retained so that a failed test is still graded as failed.
 
 Using these preprocessors in your own nbconvert workflow is relatively
 straightforward. In your ``nbconvert_config.py`` file, you would add, for
