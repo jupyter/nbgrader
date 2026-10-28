@@ -2,6 +2,70 @@ A summary of changes to nbgrader.
 
 <!-- <START NEW CHANGELOG ENTRY> -->
 
+## 0.9.6
+
+([Full Changelog](https://github.com/jupyter/nbgrader/compare/v0.9.5...094df8871ec0625624bae97cf537c66e0ddc5335))
+
+### Bugs fixed
+
+- Set defaults for date/time picker and timezone [#1996](https://github.com/jupyter/nbgrader/pull/1996) ([@asarj](https://github.com/asarj), [@brichet](https://github.com/brichet))
+- Fix Path Traversal in validate_assignment via Path Normalization [#1978](https://github.com/jupyter/nbgrader/pull/1978) ([@yueyueL](https://github.com/yueyueL), [@Copilot](https://github.com/Copilot), [@brichet](https://github.com/brichet))
+- fix: Allow null kernelspec in OverwriteKernelspec [#1962](https://github.com/jupyter/nbgrader/pull/1962) ([@shreve](https://github.com/shreve), [@brichet](https://github.com/brichet))
+
+### Maintenance and upkeep improvements
+
+- Bump @jupyterlab dependencies to >=4.4 [#2022](https://github.com/jupyter/nbgrader/pull/2022) ([@brichet](https://github.com/brichet))
+- Faster playwright setup on CI [#2001](https://github.com/jupyter/nbgrader/pull/2001) ([@brichet](https://github.com/brichet))
+- Fix package installation in test sdist [#1994](https://github.com/jupyter/nbgrader/pull/1994) ([@brichet](https://github.com/brichet))
+- Bump underscore from 1.13.7 to 1.13.8 in /nbgrader/server_extensions/formgrader/static [#1989](https://github.com/jupyter/nbgrader/pull/1989) ([@brichet](https://github.com/brichet))
+- Bump minimatch from 3.1.2 to 3.1.5 [#1988](https://github.com/jupyter/nbgrader/pull/1988) ([@brichet](https://github.com/brichet))
+- Bump ajv from 6.12.6 to 6.14.0 [#1987](https://github.com/jupyter/nbgrader/pull/1987) ([@brichet](https://github.com/brichet))
+- Bump systeminformation from 5.27.14 to 5.31.1 [#1986](https://github.com/jupyter/nbgrader/pull/1986) ([@brichet](https://github.com/brichet))
+- Bump webpack from 5.96.1 to 5.105.0 [#1985](https://github.com/jupyter/nbgrader/pull/1985) ([@brichet](https://github.com/brichet))
+- Bump python and GitHub actions [#1984](https://github.com/jupyter/nbgrader/pull/1984) ([@brichet](https://github.com/brichet))
+- Bump lodash from 4.17.21 to 4.17.23 [#1981](https://github.com/jupyter/nbgrader/pull/1981) ([@brichet](https://github.com/brichet))
+- Bump lodash-es from 4.17.21 to 4.17.23 [#1980](https://github.com/jupyter/nbgrader/pull/1980) ([@brichet](https://github.com/brichet))
+- Bump vega-selections from 5.6.0 to 5.6.3 [#1976](https://github.com/jupyter/nbgrader/pull/1976) ([@brichet](https://github.com/brichet))
+- Bump systeminformation from 5.25.11 to 5.27.14 [#1975](https://github.com/jupyter/nbgrader/pull/1975) ([@brichet](https://github.com/brichet))
+- Bump bootstrap from 3.3.4 to 5.0.0 in /nbgrader/server_extensions/formgrader/static [#1974](https://github.com/jupyter/nbgrader/pull/1974) ([@brichet](https://github.com/brichet))
+- Bump js-yaml from 4.1.0 to 4.1.1 [#1973](https://github.com/jupyter/nbgrader/pull/1973) ([@brichet](https://github.com/brichet))
+- Use NPM packages instead of bower for formgrader extension dependencies [#1967](https://github.com/jupyter/nbgrader/pull/1967) ([@brichet](https://github.com/brichet), [@shreve](https://github.com/shreve))
+- fix: Use cross-platform shortcuts in ui-tests [#1964](https://github.com/jupyter/nbgrader/pull/1964) ([@shreve](https://github.com/shreve), [@brichet](https://github.com/brichet))
+- Resolve warnings in SQLAlchemy field defs [#1963](https://github.com/jupyter/nbgrader/pull/1963) ([@shreve](https://github.com/shreve), [@brichet](https://github.com/brichet))
+- Bump vega from 5.30.0 to 5.33.0 [#1959](https://github.com/jupyter/nbgrader/pull/1959) ([@brichet](https://github.com/brichet))
+- Bump cross-spawn from 7.0.3 to 7.0.6 [#1951](https://github.com/jupyter/nbgrader/pull/1951) ([@brichet](https://github.com/brichet))
+- Bump systeminformation from 5.22.11 to 5.25.11 [#1950](https://github.com/jupyter/nbgrader/pull/1950) ([@brichet](https://github.com/brichet))
+- Update the check link action to use maintainer tools [#1949](https://github.com/jupyter/nbgrader/pull/1949) ([@brichet](https://github.com/brichet), [@raulcd](https://github.com/raulcd))
+- Bump nanoid from 3.3.7 to 3.3.8 [#1944](https://github.com/jupyter/nbgrader/pull/1944) ([@brichet](https://github.com/brichet))
+- Replace npm-run-all by npm-run-all2 [#1942](https://github.com/jupyter/nbgrader/pull/1942) ([@brichet](https://github.com/brichet))
+
+### Other merged PRs
+
+- Bump js-yaml from 4.2.0 to 4.3.2 [#2019](https://github.com/jupyter/nbgrader/pull/2019) ([@brichet](https://github.com/brichet))
+- Bump postcss-selector-parser from 6.1.0 to 6.1.4 [#2016](https://github.com/jupyter/nbgrader/pull/2016) ([@brichet](https://github.com/brichet))
+- Bump shell-quote from 1.8.4 to 1.10.0 [#2008](https://github.com/jupyter/nbgrader/pull/2008) ([@brichet](https://github.com/brichet))
+- Bump brace-expansion from 1.1.11 to 1.1.16 [#2007](https://github.com/jupyter/nbgrader/pull/2007) ([@brichet](https://github.com/brichet))
+- Bump js-yaml from 4.1.1 to 4.2.0 [#2002](https://github.com/jupyter/nbgrader/pull/2002) ([@brichet](https://github.com/brichet))
+- Bump shell-quote from 1.8.2 to 1.8.4 [#2000](https://github.com/jupyter/nbgrader/pull/2000) ([@brichet](https://github.com/brichet))
+- Bump ws from 8.17.1 to 8.21.0 [#1999](https://github.com/jupyter/nbgrader/pull/1999) ([@brichet](https://github.com/brichet))
+- Bump systeminformation from 5.31.1 to 5.31.6 [#1998](https://github.com/jupyter/nbgrader/pull/1998) ([@brichet](https://github.com/brichet))
+- Bump postcss from 8.4.38 to 8.5.10 [#1997](https://github.com/jupyter/nbgrader/pull/1997) ([@brichet](https://github.com/brichet))
+- Bump lodash from 4.17.23 to 4.18.1 [#1995](https://github.com/jupyter/nbgrader/pull/1995) ([@brichet](https://github.com/brichet))
+- Bump lodash-es from 4.17.23 to 4.18.1 [#1993](https://github.com/jupyter/nbgrader/pull/1993) ([@brichet](https://github.com/brichet))
+- Bump picomatch from 2.3.1 to 2.3.2 [#1992](https://github.com/jupyter/nbgrader/pull/1992) ([@brichet](https://github.com/brichet))
+- Bump flatted from 3.3.1 to 3.4.2 [#1991](https://github.com/jupyter/nbgrader/pull/1991) ([@brichet](https://github.com/brichet))
+
+### Contributors to this release
+
+The following people contributed discussions, new ideas, code and documentation contributions, and review.
+See [our definition of contributors](https://github-activity.readthedocs.io/en/latest/use/#how-does-this-tool-define-contributions-in-the-reports).
+
+([GitHub contributors page for this release](https://github.com/jupyter/nbgrader/graphs/contributors?from=2025-01-17&to=2026-09-30&type=c))
+
+@asarj ([activity](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Aasarj+updated%3A2025-01-17..2026-09-30&type=Issues)) | @brichet ([activity](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Abrichet+updated%3A2025-01-17..2026-09-30&type=Issues)) | @Copilot ([activity](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3ACopilot+updated%3A2025-01-17..2026-09-30&type=Issues)) | @raulcd ([activity](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Araulcd+updated%3A2025-01-17..2026-09-30&type=Issues)) | @shreve ([activity](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Ashreve+updated%3A2025-01-17..2026-09-30&type=Issues)) | @yueyueL ([activity](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3AyueyueL+updated%3A2025-01-17..2026-09-30&type=Issues))
+
+<!-- <END NEW CHANGELOG ENTRY> -->
+
 ## 0.9.5
 
 ([Full Changelog](https://github.com/jupyter/nbgrader/compare/v0.9.4...73e137511ac1dc02e95790d4fd6d4d88dab42325))
@@ -19,8 +83,6 @@ A summary of changes to nbgrader.
 ([GitHub contributors page for this release](https://github.com/jupyter/nbgrader/graphs/contributors?from=2024-11-18&to=2025-01-17&type=c))
 
 [@brichet](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Abrichet+updated%3A2024-11-18..2025-01-17&type=Issues) | [@dependabot](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Adependabot+updated%3A2024-11-18..2025-01-17&type=Issues) | [@github-actions](https://github.com/search?q=repo%3Ajupyter%2Fnbgrader+involves%3Agithub-actions+updated%3A2024-11-18..2025-01-17&type=Issues)
-
-<!-- <END NEW CHANGELOG ENTRY> -->
 
 ## 0.9.4
 

@@ -1,6 +1,6 @@
 {
   "name": "@jupyter/nbgrader",
-  "version": "0.9.5",
+  "version": "0.9.6",
   "description": "nbgrader nodejs dependencies",
   "keywords": [
     "jupyter",
@@ -67,7 +67,7 @@
   "devDependencies": {
     "@jupyter/builder": "^1.2.3",
     "@jupyterlab/galata": "^5.6.0",
-    "@playwright/test": "^1.60.0",
+    "@playwright/test": "^1.64.0",
     "@types/codemirror": "^5.60.5",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
