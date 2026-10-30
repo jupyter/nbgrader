@@ -17,7 +17,7 @@ from .. import (
     create_grade_cell, create_solution_cell,
     create_grade_and_solution_cell)
 
-from .conftest import notwindows
+from ..conftest import notwindows
 
 @pytest.fixture
 def temp_cwd(request):
