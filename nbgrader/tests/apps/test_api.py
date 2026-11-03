@@ -1,8 +1,6 @@
 import pytest
 import sys
 import os
-import shutil
-import filecmp
 
 from os.path import join
 from traitlets.config import Config
@@ -33,10 +31,7 @@ def api(request, course_dir, db, exchange, cache):
 
 class TestNbGraderAPI(BaseTestApp):
 
-    if sys.platform == 'win32':
-        tz = "Coordinated Universal Time"
-    else:
-        tz = "UTC"
+    tz = "UTC"
 
     def test_get_source_assignments(self, api, course_dir):
         assert api.get_source_assignments() == set([])
