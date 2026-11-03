@@ -43,7 +43,7 @@ dependencies = [
     "nbclient>=0.6.1",
     "nbconvert>=6",
     "notebook>=7.2.0,<8",
-    "python-dateutil>=2.8",
+    "python-dateutil>=3.0",
     "rapidfuzz>=1.8",
     "requests>=2.26",
     "setuptools",
@@ -62,7 +62,7 @@ dev = [
 ]
 docs = [
     "myst-parser",
-    "sphinx>=7,<8",
+    "sphinx>=7,<10",
     "sphinx-autodoc-typehints",
     "sphinx_rtd_theme>=1.3",
 ]
