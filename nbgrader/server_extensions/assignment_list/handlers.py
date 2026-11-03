@@ -19,6 +19,7 @@ from ...apps import NbGrader
 from ...coursedir import CourseDirectory
 from ...auth import Authenticator
 from ... import __version__ as nbgrader_version
+from ..helpers.deadline import DeadlineManager
 
 
 static = os.path.join(os.path.dirname(__file__), 'static')
@@ -83,6 +84,8 @@ class AssignmentList(LoggingConfigurable):
                     authenticator=authenticator,
                     config=config)
                 assignments = lister.start()
+                assignments = DeadlineManager(config.Exchange.root, coursedir, self.log) \
+                    .fetch_deadlines(assignments)
 
             except Exception as e:
                 self.log.error(traceback.format_exc())
