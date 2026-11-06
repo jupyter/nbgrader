@@ -622,6 +622,17 @@ var loadAssignments = function () {
             });
             insertDataTable(tbl.parent());
             models.loaded = true;
+        },
+        error: function () {
+            tbl.empty();
+            var message = $("<td/>")
+                .attr("colspan", "11")
+                .attr("role", "alert")
+                .text("Unable to load assignments. Please contact the course administrator " +
+                    "and check the server logs. If the gradebook database is from an older " +
+                    "version of nbgrader, back it up before running nbgrader db upgrade " +
+                    "from the course directory, then reload this page.");
+            tbl.append($("<tr/>").append(message));
         }
     });
 };
