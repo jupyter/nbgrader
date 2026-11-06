@@ -843,6 +843,44 @@ test("Load students submissions", async ({
   }
 });
 
+for (const failure of ['server error', 'network error']) {
+  test(`Show assignment loading ${failure}`, async ({ page, tmpPath }) => {
+    if (isNotebook) await page.goto(`tree/${tmpPath}`);
+
+    const assignmentsUrl = '**/formgrader/api/assignments';
+    await page.route(assignmentsUrl, async route => {
+      if (failure === 'network error') {
+        await route.abort();
+      } else {
+        await route.fulfill({
+          status: 500,
+          contentType: 'text/html',
+          body: '<script>window.untrustedResponseExecuted=true</script>PRIVATE_DATABASE_DETAIL'
+        });
+      }
+    });
+    await openFormgrader(page);
+    const iframe = page.mainFrame().childFrames()[0];
+    const alert = iframe.getByRole('alert');
+    await expect(alert).toContainText('Unable to load assignments');
+    await expect(alert).toContainText('back it up before running nbgrader db upgrade');
+    await expect(iframe.locator('#main-table')).not.toContainText('Loading, please wait');
+    await expect(iframe.locator('body')).not.toContainText('PRIVATE_DATABASE_DETAIL');
+    expect(await iframe.evaluate(() => 'untrustedResponseExecuted' in window)).toBe(false);
+
+    // A successful reload must replace the failure with the normal empty table.
+    await page.unroute(assignmentsUrl);
+    await page.route(assignmentsUrl, route => route.fulfill({
+      status: 200, contentType: 'application/json', body: '[]'
+    }));
+    await iframe.goto(iframe.url());
+    await expect(iframe.locator('#main-table')).toContainText('No data available in table');
+    await expect(iframe.getByRole('alert')).toHaveCount(0);
+    await expect(iframe.locator('#main-table')).not.toContainText('Loading, please wait');
+    await expect(iframe.locator('#main-table')).not.toContainText('Unable to load assignments');
+  });
+}
+
 /*
  * Test due date defaults in create and edit modals
  */
