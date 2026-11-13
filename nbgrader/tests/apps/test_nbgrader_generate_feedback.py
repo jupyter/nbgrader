@@ -1,4 +1,6 @@
+import html
 import os
+import re
 import sys
 import pytest
 from os.path import join, exists, isfile
@@ -381,3 +383,38 @@ class TestNbGraderFeedback(BaseTestApp):
         assert exists(join(course_dir, "feedback", "foo", "ps1", "p2.html"))
         assert not exists(join(course_dir, "feedback", "bar", "ps1", "p1.html"))
         assert not exists(join(course_dir, "feedback", "bar", "ps1", "p2.html"))
+
+    def _feedback_text(self, path):
+        """The visible text of a feedback file, without HTML tags."""
+        return html.unescape(re.sub(r"<[^>]+>", "", self._file_contents(path)))
+
+    def test_hide_hidden_tests(self, db, course_dir):
+        """Are hidden tests removed from the feedback when hide_hidden_tests is set?"""
+        run_nbgrader(["db", "assignment", "add", "ps1", "--db", db])
+        run_nbgrader(["db", "student", "add", "foo", "--db", db])
+
+        self._copy_file(join("files", "test-hidden-tests.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
+        run_nbgrader(["generate_assignment", "ps1", "--db", db])
+
+        # the student submits the released notebook without solving it, so the
+        # visible tests fail and their tracebacks quote the lines around them
+        self._copy_file(join(course_dir, "release", "ps1", "p1.ipynb"), join(course_dir, "submitted", "foo", "ps1", "p1.ipynb"))
+        run_nbgrader(["autograde", "ps1", "--db", db])
+
+        feedback = join(course_dir, "feedback", "foo", "ps1", "p1.html")
+        hidden = ["squares(10) ==", "sum_of_squares(10) =="]
+
+        # by default the hidden tests are shown
+        run_nbgrader(["generate_feedback", "ps1", "--db", db])
+        text = self._feedback_text(feedback)
+        for line in hidden:
+            assert line in text
+
+        run_nbgrader(["generate_feedback", "ps1", "--db", db, "--force", "--GenerateFeedback.hide_hidden_tests=True"])
+        text = self._feedback_text(feedback)
+        for line in hidden:
+            assert line not in text
+        assert "BEGIN HIDDEN TESTS" not in text
+        # the visible tests and the errors are still shown
+        assert "squares(1) ==" in text
+        assert "NotImplementedError" in text

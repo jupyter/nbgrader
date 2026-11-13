@@ -14,7 +14,7 @@ from .clearoutput import ClearOutput
 from .limitoutput import LimitOutput
 from .deduplicateids import DeduplicateIds
 from .latesubmissions import AssignLatePenalties
-from .clearhiddentests import ClearHiddenTests
+from .clearhiddentests import ClearHiddenTests, ClearHiddenTestsAndTracebacks
 from .clearmarkingscheme import ClearMarkScheme
 from .overwritekernelspec import OverwriteKernelspec
 from .ignorepattern import IgnorePattern
@@ -36,6 +36,7 @@ __all__ = [
     "LimitOutput",
     "DeduplicateIds",
     "ClearHiddenTests",
+    "ClearHiddenTestsAndTracebacks",
     "ClearMarkScheme",
     "OverwriteKernelspec",
     "IgnorePattern",

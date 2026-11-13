@@ -2,11 +2,12 @@ import os
 import pytest
 
 from textwrap import dedent
+from nbformat.v4 import new_output
 from traitlets.config import Config
 
 from .base import BaseTestPreprocessor
 from .. import create_code_cell, create_text_cell
-from ...preprocessors import ClearHiddenTests
+from ...preprocessors import ClearHiddenTests, ClearHiddenTestsAndTracebacks
 
 
 @pytest.fixture
@@ -205,3 +206,66 @@ class TestClearHiddenTests(BaseTestPreprocessor):
         nb.metadata['celltoolbar'] = 'Create Assignment'
         nb = preprocessor.preprocess(nb, {})[0]
         assert 'celltoolbar' not in nb.metadata
+
+
+class TestClearHiddenTestsAndTracebacks(BaseTestPreprocessor):
+
+    @staticmethod
+    def _graded_cell_with_outputs(source):
+        cell = create_code_cell()
+        cell.source = dedent(source).strip()
+        cell.metadata['nbgrader'] = dict(grade=True)
+        cell.outputs = [
+            new_output(
+                "error",
+                ename="AssertionError",
+                evalue="",
+                traceback=[
+                    "----> 2 assert squares(10) == [1, 4, 9]",
+                    "AssertionError: ",
+                ],
+            ),
+            new_output("stream", name="stdout", text="checked\n"),
+        ]
+        return cell
+
+    def test_shorten_traceback_in_cell_with_hidden_tests(self):
+        """Is the traceback shortened in a cell whose hidden tests were removed?"""
+        preprocessor = ClearHiddenTestsAndTracebacks()
+        cell = self._graded_cell_with_outputs(
+            """
+            assert True
+            ### BEGIN HIDDEN TESTS
+            assert squares(10) == [1, 4, 9]
+            ### END HIDDEN TESTS
+            """
+        )
+        cell = preprocessor.preprocess_cell(cell, dict(), 1)[0]
+
+        assert cell.source == "assert True"
+        assert cell.outputs[0].traceback == ["AssertionError"]
+        assert cell.outputs[1].text == "checked\n"
+
+    def test_shorten_traceback_keeps_message(self):
+        """Is the exception message kept when the traceback is shortened?"""
+        preprocessor = ClearHiddenTestsAndTracebacks()
+        cell = self._graded_cell_with_outputs(
+            """
+            ### BEGIN HIDDEN TESTS
+            assert squares(10) == [1, 4, 9], "wrong for n=10"
+            ### END HIDDEN TESTS
+            """
+        )
+        cell.outputs[0].evalue = "wrong for n=10"
+        cell = preprocessor.preprocess_cell(cell, dict(), 1)[0]
+
+        assert cell.outputs[0].traceback == ["AssertionError: wrong for n=10"]
+
+    def test_keep_traceback_in_cell_without_hidden_tests(self):
+        """Is the traceback kept in a cell without hidden tests?"""
+        preprocessor = ClearHiddenTestsAndTracebacks()
+        cell = self._graded_cell_with_outputs("assert squares(10) == [1, 4, 9]")
+        traceback = list(cell.outputs[0].traceback)
+        cell = preprocessor.preprocess_cell(cell, dict(), 1)[0]
+
+        assert cell.outputs[0].traceback == traceback
