@@ -1,12 +1,13 @@
 import os
+from textwrap import dedent
 
 from traitlets.config import Config
-from traitlets import List, default
+from traitlets import Bool, List, default
 from nbconvert.exporters import HTMLExporter
 from nbconvert.preprocessors import CSSHTMLHeaderPreprocessor
 
 from .base import BaseConverter
-from ..preprocessors import GetGrades
+from ..preprocessors import GetGrades, ClearHiddenTestsAndTracebacks
 
 
 class GenerateFeedback(BaseConverter):
@@ -23,6 +24,26 @@ class GenerateFeedback(BaseConverter):
         GetGrades,
         CSSHTMLHeaderPreprocessor
     ]).tag(config=True)
+
+    hide_hidden_tests = Bool(
+        False,
+        help=dedent(
+            """
+            Whether to remove hidden tests from the feedback. Hidden test
+            regions are removed from the cells, and the tracebacks of those
+            cells are shortened to the exception name and message, because a
+            traceback can quote the hidden test code. Other outputs, such as
+            printed text, are kept. If the hidden tests change the state of
+            the notebook, the visible parts of the feedback may be harder to
+            understand.
+            """
+        )
+    ).tag(config=True)
+
+    def start(self) -> None:
+        if self.hide_hidden_tests and ClearHiddenTestsAndTracebacks not in self.preprocessors:
+            self.preprocessors = list(self.preprocessors) + [ClearHiddenTestsAndTracebacks]
+        super(GenerateFeedback, self).start()
 
     @default("classes")
     def _classes_default(self):

@@ -1,6 +1,6 @@
 import re
 
-from traitlets import Bool, Unicode
+from traitlets import Bool, List, Unicode
 from textwrap import dedent
 
 from . import NbGraderPreprocessor
@@ -108,5 +108,38 @@ class ClearHiddenTests(NbGraderPreprocessor):
                     "please make sure all solution regions are within "
                     "'Autograder tests' cells."
                 )
+
+        return cell, resources
+
+
+class ClearHiddenTestsAndTracebacks(ClearHiddenTests):
+    """Remove hidden test regions like ``ClearHiddenTests``, and also shorten
+    the tracebacks of error outputs in the cells they were removed from.
+
+    A traceback quotes the lines around the line that failed, so it can still
+    show hidden test code after that code has been removed from the cell. Each
+    such traceback is replaced by its last line: the exception name and message.
+    """
+
+    # Like GetGrades, accept the display_data_priority option that the HTML
+    # exporter sets, so that generating feedback does not warn about it.
+    display_data_priority = List(['text/html', 'application/pdf', 'text/latex', 'image/svg+xml', 'image/png', 'image/jpeg', 'text/plain']).tag(config=True)
+
+    def preprocess_cell(self,
+                        cell: NotebookNode,
+                        resources: ResourcesDict,
+                        cell_index: int
+                        ) -> Tuple[NotebookNode, ResourcesDict]:
+        had_hidden_tests = self.begin_test_delimeter in cell.source
+        cell, resources = super(ClearHiddenTestsAndTracebacks, self).preprocess_cell(
+            cell, resources, cell_index)
+
+        if had_hidden_tests and cell.cell_type == "code":
+            for output in cell.outputs:
+                if output.output_type == "error":
+                    if output.evalue:
+                        output.traceback = ["{}: {}".format(output.ename, output.evalue)]
+                    else:
+                        output.traceback = [output.ename]
 
         return cell, resources

@@ -203,3 +203,29 @@ You can specify hidden test delimeters you want by setting the
     c.ClearHiddenTests.begin_test_delimeter = "VERBORGE TOESTE BEGIN"
     c.ClearHiddenTests.end_test_delimeter = "VERBORGE TOESTE EINDIG"
 
+Hiding hidden tests in the feedback
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+By default, ``nbgrader generate_feedback`` shows the hidden tests to the
+students, so that they can see why they lost points. To keep the hidden tests
+hidden in the feedback as well, for example when students may resubmit, set
+the ``GenerateFeedback.hide_hidden_tests`` config option:
+
+.. code:: python
+
+    c = get_config()
+    c.GenerateFeedback.hide_hidden_tests = True
+
+The hidden test regions are then removed from the feedback. A traceback quotes
+the lines around the line that failed, so it can show hidden test code as well.
+For this reason, the tracebacks of the cells that contained hidden tests are
+replaced by the exception name and message. Other outputs, such as printed
+text, are kept, so hidden tests should not print anything that gives them away.
+The markers set with ``ClearHiddenTests.begin_test_delimeter`` and
+``ClearHiddenTests.end_test_delimeter`` are used here too.
+
+.. note::
+
+    If the hidden tests change the state of the notebook, the visible parts of
+    the feedback may be harder for the students to understand.
+
