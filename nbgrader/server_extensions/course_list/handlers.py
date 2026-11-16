@@ -51,6 +51,16 @@ class CourseListHandler(JupyterHandler):
         app.load_config_file()
 
         return app.config
+    
+    def get_course_titles(self):
+        paths = jupyter_config_path()
+        paths.insert(0, os.getcwd())
+
+        app = NbGrader()
+        app.config_file_paths.append(paths)
+        app.load_config_file()
+        
+        return app.course_titles
 
     @gen.coroutine
     def check_for_local_formgrader(self, config):
@@ -77,8 +87,12 @@ class CourseListHandler(JupyterHandler):
         coursedir = CourseDirectory(config=config)
 
         if status:
+            title = coursedir.course_title
+            if not title:
+                title = coursedir.course_id
             raise gen.Return([{
                 'course_id': coursedir.course_id,
+                'course_title': title,
                 'url': base_url + '/formgrader',
                 'kind': 'local'
             }])
@@ -111,8 +125,12 @@ class CourseListHandler(JupyterHandler):
             self.log.error("Formgrader not available at URL: %s", url)
             raise gen.Return([])
 
+        title = coursedir.course_title
+        if not title:
+            title = coursedir.course_id
         courses = [{
             'course_id': coursedir.course_id,
+            'course_title': title,
             'url': url + "/lab?formgrader=true",
             'kind': 'jupyterhub'
         }]
@@ -149,13 +167,18 @@ class CourseListHandler(JupyterHandler):
             raise gen.Return([])
 
         courses = []
+        course_titles = self.get_course_titles()
         for course in course_names:
             if course not in services:
                 self.log.warning("Couldn't find formgrader for course '%s'", course)
                 continue
             service = services[course]
+            title = course_titles.get(course)
+            if not title:
+                title = course
             courses.append({
                 'course_id': course,
+                'course_title': title,
                 'url': self.get_base_url() + service['prefix'].rstrip('/') + "/lab?formgrader=true",
                 'kind': 'jupyterhub'
             })

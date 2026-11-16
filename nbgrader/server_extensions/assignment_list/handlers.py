@@ -51,6 +51,16 @@ class AssignmentList(LoggingConfigurable):
 
         return app.config
 
+    def get_course_titles(self):
+        paths = jupyter_config_path()
+        paths.insert(0, os.getcwd())
+
+        app = NbGrader()
+        app.config_file_paths.append(paths)
+        app.load_config_file()
+        
+        return app.course_titles
+
     @contextlib.contextmanager
     def get_assignment_dir_config(self):
 
@@ -186,9 +196,12 @@ class AssignmentList(LoggingConfigurable):
         if not assignments["success"]:
             return assignments
 
+        course_ids = list(set([x["course_id"] for x in assignments["value"]]))
+        titles_dict = self.get_course_titles()
+        course_ids.sort(key=lambda x: titles_dict.get(x, x))
         retvalue = {
             "success": True,
-            "value": sorted(list(set([x["course_id"] for x in assignments["value"]])))
+            "value": [{"course_id": x, "course_title": titles_dict.get(x, x)} for x in course_ids]
         }
 
         return retvalue
