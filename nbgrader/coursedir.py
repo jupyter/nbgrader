@@ -12,6 +12,15 @@ import datetime
 from typing import Optional
 
 
+# Characters that can never be part of an assignment name: '+' is the field
+# separator in the file names of submissions in the exchange, '/' and '\' are
+# path separators, and '[' and ']' are glob metacharacters (the assignment name
+# is used as a glob pattern when looking up its directory). Other characters
+# that are special in regular expressions (e.g. parentheses) are allowed, as
+# the code building regular expressions from assignment names escapes them.
+INVALID_ASSIGNMENT_ID_CHARACTERS = "+/\\[]"
+
+
 class CourseDirectory(LoggingConfigurable):
 
     course_id = Unicode(
@@ -78,14 +87,18 @@ class CourseDirectory(LoggingConfigurable):
             The assignment name. This MUST be specified, either by setting the
             config option, passing an argument on the command line, or using the
             --assignment option on the command line.
+
+            The assignment name may not contain any of the characters + / \\ [ ]
             """
         )
     ).tag(config=True)
 
     @validate('assignment_id')
     def _validate_assignment_id(self, proposal: Bunch) -> str:
-        if '+' in proposal['value']:
-            raise TraitError('Assignment names should not contain the following characters: +')
+        if set(proposal['value']) & set(INVALID_ASSIGNMENT_ID_CHARACTERS):
+            raise TraitError(
+                'Assignment names should not contain the following characters: {}'.format(
+                    ' '.join(INVALID_ASSIGNMENT_ID_CHARACTERS)))
         if proposal['value'].strip() != proposal['value']:
             self.log.warning("assignment_id '%s' has trailing whitespace, stripping it away", proposal['value'])
         return proposal['value'].strip()
@@ -303,6 +316,15 @@ class CourseDirectory(LoggingConfigurable):
     ).tag(config=True)
 
     def format_path(self, nbgrader_step: str, student_id: str, assignment_id: str, escape: bool = False) -> str:
+        """Format the path to a directory of the course directory.
+
+        If ``escape`` is True, a regular expression matching the path is
+        returned instead: the root directory and the path separators are
+        escaped, but ``nbgrader_step``, ``student_id`` and ``assignment_id``
+        are inserted verbatim so that callers can pass regular expressions
+        (e.g. named groups) for them. Literal ids must therefore be escaped by
+        the caller with ``re.escape``.
+        """
         kwargs = dict(
             nbgrader_step=nbgrader_step,
             student_id=student_id,
