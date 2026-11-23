@@ -3,6 +3,7 @@ import pytest
 from nbformat.v4 import new_notebook
 
 from ...preprocessors import DeduplicateIds
+from ...nbgraderformat import SCHEMA_REQUIRED
 from .base import BaseTestPreprocessor
 from .. import (
     create_grade_cell, create_solution_cell, create_locked_cell)
@@ -12,6 +13,10 @@ from .. import (
 def preprocessor():
     pp = DeduplicateIds()
     return pp
+
+
+EXPECTED_DUPLICATE_METADATA = SCHEMA_REQUIRED  # | {"duplicate": True}  # doesn't work in python 3.8
+EXPECTED_DUPLICATE_METADATA["duplicate"] = True
 
 
 class TestDeduplicateIds(BaseTestPreprocessor):
@@ -25,8 +30,8 @@ class TestDeduplicateIds(BaseTestPreprocessor):
 
         nb, resources = preprocessor.preprocess(nb, {})
 
-        assert nb.cells[0].metadata.nbgrader == {}
-        assert nb.cells[1].metadata.nbgrader != {}
+        assert nb.cells[0].metadata.nbgrader != {}
+        assert nb.cells[1].metadata.nbgrader == EXPECTED_DUPLICATE_METADATA
 
     def test_duplicate_solution_cell(self, preprocessor):
         cell1 = create_solution_cell("hello", "code", "foo")
@@ -37,8 +42,8 @@ class TestDeduplicateIds(BaseTestPreprocessor):
 
         nb, resources = preprocessor.preprocess(nb, {})
 
-        assert nb.cells[0].metadata.nbgrader == {}
-        assert nb.cells[1].metadata.nbgrader != {}
+        assert nb.cells[0].metadata.nbgrader != {}
+        assert nb.cells[1].metadata.nbgrader == EXPECTED_DUPLICATE_METADATA
 
     def test_duplicate_locked_cell(self, preprocessor):
         cell1 = create_locked_cell("hello", "code", "foo")
@@ -49,5 +54,5 @@ class TestDeduplicateIds(BaseTestPreprocessor):
 
         nb, resources = preprocessor.preprocess(nb, {})
 
-        assert nb.cells[0].metadata.nbgrader == {}
-        assert nb.cells[1].metadata.nbgrader != {}
+        assert nb.cells[0].metadata.nbgrader != {}
+        assert nb.cells[1].metadata.nbgrader == EXPECTED_DUPLICATE_METADATA

@@ -131,20 +131,20 @@ def test_task_value():
 
 def test_read():
     currdir = os.path.split(__file__)[0]
-    path = os.path.join(currdir, "..", "apps", "files", "test.ipynb")
+    path = os.path.join(currdir, "..", "apps", "files", "test-v3.ipynb")
     read_v3(path, current_nbformat)
 
 
 def test_reads():
     currdir = os.path.split(__file__)[0]
-    path = os.path.join(currdir, "..", "apps", "files", "test.ipynb")
+    path = os.path.join(currdir, "..", "apps", "files", "test-v3.ipynb")
     contents = open(path, "r").read()
     reads_v3(contents, current_nbformat)
 
 
 def test_write():
     currdir = os.path.split(__file__)[0]
-    path = os.path.join(currdir, "..", "apps", "files", "test.ipynb")
+    path = os.path.join(currdir, "..", "apps", "files", "test-v3.ipynb")
     nb = read_v3(path, current_nbformat)
     with tempfile.TemporaryFile(mode="w") as fh:
         write_v3(nb, fh)
@@ -152,7 +152,7 @@ def test_write():
 
 def test_writes():
     currdir = os.path.split(__file__)[0]
-    path = os.path.join(currdir, "..", "apps", "files", "test.ipynb")
+    path = os.path.join(currdir, "..", "apps", "files", "test-v3.ipynb")
     nb = read_v3(path, current_nbformat)
     writes_v3(nb)
 
@@ -166,7 +166,7 @@ def test_too_old():
 
 def test_too_new():
     currdir = os.path.split(__file__)[0]
-    path = os.path.join(currdir, "..", "apps", "files", "test.ipynb")
+    path = os.path.join(currdir, "..", "apps", "files", "test-v3.ipynb")
     nb = read_v3(path, current_nbformat)
     for cell in nb.cells:
         if hasattr(cell.metadata, "nbgrader"):
