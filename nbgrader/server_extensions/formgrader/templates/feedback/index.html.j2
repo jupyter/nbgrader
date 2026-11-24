@@ -6,6 +6,8 @@
 <head>
 
 <meta charset="utf-8" />
+<meta name="nbgrader-score" content="{{ resources.nbgrader.score | float | round(2) }}" />
+<meta name="nbgrader-max-score" content="{{ resources.nbgrader.max_score | float | round(2) }}" />
 <title>{{ resources.nbgrader.notebook }}</title>
 
 {{ resources.include_css('bootstrap.min.css')}}
