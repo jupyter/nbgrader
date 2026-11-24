@@ -88,17 +88,20 @@ var insertDataTable = function (tbl) {
     });
 };
 
-var linkTo = function (type, path) {
+var linkTo = function (type, path, base) {
     /*
      * Connect a link in the appropriate manner for the context.
      * - If we're in the outermost frame, assume notebook and use an href.
      * - If we're in an iframe, assume lab and send a message.
      */
     if (window === window.top) {
+        if (typeof base === "undefined") {
+            base = "";
+        }
         var prefix = {
-            notebook: "/notebooks/",
-            file: "/edit/",
-            directory: "/tree/"
+            notebook: base + "/notebooks/",
+            file: base + "/edit/",
+            directory: base + "/tree/"
         }[type];
 
         return (_, el) => {
