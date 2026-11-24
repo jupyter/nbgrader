@@ -409,6 +409,57 @@ test("Load manage assignments", async ({ page, baseURL, request, tmpPath }) => {
 });
 
 /*
+ * Create an assignment with an invalid timezone
+ */
+test("Create assignment with invalid timezone", async ({
+  page,
+  baseURL,
+  request,
+  tmpPath,
+}) => {
+  test.skip(isWindows, "This test does not work on Windows");
+
+  if (baseURL === undefined) throw new Error("BaseURL is undefined.");
+
+  if (isNotebook) await page.goto(`tree/${tmpPath}`);
+
+  // create environment
+  await createEnv(testDir, tmpPath, exchange_dir, cache_dir, isWindows);
+  await addCourses(request, page, tmpPath);
+  await openFormgrader(page);
+
+  const iframe = page.mainFrame().childFrames()[0];
+  await checkFormgraderBreadcrumbs(iframe, ["Assignments"]);
+
+  // "2" is not a valid UTC offset ("+2" or "+0200" would be)
+  await iframe.click('a:text("Add new assignment...")');
+  const modal = iframe.locator("#add-assignment-modal");
+  await modal.locator(".name").fill("Problem Set 2");
+  await modal.locator(".duedate").fill("2023-09-29T23:59");
+  await modal.locator(".timezone").fill("2");
+
+  const response = page.waitForResponse(
+    (r) =>
+      r.url().endsWith("/formgrader/api/assignment/Problem%20Set%202") &&
+      r.request().method() === "PUT"
+  );
+  await modal.locator("button.save").click();
+  expect((await response).status()).toBe(400);
+
+  // the user gets an error and the assignment is not listed
+  await expect(iframe.locator("#error-modal")).toBeVisible();
+  await expect(iframe.locator("#error-modal .modal-body")).toContainText(
+    "Problem Set 2"
+  );
+  await expect(iframe.locator('td.name:has-text("Problem Set 2")')).toHaveCount(0);
+
+  // and it is still not there after a reload
+  await iframe.goto(`${baseURL}/formgrader/manage_assignments`);
+  await expect(iframe.locator('td.name:has-text("Problem Set 1")')).toHaveCount(1);
+  await expect(iframe.locator('td.name:has-text("Problem Set 2")')).toHaveCount(0);
+});
+
+/*
  * Load manage submissions
  */
 test("Load manage submissions", async ({ page, baseURL, request, tmpPath }) => {
