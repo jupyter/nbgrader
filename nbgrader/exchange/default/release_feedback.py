@@ -1,12 +1,10 @@
 import os
 import shutil
-import glob
-import re
 from stat import S_IRUSR, S_IWUSR, S_IXUSR, S_IRGRP, S_IWGRP, S_IXGRP, S_IXOTH, S_ISGID
 
 from nbgrader.exchange.abc import ExchangeReleaseFeedback as ABCExchangeReleaseFeedback
 from .exchange import Exchange
-from nbgrader.utils import notebook_hash, make_unique_key
+from nbgrader.utils import notebook_hash
 
 
 class ExchangeReleaseFeedback(Exchange, ABCExchangeReleaseFeedback):
@@ -37,40 +35,37 @@ class ExchangeReleaseFeedback(Exchange, ABCExchangeReleaseFeedback):
         else:
             exclude_students = set()
 
-        html_files = glob.glob(os.path.join(self.src_path, "*.html"))
-        for html_file in html_files:
-            regexp = re.escape(os.path.sep).join([
-                self.coursedir.format_path(
-                    self.coursedir.feedback_directory,
-                    "(?P<student_id>.*)",
-                    self.coursedir.assignment_id, escape=True),
-                "(?P<notebook_id>.*).html"
-            ])
-
-            m = re.match(regexp, html_file)
-            if m is None:
-                msg = "Could not match '%s' with regexp '%s'" % (html_file, regexp)
-                self.log.error(msg)
-                continue
-
-            gd = m.groupdict()
-            student_id = gd['student_id']
-            notebook_id = gd['notebook_id']
+        for feedback in self.coursedir.find_notebooks(
+            nbgrader_step=self.coursedir.feedback_directory,
+            student_id=self.coursedir.student_id or "*",
+            assignment_id=self.coursedir.assignment_id,
+            notebook_id="*",
+            ext="html"
+        ):
+            html_file = feedback['path']
+            student_id = feedback['student_id']
             if student_id in exclude_students:
                 self.log.debug("Skipping student '{}'".format(student_id))
                 continue
 
-            feedback_dir = os.path.split(html_file)[0]
+            notebook_id = feedback['notebook_id']
+            feedback_dir = html_file.parent
 
-            timestamp = open(os.path.join(feedback_dir, 'timestamp.txt')).read()
-            with open(os.path.join(feedback_dir, "submission_secret.txt")) as fh:
-                submission_secret = fh.read()
+            timestamp = feedback_dir.joinpath('timestamp.txt').read_text()
+            submission_secret = feedback_dir.joinpath("submission_secret.txt").read_text()
 
             checksum = notebook_hash(secret=submission_secret, notebook_id=notebook_id)
             dest = os.path.join(self.dest_path, "{}-tmp.html".format(checksum))
 
-            self.log.info("Releasing feedback for student '{}' on assignment '{}/{}/{}' ({})".format(
-                student_id, self.coursedir.course_id, self.coursedir.assignment_id, notebook_id, timestamp))
+            self.log.info(
+                "Releasing feedback for student '%s' on assignment '%s/%s/%s' (%s)",
+                student_id,
+                self.coursedir.course_id,
+                feedback["assignment_id"],
+                notebook_id,
+                timestamp
+            )
+
             shutil.copy(html_file, dest)
             # Copy to temporary location and mv to update atomically.
             updated_feedback = os.path.join(self.dest_path, "{}.html". format(checksum))

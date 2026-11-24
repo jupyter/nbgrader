@@ -1016,6 +1016,7 @@ test.describe('#localFormgrader', () => {
       '#jp-mainmenu-nbgrader li[data-command="nbgrader:open-formgrader-local"]'
     );
 
+    // Ensure that the local formgrader setting is checked.
     const [settings, settingsTab] = await openSettings(page);
     const formgraderSettings = settings.locator(
       '.jp-PluginList-entry[data-id="@jupyter/nbgrader:formgrader"]'
@@ -1030,6 +1031,9 @@ test.describe('#localFormgrader', () => {
     await expect(settingsTab).toHaveAttribute('class', /jp-mod-dirty/);
     await expect(settingsTab).not.toHaveAttribute('class', /jp-mod-dirty/);
 
+    // Make sure the global nbgrader exchange and cache directories are junk
+    createEnv(testDir, "tmpPath", "/dev/null", "/dev/null", isWindows);
+
     // Add a local formgrader in another directory
     const newDirectory = path.resolve(testDir, 'localFormgrader');
 
@@ -1039,7 +1043,7 @@ test.describe('#localFormgrader', () => {
     fs.mkdirSync(newDirectory);
     fs.copyFileSync(
       path.resolve(testDir, "nbgrader_config.py"),
-      path.resolve(testDir, tmpPath, "nbgrader_config.py")
+      path.resolve(newDirectory, "nbgrader_config.py")
     );
 
     var text_to_append = `

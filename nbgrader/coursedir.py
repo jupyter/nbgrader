@@ -1,15 +1,17 @@
 import os
 import re
-
+import sys
+import datetime
+import typing
+from pathlib import Path
 from textwrap import dedent
+import logging
 
 from traitlets.config import LoggingConfigurable
 from traitlets import Integer, Bool, Unicode, List, default, validate, TraitError
 
-from .utils import full_split, parse_utc
+from .utils import parse_utc, is_ignored
 from traitlets.utils.bunch import Bunch
-import datetime
-from typing import Optional
 
 
 class CourseDirectory(LoggingConfigurable):
@@ -302,26 +304,165 @@ class CourseDirectory(LoggingConfigurable):
         )
     ).tag(config=True)
 
-    def format_path(self, nbgrader_step: str, student_id: str, assignment_id: str, escape: bool = False) -> str:
+    def format_path(
+        self,
+        nbgrader_step: str,
+        student_id: str = '.',
+        assignment_id: str = '.',
+        escape: bool = False
+    ) -> str:
+        """
+        Produce an absolute path to an assignment directory.
+
+        When escape=True, the non-passed elements of the path are regex-escaped, so the
+        resulting string can be used as a pattern to match path components.
+        """
+        kwargs = dict(
+            nbgrader_step=nbgrader_step,
+            student_id=student_id,
+            assignment_id=assignment_id
+        )
+        base = Path(self.root)
+        structure = Path(self.directory_structure.format(**kwargs))
+        if escape:
+            if structure.is_absolute():
+                anchor = structure.anchor
+                parts = list(structure.parts)
+            else:
+                anchor = base.anchor
+                parts = [re.escape(part) for part in base.parts if part != anchor]
+                parts += list(structure.parts)
+            return re.escape(anchor) + re.escape(os.path.sep).join(parts)
+        else:
+            return str(base / structure)
+
+    def find_assignments(self,
+        nbgrader_step: str = "*",
+        student_id: str = "*",
+        assignment_id: str = "*",
+    ) -> typing.List[typing.Dict]:
+        """
+        Find all directories that match the given criteria.
+
+        The default value for each acts as a wildcard. To exclude a directory, use
+        a value of "." (e.g. nbgrader_step="source", student_id=".").
+
+        Returns:
+            A list of dicts containing input values, one per matching directory.
+        """
+
+        results = []
+
         kwargs = dict(
             nbgrader_step=nbgrader_step,
             student_id=student_id,
             assignment_id=assignment_id
         )
 
-        if escape:
-            structure = [x.format(**kwargs) for x in full_split(self.directory_structure)]
-            if len(structure) == 0 or not structure[0].startswith(os.sep):
-                base = [re.escape(self.root)]
-            else:
-                base = []
-            path = re.escape(os.path.sep).join(base + structure)
-        else:
-            path = os.path.join(self.root, self.directory_structure.format(**kwargs))
+        # Locate all matching directories using a glob
+        dirs = list(
+            filter(
+                lambda p: (
+                    p.is_dir()
+                    and not is_ignored(str(p.relative_to(self.root)), self.ignore)
+                ),
+                Path(self.root).glob(self.directory_structure.format(**kwargs))
+            )
+        )
 
-        return path
+        if not dirs:
+            return results
 
-    def get_existing_timestamp(self, dest_path: str) -> Optional[datetime.datetime]:
+        # Create a regex to capture the wildcard values
+        pattern_args = {
+            key: value.replace("*", f"(?P<{key}>.*)")
+            for key, value in kwargs.items()
+        }
+
+        # Convert to a Path and back to a string to remove any instances of `/.`
+        pattern = str(self.directory_structure)
+
+        # Escape backslashes on Windows before doing any other escaping
+        if sys.platform == 'win32':
+            pattern = pattern.replace('\\', r'\\')
+
+        pattern = str(Path(self.directory_structure.format(**pattern_args)))
+
+        for dir in dirs:
+            match = re.match(pattern, str(dir.relative_to(self.root)))
+            if match:
+                results.append({ **kwargs, **match.groupdict(), 'path': dir })
+
+        return results
+
+    def find_notebooks(
+        self,
+        nbgrader_step: str = "*",
+        student_id: str = "*",
+        assignment_id: str = "*",
+        notebook_id: str = "*",
+        ext: str = "ipynb",
+    ) -> typing.List[typing.Dict]:
+        """
+        Find all notebooks that match the given criteria.
+
+        The default value for each acts as a wildcard. To exclude a directory, use
+        a value of "." (e.g. nbgrader_step="source", student_id=".").
+
+        Returns:
+            A list of dicts containing input values, one per matching directory.
+        """
+
+        results = []
+
+        kwargs = dict(
+            nbgrader_step=nbgrader_step,
+            student_id=student_id,
+            assignment_id=assignment_id,
+            notebook_id=notebook_id,
+            ext=ext,
+        )
+
+        pattern = os.path.join(self.directory_structure, "{notebook_id}.{ext}")
+
+        # Locate all matching files using a glob
+        files = list(
+            filter(
+                lambda p: p.is_file() and not is_ignored(p.name, self.ignore),
+                Path(self.root).glob(pattern.format(**kwargs))
+            )
+        )
+
+        if not files:
+            return results
+
+        pattern_args = {
+            key: value.replace("*", f"(?P<{key}>.*)")
+            for key, value in kwargs.items()
+        }
+
+        logging.error("unescaped pattern: %s", pattern)
+
+        # Escape backslashes on Windows before doing any other escaping
+        if sys.platform == 'win32':
+            pattern = pattern.replace('\\', r'\\')
+
+        logging.error("winescaped pattern: %s", pattern)
+
+        # Convert to a Path and back to a string to remove any instances of `/.`
+        pattern = str(Path(pattern.replace(".", r"\.").format(**pattern_args)))
+
+        logging.error("final pattern: %s", pattern)
+
+        for file in files:
+            logging.error("file: %s", file.relative_to(self.root))
+            match = re.match(pattern, str(file.relative_to(self.root)))
+            if match:
+                results.append({ **kwargs, **match.groupdict(), "path": file })
+
+        return results
+
+    def get_existing_timestamp(self, dest_path: str) -> typing.Optional[datetime.datetime]:
         """Get the timestamp, as a datetime object, of an existing submission."""
         timestamp_path = os.path.join(dest_path, 'timestamp.txt')
         if os.path.exists(timestamp_path):

@@ -10,8 +10,8 @@ from ...apps.api import NbGraderAPI
 from ...coursedir import CourseDirectory
 from ...utils import rmtree, get_username, parse_utc
 from .. import run_nbgrader
-from .base import BaseTestApp
 from .conftest import notwindows, windows
+from .base import BaseTestApp
 
 
 @pytest.fixture
