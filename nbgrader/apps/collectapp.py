@@ -3,7 +3,8 @@
 from traitlets import default
 
 from .baseapp import NbGrader, nbgrader_aliases, nbgrader_flags
-from ..exchange import Exchange, ExchangeCollect, ExchangeError
+from ..exchange.default import Exchange, ExchangeCollect
+from ..exchange import ExchangeError
 
 
 aliases = {}

@@ -1,4 +1,5 @@
 import datetime
+from abc import abstractmethod
 
 from textwrap import dedent
 
@@ -15,7 +16,11 @@ class ExchangeError(Exception):
     pass
 
 
-class Exchange(LoggingConfigurable):
+class ABCExchange(LoggingConfigurable):
+    """
+    The abstract Exchange, which underlies every step in the exchange process.
+    """
+
     assignment_dir = Unicode(
         ".",
         help=dedent(
@@ -51,7 +56,7 @@ class Exchange(LoggingConfigurable):
     def __init__(self, coursedir=None, authenticator=None, **kwargs):
         self.coursedir = coursedir
         self.authenticator = authenticator
-        super(Exchange, self).__init__(**kwargs)
+        super(ABCExchange, self).__init__(**kwargs)
 
     def fail(self, msg):
         self.log.fatal(msg)
@@ -64,17 +69,17 @@ class Exchange(LoggingConfigurable):
             self.fail("Invalid timezone: {}".format(self.timezone))
         self.timestamp = datetime.datetime.now(tz).strftime(self.timestamp_format)
 
+    @abstractmethod
     def init_src(self):
         """Compute and check the source paths for the transfer."""
-        raise NotImplementedError
 
+    @abstractmethod
     def init_dest(self):
         """Compute and check the destination paths for the transfer."""
-        raise NotImplementedError
 
+    @abstractmethod
     def copy_files(self):
         """Actually do the file transfer."""
-        raise NotImplementedError
 
     def start(self):
         self.set_timestamp()

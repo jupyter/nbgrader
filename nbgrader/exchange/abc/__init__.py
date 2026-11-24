@@ -1,13 +1,13 @@
-from .exchange import ExchangeError, Exchange
-from .submit import ExchangeSubmit
-from .release_feedback import ExchangeReleaseFeedback
-from .release import ExchangeRelease
-from .release_assignment import ExchangeReleaseAssignment
-from .fetch_feedback import ExchangeFetchFeedback
-from .fetch import ExchangeFetch
-from .fetch_assignment import ExchangeFetchAssignment
-from .collect import ExchangeCollect
-from .list import ExchangeList
+from .exchange import ExchangeError, ABCExchange as Exchange
+from .submit import ABCExchangeSubmit as ExchangeSubmit
+from .release_feedback import ABCExchangeReleaseFeedback as ExchangeReleaseFeedback
+from .release import ABCExchangeRelease as ExchangeRelease
+from .release_assignment import ABCExchangeReleaseAssignment as ExchangeReleaseAssignment
+from .fetch_feedback import ABCExchangeFetchFeedback as ExchangeFetchFeedback
+from .fetch import ABCExchangeFetch as ExchangeFetch
+from .fetch_assignment import ABCExchangeFetchAssignment as ExchangeFetchAssignment
+from .collect import ABCExchangeCollect as ExchangeCollect
+from .list import ABCExchangeList as ExchangeList
 
 __all__ = [
     "Exchange",

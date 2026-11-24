@@ -1,10 +1,10 @@
 from textwrap import dedent
 from traitlets import Bool
 
-from .exchange import Exchange
+from .exchange import ABCExchange
 
 
-class ExchangeSubmit(Exchange):
+class ABCExchangeSubmit(ABCExchange):
 
     strict = Bool(
         False,
