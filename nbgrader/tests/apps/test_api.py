@@ -4,7 +4,7 @@ import os
 
 from os.path import join
 from traitlets.config import Config
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from ...apps.api import NbGraderAPI
 from ...coursedir import CourseDirectory
@@ -336,7 +336,7 @@ class TestNbGraderAPI(BaseTestApp):
             "id", "name", "student", "last_name", "first_name", "score",
             "max_score", "code_score", "max_code_score", "written_score",
             "max_written_score", "task_score", "max_task_score", "needs_manual_grade", "autograded",
-            "timestamp", "submitted", "display_timestamp"])
+            "timestamp", "submitted", "display_timestamp", "extension"])
 
         default = {
             "id": None,
@@ -356,7 +356,8 @@ class TestNbGraderAPI(BaseTestApp):
             "autograded": False,
             "timestamp": None,
             "display_timestamp": None,
-            "submitted": False
+            "submitted": False,
+            "extension": None,
         }
 
         s = api.get_submission("ps1", "foo")
@@ -390,6 +391,7 @@ class TestNbGraderAPI(BaseTestApp):
         target["written_score"] = 0
         target["max_written_score"] = 2
         target["needs_manual_grade"] = True
+        target["extension"] = None
         assert s == target
 
     def test_get_submission_no_timestamp(self, api, course_dir, db):
@@ -397,7 +399,7 @@ class TestNbGraderAPI(BaseTestApp):
             "id", "name", "student", "last_name", "first_name", "score",
             "max_score", "code_score", "max_code_score", "written_score",
             "max_written_score", "task_score", "max_task_score", "needs_manual_grade", "autograded",
-            "timestamp", "submitted", "display_timestamp"])
+            "timestamp", "submitted", "display_timestamp", "extension"])
 
         default = {
             "id": None,
@@ -417,7 +419,8 @@ class TestNbGraderAPI(BaseTestApp):
             "autograded": False,
             "timestamp": None,
             "display_timestamp": None,
-            "submitted": False
+            "submitted": False,
+            "extension": None,
         }
 
         s = api.get_submission("ps1", "foo")
@@ -446,6 +449,7 @@ class TestNbGraderAPI(BaseTestApp):
         target["written_score"] = 0
         target["max_written_score"] = 2
         target["needs_manual_grade"] = True
+        target["extension"] = None
         assert s == target
 
     def test_get_submissions(self, api, course_dir, db):
@@ -852,3 +856,15 @@ class TestNbGraderAPI(BaseTestApp):
         result = api.fetch_feedback("ps2", "foo")
         assert result["success"]
         assert os.path.exists(join("ps2", "feedback", timestamp, "p2.html"))
+
+    def test_grant_extension_to_student(self, api, course_dir):
+        self._copy_file(join("files", "submitted-unchanged.ipynb"), join(course_dir, "source", "ps1", "p1.ipynb"))
+        self._copy_file(join("files", "submitted-changed.ipynb"), join(course_dir, "submitted", "foo", "ps1", "p1.ipynb"))
+        api.generate_assignment("ps1")
+        api.autograde("ps1", "foo")
+
+        result = api.grant_extension_to_student("ps1", "foo", 1, 2, 3, 4)
+        assert result["success"]
+
+        extension = api.get_submission("ps1", "foo")["extension"]
+        assert extension == timedelta(weeks=4, days=3, hours=2, minutes=1).total_seconds()
