@@ -70,13 +70,17 @@ class Exchange(ABCExchange):
         """Actually do the file transfer."""
         raise NotImplementedError
 
-    def get_size(self, root):
+    def get_size(self, root, ignore=None):
         """
-        Return total size of directory in bytes.
+        Return total size of directory in bytes, excluding ignored paths.
         """
         total_size = 0
         for dirpath, dirnames, filenames in os.walk(root):
+            ignored = set(ignore(dirpath, dirnames + filenames)) if ignore else set()
+            dirnames[:] = [dirname for dirname in dirnames if dirname not in ignored]
             for f in filenames:
+                if f in ignored:
+                    continue
                 fp = os.path.join(dirpath, f)
                 # skip if it is symbolic link
                 if not os.path.islink(fp):
@@ -91,17 +95,17 @@ class Exchange(ABCExchange):
         specified by the options coursedir.ignore, coursedir.include
         and coursedir.max_file_size.
         """
-        dir_size = self.get_size(src)
+        copy_ignore = ignore_patterns(exclude=self.coursedir.ignore,
+                                      include=self.coursedir.include,
+                                      max_file_size=self.coursedir.max_file_size,
+                                      log=self.log)
+        dir_size = self.get_size(src, ignore=copy_ignore)
         max_dir_size = self.coursedir.max_dir_size
         if dir_size > 1000 * max_dir_size:
             self.log.error("Directory size is too big")
             raise RuntimeError(f"Directory size is too big. Size is {dir_size}, maximum size is {1000 * max_dir_size}")
 
-        shutil.copytree(src, dest,
-                        ignore=ignore_patterns(exclude=self.coursedir.ignore,
-                                               include=self.coursedir.include,
-                                               max_file_size=self.coursedir.max_file_size,
-                                               log=self.log))
+        shutil.copytree(src, dest, ignore=copy_ignore)
         # copytree copies access mode too - so we must add go+rw back to it if
         # we are in groupshared.
         if self.coursedir.groupshared:
