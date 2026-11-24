@@ -269,7 +269,7 @@ class GradedMixin():
     #: The cell type, either "code" or "markdown"
     @declared_attr
     def cell_type(cls):
-        return Column(Enum("code", "markdown", name="grade_cell_type", validate_strings=True), nullable=False)
+        return Column(Enum("code", "markdown", "raw", name="grade_cell_type", validate_strings=True), nullable=False)
 
 
 class GradeCell(BaseCell, GradedMixin):
@@ -381,7 +381,7 @@ class SourceCell(Base):
     name = Column(String(128), nullable=False)
 
     #: The cell type, either "code" or "markdown"
-    cell_type = Column(Enum("code", "markdown", name="source_cell_type", validate_strings=True), nullable=False)
+    cell_type = Column(Enum("code", "markdown", "raw", name="source_cell_type", validate_strings=True), nullable=False)
 
     #: Whether the cell is locked (e.g. the source saved in the database should
     #: be used to overwrite the source of students' cells)
@@ -1053,7 +1053,7 @@ SubmittedNotebook.written_score = column_property(
     .where(and_(
         Grade.notebook_id == SubmittedNotebook.id,
         GradeCell.id == Grade.cell_id,
-        GradeCell.cell_type == "markdown"))
+        GradeCell.cell_type.in_(["markdown", "raw"])))
     .correlate_except(Grade)
     .scalar_subquery(), deferred=True)
 
@@ -1063,7 +1063,7 @@ SubmittedAssignment.written_score = column_property(
         SubmittedNotebook.assignment_id == SubmittedAssignment.id,
         Grade.notebook_id == SubmittedNotebook.id,
         GradeCell.id == Grade.cell_id,
-        GradeCell.cell_type == "markdown"))
+        GradeCell.cell_type.in_(["markdown", "raw"])))
     .correlate_except(Grade)
     .scalar_subquery(), deferred=True)
 
@@ -1075,7 +1075,7 @@ Notebook.max_written_score = column_property(
     .select_from(GradeCell)
     .where(and_(
         GradeCell.notebook_id == Notebook.id,
-        GradeCell.cell_type == "markdown"))
+        GradeCell.cell_type.in_(["markdown", "raw"])))
     .correlate_except(GradeCell)
     .scalar_subquery(), deferred=True)
 
@@ -1091,7 +1091,7 @@ Assignment.max_written_score = column_property(
     .where(and_(
         Notebook.assignment_id == Assignment.id,
         GradeCell.notebook_id == Notebook.id,
-        GradeCell.cell_type == "markdown"))
+        GradeCell.cell_type.in_(["markdown", "raw"])))
     .correlate_except(GradeCell)
     .scalar_subquery(), deferred=True)
 
@@ -1164,7 +1164,7 @@ SubmittedNotebook.task_score = column_property(
     .where(and_(
         Grade.notebook_id == SubmittedNotebook.id,
         TaskCell.id == Grade.cell_id,
-        TaskCell.cell_type == "markdown"))
+        TaskCell.cell_type.in_(["markdown", "raw"])))
     .correlate_except(Grade)
     .scalar_subquery(), deferred=True)
 
@@ -1174,7 +1174,7 @@ SubmittedAssignment.task_score = column_property(
         SubmittedNotebook.assignment_id == SubmittedAssignment.id,
         Grade.notebook_id == SubmittedNotebook.id,
         TaskCell.id == Grade.cell_id,
-        TaskCell.cell_type == "markdown"))
+        TaskCell.cell_type.in_(["markdown", "raw"])))
     .correlate_except(Grade)
     .scalar_subquery(), deferred=True)
 
@@ -1186,7 +1186,7 @@ Notebook.max_task_score = column_property(
     .select_from(TaskCell)
     .where(and_(
         TaskCell.notebook_id == Notebook.id,
-        TaskCell.cell_type == "markdown"))
+        TaskCell.cell_type.in_(["markdown", "raw"])))
     .correlate_except(TaskCell)
     .scalar_subquery(), deferred=True)
 
@@ -1202,7 +1202,7 @@ Assignment.max_task_score = column_property(
     .where(and_(
         Notebook.assignment_id == Assignment.id,
         TaskCell.notebook_id == Notebook.id,
-        TaskCell.cell_type == "markdown"))
+        TaskCell.cell_type.in_(["markdown", "raw"])))
     .correlate_except(TaskCell)
     .scalar_subquery(), deferred=True)
 
@@ -2800,7 +2800,7 @@ class Gradebook(object):
                 Notebook.assignment_id == Assignment.id,
                 TaskCell.notebook_id == Notebook.id,
                 Grade.cell_id == TaskCell.id,
-                TaskCell.cell_type == "markdown")).scalar()
+                TaskCell.cell_type.in_(["markdown", "raw"]))).scalar()
         return score_sum / assignment.num_submissions
 
     def average_notebook_score(self, notebook_id: str, assignment_id: str) -> float:
@@ -2894,7 +2894,7 @@ class Gradebook(object):
                 Notebook.assignment_id == Assignment.id,
                 GradeCell.notebook_id == Notebook.id,
                 Grade.cell_id == GradeCell.id,
-                GradeCell.cell_type == "markdown")).scalar()
+                GradeCell.cell_type.in_(["markdown", "raw"]))).scalar()
         return score_sum / notebook.num_submissions
 
     def average_notebook_task_score(self, notebook_id: str, assignment_id: str) -> float:
@@ -2927,7 +2927,7 @@ class Gradebook(object):
                 Notebook.assignment_id == Assignment.id,
                 TaskCell.notebook_id == Notebook.id,
                 Grade.cell_id == TaskCell.id,
-                TaskCell.cell_type == "markdown")).scalar()
+                TaskCell.cell_type.in_(["markdown", "raw"]))).scalar()
         return score_sum / notebook.num_submissions
 
     def student_dicts(self):
@@ -3012,7 +3012,7 @@ class Gradebook(object):
             func.sum(GradeCell.max_score).label("max_written_score"),
         ).select_from(SubmittedAssignment
         ).join(SubmittedNotebook).join(Notebook).join(Assignment).join(Student).join(Grade).join(GradeCell)\
-         .filter(GradeCell.cell_type == "markdown")\
+         .filter(GradeCell.cell_type.in_(["markdown", "raw"]))\
          .group_by(SubmittedAssignment.id)\
          .subquery()
 
@@ -3023,7 +3023,7 @@ class Gradebook(object):
             func.sum(TaskCell.max_score).label("max_task_score"),
         ).select_from(SubmittedAssignment
         ).join(SubmittedNotebook).join(Notebook).join(Assignment).join(Student).join(Grade).join(TaskCell)\
-         .filter(TaskCell.cell_type == "markdown")\
+         .filter(TaskCell.cell_type.in_(["markdown", "raw"]))\
          .group_by(SubmittedAssignment.id)\
          .subquery()
 
@@ -3056,7 +3056,7 @@ class Gradebook(object):
                 func.sum(GradeCell.max_score).label("max_score"),
             ).select_from(SubmittedAssignment
             ).join(SubmittedNotebook).join(Grade).join(GradeCell)\
-            .filter(GradeCell.cell_type == "markdown")\
+            .filter(GradeCell.cell_type.in_(["markdown", "raw"]))\
             .group_by(SubmittedAssignment.id),
 
             self.db.query(
@@ -3065,7 +3065,7 @@ class Gradebook(object):
                 func.sum(TaskCell.max_score).label("max_score"),
             ).select_from(SubmittedAssignment
             ).join(SubmittedNotebook).join(Grade).join(TaskCell)\
-            .filter(TaskCell.cell_type == "markdown")\
+            .filter(TaskCell.cell_type.in_(["markdown", "raw"]))\
             .group_by(SubmittedAssignment.id)
         ).subquery()
 
@@ -3160,7 +3160,7 @@ class Gradebook(object):
             func.sum(GradeCell.max_score).label("max_written_score"),
         ).select_from(SubmittedNotebook
         ).join(SubmittedAssignment).join(Notebook).join(Assignment).join(Student).join(Grade).join(GradeCell)\
-         .filter(GradeCell.cell_type == "markdown")\
+         .filter(GradeCell.cell_type.in_(["markdown", "raw"]))\
          .group_by(SubmittedNotebook.id)\
          .subquery()
         # subquery for the written scores
@@ -3170,7 +3170,7 @@ class Gradebook(object):
             func.sum(TaskCell.max_score).label("max_task_score"),
         ).select_from(SubmittedNotebook
         ).join(SubmittedAssignment).join(Notebook).join(Assignment).join(Student).join(Grade).join(TaskCell)\
-         .filter(TaskCell.cell_type == "markdown")\
+         .filter(TaskCell.cell_type.in_(["markdown", "raw"]))\
          .group_by(SubmittedNotebook.id)\
          .subquery()
 
@@ -3198,7 +3198,7 @@ class Gradebook(object):
                 func.sum(GradeCell.max_score).label("max_score"),
             ).select_from(SubmittedNotebook
             ).join(Grade).join(GradeCell)\
-            .filter(GradeCell.cell_type == "markdown")\
+            .filter(GradeCell.cell_type.in_(["markdown", "raw"]))\
             .group_by(SubmittedNotebook.id),
 
             self.db.query(
@@ -3207,7 +3207,7 @@ class Gradebook(object):
                 func.sum(TaskCell.max_score).label("max_score"),
             ).select_from(SubmittedNotebook
             ).join(Grade).join(TaskCell)\
-            .filter(TaskCell.cell_type == "markdown")\
+            .filter(TaskCell.cell_type.in_(["markdown", "raw"]))\
             .group_by(SubmittedNotebook.id)
         ).subquery()
 
